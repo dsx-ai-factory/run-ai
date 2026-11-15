@@ -12,7 +12,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/advice-restart-controller/pkg/apis/heimdall/v1alpha1"
+	"github.com/dsx-ai-factory/nvidia-recovery/advice-operator/api/v1alpha1"
 )
 
 const (

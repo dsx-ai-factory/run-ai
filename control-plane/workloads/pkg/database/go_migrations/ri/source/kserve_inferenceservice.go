@@ -24,6 +24,12 @@ func GetKserveInferenceServiceRIConfiguration() KartaConfiguration {
 }
 
 func BuildKServeInferenceServiceV1beta1() models.Karta {
+	const expressionTrue = "true"
+
+	// Standard mode (formerly RawDeployment) does not emit Knative route or deployment conditions.
+	const activeStandardMode = `(.status.deploymentMode == "Standard" or .status.deploymentMode == "RawDeployment")
+		and ([.status.conditions[]? | select(.type == "Stopped" and .status == "True")] | length == 0)`
+
 	return models.Karta{
 		Spec: karta.KartaSpec{
 			StructureDefinition: karta.StructureDefinition{
@@ -50,6 +56,15 @@ func BuildKServeInferenceServiceV1beta1() models.Karta {
 										{Type: "LatestDeploymentReady", Status: ptr.To("True")},
 									},
 								},
+								{
+									ByConditions: []karta.ExpectedCondition{
+										{Type: "Ready", Status: ptr.To("True")},
+									},
+									ByExpression: &karta.ExpressionMatcher{
+										Expression:     activeStandardMode,
+										ExpectedResult: expressionTrue,
+									},
+								},
 							},
 							Failed: []karta.StatusMatcher{
 								{
@@ -57,6 +72,16 @@ func BuildKServeInferenceServiceV1beta1() models.Karta {
 										{Type: "PredictorReady", Status: ptr.To("False")},
 										{Type: "PredictorConfigurationReady", Status: ptr.To("False")},
 										{Type: "RoutesReady", Status: ptr.To("False")},
+									},
+								},
+								{
+									// Ready=False also occurs during startup; lastFailureInfo can survive recovery.
+									ByExpression: &karta.ExpressionMatcher{
+										Expression: activeStandardMode + `
+											and ([.status.conditions[]? | select(.type == "Ready" and .status == "True")] | length == 0)
+											and (.status.modelStatus.states.targetModelState == "FailedToLoad"
+												or .status.modelStatus.transitionStatus == "InvalidSpec")`,
+										ExpectedResult: expressionTrue,
 									},
 								},
 							},

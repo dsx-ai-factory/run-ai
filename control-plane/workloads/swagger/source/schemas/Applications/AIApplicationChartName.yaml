@@ -1,4 +1,0 @@
-type: string
-description: The name of the chart within the specified repository. This corresponds to the chart’s directory name.
-maxLength: 250
-example: redis

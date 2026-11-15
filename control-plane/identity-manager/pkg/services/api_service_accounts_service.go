@@ -89,7 +89,7 @@ func (s *ServiceAccountsApiService) CreateServiceAccount(ctx context.Context, se
 			CreatedBy: createdBy,
 		},
 	}
-	realm_client.ApplyClientProfile(serviceAccountClient, realm_client.ClientTypeTenantApp)
+	realm_client.ApplyClientProfile(serviceAccountClient, realm_client.ClientTypeServiceAccount)
 	audit.AuditFromCtx(ctx).WithEntityType(utils.AuditEntityTypeServiceAccount).WithEntityName(name)
 	serviceAccountId, err := s.iamClients.CreateClient(ctx, realm, serviceAccountClient)
 	if err != nil {
@@ -185,7 +185,7 @@ func (s *ServiceAccountsApiService) GetServiceAccountById(ctx context.Context, i
 func (s *ServiceAccountsApiService) GetServiceAccounts(ctx context.Context) (api.ImplResponse, error) {
 	realm := utils.GetStringFromCtx(ctx, utils.AuthRealmKey)
 	tenantServiceAccounts, err := s.serviceAccountsCache.GetTenantServiceAccountsForRealm(ctx, realm, func() (*internalCache.TenantServiceAccounts, error) {
-		serviceAccounts, err := s.iamClients.GetClients(ctx, realm, &iamModels.ClientFilter{ClientType: ptr.To(realm_client.ClientTypeTenantApp)})
+		serviceAccounts, err := s.iamClients.GetClients(ctx, realm, &iamModels.ClientFilter{ClientType: ptr.To(realm_client.ClientTypeServiceAccount)})
 		if err != nil {
 			return nil, err
 		}
@@ -372,7 +372,7 @@ func (s *ServiceAccountsApiService) getOrCreateInstallerClient(ctx context.Conte
 		Id:   clusterId,
 		Type: authorization_api.SCOPETYPE_CLUSTER,
 	}
-	if err := s.authzClient.SetServiceAccountPermissions(ctx, grantTenantId, clientId, scope, authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION); err != nil {
+	if err := s.authzClient.SetServiceAccountPermissions(ctx, grantTenantId, clientId, scope, authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_SERVICE_ACCOUNT); err != nil {
 		return "", fmt.Errorf("failed to grant access rule for installer client %s: %w", clientId, err)
 	}
 

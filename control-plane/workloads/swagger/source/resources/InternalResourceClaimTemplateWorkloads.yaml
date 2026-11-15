@@ -1,0 +1,44 @@
+post:
+  x-internal: true
+  summary: List the workloads referencing a resource claim template (Internal API).
+  description: >
+    Lists the workloads in the given scope whose pods reference the ResourceClaimTemplate
+    with the given name, with the pods that use it and the ResourceClaim each pod is bound
+    to. Standalone ResourceClaims are never included. Results are limited to the workloads
+    the caller is permitted to read. Used by assets-service to serve the workloads view of
+    a managed resource claim template.
+  operationId: internal_get_resource_claim_template_workloads
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/resource_claims_api_test.go
+  x-authorize:
+    resource-type: workloads
+    action: read
+  tags:
+    - Workloads
+  parameters:
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Workloads/InternalResourceClaimTemplateWorkloadsRequest.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../infra/openapi/docs/schemas/workloads/ResourceClaimTemplateWorkloadsResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

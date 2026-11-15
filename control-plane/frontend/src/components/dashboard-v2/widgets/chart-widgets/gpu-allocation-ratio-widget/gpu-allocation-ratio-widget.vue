@@ -171,7 +171,6 @@ export interface Props {
 const props = defineProps<Props>();
 const router = useRouter();
 
-const nodePoolsNames = ref<string[]>([]);
 const allocationClusterByNodePoolArray = ref<IChartArrayItemConfig[]>([]);
 const allocationDepartmentsByNodePoolArray = ref<IChartArrayItemConfig[]>([]);
 const displayLoading = ref(true);
@@ -469,7 +468,6 @@ async function loadInitialChartData(): Promise<void> {
     error.value = false;
     const res: DepartmentsMetricData = await departmentService.getDepartmentsMetric(props.clusterId, props.nodePoolName);
     const topAllocationRatioProjects = widgetUtil.filterTopAllocationRatioProjects(res.data);
-    nodePoolsNames.value = extractNodepoolNames(topAllocationRatioProjects);
     transformDataIntoChartFormat(topAllocationRatioProjects);
   } catch (e: unknown) {
     handleError(e);
@@ -485,9 +483,10 @@ function buildResourcesByNodePoolMap(
   drilldownTo: string,
   projectResource: IResourceData,
   drilldownId: string,
+  nodepoolName?: string,
 ): void {
   if (!resourceMap[resourceKey]) {
-    resourceMap[resourceKey] = { id: drilldownId, name: resourceName, data: {} };
+    resourceMap[resourceKey] = { id: drilldownId, name: resourceName, data: {}, nodepoolName };
   }
   if (!resourceMap[resourceKey].data[resourceName]) {
     resourceMap[resourceKey].data[resourceName] = {
@@ -575,6 +574,7 @@ function transformDataIntoChartFormat(data: Array<MetricsData>): void {
         "",
         projectResource,
         getDrilldownId(EDrillDownType.Projects, clusterName, nodepoolName, departmentName),
+        props.hasDepartments ? nodepoolName : undefined,
       );
     }
   }
@@ -609,9 +609,6 @@ function convertResourceMapToChartArrayData(
     if (quota <= 0) return 0;
     return parseFloat(((allocated / quota) * 100).toFixed(2));
   };
-  const getCorrectNodePoolName = (mixedName: string) => {
-    return nodePoolsNames.value.find((name) => mixedName.startsWith(name) && mixedName.length !== name.length);
-  };
 
   for (const nodepoolName in resourceMap) {
     const nodePoolData = resourceMap[nodepoolName];
@@ -619,7 +616,7 @@ function convertResourceMapToChartArrayData(
     const item: IChartArrayItemConfig = {
       id: nodePoolData.id,
       name: nodepoolName,
-      meta: { correctName: getCorrectNodePoolName(nodepoolName) },
+      meta: { correctName: nodePoolData.nodepoolName },
       data: data.map((entry) => ({
         name: entry.name,
         y: calculateAllocationRatio(entry.quotaY, entry.allocatedY),
@@ -629,15 +626,6 @@ function convertResourceMapToChartArrayData(
     };
     chartArray.push(item);
   }
-}
-
-function extractNodepoolNames(data: MetricsData[]): string[] {
-  const names = new Set<string>();
-  data.forEach((item) => {
-    item.current.resources.forEach((r) => names.add(r.nodepoolName));
-    item.current.projectResources.forEach((r) => names.add(r.nodepoolName));
-  });
-  return Array.from(names);
 }
 
 function fixNodePoolsNames(): void {
@@ -659,7 +647,6 @@ function handleError(err: unknown): void {
 
 function resetData(): void {
   chartOption.value = null;
-  nodePoolsNames.value = [];
   allocationClusterByNodePoolArray.value = [];
   allocationDepartmentsByNodePoolArray.value = [];
   breadcrumbPath.value = [];

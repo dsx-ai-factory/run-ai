@@ -67,9 +67,6 @@ func CreateRouter() chi.Router {
 	environmentApiService := NewEnvironmentApiService()
 	environmentApiController := api.NewEnvironmentAPIController(environmentApiService)
 
-	TemplateApiService := NewTemplateApiService()
-	TemplateApiController := api.NewTemplateAPIController(TemplateApiService)
-
 	dataVolumesAdapter := datavolumes.NewAdapter(dvclient.NewDatavolumesClient(runai_config.Get[*config.ServicesConfig]().DataVolumesServiceUrl))
 	datasourcesApiService := NewDatasourcesApiService(&dao.ConfigMapsDBAccessor, &dao.SecretVolumeDBAccessor, dataVolumesAdapter)
 	datasourceController := api.NewDatasourcesAPIController(datasourcesApiService)
@@ -122,7 +119,6 @@ func CreateRouter() chi.Router {
 			ComputeApiController,
 			environmentApiController,
 			datasourceController,
-			TemplateApiController,
 			workspacesApiController,
 			trainingsApiController,
 			inferencesApiController,

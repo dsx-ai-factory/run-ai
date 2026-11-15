@@ -109,7 +109,7 @@ func idmRealmToConfigRealm(r *openapi.RealmCreationResponse) *config.Realm {
 
 func (b *Builder) setAgentPermissions(ctx context.Context, agent config.Client, tenantId uint, tenantName string) error {
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Debugf("Set agent permissions for tenant %d", tenantId)
-	reqBody := authorization_api.NewInternalCreateAccessRuleRequest(agent.ClientId, authorization_api.SUBJECTTYPE_SERVICE_ACCOUNT, authorization_api.ALLOWEDINTERNALCREATEROLES_CLUSTER_APPLICATION)
+	reqBody := authorization_api.NewInternalCreateAccessRuleRequest(agent.ClientId, authorization_api.SUBJECTTYPE_SERVICE_ACCOUNT, authorization_api.ALLOWEDINTERNALCREATEROLES_CLUSTER_SERVICE_ACCOUNT)
 	reqBody.SetScope(authorization_api.InternalCreateAccessRuleRequestScope{
 		Id:   fmt.Sprintf("%d", tenantId),
 		Type: authorization_api.SCOPETYPE_TENANT,

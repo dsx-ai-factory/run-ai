@@ -12,6 +12,7 @@ import (
 
 // Register wires the cluster-service-backed tools.
 func Register(r *runaimcp.Registry, client *runaiclient.Client) {
+	registerListClusters(r, client)
 	registerListNodePools(r, client)
 	registerManageNodePool(r, client)
 	registerGetClusterPhysicalInventory(r, client)

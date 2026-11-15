@@ -5,9 +5,9 @@
 
 * `SYSTEM_ADMINISTRATOR` (value: `"System administrator"`)
 
-* `CLUSTER_APPLICATION` (value: `"Cluster application"`)
+* `CLUSTER_SERVICE_ACCOUNT` (value: `"Cluster service account"`)
 
-* `INSTALLER_APPLICATION` (value: `"Installer application"`)
+* `INSTALLER_SERVICE_ACCOUNT` (value: `"Installer service account"`)
 
 * `CLOUD_OPERATOR` (value: `"Cloud operator"`)
 

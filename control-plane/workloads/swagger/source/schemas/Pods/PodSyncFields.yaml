@@ -82,3 +82,15 @@ properties:
     items:
       $ref: "./PodElement.yaml"
     description: The workload structure elements this pod belongs to, ordered by hierarchy level.
+  resourceClaims:
+    type: array
+    nullable: true
+    items:
+      $ref: "./PodResourceClaim.yaml"
+    description: >-
+      Per-pod DRA usage reported as-is from the cluster. One entry per
+      `pod.spec.resourceClaims[]` member — either a reference to a
+      `ResourceClaimTemplate` or a standalone `ResourceClaim` — enriched with
+      the actual bound `ResourceClaim` name once published in
+      `pod.status.resourceClaimStatuses[]`. Managed/ownership resolution
+      against the k8s-object store happens at API read time, not here.

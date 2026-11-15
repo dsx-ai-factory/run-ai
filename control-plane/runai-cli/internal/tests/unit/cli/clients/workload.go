@@ -173,7 +173,7 @@ func MockWorkload(mockCtrl *gomock.Controller, filterList []string) {
 	var emptyStrList []string
 	emptyStrList = append(emptyStrList, "clusterId==uuid-cluster-1")
 	emptyStrList = append(emptyStrList, filterList...)
-	mockWsClient := cpworkloadmocks.NewMockWorkloadClient(mockCtrl)
+	mockWsClient := cpworkloadmocks.NewMockPaginator(mockCtrl)
 	mockWsClient.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.InAnyOrder(emptyStrList), false).Return(&openapi.GetWorkloads200Response{
 		Next:      nil,
 		Workloads: WorkloadList,

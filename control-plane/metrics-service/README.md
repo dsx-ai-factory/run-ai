@@ -125,8 +125,7 @@ It takes a single `--build-arg TARGETARCH` (selects `bin/metrics-service-$TARGET
 
 | Target | Description |
 |--------|-------------|
-| `make test` | `build` + `test-ginkgo` (unit tests) + `integration-tests` |
-| `make test-ginkgo` | Run the Ginkgo unit-test suites |
+| `make test` | `build` + `test-go` (unit tests) + `integration-tests` |
 | `make integration-tests` | Build the promtool agent + integration-test binary, then run the full docker-compose suite (abort-on-container-exit, torn down afterwards) |
 | `make integration-tests-debug` | Bring up only the compose `run-setup` profile so tests can be run from an IDE |
 | `make build-integration-tests` | Compile the `integration-tests/tests` test binary and `docker compose build` |

@@ -60,6 +60,7 @@ import { CLUSTER_ROUTE_NAMES } from "@/router/cluster.routes/cluster.routes.name
 import { DepartmentFilterSortFields, ProjectFilterSortFields } from "@/swagger-models/org-unit-service-client";
 import { EFilterOperator } from "@/models/filter.model";
 import { filterUtil } from "@/utils/filter.util/filter.util";
+import { workloadUtil } from "@/utils/workload.util/workload.util";
 
 export const DETAILS_PANEL_SECTIONS = {
   GENERAL: { id: "general", title: "General information" },
@@ -274,10 +275,27 @@ function getEnrichedConnections(
   const specPorts = ((workloadSpec as { ports?: SpecPortLike[] | null } | undefined)?.ports ?? []) as SpecPortLike[];
   const servingPort = (workloadSpec as WorkloadSpecWithServingPort)?.servingPort;
 
+  // Clusters may report the ServingPort connection without a URL; fall back to the only
+  // workload URL that no other connection claims. A serving port that is not exposed
+  // externally has no URL to show.
+  const servingPortExposure = servingPort as { exposeExternally?: boolean | null } | null | undefined;
+  const isServingPortInternal = servingPortExposure?.exposeExternally === false || !!servingPort?.clusterLocalAccessOnly;
+  const servingUrl = isServingPortInternal
+    ? undefined
+    : workloadUtil.getUnclaimedServingUrl(
+        workloadDetailed.urls,
+        allEnvConnections,
+        exposedUrls.map((exposed) => exposed.url),
+      );
+  const withServingUrl = (conn: ConnectionWithAccess): ConnectionWithAccess =>
+    conn.connectionType === InternalConnectionType.ServingPort && !conn.url && servingUrl
+      ? { ...conn, url: servingUrl }
+      : conn;
+
   // When the spec declares no networking entries at all, fall back to the runtime list
   // (covers completed workloads with no spec, externally-wired connections, etc.).
   if (!exposedUrls.length && !specPorts.length && !servingPort) {
-    return [...allEnvConnections, ...externalConnections];
+    return [...allEnvConnections.map(withServingUrl), ...externalConnections];
   }
 
   // Build the list from the SPEC so switching Master / Worker reflects each spec. Each spec
@@ -337,10 +355,13 @@ function getEnrichedConnections(
   }
 
   if (servingPort) {
-    const matching = allEnvConnections.find((conn) => conn.containerPort === servingPort.container);
+    // Prefer the ServingPort connection: a NodePort on the same container port must not take its place.
+    const matching =
+      allEnvConnections.find((conn) => conn.connectionType === InternalConnectionType.ServingPort) ??
+      allEnvConnections.find((conn) => conn.containerPort === servingPort.container);
     if (matching) {
       result.push({
-        ...matching,
+        ...withServingUrl(matching),
         exposedUrlAuthorizationType: servingPort.authorizationType,
         exposedUrlAuthorizedUsers: servingPort.authorizedUsers,
         exposedUrlAuthorizedGroups: servingPort.authorizedGroups,
@@ -351,6 +372,7 @@ function getEnrichedConnections(
         toolType: "custom",
         connectionType: "ServingPort",
         containerPort: servingPort.container ?? undefined,
+        url: servingUrl,
         authorizationType: servingPort.authorizationType ?? undefined,
         authorizedUsers: servingPort.authorizedUsers ?? undefined,
         authorizedGroups: servingPort.authorizedGroups ?? undefined,

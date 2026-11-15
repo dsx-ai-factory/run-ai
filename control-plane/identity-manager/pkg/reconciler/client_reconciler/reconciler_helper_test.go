@@ -326,3 +326,90 @@ func TestReconcileClient_CreateClientError(t *testing.T) {
 
 	assert.ErrorContains(t, err, "create failed")
 }
+
+func TestDisableClientIfExists_DisablesExistingClient(t *testing.T) {
+	const (
+		realm      = "test-realm"
+		clientID   = "admin-cli"
+		internalID = "some-internal-id"
+	)
+
+	existingClient := &iamModels.Client{ID: ptr.To(internalID), ClientID: ptr.To(clientID)}
+
+	mockContainer := iamMock.NewMockServicesContainer()
+	mockContainer.MockClientService.On(
+		"GetClientByClientId", context.Background(), realm, clientID,
+	).Return(existingClient, nil)
+	mockContainer.MockClientService.On(
+		"DisableClient", context.Background(), realm, internalID,
+	).Return(nil)
+
+	helper := NewClientReconcilerHelper(context.Background(), *mockContainer.ToServicesContainer(), nil)
+
+	err := helper.DisableClientIfExists(context.Background(), realm, clientID)
+
+	assert.NoError(t, err)
+	mockContainer.MockClientService.AssertCalled(t, "DisableClient", context.Background(), realm, internalID)
+	mockContainer.MockClientService.AssertNotCalled(t, "DeleteClient", mock.Anything, mock.Anything, mock.Anything)
+}
+
+func TestDisableClientIfExists_NoopWhenClientDoesNotExist(t *testing.T) {
+	const (
+		realm    = "test-realm"
+		clientID = "admin-cli"
+	)
+
+	mockContainer := iamMock.NewMockServicesContainer()
+	mockContainer.MockClientService.On(
+		"GetClientByClientId", context.Background(), realm, clientID,
+	).Return(nil, nil)
+
+	helper := NewClientReconcilerHelper(context.Background(), *mockContainer.ToServicesContainer(), nil)
+
+	err := helper.DisableClientIfExists(context.Background(), realm, clientID)
+
+	assert.NoError(t, err)
+	mockContainer.MockClientService.AssertNotCalled(t, "DisableClient", mock.Anything, mock.Anything, mock.Anything)
+}
+
+func TestDisableClientIfExists_GetClientByClientIdError(t *testing.T) {
+	const (
+		realm    = "test-realm"
+		clientID = "admin-cli"
+	)
+
+	mockContainer := iamMock.NewMockServicesContainer()
+	mockContainer.MockClientService.On(
+		"GetClientByClientId", context.Background(), realm, clientID,
+	).Return(nil, errors.New("iam unavailable"))
+
+	helper := NewClientReconcilerHelper(context.Background(), *mockContainer.ToServicesContainer(), nil)
+
+	err := helper.DisableClientIfExists(context.Background(), realm, clientID)
+
+	assert.ErrorContains(t, err, "iam unavailable")
+}
+
+func TestDisableClientIfExists_DisableClientError(t *testing.T) {
+	const (
+		realm      = "test-realm"
+		clientID   = "admin-cli"
+		internalID = "some-internal-id"
+	)
+
+	existingClient := &iamModels.Client{ID: ptr.To(internalID), ClientID: ptr.To(clientID)}
+
+	mockContainer := iamMock.NewMockServicesContainer()
+	mockContainer.MockClientService.On(
+		"GetClientByClientId", context.Background(), realm, clientID,
+	).Return(existingClient, nil)
+	mockContainer.MockClientService.On(
+		"DisableClient", context.Background(), realm, internalID,
+	).Return(errors.New("disable failed"))
+
+	helper := NewClientReconcilerHelper(context.Background(), *mockContainer.ToServicesContainer(), nil)
+
+	err := helper.DisableClientIfExists(context.Background(), realm, clientID)
+
+	assert.ErrorContains(t, err, "disable failed")
+}

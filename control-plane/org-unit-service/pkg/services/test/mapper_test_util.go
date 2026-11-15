@@ -13,6 +13,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/services"
 	. "github.com/onsi/gomega" //nolint:staticcheck // dot-import is the idiomatic gomega usage in test helpers
+	"k8s.io/utils/ptr"
 )
 
 const (
@@ -216,7 +217,7 @@ func CreateRequestResources(withCpu bool) []api.ResourcesNullable {
 		},
 		Gpu: api.ResourcesNullableGpu{
 			Limit:           &reqLimit,
-			Deserved:        reqDeserved,
+			Deserved:        ptr.To(reqDeserved),
 			OverQuotaWeight: &reqOqWeight,
 		},
 	}, {
@@ -226,7 +227,7 @@ func CreateRequestResources(withCpu bool) []api.ResourcesNullable {
 		},
 		Gpu: api.ResourcesNullableGpu{
 			Limit:           &req2Limit,
-			Deserved:        req2Deserved,
+			Deserved:        ptr.To(req2Deserved),
 			OverQuotaWeight: &req2OqWeight,
 		},
 	}}
@@ -344,7 +345,7 @@ func CreateRequestResourcesPerPool(cpuForPool1 bool, cpuForPool2 bool) []api.Res
 		},
 		Gpu: api.ResourcesNullableGpu{
 			Limit:           &reqLimit,
-			Deserved:        reqDeserved,
+			Deserved:        ptr.To(reqDeserved),
 			OverQuotaWeight: &reqOqWeight,
 		},
 	}, {
@@ -354,7 +355,7 @@ func CreateRequestResourcesPerPool(cpuForPool1 bool, cpuForPool2 bool) []api.Res
 		},
 		Gpu: api.ResourcesNullableGpu{
 			Limit:           &req2Limit,
-			Deserved:        req2Deserved,
+			Deserved:        ptr.To(req2Deserved),
 			OverQuotaWeight: &req2OqWeight,
 		},
 	}}

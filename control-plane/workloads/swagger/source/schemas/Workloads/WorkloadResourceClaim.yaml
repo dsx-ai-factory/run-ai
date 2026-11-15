@@ -1,0 +1,6 @@
+allOf:
+  - $ref: '../../../../../infra/openapi/docs/schemas/workloads/PodResourceClaimBinding.yaml'
+  - type: object
+    properties:
+      template:
+        $ref: './ResourceClaimTemplateRef.yaml'

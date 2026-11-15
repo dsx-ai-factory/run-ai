@@ -24,6 +24,8 @@ var _ MappedNullable = &Node{}
 
 // Node struct for Node
 type Node struct {
+	// Labels assigned to the node.
+	Labels *map[string]string `json:"labels,omitempty"`
 	// The calculated status of the node.
 	Status     string                       `json:"status"`
 	Conditions []NodeStatusConditionDetails `json:"conditions,omitempty"`
@@ -71,6 +73,38 @@ func NewNode(status string, nodePool string, createdAt time.Time, name string, c
 func NewNodeWithDefaults() *Node {
 	this := Node{}
 	return &this
+}
+
+// GetLabels returns the Labels field value if set, zero value otherwise.
+func (o *Node) GetLabels() map[string]string {
+	if o == nil || IsNil(o.Labels) {
+		var ret map[string]string
+		return ret
+	}
+	return *o.Labels
+}
+
+// GetLabelsOk returns a tuple with the Labels field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Node) GetLabelsOk() (*map[string]string, bool) {
+	if o == nil || IsNil(o.Labels) {
+		return nil, false
+	}
+	return o.Labels, true
+}
+
+// HasLabels returns a boolean if a field has been set.
+func (o *Node) HasLabels() bool {
+	if o != nil && !IsNil(o.Labels) {
+		return true
+	}
+
+	return false
+}
+
+// SetLabels gets a reference to the given map[string]string and assigns it to the Labels field.
+func (o *Node) SetLabels(v map[string]string) {
+	o.Labels = &v
 }
 
 // GetStatus returns the Status field value
@@ -528,6 +562,9 @@ func (o Node) MarshalJSON() ([]byte, error) {
 
 func (o Node) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.Labels) {
+		toSerialize["labels"] = o.Labels
+	}
 	toSerialize["status"] = o.Status
 	if !IsNil(o.Conditions) {
 		toSerialize["conditions"] = o.Conditions

@@ -132,6 +132,7 @@ func TestRunaiPublic_InitContainerConstructorInputs(t *testing.T) {
 		Name:     ptr.To("goofys"),
 		Tag:      ptr.To("v2"),
 	}
+	aw.S3FileSystemMountCheckEnabled = ptr.To(true)
 	aw.RunaiOauth2ProxyImage = &common.Image{
 		Registry: ptr.To("reg.example.com"),
 		Name:     ptr.To("oauth2-proxy"),
@@ -216,6 +217,7 @@ func TestRunaiPublic_InitContainerConstructorInputs(t *testing.T) {
 
 	assert.Equal(t, "reg.example.com/git-sync:v1", *cfg.GitSyncImage)
 	assert.Equal(t, "reg.example.com/goofys:v2", *cfg.S3FileSystemImage)
+	assert.Equal(t, "reg.example.com/goofys:v2", *cfg.S3FileSystemMountCheckImage)
 	assert.Equal(t, "reg.example.com/oauth2-proxy:v3", *cfg.RunaiOauth2ProxyImage)
 	assert.Equal(t, map[string]string{"cpu": "100m", "memory": "128Mi"}, cfg.RunaiOauth2ProxyResources.Requests)
 	assert.Equal(t, map[string]string{"cpu": "100m", "memory": "128Mi"}, cfg.RunaiOauth2ProxyResources.Limits)

@@ -636,7 +636,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 						// Add node pool with quota 3 to every 3rd department
 						if departmentIndex%3 == 0 {
 							nodePoolWithQuota3 := CreateNodePoolApiResources(true, fmt.Sprint(nodePool2Id), nodePool2Name)
-							nodePoolWithQuota3.Gpu.Deserved = float64(3)
+							nodePoolWithQuota3.Gpu.Deserved = ptr.To(float64(3))
 							nodePoolWithQuota3.Gpu.Limit = ptr.To(float64(3))
 							nodePoolWithQuota3.Gpu.OverQuotaWeight = ptr.To(float64(3))
 							createDepartmentRequest.Resources = append(createDepartmentRequest.Resources, nodePoolWithQuota3)
@@ -659,7 +659,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 							// Add node pool with quota 3 to every 3rd project
 							if projectIndex%3 == 0 {
 								nodePoolWithQuota3 := CreateNodePoolApiResources(true, fmt.Sprint(nodePool2Id), nodePool2Name)
-								nodePoolWithQuota3.Gpu.Deserved = float64(3)
+								nodePoolWithQuota3.Gpu.Deserved = ptr.To(float64(3))
 								nodePoolWithQuota3.Gpu.Limit = ptr.To(float64(3))
 								nodePoolWithQuota3.Gpu.OverQuotaWeight = ptr.To(float64(3))
 							}

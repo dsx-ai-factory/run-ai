@@ -78,8 +78,8 @@ var (
 		static_permission_sets.ApplicationEdit,
 		static_permission_sets.ApplicationRead,
 		static_permission_sets.StorageClassConfigEdit,
-		static_permission_sets.InstallerAppPS,
-		static_permission_sets.ClusterAppPS,
+		static_permission_sets.InstallerServiceAccountPS,
+		static_permission_sets.ClusterServiceAccountPS,
 	}
 )
 

@@ -23,17 +23,17 @@ type AllowedInternalCreateRoles string
 
 // List of AllowedInternalCreateRoles
 const (
-	ALLOWEDINTERNALCREATEROLES_SYSTEM_ADMINISTRATOR  AllowedInternalCreateRoles = "System administrator"
-	ALLOWEDINTERNALCREATEROLES_CLUSTER_APPLICATION   AllowedInternalCreateRoles = "Cluster application"
-	ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION AllowedInternalCreateRoles = "Installer application"
-	ALLOWEDINTERNALCREATEROLES_CLOUD_OPERATOR        AllowedInternalCreateRoles = "Cloud operator"
+	ALLOWEDINTERNALCREATEROLES_SYSTEM_ADMINISTRATOR      AllowedInternalCreateRoles = "System administrator"
+	ALLOWEDINTERNALCREATEROLES_CLUSTER_SERVICE_ACCOUNT   AllowedInternalCreateRoles = "Cluster service account"
+	ALLOWEDINTERNALCREATEROLES_INSTALLER_SERVICE_ACCOUNT AllowedInternalCreateRoles = "Installer service account"
+	ALLOWEDINTERNALCREATEROLES_CLOUD_OPERATOR            AllowedInternalCreateRoles = "Cloud operator"
 )
 
 // All allowed values of AllowedInternalCreateRoles enum
 var AllowedAllowedInternalCreateRolesEnumValues = []AllowedInternalCreateRoles{
 	"System administrator",
-	"Cluster application",
-	"Installer application",
+	"Cluster service account",
+	"Installer service account",
 	"Cloud operator",
 }
 

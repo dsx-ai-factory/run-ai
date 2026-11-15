@@ -150,13 +150,13 @@ func TestAuthHandler_Flow(t *testing.T) {
 			wantHeaders: map[string]string{auth.HeaderSubjectType: "ServiceAccount"},
 		},
 		{
-			name: "personal app", sub: "app-abc123", tenantID: 1, ttl: time.Hour,
-			extra:       map[string]any{"client_id": "app-abc123", "client_type": "personal-application"},
+			name: "access key", sub: "app-abc123", tenantID: 1, ttl: time.Hour,
+			extra:       map[string]any{"client_id": "app-abc123", "client_type": "access-key"},
 			wantStatus:  http.StatusOK,
 			wantHeaders: map[string]string{auth.HeaderClientId: "app-abc123"},
 		},
 		{
-			name: "client id empty for non personal app", sub: "app-abc123", tenantID: 1, ttl: time.Hour,
+			name: "client id empty for non access key", sub: "app-abc123", tenantID: 1, ttl: time.Hour,
 			extra:       map[string]any{"client_id": "app-abc123"},
 			wantStatus:  http.StatusOK,
 			wantHeaders: map[string]string{auth.HeaderClientId: ""},
@@ -193,7 +193,7 @@ func TestAuthHandler_Flow(t *testing.T) {
 		{
 			name: "all headers set", sub: "app-abc123", tenantID: 42, ttl: time.Hour,
 			extra: map[string]any{
-				"client_id": "app-abc123", "client_type": "personal-application",
+				"client_id": "app-abc123", "client_type": "access-key",
 				"groups": []string{"eng", "ops"}, "supplementarygroups": []int{100, 200},
 				"gid": "1000", "uid": "2000", "sid": "session-1",
 			},

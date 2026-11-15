@@ -26,7 +26,7 @@ runai my-credential create SECRET_NAME --type <genericSecret|dockerRegistry|ngcA
 
 ```
       --description string   Optional description for the credential (e.g. "My API config" or a single word).
-  -h, --help                 help for create
+  -h, --help[=true|false]    help for create
       --item stringArray     Key=value pairs; required keys depend on --type (see above). For genericSecret only, repeat to add multiple pairs to one credential.
       --type string          Credential type: genericSecret, dockerRegistry, or ngcApiKey (required)
 ```
@@ -34,11 +34,11 @@ runai my-credential create SECRET_NAME --type <genericSecret|dockerRegistry|ngcA
 ### Options inherited from parent commands
 
 ```
-      --config-file string   config file name; can be set by environment variable RUNAI_CLI_CONFIG_FILE (default "config.json")
-      --config-path string   config path; can be set by environment variable RUNAI_CLI_CONFIG_PATH
-  -d, --debug                enable debug mode
-  -q, --quiet                enable quiet mode, suppress all output except error messages
-      --verbose              enable verbose mode
+      --config-file string     config file name; can be set by environment variable RUNAI_CLI_CONFIG_FILE (default "config.json")
+      --config-path string     config path; can be set by environment variable RUNAI_CLI_CONFIG_PATH
+  -d, --debug[=true|false]     enable debug mode
+  -q, --quiet[=true|false]     enable quiet mode, suppress all output except error messages
+      --verbose[=true|false]   enable verbose mode
 ```
 
 ### SEE ALSO

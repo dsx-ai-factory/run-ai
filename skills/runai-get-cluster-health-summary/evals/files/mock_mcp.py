@@ -11,6 +11,9 @@ Two clusters share one server:
 - LAB_CLUSTER is synthetic. It follows the current MCP response shapes and
   holds one fault per node pool. Its totals reconcile per node, pool, and
   cluster.
+
+As on the real backend, get_cluster_metrics ignores nodePoolName and returns
+cluster-wide series.
 """
 
 from datetime import datetime, timedelta, timezone
@@ -231,15 +234,15 @@ STATUS_SIGNALS = {
     "batch-7": capacity_status("batch-7", 8, 4),
     "svc-a": capacity_status("svc-a", 4, 4),
     "eval-3": capacity_status("eval-3", 2, 4),
+    # Recorded from a live pinned workload: once the scheduler retried, its recent
+    # events named only the GPU shortage; the node-type pin is visible in the spec.
     "pinned-h200": {
-        "phaseMessage": "Unschedulable: 0/4 nodes in node pool train-pool match node selector gpu-type=h200.",
-        "phaseReason": "Unschedulable",
         "k8sPhase": "Pending",
         "conditions": [{"type": "PodScheduled", "status": "False", "reason": "Unschedulable",
-                        "message": "0/4 nodes are available: 4 node(s) didn't match Pod's node affinity/selector.",
-                        "lastTransitionTime": "2026-10-07T13:00:00Z"}],
-        "events": [{"createdAt": "2026-10-07T13:00:00Z", "type": "Warning", "reason": "Unschedulable",
-                    "message": "0/4 nodes are available: 4 node(s) didn't match Pod's node affinity/selector."}],
+                        "message": "no nodes with enough resources were found: 4 node(s) didn't have enough resources: GPUs.",
+                        "lastTransitionTime": "2026-10-07T13:20:00Z"}],
+        "events": [{"createdAt": "2026-10-07T13:20:00Z", "type": "Warning", "reason": "Unschedulable",
+                    "message": "no nodes with enough resources were found: 4 node(s) didn't have enough resources: GPUs."}],
     },
     "fresh-1": {"k8sPhase": "Pending", "conditions": [], "events": []},
     "seg-train-2": {
@@ -280,29 +283,10 @@ METRIC_VALUES = {
     (LIVE_CLUSTER, None): {"allocatedGpu": [0], "totalGpu": [16], "gpuUtilization": [0],
                            "gpuMemoryUtilization": [0],
                            "cpuUtilization": [11.271, 11.366, 11.232, 11.342]},
-    (LIVE_CLUSTER, "default"): {"allocatedGpu": [0], "totalGpu": [16], "gpuUtilization": [0],
-                                "gpuMemoryUtilization": [0],
-                                "cpuUtilization": [11.271, 11.366, 11.232, 11.342]},
     (LAB_CLUSTER, None): {"allocatedGpu": [44], "totalGpu": [88],
                           "gpuUtilization": [39.6, 39.1, 40.1, 38.8],
                           "gpuMemoryUtilization": [35.2, 34.8, 35.9, 34.6],
                           "cpuUtilization": [41.3, 40.7, 42.0, 40.9]},
-    (LAB_CLUSTER, "default"): {"allocatedGpu": [32], "totalGpu": [32],
-                               "gpuUtilization": [82.5, 81.4, 83.6, 80.9],
-                               "gpuMemoryUtilization": [71.0, 70.2, 72.4, 69.9],
-                               "cpuUtilization": [73.6, 72.9, 74.4, 73.1]},
-    (LAB_CLUSTER, "train-pool"): {"allocatedGpu": [12], "totalGpu": [32],
-                                  "gpuUtilization": [70.1, 69.3, 71.0, 68.8],
-                                  "gpuMemoryUtilization": [66.4, 65.8, 67.1, 65.2],
-                                  "cpuUtilization": [39.4, 38.8, 40.1, 39.0]},
-    (LAB_CLUSTER, "infer-pool"): {"allocatedGpu": [0], "totalGpu": [16], "gpuUtilization": [0],
-                                  "gpuMemoryUtilization": [0], "cpuUtilization": [5.0]},
-    (LAB_CLUSTER, "edge-pool"): {"allocatedGpu": [0], "totalGpu": [8], "gpuUtilization": [0],
-                                 "gpuMemoryUtilization": [0], "cpuUtilization": [0]},
-    (LAB_CLUSTER, "archive-pool"): {"allocatedGpu": [0], "totalGpu": [0], "gpuUtilization": [0],
-                                    "gpuMemoryUtilization": [0], "cpuUtilization": [0]},
-    (LAB_CLUSTER, "cpu-pool"): {"allocatedGpu": [0], "totalGpu": [0], "gpuUtilization": [0],
-                                "gpuMemoryUtilization": [0], "cpuUtilization": [42.9]},
 }
 
 
@@ -399,12 +383,11 @@ def get_cluster_physical_inventory(args):
 
 
 def get_cluster_metrics(args):
-    """Return evenly spaced metric series, dropping metrics the cluster cannot serve."""
+    """Return cluster-wide series even for a nodePoolName, as the real backend does."""
     require_known(args, {"clusterId", "nodePoolName", "metricTypes", "window", "start",
                          "end", "numberOfSamples"})
     cluster_id = require_cluster(args)
     pool = args.get("nodePoolName")
-    require_pool(cluster_id, pool)
     requested = args.get("metricTypes") or DEFAULT_METRICS
     unknown = [name for name in requested if name not in METRIC_NAMES]
     if unknown:
@@ -426,7 +409,7 @@ def get_cluster_metrics(args):
         .strftime("%Y-%m-%dT%H:%M:%SZ")
         for index in range(samples)
     ]
-    values = METRIC_VALUES.get((cluster_id, pool), METRIC_VALUES[(cluster_id, None)])
+    values = METRIC_VALUES[(cluster_id, None)]
     series = {}
     for name in requested:
         if name in UNAVAILABLE_METRICS or name not in values:
@@ -620,6 +603,66 @@ def get_workload_status(args):
     return result
 
 
+SPEC_PLACEMENT = {"pinned-h200": {"nodeType": "gpu-h200"}}
+
+# Older scheduler events that no longer appear among the recent status events.
+# Each retry logs another shortage event, so at the default page size the
+# affinity mismatch lands on the second history page.
+HISTORY_EVENTS = {
+    "pinned-h200": [{"createdAt": "2026-10-07T13:00:30Z", "type": "Warning", "reason": "Unschedulable",
+                     "message": "0/4 nodes are available: 4 node(s) didn't match Pod's node affinity/selector."}]
+    + [{"createdAt": f"2026-10-07T13:{minute:02d}:00Z", "type": "Warning", "reason": "Unschedulable",
+        "message": "no nodes with enough resources were found: 4 node(s) didn't have enough resources: GPUs."}
+       for minute in range(1, 20)],
+}
+
+
+def get_workload_history(args):
+    require_known(args, {"workloadId", "limit", "offset"})
+    workload_id = args.get("workloadId")
+    row = next((item for item in WORKLOADS if item["id"] == workload_id), None)
+    if row is None:
+        raise ToolError(f"not_found: workload {workload_id} not found")
+    limit = int(args.get("limit") or 20)
+    offset = int(args.get("offset") or 0)
+    if limit < 1 or limit > 50 or offset < 0:
+        raise ToolError("validation: limit must be 1-50 and offset non-negative")
+    events = STATUS_SIGNALS.get(row["name"], {}).get("events", []) + HISTORY_EVENTS.get(row["name"], [])
+    records = [{"meta": {"creationTimestamp": event["createdAt"], "type": "Event"},
+                "spec": {"event": event}} for event in events]
+    records.append({"meta": {"creationTimestamp": row["createdAt"], "type": "PhaseUpdate"},
+                    "spec": {"phaseUpdate": {"phase": "Pending", "phaseMessage": ""}}})
+    records.sort(key=lambda record: record["meta"]["creationTimestamp"], reverse=True)
+    result = {"workloadId": row["id"], "type": row["type"], "records": records[offset:offset + limit]}
+    if offset + limit < len(records):
+        result["next"] = offset + limit
+    return result
+
+
+def get_workload_spec(args):
+    """Return the compact requested-spec summary, with scheduler messages for pending work."""
+    require_known(args, {"workloadId", "includeFullSpec"})
+    workload_id = args.get("workloadId")
+    row = next((item for item in WORKLOADS if item["id"] == workload_id), None)
+    if row is None:
+        raise ToolError(f"not_found: workload {workload_id} not found")
+    spec = {"image": "nvcr.io/nvidia/pytorch:24.08-py3",
+            "compute": {"gpuDevicesRequest": row["requestedGpu"]},
+            "nodePools": row["requestedNodePools"]}
+    spec.update(SPEC_PLACEMENT.get(row["name"], {}))
+    result = {"workloadId": row["id"], "name": row["name"], "type": row["type"],
+              "projectName": row["projectName"], "departmentName": row["_department"], "spec": spec}
+    if row["phase"] == "Running":
+        result["allocatedResources"] = {"gpu": float(row["allocatedGpu"])}
+    if row["phase"] == "Pending":
+        events = STATUS_SIGNALS.get(row["name"], {}).get("events", [])
+        pool = (row["requestedNodePools"] or [""])[0]
+        result["pendingSchedulingMessages"] = [
+            {"nodePool": pool, "phaseReason": "Unschedulable", "reason": event["reason"],
+             "userMessage": event["message"]} for event in events]
+    return result
+
+
 def schema(properties, required=None):
     return {"type": "object", "properties": properties, "required": required or [],
             "additionalProperties": False}
@@ -647,6 +690,7 @@ TOOLS = {
                               ["clusterId"]),
         "handler": get_cluster_physical_inventory,
     },
+    # Like the real server, the description advertises nodePoolName scoping that the backend does not apply.
     "get_cluster_metrics": {
         "description": "Get a cluster's resource capacity and consumption over time: allocatedGpu, unallocatedGpu, totalGpu, gpuUtilization, gpuMemoryUtilization, cpuUtilization, cpuMemoryUtilization, avgWorkloadWaitTime, workloadsCount. Scope to one node pool with nodePoolName. window is one of last_1h, last_24h, last_7d, last_30d (default last_1h). partialData is true when some metrics failed; failed metrics are absent. Read-only.",
         "inputSchema": schema({
@@ -686,6 +730,18 @@ TOOLS = {
         "description": "Get one workload's current phase, phaseMessage, phaseReason, k8sPhase, conditions, and up to 5 recent events. For 'why' questions check phaseMessage first, then condition and event reasons. Read-only.",
         "inputSchema": schema({"workloadId": {"type": "string"}}, ["workloadId"]),
         "handler": get_workload_status,
+    },
+    "get_workload_history": {
+        "description": "Call when the user asks about a workload's event history \u2014 what happened to a workload (job) over time and the lifecycle events logged along the way. Returns a chronological, paginated list of history records, newest first; each record is a phase update or an event (a lifecycle event with its reason and message). Pass the returned next value as offset to get older records. Read-only.",
+        "inputSchema": schema({"workloadId": {"type": "string"}, "limit": {"type": "integer"},
+                               "offset": {"type": "integer"}}, ["workloadId"]),
+        "handler": get_workload_history,
+    },
+    "get_workload_spec": {
+        "description": "Call when the user asks what a workload (job) requested or how it is configured \u2014 the resources it asked for, the image it runs, its environment variables, volumes, or node placement \u2014 or why it is pending scheduling. Returns a compact requested-spec summary by default (image, compute, storage, scaling, placement such as nodePools, nodeType, nodeAffinityRequired, podAffinity, tolerations, and scheduling); set includeFullSpec for the complete spec. Also returns allocated resources and, for pending workloads, the scheduler's pending messages. Read-only.",
+        "inputSchema": schema({"workloadId": {"type": "string"}, "includeFullSpec": {"type": "boolean"}},
+                              ["workloadId"]),
+        "handler": get_workload_spec,
     },
 }
 

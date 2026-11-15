@@ -15,9 +15,9 @@ import (
 )
 
 var accessRuleRoleByClientType = map[idmclienttypes.ClientType]authorizationclienttypes.AllowedInternalCreateRoles{
-	idmclienttypes.CLIENTTYPE_AGENT:          authorizationclienttypes.ALLOWEDINTERNALCREATEROLES_CLUSTER_APPLICATION,
-	idmclienttypes.CLIENTTYPE_WORKLOADS_AUTH: authorizationclienttypes.ALLOWEDINTERNALCREATEROLES_CLUSTER_APPLICATION,
-	idmclienttypes.CLIENTTYPE_INSTALLER:      authorizationclienttypes.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION,
+	idmclienttypes.CLIENTTYPE_AGENT:          authorizationclienttypes.ALLOWEDINTERNALCREATEROLES_CLUSTER_SERVICE_ACCOUNT,
+	idmclienttypes.CLIENTTYPE_WORKLOADS_AUTH: authorizationclienttypes.ALLOWEDINTERNALCREATEROLES_CLUSTER_SERVICE_ACCOUNT,
+	idmclienttypes.CLIENTTYPE_INSTALLER:      authorizationclienttypes.ALLOWEDINTERNALCREATEROLES_INSTALLER_SERVICE_ACCOUNT,
 }
 
 func (a *AuthzManager) CreateAccessRule(ctx context.Context, clientID, clusterUuid, clusterName string, clientType idmclienttypes.ClientType) error {

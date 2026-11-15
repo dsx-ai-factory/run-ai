@@ -206,6 +206,65 @@ func (_c *IWorkloadsClient_CreateWorkload_Call) RunAndReturn(run func(ctx contex
 	return _c
 }
 
+// CreateWorkloadActions provides a mock function for the type IWorkloadsClient
+func (_mock *IWorkloadsClient) CreateWorkloadActions(ctx context.Context, request openapi.CreateWorkloadActionsRequest) *openapi.Error {
+	ret := _mock.Called(ctx, request)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateWorkloadActions")
+	}
+
+	var r0 *openapi.Error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, openapi.CreateWorkloadActionsRequest) *openapi.Error); ok {
+		r0 = returnFunc(ctx, request)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.Error)
+		}
+	}
+	return r0
+}
+
+// IWorkloadsClient_CreateWorkloadActions_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateWorkloadActions'
+type IWorkloadsClient_CreateWorkloadActions_Call struct {
+	*mock.Call
+}
+
+// CreateWorkloadActions is a helper method to define mock.On call
+//   - ctx context.Context
+//   - request openapi.CreateWorkloadActionsRequest
+func (_e *IWorkloadsClient_Expecter) CreateWorkloadActions(ctx any, request any) *IWorkloadsClient_CreateWorkloadActions_Call {
+	return &IWorkloadsClient_CreateWorkloadActions_Call{Call: _e.mock.On("CreateWorkloadActions", ctx, request)}
+}
+
+func (_c *IWorkloadsClient_CreateWorkloadActions_Call) Run(run func(ctx context.Context, request openapi.CreateWorkloadActionsRequest)) *IWorkloadsClient_CreateWorkloadActions_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 openapi.CreateWorkloadActionsRequest
+		if args[1] != nil {
+			arg1 = args[1].(openapi.CreateWorkloadActionsRequest)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *IWorkloadsClient_CreateWorkloadActions_Call) Return(error *openapi.Error) *IWorkloadsClient_CreateWorkloadActions_Call {
+	_c.Call.Return(error)
+	return _c
+}
+
+func (_c *IWorkloadsClient_CreateWorkloadActions_Call) RunAndReturn(run func(ctx context.Context, request openapi.CreateWorkloadActionsRequest) *openapi.Error) *IWorkloadsClient_CreateWorkloadActions_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetAncestors provides a mock function for the type IWorkloadsClient
 func (_mock *IWorkloadsClient) GetAncestors(ctx context.Context, resourceId string) (*openapi.Ancestors, error) {
 	ret := _mock.Called(ctx, resourceId)

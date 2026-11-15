@@ -426,6 +426,133 @@ func (_c *ResourceClaimTemplatesAPI_GetRctByIdExecute_Call) RunAndReturn(run fun
 	return _c
 }
 
+// GetRctWorkloads provides a mock function for the type ResourceClaimTemplatesAPI
+func (_mock *ResourceClaimTemplatesAPI) GetRctWorkloads(ctx context.Context, assetId string) openapi.ApiGetRctWorkloadsRequest {
+	ret := _mock.Called(ctx, assetId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetRctWorkloads")
+	}
+
+	var r0 openapi.ApiGetRctWorkloadsRequest
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) openapi.ApiGetRctWorkloadsRequest); ok {
+		r0 = returnFunc(ctx, assetId)
+	} else {
+		r0 = ret.Get(0).(openapi.ApiGetRctWorkloadsRequest)
+	}
+	return r0
+}
+
+// ResourceClaimTemplatesAPI_GetRctWorkloads_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetRctWorkloads'
+type ResourceClaimTemplatesAPI_GetRctWorkloads_Call struct {
+	*mock.Call
+}
+
+// GetRctWorkloads is a helper method to define mock.On call
+//   - ctx context.Context
+//   - assetId string
+func (_e *ResourceClaimTemplatesAPI_Expecter) GetRctWorkloads(ctx any, assetId any) *ResourceClaimTemplatesAPI_GetRctWorkloads_Call {
+	return &ResourceClaimTemplatesAPI_GetRctWorkloads_Call{Call: _e.mock.On("GetRctWorkloads", ctx, assetId)}
+}
+
+func (_c *ResourceClaimTemplatesAPI_GetRctWorkloads_Call) Run(run func(ctx context.Context, assetId string)) *ResourceClaimTemplatesAPI_GetRctWorkloads_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *ResourceClaimTemplatesAPI_GetRctWorkloads_Call) Return(apiGetRctWorkloadsRequest openapi.ApiGetRctWorkloadsRequest) *ResourceClaimTemplatesAPI_GetRctWorkloads_Call {
+	_c.Call.Return(apiGetRctWorkloadsRequest)
+	return _c
+}
+
+func (_c *ResourceClaimTemplatesAPI_GetRctWorkloads_Call) RunAndReturn(run func(ctx context.Context, assetId string) openapi.ApiGetRctWorkloadsRequest) *ResourceClaimTemplatesAPI_GetRctWorkloads_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetRctWorkloadsExecute provides a mock function for the type ResourceClaimTemplatesAPI
+func (_mock *ResourceClaimTemplatesAPI) GetRctWorkloadsExecute(r openapi.ApiGetRctWorkloadsRequest) (*openapi.ResourceClaimTemplateWorkloadsResponse, *http.Response, error) {
+	ret := _mock.Called(r)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetRctWorkloadsExecute")
+	}
+
+	var r0 *openapi.ResourceClaimTemplateWorkloadsResponse
+	var r1 *http.Response
+	var r2 error
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiGetRctWorkloadsRequest) (*openapi.ResourceClaimTemplateWorkloadsResponse, *http.Response, error)); ok {
+		return returnFunc(r)
+	}
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiGetRctWorkloadsRequest) *openapi.ResourceClaimTemplateWorkloadsResponse); ok {
+		r0 = returnFunc(r)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.ResourceClaimTemplateWorkloadsResponse)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(openapi.ApiGetRctWorkloadsRequest) *http.Response); ok {
+		r1 = returnFunc(r)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*http.Response)
+		}
+	}
+	if returnFunc, ok := ret.Get(2).(func(openapi.ApiGetRctWorkloadsRequest) error); ok {
+		r2 = returnFunc(r)
+	} else {
+		r2 = ret.Error(2)
+	}
+	return r0, r1, r2
+}
+
+// ResourceClaimTemplatesAPI_GetRctWorkloadsExecute_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetRctWorkloadsExecute'
+type ResourceClaimTemplatesAPI_GetRctWorkloadsExecute_Call struct {
+	*mock.Call
+}
+
+// GetRctWorkloadsExecute is a helper method to define mock.On call
+//   - r openapi.ApiGetRctWorkloadsRequest
+func (_e *ResourceClaimTemplatesAPI_Expecter) GetRctWorkloadsExecute(r any) *ResourceClaimTemplatesAPI_GetRctWorkloadsExecute_Call {
+	return &ResourceClaimTemplatesAPI_GetRctWorkloadsExecute_Call{Call: _e.mock.On("GetRctWorkloadsExecute", r)}
+}
+
+func (_c *ResourceClaimTemplatesAPI_GetRctWorkloadsExecute_Call) Run(run func(r openapi.ApiGetRctWorkloadsRequest)) *ResourceClaimTemplatesAPI_GetRctWorkloadsExecute_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 openapi.ApiGetRctWorkloadsRequest
+		if args[0] != nil {
+			arg0 = args[0].(openapi.ApiGetRctWorkloadsRequest)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *ResourceClaimTemplatesAPI_GetRctWorkloadsExecute_Call) Return(resourceClaimTemplateWorkloadsResponse *openapi.ResourceClaimTemplateWorkloadsResponse, response *http.Response, err error) *ResourceClaimTemplatesAPI_GetRctWorkloadsExecute_Call {
+	_c.Call.Return(resourceClaimTemplateWorkloadsResponse, response, err)
+	return _c
+}
+
+func (_c *ResourceClaimTemplatesAPI_GetRctWorkloadsExecute_Call) RunAndReturn(run func(r openapi.ApiGetRctWorkloadsRequest) (*openapi.ResourceClaimTemplateWorkloadsResponse, *http.Response, error)) *ResourceClaimTemplatesAPI_GetRctWorkloadsExecute_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListRcts provides a mock function for the type ResourceClaimTemplatesAPI
 func (_mock *ResourceClaimTemplatesAPI) ListRcts(ctx context.Context) openapi.ApiListRctsRequest {
 	ret := _mock.Called(ctx)

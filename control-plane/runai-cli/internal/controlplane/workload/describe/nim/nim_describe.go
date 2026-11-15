@@ -60,6 +60,7 @@ type Fields struct {
 	GpuDevicesRequest *int32   `json:"gpuDevicesRequest,omitempty"`
 	GpuPortionRequest *float64 `json:"gpuPortionRequest,omitempty"`
 	GpuPortionLimit   *float64 `json:"gpuPortionLimit,omitempty"`
+	GpuComputeMode    *string  `json:"gpuComputeMode,omitempty" yaml:"gpucomputemode,omitempty"`
 	GpuMemoryRequest  *string  `json:"gpuMemoryRequest,omitempty"`
 	GpuMemoryLimit    *string  `json:"gpuMemoryLimit,omitempty"`
 	CpuCoreRequest    *float64 `json:"cpuCoreRequest,omitempty"`
@@ -138,6 +139,7 @@ func (b *Builder) ServiceType(v string)     { b.fields.ServiceType = &v }
 func (b *Builder) GpuDevicesRequest(v int32)   { b.fields.GpuDevicesRequest = &v }
 func (b *Builder) GpuPortionRequest(v float64) { b.fields.GpuPortionRequest = &v }
 func (b *Builder) GpuPortionLimit(v float64)   { b.fields.GpuPortionLimit = &v }
+func (b *Builder) GpuComputeMode(v string)     { b.fields.GpuComputeMode = &v }
 func (b *Builder) GpuMemoryRequest(v string)   { b.fields.GpuMemoryRequest = &v }
 func (b *Builder) GpuMemoryLimit(v string)     { b.fields.GpuMemoryLimit = &v }
 func (b *Builder) CpuCoreRequest(v float64)    { b.fields.CpuCoreRequest = &v }
@@ -243,11 +245,18 @@ func BuildFromSpec(spec *nimclient.NimServiceSpec) *Fields {
 		if compute.GpuDevicesRequest.IsSet() {
 			builder.GpuDevicesRequest(compute.GetGpuDevicesRequest())
 		}
-		if compute.GpuPortionRequest.IsSet() {
+		if value, _ := compute.GetGpuMemoryPortionRequestOk(); value != nil {
+			builder.GpuPortionRequest(*value)
+		} else if compute.GpuPortionRequest.IsSet() {
 			builder.GpuPortionRequest(compute.GetGpuPortionRequest())
 		}
-		if compute.GpuPortionLimit.IsSet() {
+		if value, _ := compute.GetGpuMemoryPortionLimitOk(); value != nil {
+			builder.GpuPortionLimit(*value)
+		} else if compute.GpuPortionLimit.IsSet() {
 			builder.GpuPortionLimit(compute.GetGpuPortionLimit())
+		}
+		if mode, _ := compute.GetGpuComputeModeOk(); mode != nil {
+			builder.GpuComputeMode(string(*mode))
 		}
 		if compute.GpuMemoryRequest.IsSet() {
 			builder.GpuMemoryRequest(compute.GetGpuMemoryRequest())

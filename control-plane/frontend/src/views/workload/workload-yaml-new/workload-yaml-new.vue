@@ -51,6 +51,7 @@
               />
               <general-section
                 :workload-form-type="workloadFormType"
+                :single-pod-workload="false"
                 :general-model="generalModel"
                 :support-preemptibility="supportPreemptibility"
                 :support-mnnvl="supportMnnvl"

@@ -8,7 +8,7 @@ description: |
   merged by the formatter's arrayKey):
 
     * dnsOptions, hostAliases, tolerations, readinessGates,
-      reservedResourceClaims (runai-podSpec, array fields).
+      resourceClaims (runai-podSpec, array fields).
     * nodeSelectors, resourceOverheads (runai-podSpec, map fields keyed by
       the entry's key+value pair).
     * configMapVolumes, emptyDirVolumes, hostPathVolumes, nfsVolumes,
@@ -150,15 +150,15 @@ effectiveRules:
     specSelector: podSpec
     enforcements: [{ set: { value: [{ name: example.com/gate }] } }]
 
-  # ----- reservedResourceClaims (custom; two entries to exercise both
+  # ----- resourceClaims (custom; two entries to exercise both
   # mutually-exclusive shapes: by-name vs by-template) -----
-  - field: reservedResourceClaims
+  - field: resourceClaims
     specSelector: podSpec
     enforcements:
       - set:
           name: claimRefByName
           resourceClaimName: shared-claim
-  - field: reservedResourceClaims
+  - field: resourceClaims
     specSelector: podSpec
     enforcements:
       - set:

@@ -74,7 +74,6 @@ import { defineComponent, type PropType } from "vue";
 // cmps
 import { RunaiSelectCard } from "@/components/common/runai-select-card";
 import { ProjectCard } from "./cards/project-card";
-import { TemplateCard } from "./cards/template-card";
 import { EnvironmentCard } from "./cards/environment-card";
 import { ComputeResourceCard } from "./cards/compute-resource-card";
 import { DataSourceCard } from "./cards/data-source-card";
@@ -98,7 +97,6 @@ export default defineComponent({
   name: "runai-card-list",
   components: {
     ProjectCard,
-    TemplateCard,
     RunaiSelectCard,
     SkeletonCard,
     CreateNewCard,

@@ -91,10 +91,12 @@ func MapHTTPError(resp *http.Response, err error) error {
 	if err == nil {
 		return nil
 	}
-	err = preferUpstreamBody(err)
+	err = preferUpstreamBody(resp, err)
 	sentinel := ErrUpstream
 	if resp != nil {
 		switch resp.StatusCode {
+		case http.StatusBadRequest, http.StatusUnprocessableEntity:
+			sentinel = ErrValidation
 		case http.StatusUnauthorized:
 			sentinel = ErrAuth
 		case http.StatusForbidden:
@@ -123,26 +125,31 @@ func MapHTTPError(resp *http.Response, err error) error {
 // stray HTML gateway page can't flood the LLM-facing error.
 const maxUpstreamBodyLen = 300
 
-// preferUpstreamBody replaces a generated-client decode failure with the raw
-// response body. When the server returns an error shape the client can't decode
-// (e.g. a bare JSON string), the client discards the server's message and reports
-// the unmarshal error instead — but keeps the raw body, which is the real reason.
-func preferUpstreamBody(err error) error {
+// preferUpstreamBody recovers the API message when the generated client reports
+// only an HTTP status or a decoding error.
+func preferUpstreamBody(resp *http.Response, err error) error {
 	var oe interface {
 		Body() []byte
 		Model() any
 	}
-	// A non-nil Model means the client decoded a structured error; its message is good.
-	if !errors.As(err, &oe) || oe.Model() != nil {
+	if !errors.As(err, &oe) {
+		return err
+	}
+	// A decoded model can still lose its message if the client only formats the status.
+	if oe.Model() != nil && (resp == nil || err.Error() != resp.Status) {
 		return err
 	}
 	msg := strings.TrimSpace(string(oe.Body()))
 	if msg == "" {
 		return err
 	}
-	// Bodies are often a JSON-quoted string; unwrap to the bare text when so.
+	var structured struct {
+		Message string `json:"message"`
+	}
 	var unquoted string
-	if json.Unmarshal(oe.Body(), &unquoted) == nil && strings.TrimSpace(unquoted) != "" {
+	if json.Unmarshal(oe.Body(), &structured) == nil && strings.TrimSpace(structured.Message) != "" {
+		msg = strings.TrimSpace(structured.Message)
+	} else if json.Unmarshal(oe.Body(), &unquoted) == nil && strings.TrimSpace(unquoted) != "" {
 		msg = strings.TrimSpace(unquoted)
 	}
 	if r := []rune(msg); len(r) > maxUpstreamBodyLen {

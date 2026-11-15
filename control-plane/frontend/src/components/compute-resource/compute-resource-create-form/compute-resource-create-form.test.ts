@@ -11,7 +11,7 @@ import type { DefineComponent } from "vue";
 import { setActivePinia } from "pinia";
 import { createTestingPinia } from "@pinia/testing";
 import { Quasar } from "quasar";
-import { GpuRequestType, Scope } from "@/swagger-models/assets-service-client";
+import { GpuComputeMode, GpuRequestType, Scope } from "@/swagger-models/assets-service-client";
 import type { IProjectSectionModel } from "@/models/project.model";
 import { assetService } from "@/services/control-plane/asset.service/asset.service";
 import type { IUIComputeResourceCreation } from "@/models/compute-resource.model";
@@ -153,6 +153,50 @@ describe("compute-resource-create-form.vue", () => {
     await computeCreateFormCmp.vm.$nextTick();
     expect(computeCreateFormCmp.emitted().submit).toBeTruthy();
   });
+
+  test.each([
+    { name: "edited", devices: 1, request: 0.25, limit: 0.75, requestType: GpuRequestType.Portion },
+    { name: "cleared", devices: 2, request: undefined, limit: undefined, requestType: undefined },
+  ])(
+    "submits $name memory portions without stale response aliases",
+    async ({ devices, request, limit, requestType }) => {
+      vi.spyOn(computeCreateFormCmp.vm, "validate").mockResolvedValue(true);
+      const model = {
+        meta: { name: "compute-alias-test", scope: Scope.Project, projectId: 25 },
+        spec: {
+          gpuDevicesRequest: 1,
+          gpuRequestType: GpuRequestType.Portion,
+          gpuPortionRequest: 0.5,
+          gpuPortionLimit: 0.5,
+          gpuMemoryPortionRequest: 0.5,
+          gpuMemoryPortionLimit: 0.5,
+          gpuComputeMode: GpuComputeMode.SmSharing,
+          cpuCoreRequest: 2,
+        },
+      };
+      await computeCreateFormCmp.setData({ computeModel: model });
+      computeCreateFormCmp.vm.updateResourceSectionModel({
+        gpuDevicesRequest: devices,
+        gpuRequestType: requestType,
+        gpuPortionRequest: request,
+        gpuPortionLimit: limit,
+        cpuCore: { request: 2 },
+        cpuMemory: {},
+      });
+      await computeCreateFormCmp.vm.save();
+
+      const submitted = computeCreateFormCmp.emitted<[IUIComputeResourceCreation]>("submit")?.[0][0];
+      expect(submitted?.spec).toMatchObject({
+        gpuDevicesRequest: devices,
+        gpuPortionRequest: request,
+        gpuPortionLimit: limit,
+        gpuComputeMode: GpuComputeMode.SmSharing,
+        cpuCoreRequest: 2,
+      });
+      expect(submitted?.spec).not.toHaveProperty("gpuMemoryPortionRequest");
+      expect(submitted?.spec).not.toHaveProperty("gpuMemoryPortionLimit");
+    },
+  );
 
   test("isExists is called when submitting the form", async () => {
     mockIsExist.mockResolvedValue(false);

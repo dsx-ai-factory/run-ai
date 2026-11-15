@@ -6,8 +6,12 @@
 package services
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
+	"net/http/httptest"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -23,6 +27,7 @@ import (
 	events "github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events"
 	runai_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 	. "github.com/onsi/ginkgo/v2"
@@ -38,7 +43,7 @@ var _ = Describe("Workload action history", func() {
 	var ctx context.Context
 	var workloadID uuid.UUID
 	var records []models.WorkloadActionHistory
-	service := NewEventsService()
+	service := NewWorkloadActionsService()
 
 	BeforeEach(func() {
 		ctx = testing.SetContext(testing.TestTenant, testing.TestUser, nil)
@@ -67,6 +72,298 @@ var _ = Describe("Workload action history", func() {
 		Expect(second.Actions[0].WorkloadName).To(Equal("deleted-workspace"))
 	})
 
+	Describe("filtered and sorted queries", func() {
+		var router http.Handler
+		BeforeEach(func() {
+			workload := testActionWorkload(workloadID, records[0].WorkloadActionScope)
+			_, err := runaidb.DB().Create(&workload)
+			Expect(err).NotTo(HaveOccurred())
+			r := chi.NewRouter()
+			r.Get("/api/v1/workloads/{workloadId}/actions", api.NewWorkloadActionsAPIController(service).GetWorkloadActionsHistory)
+			router = r
+			for i, subject := range []string{"z@example.com", "a@example.com", "m@example.com"} {
+				_, err := runaidb.DB().Model(&models.WorkloadActionHistory{}).Where("id = ?", records[i].ID).
+					Updates(map[string]interface{}{"subject": subject, "action": []string{"create", "update", "update"}[i], "accepted_at": records[i].AcceptedAt.Add(time.Duration(i) * time.Minute)})
+				Expect(err).NotTo(HaveOccurred())
+			}
+		})
+		query := func(params string) *httptest.ResponseRecorder {
+			GinkgoHelper()
+			response := httptest.NewRecorder()
+			request := httptest.NewRequest(http.MethodGet, "/api/v1/workloads/"+workloadID.String()+"/actions?"+params, nil).WithContext(ctx)
+			router.ServeHTTP(response, request)
+			return response
+		}
+		read := func(params string) api.GetWorkloadActionsResponse {
+			GinkgoHelper()
+			response := query(params)
+			Expect(response.Code).To(Equal(http.StatusOK), response.Body.String())
+			var body api.GetWorkloadActionsResponse
+			Expect(json.Unmarshal(response.Body.Bytes(), &body)).To(Succeed())
+			return body
+		}
+		It("filters before pagination, including matches outside the default page", func() {
+			later := make([]models.WorkloadActionHistory, 55)
+			for i := range later {
+				later[i] = records[0]
+				later[i].ID = uuid.New()
+				later[i].Action = "update"
+				later[i].AcceptedAt = records[0].AcceptedAt.Add(time.Hour)
+			}
+			Expect(dao.DbInsertWorkloadActions(ctx, later)).To(Succeed())
+			unfiltered := read("limit=50")
+			Expect(unfiltered.Actions).To(HaveLen(50))
+			for _, row := range unfiltered.Actions {
+				Expect(row.Action).To(Equal(api.WORKLOADACTIONTYPE_UPDATE))
+			}
+			body := read("limit=1&filterBy=" + url.QueryEscape("action==create"))
+			Expect(body.Actions).To(HaveLen(1))
+			Expect(body.Actions[0].Id).To(Equal(testing.TestUuid1))
+			Expect(body.Next).To(BeZero())
+			searched := read("search=CrEaTe&limit=1")
+			Expect(searched.Actions).To(HaveLen(1))
+			Expect(searched.Actions[0].Id).To(Equal(testing.TestUuid1))
+			Expect(searched.Next).To(BeZero())
+		})
+		It("combines case-insensitive subject search with filters and sorted server pages", func() {
+			first := read("search=" + url.QueryEscape("@EXAMPLE.COM") + "&sortBy=subject&sortOrder=asc&limit=1")
+			Expect(first.Actions).To(HaveLen(1))
+			Expect(first.Actions[0].Subject).To(Equal("a@example.com"))
+			Expect(first.Next).To(Equal(int32(1)))
+			next := read("search=" + url.QueryEscape("@EXAMPLE.COM") + "&sortBy=subject&sortOrder=asc&limit=1&offset=1")
+			Expect(next.Actions[0].Subject).To(Equal("m@example.com"))
+			filtered := read("search=" + url.QueryEscape("Z@EXAMPLE.COM") + "&filterBy=" + url.QueryEscape("action==update"))
+			Expect(filtered.Actions).To(BeEmpty())
+		})
+		DescribeTable("searches raw action values", func(action api.WorkloadActionType) {
+			_, err := runaidb.DB().Model(&models.WorkloadActionHistory{}).Where("id = ?", records[0].ID).
+				Updates(map[string]interface{}{"action": string(action)})
+			Expect(err).NotTo(HaveOccurred())
+			body := read("search=" + url.QueryEscape(strings.ToUpper(string(action))) + "&filterBy=" + url.QueryEscape("subject==z@example.com"))
+			Expect(body.Actions).To(HaveLen(1))
+			Expect(body.Actions[0].Action).To(Equal(action))
+		},
+			Entry("create", api.WORKLOADACTIONTYPE_CREATE),
+			Entry("update", api.WORKLOADACTIONTYPE_UPDATE),
+			Entry("delete", api.WORKLOADACTIONTYPE_DELETE),
+			Entry("suspend", api.WORKLOADACTIONTYPE_SUSPEND),
+			Entry("resume", api.WORKLOADACTIONTYPE_RESUME),
+		)
+		It("does not translate display labels and keeps the event filter independent", func() {
+			_, err := runaidb.DB().Model(&models.WorkloadActionHistory{}).Where("id = ?", records[0].ID).
+				Updates(map[string]interface{}{"action": "suspend"})
+			Expect(err).NotTo(HaveOccurred())
+			_, err = runaidb.DB().Model(&models.WorkloadActionHistory{}).Where("id = ?", records[1].ID).
+				Updates(map[string]interface{}{"subject": "stopped@example.com"})
+			Expect(err).NotTo(HaveOccurred())
+			searched := read("search=StOpPeD")
+			Expect(searched.Actions).To(HaveLen(1))
+			Expect(searched.Actions[0].Id).To(Equal(records[1].ID.String()))
+			filtered := read("filterBy=" + url.QueryEscape("action==suspend"))
+			Expect(filtered.Actions).To(HaveLen(1))
+			Expect(filtered.Actions[0].Action).To(Equal(api.WORKLOADACTIONTYPE_SUSPEND))
+			combined := read("search=Stopped&filterBy=" + url.QueryEscape("action==suspend"))
+			Expect(combined.Actions).To(BeEmpty())
+		})
+		It("treats search wildcards and SQL syntax as literal text", func() {
+			Expect(read("search=" + url.QueryEscape("%")).Actions).To(BeEmpty())
+			Expect(read("search=" + url.QueryEscape("_")).Actions).To(BeEmpty())
+			Expect(read("search=" + url.QueryEscape("%_\\' OR 1=1 --")).Actions).To(BeEmpty())
+			Expect(read("search=" + url.QueryEscape("  CrEaTe  ")).Actions).To(HaveLen(1))
+		})
+		It("keeps search scoped to the requested workload and tenant", func() {
+			other := records[0]
+			other.ID = uuid.New()
+			other.WorkloadID = uuid.New()
+			other.Subject = "a@example.com"
+			foreign := other
+			foreign.ID = uuid.New()
+			foreign.WorkloadID = workloadID
+			foreign.TenantID = 2
+			Expect(dao.DbInsertWorkloadActions(ctx, []models.WorkloadActionHistory{other, foreign})).To(Succeed())
+			body := read("search=" + url.QueryEscape("a@example.com"))
+			Expect(body.Actions).To(HaveLen(1))
+			Expect(body.Actions[0].Id).To(Equal(testing.TestUuid2))
+		})
+
+		It("combines event, subject and date filters", func() {
+			filters := "action==update,subject=@A@,acceptedAt>=" + records[0].AcceptedAt.Add(time.Minute).Format(time.RFC3339Nano)
+			body := read("filterBy=" + url.QueryEscape(filters))
+			Expect(body.Actions).To(HaveLen(1))
+			Expect(body.Actions[0].Subject).To(Equal("a@example.com"))
+		})
+		It("sorts the complete result before pagination in either direction", func() {
+			first := read("sortBy=subject&sortOrder=asc&limit=1")
+			Expect(first.Actions[0].Subject).To(Equal("a@example.com"))
+			second := read("sortBy=subject&sortOrder=asc&limit=1&offset=1")
+			Expect(second.Actions[0].Subject).To(Equal("m@example.com"))
+			descending := read("sortBy=acceptedAt&sortOrder=asc&limit=1")
+			Expect(descending.Actions[0].Id).To(Equal(testing.TestUuid1))
+			event := read("sortBy=action&sortOrder=desc&limit=1")
+			Expect(event.Actions[0].Action).To(Equal(api.WORKLOADACTIONTYPE_UPDATE))
+		})
+		DescribeTable("accepts supported date comparison operators", func(operator string, count int) {
+			body := read("filterBy=" + url.QueryEscape("acceptedAt"+operator+records[0].AcceptedAt.Format(time.RFC3339Nano)))
+			Expect(body.Actions).To(HaveLen(count))
+		}, Entry("equals", "==", 1), Entry("not equals", "!=", 2), Entry("before", "<=", 1), Entry("after", ">=", 3))
+		DescribeTable("rejects invalid query fields and values", func(params string) {
+			Expect(query(params).Code).To(Equal(http.StatusBadRequest))
+		},
+			Entry("unknown sort column", "sortBy=tenantId"),
+			Entry("invalid direction", "sortOrder=sideways"),
+			Entry("unknown filter column", "filterBy=tenantId%3D%3D1"),
+			Entry("invalid date", "filterBy=acceptedAt%3E%3Dinvalid"),
+			Entry("date contains", "filterBy="+url.QueryEscape("acceptedAt=@2026-11-02T00:00:00Z")),
+			Entry("date does not contain", "filterBy="+url.QueryEscape("acceptedAt!@2026-11-02T00:00:00Z")),
+			Entry("date starts with", "filterBy="+url.QueryEscape("acceptedAt=^2026-11-02T00:00:00Z")),
+			Entry("date ends with", "filterBy="+url.QueryEscape("acceptedAt=$2026-11-02T00:00:00Z")),
+		)
+	})
+
+	It("records who performed the action", func() {
+		input := api.WorkloadActionRecordInput{
+			Id: uuid.NewString(), ClusterId: testing.ClusterUuid1, WorkloadId: uuid.NewString(),
+			WorkloadName: "direct-v2-workload", Action: api.WORKLOADACTIONTYPE_CREATE,
+			AcceptedAt: time.Now().UTC().Truncate(time.Microsecond),
+		}
+		workload := testActionWorkload(uuid.MustParse(input.WorkloadId), records[0].WorkloadActionScope)
+		_, createErr := runaidb.DB().Create(&workload)
+		Expect(createErr).NotTo(HaveOccurred())
+		body, err := json.Marshal(api.CreateWorkloadActionsRequest{Actions: []api.WorkloadActionRecordInput{input}})
+		Expect(err).NotTo(HaveOccurred())
+		request := httptest.NewRequest(http.MethodPost, "/internal/workloads/actions", bytes.NewReader(body)).WithContext(ctx)
+		request.Header.Set("Content-Type", "application/json")
+		response := httptest.NewRecorder()
+		api.NewWorkloadActionsAPIController(service).InternalCreateWorkloadActions(response, request)
+		Expect(response.Code).To(Equal(http.StatusNoContent))
+
+		stored := storedWorkloadActions(ctx, uuid.MustParse(input.WorkloadId), 0)
+		Expect(stored).To(HaveLen(1))
+		Expect(stored[0].ID.String()).To(Equal(input.Id))
+		Expect(stored[0].Subject).To(Equal(testing.TestUser))
+		Expect(stored[0].SubjectType).To(Equal("user"))
+		Expect(stored[0].Action).To(Equal(string(api.WORKLOADACTIONTYPE_CREATE)))
+		Expect(stored[0].AcceptedAt).To(BeTemporally("==", input.AcceptedAt))
+	})
+
+	It("stores saved and new actions once when retrying a batch", func() {
+		input := api.WorkloadActionRecordInput{
+			Id: uuid.NewString(), ClusterId: testing.ClusterUuid1, WorkloadId: uuid.NewString(),
+			WorkloadName: "retried-workload", Action: api.WORKLOADACTIONTYPE_UPDATE, AcceptedAt: time.Now().UTC(),
+		}
+		workload := testActionWorkload(uuid.MustParse(input.WorkloadId), records[0].WorkloadActionScope)
+		_, createErr := runaidb.DB().Create(&workload)
+		Expect(createErr).NotTo(HaveOccurred())
+		request := api.CreateWorkloadActionsRequest{Actions: []api.WorkloadActionRecordInput{input}}
+		response, err := service.InternalCreateWorkloadActions(ctx, request)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(response.Code).To(Equal(http.StatusNoContent))
+		Expect(storedWorkloadActions(ctx, workload.ID, 0)).To(HaveLen(1))
+
+		newInput := input
+		newInput.Id = uuid.NewString()
+		newInput.Action = api.WORKLOADACTIONTYPE_DELETE
+		request.Actions = append(request.Actions, newInput)
+		for range 2 {
+			response, err := service.InternalCreateWorkloadActions(ctx, request)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(response.Code).To(Equal(http.StatusNoContent))
+			stored := storedWorkloadActions(ctx, workload.ID, 0)
+			Expect(stored).To(HaveLen(2))
+			Expect([]string{stored[0].ID.String(), stored[1].ID.String()}).To(ConsistOf(input.Id, newInput.Id))
+		}
+	})
+
+	It("retries a batch until every workload is registered", func() {
+		registered := testActionWorkload(uuid.New(), records[0].WorkloadActionScope)
+		pending := testActionWorkload(uuid.New(), records[0].WorkloadActionScope)
+		_, err := runaidb.DB().Create(&registered)
+		Expect(err).NotTo(HaveOccurred())
+		request := api.CreateWorkloadActionsRequest{}
+		for _, id := range []uuid.UUID{registered.ID, registered.ID, pending.ID} {
+			request.Actions = append(request.Actions, api.WorkloadActionRecordInput{
+				Id: uuid.NewString(), ClusterId: testing.ClusterUuid1, WorkloadId: id.String(),
+				WorkloadName: "registered-workload", Action: api.WORKLOADACTIONTYPE_CREATE, AcceptedAt: time.Now().UTC(),
+			})
+		}
+		response, err := service.InternalCreateWorkloadActions(ctx, request)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(response.Code).To(Equal(http.StatusPreconditionFailed))
+		Expect(storedWorkloadActions(ctx, registered.ID, 0)).To(BeEmpty())
+		Expect(storedWorkloadActions(ctx, pending.ID, 0)).To(BeEmpty())
+
+		cleanupQuery := workloadActionCleanupQuery()
+		_, err = runaidb.DB().Exec(cleanupQuery)
+		Expect(err).NotTo(HaveOccurred())
+		_, err = runaidb.DB().Create(&pending)
+		Expect(err).NotTo(HaveOccurred())
+		_, err = runaidb.DB().Delete(&pending)
+		Expect(err).NotTo(HaveOccurred())
+
+		response, err = service.InternalCreateWorkloadActions(ctx, request)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(response.Code).To(Equal(http.StatusNoContent))
+		_, err = runaidb.DB().Exec(cleanupQuery)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(storedWorkloadActions(ctx, registered.ID, 0)).To(HaveLen(2))
+		Expect(storedWorkloadActions(ctx, pending.ID, 0)).To(HaveLen(1))
+	})
+
+	It("requires workload registration in the authenticated tenant", func() {
+		scope := records[0].WorkloadActionScope
+		scope.TenantID = 2
+		workload := testActionWorkload(uuid.New(), scope)
+		_, err := runaidb.DB().Create(&workload)
+		Expect(err).NotTo(HaveOccurred())
+		request := api.CreateWorkloadActionsRequest{Actions: []api.WorkloadActionRecordInput{{
+			Id: uuid.NewString(), ClusterId: testing.ClusterUuid1, WorkloadId: workload.ID.String(),
+			WorkloadName: workload.Name, Action: api.WORKLOADACTIONTYPE_CREATE, AcceptedAt: time.Now().UTC(),
+		}}}
+		response, err := service.InternalCreateWorkloadActions(ctx, request)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(response.Code).To(Equal(http.StatusPreconditionFailed))
+		Expect(storedWorkloadActions(ctx, workload.ID, 0)).To(BeEmpty())
+	})
+
+	DescribeTable("rejects malformed internal action IDs", func(field string) {
+		input := api.WorkloadActionRecordInput{
+			Id: uuid.NewString(), ClusterId: testing.ClusterUuid1, WorkloadId: uuid.NewString(),
+			WorkloadName: "invalid-action", Action: api.WORKLOADACTIONTYPE_CREATE, AcceptedAt: time.Now().UTC(),
+		}
+		switch field {
+		case "record":
+			input.Id = "invalid"
+		case "cluster":
+			input.ClusterId = "invalid"
+		case "workload":
+			input.WorkloadId = "invalid"
+		}
+
+		response, err := service.InternalCreateWorkloadActions(ctx, api.CreateWorkloadActionsRequest{Actions: []api.WorkloadActionRecordInput{input}})
+		Expect(err).NotTo(HaveOccurred())
+		Expect(response.Code).To(Equal(http.StatusBadRequest))
+	},
+		Entry("record ID", "record"),
+		Entry("cluster ID", "cluster"),
+		Entry("workload ID", "workload"),
+	)
+
+	DescribeTable("rejects empty and oversized action batches", func(size int) {
+		input := api.WorkloadActionRecordInput{
+			Id: uuid.NewString(), ClusterId: testing.ClusterUuid1, WorkloadId: uuid.NewString(),
+			WorkloadName: "bounded-workload", Action: api.WORKLOADACTIONTYPE_CREATE, AcceptedAt: time.Now().UTC(),
+		}
+		request := api.CreateWorkloadActionsRequest{Actions: make([]api.WorkloadActionRecordInput, size)}
+		for i := range request.Actions {
+			request.Actions[i] = input
+			request.Actions[i].Id = uuid.NewString()
+		}
+		Expect(api.AssertCreateWorkloadActionsRequestConstraints(request)).To(HaveOccurred())
+	},
+		Entry("empty batch", 0),
+		Entry("more than 500 actions", 501),
+	)
+
 	It("omits next when the final page exactly matches the limit", func() {
 		response := getWorkloadActionsHistory(service, ctx, workloadID, 1, 2)
 		Expect(response.Next).To(BeZero())
@@ -87,7 +384,7 @@ var _ = Describe("Workload action history", func() {
 	})
 
 	It("requires tenant context for DAO reads", func() {
-		_, _, apiErr := dao.DbGetWorkloadActions(context.Background(), workloadID, 0, 0)
+		_, _, apiErr := dao.DbGetWorkloadActions(context.Background(), workloadID, 0, 0, "desc", "accepted_at", nil, "")
 		Expect(apiErr).NotTo(BeNil())
 		Expect(apiErr.Code).To(Equal(int32(http.StatusBadRequest)))
 
@@ -98,7 +395,7 @@ var _ = Describe("Workload action history", func() {
 			id            string
 			offset, limit int32
 		}{{"invalid", 0, 0}, {workloadID.String(), -1, 1}, {workloadID.String(), 0, -1}} {
-			response, err := service.GetWorkloadActionsHistory(ctx, request.id, request.offset, request.limit)
+			response, err := service.GetWorkloadActionsHistory(ctx, request.id, request.offset, request.limit, "", "", nil, "")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(response.Code).To(Equal(http.StatusBadRequest))
 		}
@@ -130,9 +427,9 @@ var _ = Describe("Workload action history", func() {
 	})
 
 	It("runs paired migrations repeatedly with all indexes and no workload foreign key", func() {
-		up, err := os.ReadFile("../database/migrations/up/03100001_workloads_action_history.up.sql")
+		up, err := os.ReadFile("../database/migrations/up/03010001_workloads_action_history.up.sql")
 		Expect(err).NotTo(HaveOccurred())
-		down, err := os.ReadFile("../database/migrations/down/03100001_workloads_action_history.down.sql")
+		down, err := os.ReadFile("../database/migrations/down/03010001_workloads_action_history.down.sql")
 		Expect(err).NotTo(HaveOccurred())
 
 		tx := runaidb.DB().Begin()
@@ -160,27 +457,10 @@ var _ = Describe("Workload action history", func() {
 	})
 
 	It("aligns history cleanup with workload row deletion", func() {
-		_, err := runaidb.DB().Exec("CREATE EXTENSION IF NOT EXISTS pg_cron")
-		Expect(err).NotTo(HaveOccurred())
-
-		stop := make(chan struct{})
-		DeferCleanup(func() { close(stop) })
-		originalConfig := *runai_config.Get[*config.DBCleanerConfig]()
-		cleanerConfig := originalConfig
-		cleanerConfig.CleanerIntervalHours = 1
-		Expect(runai_config.Set(&cleanerConfig)).To(Succeed())
-		DeferCleanup(func() { Expect(runai_config.Set(&originalConfig)).To(Succeed()) })
-
-		database.InitGoRoutines(stop)
-		var command string
-		Expect(runaidb.DB().Table("cron.job").Where("jobname = ?", "workloads_cleaner").Pluck("command", &command)).To(Succeed())
-		actionQuery := findQuery(command, "DELETE FROM workloads_action_history")
-		Expect(actionQuery).NotTo(BeEmpty())
-		Expect(actionQuery).To(ContainSubstring("NOT EXISTS"))
-		Expect(actionQuery).NotTo(ContainSubstring("accepted_at"))
+		actionQuery := workloadActionCleanupQuery()
 
 		workload := testActionWorkload(workloadID, records[0].WorkloadActionScope)
-		_, err = runaidb.DB().Create(&workload)
+		_, err := runaidb.DB().Create(&workload)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(dao.DbInsertWorkloadActions(ctx, records)).To(Succeed())
 		_, err = runaidb.DB().Model(&models.WorkloadActionHistory{}).
@@ -243,9 +523,9 @@ func testWorkloadActionRecords(workloadID uuid.UUID) []models.WorkloadActionHist
 	return records
 }
 
-func getWorkloadActionsHistory(service api.EventsAPIServicer, ctx context.Context, workloadID uuid.UUID, offset, limit int32) api.GetWorkloadActionsResponse {
+func getWorkloadActionsHistory(service api.WorkloadActionsAPIServicer, ctx context.Context, workloadID uuid.UUID, offset, limit int32) api.GetWorkloadActionsResponse {
 	GinkgoHelper()
-	response, err := service.GetWorkloadActionsHistory(ctx, workloadID.String(), offset, limit)
+	response, err := service.GetWorkloadActionsHistory(ctx, workloadID.String(), offset, limit, "", "", nil, "")
 	Expect(err).NotTo(HaveOccurred())
 	Expect(response.Code).To(Equal(http.StatusOK))
 	return response.Body.(api.GetWorkloadActionsResponse)
@@ -253,7 +533,7 @@ func getWorkloadActionsHistory(service api.EventsAPIServicer, ctx context.Contex
 
 func storedWorkloadActions(ctx context.Context, workloadID uuid.UUID, limit int32) []models.WorkloadActionHistory {
 	GinkgoHelper()
-	records, _, apiErr := dao.DbGetWorkloadActions(ctx, workloadID, 0, limit)
+	records, _, apiErr := dao.DbGetWorkloadActions(ctx, workloadID, 0, limit, "desc", "accepted_at", nil, "")
 	Expect(apiErr).To(BeNil())
 	return records
 }
@@ -284,4 +564,27 @@ func expectWorkloadAncestorProject(ctx context.Context, workloadID uuid.UUID, pr
 	ancestors := response.Body.(authorization_utils.Ancestors)
 	Expect(ancestors.ProjectId).NotTo(BeNil())
 	Expect(*ancestors.ProjectId).To(Equal(projectID))
+}
+
+func workloadActionCleanupQuery() string {
+	GinkgoHelper()
+	_, err := runaidb.DB().Exec("CREATE EXTENSION IF NOT EXISTS pg_cron")
+	Expect(err).NotTo(HaveOccurred())
+
+	stop := make(chan struct{})
+	DeferCleanup(func() { close(stop) })
+	originalConfig := *runai_config.Get[*config.DBCleanerConfig]()
+	cleanerConfig := originalConfig
+	cleanerConfig.CleanerIntervalHours = 1
+	Expect(runai_config.Set(&cleanerConfig)).To(Succeed())
+	DeferCleanup(func() { Expect(runai_config.Set(&originalConfig)).To(Succeed()) })
+
+	database.InitGoRoutines(stop)
+	var command string
+	Expect(runaidb.DB().Table("cron.job").Where("jobname = ?", "workloads_cleaner").Pluck("command", &command)).To(Succeed())
+	actionQuery := findQuery(command, "DELETE FROM workloads_action_history")
+	Expect(actionQuery).NotTo(BeEmpty())
+	Expect(actionQuery).To(ContainSubstring("NOT EXISTS"))
+	Expect(actionQuery).NotTo(ContainSubstring("accepted_at"))
+	return actionQuery
 }

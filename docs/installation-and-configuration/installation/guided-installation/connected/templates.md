@@ -482,60 +482,42 @@ controlPlane:
     keyPath: /path/to/cp-key.pem
   customHelmValues:
     supportEntitled: true # Support-Entitled Release only
-    global:
-      fipsMode: only
-      imagePullSecrets:
-        - name: runai-reg-creds
-        - name: <dhi-secret-name>
-      postgresql:
-        auth:
-          host: <POSTGRESQL_HOST>
-          port: <POSTGRESQL_PORT>
-          database: <DATABASE_NAME>
-          username: <ROLE_NAME>
-          password: <ROLE_PASSWORD> # Or use existingSecret
-          postgresPassword: <ANY_VALUE> # Required, not used with an external instance
-          dbSslMode: <SSL_MODE>
-      postgresImage:
-        registry: docker.io
-        repository: <organization>/dhi-postgres
-        tag: <fips-ready-tag>
-    postgresql:
-      enabled: false
-    keycloakx:
-      image:
-        repository: docker.io/<organization>/dhi-keycloak
-        tag: <fips-ready-tag>
-      imagePullSecrets:
-        - name: runai-reg-creds
-        - name: <dhi-secret-name>
-      securityContext:
-        runAsUser: 65532
-      command:
-        - /bin/sh
-        - -c
-        - |
-          KC_BOOTSTRAP_ADMIN_USERNAME="$(cat /run/secrets/keycloak/admin-username)" \
-          KC_BOOTSTRAP_ADMIN_PASSWORD="$(cat /run/secrets/keycloak/admin-password)" \
-          exec /opt/keycloak/bin/kc.sh start \
-            --features=token-exchange,admin-fine-grained-authz:v1,fips
-    traefik:
-      image:
-        registry: docker.io
-        repository: <organization>/dhi-traefik
-        tag: <fips-ready-tag>
-    nats:
-      image:
-        registry: docker.io
-        repository: <organization>/dhi-nats
-        tag: <fips-ready-tag>
-      command:
-        - /nats-server
-    thanos:
-      image:
-        registry: docker.io
-        repository: <organization>/dhi-thanos
-        tag: <fips-ready-tag>
+    global.fipsMode: only
+    global.imagePullSecrets[0].name: runai-reg-creds
+    global.imagePullSecrets[1].name: <dhi-secret-name>
+    global.postgresql.auth.host: <POSTGRESQL_HOST>
+    global.postgresql.auth.port: <POSTGRESQL_PORT>
+    global.postgresql.auth.database: <DATABASE_NAME>
+    global.postgresql.auth.username: <ROLE_NAME>
+    global.postgresql.auth.password: <ROLE_PASSWORD> # Or use existingSecret
+    global.postgresql.auth.postgresPassword: <ANY_VALUE> # Required, not used with an external instance
+    global.postgresql.auth.dbSslMode: <SSL_MODE>
+    global.postgresImage.registry: docker.io
+    global.postgresImage.repository: <organization>/dhi-postgres
+    global.postgresImage.tag: <fips-ready-tag>
+    postgresql.enabled: false
+    keycloakx.image.repository: docker.io/<organization>/dhi-keycloak
+    keycloakx.image.tag: <fips-ready-tag>
+    keycloakx.imagePullSecrets[0].name: runai-reg-creds
+    keycloakx.imagePullSecrets[1].name: <dhi-secret-name>
+    keycloakx.securityContext.runAsUser: 65532
+    keycloakx.command[0]: /bin/sh
+    keycloakx.command[1]: -c
+    keycloakx.command[2]: >-
+      KC_BOOTSTRAP_ADMIN_USERNAME="$(cat /run/secrets/keycloak/admin-username)"
+      KC_BOOTSTRAP_ADMIN_PASSWORD="$(cat /run/secrets/keycloak/admin-password)"
+      exec /opt/keycloak/bin/kc.sh start
+      --features=token-exchange\,admin-fine-grained-authz:v1\,fips
+    traefik.image.registry: docker.io
+    traefik.image.repository: <organization>/dhi-traefik
+    traefik.image.tag: <fips-ready-tag>
+    nats.image.registry: docker.io
+    nats.image.repository: <organization>/dhi-nats
+    nats.image.tag: <fips-ready-tag>
+    nats.command[0]: /nats-server
+    thanos.image.registry: docker.io
+    thanos.image.repository: <organization>/dhi-thanos
+    thanos.image.tag: <fips-ready-tag>
 
 cluster:
   enabled: true
@@ -550,20 +532,15 @@ cluster:
       certPath: /path/to/inference-wildcard-cert.pem
       keyPath: /path/to/inference-wildcard-key.pem
   customHelmValues:
-    global:
-      fipsMode: only
-      additionalImagePullSecrets:
-        - runai-reg-creds
-        - <dhi-secret-name>
-    thirdPartyImages:
-      valkey:
-        registry: docker.io
-        repository: <organization>/dhi-valkey
-        tag: <fips-ready-tag>
-      git-sync:
-        registry: docker.io
-        repository: <organization>/dhi-git-sync
-        tag: <fips-ready-tag>
+    global.fipsMode: only
+    global.additionalImagePullSecrets[0]: runai-reg-creds
+    global.additionalImagePullSecrets[1]: <dhi-secret-name>
+    thirdPartyImages.valkey.registry: docker.io
+    thirdPartyImages.valkey.repository: <organization>/dhi-valkey
+    thirdPartyImages.valkey.tag: <fips-ready-tag>
+    thirdPartyImages.git-sync.registry: docker.io
+    thirdPartyImages.git-sync.repository: <organization>/dhi-git-sync
+    thirdPartyImages.git-sync.tag: <fips-ready-tag>
 
 prerequisites:
   gpuOperator:

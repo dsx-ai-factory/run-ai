@@ -5,8 +5,8 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Repo** | Pointer to **string** | The HTTP or HTTPS URL of the Helm repository that hosts the chart. This must match a repository that is accessible. Used together with &#x60;name&#x60; and &#x60;version&#x60;. | [optional] 
-**ChartName** | Pointer to **string** | The name of the chart within the specified repository. This corresponds to the chart’s directory name. | [optional] 
-**ChartVersion** | Pointer to **string** | The specific Semantic Version (SemVer) of the chart to deploy. | [optional] 
+**ChartName** | Pointer to **string** | Helm chart name. | [optional] 
+**ChartVersion** | Pointer to **string** | Helm chart version. | [optional] 
 **ChartURL** | Pointer to **string** | A direct HTTPS URL to a packaged Helm chart archive (.tgz). When provided, the chart is downloaded directly from this location instead of being resolved through a Helm repository reference. | [optional] 
 **ChartId** | Pointer to **string** | Identifier of a Helm chart archive that was previously uploaded via the chart upload endpoint. When provided, the control plane serves the uploaded chart to the cluster for installation instead of resolving a Helm repository reference or a direct chart URL.  | [optional] 
 

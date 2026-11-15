@@ -44,6 +44,12 @@ type SchedulingCapabilities struct {
 	//CpuQuota bool `json:"cpuQuota"`
 	CpuQuota bool `json:"cpuQuota" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Whether to allow GPU, CPU and memory limits for the nodepool's resources. Only allowed when quota=true.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Limits bool `json:"limits"`
+	Limits bool `json:"limits" gorm:"not null;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertSchedulingCapabilitiesRequired checks if the required fields are not zero-ed
@@ -53,6 +59,7 @@ func AssertSchedulingCapabilitiesRequired(obj SchedulingCapabilities) error {
 		"ranks":             obj.Ranks,
 		"quota":             obj.Quota,
 		"cpuQuota":          obj.CpuQuota,
+		"limits":            obj.Limits,
 	}
 	for name, el := range elements {
 		if isZero := IsZeroValue(el); isZero {
@@ -65,6 +72,11 @@ func AssertSchedulingCapabilitiesRequired(obj SchedulingCapabilities) error {
 
 // AssertSchedulingCapabilitiesConstraints checks if the values respects the defined constraints
 func AssertSchedulingCapabilitiesConstraints(obj SchedulingCapabilities) error {
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////

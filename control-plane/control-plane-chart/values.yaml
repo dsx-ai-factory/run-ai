@@ -759,9 +759,9 @@ identityManager:
     ignoredRealms: ''
     dbScheme: identity_manager
     migrationFiles: file:///migrations
-    serviceAccountsVersion: v3
+    serviceAccountsVersion: v4
     internalServiceAccountsVersion: v2
-    accessKeysVersion: v5
+    accessKeysVersion: v6
     secretsMountPath: /etc/secrets
     loginTheme: 'runai-theme'
     clientCachingCleanup: 60
@@ -1266,7 +1266,7 @@ keycloakx:
   fullnameOverride: keycloak
   image:
     repository: quay.io/keycloak/keycloak
-    tag: "26.6"
+    tag: "26.8.2"
   imagePullSecrets:
     - name: runai-reg-creds
   command:
@@ -2204,7 +2204,7 @@ clusterService:
         # Inclusive
         # Defaults to the chart's app version
         max: ''
-      helmRegistryUrl: https://helm.ngc.nvidia.com/nvidia/runai
+      helmRegistryUrl: https://helm.ngc.nvidia.com/nvidia/runai-oss
       helmRegistryUsername: ''
       helmRegistryPasswordPlaceholder: ''
     maxWaitForClusterRemoteConfigStatusUpdate: 5m
@@ -2953,12 +2953,6 @@ traefik:
     interval: 30s
     scrapeTimeout: 30s
 
-# When set, /api/docs and /redoc/* paths redirect to this external URL (used in SaaS).
-# Leave empty for self-hosted (no API docs endpoint served).
-redoc:
-  docsSite:
-    url: ""
-
 # When enabled, the chart fails to render if the release namespace is not labeled
 # istio-injection=disabled. Run the following before installing/upgrading:
 #   kubectl label namespace <release-namespace> istio-injection=disabled
@@ -3317,6 +3311,7 @@ workloads:
     # (CHART_RETENTION_MINUTES). Charts referenced by an already-deployed application
     # are removed regardless; this bounds abandoned/unclaimed uploads. Default 24h.
     chartRetentionMinutes: 1440
+    chartInspectionCacheTTLSeconds: 600
     server:
       writeTimeout: 2m
       readTimeout: 2m
@@ -3964,6 +3959,11 @@ catalogService:
   affinity: {}
 
   config:
+    # null uses catalog-service's default sharing cutoff; explicit values must be 1..100.
+    wholeGPUCutoffPercent: null
+    # null uses catalog-service's 900-second NGC metadata cache expiry; must be positive.
+    ngcMetadataCacheTTLSeconds: null
+    inventoryRequestTimeoutSec: 30
     logLevel: Info
     dbScheme: catalog
     server:

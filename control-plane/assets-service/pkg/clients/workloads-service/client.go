@@ -261,3 +261,29 @@ func (c Client) InternalCreateWorkload(ctx context.Context, notification *worklo
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("failed to notify on workloads service about the creation of workload, creation md %+v: %v", *notification, err)
 	return nil, workloadsServiceClient.NewError(http.StatusServiceUnavailable, fmt.Sprintf("failed to notify on workloads service about the creation of workload, creation md %+v: %v", *notification, err))
 }
+
+// InternalGetResourceClaimTemplateWorkloads lists the workloads in the request's scope whose pods
+// reference the resource claim template with the request's name
+func (c Client) InternalGetResourceClaimTemplateWorkloads(ctx context.Context,
+	request *workloadsServiceClient.InternalResourceClaimTemplateWorkloadsRequest, offset int32, limit int32,
+) (*workloadsServiceClient.ResourceClaimTemplateWorkloadsResponse, *workloadsServiceClient.Error) {
+	resp, r, err := c.apiClient.WorkloadsAPI.InternalGetResourceClaimTemplateWorkloads(ctx).
+		InternalResourceClaimTemplateWorkloadsRequest(*request).
+		Offset(offset).
+		Limit(limit).
+		Execute()
+	if err == nil && r != nil && r.StatusCode == http.StatusOK {
+		return resp, nil
+	}
+
+	if r != nil && r.StatusCode >= http.StatusBadRequest {
+		data, _ := io.ReadAll(r.Body)
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("failed to list the workloads of resource claim template %s in %s %s, status %d, data: %s",
+			request.Name, request.ScopeType, request.ScopeId, r.StatusCode, data)
+		return nil, workloadsServiceClient.NewError(int32(r.StatusCode), fmt.Sprintf("failed to list the workloads of resource claim template %s", request.Name))
+	}
+
+	logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("failed requesting workloads service to list the workloads of resource claim template %s in %s %s: %v",
+		request.Name, request.ScopeType, request.ScopeId, err)
+	return nil, workloadsServiceClient.NewError(http.StatusServiceUnavailable, fmt.Sprintf("failed to request the workloads of resource claim template %s", request.Name))
+}

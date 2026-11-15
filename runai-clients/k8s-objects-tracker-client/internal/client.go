@@ -251,6 +251,33 @@ func (c *K8SObjectTrackerClient) SyncResourceClaimTemplates(ctx context.Context,
 		}).ClusterId(clusterId).Execute()
 }
 
+func (c *K8SObjectTrackerClient) ListResourceClaimTemplatesByName(ctx context.Context, clusterId string, name string, origin string) (*openapi.ResourceClaimTemplates, *openapi.Error) {
+	paramsAsStr := fmt.Sprintf("resource claim templates named %s in cluster %s", name, clusterId)
+
+	request := c.ApiClient.ResourceClaimTemplatesAPI.ListResourceClaimTemplates(ctx).ClusterId(clusterId).Name(name)
+	if origin != "" {
+		request = request.Origin(origin)
+	}
+
+	resp, r, err := request.Execute()
+	if r != nil {
+		if err == nil && resp != nil && r.StatusCode == http.StatusOK {
+			return resp, nil
+		}
+
+		data, readErr := io.ReadAll(r.Body)
+		if readErr != nil {
+			data = []byte(fmt.Sprintf("<failed to read body: %v>", readErr))
+		}
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to list %s: %s", paramsAsStr, data)
+
+		return nil, openapi.NewError(http.StatusServiceUnavailable, fmt.Sprintf("failed to list %s", paramsAsStr))
+	}
+
+	logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to request list %s: %v", paramsAsStr, err)
+	return nil, openapi.NewError(http.StatusServiceUnavailable, fmt.Sprintf("failed to request list %s", paramsAsStr))
+}
+
 func (c *K8SObjectTrackerClient) ListSecrets(ctx context.Context, clusterId string) (*openapi.SecretListResponse, *http.Response, error) {
 	return c.ApiClient.SecretsAPI.ListSecrets(ctx).ClusterId(clusterId).Origin(originAll).Execute()
 }

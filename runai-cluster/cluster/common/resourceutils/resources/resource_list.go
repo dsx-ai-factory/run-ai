@@ -80,34 +80,45 @@ func PodRunaiRequestsAndLimits(containers, initContainers []v1.Container, annota
 	requests, limits v1.ResourceList) {
 	requests, limits = PodRequestsAndLimits(containers, initContainers)
 	AddRunaiAnnotationsRequestedResources(annotations, requests, limits)
-	AddGpuLimitsFromContainers(containers, limits)
+	addGpuLimitsFromContainers(containers, limits, !hasPerContainerGPUMemoryLimit(annotations))
 	return
 }
 
 // AddRunaiAnnotationsRequestedResources
 // adds to both request and limit
-// uses correct units for gpu memory - in MB
+// preserves native GPU memory quantities and interprets legacy values as MB
 // mainly used by external-workload-integrator and cluster-sync for new workload api.
 func AddRunaiAnnotationsRequestedResources(podAnnotations map[string]string,
 	requests, limits v1.ResourceList) {
-	// currently, gpu fraction, memory and mig from annotation are only reflected in the first container,
-	// even if there are several containers. so we calculate it once (for each pod).
-
-	// Add gpu memory request
-	gpuMemoryMb, found := podAnnotations[constants.AnnotationGpuMemory]
-	if found && gpuMemoryMb != "" {
-		quantity, err := resource.ParseQuantity(gpuMemoryMb)
-		if err != nil {
-			zap.S().Warnf("Failed to parse %s annotation %s", constants.AnnotationGpuMemory, gpuMemoryMb)
-		} else {
-			// the annotation's expected value is a number in MB, while resource.ParseQuantity parses it into Bytes,
-			// so we need to re-set it as MB.
-			quantity.Set(int64(quantity.AsApproximateFloat64() * 1000 * 1000))
-			addResource(requests, constants.GpuMemoryResourceName, quantity)
-			addResource(limits, constants.GpuMemoryResourceName, quantity)
+	memory, err := ReadGPUMemoryAnnotations(podAnnotations)
+	if err != nil {
+		zap.S().Warnf("Failed to parse GPU memory annotations: %s", err)
+	} else {
+		if memory.HasRequest {
+			addResource(requests, constants.GpuMemoryResourceName, memory.Request)
+		}
+		if memory.HasRequest || !memory.Limit.IsZero() {
+			addResource(limits, constants.GpuMemoryResourceName, memory.Limit)
 		}
 	}
+	addLegacyGpuFractionRequests(podAnnotations, requests, limits)
 
+	// Add mig requests
+	for key, val := range podAnnotations {
+		if !strings.HasPrefix(key, constants.AnnotationMigProfilePrefix) {
+			continue
+		}
+		quantity, err := resource.ParseQuantity(val)
+		if err != nil {
+			zap.S().Warnf("Failed to parse mig %s annotation %s", key, val)
+		} else {
+			requests[v1.ResourceName(key)] = quantity
+			limits[v1.ResourceName(key)] = quantity
+		}
+	}
+}
+
+func addLegacyGpuFractionRequests(podAnnotations map[string]string, requests, limits v1.ResourceList) {
 	// Add gpu fraction request. The gpu-fraction annotation carries the per-device
 	// fraction (e.g. "0.5"); when the workload requests multiple devices at that
 	// fraction (via gpu-fraction-num-devices), scale so the reported request/limit
@@ -129,20 +140,6 @@ func AddRunaiAnnotationsRequestedResources(podAnnotations map[string]string,
 			addResource(limits, constants.NvidiaGpuResourceName, quantity)
 		}
 	}
-
-	// Add mig requests
-	for key, val := range podAnnotations {
-		if !strings.HasPrefix(key, constants.AnnotationMigProfilePrefix) {
-			continue
-		}
-		quantity, err := resource.ParseQuantity(val)
-		if err != nil {
-			zap.S().Warnf("Failed to parse mig %s annotation %s", key, val)
-		} else {
-			requests[v1.ResourceName(key)] = quantity
-			limits[v1.ResourceName(key)] = quantity
-		}
-	}
 }
 
 func SumResourceRequirements(left, right v1.ResourceRequirements) v1.ResourceRequirements {
@@ -153,6 +150,10 @@ func SumResourceRequirements(left, right v1.ResourceRequirements) v1.ResourceReq
 }
 
 func AddGpuLimitsFromContainers(containers []v1.Container, limits v1.ResourceList) {
+	addGpuLimitsFromContainers(containers, limits, true)
+}
+
+func addGpuLimitsFromContainers(containers []v1.Container, limits v1.ResourceList, allowMemoryLimit bool) {
 	if len(containers) == 0 {
 		return
 	}
@@ -179,7 +180,7 @@ func AddGpuLimitsFromContainers(containers []v1.Container, limits v1.ResourceLis
 		// if the value is less than or equal to 1,
 		// it means it's the limit for GPU resources (a fraction or a whole GPU).
 		limits[constants.NvidiaGpuResourceName] = *gpuLimit
-	} else {
+	} else if allowMemoryLimit {
 		// else - it means it's gpu-memory limit.
 		limits[constants.GpuMemoryResourceName] = *gpuLimit
 	}

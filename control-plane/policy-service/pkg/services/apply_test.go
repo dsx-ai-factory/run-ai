@@ -85,6 +85,112 @@ var _ = Describe("ApplyTest", Ordered, func() {
 		})
 	})
 
+	Context("GPU memory defaultFrom compatibility", func() {
+		applyPolicyRules := func(url string, rules map[string]interface{}) *httptest.ResponseRecorder {
+			body := map[string]interface{}{
+				"meta":   map[string]interface{}{"scope": "tenant", "name": "gpu-memory-dependencies"},
+				"policy": map[string]interface{}{"rules": rules},
+			}
+			request, err := http.NewRequest(http.MethodPatch, url, makePayload(body))
+			Expect(err).NotTo(HaveOccurred())
+			request.Header = *headerForAdmin(1)
+			response := httptest.NewRecorder()
+			router.ServeHTTP(response, request)
+			return response
+		}
+		applyRules := func(rules map[string]interface{}) *httptest.ResponseRecorder {
+			return applyPolicyRules(urlPolicyWorkspace, map[string]interface{}{"compute": rules})
+		}
+		derivedFrom := func(field string) map[string]interface{} {
+			return map[string]interface{}{"defaultFrom": map[string]interface{}{"field": "compute." + field}}
+		}
+		effective := func(response *httptest.ResponseRecorder) map[string]interface{} {
+			var body map[string]interface{}
+			Expect(json.Unmarshal(response.Body.Bytes(), &body)).To(Succeed())
+			return convutils.MapMe(body["effective"])
+		}
+		getPolicy := func() *httptest.ResponseRecorder {
+			request, err := http.NewRequest(http.MethodGet, urlPolicyWorkspace+"?scope=tenant", nil)
+			Expect(err).NotTo(HaveOccurred())
+			request.Header = *headerForAdmin(1)
+			response := httptest.NewRecorder()
+			router.ServeHTTP(response, request)
+			Expect(response.Code).To(Equal(http.StatusOK))
+			return response
+		}
+
+		DescribeTable("rejects a default derived from the same field",
+			func(target, source string) {
+				response := applyRules(map[string]interface{}{target: derivedFrom(source)})
+				Expect(response.Code).To(Equal(http.StatusBadRequest))
+				Expect(response.Body.String()).To(ContainSubstring("defaultFrom.field must be a different field"))
+			},
+			Entry("ordinary CPU self reference", "cpuCoreRequest", "cpuCoreRequest"),
+			Entry("legacy request from new request", "gpuPortionRequest", "gpuMemoryPortionRequest"),
+			Entry("new request from legacy request", "gpuMemoryPortionRequest", "gpuPortionRequest"),
+			Entry("legacy limit from new limit", "gpuPortionLimit", "gpuMemoryPortionLimit"),
+			Entry("new limit from legacy limit", "gpuMemoryPortionLimit", "gpuPortionLimit"),
+		)
+
+		DescribeTable("rejects alias self references in each policy section",
+			func(url, section string) {
+				rules := map[string]interface{}{"compute": map[string]interface{}{"gpuPortionRequest": derivedFrom("gpuMemoryPortionRequest")}}
+				if section != "" {
+					rules = map[string]interface{}{section: rules}
+				}
+				response := applyPolicyRules(url, rules)
+				Expect(response.Code).To(Equal(http.StatusBadRequest))
+				Expect(response.Body.String()).To(ContainSubstring("defaultFrom.field must be a different field"))
+			},
+			Entry("training", urlPolicyTraining, ""),
+			Entry("inference", urlPolicyInference, ""),
+			Entry("NIM", urlPolicyNimService, ""),
+			Entry("fallback", urlPolicyFallback, ""),
+			Entry("distributed worker", urlPolicyDistributed, "worker"),
+			Entry("distributed master", urlPolicyDistributed, "master"),
+			Entry("distributed inference worker", urlPolicyDistributedInference, "worker"),
+			Entry("distributed inference leader", urlPolicyDistributedInference, "leader"),
+		)
+
+		DescribeTable("keeps response dependency paths consistent for distinct fields",
+			func(target, source, legacyTarget, legacySource string) {
+				response := applyRules(map[string]interface{}{target: derivedFrom(source)})
+				Expect(response.Code).To(Equal(http.StatusOK))
+				applied := effective(response)
+				compute := convutils.MapMe(convutils.MapMe(applied["rules"])["compute"])
+				reference := convutils.MapMe(convutils.MapMe(compute[legacyTarget])["defaultFrom"])
+				Expect(reference["field"]).To(Equal("compute." + legacySource))
+				order := convutils.MapMe(convutils.MapMe(applied["defaultFromOrder"])["worker"])
+				Expect(order[""]).To(Equal([]interface{}{"compute." + legacySource, "compute." + legacyTarget}))
+				Expect(effective(getPolicy())).To(Equal(applied))
+			},
+			Entry("CPU from legacy request", "cpuCoreRequest", "gpuPortionRequest", "cpuCoreRequest", "gpuPortionRequest"),
+			Entry("CPU from new request", "cpuCoreRequest", "gpuMemoryPortionRequest", "cpuCoreRequest", "gpuPortionRequest"),
+			Entry("new limit from legacy request", "gpuMemoryPortionLimit", "gpuPortionRequest", "gpuPortionLimit", "gpuPortionRequest"),
+			Entry("legacy limit from new request", "gpuPortionLimit", "gpuMemoryPortionRequest", "gpuPortionLimit", "gpuPortionRequest"),
+		)
+
+		It("includes distributed inference leader dependencies in the primary replica order", func() {
+			response := applyPolicyRules(urlPolicyDistributedInference, map[string]interface{}{
+				"leader": map[string]interface{}{"compute": map[string]interface{}{"gpuMemoryPortionLimit": derivedFrom("gpuPortionRequest")}},
+			})
+			Expect(response.Code).To(Equal(http.StatusOK))
+			order := convutils.MapMe(convutils.MapMe(effective(response)["defaultFromOrder"])["master"])
+			Expect(order[""]).To(Equal([]interface{}{"compute.gpuPortionRequest", "compute.gpuPortionLimit"}))
+		})
+
+		It("rejects a mixed-alias cycle introduced by PATCH and preserves the saved policy", func() {
+			initial := applyRules(map[string]interface{}{"cpuCoreRequest": derivedFrom("gpuPortionRequest")})
+			Expect(initial.Code).To(Equal(http.StatusOK))
+			before := effective(getPolicy())
+
+			response := applyRules(map[string]interface{}{"gpuMemoryPortionRequest": derivedFrom("cpuCoreRequest")})
+			Expect(response.Code).To(Equal(http.StatusBadRequest))
+			Expect(response.Body.String()).To(ContainSubstring("cycle"))
+			Expect(effective(getPolicy())).To(Equal(before))
+		})
+	})
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Authentication
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1587,6 +1693,7 @@ var _ = Describe("ApplyTest", Ordered, func() {
 				Defaults: bodyTenantA.Policy.Defaults,
 			}
 			expectedTenantA.Rules.Compute.GpuPortionRequest.SourceOfRule = &api.SourceOfRule{Scope: api.SCOPETYPE_TENANT}
+			expectedTenantA.Rules.Compute.GpuMemoryPortionRequest = expectedTenantA.Rules.Compute.GpuPortionRequest
 			dao.InjectSystemPolicyForTesting[api.WorkspacePolicyDefaultsAndRulesV2](&expectedTenantA)
 
 			testutils.Expect(*actualRespTenantA.Effective).ToEqual(expectedTenantA)
@@ -1682,6 +1789,7 @@ var _ = Describe("ApplyTest", Ordered, func() {
 				},
 			}
 			expectedDeptA.Rules.Compute.GpuPortionRequest.SourceOfRule = &api.SourceOfRule{Scope: api.SCOPETYPE_TENANT}
+			expectedDeptA.Rules.Compute.GpuMemoryPortionRequest = expectedDeptA.Rules.Compute.GpuPortionRequest
 			expectedDeptA.Rules.Compute.CpuMemoryLimit.SourceOfRule = &api.SourceOfRule{Scope: api.SCOPETYPE_DEPARTMENT, DepartmentId: convutils.Ref("111")}
 			dao.InjectSystemPolicyForTesting[api.WorkspacePolicyDefaultsAndRulesV2](&expectedDeptA)
 

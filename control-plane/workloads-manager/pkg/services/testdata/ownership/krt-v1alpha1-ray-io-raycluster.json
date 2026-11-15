@@ -1,0 +1,122 @@
+{
+  "apiVersion": "run.ai/v1alpha1",
+  "kind": "Karta",
+  "spec": {
+    "optimizationInstructions": {
+      "gangScheduling": {
+        "podGroups": [
+          {
+            "members": [
+              {
+                "componentName": "head",
+                "groupByKeyPaths": [
+                  ".metadata.labels[\"ray.io/cluster\"]"
+                ]
+              },
+              {
+                "componentName": "worker",
+                "groupByKeyPaths": [
+                  ".metadata.labels[\"ray.io/cluster\"]"
+                ]
+              }
+            ],
+            "name": "cluster"
+          }
+        ]
+      }
+    },
+    "structureDefinition": {
+      "childComponents": [
+        {
+          "kind": {
+            "group": "",
+            "kind": "Pod",
+            "version": "v1"
+          },
+          "name": "head",
+          "ownerRef": "raycluster",
+          "podSelector": {
+            "componentTypeSelector": {
+              "keyPath": ".metadata.labels[\"ray.io/node-type\"]",
+              "value": "head"
+            }
+          },
+          "scaleDefinition": {
+            "replicasPath": "1"
+          },
+          "specDefinition": {
+            "podTemplateSpecPath": ".spec.headGroupSpec.template"
+          }
+        },
+        {
+          "instanceIdPath": ".spec.workerGroupSpecs[].groupName",
+          "kind": {
+            "group": "",
+            "kind": "Pod",
+            "version": "v1"
+          },
+          "name": "worker",
+          "ownerRef": "raycluster",
+          "podSelector": {
+            "componentInstanceSelector": {
+              "idPath": ".metadata.labels[\"ray.io/group\"]"
+            },
+            "componentTypeSelector": {
+              "keyPath": ".metadata.labels[\"ray.io/node-type\"]",
+              "value": "worker"
+            }
+          },
+          "scaleDefinition": {
+            "maxReplicasPath": ".spec.workerGroupSpecs[].maxReplicas",
+            "minReplicasPath": ".spec.workerGroupSpecs[].minReplicas",
+            "replicasPath": ".spec.workerGroupSpecs[].replicas"
+          },
+          "specDefinition": {
+            "podTemplateSpecPath": ".spec.workerGroupSpecs[].template"
+          }
+        }
+      ],
+      "rootComponent": {
+        "kind": {
+          "group": "ray.io",
+          "kind": "RayCluster",
+          "version": "v1alpha1"
+        },
+        "name": "raycluster",
+        "statusDefinition": {
+          "phaseDefinition": {
+            "path": ".status.state"
+          },
+          "statusMappings": {
+            "failed": [
+              {
+                "byPhase": "failed"
+              }
+            ],
+            "running": [
+              {
+                "byPhase": "ready"
+              }
+            ],
+            "suspended": [
+              {
+                "byExpression": {
+                  "expectedResult": "true",
+                  "expression": ".spec.suspend == true and (.status.state == \"suspended\" or (.status.state | not))"
+                }
+              }
+            ],
+            "suspending": [
+              {
+                "byExpression": {
+                  "expectedResult": "true",
+                  "expression": ".spec.suspend == true and .status.state != null and .status.state != \"suspended\""
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

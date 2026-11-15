@@ -129,14 +129,14 @@ nginx:
    annotations:
      nginx.ingress.kubernetes.io/client-body-buffer-size: 128k
    hosts:
-    - host: <MIMIR_HOST_FQDN> #example: ozbarshalom-mimir.runailabs.com
+    - host: <MIMIR_HOST_FQDN> #example: mimir.example.com
       paths:
         - path: /
           pathType: Prefix
    tls:
     - secretName: mimir-tls-certificate
       hosts:
-        - <MIMIR_HOST_FQDN> #example: ozbarshalom-mimir.runailabs.com
+        - <MIMIR_HOST_FQDN> #example: mimir.example.com
 
  nginxConfig:
    logFormat: |-

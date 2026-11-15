@@ -74,6 +74,8 @@ code-rabbit/ @dsx-ai-factory/workloads
 
 # DevOps
 /common/opa-policies/ @dsx-ai-factory/ops
+/local-dev.sh @dsx-ai-factory/ops
+/local-dev.md @dsx-ai-factory/ops
 
 # Tech Docs
 /docs/** @dsx-ai-factory/tech-docs

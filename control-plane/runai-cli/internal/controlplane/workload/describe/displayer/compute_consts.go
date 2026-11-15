@@ -7,10 +7,11 @@ package displayer
 
 const (
 	// Field names
-	FieldGPUCompute = "GPU Compute"
-	FieldCPUCores   = "CPU Cores"
-	FieldGPUMemory  = "GPU Memory"
-	FieldCPUMemory  = "CPU Memory"
+	FieldGPUCompute     = "GPU Compute"
+	FieldGPUComputeMode = "GPU Compute Mode"
+	FieldCPUCores       = "CPU Cores"
+	FieldGPUMemory      = "GPU Memory"
+	FieldCPUMemory      = "CPU Memory"
 
 	// Column widths
 	ResourceColumnWidth  = 20

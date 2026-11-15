@@ -899,6 +899,10 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 
 </Accordion>
 
+## Kubernetes ClusterRoles
+
+Each predefined role is mapped to Kubernetes ClusterRoles. Users who [authenticate to the cluster](../../installation-and-configuration/configuration/cluster-authentication.md) with their NVIDIA Run:ai identity receive these permissions when they use `kubectl`. For the ClusterRole names and the permissions that each one grants, refer to [Role to ClusterRole Mapping](role-clusterrole-mapping.md).
+
 ## Custom Roles (API Only)
 
 Administrators can create and manage custom roles to meet specific organizational access requirements using the [Roles](api:main-api:POST/api/v2/authorization/roles) API.

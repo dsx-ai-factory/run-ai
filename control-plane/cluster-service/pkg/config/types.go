@@ -137,6 +137,16 @@ func (a *AsyncClusterDelete) SetDefaults() {
 	a.Enabled = true
 }
 
+// EditableNodepoolCapabilities stays off until the project and department forms handle the capabilities of
+// each nodepool; they still assume the tenant-wide settings, so a per-nodepool change makes their saves fail.
+type EditableNodepoolCapabilities struct {
+	Enabled bool `mapstructure:"editable_nodepool_scheduling_capabilities_enabled"`
+}
+
+func (e *EditableNodepoolCapabilities) SetDefaults() {
+	e.Enabled = false
+}
+
 // ImagePullSecret holds the static image pull secret (a docker config JSON)
 // supplied via Helm (the global image-pull-secret, mounted as
 // STATIC_IMAGE_PULL_SECRET). Surfaced to clusters via DockerConfigJson; no

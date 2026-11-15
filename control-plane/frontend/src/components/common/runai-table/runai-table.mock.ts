@@ -7,7 +7,6 @@ import { computeResourceIndexColumns } from "@/table-models/compute-resource.tab
 import { dataSourceIndexColumns } from "@/table-models/data-source.table-model";
 import { environmentIndexColumns } from "@/table-models/environment.table-model";
 import { credentialIndexColumns } from "@/table-models/credential.table-model";
-import { workloadTemplateIndexColumns } from "@/table-models/workload-template.table-model";
 
 import {
   GpuRequestType,
@@ -15,7 +14,6 @@ import {
   type CredentialsListResponseEntry,
   type DatasourceListResponseEntry,
   type EnvironmentAsset,
-  type WorkloadTemplate,
 } from "@/swagger-models/assets-service-client";
 import type { IFilterBy } from "@/models/filter.model";
 import type { ITableColumn } from "@/models/table.model";
@@ -639,113 +637,11 @@ const credentialModel = {
   } as IFilterBy,
 };
 
-const templateModel = {
-  rows: [
-    {
-      meta: {
-        name: "temp-1",
-        scope: "project",
-        clusterId: "37e0838e-2161-45ab-ab63-259d82392fc5",
-        projectId: 1,
-        id: "c25d764e-dcc3-4266-a320-c392e71f6323",
-        kind: "workload-template",
-        tenantId: 1,
-        createdBy: "test@run.ai",
-        createdAt: "2023-06-05T13:47:25.782095Z",
-        updatedBy: "test@run.ai",
-        updatedAt: "2023-06-05T13:47:25.782095Z",
-        projectName: "project-1",
-      },
-      spec: {
-        assets: {
-          environment: {
-            id: "f296d002-a943-4a81-bc15-b1678dcbd75d",
-            name: "tensorboard",
-            toolTypes: ["tensorboard"],
-          },
-          compute: {
-            id: "03690406-d1c8-436d-8861-fdf6fb65a1fb",
-            name: "cpu-only",
-          },
-          datasources: [
-            {
-              id: "83e06652-74f0-4bf7-ac62-4bb734de5f55",
-              name: "pvc",
-              kind: "pvc",
-            },
-            {
-              id: "c0b37553-d388-4185-ab94-d02721faee6f",
-              name: "s3-with-cred",
-              kind: "s3",
-            },
-            {
-              id: "cdcbd072-3a80-420b-844b-18199610e57c",
-              name: "git",
-              kind: "git",
-            },
-          ],
-        },
-        specificEnv: {
-          command: "tensorboard",
-          args: "--logdir ./ --host 0.0.0.0 --path_prefix /${RUNAI_PROJECT}/${RUNAI_JOB_NAME}",
-          environmentVariables: [],
-          connections: [],
-          allowOverQuota: false,
-          nodePools: [],
-        },
-      },
-    },
-    {
-      meta: {
-        name: "temp-2",
-        scope: "project",
-        clusterId: "37e0838e-2161-45ab-ab63-259d82392fc5",
-        projectId: 1,
-        id: "fcfd942e-a1d1-478a-afe0-d92b53781b57",
-        kind: "workload-template",
-        tenantId: 1,
-        createdBy: "test@run.ai",
-        createdAt: "2023-06-05T13:47:39.799499Z",
-        updatedBy: "test@run.ai",
-        updatedAt: "2023-06-05T13:47:39.799499Z",
-        projectName: "project-1",
-      },
-      spec: {
-        assets: {
-          environment: {
-            id: "59a56cf3-9af7-42a9-ad91-be99693a6dd3",
-            name: "jupyter-lab",
-            toolTypes: ["jupyter-notebook"],
-          },
-          compute: {
-            id: "967b7f1c-d4ed-493e-bca1-f1e7afa75ff7",
-            name: "two-gpus",
-          },
-        },
-        specificEnv: {
-          command: "start-notebook.sh",
-          args: "--NotebookApp.base_url=/${RUNAI_PROJECT}/${RUNAI_JOB_NAME} --NotebookApp.token=''",
-          environmentVariables: [],
-          connections: [],
-          allowOverQuota: false,
-          nodePools: [],
-        },
-      },
-    },
-  ] as Array<WorkloadTemplate>,
-  filterBy: {
-    sortBy: "template",
-    displayedColumns: getDisplayedColumns(workloadTemplateIndexColumns),
-    rowsPerPage: 10,
-  } as IFilterBy,
-};
-
 export const tableModels = {
   environmentModel,
   computeResourceModel,
   dataSourceModel,
   credentialModel,
-  templateModel,
   environmentColumns,
   computeColumns,
   dataSourceColumns,

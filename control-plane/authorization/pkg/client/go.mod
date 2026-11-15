@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client
 
-go 1.27.1
+go 1.27.3
 
 require (
 	github.com/aws/smithy-go v1.28.2 // indirect

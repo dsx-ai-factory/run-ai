@@ -1,0 +1,23 @@
+description: >-
+  The ResourceClaimTemplate the claim was generated from. Absent for a standalone
+  ResourceClaim that the pod references directly.
+nullable: true
+type: object
+required:
+  - name
+  - managed
+properties:
+  name:
+    type: string
+    description: Name of the ResourceClaimTemplate in the pod's namespace.
+    example: "single-gpu"
+  managed:
+    type: boolean
+    description: >-
+      Whether the template is managed by NVIDIA Run:ai (created through the resource
+      claim templates API) rather than created directly in the cluster.
+  id:
+    type: string
+    format: uuid
+    nullable: true
+    description: The id of the managed resource claim template. Null for an unmanaged template.

@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-clients/cluster-api-client
 
-go 1.27.1
+go 1.27.3
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.7

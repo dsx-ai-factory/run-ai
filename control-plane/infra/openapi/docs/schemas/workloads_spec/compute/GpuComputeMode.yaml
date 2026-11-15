@@ -2,14 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 description: GPU compute sharing mode. Policy and template defaults apply before the
-  built-in time-slicing fallback. Explicit modes require an available GPU fractioning
-  runtime on the selected cluster.
+  built-in time-slicing fallback. Explicit modes require Run:ai cluster version
+  3.0.14 or later.
 type: string
 minLength: 1
 enum:
   - time-slicing
   - sm-sharing
 nullable: true
-
-# Keep schema preparation independent of the asset-column migration.
-x-gorm-ignore: true

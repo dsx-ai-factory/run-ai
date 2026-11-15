@@ -323,12 +323,13 @@ func ApiResourcesToModel(
 		if err != nil {
 			return nil, err
 		}
+		gpuDeserved := ptr.To(ptr.Deref(resources.Gpu.Deserved, 0))
 		modelResources[i] = models.Resources{
 			NodePoolId:         nodePoolId,
 			NodePoolName:       resources.NodePool.Name,
-			GpuDeserved:        ptr.To(resources.Gpu.Deserved),
+			GpuDeserved:        gpuDeserved,
 			GpuLimit:           resources.Gpu.Limit,
-			GpuOverQuotaWeight: calcOverQuotaWeight(adjustableWeightsFlag, isDepartment, ptr.To(resources.Gpu.Deserved), resources.Gpu.OverQuotaWeight),
+			GpuOverQuotaWeight: calcOverQuotaWeight(adjustableWeightsFlag, isDepartment, gpuDeserved, resources.Gpu.OverQuotaWeight),
 			Rank:               rank,
 		}
 		resourcesId, found := originalResourcesNodePoolToId[nodePoolId]
@@ -434,6 +435,9 @@ func getAllEmptyResources(allClusterNodePools map[string]openapi.NodepoolMinimal
 				if highestMemoryLimit == -1 {
 					maxAllowedMemory = nil
 				}
+				if nodePool.SchedulingCapabilities != nil && !nodePool.SchedulingCapabilities.Limits {
+					maxAllowedGpu, maxAllowedCpu, maxAllowedMemory = nil, nil, nil
+				}
 				emptyResource := createEmptyResources(nodePool, isDepartment, maxAllowedGpu, maxAllowedCpu, maxAllowedMemory)
 				emptyResources = append(emptyResources, emptyResource)
 			}
@@ -467,6 +471,9 @@ func createEmptyResources(nodePoolMetadata openapi.NodepoolMinimal, isDepartment
 		emptyResources.GpuOverQuotaWeight = ptr.To(gpuDeserved)
 		emptyResources.CpuOverQuotaWeight = ptr.To(unlimited)
 		emptyResources.MemoryOverQuotaWeight = ptr.To(unlimited)
+		if capabilities := nodePoolMetadata.SchedulingCapabilities; capabilities != nil && !capabilities.Quota {
+			emptyResources.GpuOverQuotaWeight = ptr.To(departmentWeightWithoutQuota(*capabilities))
+		}
 	}
 	return emptyResources
 }
@@ -775,20 +782,21 @@ func MapAllocationStatus(status float64) *float64 {
 	return ptr.To(status)
 }
 
-func ConvertNodePoolResourcesPatchRequest(npr api.NodePoolResourcesPatchRequest) api.ResourcesNullable {
+func ConvertNodePoolResourcesPatchRequest(npr api.NodePoolResourcesPatchRequest, storedGpuDeserved *float64) api.ResourcesNullable {
 	result := api.ResourcesNullable{
 		NodePool: &api.ResourcesNodePool{
 			Id: npr.NodePoolId,
 		},
 		Rank: npr.Rank,
+		Gpu:  api.ResourcesNullableGpu{Deserved: storedGpuDeserved},
 	}
 
 	if npr.Resources != nil {
 		if npr.Resources.Gpu != nil {
-			result.Gpu = api.ResourcesNullableGpu{
-				Deserved:        ptr.Deref(npr.Resources.Gpu.Deserved, 0),
-				Limit:           npr.Resources.Gpu.Limit,
-				OverQuotaWeight: npr.Resources.Gpu.OverQuotaWeight,
+			result.Gpu.Limit = npr.Resources.Gpu.Limit
+			result.Gpu.OverQuotaWeight = npr.Resources.Gpu.OverQuotaWeight
+			if npr.Resources.Gpu.Deserved != nil {
+				result.Gpu.Deserved = npr.Resources.Gpu.Deserved
 			}
 		}
 		if npr.Resources.Cpu != nil {

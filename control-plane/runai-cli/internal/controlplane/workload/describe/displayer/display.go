@@ -20,7 +20,7 @@ func DisplaySection(section *Section) error {
 	fmt.Printf("%s%s%s", SectionsSeparator, section.Displayer.Subject(), SectionsSeparator) //nolint:forbidigo
 
 	if beforeDisplayer, ok := section.Displayer.(BeforeTableDisplayer); ok {
-		beforeDisplayer.DisplayBeforeTable()
+		beforeDisplayer.DisplayBeforeTable("  ")
 	}
 
 	tableDisplay := uitable.NewTableDisplay(section.Displayer)
@@ -43,6 +43,10 @@ func DisplayIndentedSection(section *Section, title string) {
 	}
 
 	fmt.Printf("\n    %s\n", title) //nolint:forbidigo
+
+	if beforeDisplayer, ok := section.Displayer.(BeforeTableDisplayer); ok {
+		beforeDisplayer.DisplayBeforeTable("    ")
+	}
 
 	tableDisplay := uitable.NewTableDisplay(section.Displayer)
 	output, err := tableDisplay.Generate()

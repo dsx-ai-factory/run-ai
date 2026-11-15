@@ -892,6 +892,12 @@ export interface ClusterReportedConfig {
      */
     's3FileSystemResources'?: ClusterReportedResourceRequirements | null;
     /**
+     * The exact S3 image reference that supports goofys --ready-file and --check-ready. Omitted when support is unknown or disabled.
+     * @type {string}
+     * @memberof ClusterReportedConfig
+     */
+    's3FileSystemMountCheckImage'?: string | null;
+    /**
      * 
      * @type {FipsModeEnum}
      * @memberof ClusterReportedConfig
@@ -3002,6 +3008,12 @@ export interface NetworkTopologyUpdateFields {
  */
 export interface Node {
     /**
+     * Labels assigned to the node.
+     * @type {{ [key: string]: string; }}
+     * @memberof Node
+     */
+    'labels'?: { [key: string]: string; };
+    /**
      * The calculated status of the node.
      * @type {string}
      * @memberof Node
@@ -3140,6 +3152,12 @@ export interface NodeAdditionalReadFields {
  * @interface NodeExtended
  */
 export interface NodeExtended {
+    /**
+     * Labels assigned to the node.
+     * @type {{ [key: string]: string; }}
+     * @memberof NodeExtended
+     */
+    'labels'?: { [key: string]: string; };
     /**
      * The calculated status of the node.
      * @type {string}
@@ -3305,6 +3323,12 @@ export interface NodeForSyncAllOf {
  * @interface NodeInfo
  */
 export interface NodeInfo {
+    /**
+     * Labels assigned to the node.
+     * @type {{ [key: string]: string; }}
+     * @memberof NodeInfo
+     */
+    'labels'?: { [key: string]: string; };
     /**
      * The calculated status of the node.
      * @type {string}
@@ -3626,6 +3650,12 @@ export interface Nodepool {
      */
     'name': string;
     /**
+     * The description of the node pool.
+     * @type {string}
+     * @memberof Nodepool
+     */
+    'description'?: string;
+    /**
      * Label key for associated nodes to the Node Pool (with value as in labelValue)
      * @type {string}
      * @memberof Nodepool
@@ -3902,6 +3932,12 @@ export interface NodepoolCreateFields {
      */
     'name': string;
     /**
+     * The description of the node pool.
+     * @type {string}
+     * @memberof NodepoolCreateFields
+     */
+    'description'?: string | null;
+    /**
      * Label key for associated nodes to the Node Pool (with value as in labelValue)
      * @type {string}
      * @memberof NodepoolCreateFields
@@ -3962,6 +3998,12 @@ export interface NodepoolCreateResponseFields {
      * @memberof NodepoolCreateResponseFields
      */
     'name': string;
+    /**
+     * The description of the node pool.
+     * @type {string}
+     * @memberof NodepoolCreateResponseFields
+     */
+    'description'?: string;
     /**
      * Label key for associated nodes to the Node Pool (with value as in labelValue)
      * @type {string}
@@ -4089,6 +4131,12 @@ export interface NodepoolGpuTypeDetails {
      * @memberof NodepoolGpuTypeDetails
      */
     'totalDevices': number;
+    /**
+     * Largest installed GPU count on a single node for this exact GPU type and per-device memory capacity. Not a sum across nodes or a free-device count. Omitted when per-node count evidence is unavailable.
+     * @type {number}
+     * @memberof NodepoolGpuTypeDetails
+     */
+    'maxDevicesPerNode'?: number;
 }
 /**
  * 
@@ -4408,6 +4456,12 @@ export interface NodepoolSyncUpdateFieldsPlacementStrategy {
  * @interface NodepoolUpdateFields
  */
 export interface NodepoolUpdateFields {
+    /**
+     * The description of the node pool.
+     * @type {string}
+     * @memberof NodepoolUpdateFields
+     */
+    'description'?: string | null;
     /**
      * Label key for associated nodes to the Node Pool (with value as in labelValue)
      * @type {string}
@@ -4744,6 +4798,12 @@ export interface SchedulingCapabilities {
      * @memberof SchedulingCapabilities
      */
     'cpuQuota': boolean;
+    /**
+     * Whether to allow GPU, CPU and memory limits for the nodepool\'s resources. Only allowed when quota=true.
+     * @type {boolean}
+     * @memberof SchedulingCapabilities
+     */
+    'limits': boolean;
 }
 /**
  * 
@@ -4775,6 +4835,12 @@ export interface SchedulingCapabilitiesNullable {
      * @memberof SchedulingCapabilitiesNullable
      */
     'cpuQuota'?: boolean | null;
+    /**
+     * Whether to allow GPU, CPU and memory limits for the nodepool\'s resources. Only allowed when quota=true.
+     * @type {boolean}
+     * @memberof SchedulingCapabilitiesNullable
+     */
+    'limits'?: boolean | null;
 }
 /**
  * 
@@ -9904,6 +9970,119 @@ export const NodesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Return unique, sorted label keys up to 253 characters long from nodes in the selected cluster.
+         * @summary Get node label keys.
+         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {string} [search] Filter results by a free text search.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getNodeLabelKeys: async (clusterUuid: string, offset?: number, limit?: number, search?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'clusterUuid' is not null or undefined
+            assertParamExists('getNodeLabelKeys', 'clusterUuid', clusterUuid)
+            const localVarPath = `/api/v1/clusters/{clusterUuid}/nodes/labels/keys`
+                .replace(`{${"clusterUuid"}}`, encodeURIComponent(String(clusterUuid)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (search !== undefined) {
+                localVarQueryParameter['search'] = search;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Return unique, sorted nonempty values for an exact label key up to 253 characters long from nodes in the selected cluster.
+         * @summary Get node label values.
+         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+         * @param {string} key The exact label key whose values to return.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {string} [search] Filter results by a free text search.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getNodeLabelValues: async (clusterUuid: string, key: string, offset?: number, limit?: number, search?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'clusterUuid' is not null or undefined
+            assertParamExists('getNodeLabelValues', 'clusterUuid', clusterUuid)
+            // verify required parameter 'key' is not null or undefined
+            assertParamExists('getNodeLabelValues', 'key', key)
+            const localVarPath = `/api/v1/clusters/{clusterUuid}/nodes/labels/values`
+                .replace(`{${"clusterUuid"}}`, encodeURIComponent(String(clusterUuid)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (key !== undefined) {
+                localVarQueryParameter['key'] = key;
+            }
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (search !== undefined) {
+                localVarQueryParameter['search'] = search;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieve the node metrics data by Universally Unique Identifier (UUID).
          * @summary Get the node metrics data.
          * @param {string} nodeId The node UUID.
@@ -10303,6 +10482,35 @@ export const NodesApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
+         * Return unique, sorted label keys up to 253 characters long from nodes in the selected cluster.
+         * @summary Get node label keys.
+         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {string} [search] Filter results by a free text search.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getNodeLabelKeys(clusterUuid: string, offset?: number, limit?: number, search?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<string>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getNodeLabelKeys(clusterUuid, offset, limit, search, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Return unique, sorted nonempty values for an exact label key up to 253 characters long from nodes in the selected cluster.
+         * @summary Get node label values.
+         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+         * @param {string} key The exact label key whose values to return.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {string} [search] Filter results by a free text search.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getNodeLabelValues(clusterUuid: string, key: string, offset?: number, limit?: number, search?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<string>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getNodeLabelValues(clusterUuid, key, offset, limit, search, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
          * Retrieve the node metrics data by Universally Unique Identifier (UUID).
          * @summary Get the node metrics data.
          * @param {string} nodeId The node UUID.
@@ -10449,6 +10657,33 @@ export const NodesApiFactory = function (configuration?: Configuration, basePath
          */
         getNodeInternal(clusterUuid: string, nodeName: string, options?: any): AxiosPromise<NodeInternal> {
             return localVarFp.getNodeInternal(clusterUuid, nodeName, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Return unique, sorted label keys up to 253 characters long from nodes in the selected cluster.
+         * @summary Get node label keys.
+         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {string} [search] Filter results by a free text search.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getNodeLabelKeys(clusterUuid: string, offset?: number, limit?: number, search?: string, options?: any): AxiosPromise<Array<string>> {
+            return localVarFp.getNodeLabelKeys(clusterUuid, offset, limit, search, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Return unique, sorted nonempty values for an exact label key up to 253 characters long from nodes in the selected cluster.
+         * @summary Get node label values.
+         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+         * @param {string} key The exact label key whose values to return.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {string} [search] Filter results by a free text search.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getNodeLabelValues(clusterUuid: string, key: string, offset?: number, limit?: number, search?: string, options?: any): AxiosPromise<Array<string>> {
+            return localVarFp.getNodeLabelValues(clusterUuid, key, offset, limit, search, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve the node metrics data by Universally Unique Identifier (UUID).
@@ -10600,6 +10835,37 @@ export class NodesApi extends BaseAPI {
      */
     public getNodeInternal(clusterUuid: string, nodeName: string, options?: AxiosRequestConfig) {
         return NodesApiFp(this.configuration).getNodeInternal(clusterUuid, nodeName, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Return unique, sorted label keys up to 253 characters long from nodes in the selected cluster.
+     * @summary Get node label keys.
+     * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+     * @param {number} [offset] The offset of the first item returned in the collection.
+     * @param {number} [limit] The maximum number of entries to return.
+     * @param {string} [search] Filter results by a free text search.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof NodesApi
+     */
+    public getNodeLabelKeys(clusterUuid: string, offset?: number, limit?: number, search?: string, options?: AxiosRequestConfig) {
+        return NodesApiFp(this.configuration).getNodeLabelKeys(clusterUuid, offset, limit, search, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Return unique, sorted nonempty values for an exact label key up to 253 characters long from nodes in the selected cluster.
+     * @summary Get node label values.
+     * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+     * @param {string} key The exact label key whose values to return.
+     * @param {number} [offset] The offset of the first item returned in the collection.
+     * @param {number} [limit] The maximum number of entries to return.
+     * @param {string} [search] Filter results by a free text search.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof NodesApi
+     */
+    public getNodeLabelValues(clusterUuid: string, key: string, offset?: number, limit?: number, search?: string, options?: AxiosRequestConfig) {
+        return NodesApiFp(this.configuration).getNodeLabelValues(clusterUuid, key, offset, limit, search, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

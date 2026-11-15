@@ -115,7 +115,7 @@ To build and run NVIDIA Run:ai locally for development, see [Usage](#usage).
 
 ### Distribution Channels
 
-Released NVIDIA Run:ai container images and Helm charts are published to the NVIDIA NGC container registry under `nvcr.io/nvidia/runai`: this is the registry the installer and Helm charts pull from by default. Source releases and their notes are on the [GitHub Releases page](https://github.com/dsx-ai-factory/run-ai/releases); see [Release Process](RELEASE.md) for how releases are cut and versioned.
+Released NVIDIA Run:ai container images are published to the NVIDIA NGC container registry under `nvcr.io/nvidia/runai-oss`, and the Helm charts to `https://helm.ngc.nvidia.com/nvidia/runai-oss`: these are the locations the installer and Helm charts pull from by default. Source releases and their notes are on the [GitHub Releases page](https://github.com/dsx-ai-factory/run-ai/releases); see [Release Process](RELEASE.md) for how releases are cut and versioned.
 
 ## Contributing
 

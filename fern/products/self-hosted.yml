@@ -214,17 +214,18 @@ navigation:
         - page: Set Up SSO with OpenShift
           slug: openshift
           path: ../../docs/platform-management/authentication/sso/openshift.md
-      - page: Permissions
-        path: ../../docs/platform-management/authentication/permissions.md
-      - page: Roles
+      - section: Roles
         path: ../../docs/platform-management/authentication/roles.md
+        contents:
+        - page: Permissions
+          path: ../../docs/platform-management/authentication/permissions.md
+        - page: Role to ClusterRole Mapping
+          path: ../../docs/platform-management/authentication/role-clusterrole-mapping.md
       - page: Service Accounts (formerly applications)
         slug: service-accounts
         path: ../../docs/platform-management/authentication/service-accounts.md
       - page: Access Rules
         path: ../../docs/platform-management/authentication/accessrules.md
-      - page: Cluster Authentication
-        path: ../../docs/platform-management/authentication/cluster-authentication.md
     - section: Manage AI Initiatives
       contents:
       - page: Adapting AI Initiatives to Your Organization
@@ -414,11 +415,8 @@ navigation:
     - section: Workload Templates
       path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/README.md
       contents:
-      - section: Workspace Templates
+      - page: Workspace Templates
         path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/workspace-templates/README.md
-        contents:
-        - page: Workspace Templates (Legacy)
-          path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/workspace-templates/workspace-templates-legacy.md
       - section: Training Templates
         contents:
         - page: Standard Training Templates
@@ -535,6 +533,16 @@ navigation:
       - page: RAG Blueprint Deployment from NGC Catalog
         slug: rag-blueprint-deployment
         path: ../../docs/tutorials/blueprint-tutorials/rag-blueprint-deployment.md
+    - section: Agent Tutorials
+      contents:
+      - page: Running AI Agents with NVIDIA OpenShell on NVIDIA Run:ai
+        slug: openshell-on-runai
+        path: ../../docs/tutorials/agent-tutorials/openshell-on-runai.md
+    - section: Pipeline Tutorials
+      contents:
+      - page: Running NVIDIA OSMO Workflows on NVIDIA Run:ai
+        slug: osmo-on-runai
+        path: ../../docs/tutorials/pipeline-tutorials/osmo-on-runai.md
   - section: Agents
     contents:
     - page: Overview
@@ -602,8 +610,12 @@ navigation:
         path: ../../docs/resources/videos/create-and-reuse-workload-templates.md
       - page: Monitor GPU Usage and Platform Health
         path: ../../docs/resources/videos/monitor-gpu-usage-and-platform-health.md
-    - page: Blogs
+    - section: Blogs
       path: ../../docs/resources/blogs.md
+      contents:
+      - page: Numa-Aware Scheduling in NVIDIA Run:ai
+        path: ../../docs/resources/blogs/numa-aware-scheduling-in-nvidia-run-ai.md
+        hidden: true
     - page: NVIDIA On-Demand Sessions
       path: ../../docs/resources/nvidia-on-demand-sessions.md
 
@@ -736,8 +748,6 @@ navigation:
             summary: ../../docs/rest-api/self-hosted/tags/config-map.md
         - secret:
             summary: ../../docs/rest-api/self-hosted/tags/secret.md
-        - template:
-            summary: ../../docs/rest-api/self-hosted/tags/template.md
       - section: Policies
         contents:
         - policy:

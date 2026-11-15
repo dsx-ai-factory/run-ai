@@ -329,9 +329,9 @@ func BuildSystemPodSpecFormatterFields() map[string]api.FormatterField {
 		&api.FormatterArrayKey{ArgName: "conditionType"}, nil, nil)
 
 	////////////////////////////////////////////////////////
-	// reservedResourceClaims
+	// resourceClaims
 	////////////////////////////////////////////////////////
-	addPodSpecField(m, "reservedResourceClaims", `{
+	addPodSpecField(m, "resourceClaims", `{
 	  "resourceClaims": [
 		{
 		  "name": $ARGS.named.name,
@@ -339,21 +339,6 @@ func BuildSystemPodSpecFormatterFields() map[string]api.FormatterField {
 		  "resourceClaimTemplateName": $ARGS.named.resourceClaimTemplateName
 		}
 	  ]
-	}`, nil,
-		&api.FormatterArrayKey{ArgName: "name"}, nil, nil)
-
-	////////////////////////////////////////////////////////
-	// resourceClaims
-	////////////////////////////////////////////////////////
-	addPodSpecField(m, "resourceClaims", `{
-	  "resources": {
-		"claims": [
-		  {
-			"name": $ARGS.named.name,
-			"request": $ARGS.named.request
-		  }
-		]
-	  }
 	}`, nil,
 		&api.FormatterArrayKey{ArgName: "name"}, nil, nil)
 

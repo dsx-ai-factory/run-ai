@@ -17,11 +17,11 @@ import (
 func TestBasicParsing(t *testing.T) {
 	flags := []string{"BaseParse",
 		"--pre-upgrade",
-		"--control-plane-url=https://testing.runailabs.com",
+		"--control-plane-url=https://testing.example.com",
 		"--control-plane-client-id=",
 		"--control-plane-client-secret=C6RxwmHVLD4N3CINIPVdY4iHslzdm1ra",
 		"--cluster-uid=551012a5-6759-4966-ac48-bdbd4491a31f",
-		"--cluster-url=https://op-1306-iris-test.runailabs.com",
+		"--cluster-url=https://op-1306-iris-test.example.com",
 		"--custom-ca-enabled=false",
 		"--custom-ca-secret-name=runai-ca-cert",
 		"--custom-ca-secret-key=runai-ca.pem",
@@ -35,7 +35,7 @@ func TestBasicParsing(t *testing.T) {
 	assert.False(t, opts.PreCrdUpgrade)
 	assert.False(t, opts.PreInstall)
 	assert.False(t, opts.PostUpgrade)
-	assert.Equal(t, "https://testing.runailabs.com", opts.ControlPlaneURL)
+	assert.Equal(t, "https://testing.example.com", opts.ControlPlaneURL)
 	assert.False(t, opts.CustomCaEnabled)
 	assert.True(t, opts.CustomCaSecretOptional)
 	assert.Equal(t, "runai-ca.pem", opts.CustomCaSecretKey)
@@ -88,7 +88,7 @@ func TestCMDParsingAdditionalImagePullSecretsOneValue(t *testing.T) {
 
 func TestCMDParsingAdditionalImagePullSecretsEmptyValue(t *testing.T) {
 	flags := []string{"3 test", "--pre-install",
-		"--control-plane-url=https://testing.runailabs.com"}
+		"--control-plane-url=https://testing.example.com"}
 	os.Args = flags
 	flagSet := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	opts := parse(flagSet)
@@ -106,11 +106,11 @@ func TestCMDParsingAdditionalImagePullSecretsExplicitEmptyValue(t *testing.T) {
 func TestBasicParsingAndFile(t *testing.T) {
 	flags := []string{"BaseParse",
 		"--pre-upgrade",
-		"--control-plane-url=https://testing.runailabs.com",
+		"--control-plane-url=https://testing.example.com",
 		"--control-plane-client-id=",
 		"--control-plane-client-secret=C6RxwmHVLD4N3CINIPVdY4iHslzdm1ra",
 		"--cluster-uid=551012a5-6759-4966-ac48-bdbd4491a31f",
-		"--cluster-url=https://op-1306-iris-test.runailabs.com",
+		"--cluster-url=https://op-1306-iris-test.example.com",
 		"--custom-ca-enabled=false",
 		"--custom-ca-secret-name=runai-ca-cert",
 		"--custom-ca-secret-key=runai-ca.pem",
@@ -124,7 +124,7 @@ func TestBasicParsingAndFile(t *testing.T) {
 	assert.True(t, opts.PreUpgrade)
 	assert.False(t, opts.PreInstall)
 	assert.False(t, opts.PostUpgrade)
-	assert.Equal(t, "https://testing.runailabs.com", opts.ControlPlaneURL)
+	assert.Equal(t, "https://testing.example.com", opts.ControlPlaneURL)
 	assert.False(t, opts.CustomCaEnabled)
 	assert.True(t, opts.CustomCaSecretOptional)
 	assert.Equal(t, "runai-ca.pem", opts.CustomCaSecretKey)
@@ -150,11 +150,11 @@ func TestClientSecretFromFile(t *testing.T) {
 
 	flags := []string{"BaseParse",
 		"--pre-upgrade",
-		"--control-plane-url=https://testing.runailabs.com",
+		"--control-plane-url=https://testing.example.com",
 		"--control-plane-client-id=",
 		"--control-plane-client-secret=@" + clientSecretFilePath,
 		"--cluster-uid=551012a5-6759-4966-ac48-bdbd4491a31f",
-		"--cluster-url=https://op-1306-iris-test.runailabs.com",
+		"--cluster-url=https://op-1306-iris-test.example.com",
 		"--custom-ca-enabled=false",
 		"--custom-ca-secret-name=runai-ca-cert",
 		"--custom-ca-secret-key=runai-ca.pem",

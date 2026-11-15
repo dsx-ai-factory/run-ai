@@ -60,7 +60,10 @@ func UpsertPolicyCompliance(ctx context.Context, assetId string, whichPolicy Pol
 		ProjectId:    record.ProjectId,
 		AssetId:      record.AssetId,
 		WorkloadType: whichPolicy.WorkloadAndReplicaType(),
-	}).Assign(record).FirstOrCreate(&record)
+	}).Assign(record, map[string]interface{}{
+		// Struct assignment skips false values when a cached result becomes noncompliant.
+		"Aligned": record.Aligned,
+	}).FirstOrCreate(&record)
 	if err != nil {
 		return database.Error(database.UPSERT, ComplianceAsAssetKind).WithDetails(err)
 	}

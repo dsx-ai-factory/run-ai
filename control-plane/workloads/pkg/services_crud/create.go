@@ -9,6 +9,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"slices"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
 
 	clusterApi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/policies"
@@ -24,12 +31,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services_crud/validators"
 	assetsApi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
-
-	"net/http"
-	"slices"
-	"strconv"
-	"strings"
-	"time"
 
 	authorization_api "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/datavolumes"
@@ -101,12 +102,12 @@ var permissionError = workloadsApi.NewSubmissionErrorV2(http.StatusForbidden, "i
 var (
 	computeJsonCracker = jsonutils.NewJsonCracker(workloadsApi.WorkspaceSpecSpecAllOfCompute{})
 
-	fldNameGpuDevicesRequest = computeJsonCracker.NameOf(&computeJsonCracker.Struct().GpuDevicesRequest)
-	fldNameGpuPortionRequest = computeJsonCracker.NameOf(&computeJsonCracker.Struct().GpuPortionRequest)
-	fldNameGpuPortionLimit   = computeJsonCracker.NameOf(&computeJsonCracker.Struct().GpuPortionLimit)
-	fldNameGpuMemoryRequest  = computeJsonCracker.NameOf(&computeJsonCracker.Struct().GpuMemoryRequest)
-	fldNameGpuMemoryLimit    = computeJsonCracker.NameOf(&computeJsonCracker.Struct().GpuMemoryLimit)
-	fldNameGpuRequestType    = computeJsonCracker.NameOf(&computeJsonCracker.Struct().GpuRequestType)
+	fldNameGpuDevicesRequest       = computeJsonCracker.NameOf(&computeJsonCracker.Struct().GpuDevicesRequest)
+	fldNameGpuMemoryPortionRequest = computeJsonCracker.NameOf(&computeJsonCracker.Struct().GpuMemoryPortionRequest)
+	fldNameGpuMemoryPortionLimit   = computeJsonCracker.NameOf(&computeJsonCracker.Struct().GpuMemoryPortionLimit)
+	fldNameGpuMemoryRequest        = computeJsonCracker.NameOf(&computeJsonCracker.Struct().GpuMemoryRequest)
+	fldNameGpuMemoryLimit          = computeJsonCracker.NameOf(&computeJsonCracker.Struct().GpuMemoryLimit)
+	fldNameGpuRequestType          = computeJsonCracker.NameOf(&computeJsonCracker.Struct().GpuRequestType)
 )
 
 var frameworksSupportingNoMaster = datastructs.NewSet(workloadsApi.DISTRIBUTEDFRAMEWORK_PY_TORCH, workloadsApi.DISTRIBUTEDFRAMEWORK_TF, workloadsApi.DISTRIBUTEDFRAMEWORK_JAX)
@@ -136,6 +137,9 @@ type createWorkloadParams struct {
 }
 
 func createWorkload(ctx context.Context, backendClient clients.TenantSettingsClient, params *createWorkloadParams, workloadType string) *workloadsApi.SubmissionErrorV2 {
+	if err := gpucompat.ValidateMemoryRequestInput(params.Spec); err != nil {
+		return workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, err.Error())
+	}
 	tenantId, apiErr := services_utils.ParseTenantId(ctx)
 	if apiErr != nil {
 		return ToSubmissionError(apiErr)
@@ -252,7 +256,7 @@ func createWorkload(ctx context.Context, backendClient clients.TenantSettingsCli
 	policy_compliance.PrepareDefaultsForMutation(effectivePolicy.DefaultsV2)
 
 	// Validate policy compliance on the mutated workload
-	complianceErr := validateSpecAgainstPolicy(params.WorkloadType, effectivePolicy.RulesV2, effectivePolicy.DefaultsV2, mutatedSpec, &effectivePolicy.DefaultFromOrder)
+	complianceErr := validateSpecAgainstPolicy(params.WorkloadType, effectivePolicy.RulesV2, effectivePolicy.DefaultsV2, mutatedSpec)
 	if complianceErr != nil {
 		return complianceErr
 	}
@@ -768,6 +772,20 @@ func MutateWorkload(
 	assetsSpec map[string]interface{},
 ) (map[string]interface{}, *workloadsApi.SubmissionErrorV2) {
 
+	for _, source := range []struct {
+		name  string
+		value *map[string]interface{}
+	}{
+		{"request", &inputSpec}, {"policy defaults", &policyDefaults},
+		{"template", &templateSpec}, {"assets", &assetsSpec},
+	} {
+		normalized, err := gpucompat.NormalizeLegacyGPUFields(*source.value)
+		if err != nil {
+			return nil, workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, fmt.Sprintf("%s: %v", source.name, err))
+		}
+		*source.value = normalized
+	}
+
 	var inputSpecAsMap map[string]interface{}
 	if inputSpec == nil {
 		inputSpecAsMap = make(map[string]interface{})
@@ -959,14 +977,14 @@ func preValidateSpec(ctx context.Context, params *createWorkloadParams,
 
 	// this is not a proper validation but a fix for a validation error that happens in the workload-controller webhook
 
-	if spec.GetCompute().GpuPortionRequest.IsSet() && spec.GetCompute().GpuPortionLimit.IsSet() {
-		if *spec.GetCompute().GpuPortionRequest.Get() == 1 && *spec.GetCompute().GpuPortionLimit.Get() == 1 {
-			spec.Compute.Get().GpuPortionLimit.Unset()
+	if spec.GetCompute().GpuMemoryPortionRequest.Get() != nil && spec.GetCompute().GpuMemoryPortionLimit.Get() != nil {
+		if *spec.GetCompute().GpuMemoryPortionRequest.Get() == 1 && *spec.GetCompute().GpuMemoryPortionLimit.Get() == 1 {
+			spec.Compute.Get().GpuMemoryPortionLimit.Unset()
 		}
 	}
-	if masterSpec != nil && masterSpec.GetCompute().GpuPortionRequest.IsSet() && masterSpec.GetCompute().GpuPortionLimit.IsSet() {
-		if *masterSpec.GetCompute().GpuPortionRequest.Get() == 1 && *masterSpec.GetCompute().GpuPortionLimit.Get() == 1 {
-			masterSpec.Compute.Get().GpuPortionLimit.Unset()
+	if masterSpec != nil && masterSpec.GetCompute().GpuMemoryPortionRequest.Get() != nil && masterSpec.GetCompute().GpuMemoryPortionLimit.Get() != nil {
+		if *masterSpec.GetCompute().GpuMemoryPortionRequest.Get() == 1 && *masterSpec.GetCompute().GpuMemoryPortionLimit.Get() == 1 {
+			masterSpec.Compute.Get().GpuMemoryPortionLimit.Unset()
 		}
 	}
 
@@ -1222,15 +1240,15 @@ func preValidateMpiGpuFields(ctx context.Context, spec *workloadsApi.SupersetSpe
 	if !masterSameAsWorker {
 		validateForbiddenFieldForMpi(&err, fldNameGpuDevicesRequest, computeFields.GpuDevicesRequest.Get())
 		validateForbiddenFieldForMpi(&err, fldNameGpuRequestType, computeFields.GpuRequestType.Get())
-		validateForbiddenFieldForMpi(&err, fldNameGpuPortionRequest, computeFields.GpuPortionRequest.Get())
-		validateForbiddenFieldForMpi(&err, fldNameGpuPortionLimit, computeFields.GpuPortionLimit.Get())
+		validateForbiddenFieldForMpi(&err, fldNameGpuMemoryPortionRequest, computeFields.GpuMemoryPortionRequest.Get())
+		validateForbiddenFieldForMpi(&err, fldNameGpuMemoryPortionLimit, computeFields.GpuMemoryPortionLimit.Get())
 		validateForbiddenFieldForMpi(&err, fldNameGpuMemoryRequest, computeFields.GpuMemoryRequest.Get())
 		validateForbiddenFieldForMpi(&err, fldNameGpuMemoryLimit, computeFields.GpuMemoryLimit.Get())
 	} else {
 		computeFields.GpuDevicesRequest = workloadsApi.NullableInt32{}
 		computeFields.GpuRequestType = workloadsApi.NullableGpuRequestType{}
-		computeFields.GpuPortionRequest = workloadsApi.NullableFloat64{}
-		computeFields.GpuPortionLimit = workloadsApi.NullableFloat64{}
+		computeFields.GpuMemoryPortionRequest = workloadsApi.NullableFloat64{}
+		computeFields.GpuMemoryPortionLimit = workloadsApi.NullableFloat64{}
 		computeFields.GpuMemoryRequest = workloadsApi.NullableString{}
 		computeFields.GpuMemoryLimit = workloadsApi.NullableString{}
 	}

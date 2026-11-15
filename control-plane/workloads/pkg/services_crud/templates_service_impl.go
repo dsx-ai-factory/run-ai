@@ -471,8 +471,6 @@ func (ts *TemplatesService) ListTemplatesUnified(ctx context.Context, workloadTy
 		return nil, apiErr
 	}
 
-	migrateAssetTemplatesIfNeeded(ctx, ts.tenantSettingsClient)
-
 	limitParam = setDefaultLimit(limitParam)
 
 	// for list, we need to allow adding filtering for all the org units the user is allowed to see.
@@ -538,6 +536,14 @@ func (ts *TemplatesService) ListTemplatesUnified(ctx context.Context, workloadTy
 	recordCount := int32(len(response.Entries))
 	if recordCount == limitParam {
 		response.Pagination.NextOffset = float32(offsetParam + recordCount)
+	}
+
+	for i, template := range response.Entries {
+		projected, err := legacyCompatibleTemplate(template)
+		if err != nil {
+			return nil, err
+		}
+		response.Entries[i] = projected
 	}
 
 	return &response, nil

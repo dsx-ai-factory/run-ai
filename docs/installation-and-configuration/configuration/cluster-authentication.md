@@ -2,6 +2,8 @@
 
 To allow users to securely submit workloads using `kubectl`, you must configure the Kubernetes API server to authenticate users via the NVIDIA Run:ai identity provider. This is done by adding OpenID Connect (OIDC) flags to the Kubernetes API server configuration on each cluster.&#x20;
 
+Each predefined role is mapped to Kubernetes ClusterRoles. When users authenticate to the cluster with their NVIDIA Run:ai identity, they receive the permissions of these ClusterRoles when they use `kubectl`. To see what each role grants in Kubernetes, refer to [Role to ClusterRole Mapping](../../platform-management/authentication/role-clusterrole-mapping.md).
+
 ### Retrieve Required OIDC Flags
 
 1. Go to **General settings**

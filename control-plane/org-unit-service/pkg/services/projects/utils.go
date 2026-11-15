@@ -194,7 +194,9 @@ func prepareAndValidatePatchResourcesForDepartment(
 
 		requestedPatchNodePoolResourcesPerProject := []api.ResourcesNullable{}
 		for _, patchRequest := range projectPatches.patchRequests {
-			err := services.ValidateNodePoolResourcesPatchRequest(ctx, patchRequest, nodePools)
+			resources := services.ConvertNodePoolResourcesPatchRequest(patchRequest,
+				services.StoredGpuDeserved(projectPatches.dbProject.OrgUnitData.Resources, patchRequest.NodePoolId))
+			err := services.ValidateNodePoolResourcesPatchRequest(ctx, resources, nodePools)
 			if err != nil {
 				failed = append(failed, api.FailedNodePoolResourcesPatchRequest{
 					Payload: patchRequest,
@@ -203,7 +205,7 @@ func prepareAndValidatePatchResourcesForDepartment(
 				})
 				continue
 			}
-			requestedPatchNodePoolResourcesPerProject = append(requestedPatchNodePoolResourcesPerProject, services.ConvertNodePoolResourcesPatchRequest(patchRequest))
+			requestedPatchNodePoolResourcesPerProject = append(requestedPatchNodePoolResourcesPerProject, resources)
 			stagedGroupPatches = append(stagedGroupPatches, patchRequest)
 		}
 

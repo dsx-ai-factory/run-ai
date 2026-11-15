@@ -36,7 +36,6 @@ var tenantSettingKeys = map[string]string{
 	"EnableHybridSubmission":        "tenant.enable_hybrid_submission",
 	"EnableCustomRoles":             "tenant.enable_custom_roles",
 	"EnableDataVolumes":             "tenant.enable_data_volumes",
-	"EnableTemplatesV2":             "tenant.enable_templates_v2",
 	"EnableNgcIntegration":          "tenant.enable_ngc_integration",
 }
 

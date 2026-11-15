@@ -36,12 +36,14 @@ import (
 const applicationTypeApplication = "application"
 
 type AIApplicationsService struct {
-	SyncConf *config.ApplicationsSyncConfig
+	SyncConf        *config.ApplicationsSyncConfig
+	chartInspection *applicationChartInspector
 }
 
 func NewAIApplicationsService() api.AIApplicationsAPIServicer {
 	return &AIApplicationsService{
-		SyncConf: runai_config.Get[*config.ApplicationsSyncConfig](),
+		SyncConf:        runai_config.Get[*config.ApplicationsSyncConfig](),
+		chartInspection: newApplicationChartInspector(),
 	}
 }
 

@@ -232,7 +232,7 @@ type DepartmentsAPI interface {
 	/*
 		PatchDepartmentResources Patch department resources
 
-		Partial updates to specific items in the list. Should be used for update one or more attributes of an item without modifying the entire resource.
+		Updates the resources of the node pools in the request. Node pools that are not in the request stay unchanged. Each node pool in the request is replaced as a whole. GPU deserved is required for node pools with quota enabled, and other omitted fields are set to their defaults. To change only part of a node pool, for example only its rank, use the node pool resources batch patch.
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param departmentId The id of the department.
@@ -2928,7 +2928,7 @@ func (r ApiPatchDepartmentResourcesRequest) Execute() ([]Resources, *http.Respon
 /*
 PatchDepartmentResources Patch department resources
 
-Partial updates to specific items in the list. Should be used for update one or more attributes of an item without modifying the entire resource.
+Updates the resources of the node pools in the request. Node pools that are not in the request stay unchanged. Each node pool in the request is replaced as a whole. GPU deserved is required for node pools with quota enabled, and other omitted fields are set to their defaults. To change only part of a node pool, for example only its rank, use the node pool resources batch patch.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param departmentId The id of the department.

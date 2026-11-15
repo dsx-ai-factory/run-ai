@@ -5,7 +5,7 @@
 
 <template>
   <section class="notification-alert-container">
-    <notification-alert-bar :variant="ENotificationBarVariant.Info">
+    <notification-alert-bar page-banner :variant="ENotificationBarVariant.Info">
       <template #default>
         <strong>You have access rules that use legacy roles.</strong> For continued compatibility and better permission
         control,

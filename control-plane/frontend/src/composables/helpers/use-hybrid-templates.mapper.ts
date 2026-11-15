@@ -66,7 +66,7 @@ export const useHybridTemplatesMapper: Record<EHybridFormTypes, IUseHybridTempla
     ),
     templateCreationRoutes: workloadUtil.getSupportedRoutes(
       WORKLOAD_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_WORKSPACE_HYBRID,
-      WORKLOAD_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_NEW,
+      WORKLOAD_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_WORKSPACE_NEW,
     ),
     getRelevantEnvironmentFields: workloadHybridUtil.getRelevantEnvironmentFields,
     getUIModel: workloadHybridUtil.getHybridWorkspaceModel,
@@ -91,7 +91,7 @@ export const useHybridTemplatesMapper: Record<EHybridFormTypes, IUseHybridTempla
     ),
     templateCreationRoutes: workloadUtil.getSupportedRoutes(
       WORKLOAD_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_TRAINING_HYBRID,
-      WORKLOAD_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_NEW,
+      WORKLOAD_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_TRAINING_NEW,
     ),
     getRelevantEnvironmentFields: workloadHybridUtil.getRelevantEnvironmentFields,
     getUIModel: workloadHybridUtil.getHybridTrainingModel,
@@ -116,7 +116,7 @@ export const useHybridTemplatesMapper: Record<EHybridFormTypes, IUseHybridTempla
     ),
     templateCreationRoutes: workloadUtil.getSupportedRoutes(
       WORKLOAD_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_TRAINING_HYBRID_DISTRIBUTED,
-      WORKLOAD_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_NEW,
+      WORKLOAD_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_TRAINING_NEW,
     ),
     getRelevantEnvironmentFields: workloadHybridUtil.getRelevantEnvironmentFields,
     getUIModel: workloadHybridUtil.getHybridDistributedModel,
@@ -141,7 +141,7 @@ export const useHybridTemplatesMapper: Record<EHybridFormTypes, IUseHybridTempla
     ),
     templateCreationRoutes: workloadUtil.getSupportedRoutes(
       WORKLOAD_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_TRAINING_HYBRID_DISTRIBUTED,
-      WORKLOAD_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_NEW,
+      WORKLOAD_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_TRAINING_NEW,
     ),
     getRelevantEnvironmentFields: workloadHybridUtil.getRelevantEnvironmentFields,
     getUIModel: workloadHybridUtil.getHybridDistributedMasterModel,

@@ -22,7 +22,7 @@ runai kubeconfig set
 
 Before executing the command, ensure that
 
-1. [Cluster authentication](../../platform-management/authentication/cluster-authentication.md) is configured and enabled.
+1. [Cluster authentication](../../installation-and-configuration/configuration/cluster-authentication.md) is configured and enabled.
 2. The user has a kubeconfig file configured.
 3. The user is logged in (use the [runai login](runai/runai_login.md) command).
 

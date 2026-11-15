@@ -646,7 +646,7 @@ var _ = Describe("distributed service validations", func() {
 			createResponse, _ = distributedService.CreateDistributed(ctx, request)
 			Expect(createResponse.Code).To(Equal(http.StatusBadRequest))
 			submissionErr = createResponse.Body.(*workloadsApi.SubmissionErrorV2)
-			Expect(submissionErr.Message).To(ContainSubstring("gpuPortionRequest should not be provided for master replica of MPI workload"))
+			Expect(submissionErr.Message).To(ContainSubstring("gpuMemoryPortionRequest should not be provided for master replica of MPI workload"))
 
 			request.MasterSpec = &api.MasterSpec{
 				Image: convutils.Ref("ubuntu"),
@@ -658,7 +658,7 @@ var _ = Describe("distributed service validations", func() {
 			createResponse, _ = distributedService.CreateDistributed(ctx, request)
 			Expect(createResponse.Code).To(Equal(http.StatusBadRequest))
 			submissionErr = createResponse.Body.(*workloadsApi.SubmissionErrorV2)
-			Expect(submissionErr.Message).To(ContainSubstring("gpuPortionLimit should not be provided for master replica of MPI workload"))
+			Expect(submissionErr.Message).To(ContainSubstring("gpuMemoryPortionLimit should not be provided for master replica of MPI workload"))
 
 			request.MasterSpec = &api.MasterSpec{
 				Image: convutils.Ref("ubuntu"),

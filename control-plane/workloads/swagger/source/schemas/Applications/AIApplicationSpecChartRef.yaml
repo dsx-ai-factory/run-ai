@@ -7,9 +7,9 @@ properties:
   repo:
     $ref: "./AIApplicationChartRepo.yaml"
   chartName:
-    $ref: "./AIApplicationChartName.yaml"
+    $ref: "../../../../../infra/openapi/docs/schemas/applications/ChartName.yaml"
   chartVersion:
-    $ref: "./AIApplicationChartVersion.yaml"
+    $ref: "../../../../../infra/openapi/docs/schemas/applications/ChartVersion.yaml"
   chartURL:
     $ref: "./AIApplicationChartUrl.yaml"
   chartId:

@@ -118,10 +118,9 @@ func CalculateEffectiveOfGvkPolicy(ctx context.Context, tx orm.DB,
 	return ht.calculateEffectivePolicy(withEffective, tx, appliedPolicyId, 0, nil, nil, nil, nil)
 }
 
-// calculateEffectivePolicy receives list of hierarchy nodes (proj -> dept -> tenant, for example) and
-// calculates the effective policy of the node in "idxToCalculate". the function is recursive, because it is possible
-// that the parent node, from which we inherit our effective policy, needs also to re-calculate its effective policy
-func (ht *HierarchyTree) calculateEffectivePolicy(ctx context.Context, tx orm.DB,
+// calculateEffectivePolicyAt calculates the effective policy of the node at idxToCalculate.
+// Missing parent policies are calculated recursively before merging their rules and defaults.
+func (ht *HierarchyTree) calculateEffectivePolicyAt(ctx context.Context, tx orm.DB,
 	appliedPolicyId string, idxToCalculate int,
 	imposedAssets map[string]interface{}, masterImposedAssets map[string]interface{},
 	imposedAssetsRules map[string]interface{}, masterImposedAssetsRules map[string]interface{}) (
@@ -189,7 +188,9 @@ func (ht *HierarchyTree) calculateEffectivePolicy(ctx context.Context, tx orm.DB
 
 	// if the effective policy of the parent scope is missing, calculate it.
 	if effectiveContext.Hierarchy[inheritFrom].Policy.EffectivePolicy.IsDeleted() {
-		ht.calculateEffectivePolicy(ctx, tx, appliedPolicyId, inheritFrom, nil, nil, nil, nil)
+		if _, err := ht.calculateEffectivePolicyAt(ctx, tx, appliedPolicyId, inheritFrom, nil, nil, nil, nil); err != nil {
+			return nil, err
+		}
 	}
 
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("[%s] effective policy of %s based on %s", ht.treeId.ToString(),
@@ -374,6 +375,9 @@ func calculateDefaultFromOrder(rules map[string]interface{}) (*api.DefaultFromOr
 	var err error
 
 	masterRules := rules[masterSection]
+	if masterRules == nil {
+		masterRules = rules[leaderSection]
+	}
 	workerRules := rules[workerSection]
 
 	if masterRules != nil || workerRules != nil {

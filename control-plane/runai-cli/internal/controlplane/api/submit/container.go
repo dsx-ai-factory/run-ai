@@ -6,8 +6,7 @@
 package submit
 
 import (
-	"fmt"
-	"io"
+	"errors"
 	"strings"
 	"time"
 
@@ -39,8 +38,6 @@ type Container struct {
 	EnvMyCredentials       []string
 	ImagePullMyCredentials []string
 
-	// RawEnvironment holds values from --environment flag
-	RawEnvironment []string
 	// EnvironmentAsset holds the environment asset name (resolved to ID before submit)
 	EnvironmentAsset string
 	// ComputeAsset holds the compute asset name (resolved to ID before submit)
@@ -131,7 +128,7 @@ func ContainerFlagSet(containerFlags *pflag.FlagSet, containerSpec *Container, g
 	containerFlags.BoolVar(&containerSpec.Command, oldCommand, false, consts.AttributeUsageCommand)
 	_ = containerFlags.MarkDeprecated(oldCommand, "use --command instead")
 
-	containerFlags.StringArrayVar(&containerSpec.RawEnvironment, consts.AttributeNameEnvironment, []string{}, consts.AttributeUsageEnvironmentAsset)
+	EnvironmentAssetFlagSet(containerFlags, containerSpec)
 	containerFlags.StringArrayVarP(&containerSpec.EnvironmentVariables, consts.AttributeNameEnvironmentVariables,
 		"e", []string{}, consts.AttributeUsageEnvironmentVariables)
 
@@ -142,24 +139,20 @@ func ContainerFlagSet(containerFlags *pflag.FlagSet, containerSpec *Container, g
 	}
 }
 
-// ProcessRawEnvironment processes the --environment flag values:
-// - If value contains "=" (key=value format): treated as environment variable (deprecated)
-// - If value does NOT contain "=": treated as environment asset name
-func (c *Container) ProcessRawEnvironment(w io.Writer) error {
-	var hasEnvVars bool
-	for _, v := range c.RawEnvironment {
-		if strings.Contains(v, "=") {
-			c.EnvironmentVariables = append(c.EnvironmentVariables, v)
-			hasEnvVars = true
-		} else {
-			c.EnvironmentAsset = v
-		}
+// EnvironmentAssetFlagSet registers the asset selector for submit and update commands.
+func EnvironmentAssetFlagSet(flags *pflag.FlagSet, containerSpec *Container) {
+	flags.StringVar(&containerSpec.EnvironmentAsset, consts.AttributeNameEnvironment, "", consts.AttributeUsageEnvironmentAsset)
+	flag := flags.Lookup(consts.AttributeNameEnvironment)
+	flag.Value = environmentAssetValue{flag.Value}
+}
+
+type environmentAssetValue struct {
+	pflag.Value
+}
+
+func (v environmentAssetValue) Set(value string) error {
+	if strings.Contains(value, "=") {
+		return errors.New("--environment accepts only an environment asset name; use --environment-variable KEY=VALUE to set environment variables")
 	}
-	if hasEnvVars {
-		_, err := fmt.Fprintln(w, consts.DeprecatedEnvironmentKeyValueMsg)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	return v.Value.Set(value)
 }

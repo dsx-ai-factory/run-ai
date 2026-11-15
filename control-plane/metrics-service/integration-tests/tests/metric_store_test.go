@@ -240,6 +240,15 @@ func (suite *MetricStoreTestSuite) TestDeleteMetricStore() {
 	require.Equal(suite.T(), http.StatusNotFound, int(apiErr.Code))
 }
 
+func (suite *MetricStoreTestSuite) TestDeleteMetricStore_NotExisting() {
+	tenantId := random.Int31()
+	fmt.Printf("running TestDeleteMetricStore_NotExisting, tenant [%d]\n", tenantId)
+	ctx := context.WithValue(context.Background(), runaictx.CfTenantId, fmt.Sprintf("%d", tenantId))
+	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@example.com")
+
+	require.NoError(suite.T(), metrics_client.GetMetricStoresClient().DeleteMetricStores(ctx, tenantId))
+}
+
 func (suite *MetricStoreTestSuite) TestTenantDeletePubsubEvent_MetricStoreDeleted() {
 	tenantId := random.Int31()
 	fmt.Printf("running TestTenantDeletePubsubEvent_MetricStoreDeleted, tenant [%d]\n", tenantId)

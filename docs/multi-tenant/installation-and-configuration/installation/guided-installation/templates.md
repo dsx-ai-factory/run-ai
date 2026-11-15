@@ -39,30 +39,16 @@ controlPlane:
   multiTenant: true
   customHelmValues:
     supportEntitled: true # Support-Entitled Release only
-    metricsService:
-      config:
-        datasourceUrl: <METRIC_STORE_READ_URL> # example: https://prometheus-prod-13-prod-us-east-0.grafana.net/api/prom
-    tenantsManager:
-      config:
-        defaultMetricStore:
-          read:
-            auth:
-              basic:
-                password: <METRIC_STORE_READ_PASSWORD>
-                username: "1434499"
-            url: <METRIC_STORE_READ_URL> # example: https://prometheus-prod-13-prod-us-east-0.grafana.net/api/prom
-          useXscopeHeader: true
-          write:
-            auth:
-              basic:
-                password: <METRIC_STORE_WRITE_PASSWORD>
-                username: "1434499"
-            url: <METRIC_STORE_WRITE_URL> # example: https://prometheus-prod-56-prod-us-east-2.grafana.net/api/prom
-    thanos:
-      enabled: false
-    authorization:
-      config:
-        isCSPEnv: true
+    metricsService.config.datasourceUrl: <METRIC_STORE_READ_URL> # example: https://prometheus-prod-13-prod-us-east-0.grafana.net/api/prom
+    tenantsManager.config.defaultMetricStore.read.auth.basic.password: <METRIC_STORE_READ_PASSWORD>
+    tenantsManager.config.defaultMetricStore.read.auth.basic.username: "1434499"
+    tenantsManager.config.defaultMetricStore.read.url: <METRIC_STORE_READ_URL> # example: https://prometheus-prod-13-prod-us-east-0.grafana.net/api/prom
+    tenantsManager.config.defaultMetricStore.useXscopeHeader: true
+    tenantsManager.config.defaultMetricStore.write.auth.basic.password: <METRIC_STORE_WRITE_PASSWORD>
+    tenantsManager.config.defaultMetricStore.write.auth.basic.username: "1434499"
+    tenantsManager.config.defaultMetricStore.write.url: <METRIC_STORE_WRITE_URL> # example: https://prometheus-prod-56-prod-us-east-2.grafana.net/api/prom
+    thanos.enabled: false
+    authorization.config.isCSPEnv: true
 
 externalConnection:
   type: ingress
@@ -91,30 +77,16 @@ controlPlane:
   multiTenant: true
   customHelmValues:
     supportEntitled: true # Support-Entitled Release only
-    metricsService:
-      config:
-        datasourceUrl: <METRIC_STORE_READ_URL> # example: https://prometheus-prod-13-prod-us-east-0.grafana.net/api/prom
-    tenantsManager:
-      config:
-        defaultMetricStore:
-          read:
-            auth:
-              basic:
-                password: <METRIC_STORE_READ_PASSWORD>
-                username: "1434499"
-            url: <METRIC_STORE_READ_URL> # example: https://prometheus-prod-13-prod-us-east-0.grafana.net/api/prom
-          useXscopeHeader: true
-          write:
-            auth:
-              basic:
-                password: <METRIC_STORE_WRITE_PASSWORD>
-                username: "1434499"
-            url: <METRIC_STORE_WRITE_URL> # example: https://prometheus-prod-56-prod-us-east-2.grafana.net/api/prom
-    thanos:
-      enabled: false
-    authorization:
-      config:
-        isCSPEnv: true
+    metricsService.config.datasourceUrl: <METRIC_STORE_READ_URL> # example: https://prometheus-prod-13-prod-us-east-0.grafana.net/api/prom
+    tenantsManager.config.defaultMetricStore.read.auth.basic.password: <METRIC_STORE_READ_PASSWORD>
+    tenantsManager.config.defaultMetricStore.read.auth.basic.username: "1434499"
+    tenantsManager.config.defaultMetricStore.read.url: <METRIC_STORE_READ_URL> # example: https://prometheus-prod-13-prod-us-east-0.grafana.net/api/prom
+    tenantsManager.config.defaultMetricStore.useXscopeHeader: true
+    tenantsManager.config.defaultMetricStore.write.auth.basic.password: <METRIC_STORE_WRITE_PASSWORD>
+    tenantsManager.config.defaultMetricStore.write.auth.basic.username: "1434499"
+    tenantsManager.config.defaultMetricStore.write.url: <METRIC_STORE_WRITE_URL> # example: https://prometheus-prod-56-prod-us-east-2.grafana.net/api/prom
+    thanos.enabled: false
+    authorization.config.isCSPEnv: true
 
 externalConnection:
   type: gatewayApi
@@ -137,30 +109,16 @@ controlPlane:
     keyPath: /path/to/cp-key.pem
   multiTenant: true
   customHelmValues:
-    metricsService:
-      config:
-        datasourceUrl: <METRIC_STORE_READ_URL> # example: http://mimir-query-frontend.monitoring.svc:8080/prometheus
-    tenantsManager:
-      config:
-        defaultMetricStore:
-          read:
-            auth:
-              basic:
-                password: ''
-                username: ''
-            url: <METRIC_STORE_READ_URL> # example: http://mimir-query-frontend.monitoring.svc:8080/prometheus
-          useXscopeHeader: true
-          write:
-            auth:
-              basic:
-                password: ''
-                username: ''
-            url: <<REPLACE ME WITH MIMIR ENDPOINT>> # example: http://mimir-distributor.monitoring.svc:8080/api/v1/push
-    thanos:
-      enabled: false
-    authorization:
-      config:
-        isCSPEnv: true
+    metricsService.config.datasourceUrl: <METRIC_STORE_READ_URL> # example: http://mimir-query-frontend.monitoring.svc:8080/prometheus
+    tenantsManager.config.defaultMetricStore.read.auth.basic.password: ''
+    tenantsManager.config.defaultMetricStore.read.auth.basic.username: ''
+    tenantsManager.config.defaultMetricStore.read.url: <METRIC_STORE_READ_URL> # example: http://mimir-query-frontend.monitoring.svc:8080/prometheus
+    tenantsManager.config.defaultMetricStore.useXscopeHeader: true
+    tenantsManager.config.defaultMetricStore.write.auth.basic.password: ''
+    tenantsManager.config.defaultMetricStore.write.auth.basic.username: ''
+    tenantsManager.config.defaultMetricStore.write.url: <<REPLACE ME WITH MIMIR ENDPOINT>> # example: http://mimir-distributor.monitoring.svc:8080/api/v1/push
+    thanos.enabled: false
+    authorization.config.isCSPEnv: true
 
 externalConnection:
   type: ingress

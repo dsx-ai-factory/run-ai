@@ -764,7 +764,7 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 		}, entries)
 	})
 
-	Context("test usage info - workspaces, trainings and templates", func() {
+	Context("test usage info - workspaces and trainings", func() {
 		DescribeTable("request should return usage info of the asset", func(testData AssetTest) {
 			if testData.testUsageInfo && testData.supportsClusterMockVersion(testing.OldClustersPreK8sObjectsTracker) {
 				//   environment asset we always need
@@ -782,7 +782,7 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 
 				expectedUsage := datastructs.Set[string]{} // expected set of workloads which are using our asset
 
-				//  list with usage, currently not used by any workspace/template
+				//  list with usage, currently not used by any workspace
 				listAllHttpReq, err := http.NewRequest("GET", testData.url, nil)
 				Expect(err).To(BeNil())
 				listAllHttpReq.Header = *headerForAdmin(randoms)
@@ -800,11 +800,8 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 				expectedUsage.Add(createTestWorkload(router, auth.WorkloadTypeWorkspace, randoms, envAsset, testAsset))
 				expectedUsage.Add(createTestWorkload(router, auth.WorkloadTypeWorkspace, randoms, envAsset, testAsset))
 				expectedUsage.Add(createTestWorkload(router, auth.WorkloadTypeTraining, randoms, envAsset, testAsset))
-				//  ...and by one template
-				template, _, _ := createTemplateAsset(buildRandomProjectTemplate(randoms, envAsset.Meta.Id, testAsset), router, headerForAdmin(randoms))
-				expectedUsage.Add(template.Meta.Id)
 
-				//  list with usage, now used by the three workloads + one template
+				//  list with usage, now used by the three workloads
 				listAllHttpReq, err = http.NewRequest("GET", fmt.Sprintf("%s?usageInfo=true", testData.url), nil)
 				Expect(err).To(BeNil())
 				listAllHttpReq.Header = *headerForAdmin(randoms)
@@ -812,7 +809,7 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 				//   make sure the list contains the created assets and the usage info now contains the three workloads
 				testData.factory.validateListContent(listAllHttpReq, expectedUsage, testSpec)
 
-				//  specific "Get" with usage, again used by three workloads + one template
+				//  specific "Get" with usage, again used by three workloads
 				getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s?usageInfo=true", testData.url, testAsset.Id), nil)
 				Expect(err).To(BeNil())
 				getHttpReq.Header = *headerForAdmin(randoms)
@@ -822,7 +819,7 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 		}, entries)
 	})
 
-	Context("test usage info with system scope assets - workspaces, trainings and templates", func() {
+	Context("test usage info with system scope assets - workspaces and trainings", func() {
 		DescribeTable("request should return usage info of the asset", func(testData AssetTest) {
 			if !testData.testUsageInfo || !testData.canRunOnScope(api.SCOPE_SYSTEM) {
 				return
@@ -849,7 +846,7 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 
 			expectedUsage := datastructs.Set[string]{} // expected set of workloads which are using our asset
 
-			//  list with usage, currently not used by any workspace/template
+			//  list with usage, currently not used by any workspace
 			listAllHttpReq, err := http.NewRequest("GET", testData.url, nil)
 			Expect(err).To(BeNil())
 			listAllHttpReq.Header = *headerForAdmin(randoms)
@@ -861,11 +858,8 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 			expectedUsage.Add(createTestWorkload(router, auth.WorkloadTypeWorkspace, randoms, envAsset, testAsset))
 			expectedUsage.Add(createTestWorkload(router, auth.WorkloadTypeWorkspace, randoms, envAsset, testAsset))
 			expectedUsage.Add(createTestWorkload(router, auth.WorkloadTypeTraining, randoms, envAsset, testAsset))
-			//  ...and by one template
-			template, _, _ := createTemplateAsset(buildRandomProjectTemplate(randoms, envAsset.Meta.Id, testAsset), router, headerForAdmin(randoms))
-			expectedUsage.Add(template.Meta.Id)
 
-			//  list with usage, now used by the three workloads + one template
+			//  list with usage, now used by the three workloads
 			listAllHttpReq, err = http.NewRequest("GET", fmt.Sprintf("%s?usageInfo=true", testData.url), nil)
 			Expect(err).To(BeNil())
 			listAllHttpReq.Header = *headerForAdmin(randoms)
@@ -873,7 +867,7 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 			//   make sure the list contains the created assets and the usage info now contains the three workloads
 			testData.factory.validateListContent(listAllHttpReq, expectedUsage, testSpec)
 
-			//  specific "Get" with usage, again used by three workloads + one template
+			//  specific "Get" with usage, again used by three workloads
 			getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s?usageInfo=true", testData.url, testAsset.Id), nil)
 			Expect(err).To(BeNil())
 			getHttpReq.Header = *headerForAdmin(randoms)
@@ -954,135 +948,6 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 		}, entries)
 	})
 
-	Context("test usage info - templates only", func() {
-		DescribeTable("request should return usage info of the asset", func(testData AssetTest) {
-			if testData.testUsageInfo {
-				//   environment asset we always need
-				envAsset, envSpec, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-
-				var testAsset api.AssetMeta
-				var testSpec []byte
-
-				if testData.kind == api.ASSETKIND_ENVIRONMENT {
-					testAsset = envAsset.Meta
-					testSpec = envSpec
-				} else {
-					testAsset, testSpec, _ = testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
-				}
-
-				expectedUsage := datastructs.Set[string]{} // expected set of templates which are using our asset
-
-				//  now the asset will be used by two templates
-				template1, _, _ := createTemplateAsset(buildRandomProjectTemplate(randoms, envAsset.Meta.Id, testAsset), router, headerForAdmin(randoms))
-				expectedUsage.Add(template1.Meta.Id)
-				template2, _, _ := createTemplateAsset(buildRandomProjectTemplate(randoms, envAsset.Meta.Id, testAsset), router, headerForAdmin(randoms))
-				expectedUsage.Add(template2.Meta.Id)
-
-				//  list with usage, now used by the templates
-				listAllHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s?usageInfo=true", testData.url), nil)
-				Expect(err).To(BeNil())
-				listAllHttpReq.Header = *headerForAdmin(randoms)
-
-				//   make sure the list contains the created assets and the usage info now contains the two workspaces
-				testData.factory.validateListContent(listAllHttpReq, expectedUsage, testSpec)
-
-				//  specific "Get" with usage, again used by two workspaces
-				getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s?usageInfo=true", testData.url, testAsset.Id), nil)
-				Expect(err).To(BeNil())
-				getHttpReq.Header = *headerForAdmin(randoms)
-
-				validateUsageInfoOfAsset(router, getHttpReq, expectedUsage)
-			}
-		}, entries)
-	})
-
-	Context("test usage info with system scope assets - templates only", func() {
-		DescribeTable("request should return usage info of the asset", func(testData AssetTest) {
-			if !testData.testUsageInfo || !testData.canRunOnScope(api.SCOPE_SYSTEM) {
-				return
-			}
-			//   environment asset we always need
-			envAsset, envSpec, _ := createEnvironmentAsset(buildRandomSystemEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-
-			var testAsset api.AssetMeta
-			var testSpec []byte
-
-			if testData.kind == api.ASSETKIND_ENVIRONMENT {
-				testAsset = envAsset.Meta
-				testSpec = envSpec
-			} else {
-				testAsset, testSpec, _ = testData.factory.createSystemBasedAsset(randoms, headerForAdmin(randoms))
-			}
-
-			expectedUsage := datastructs.Set[string]{} // expected set of templates which are using our asset
-
-			//  now the asset will be used by two templates
-			template1, _, _ := createTemplateAsset(buildRandomProjectTemplate(randoms, envAsset.Meta.Id, testAsset), router, headerForAdmin(randoms))
-			expectedUsage.Add(template1.Meta.Id)
-			template2, _, _ := createTemplateAsset(buildRandomProjectTemplate(randoms, envAsset.Meta.Id, testAsset), router, headerForAdmin(randoms))
-			expectedUsage.Add(template2.Meta.Id)
-
-			//  list with usage, now used by the templates
-			listAllHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s?usageInfo=true", testData.url), nil)
-			Expect(err).To(BeNil())
-			listAllHttpReq.Header = *headerForAdmin(randoms)
-
-			//   make sure the list contains the created assets and the usage info now contains the two workspaces
-			testData.factory.validateListContent(listAllHttpReq, expectedUsage, testSpec)
-
-			//  specific "Get" with usage, again used by two workspaces
-			getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s?usageInfo=true", testData.url, testAsset.Id), nil)
-			Expect(err).To(BeNil())
-			getHttpReq.Header = *headerForAdmin(randoms)
-
-			validateUsageInfoOfAsset(router, getHttpReq, expectedUsage)
-		}, entries)
-	})
-
-	Context("test usage info with system scope assets - for templates of system scope", func() {
-		DescribeTable("request should return usage info of the asset", func(testData AssetTest) {
-			if !testData.testUsageInfo || !testData.canRunOnScope(api.SCOPE_SYSTEM) {
-				return
-			}
-
-			//   environment asset we always need
-			envAsset, envSpec, _ := createEnvironmentAsset(buildRandomSystemEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-
-			var testAsset api.AssetMeta
-			var testSpec []byte
-
-			if testData.kind == api.ASSETKIND_ENVIRONMENT {
-				testAsset = envAsset.Meta
-				testSpec = envSpec
-			} else {
-				testAsset, testSpec, _ = testData.factory.createSystemBasedAsset(randoms, headerForAdmin(randoms))
-			}
-
-			expectedUsage := datastructs.Set[string]{} // expected set of templates which are using our asset
-
-			//  now the asset will be used by two templates
-			template1, _, _ := createTemplateAsset(buildRandomSystemTemplate(randoms, envAsset.Meta.Id, testAsset), router, headerForAdmin(randoms))
-			expectedUsage.Add(template1.Meta.Id)
-			template2, _, _ := createTemplateAsset(buildRandomSystemTemplate(randoms, envAsset.Meta.Id, testAsset), router, headerForAdmin(randoms))
-			expectedUsage.Add(template2.Meta.Id)
-
-			//  list with usage, now used by the templates
-			listAllHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s?usageInfo=true", testData.url), nil)
-			Expect(err).To(BeNil())
-			listAllHttpReq.Header = *headerForAdmin(randoms)
-
-			//   make sure the list contains the created assets and the usage info now contains the two workspaces
-			testData.factory.validateListContent(listAllHttpReq, expectedUsage, testSpec)
-
-			//  specific "Get" with usage, again used by two workspaces
-			getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s?usageInfo=true", testData.url, testAsset.Id), nil)
-			Expect(err).To(BeNil())
-			getHttpReq.Header = *headerForAdmin(randoms)
-
-			validateUsageInfoOfAsset(router, getHttpReq, expectedUsage)
-		}, entries)
-	})
-
 	Context("asset not supporting auto deletion", func() {
 		DescribeTable("request should not fail but only for pvc the auto delete is accepted", func(testData AssetTest) {
 			if !testData.canRunOnScope(api.SCOPE_TENANT) {
@@ -1118,11 +983,6 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 			var meta api.AssetMeta
 
 			switch testData.kind {
-			case api.ASSETKIND_WORKLOAD_TEMPLATE:
-				// Creation of template needs to be more precise
-				envAsset, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-				resp, _, _ := createTemplateAsset(buildRandomTenantTemplate(randoms, envAsset.Meta.Id), router, headerForAdmin(randoms))
-				meta = resp.Meta
 			case api.ASSETKIND_SECRET_VOLUME:
 				// Creation of secret storage needs to create a credential as well
 				secretReq := testing.BuildRandomProjectSecretVolumeAsset(randoms, nil)
@@ -1149,72 +1009,6 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 			}
 
 			Expect(convutils.Deref(meta.AutoDelete, dao.DefaultAutoDelete)).To(Equal(testData.supportsAutoDeletion))
-		}, entries)
-	})
-
-	Context("only auto delete PVC assets can be used as workloadVolumes", func() {
-		DescribeTable("any other combination should fail", func(testData AssetTest) {
-			envAsset, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-
-			var testAsset api.AssetMeta
-
-			if testData.kind == api.ASSETKIND_ENVIRONMENT {
-				testAsset = envAsset.Meta
-			} else {
-				testAsset, _, _ = testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
-			}
-
-			templatePayload := buildRandomProjectTemplate(randoms, envAsset.Meta.Id, testAsset)
-			templatePayload.Spec.Assets.WorkloadVolumes = []string{testAsset.Id}
-
-			createHttpReq, err := http.NewRequest("POST", urlTemplate, makePayload(templatePayload))
-			createHttpReq.Header = *headerForAdmin(randoms)
-			Expect(err).To(BeNil())
-
-			createHttpResp := httptest.NewRecorder()
-			router.ServeHTTP(createHttpResp, createHttpReq)
-			Expect(createHttpResp.Code).To(Equal(http.StatusBadRequest))
-
-			if !testData.supportsAutoDeletion {
-				Expect(createHttpResp.Body.String()).To(Or(
-					ContainSubstring("is incompatible with workloadVolume (asset kind should be PVC)"),
-					ContainSubstring("rather than")))
-			} else {
-				Expect(createHttpResp.Body.String()).To(ContainSubstring("is not an autoDelete asset"))
-			}
-		}, entries)
-	})
-
-	Context("auto delete cannot be datasource", func() {
-		DescribeTable("request should fail", func(testData AssetTest) {
-			if testData.supportsAutoDeletion {
-				envAsset, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-
-				assetCreationRequest := api.AssetCreationRequest{
-					Name:       "whatever",
-					Scope:      api.SCOPE_CLUSTER,
-					ClusterId:  convutils.Ref(randoms.ClusterId),
-					AutoDelete: convutils.Ref(true),
-				}
-				assetMeta, _ := createAutoDeleteAsset(testData, router, randoms, &assetCreationRequest)
-
-				templatePayload := buildRandomProjectTemplate(randoms, envAsset.Meta.Id)
-				templatePayload.Spec.Assets.Datasources = []api.AssetIdAndKind{
-					{
-						Id:   assetMeta.Id,
-						Kind: testData.kind,
-					},
-				}
-
-				createTempHttpReq, err := http.NewRequest("POST", urlTemplate, makePayload(templatePayload))
-				createTempHttpReq.Header = *headerForAdmin(randoms)
-				Expect(err).To(BeNil())
-
-				createTempHttpResp := httptest.NewRecorder()
-				router.ServeHTTP(createTempHttpResp, createTempHttpReq)
-				Expect(createTempHttpResp.Code).To(Equal(http.StatusBadRequest))
-				Expect(createTempHttpResp.Body.String()).To(ContainSubstring("should not be used as datasource"))
-			}
 		}, entries)
 	})
 
@@ -1265,86 +1059,6 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 				Expect(err).To(BeNil())
 
 				Expect(convutils.Deref(getResponse.Meta.AutoDelete, dbmodel.DefaultForAutoDelete)).To(Equal(true))
-			}
-		}, entries)
-	})
-
-	Context("auto delete + template", func() {
-		BeforeEach(func() {
-			//   disable grace time for the test, return it after test completed
-			origGraceTime = dao.AutoDeleteGraceTimeSec
-			setAutoDeleteGrateTime(0)
-		})
-
-		AfterEach(func() {
-			setAutoDeleteGrateTime(origGraceTime)
-		})
-
-		DescribeTable("should be removed when template is gone", func(testData AssetTest) {
-			if testData.supportsAutoDeletion {
-
-				envAsset, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-
-				assetCreationRequest := api.AssetCreationRequest{
-					Name:       "whatever",
-					Scope:      api.SCOPE_CLUSTER,
-					ClusterId:  convutils.Ref(randoms.ClusterId),
-					AutoDelete: convutils.Ref(true),
-				}
-				autoDeleteMeta, _ := createAutoDeleteAsset(testData, router, randoms, &assetCreationRequest)
-
-				templatePayload1 := buildRandomProjectTemplate(randoms, envAsset.Meta.Id)
-				templatePayload1.Spec.Assets.WorkloadVolumes = []string{autoDeleteMeta.Id}
-				templatePayload2 := buildRandomProjectTemplate(randoms, envAsset.Meta.Id)
-				templatePayload2.Spec.Assets.WorkloadVolumes = []string{autoDeleteMeta.Id}
-
-				templateIds := make([]string, 0)
-
-				for _, templatePayload := range []api.WorkloadTemplateCreationRequest{templatePayload1, templatePayload2} {
-					createTempHttpReq, err := http.NewRequest("POST", urlTemplate, makePayload(templatePayload))
-					createTempHttpReq.Header = *headerForAdmin(randoms)
-					Expect(err).To(BeNil())
-
-					createTempHttpResp := httptest.NewRecorder()
-					router.ServeHTTP(createTempHttpResp, createTempHttpReq)
-					Expect(createTempHttpResp.Code).To(Equal(http.StatusAccepted))
-
-					var createResp GenericGetResponse
-					err = json.Unmarshal(createTempHttpResp.Body.Bytes(), &createResp)
-					Expect(err).To(BeNil())
-
-					templateIds = append(templateIds, createResp.Meta.Id)
-				}
-
-				//
-				//   now delete the templates
-				//
-				deleted := 0
-
-				for _, templateId := range templateIds {
-					delByIdHttpReq, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", urlTemplate, templateId), nil)
-					Expect(err).To(BeNil())
-					delByIdHttpReq.Header = *headerForAdmin(randoms)
-
-					delByIdHttpResp := httptest.NewRecorder()
-					router.ServeHTTP(delByIdHttpResp, delByIdHttpReq)
-					Expect(delByIdHttpResp.Code).To(Equal(http.StatusAccepted))
-
-					deleted += 1
-
-					// now see if the auto delete asset is there
-					getByIdHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", testData.url, autoDeleteMeta.Id), nil)
-					Expect(err).To(BeNil())
-					getByIdHttpReq.Header = *headerForAdmin(randoms)
-
-					getByIdHttpResp := httptest.NewRecorder()
-					router.ServeHTTP(getByIdHttpResp, getByIdHttpReq)
-					if deleted < len(templateIds) {
-						Expect(getByIdHttpResp.Code).To(Equal(http.StatusOK))
-					} else {
-						Expect(getByIdHttpResp.Code).To(Equal(http.StatusNotFound))
-					}
-				}
 			}
 		}, entries)
 	})
@@ -1438,25 +1152,6 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 
 			var meta api.AssetMeta
 			switch testData.kind {
-			case api.ASSETKIND_WORKLOAD_TEMPLATE:
-				// Creation of template needs to be more precise
-				envAsset, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-				request := api.WorkloadTemplateCreationRequest{
-					Meta: api.AssetCreationRequest{
-						Name:        testutils.RandString(5),
-						Description: assetDescription,
-						Scope:       api.SCOPE_PROJECT,
-						ProjectId:   convutils.Ref(int32(randoms.ProjectId)),
-					},
-					Spec: api.SpecificRunCreationFields{
-						Assets: api.AssetsIds{
-							Environment: envAsset.Meta.Id,
-						},
-						SpecificEnv: randomSpecificEnv(),
-					},
-				}
-				resp, _, _ := createTemplateAsset(request, router, headerForAdmin(randoms))
-				meta = resp.Meta
 			case api.ASSETKIND_SECRET_VOLUME:
 				// Creation of secret storage needs to create a credential as well
 				secretReq := testing.BuildRandomProjectSecretVolumeAsset(randoms, nil)

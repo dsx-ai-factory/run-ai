@@ -28,6 +28,7 @@ func (w WorkloadsV2Service) CreateWorkloadV2(ctx context.Context, request api.Wo
 		DryRun:                  dryRun,
 		CheckYamlSubmissionFlag: true,
 		TranslatedFromV1:        false,
+		RecordAction:            recordAction,
 	})
 	if len(errors) > 0 {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to create workload with %d errors", len(errors))

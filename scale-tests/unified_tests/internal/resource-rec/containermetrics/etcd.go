@@ -35,7 +35,7 @@ func ExtractEtcdDBSize(ctx context.Context, api v1.API, window time.Duration, en
 	base := "max(etcd_mvcc_db_total_size_in_bytes)"
 
 	value := func(query string) (float64, error) {
-		res, _, err := api.Query(ctx, query, endTime)
+		res, _, _, err := api.Query(ctx, query, endTime)
 		if err != nil {
 			return 0, fmt.Errorf("etcd db size query failed: %w", err)
 		}

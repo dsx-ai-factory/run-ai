@@ -60,7 +60,7 @@ func Extract(ctx context.Context, api v1.API, namespaces []string, window time.D
 			"mid": fmt.Sprintf(`quantile_over_time(0.95, (%s)[%s:1m])`, base, dur),
 			"hi":  fmt.Sprintf(`max_over_time((%s)[%s:1m])`, base, dur),
 		} {
-			res, _, err := api.Query(ctx, fn, endTime)
+			res, _, _, err := api.Query(ctx, fn, endTime)
 			if err != nil {
 				return nil, fmt.Errorf("query failed: %w", err)
 			}

@@ -144,7 +144,6 @@ func CleanTables() {
 	gormDb.Unscoped().Delete(&models_crud.Template{}, All)
 	gormDb.Unscoped().Delete(&models_crud.TemplateAssets{}, All)
 	gormDb.Unscoped().Delete(&models_crud.PolicyComplianceRecord{}, All)
-	gormDb.Unscoped().Delete(&models_crud.Migrations{}, All)
 }
 
 func GetDefaultClustersCacheConfig() *checker.ClustersCacheConfig {

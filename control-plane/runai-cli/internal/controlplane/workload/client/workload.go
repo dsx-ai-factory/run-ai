@@ -70,6 +70,51 @@ func (bsc *BackendWorkloadServiceClient) List(ctx context.Context, limit, offset
 	return httputils.HandleResponse(workloadList, response, err)
 }
 
+// ListSlim lists the active workloads with only their identity fields, for looking workloads up by name: the control
+// plane reads the workloads table instead of the workloads view, so new workloads are found immediately. Control
+// planes that don't have the slim endpoint are served by List.
+func (bsc *BackendWorkloadServiceClient) ListSlim(ctx context.Context, limit, offset int32, filters []string) (*openapi.GetWorkloadsSlimResponse, error) {
+	request := bsc.apiClient.WorkloadsAPI.GetWorkloadsSlim(ctx)
+	request = request.Limit(limit)
+	request = request.Offset(offset)
+
+	if len(filters) != 0 {
+		request = request.FilterBy(filters)
+	}
+
+	workloadList, response, err := request.Execute() //nolint:bodyclose // handle in handler
+	if response != nil && response.StatusCode == http.StatusNotFound {
+		if response.Body != nil {
+			_ = response.Body.Close()
+		}
+		fullWorkloadList, err := bsc.List(ctx, limit, offset, filters, false)
+		if err != nil {
+			return nil, err
+		}
+		return ToSlimResponse(fullWorkloadList), nil
+	}
+	return httputils.HandleResponse(workloadList, response, err)
+}
+
+// ToSlimResponse keeps only the slim fields of a workload list.
+func ToSlimResponse(workloadList *openapi.GetWorkloads200Response) *openapi.GetWorkloadsSlimResponse {
+	slimList := &openapi.GetWorkloadsSlimResponse{
+		Next:      workloadList.Next,
+		Workloads: make([]openapi.WorkloadSlim, 0, len(workloadList.Workloads)),
+	}
+	for _, workload := range workloadList.Workloads {
+		slimList.Workloads = append(slimList.Workloads, openapi.WorkloadSlim{
+			Id:                   workload.Id,
+			Name:                 workload.Name,
+			Type:                 openapi.PtrString(workload.Type),
+			ProjectName:          workload.ProjectName,
+			ClusterId:            workload.ClusterId,
+			DistributedFramework: workload.DistributedFramework,
+		})
+	}
+	return slimList
+}
+
 func (bsc *BackendWorkloadServiceClient) GetWorkload(ctx context.Context, id string) (*openapi.WorkloadDetailed, error) {
 	request := bsc.apiClient.WorkloadsAPI.GetWorkload(ctx, id)
 

@@ -31,9 +31,9 @@ func TestWorkloadRunnerOwnershipRulesAreFeatureGated(t *testing.T) {
 	runaiConfig := &runv1.RunaiConfig{ObjectMeta: metav1.ObjectMeta{Namespace: "runai", Name: "runai"}}
 	runaiConfig.SetDefaultsWhereNeeded()
 
-	assertWorkloadRunnerOwnershipRules(t, webhooksFile(runaiConfig)["webhooks.yaml"], false)
+	assertWorkloadRunnerOwnershipRules(t, webhooksFile(runaiConfig, false)["webhooks.yaml"], false)
 	runaiConfig.Spec.Global.EnableWorkloadOwnershipProtection = ptr.To(true)
-	assertWorkloadRunnerOwnershipRules(t, webhooksFile(runaiConfig)["webhooks.yaml"], true)
+	assertWorkloadRunnerOwnershipRules(t, webhooksFile(runaiConfig, false)["webhooks.yaml"], true)
 }
 
 func TestLegacyOwnershipRulesTargetAnyWorkloadController(t *testing.T) {
@@ -64,7 +64,7 @@ func TestLegacyOwnershipRulesTargetAnyWorkloadController(t *testing.T) {
 		},
 	}
 
-	for _, object := range decodeWebhookObjects(t, webhooksFile(runaiConfig)["webhooks.yaml"]) {
+	for _, object := range decodeWebhookObjects(t, webhooksFile(runaiConfig, false)["webhooks.yaml"]) {
 		want, tracked := expected[object.GetName()]
 		if !tracked {
 			continue
@@ -113,7 +113,7 @@ func TestOpenShiftOwnershipWebhooksRequestServiceCAInjection(t *testing.T) {
 		"runai-workload-ownership-mutation":                        true,
 		"runai-inference-workload-ownership-mutation":              true,
 	}
-	for _, object := range decodeWebhookObjects(t, webhooksFile(runaiConfig)["webhooks.yaml"]) {
+	for _, object := range decodeWebhookObjects(t, webhooksFile(runaiConfig, false)["webhooks.yaml"]) {
 		if !want[object.GetName()] {
 			continue
 		}
@@ -223,7 +223,9 @@ func TestWebhookNamesInClusterRoleResourceNames(t *testing.T) {
 	runaiConfig.Spec.Global.EnableWorkloadOwnershipProtection = ptr.To(true)
 	runaiConfig.Spec.Internal.Development.Headless = false
 
-	data := webhooksFile(runaiConfig)
+	// Snapshot installed, so the conditional restore webhook is in the file too.
+	// Without it this guardrail passes vacuously for exactly that name.
+	data := webhooksFile(runaiConfig, true)
 	webhooksYAML := data["webhooks.yaml"]
 
 	webhookNames := extractWebhookNames(t, webhooksYAML)
@@ -308,7 +310,7 @@ func TestWebhooksFileContainsOnlySurvivingConfigurations(t *testing.T) {
 	runaiConfig.Spec.AdviceRestartController.Enabled = ptr.To(true)
 	runaiConfig.Spec.Global.EnableWorkloadOwnershipProtection = ptr.To(true)
 
-	webhookNames := extractWebhookNames(t, webhooksFile(runaiConfig)["webhooks.yaml"])
+	webhookNames := extractWebhookNames(t, webhooksFile(runaiConfig, false)["webhooks.yaml"])
 	sort.Strings(webhookNames)
 	expected := []string{
 		"application-validation",
@@ -337,7 +339,7 @@ func TestPodControllerMutationExcludesRunaiJobs(t *testing.T) {
 	}
 	runaiConfig.SetDefaultsWhereNeeded()
 
-	docs := strings.Split(webhooksFile(runaiConfig)["webhooks.yaml"], "---")
+	docs := strings.Split(webhooksFile(runaiConfig, false)["webhooks.yaml"], "---")
 	for _, doc := range docs {
 		if strings.TrimSpace(doc) == "" {
 			continue

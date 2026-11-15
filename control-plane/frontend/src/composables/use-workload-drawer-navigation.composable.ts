@@ -6,6 +6,7 @@
 import { useRouter, useRoute } from "vue-router";
 import { WORKLOAD_ROUTE_NAMES } from "@/router/workloads.routes/workloads.routes.names";
 import type { TWorkloadDrawerTab, IWorkloadDrawerNavigationPayload } from "@/models/workload.model";
+import { workloadDrawerTabs } from "@/models/workload.model";
 
 export interface IWorkloadDrawerUrlParams extends IWorkloadDrawerNavigationPayload {
   workloadId: string;
@@ -40,6 +41,7 @@ export function useWorkloadDrawerNavigation() {
     const tab = route.query.drawerTab;
 
     if (typeof workloadId !== "string" || typeof tab !== "string") return null;
+    if (!workloadDrawerTabs.includes(tab as TWorkloadDrawerTab)) return null;
 
     const podName = route.query.podName;
 

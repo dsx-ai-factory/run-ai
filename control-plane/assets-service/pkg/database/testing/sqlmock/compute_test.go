@@ -24,7 +24,7 @@ const (
 	computeGet  = computeCols + ` ` + computeJoins + ` WHERE (assets_metadata.id = ? AND assets_metadata.kind = ?) AND ` + computeScope + ` AND assets_metadata.deleted_at IS NULL`
 	computeList = computeCols + ` ` + computeJoins + ` WHERE assets_metadata.kind = ? AND ` + computeScope + ` AND assets_metadata.deleted_at IS NULL`
 
-	computeInsert  = `INSERT INTO assets_compute (asset_id,cpu_core_limit,cpu_core_request,cpu_memory_limit,cpu_memory_request,extended_resources,gpu_devices_request,gpu_memory_limit,gpu_memory_request,gpu_portion_limit,gpu_portion_request,gpu_request_type,large_shm_request) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`
+	computeInsert  = `INSERT INTO assets_compute (asset_id,cpu_core_limit,cpu_core_request,cpu_memory_limit,cpu_memory_request,extended_resources,gpu_compute_mode,gpu_devices_request,gpu_memory_limit,gpu_memory_request,gpu_portion_limit,gpu_portion_request,gpu_request_type,large_shm_request) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
 	computeHardDel = `DELETE FROM assets_compute WHERE assets_compute.asset_id = ?`
 )
 
@@ -79,8 +79,8 @@ func TestDeleteComputeAsset_SoftUnsupported(t *testing.T) {
 }
 
 const (
-	computeSpecFirst = `SELECT assets_compute.cpu_core_limit,assets_compute.cpu_core_request,assets_compute.cpu_memory_limit,assets_compute.cpu_memory_request,assets_compute.extended_resources,assets_compute.gpu_devices_request,assets_compute.gpu_memory_limit,assets_compute.gpu_memory_request,assets_compute.gpu_portion_limit,assets_compute.gpu_portion_request,assets_compute.gpu_request_type,assets_compute.large_shm_request FROM assets_compute WHERE assets_compute.asset_id = ? ORDER BY assets_compute.asset_id LIMIT ?`
-	computeSpecSave  = `UPDATE assets_compute SET cpu_core_limit=?,cpu_core_request=?,cpu_memory_limit=?,cpu_memory_request=?,extended_resources=?,gpu_devices_request=?,gpu_memory_limit=?,gpu_memory_request=?,gpu_portion_limit=?,gpu_portion_request=?,gpu_request_type=?,large_shm_request=? WHERE assets_compute.asset_id = ?`
+	computeSpecFirst = `SELECT assets_compute.cpu_core_limit,assets_compute.cpu_core_request,assets_compute.cpu_memory_limit,assets_compute.cpu_memory_request,assets_compute.extended_resources,assets_compute.gpu_compute_mode,assets_compute.gpu_devices_request,assets_compute.gpu_memory_limit,assets_compute.gpu_memory_request,assets_compute.gpu_portion_limit,assets_compute.gpu_portion_request,assets_compute.gpu_request_type,assets_compute.large_shm_request FROM assets_compute WHERE assets_compute.asset_id = ? ORDER BY assets_compute.asset_id LIMIT ?`
+	computeSpecSave  = `UPDATE assets_compute SET cpu_core_limit=?,cpu_core_request=?,cpu_memory_limit=?,cpu_memory_request=?,extended_resources=?,gpu_compute_mode=?,gpu_devices_request=?,gpu_memory_limit=?,gpu_memory_request=?,gpu_portion_limit=?,gpu_portion_request=?,gpu_request_type=?,large_shm_request=? WHERE assets_compute.asset_id = ?`
 )
 
 func TestUpdateComputeAsset(t *testing.T) {

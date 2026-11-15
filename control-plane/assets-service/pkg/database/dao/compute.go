@@ -56,7 +56,11 @@ func createComputeAssetInTransaction(ctx context.Context, tx orm.DB, request api
 		AssetId: id,
 	}
 	if request.Spec != nil {
-		ComputeAssetRec.ComputeAssetSpec = *request.Spec
+		stored, err := dbmodel.ComputeAssetForDB(*request.Spec)
+		if err != nil {
+			return nil, api.NewValidationError(err.Error())
+		}
+		ComputeAssetRec.ComputeAssetSpec = stored
 	}
 
 	_, err = tx.Create(ComputeAssetRec)
@@ -66,7 +70,7 @@ func createComputeAssetInTransaction(ctx context.Context, tx orm.DB, request api
 
 	return &api.ComputeAsset{
 		Meta: *assetMeta,
-		Spec: convutils.Deref(request.Spec, api.ComputeAssetSpec{}),
+		Spec: dbmodel.LegacyCompatibleComputeAsset(convutils.Deref(request.Spec, api.ComputeAssetSpec{})),
 	}, nil
 }
 
@@ -91,7 +95,7 @@ func GetComputeAssetById(ctx context.Context, id string) (*api.ComputeAsset, *ap
 
 	response := api.ComputeAsset{
 		Meta: combinedRec.AssetMeta,
-		Spec: combinedRec.ComputeAssetSpec,
+		Spec: dbmodel.LegacyCompatibleComputeAsset(combinedRec.ComputeAssetSpec),
 	}
 	return &response, nil
 }
@@ -125,7 +129,7 @@ func ListComputeAssets(ctx context.Context, queryParams *query_types.QueryParams
 	for _, row := range combinedList {
 		response.Entries = append(response.Entries, api.ComputeAsset{
 			Meta: row.AssetMeta,
-			Spec: row.ComputeAssetSpec,
+			Spec: dbmodel.LegacyCompatibleComputeAsset(row.ComputeAssetSpec),
 		})
 	}
 
@@ -171,7 +175,11 @@ func updateComputeAssetInTransaction(ctx context.Context, tx orm.DB, id string,
 	}
 
 	if request.Spec != nil {
-		computeAssetUpdate.ComputeAssetSpec = *request.Spec
+		stored, err := dbmodel.ComputeAssetForDB(*request.Spec)
+		if err != nil {
+			return nil, assetMeta, api.NewValidationError(err.Error())
+		}
+		computeAssetUpdate.ComputeAssetSpec = stored
 	}
 
 	saveRows, saveErr := tx.Where(recId).Save(&computeAssetUpdate)
@@ -185,7 +193,7 @@ func updateComputeAssetInTransaction(ctx context.Context, tx orm.DB, id string,
 
 	return &api.ComputeAsset{
 		Meta: assetMeta.ToApiAssetMeta(),
-		Spec: convutils.Deref(request.Spec, api.ComputeAssetSpec{}),
+		Spec: dbmodel.LegacyCompatibleComputeAsset(convutils.Deref(request.Spec, api.ComputeAssetSpec{})),
 	}, assetMeta, nil
 }
 

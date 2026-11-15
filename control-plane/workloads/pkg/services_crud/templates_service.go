@@ -10,18 +10,13 @@ import (
 	"net/http"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
-	clients "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/backend"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 )
 
-type TemplatesService struct {
-	tenantSettingsClient clients.TenantSettingsClient
-}
+type TemplatesService struct{}
 
-func NewTemplatesService(tenantSettingsClient clients.TenantSettingsClient) api.WorkloadTemplatesAPIServicer {
-	return &TemplatesService{
-		tenantSettingsClient: tenantSettingsClient,
-	}
+func NewTemplatesService() api.WorkloadTemplatesAPIServicer {
+	return &TemplatesService{}
 }
 
 func (ts *TemplatesService) CountTemplates(ctx context.Context, filterByParam []string, searchParam string, includeAncestors bool) (api.ImplResponse, error) {
@@ -46,7 +41,7 @@ func (ts *TemplatesService) CreateDistributedTemplate(ctx context.Context, reque
 		return api.Response(int(err.Code), err), nil
 	}
 
-	return api.Response(http.StatusOK, *unifiedRequest.template), nil
+	return legacyCompatibleTemplateResponse(unifiedRequest.template)
 }
 
 func (ts *TemplatesService) CreateInferenceTemplate(ctx context.Context, request api.InferenceTemplateCreationRequest) (api.ImplResponse, error) {
@@ -60,7 +55,7 @@ func (ts *TemplatesService) CreateInferenceTemplate(ctx context.Context, request
 		return api.Response(int(err.Code), err), nil
 	}
 
-	return api.Response(http.StatusOK, *unifiedRequest.template), nil
+	return legacyCompatibleTemplateResponse(unifiedRequest.template)
 }
 
 func (ts *TemplatesService) CreateDistributedInferenceTemplate(ctx context.Context, request api.DistributedInferenceTemplateCreationRequest) (api.ImplResponse, error) {
@@ -74,7 +69,7 @@ func (ts *TemplatesService) CreateDistributedInferenceTemplate(ctx context.Conte
 		return api.Response(int(err.Code), err), nil
 	}
 
-	return api.Response(http.StatusOK, *unifiedRequest.template), nil
+	return legacyCompatibleTemplateResponse(unifiedRequest.template)
 }
 
 func (ts *TemplatesService) CreateTrainingTemplate(ctx context.Context, request api.TrainingTemplateCreationRequest) (api.ImplResponse, error) {
@@ -88,7 +83,7 @@ func (ts *TemplatesService) CreateTrainingTemplate(ctx context.Context, request 
 		return api.Response(int(err.Code), err), nil
 	}
 
-	return api.Response(http.StatusOK, *unifiedRequest.template), nil
+	return legacyCompatibleTemplateResponse(unifiedRequest.template)
 }
 
 func (ts *TemplatesService) CreateWorkspaceTemplate(ctx context.Context, request api.WorkspaceTemplateCreationRequest) (api.ImplResponse, error) {
@@ -102,7 +97,7 @@ func (ts *TemplatesService) CreateWorkspaceTemplate(ctx context.Context, request
 		return api.Response(int(err.Code), err), nil
 	}
 
-	return api.Response(http.StatusOK, *unifiedRequest.template), nil
+	return legacyCompatibleTemplateResponse(unifiedRequest.template)
 }
 
 func (ts *TemplatesService) DeleteDistributedTemplate(ctx context.Context, id string) (api.ImplResponse, error) {
@@ -151,7 +146,7 @@ func (ts *TemplatesService) GetTemplateById(ctx context.Context, templateId stri
 		return api.Response(int(err.Code), err), nil
 	}
 
-	return api.Response(http.StatusOK, template.template), nil
+	return legacyCompatibleTemplateResponse(template.template)
 }
 
 func (ts *TemplatesService) GetDistributedTemplate(ctx context.Context, templateId string) (api.ImplResponse, error) {
@@ -160,7 +155,7 @@ func (ts *TemplatesService) GetDistributedTemplate(ctx context.Context, template
 		return api.Response(int(err.Code), err), nil
 	}
 
-	return api.Response(http.StatusOK, template.template), nil
+	return legacyCompatibleTemplateResponse(template.template)
 }
 
 func (ts *TemplatesService) GetInferenceTemplate(ctx context.Context, templateId string) (api.ImplResponse, error) {
@@ -169,7 +164,7 @@ func (ts *TemplatesService) GetInferenceTemplate(ctx context.Context, templateId
 		return api.Response(int(err.Code), err), nil
 	}
 
-	return api.Response(http.StatusOK, template.template), nil
+	return legacyCompatibleTemplateResponse(template.template)
 }
 
 func (ts *TemplatesService) GetDistributedInferenceTemplate(ctx context.Context, templateId string) (api.ImplResponse, error) {
@@ -178,7 +173,7 @@ func (ts *TemplatesService) GetDistributedInferenceTemplate(ctx context.Context,
 		return api.Response(int(err.Code), err), nil
 	}
 
-	return api.Response(http.StatusOK, template.template), nil
+	return legacyCompatibleTemplateResponse(template.template)
 }
 
 func (ts *TemplatesService) GetTrainingTemplate(ctx context.Context, templateId string) (api.ImplResponse, error) {
@@ -187,7 +182,7 @@ func (ts *TemplatesService) GetTrainingTemplate(ctx context.Context, templateId 
 		return api.Response(int(err.Code), err), nil
 	}
 
-	return api.Response(http.StatusOK, template.template), nil
+	return legacyCompatibleTemplateResponse(template.template)
 }
 
 func (ts *TemplatesService) GetWorkspaceTemplate(ctx context.Context, templateId string) (api.ImplResponse, error) {
@@ -196,7 +191,7 @@ func (ts *TemplatesService) GetWorkspaceTemplate(ctx context.Context, templateId
 		return api.Response(int(err.Code), err), nil
 	}
 
-	return api.Response(http.StatusOK, template.template), nil
+	return legacyCompatibleTemplateResponse(template.template)
 }
 
 // TemplateNameAvailability - Template name availability
@@ -360,7 +355,7 @@ func (ts *TemplatesService) PatchDistributedTemplate(ctx context.Context, templa
 		return api.Response(int(err.Code), err), nil
 	}
 
-	return api.Response(http.StatusOK, *updated.template), nil
+	return legacyCompatibleTemplateResponse(updated.template)
 }
 
 func (ts *TemplatesService) PatchInferenceTemplate(ctx context.Context, templateId string, request api.InferenceTemplatePatchRequest) (api.ImplResponse, error) {
@@ -378,7 +373,7 @@ func (ts *TemplatesService) PatchInferenceTemplate(ctx context.Context, template
 		return api.Response(int(err.Code), err), nil
 	}
 
-	return api.Response(http.StatusOK, *updated.template), nil
+	return legacyCompatibleTemplateResponse(updated.template)
 }
 
 func (ts *TemplatesService) PatchDistributedInferenceTemplate(ctx context.Context, templateId string, request api.DistributedInferenceTemplatePatchRequest) (api.ImplResponse, error) {
@@ -396,7 +391,7 @@ func (ts *TemplatesService) PatchDistributedInferenceTemplate(ctx context.Contex
 		return api.Response(int(err.Code), err), nil
 	}
 
-	return api.Response(http.StatusOK, *updated.template), nil
+	return legacyCompatibleTemplateResponse(updated.template)
 }
 
 func (ts *TemplatesService) PatchTrainingTemplate(ctx context.Context, templateId string, request api.TrainingTemplatePatchRequest) (api.ImplResponse, error) {
@@ -414,7 +409,7 @@ func (ts *TemplatesService) PatchTrainingTemplate(ctx context.Context, templateI
 		return api.Response(int(err.Code), err), nil
 	}
 
-	return api.Response(http.StatusOK, *updated.template), nil
+	return legacyCompatibleTemplateResponse(updated.template)
 }
 
 func (ts *TemplatesService) PatchWorkspaceTemplate(ctx context.Context, templateId string, request api.WorkspaceTemplatePatchRequest) (api.ImplResponse, error) {
@@ -432,7 +427,7 @@ func (ts *TemplatesService) PatchWorkspaceTemplate(ctx context.Context, template
 		return api.Response(int(err.Code), err), nil
 	}
 
-	return api.Response(http.StatusOK, *updated.template), nil
+	return legacyCompatibleTemplateResponse(updated.template)
 }
 
 func (ts *TemplatesService) UpdateDistributedTemplate(ctx context.Context, templateId string, request api.DistributedTemplateUpdateRequest) (api.ImplResponse, error) {
@@ -446,7 +441,7 @@ func (ts *TemplatesService) UpdateDistributedTemplate(ctx context.Context, templ
 		return api.Response(int(err.Code), err), nil
 	}
 
-	return api.Response(http.StatusOK, *updated.template), nil
+	return legacyCompatibleTemplateResponse(updated.template)
 }
 
 func (ts *TemplatesService) UpdateInferenceTemplate(ctx context.Context, templateId string, request api.InferenceTemplateUpdateRequest) (api.ImplResponse, error) {
@@ -460,7 +455,7 @@ func (ts *TemplatesService) UpdateInferenceTemplate(ctx context.Context, templat
 		return api.Response(int(err.Code), err), nil
 	}
 
-	return api.Response(http.StatusOK, *updated.template), nil
+	return legacyCompatibleTemplateResponse(updated.template)
 }
 
 func (ts *TemplatesService) UpdateDistributedInferenceTemplate(ctx context.Context, templateId string, request api.DistributedInferenceTemplateUpdateRequest) (api.ImplResponse, error) {
@@ -474,7 +469,7 @@ func (ts *TemplatesService) UpdateDistributedInferenceTemplate(ctx context.Conte
 		return api.Response(int(err.Code), err), nil
 	}
 
-	return api.Response(http.StatusOK, *updated.template), nil
+	return legacyCompatibleTemplateResponse(updated.template)
 }
 
 func (ts *TemplatesService) UpdateTrainingTemplate(ctx context.Context, templateId string, request api.TrainingTemplateUpdateRequest) (api.ImplResponse, error) {
@@ -488,7 +483,7 @@ func (ts *TemplatesService) UpdateTrainingTemplate(ctx context.Context, template
 		return api.Response(int(err.Code), err), nil
 	}
 
-	return api.Response(http.StatusOK, *updated.template), nil
+	return legacyCompatibleTemplateResponse(updated.template)
 }
 
 func (ts *TemplatesService) UpdateWorkspaceTemplate(ctx context.Context, templateId string, request api.WorkspaceTemplateUpdateRequest) (api.ImplResponse, error) {
@@ -502,5 +497,5 @@ func (ts *TemplatesService) UpdateWorkspaceTemplate(ctx context.Context, templat
 		return api.Response(int(err.Code), err), nil
 	}
 
-	return api.Response(http.StatusOK, *updated.template), nil
+	return legacyCompatibleTemplateResponse(updated.template)
 }

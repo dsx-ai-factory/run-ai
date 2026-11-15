@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	runai_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 
 	"k8s.io/utils/ptr"
 
@@ -77,7 +78,7 @@ func (k *KeycloakIdpRepository) UpdateIdp(ctx context.Context, realm string, idp
 	}
 	kcIdp, err := k.kcClient.GetIdentityProvider(ctx, *token, realm, *idp.Alias)
 	if err != nil {
-		return fmt.Errorf("failed to get idp %s in realm %s. err: %s", *idp.Alias, realm, err.Error())
+		return fmt.Errorf("failed to get idp %s in realm %s: %w", *idp.Alias, realm, iamError.HandleKeyCloakError(err))
 	}
 	kcIdp = k.fromIdpModel(&idp, kcIdp)
 	err = k.kcClient.UpdateIdentityProvider(ctx, *token, realm, *idp.Alias, *kcIdp)
@@ -175,14 +176,13 @@ func (k *KeycloakIdpRepository) UpdateIdpMappers(ctx context.Context, realm, ali
 		kcMapper := k.fromIdpMapperModel(mapper)
 		if mapper.ID != nil {
 			err = k.kcClient.UpdateIdentityProviderMapper(ctx, *token, realm, alias, *kcMapper)
-			mapperErr = errors.Join(mapperErr, err)
 		} else {
 			_, err = k.kcClient.CreateIdentityProviderMapper(ctx, *token, realm, alias, *kcMapper)
 		}
 		mapperErr = errors.Join(mapperErr, err)
 	}
 	if mapperErr != nil {
-		return fmt.Errorf("failed to update idp mappers. err: %s", err.Error())
+		return fmt.Errorf("failed to update idp mappers. err: %s", mapperErr.Error())
 	}
 	return mapperErr
 }
@@ -192,7 +192,12 @@ func (k *KeycloakIdpRepository) GetIdpConfig(ctx context.Context, realm string, 
 	if err != nil {
 		return nil, iamError.HandleKeyCloakError(err)
 	}
-	return k.kcClient.ImportIdentityProviderConfig(ctx, *token, realm, url, providerId)
+
+	config, err := k.kcClient.ImportIdentityProviderConfig(ctx, *token, realm, url, providerId)
+	if err != nil {
+		logging.Errorf("failed to get identityProvider from url. err: %+v", err)
+	}
+	return config, iamError.HandleKeyCloakError(err)
 }
 
 func (k *KeycloakIdpRepository) GetIdpConfigFromFile(ctx context.Context, realm string, providerId string, fileName string, fileBody io.Reader) (map[string]string, error) {
@@ -200,7 +205,12 @@ func (k *KeycloakIdpRepository) GetIdpConfigFromFile(ctx context.Context, realm 
 	if err != nil {
 		return nil, iamError.HandleKeyCloakError(err)
 	}
-	return k.kcClient.ImportIdentityProviderConfigFromFile(ctx, *token, realm, providerId, fileName, fileBody)
+
+	config, err := k.kcClient.ImportIdentityProviderConfigFromFile(ctx, *token, realm, providerId, fileName, fileBody)
+	if err != nil {
+		logging.Errorf("failed to get identityProvider from url. err: %+v", err)
+	}
+	return config, iamError.HandleKeyCloakError(err)
 }
 
 func (k *KeycloakIdpRepository) SetBrowserRedirector(ctx context.Context, realm string, alias string) error {

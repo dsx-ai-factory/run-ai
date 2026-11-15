@@ -119,7 +119,7 @@ func queryInstantScalar(ctx context.Context, api v1.API, query string) (float64,
 // Final-report queries must use the run's actual end time, not time.Now() —
 // otherwise the query window shifts forward and events near the run start fall out.
 func queryInstantScalarAt(ctx context.Context, api v1.API, query string, t time.Time) (float64, bool, error) {
-	result, _, err := api.Query(ctx, query, t)
+	result, _, _, err := api.Query(ctx, query, t)
 	if err != nil {
 		return 0, false, fmt.Errorf("query %q failed: %w", query, err)
 	}
@@ -131,7 +131,7 @@ func queryInstantScalarAt(ctx context.Context, api v1.API, query string, t time.
 }
 
 func queryInstantMax(ctx context.Context, api v1.API, query string) (float64, bool, error) {
-	result, _, err := api.Query(ctx, fmt.Sprintf("max(%s)", query), time.Now())
+	result, _, _, err := api.Query(ctx, fmt.Sprintf("max(%s)", query), time.Now())
 	if err != nil {
 		return 0, false, fmt.Errorf("query %q failed: %w", query, err)
 	}
@@ -217,7 +217,7 @@ func heartbeatWorkloadSubmissionLatencyP99(ctx context.Context, api v1.API) (flo
 // controller (instant query over 5m rate window). Returns nil map if no data.
 func heartbeatReconciliationLatencyP99(ctx context.Context, api v1.API) (map[string]float64, error) {
 	q := `histogram_quantile(0.99, sum(rate(controller_runtime_reconcile_time_seconds_bucket[5m])) by (le, controller))`
-	result, _, err := api.Query(ctx, q, time.Now())
+	result, _, _, err := api.Query(ctx, q, time.Now())
 	if err != nil {
 		return nil, fmt.Errorf("reconciliation latency query failed: %w", err)
 	}
@@ -240,7 +240,7 @@ func heartbeatWorkQueueLatency(ctx context.Context, api v1.API, quantile float64
 	q := fmt.Sprintf(
 		`histogram_quantile(%.2f, sum by (name, namespace, pod, le) (rate(workqueue_queue_duration_seconds_bucket[5m]))) > 0`,
 		quantile)
-	result, _, err := api.Query(ctx, q, time.Now())
+	result, _, _, err := api.Query(ctx, q, time.Now())
 	if err != nil {
 		return nil, fmt.Errorf("workqueue latency query failed: %w", err)
 	}
@@ -259,7 +259,7 @@ func heartbeatWorkQueueLatency(ctx context.Context, api v1.API, quantile float64
 }
 
 func heartbeatWorkQueueDepth(ctx context.Context, api v1.API) (map[string]float64, error) {
-	result, _, err := api.Query(ctx, `workqueue_depth > 0`, time.Now())
+	result, _, _, err := api.Query(ctx, `workqueue_depth > 0`, time.Now())
 	if err != nil {
 		return nil, fmt.Errorf("workqueue depth query failed: %w", err)
 	}
@@ -277,7 +277,7 @@ func heartbeatWorkQueueDepth(ctx context.Context, api v1.API) (map[string]float6
 // heartbeatNodeCPUUtilization returns current CPU utilization per node (1 - idle fraction).
 func heartbeatNodeCPUUtilization(ctx context.Context, api v1.API) (map[string]float64, error) {
 	q := `1 - avg by(instance)(rate(node_cpu_seconds_total{mode="idle"}[2m]))`
-	result, _, err := api.Query(ctx, q, time.Now())
+	result, _, _, err := api.Query(ctx, q, time.Now())
 	if err != nil {
 		return nil, fmt.Errorf("node CPU query failed: %w", err)
 	}
@@ -376,7 +376,7 @@ func submissionSeriesPresent(ctx context.Context, api v1.API, window time.Durati
 // heartbeatNodeMemoryUtilization mirrors the final node memory gate.
 func heartbeatNodeMemoryUtilization(ctx context.Context, api v1.API) (map[string]float64, error) {
 	q := `1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)`
-	result, _, err := api.Query(ctx, q, time.Now())
+	result, _, _, err := api.Query(ctx, q, time.Now())
 	if err != nil {
 		return nil, fmt.Errorf("node memory query failed: %w", err)
 	}
@@ -398,7 +398,7 @@ func heartbeatMetricSourcesDown(ctx context.Context, api v1.API) ([]string, erro
 	var down []string
 	for _, job := range CriticalMetricSources {
 		q := fmt.Sprintf(`up{job=%q}`, job)
-		result, _, err := api.Query(ctx, q, time.Now())
+		result, _, _, err := api.Query(ctx, q, time.Now())
 		if err != nil {
 			return nil, fmt.Errorf("up query for %q failed: %w", job, err)
 		}
@@ -447,7 +447,7 @@ func finalApiserverLatency(ctx context.Context, api v1.API, elapsed time.Duratio
 // so pod_restarts cannot see it — comparing UIDs between heartbeats is what detects it.
 func heartbeatPodUIDs(ctx context.Context, api v1.API, namespaces []string) (map[string]string, error) {
 	q := fmt.Sprintf(`kube_pod_info{namespace=~"%s"}`, namespacesRegex(namespaces))
-	result, _, err := api.Query(ctx, q, time.Now())
+	result, _, _, err := api.Query(ctx, q, time.Now())
 	if err != nil {
 		return nil, fmt.Errorf("pod uid query failed: %w", err)
 	}
@@ -569,7 +569,7 @@ func finalEtcdProposalsPeakAndSustained(ctx context.Context, api v1.API, elapsed
 		`count(max_over_time((min_over_time(etcd_server_proposals_pending[%ds]) > %d)[%s:%ds]) > 0) > 0`,
 		sustainedSecs, depthThreshold, dur, sustainedSecs,
 	)
-	result, _, qErr := api.Query(ctx, sustainedQ, endTime)
+	result, _, _, qErr := api.Query(ctx, sustainedQ, endTime)
 	if qErr != nil {
 		err = fmt.Errorf("sustained proposals query failed: %w", qErr)
 		return
@@ -597,7 +597,7 @@ func heartbeatPodRestartDetails(ctx context.Context, api v1.API, namespaces []st
 		`increase(kube_pod_container_status_restarts_total{namespace=~"%s"}[5m]) > 0`,
 		nsRegex,
 	)
-	result, _, err := api.Query(ctx, q, time.Now())
+	result, _, _, err := api.Query(ctx, q, time.Now())
 	if err != nil {
 		return nil, fmt.Errorf("heartbeat pod restart details query failed: %w", err)
 	}
@@ -622,7 +622,7 @@ func heartbeatPodRestartDetails(ctx context.Context, api v1.API, namespaces []st
 func heartbeatPodRestartTotals(ctx context.Context, api v1.API, namespaces []string) (map[string]float64, error) {
 	q := fmt.Sprintf(`kube_pod_container_status_restarts_total{namespace=~"%s"}`,
 		namespacesRegex(namespaces))
-	result, _, err := api.Query(ctx, q, time.Now())
+	result, _, _, err := api.Query(ctx, q, time.Now())
 	if err != nil {
 		return nil, fmt.Errorf("heartbeat pod restart totals query failed: %w", err)
 	}
@@ -647,7 +647,7 @@ func finalPodRestartDetails(ctx context.Context, api v1.API, elapsed time.Durati
 		`increase(kube_pod_container_status_restarts_total{namespace=~"%s"}[%s]) > 0`,
 		nsRegex, promDuration(elapsed),
 	)
-	result, _, err := api.Query(ctx, q, endTime)
+	result, _, _, err := api.Query(ctx, q, endTime)
 	if err != nil {
 		return nil, fmt.Errorf("pod restart details query failed: %w", err)
 	}
@@ -757,7 +757,7 @@ func finalSchedulerCycleLatencyByScheduler(ctx context.Context, api v1.API, elap
 		{fmt.Sprintf(`avg_over_time(%s[%s])`, base, dur), func(s *SchedulerCycleStat, v float64) { s.Avg = v }},
 		{fmt.Sprintf(`max_over_time(%s[%s])`, base, dur), func(s *SchedulerCycleStat, v float64) { s.Peak = v }},
 	} {
-		res, _, err := api.Query(ctx, q.query, endTime)
+		res, _, _, err := api.Query(ctx, q.query, endTime)
 		if err != nil {
 			return nil, fmt.Errorf("querying scheduler cycle latency: %w", err)
 		}
@@ -784,7 +784,7 @@ func finalReconciliationLatencyP99ByController(ctx context.Context, api v1.API, 
 		`max_over_time(histogram_quantile(0.99, sum(rate(controller_runtime_reconcile_time_seconds_bucket[5m])) by (le, controller))[%s:5m])`,
 		promDuration(elapsed),
 	)
-	result, _, err := api.Query(ctx, q, endTime)
+	result, _, _, err := api.Query(ctx, q, endTime)
 	if err != nil {
 		return nil, fmt.Errorf("reconciliation latency query failed: %w", err)
 	}
@@ -871,7 +871,7 @@ func finalWorkQueueDepthByController(
 }
 
 func workQueueVector(ctx context.Context, api v1.API, endTime time.Time, q string) (map[string]float64, error) {
-	result, _, err := api.Query(ctx, q, endTime)
+	result, _, _, err := api.Query(ctx, q, endTime)
 	if err != nil {
 		return nil, fmt.Errorf("workqueue depth query failed: %w", err)
 	}
@@ -955,7 +955,7 @@ func finalNodeCPUUtilizationPeak(ctx context.Context, api v1.API, elapsed time.D
 		`max_over_time((1 - avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])))[%s:30s])`,
 		dur,
 	)
-	result, _, err := api.Query(ctx, q, endTime)
+	result, _, _, err := api.Query(ctx, q, endTime)
 	if err != nil {
 		return nil, fmt.Errorf("node CPU utilization query failed: %w", err)
 	}
@@ -982,7 +982,7 @@ func finalNodeMemoryUtilizationPeak(ctx context.Context, api v1.API, elapsed tim
 		`max_over_time((1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))[%s:30s])`,
 		dur,
 	)
-	result, _, err := api.Query(ctx, q, endTime)
+	result, _, _, err := api.Query(ctx, q, endTime)
 	if err != nil {
 		return nil, fmt.Errorf("node memory utilization query failed: %w", err)
 	}

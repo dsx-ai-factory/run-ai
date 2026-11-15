@@ -41,7 +41,9 @@ type ClusterReportedConfig struct {
 	// the fully qualified s3 file-system image reference used by init containers (format \"registry/name:tag\")
 	S3FileSystemImage     NullableString                              `json:"s3FileSystemImage,omitempty"`
 	S3FileSystemResources NullableClusterReportedResourceRequirements `json:"s3FileSystemResources,omitempty"`
-	FipsMode              NullableFipsModeEnum                        `json:"fipsMode,omitempty"`
+	// The exact S3 image reference that supports goofys --ready-file and --check-ready. Omitted when support is unknown or disabled.
+	S3FileSystemMountCheckImage NullableString       `json:"s3FileSystemMountCheckImage,omitempty"`
+	FipsMode                    NullableFipsModeEnum `json:"fipsMode,omitempty"`
 	// the fully qualified runai oauth2-proxy image reference used by init containers (format \"registry/name:tag\")
 	RunaiOauth2ProxyImage     NullableString                              `json:"runaiOauth2ProxyImage,omitempty"`
 	RunaiOauth2ProxyResources NullableClusterReportedResourceRequirements `json:"runaiOauth2ProxyResources,omitempty"`
@@ -556,6 +558,49 @@ func (o *ClusterReportedConfig) SetS3FileSystemResourcesNil() {
 // UnsetS3FileSystemResources ensures that no value is present for S3FileSystemResources, not even an explicit nil
 func (o *ClusterReportedConfig) UnsetS3FileSystemResources() {
 	o.S3FileSystemResources.Unset()
+}
+
+// GetS3FileSystemMountCheckImage returns the S3FileSystemMountCheckImage field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *ClusterReportedConfig) GetS3FileSystemMountCheckImage() string {
+	if o == nil || IsNil(o.S3FileSystemMountCheckImage.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.S3FileSystemMountCheckImage.Get()
+}
+
+// GetS3FileSystemMountCheckImageOk returns a tuple with the S3FileSystemMountCheckImage field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ClusterReportedConfig) GetS3FileSystemMountCheckImageOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.S3FileSystemMountCheckImage.Get(), o.S3FileSystemMountCheckImage.IsSet()
+}
+
+// HasS3FileSystemMountCheckImage returns a boolean if a field has been set.
+func (o *ClusterReportedConfig) HasS3FileSystemMountCheckImage() bool {
+	if o != nil && o.S3FileSystemMountCheckImage.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetS3FileSystemMountCheckImage gets a reference to the given NullableString and assigns it to the S3FileSystemMountCheckImage field.
+func (o *ClusterReportedConfig) SetS3FileSystemMountCheckImage(v string) {
+	o.S3FileSystemMountCheckImage.Set(&v)
+}
+
+// SetS3FileSystemMountCheckImageNil sets the value for S3FileSystemMountCheckImage to be an explicit nil
+func (o *ClusterReportedConfig) SetS3FileSystemMountCheckImageNil() {
+	o.S3FileSystemMountCheckImage.Set(nil)
+}
+
+// UnsetS3FileSystemMountCheckImage ensures that no value is present for S3FileSystemMountCheckImage, not even an explicit nil
+func (o *ClusterReportedConfig) UnsetS3FileSystemMountCheckImage() {
+	o.S3FileSystemMountCheckImage.Unset()
 }
 
 // GetFipsMode returns the FipsMode field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -1288,6 +1333,9 @@ func (o ClusterReportedConfig) ToMap() (map[string]interface{}, error) {
 	}
 	if o.S3FileSystemResources.IsSet() {
 		toSerialize["s3FileSystemResources"] = o.S3FileSystemResources.Get()
+	}
+	if o.S3FileSystemMountCheckImage.IsSet() {
+		toSerialize["s3FileSystemMountCheckImage"] = o.S3FileSystemMountCheckImage.Get()
 	}
 	if o.FipsMode.IsSet() {
 		toSerialize["fipsMode"] = o.FipsMode.Get()

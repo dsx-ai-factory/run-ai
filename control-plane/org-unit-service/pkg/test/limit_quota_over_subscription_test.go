@@ -270,7 +270,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 
 		It("sanity of failure with API", func() {
 			projUpdateReqCopy := copyProjUpdateReqeust(&projUpdateRequestUnlimited)
-			projUpdateReqCopy.Resources[0].Gpu.Deserved = 0
+			projUpdateReqCopy.Resources[0].Gpu.Deserved = ptr.To(float64(0))
 			strProjectIdToUpdate := strconv.FormatInt(projectIdToUpdateUnlimited, 10)
 
 			// block because of bad deserved gpus
@@ -288,7 +288,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 		It("test blocks", func() {
 			// block because of bad deserved gpus
 			projUpdateReqCopy := copyProjUpdateReqeust(&projUpdateRequestUnlimited)
-			projUpdateReqCopy.Resources[0].Gpu.Deserved = 0
+			projUpdateReqCopy.Resources[0].Gpu.Deserved = ptr.To(float64(0))
 			apiErr := services.ValidateProjectUpdateNotCausingOverSubscriptionV2(ctx,
 				TestTenant, apiResourcesDeservedToModelDeserved(projUpdateReqCopy.Resources), dbProjectToUpdateUnlimited)
 			Expect(apiErr).ToNot(BeNil())
@@ -327,7 +327,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 			dbProjectInCluster2ToUpdate, err := dao.GetProjectById(ctx, int64(projCluster2IdInt), TestTenant, models.SlimVerbosity)
 			Expect(err).To(BeNil())
 			projUpdateReqCopy = copyProjUpdateReqeust(&projUpdateRequest)
-			projUpdateReqCopy.Resources[0].Gpu.Deserved = 0
+			projUpdateReqCopy.Resources[0].Gpu.Deserved = ptr.To(float64(0))
 			apiErr = services.ValidateProjectUpdateNotCausingOverSubscriptionV2(ctx,
 				TestTenant, apiResourcesDeservedToModelDeserved(projUpdateReqCopy.Resources), *dbProjectInCluster2ToUpdate)
 			Expect(apiErr).To(BeNil())
@@ -349,7 +349,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 			projQuotaStatusesCopy := projQuotaStatuses[1:]
 			updateProjectStatus(ctx, projectApiService, strconv.Itoa(int(dbProjectToUpdateUnlimited.ID)), dbProjectToUpdateUnlimited.ClusterId.String(), projQuotaStatusesCopy)
 			projUpdateReqCopy = copyProjUpdateReqeust(&projUpdateRequestUnlimited)
-			projUpdateReqCopy.Resources[0].Gpu.Deserved = 0
+			projUpdateReqCopy.Resources[0].Gpu.Deserved = ptr.To(float64(0))
 			apiErr = services.ValidateProjectUpdateNotCausingOverSubscriptionV2(ctx,
 				TestTenant, apiResourcesDeservedToModelDeserved(projUpdateRequestUnlimited.Resources), dbProjectToUpdateUnlimited)
 			Expect(apiErr).To(BeNil())
@@ -370,7 +370,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 
 		It("sanity of failure with API", func() {
 			projUpdateReqCopy := copyProjUpdateReqeust(&projUpdateRequest)
-			projUpdateReqCopy.Resources[0].Gpu.Deserved = 10
+			projUpdateReqCopy.Resources[0].Gpu.Deserved = ptr.To(float64(10))
 			strProjectIdToUpdate := strconv.FormatInt(projectIdToUpdate, 10)
 
 			// block because of bad deserved gpus
@@ -388,7 +388,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 		It("test blocks", func() {
 			// block because of bad deserved gpus
 			projUpdateReqCopy := copyProjUpdateReqeust(&projUpdateRequest)
-			projUpdateReqCopy.Resources[0].Gpu.Deserved = 10
+			projUpdateReqCopy.Resources[0].Gpu.Deserved = ptr.To(float64(10))
 			apiErr := services.ValidateProjectUpdateNotCausingOverSubscriptionV2(ctx,
 				TestTenant, apiResourcesDeservedToModelDeserved(projUpdateReqCopy.Resources), dbProjectToUpdate)
 			Expect(apiErr).ToNot(BeNil())
@@ -486,12 +486,12 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 			// block because of bad deserved gpus - max allowed deserved is 0
 			setLimitQuotaOverSubscription(false)
 			newResources = getDep2Resources()
-			newResources[1].Gpu.Deserved = 0
+			newResources[1].Gpu.Deserved = ptr.To(float64(0))
 			updateDepartmentWithResources(ctx, departmentApiService, departmentId2, newResources)
 			setLimitQuotaOverSubscription(true)
 
 			projUpdateReqCopy = copyProjUpdateReqeust(&projUpdateRequest)
-			projUpdateReqCopy.Resources[1].Gpu.Deserved = 1
+			projUpdateReqCopy.Resources[1].Gpu.Deserved = ptr.To(float64(1))
 			apiErr = services.ValidateProjectUpdateNotCausingOverSubscriptionV2(ctx,
 				TestTenant, apiResourcesDeservedToModelDeserved(projUpdateReqCopy.Resources), dbProjectToUpdate)
 			Expect(apiErr).ToNot(BeNil())
@@ -499,7 +499,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 			Expect(apiErr.Message).To(Equal("Cannot modify the deserved GPUs for node pool 'nodepool-a' because the requested amount exceeds the department's available quota. The maximum allowed value is '0.00'."))
 
 			// block modifying project because of bad deserved gpus in original project
-			projUpdateReqCopy.Resources[1].Gpu.Deserved = 0
+			projUpdateReqCopy.Resources[1].Gpu.Deserved = ptr.To(float64(0))
 			apiErr = services.ValidateProjectUpdateNotCausingOverSubscriptionV2(ctx,
 				TestTenant, apiResourcesDeservedToModelDeserved(projUpdateReqCopy.Resources), dbProjectToUpdate)
 			Expect(apiErr).ToNot(BeNil())
@@ -528,7 +528,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 
 		It("sanity of failure with API", func() {
 			projCreateReqCopy := copyProjCreateRequest(&projCreateRequest)
-			projCreateReqCopy.Resources[1].Gpu.Deserved = 10
+			projCreateReqCopy.Resources[1].Gpu.Deserved = ptr.To(float64(10))
 
 			// block because of bad deserved gpus
 			res, err := projectApiService.CreateProject(ctx, projCreateReqCopy)
@@ -552,7 +552,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 
 			// block because of bad deserved gpus
 			projCreateReqCopy := copyProjCreateRequest(&projCreateRequest)
-			projCreateReqCopy.Resources[1].Gpu.Deserved = 10
+			projCreateReqCopy.Resources[1].Gpu.Deserved = ptr.To(float64(10))
 			apiErr := services.ValidateProjectCreateNotCausingOverSubscriptionOfDepartmentV2(ctx,
 				TestTenant, apiResourcesDeservedToModelDeserved(projCreateReqCopy.Resources), parentId)
 			Expect(apiErr).ToNot(BeNil())
@@ -633,7 +633,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 			// no node pool resources for gpu - allow
 			updateDepartmentWithResources(ctx, departmentApiService, departmentId2, getDep2Resources())
 			projCreateReqCopy = copyProjCreateRequest(&projCreateRequest)
-			projCreateReqCopy.Resources[1].Gpu.Deserved = 0
+			projCreateReqCopy.Resources[1].Gpu.Deserved = ptr.To(float64(0))
 			apiErr = services.ValidateProjectCreateNotCausingOverSubscriptionOfDepartmentV2(ctx,
 				TestTenant, apiResourcesDeservedToModelDeserved(projCreateReqCopy.Resources), parentId)
 			Expect(apiErr).To(BeNil())
@@ -645,7 +645,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 			// block creating project because of bad deserved gpus in original department
 			setLimitQuotaOverSubscription(false)
 			newResources := getDep2Resources()
-			newResources[1].Gpu.Deserved = 0
+			newResources[1].Gpu.Deserved = ptr.To(float64(0))
 			updateDepartmentWithResources(ctx, departmentApiService, departmentId2, newResources)
 			setLimitQuotaOverSubscription(true)
 
@@ -657,7 +657,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 			Expect(apiErr.Message).To(Equal("Cannot create project until department's projects quotas of GPUs for node pool 'nodepool-a' don't exceed the department's available quota."))
 
 			// block because of bad deserved gpus - max allowed deserved is 0
-			projCreateReqCopy.Resources[1].Gpu.Deserved = 1
+			projCreateReqCopy.Resources[1].Gpu.Deserved = ptr.To(float64(1))
 			apiErr = services.ValidateProjectCreateNotCausingOverSubscriptionOfDepartmentV2(ctx,
 				TestTenant, apiResourcesDeservedToModelDeserved(projCreateReqCopy.Resources), parentId)
 			Expect(apiErr).ToNot(BeNil())
@@ -710,7 +710,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 
 		It("sanity of failure with API", func() {
 			depUpdateReq = api.DepartmentUpdateRequest{Resources: getDep2Resources()}
-			depUpdateReq.Resources[0].Gpu.Deserved = 0
+			depUpdateReq.Resources[0].Gpu.Deserved = ptr.To(float64(0))
 			strDepIdToUpdate := strconv.FormatInt(dbDepartment.ID, 10)
 
 			// block because of bad deserved gpus
@@ -752,7 +752,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 		It("test blocks", func() {
 			// block because of bad deserved gpus
 			depUpdateReq = api.DepartmentUpdateRequest{Resources: getDep2Resources()}
-			depUpdateReq.Resources[0].Gpu.Deserved = 0
+			depUpdateReq.Resources[0].Gpu.Deserved = ptr.To(float64(0))
 			apiErr := services.ValidateDepartmentUpdateNotCausingOverSubscriptionV2(ctx,
 				TestTenant, apiResourcesDeservedToModelDeserved(depUpdateReq.Resources), depId2Int)
 			Expect(apiErr).ToNot(BeNil())
@@ -781,7 +781,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 		It("test block then allow", func() {
 			// block because of bad deserved gpus
 			depUpdateReq = api.DepartmentUpdateRequest{Resources: getDep2Resources()}
-			depUpdateReq.Resources[1].Gpu.Deserved = 1
+			depUpdateReq.Resources[1].Gpu.Deserved = ptr.To(float64(1))
 			apiErr := services.ValidateDepartmentUpdateNotCausingOverSubscriptionV2(ctx,
 				TestTenant, apiResourcesDeservedToModelDeserved(depUpdateReq.Resources), depId2Int)
 			Expect(apiErr).ToNot(BeNil())
@@ -790,7 +790,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 
 			// update proj2 so the aggregated for the whole department for nodepool-a is now "1" and not "2"
 			proj2ResourcesToUpdate := getProj2Resources()
-			proj2ResourcesToUpdate[1].Gpu.Deserved = 0
+			proj2ResourcesToUpdate[1].Gpu.Deserved = ptr.To(float64(0))
 			proj2ResourcesToUpdate[1].Cpu.Deserved = ptr.To(float64(0))
 			proj2ResourcesToUpdate[1].Memory.Deserved = ptr.To(float64(0))
 			updateProjectWithResources(ctx, projectApiService, testProjectIds[1], proj2ResourcesToUpdate)
@@ -829,7 +829,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 			Expect(apiErr).To(BeNil())
 
 			// block modifying department until deserved is fixed
-			proj2ResourcesToUpdate[0].Gpu.Deserved = 4
+			proj2ResourcesToUpdate[0].Gpu.Deserved = ptr.To(float64(4))
 			proj2ResourcesToUpdate[0].Gpu.Limit = ptr.To(float64(4))
 			setLimitQuotaOverSubscription(false)
 			updateProjectWithResources(ctx, projectApiService, testProjectIds[1], proj2ResourcesToUpdate)
@@ -870,7 +870,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 					},
 					Gpu: api.ResourcesNullableGpu{
 						Limit:    ptr.To(float64(10)),
-						Deserved: 10,
+						Deserved: ptr.To(float64(10)),
 					},
 					Cpu: &api.ResourcesCpu{
 						Limit:    ptr.To(float64(10000)),
@@ -909,7 +909,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 						},
 						Gpu: api.ResourcesNullableGpu{
 							Limit:    ptr.To(float64(5)),
-							Deserved: 5,
+							Deserved: ptr.To(float64(5)),
 						},
 						Cpu: &api.ResourcesCpu{
 							Limit:    ptr.To(float64(5000)),
@@ -957,7 +957,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 						},
 						Gpu: api.ResourcesNullableGpu{
 							Limit:    ptr.To(float64(10)),
-							Deserved: 10,
+							Deserved: ptr.To(float64(10)),
 						},
 						Cpu: &api.ResourcesCpu{
 							Limit:    ptr.To(float64(10000)),
@@ -1045,7 +1045,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 						},
 						Gpu: api.ResourcesNullableGpu{
 							Limit:    ptr.To(float64(1)),
-							Deserved: 1,
+							Deserved: ptr.To(float64(1)),
 						},
 						Cpu: &api.ResourcesCpu{
 							Limit:    ptr.To(float64(0)),
@@ -1079,7 +1079,7 @@ var _ = Describe("Limit quota over subscriptions tests", Ordered, func() {
 					{
 						Gpu: api.ResourcesNullableGpu{
 							Limit:    ptr.To(float64(1)),
-							Deserved: 1,
+							Deserved: ptr.To(float64(1)),
 						},
 						Cpu: &api.ResourcesCpu{
 							Limit:    ptr.To(float64(0)),
@@ -1126,7 +1126,7 @@ func modelResourceDeservedToApiDeserved(resource models.Resources) api.Resources
 			Name: resource.NodePoolName,
 		},
 		Gpu: api.ResourcesNullableGpu{
-			Deserved: *resource.GpuDeserved,
+			Deserved: ptr.To(*resource.GpuDeserved),
 		},
 	}
 
@@ -1154,7 +1154,7 @@ func getDep2Resources() []api.ResourcesNullable {
 			},
 			Gpu: api.ResourcesNullableGpu{
 				Limit:    ptr.To(float64(4)),
-				Deserved: 4,
+				Deserved: ptr.To(float64(4)),
 			},
 			Cpu: &api.ResourcesCpu{
 				Limit:    ptr.To(float64(4000)),
@@ -1173,7 +1173,7 @@ func getDep2Resources() []api.ResourcesNullable {
 			},
 			Gpu: api.ResourcesNullableGpu{
 				Limit:    ptr.To(float64(2)),
-				Deserved: 2,
+				Deserved: ptr.To(float64(2)),
 			},
 			Cpu: &api.ResourcesCpu{
 				Limit:    ptr.To(float64(2000)),
@@ -1197,7 +1197,7 @@ func getDepResourcesUnlimited() []api.ResourcesNullable {
 			},
 			Gpu: api.ResourcesNullableGpu{
 				Limit:    ptr.To(float64(-1)),
-				Deserved: 1000,
+				Deserved: ptr.To(float64(1000)),
 			},
 			Cpu: &api.ResourcesCpu{
 				Limit:    ptr.To(float64(-1)),
@@ -1216,7 +1216,7 @@ func getDepResourcesUnlimited() []api.ResourcesNullable {
 			},
 			Gpu: api.ResourcesNullableGpu{
 				Limit:    ptr.To(float64(-1)),
-				Deserved: 1000,
+				Deserved: ptr.To(float64(1000)),
 			},
 			Cpu: &api.ResourcesCpu{
 				Limit:    ptr.To(float64(-1)),
@@ -1290,7 +1290,7 @@ func getProj1Resources() []api.ResourcesNullable {
 			},
 			Gpu: api.ResourcesNullableGpu{
 				Limit:    ptr.To(float64(1)),
-				Deserved: 1,
+				Deserved: ptr.To(float64(1)),
 			},
 			Cpu: &api.ResourcesCpu{
 				Limit:    ptr.To(float64(1000)),
@@ -1309,7 +1309,7 @@ func getProj1Resources() []api.ResourcesNullable {
 			},
 			Gpu: api.ResourcesNullableGpu{
 				Limit:    ptr.To(float64(1)),
-				Deserved: 1,
+				Deserved: ptr.To(float64(1)),
 			},
 			Cpu: &api.ResourcesCpu{
 				Limit:    ptr.To(float64(1000)),
@@ -1333,7 +1333,7 @@ func getProj2Resources() []api.ResourcesNullable {
 			},
 			Gpu: api.ResourcesNullableGpu{
 				Limit:    ptr.To(float64(0)),
-				Deserved: 0,
+				Deserved: ptr.To(float64(0)),
 			},
 			Cpu: &api.ResourcesCpu{
 				Limit:    ptr.To(float64(0)),
@@ -1352,7 +1352,7 @@ func getProj2Resources() []api.ResourcesNullable {
 			},
 			Gpu: api.ResourcesNullableGpu{
 				Limit:    ptr.To(float64(1)),
-				Deserved: 1,
+				Deserved: ptr.To(float64(1)),
 			},
 			Cpu: &api.ResourcesCpu{
 				Limit:    ptr.To(float64(1000)),
@@ -1376,7 +1376,7 @@ func getProjToCreateResources() []api.ResourcesNullable {
 			},
 			Gpu: api.ResourcesNullableGpu{
 				Limit:    ptr.To(float64(2)),
-				Deserved: 2,
+				Deserved: ptr.To(float64(2)),
 			},
 			Cpu: &api.ResourcesCpu{
 				Limit:    ptr.To(float64(2000)),
@@ -1395,7 +1395,7 @@ func getProjToCreateResources() []api.ResourcesNullable {
 			},
 			Gpu: api.ResourcesNullableGpu{
 				Limit:    ptr.To(float64(0)),
-				Deserved: 0,
+				Deserved: ptr.To(float64(0)),
 			},
 			Cpu: &api.ResourcesCpu{
 				Limit:    ptr.To(float64(0)),
@@ -1488,7 +1488,7 @@ func apiResourceDeservedToModelDeserved(resource api.ResourcesNullable) models.R
 	result := models.Resources{
 		NodePoolId:   resource.NodePool.Id,
 		NodePoolName: resource.NodePool.Name,
-		GpuDeserved:  &resource.Gpu.Deserved,
+		GpuDeserved:  resource.Gpu.Deserved,
 	}
 
 	if resource.Cpu != nil {

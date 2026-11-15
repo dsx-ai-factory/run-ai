@@ -22,7 +22,7 @@ var _ MappedNullable = &ResourcesNullableGpu{}
 
 // ResourcesNullableGpu struct for ResourcesNullableGpu
 type ResourcesNullableGpu struct {
-	// The GPU quota assigned to this org-unit.
+	// The GPU quota assigned to this org-unit. Required for node pools with quota enabled. For node pools with quota disabled, it must be 0 or omitted.
 	Deserved *float64 `json:"deserved,omitempty"`
 	// The maximum GPU device allocation the org-unit can get from this node pool, representing the maximum sum of assigned quota and over-quota GPUs. Set to null for unlimited.
 	Limit NullableFloat64 `json:"limit,omitempty"`
@@ -36,8 +36,6 @@ type ResourcesNullableGpu struct {
 // will change when the set of required properties is changed
 func NewResourcesNullableGpu() *ResourcesNullableGpu {
 	this := ResourcesNullableGpu{}
-	var deserved float64 = 0
-	this.Deserved = &deserved
 	return &this
 }
 
@@ -46,8 +44,6 @@ func NewResourcesNullableGpu() *ResourcesNullableGpu {
 // but it doesn't guarantee that properties required by API are set
 func NewResourcesNullableGpuWithDefaults() *ResourcesNullableGpu {
 	this := ResourcesNullableGpu{}
-	var deserved float64 = 0
-	this.Deserved = &deserved
 	return &this
 }
 

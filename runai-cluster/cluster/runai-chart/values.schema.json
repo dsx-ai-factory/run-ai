@@ -343,6 +343,9 @@
         "s3FileSystemImage": {
           "$ref": "#/$defs/Image"
         },
+        "s3FileSystemMountCheckEnabled": {
+          "type": "boolean"
+        },
         "runaiOauth2ProxyImage": {
           "$ref": "#/$defs/Image"
         },
@@ -4416,6 +4419,9 @@
         },
         "cluster-redis": {
           "$ref": "#/$defs/ClusterRedis"
+        },
+        "snapshot": {
+          "$ref": "#/$defs/Snapshot"
         }
       },
       "type": "object"
@@ -4891,6 +4897,17 @@
       "required": [
         "seconds"
       ]
+    },
+    "Snapshot": {
+      "properties": {
+        "namespace": {
+          "type": "string"
+        },
+        "releaseName": {
+          "type": "string"
+        }
+      },
+      "type": "object"
     },
     "Spec": {
       "properties": {

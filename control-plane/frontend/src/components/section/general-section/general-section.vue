@@ -50,6 +50,7 @@
         :policy-rules="policyRules?.preemptibility || null"
         :disabled="sectionDisabled"
         :support-semi-preemptibility="workloadPriorityData?.supportSemiPreemptibility"
+        :single-pod-workload="isSinglePodWorkload"
         @update:model-value="updateWorkloadPreemptibility"
         :show-quota-warning="shouldShowQuotaWarning"
         :hint="overrideHints.preemptibility ? 'Overrides YAML' : undefined"
@@ -315,6 +316,10 @@ export default defineComponent({
       type: Boolean as PropType<boolean>,
       default: false,
     },
+    singlePodWorkload: {
+      type: Boolean as PropType<boolean>,
+      default: undefined,
+    },
     supportMnnvl: {
       type: Boolean as PropType<boolean>,
       default: false,
@@ -346,6 +351,12 @@ export default defineComponent({
     };
   },
   computed: {
+    isSinglePodWorkload(): boolean {
+      return (
+        this.singlePodWorkload ??
+        (this.workloadFormType === EWorkloadFormType.Workspace || this.workloadFormType === EWorkloadFormType.Training)
+      );
+    },
     defaultSummary(): string {
       if (!this.showAnnotationsAndLabels) {
         return "";

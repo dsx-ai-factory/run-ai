@@ -6,7 +6,6 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**GetRevisionEvents**](EventsAPI.md#GetRevisionEvents) | **Get** /api/v1/workloads/inferences/revisions/{revisionId}/events | Get revision events by id.
 [**GetRevisionHistory**](EventsAPI.md#GetRevisionHistory) | **Get** /api/v1/workloads/inferences/revisions/{revisionId}/history | Get the revision history.
-[**GetWorkloadActionsHistory**](EventsAPI.md#GetWorkloadActionsHistory) | **Get** /api/v1/workloads/{workloadId}/actions | Get workload action history.
 [**GetWorkloadEvents**](EventsAPI.md#GetWorkloadEvents) | **Get** /api/v1/workloads/{workloadId}/events | Get the workload events.
 [**GetWorkloadHistory**](EventsAPI.md#GetWorkloadHistory) | **Get** /api/v1/workloads/{workloadId}/history | Get the workload history.
 [**SyncEvents**](EventsAPI.md#SyncEvents) | **Post** /api/v1/workloads/events | Sync events.
@@ -148,80 +147,6 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**GetWorkloadHistory200Response**](GetWorkloadHistory200Response.md)
-
-### Authorization
-
-[bearerAuth](../README.md#bearerAuth)
-
-### HTTP request headers
-
-- **Content-Type**: Not defined
-- **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
-## GetWorkloadActionsHistory
-
-> GetWorkloadActionsResponse GetWorkloadActionsHistory(ctx, workloadId).Offset(offset).Limit(limit).Execute()
-
-Get workload action history.
-
-
-
-### Example
-
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"os"
-	openapiclient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client"
-)
-
-func main() {
-	workloadId := "38400000-8cf0-11bd-b23e-10b96e4ef00d" // string | The  Universally Unique Identifier (UUID) of the workload.
-	offset := int32(100) // int32 | The offset of the first item returned in the collection. (optional)
-	limit := int32(56) // int32 | The maximum number of entries to return. (optional) (default to 50)
-
-	configuration := openapiclient.NewConfiguration()
-	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.EventsAPI.GetWorkloadActionsHistory(context.Background(), workloadId).Offset(offset).Limit(limit).Execute()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `EventsAPI.GetWorkloadActionsHistory``: %v\n", err)
-		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
-	}
-	// response from `GetWorkloadActionsHistory`: GetWorkloadActionsResponse
-	fmt.Fprintf(os.Stdout, "Response from `EventsAPI.GetWorkloadActionsHistory`: %v\n", resp)
-}
-```
-
-### Path Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**workloadId** | **string** | The  Universally Unique Identifier (UUID) of the workload. | 
-
-### Other Parameters
-
-Other parameters are passed through a pointer to a apiGetWorkloadActionsHistoryRequest struct via the builder pattern
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-
- **offset** | **int32** | The offset of the first item returned in the collection. | 
- **limit** | **int32** | The maximum number of entries to return. | [default to 50]
-
-### Return type
-
-[**GetWorkloadActionsResponse**](GetWorkloadActionsResponse.md)
 
 ### Authorization
 

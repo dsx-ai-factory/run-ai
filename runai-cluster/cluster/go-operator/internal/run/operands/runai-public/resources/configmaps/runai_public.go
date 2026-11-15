@@ -8,9 +8,11 @@ package configmaps
 import (
 	"context"
 	"fmt"
+	"os"
 	"regexp"
 	_ "regexp"
 	"slices"
+	"sort"
 	_ "strconv"
 	"strings"
 
@@ -33,6 +35,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/prometheus/resources"
 	controller_utils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/controller-utils"
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
+	anyworkloadcontroller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/anyworkload-controller"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/common"
 	runv1_internal "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/runai-internal"
 	kfv1 "github.com/kubeflow/training-operator/pkg/apis/kubeflow.org/v1"
@@ -53,6 +56,9 @@ import (
 const (
 	mpiJobKind                     = "MPIJob"
 	kubeflowMPIV2Beta1GroupVersion = "kubeflow.org/v2beta1"
+
+	SnapshotJobKind      = "SnapshotJob"
+	SnapshotGroupVersion = "nvidia.com/v1alpha1"
 
 	name      = runv1.RunaiPublicConfigMapName
 	namespace = runv1.DefaultNamespace
@@ -145,6 +151,8 @@ func (rp *RunaiPublic) Object(ctx context.Context) (client.Object, error) {
 		}
 	}
 
+	snapshotStatus := getSnapshotStatus(ctx, discoveryClient, rp.kbClient, rp.runaiConfig)
+
 	configuration := &runv1.PublicConfiguration{
 		WorkloadOwnershipProtection: rp.runaiConfig.Spec.Global.EnableWorkloadOwnershipProtection,
 		SubdomainEnabled:            ptr.To(ptr.Deref(rp.runaiConfig.Spec.Global.SubdomainSupport, true)),
@@ -162,9 +170,14 @@ func (rp *RunaiPublic) Object(ctx context.Context) (client.Object, error) {
 		configuration.GatewayNamespace = &gw.Namespace
 	}
 
+	if selector := snapshotsAgentNodeSelector(ctx, rp.kbClient, rp.runaiConfig); selector != "" {
+		configuration.SnapshotAgentNodeSelector = ptr.To(selector)
+	}
+
 	if aw := rp.runaiConfig.Spec.AnyworkloadController; aw != nil {
 		configuration.GitSyncImage = formatImageRef(aw.GitSyncImage)
 		configuration.S3FileSystemImage = formatImageRef(aw.S3FileSystemImage)
+		configuration.S3FileSystemMountCheckImage = s3MountCheckImage(aw.S3FileSystemImage, aw.S3FileSystemMountCheckEnabled)
 		configuration.RunaiOauth2ProxyImage = formatImageRef(aw.RunaiOauth2ProxyImage)
 		configuration.RunaiOauth2ProxyUsernameLoaderImage = formatImageRef(aw.RunaiOauth2ProxyUsernameLoaderImage)
 		configuration.RunaiOauth2ProxyRedisFQDN = aw.RunaiOauth2ProxyRedisFQDN
@@ -192,7 +205,7 @@ func (rp *RunaiPublic) Object(ctx context.Context) (client.Object, error) {
 		RunaiConfigStatus: &rp.runaiConfig.Status,
 		Dependencies: &runv1.PublicDependencies{
 			Required: getRequiredComponentsStatus(ctx, rp.kbClient, rp.runaiConfig),
-			Optional: getOptionalComponentsStatus(ctx, rp.kbClient, rp.runaiConfig, discoveryClient),
+			Optional: getOptionalComponentsStatus(ctx, rp.kbClient, rp.runaiConfig, discoveryClient, snapshotStatus),
 		},
 		Platform: &runv1.PublicPlatform{
 			Type:        strings.ToLower(rp.runaiConfig.Spec.Internal.Global.Platform.KubernetesFlavor.String()),
@@ -384,7 +397,8 @@ func getMissingMetricsErrorStr(nvidiaExporterVerificationErr error, missingMetri
 		"Make sure they are mentioned in the file specified under the DCGM_EXPORTER_COLLECTORS environment variable"
 }
 
-func getOptionalComponentsStatus(ctx context.Context, kbClient kc.HybridClient, runaiConfig *runv1.RunaiConfig, discoveryClient discovery.DiscoveryInterface) map[string]runv1.PublicStatus {
+func getOptionalComponentsStatus(ctx context.Context, kbClient kc.HybridClient, runaiConfig *runv1.RunaiConfig,
+	discoveryClient discovery.DiscoveryInterface, snapshotStatus runv1.PublicStatus) map[string]runv1.PublicStatus {
 	components := map[string]runv1.PublicStatus{}
 
 	components["knative"] = knative.GetKnativeStatus(ctx, kbClient)
@@ -402,8 +416,109 @@ func getOptionalComponentsStatus(ctx context.Context, kbClient kc.HybridClient, 
 	}
 
 	components[runv1.RunaiPublicAdvice] = getAdviceCRDStatus(discoveryClient)
+	components[runv1.RunaiPublicSnapshot] = snapshotStatus
 
 	return components
+}
+
+// getSnapshotStatus reports the NVIDIA Snapshot installation. Snapshot is a
+// separate Helm install the administrator owns, so an absent one is a normal
+// result and reported as unavailable with a reason, never as an error.
+func getSnapshotStatus(ctx context.Context, discoveryClient discovery.DiscoveryInterface, kbClient kc.HybridClient, runaiConfig *runv1.RunaiConfig) runv1.PublicStatus {
+	crdReason := ""
+	crdInstalled, err := isCrdInstalled(discoveryClient, SnapshotJobKind, SnapshotGroupVersion)
+	if err != nil {
+		crdReason = fmt.Sprintf("CRD check failed: %v", err)
+	} else if !crdInstalled {
+		crdReason = "SnapshotJob CRD is not installed in the cluster"
+	}
+	operatorReady, operatorReason := snapshotsOperatorReady(ctx, kbClient, runaiConfig)
+
+	available, reason := snapshotsAvailable(crdReason, operatorReason)
+
+	return runv1.PublicStatus{
+		Available: runv1.AvailableStatus(available),
+		Reason:    reason,
+		Components: map[string]runv1.PublicStatus{
+			runv1.SnapshotComponentCRD: {
+				Available: runv1.AvailableStatus(crdInstalled),
+				Reason:    crdReason,
+			},
+			runv1.SnapshotComponentOperator: {
+				Available: runv1.AvailableStatus(operatorReady),
+				Reason:    operatorReason,
+			},
+		},
+	}
+}
+
+func snapshotsOperatorReady(ctx context.Context, reader client.Reader, runaiConfig *runv1.RunaiConfig) (bool, string) {
+	if reader == nil {
+		return false, "no client available to check the Snapshot operator deployment"
+	}
+
+	cfg := runaiConfig.Spec.Snapshot
+	namespace, name := cfg.GetNamespace(), cfg.OperatorDeploymentName()
+
+	deployment := &appsv1.Deployment{}
+	err := reader.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, deployment)
+	if err != nil {
+		if kerrors.IsNotFound(err) {
+			return false, fmt.Sprintf("Snapshot operator deployment %s/%s not found", namespace, name)
+		}
+		return false, fmt.Sprintf("failed to get Snapshot operator deployment %s/%s: %v", namespace, name, err)
+	}
+
+	if deployment.Status.AvailableReplicas == 0 {
+		return false, "Snapshot operator has no available replicas"
+	}
+	return true, ""
+}
+
+func snapshotsAvailable(crdReason, operatorReason string) (bool, string) {
+	if crdReason != "" {
+		return false, crdReason
+	}
+	if operatorReason != "" {
+		return false, operatorReason
+	}
+	return true, ""
+}
+
+// AgentNodeSelector reads the node selector off the agent DaemonSet's pod
+// template. A DaemonSet we cannot read yields no selector rather than an error:
+// the integration still works, it just places capture and restore pods without
+// the hint.
+func snapshotsAgentNodeSelector(ctx context.Context, reader client.Reader, runaiConfig *runv1.RunaiConfig) string {
+	if reader == nil {
+		return ""
+	}
+
+	cfg := runaiConfig.Spec.Snapshot
+	namespace, name := cfg.GetNamespace(), cfg.AgentDaemonSetName()
+
+	daemonSet := &appsv1.DaemonSet{}
+	if err := reader.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, daemonSet); err != nil {
+		return ""
+	}
+
+	selector := daemonSet.Spec.Template.Spec.NodeSelector
+
+	if len(selector) == 0 {
+		return ""
+	}
+
+	keys := make([]string, 0, len(selector))
+	for key := range selector {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	pairs := make([]string, 0, len(keys))
+	for _, key := range keys {
+		pairs = append(pairs, fmt.Sprintf("%s=%s", key, selector[key]))
+	}
+	return strings.Join(pairs, ",")
 }
 
 func getAdviceCRDStatus(discoveryClient discovery.DiscoveryInterface) runv1.PublicStatus {
@@ -681,6 +796,26 @@ func errToString(err error) string {
 	}
 
 	return err.Error()
+}
+
+func s3MountCheckImage(image *common.Image, enabled *bool) *string {
+	ref := formatImageRef(image)
+	if ref == nil {
+		return nil
+	}
+	// Only the bundled image from this build is known to support goofys readiness flags.
+	// Older tags and custom images retain their behavior unless explicitly opted in.
+	if enabled == nil {
+		// Helm derives both this registry and the default S3 image registry from global.image.registry.
+		registry := os.Getenv(common.DefaultRegistryEnvVarName)
+		tag := os.Getenv(common.DefaultVersionEnvVarName)
+		if registry == "" || tag == "" || *image.Registry != registry || *image.Name != anyworkloadcontroller.DefaultS3FileSystemImageName || *image.Tag != tag {
+			return nil
+		}
+	} else if !*enabled {
+		return nil
+	}
+	return ref
 }
 
 func formatImageRef(image *common.Image) *string {

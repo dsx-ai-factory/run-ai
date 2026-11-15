@@ -34,7 +34,9 @@ func TestGetWorkloadEffectivePolicyInput_Validate(t *testing.T) {
 		{"unknown kind", getWorkloadEffectivePolicyInput{ProjectID: validProjectID, Kind: "ci"}, true},
 		{"example job kind rejected", getWorkloadEffectivePolicyInput{ProjectID: "4500001", Kind: "job"}, true},
 		{"nim-service rejected", getWorkloadEffectivePolicyInput{ProjectID: validProjectID, Kind: "nim-service"}, true},
-		{"distributed-inference rejected", getWorkloadEffectivePolicyInput{ProjectID: validProjectID, Kind: "DistributedInference"}, true},
+		{"distributed inference accepted", getWorkloadEffectivePolicyInput{ProjectID: validProjectID, Kind: "DistributedInference"}, false},
+		{"nimService accepted", getWorkloadEffectivePolicyInput{ProjectID: validProjectID, Kind: "nimService"}, false},
+		{"fallback accepted", getWorkloadEffectivePolicyInput{ProjectID: validProjectID, Kind: "fallback"}, false},
 		{"valid training", getWorkloadEffectivePolicyInput{ProjectID: validProjectID, Kind: "training"}, false},
 		{"valid workspace", getWorkloadEffectivePolicyInput{ProjectID: validProjectID, Kind: "workspace"}, false},
 		{"valid distributed", getWorkloadEffectivePolicyInput{ProjectID: validProjectID, Kind: "distributed"}, false},
@@ -61,6 +63,9 @@ var kindURLMappings = []struct {
 	{policyKindWorkspace, "/api/v2/policy/workspaces"},
 	{policyKindDistributed, "/api/v2/policy/distributed"},
 	{policyKindInference, "/api/v2/policy/inferences"},
+	{policyKindDistributedInference, "/api/v2/policy/distributed-inferences"},
+	{policyKindNimService, "/api/v2/policy/nim-services"},
+	{policyKindFallback, "/api/v2/policy/fallback"},
 }
 
 func TestGetWorkloadEffectivePolicyRun_KindToURLMapping(t *testing.T) {
@@ -73,6 +78,7 @@ func TestGetWorkloadEffectivePolicyRun_KindToURLMapping(t *testing.T) {
 				gotScope = r.URL.Query().Get("scope")
 				gotProjectID = r.URL.Query().Get("projectId")
 				runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{
+					"policy": map[string]any{"defaults": map[string]any{"image": "declared-image"}, "imposedAssets": []any{}},
 					"effective": map[string]any{
 						"defaults": map[string]any{"image": "nvcr.io/" + m.kind},
 					},
@@ -87,7 +93,9 @@ func TestGetWorkloadEffectivePolicyRun_KindToURLMapping(t *testing.T) {
 			assert.Equal(t, "project", gotScope, "scope=project always")
 			assert.Equal(t, validProjectID, gotProjectID, "projectId forwarded as the query param")
 			assert.Equal(t, validProjectID, out.ProjectID, "projectId echoed in the output")
-			assert.Equal(t, m.kind, out.Kind, "kind echoed in the output (lowercase)")
+			assert.Equal(t, m.kind, out.Kind)
+			assert.Equal(t, "declared-image", out.Policy["defaults"].(map[string]any)["image"])
+			assert.Contains(t, out.Policy, "imposedAssets")
 			require.NotNil(t, out.Effective)
 			defaults, ok := out.Effective["defaults"].(map[string]any)
 			require.True(t, ok, "modern shape preserves defaults map")
@@ -257,4 +265,31 @@ func TestGetWorkloadEffectivePolicyRun_ForbiddenSurfacedDirectly(t *testing.T) {
 		Kind:      policyKindDistributed,
 	})
 	assert.ErrorIs(t, err, runaimcp.ErrForbidden)
+}
+
+func TestEffectiveLegacyPolicyScopes(t *testing.T) {
+	for _, tc := range []struct{ scope, cluster, department, project string }{
+		{scope: "tenant"},
+		{scope: "cluster", cluster: "6fced230-c208-4b73-98a8-964fc1a32787"},
+		{scope: "department", department: "4500001"},
+		{scope: "project", project: validProjectID},
+	} {
+		t.Run(tc.scope, func(t *testing.T) {
+			client, mux := runaiclienttest.NewServer(t)
+			mux.HandleFunc("/api/v2/policy/trainings", func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, tc.scope, r.URL.Query().Get("scope"))
+				assert.Equal(t, tc.cluster, r.URL.Query().Get("clusterId"))
+				assert.Equal(t, tc.department, r.URL.Query().Get("departmentId"))
+				assert.Equal(t, tc.project, r.URL.Query().Get("projectId"))
+				runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{"policy": map[string]any{"defaults": map[string]any{"image": "declared"}}, "effective": map[string]any{"defaults": map[string]any{"image": "effective"}}})
+			})
+			in := getWorkloadEffectivePolicyInput{Scope: tc.scope, ClusterID: tc.cluster, DepartmentID: tc.department, ProjectID: tc.project, Kind: "training"}
+			require.NoError(t, in.Validate())
+			out, err := getWorkloadEffectivePolicyRun(context.Background(), client, in)
+			require.NoError(t, err)
+			assert.Equal(t, tc.scope, out.Scope)
+			assert.Equal(t, "declared", out.Policy["defaults"].(map[string]any)["image"])
+			assert.Equal(t, "effective", out.Effective["defaults"].(map[string]any)["image"])
+		})
+	}
 }

@@ -121,6 +121,7 @@ export const workloadByCategoryWidgetConfig: IGenericMetricWidgetConfig = {
     xAxisIntervalMs: 12 * 60 * 60 * 1000,
     sharedTooltip: true,
     showSharedCrosshair: true,
+    tooltipAboveXAxis: true,
     yAxisTitle: "Workloads",
   },
   wrapperProps: {

@@ -26,7 +26,9 @@ func NonEmptyStrings(in []string) []string {
 }
 
 type EnumType interface {
-	workloadsApi.ImagePullPolicy |
+	workloadsApi.GpuComputeMode |
+		workloadsManagerApi.GpuComputeMode |
+		workloadsApi.ImagePullPolicy |
 		workloadsApi.SeccompProfileType |
 		workloadsApi.UidGidSource |
 		workloadsApi.DistributedFramework |

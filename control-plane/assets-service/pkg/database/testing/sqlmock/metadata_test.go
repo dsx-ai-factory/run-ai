@@ -21,7 +21,7 @@ const (
 	metaScope       = `(assets_metadata.scope = ? OR assets_metadata.tenant_id = ?)`
 
 	sqlMetaById = `SELECT assets_metadata.*, assets_supported_workload_types.* ` + metaLeftJoinWST +
-		` WHERE ` + metaScope +
+		` WHERE assets_metadata.kind <> ? AND ` + metaScope +
 		` AND (COALESCE(assets_metadata.private, FALSE) = false OR assets_metadata.created_by = ?) AND assets_metadata.id = ?`
 
 	sqlListAssetMeta = `SELECT * FROM assets_metadata WHERE assets_metadata.kind = ? AND ` + metaScope +
@@ -29,7 +29,7 @@ const (
 
 	sqlListMetaByIds = `SELECT assets_metadata.*, assets_supported_workload_types.* ` + metaLeftJoinWST +
 		` WHERE (assets_metadata.auto_delete is null or assets_metadata.auto_delete = ?)` +
-		` AND COALESCE(assets_metadata.private, FALSE) = false AND ` + metaScope +
+		` AND COALESCE(assets_metadata.private, FALSE) = false AND assets_metadata.kind <> ? AND ` + metaScope +
 		` AND id IN (?) AND assets_metadata.deleted_at IS NULL`
 
 	sqlCountAssetMeta = `SELECT count(*) as count FROM assets_metadata WHERE assets_metadata.kind = ? AND ` + metaScope +

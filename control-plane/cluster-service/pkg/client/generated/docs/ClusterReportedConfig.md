@@ -15,6 +15,7 @@ Name | Type | Description | Notes
 **GitSyncResources** | Pointer to [**NullableClusterReportedResourceRequirements**](ClusterReportedResourceRequirements.md) |  | [optional] 
 **S3FileSystemImage** | Pointer to **NullableString** | the fully qualified s3 file-system image reference used by init containers (format \&quot;registry/name:tag\&quot;) | [optional] 
 **S3FileSystemResources** | Pointer to [**NullableClusterReportedResourceRequirements**](ClusterReportedResourceRequirements.md) |  | [optional] 
+**S3FileSystemMountCheckImage** | Pointer to **NullableString** | The exact S3 image reference that supports goofys --ready-file and --check-ready. Omitted when support is unknown or disabled. | [optional] 
 **FipsMode** | Pointer to [**NullableFipsModeEnum**](FipsModeEnum.md) |  | [optional] 
 **RunaiOauth2ProxyImage** | Pointer to **NullableString** | the fully qualified runai oauth2-proxy image reference used by init containers (format \&quot;registry/name:tag\&quot;) | [optional] 
 **RunaiOauth2ProxyResources** | Pointer to [**NullableClusterReportedResourceRequirements**](ClusterReportedResourceRequirements.md) |  | [optional] 
@@ -436,6 +437,41 @@ HasS3FileSystemResources returns a boolean if a field has been set.
 `func (o *ClusterReportedConfig) UnsetS3FileSystemResources()`
 
 UnsetS3FileSystemResources ensures that no value is present for S3FileSystemResources, not even an explicit nil
+### GetS3FileSystemMountCheckImage
+
+`func (o *ClusterReportedConfig) GetS3FileSystemMountCheckImage() string`
+
+GetS3FileSystemMountCheckImage returns the S3FileSystemMountCheckImage field if non-nil, zero value otherwise.
+
+### GetS3FileSystemMountCheckImageOk
+
+`func (o *ClusterReportedConfig) GetS3FileSystemMountCheckImageOk() (*string, bool)`
+
+GetS3FileSystemMountCheckImageOk returns a tuple with the S3FileSystemMountCheckImage field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetS3FileSystemMountCheckImage
+
+`func (o *ClusterReportedConfig) SetS3FileSystemMountCheckImage(v string)`
+
+SetS3FileSystemMountCheckImage sets S3FileSystemMountCheckImage field to given value.
+
+### HasS3FileSystemMountCheckImage
+
+`func (o *ClusterReportedConfig) HasS3FileSystemMountCheckImage() bool`
+
+HasS3FileSystemMountCheckImage returns a boolean if a field has been set.
+
+### SetS3FileSystemMountCheckImageNil
+
+`func (o *ClusterReportedConfig) SetS3FileSystemMountCheckImageNil(b bool)`
+
+ SetS3FileSystemMountCheckImageNil sets the value for S3FileSystemMountCheckImage to be an explicit nil
+
+### UnsetS3FileSystemMountCheckImage
+`func (o *ClusterReportedConfig) UnsetS3FileSystemMountCheckImage()`
+
+UnsetS3FileSystemMountCheckImage ensures that no value is present for S3FileSystemMountCheckImage, not even an explicit nil
 ### GetFipsMode
 
 `func (o *ClusterReportedConfig) GetFipsMode() FipsModeEnum`

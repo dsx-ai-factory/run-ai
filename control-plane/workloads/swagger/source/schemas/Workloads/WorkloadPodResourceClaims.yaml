@@ -1,0 +1,23 @@
+type: object
+required:
+  - podId
+  - podName
+  - resourceClaims
+properties:
+  podId:
+    type: string
+    format: uuid
+    description: The id of the pod.
+  podName:
+    type: string
+    example: "bert-worker-0"
+  task:
+    type: string
+    nullable: true
+    description: "Identifies the function of the pod within a distributed workload (for example, leader, worker, or master)."
+    example: "worker"
+  resourceClaims:
+    type: array
+    description: The claims the pod references, in the order they appear in `pod.spec.resourceClaims`.
+    items:
+      $ref: './WorkloadResourceClaim.yaml'

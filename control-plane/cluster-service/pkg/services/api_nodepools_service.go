@@ -57,18 +57,26 @@ const (
 // NodePoolsApiService is a service that implements the logic for the NodePoolsApiServicer
 // This service should implement the business logic for every endpoint for the NodePoolsApi API.
 // Include any external packages or services that will be required by this service.
+type permittedScopesGetter interface {
+	GetPermittedScopes(ctx context.Context, resourceType authorization_api.ResourceType, action *authorization_api.Action) (*authorization_api.PermittedScopesActions, int, error)
+}
+
 type NodePoolsApiService struct {
 	tenantSettingsClient            clients.TenantSettingsClient
 	orgUnitClient                   org_unit_service_client.IOrgUnitClient
+	authorizationClient             permittedScopesGetter
 	metricsService                  QueryMetricsService
 	clusterCapabilityCheckerFactory clients_local.ClusterCapabilityCheckerFactory
 }
 
 // NewNodePoolsApiService creates a default api service
-func NewNodePoolsApiService(client clients.TenantSettingsClient, orgUnitClient org_unit_service_client.IOrgUnitClient) api.NodePoolsAPIServicer {
+func NewNodePoolsApiService(client clients.TenantSettingsClient, orgUnitClient org_unit_service_client.IOrgUnitClient,
+	authorizationClient permittedScopesGetter,
+) api.NodePoolsAPIServicer {
 	return &NodePoolsApiService{
 		tenantSettingsClient:            client,
 		orgUnitClient:                   orgUnitClient,
+		authorizationClient:             authorizationClient,
 		metricsService:                  NewDefaultMetricsService(),
 		clusterCapabilityCheckerFactory: clients_local.LocalClusterCapabilityCheckerFactory,
 	}
@@ -136,6 +144,7 @@ func (s *NodePoolsApiService) CreateNodepool(ctx context.Context, fields api.Nod
 			UpdatedAt: time.Now(),
 		},
 		Name:                            fields.Name,
+		Description:                     fields.Description,
 		TenantId:                        tenantId,
 		LabelKey:                        &fields.LabelKey,
 		LabelValue:                      &fields.LabelValue,
@@ -481,6 +490,12 @@ func (s *NodePoolsApiService) PatchNodepool(ctx context.Context, nodepoolId stri
 		return api.Response(http.StatusBadRequest, validationErr.Error()), nil
 	}
 
+	completedResets, apiErr := s.validateSchedulingCapabilitiesChangeAndResetOrgUnits(ctx, nodepoolModel, *patched)
+	if apiErr != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Nodepool %s with id %s capabilities change failed. error: %v", nodepoolModel.Name, nodepoolId, apiErr.Message)
+		return NewErrorResponse(apiErr), nil
+	}
+
 	patched.UpdatedBy = subjectId
 	if patched.Phase != api.NODEPOOLPHASE_CREATING && clusterFieldsUpdated(*patched, nodepoolModel) {
 		patched.Phase = api.NODEPOOLPHASE_UPDATING
@@ -490,7 +505,7 @@ func (s *NodePoolsApiService) PatchNodepool(ctx context.Context, nodepoolId stri
 	if dbErr != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Patch nodepool %s with id %s request failed. error: %v", nodepoolModel.Name, nodepoolId, dbErr)
 		return NewErrorResponse(api.NewError(http.StatusInternalServerError,
-			fmt.Sprintf("Failed to update nodepool %s in cluster %s", nodepool.Name, nodepool.ClusterId), dbErr)), nil
+			fmt.Sprintf("Failed to update nodepool %s in cluster %s%s", nodepoolModel.Name, nodepoolModel.ClusterId, describeCompletedResets(completedResets)), dbErr)), nil
 	}
 
 	audit.AuditFromCtx(ctx).WithEntityName(nodepool.Name).WithEntityType(NodepoolAuditEntityType).WithEntityId(strconv.Itoa(int(nodepool.ID)))
@@ -596,6 +611,12 @@ func (s *NodePoolsApiService) UpdateNodepool(ctx context.Context, nodepoolId str
 		return api.Response(http.StatusBadRequest, validationErr.Error()), nil
 	}
 
+	completedResets, apiErr := s.validateSchedulingCapabilitiesChangeAndResetOrgUnits(ctx, nodepoolModel, *updated)
+	if apiErr != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Nodepool %s with id %s capabilities change failed. error: %v", nodepoolModel.Name, nodepoolId, apiErr.Message)
+		return NewErrorResponse(apiErr), nil
+	}
+
 	updated.UpdatedBy = subjectId
 	if updated.Phase != api.NODEPOOLPHASE_CREATING && clusterFieldsUpdated(*updated, nodepoolModel) {
 		updated.Phase = api.NODEPOOLPHASE_UPDATING
@@ -605,7 +626,7 @@ func (s *NodePoolsApiService) UpdateNodepool(ctx context.Context, nodepoolId str
 	if dbErr != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Update nodepool %s with id %s request failed. error: %v", nodepoolModel.Name, nodepoolId, dbErr)
 		return NewErrorResponse(api.NewError(http.StatusInternalServerError,
-			fmt.Sprintf("Failed to update nodepool %s in cluster %s", nodepool.Name, nodepool.ClusterId), dbErr)), nil
+			fmt.Sprintf("Failed to update nodepool %s in cluster %s%s", nodepoolModel.Name, nodepoolModel.ClusterId, describeCompletedResets(completedResets)), dbErr)), nil
 	}
 
 	audit.AuditFromCtx(ctx).WithEntityName(nodepool.Name).WithEntityType(NodepoolAuditEntityType).WithEntityId(strconv.Itoa(int(nodepool.ID)))
@@ -684,7 +705,8 @@ func (s *NodePoolsApiService) createDefaultNodepool(ctx context.Context, cluster
 		CpuPlacementStrategy:       "",
 		MinGuaranteedRuntime:       nil,
 	}
-	setSchedulingCapabilitiesOnCreateUpdate(ctx, &nodepoolModel, clusterNotification.SchedulingCapabilities)
+	// the default nodepool keeps the defaults: org-unit-service gives its default department unlimited quota
+	setSchedulingCapabilitiesOnCreateUpdate(ctx, &nodepoolModel, api.SchedulingCapabilitiesNullable{})
 	nodepoolSetDefaults(&nodepoolModel)
 
 	nodepoolModel.ClusterId = uuid.MustParse(clusterNotification.Id)
@@ -728,6 +750,7 @@ func mapUpdateFieldsToModel(ctx context.Context, nodepoolModel models.Nodepool, 
 	result := &models.Nodepool{}
 	(&nodepoolModel).DeepCopyInto(result)
 
+	result.Description = updateFields.Description
 	result.LabelKey = updateFields.LabelKey
 	result.LabelValue = updateFields.LabelValue
 
@@ -750,6 +773,9 @@ func mapPatchFieldsToModel(ctx context.Context, nodepoolModel models.Nodepool, p
 	result := &models.Nodepool{}
 	(&nodepoolModel).DeepCopyInto(result)
 
+	if patchFields.Description != nil {
+		result.Description = patchFields.Description
+	}
 	if patchFields.LabelKey != nil {
 		result.LabelKey = patchFields.LabelKey
 	}
@@ -837,6 +863,7 @@ func gpuTypesOf(
 func nodepoolDaoToApi(nodepool models.Nodepool) api.Nodepool {
 	apiNodepool := api.Nodepool{
 		Name:                            nodepool.Name,
+		Description:                     convutils.Deref(nodepool.Description, ""),
 		LabelKey:                        convutils.Deref(nodepool.LabelKey, ""),
 		LabelValue:                      convutils.Deref(nodepool.LabelValue, ""),
 		ClusterId:                       nodepool.ClusterId.String(),
@@ -1028,6 +1055,9 @@ func validateLabels(key *string, value *string, isDefault bool) error {
 func validateSchedulingMode(nodepool models.Nodepool) error {
 	if nodepool.AllowCpuQuota && !nodepool.AllowQuota {
 		return fmt.Errorf("SchedulingCapabilities.CpuQuota can only be enabled when SchedulingCapabilities.Quota is enabled")
+	}
+	if nodepool.AllowLimits && !nodepool.AllowQuota {
+		return fmt.Errorf("SchedulingCapabilities.Limits can only be enabled when SchedulingCapabilities.Quota is enabled")
 	}
 	return nil
 }

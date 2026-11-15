@@ -61,12 +61,17 @@ func (wd *WorkloadDisplayer) AsTable() error {
 		workersPerReplica = wd.workload.DistributedInference.Workers
 	}
 
+	compute := wd.workload.Compute
+	if wd.workload.Nim != nil {
+		compute.GPUComputeMode = wd.workload.Nim.GpuComputeMode
+	}
+
 	sections := []struct {
 		show    bool
 		section *displayer.Section
 	}{
 		{true, displayer.NewIssuesSection(wd.workload.Issues)},
-		{wd.options.ShowCompute, displayer.NewComputeSection(wd.workload.Compute)},
+		{wd.options.ShowCompute, displayer.NewComputeSection(compute)},
 		{wd.options.ShowStorage, displayer.NewStorageSection(wd.workload.Storage)},
 		{wd.options.ShowNetworks, displayer.NewNetworksSection(wd.workload.Networks)},
 		{true, displayer.NewNetworkTopologySection(wd.workload.NetworkTopology)},

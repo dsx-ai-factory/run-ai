@@ -4,11 +4,6 @@ info:
   description: |
     The aggregated API of Run:ai Control-Plane
   title: Runai API
-  x-logo:
-    url: ./redoc-runai-logo.png
-    altText: 'Run:ai'
-    backgroundColor: '#FAFAFA'
-    href: 'https://run.ai'
   license:
     name: 'Run:ai'
     url: www.run.ai
@@ -2103,51 +2098,3 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: Bearer authentication
-x-tagGroups:
-  - name: Workloads
-    tags:
-      - Policy
-      - Jobs
-      - Secrets
-      - Storage Classes
-      - PVCs
-      - Pods
-      - Deployments
-      - Workspaces
-  - name: Authentication and Authorization
-    tags:
-      - Sso
-      - AccessRules
-      - Roles
-      - Users
-      - Applications
-      - Tokens
-  - name: Organizations
-    tags:
-      - Tenant
-      - Clusters
-      - NodePools
-      - Departments
-      - Projects
-  - name: Metrics
-    tags:
-      - Metrics
-  - name: Admin
-    tags:
-      - Admin CLI
-      - Audit
-  - name: Assets
-    tags:
-      - PVC
-      - Compute
-      - Credentials
-      - Registry
-      - Environment
-      - Datasources
-      - Git
-      - HostPath
-      - NFS
-      - S3
-      - Template
-      - Workspace
-      - Training

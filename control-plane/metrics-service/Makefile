@@ -17,7 +17,7 @@ SHARED_PACKAGES_PATH=pkg
 OPENAPI_CLIENT_NAME_GO=client
 SHARED_PACKAGES_PATH_ABS=control-plane/metrics-service/pkg
 
-test: build  test-ginkgo integration-tests ## Run unit and integration tests
+test: build  test-go integration-tests ## Run unit and integration tests
 .PHONY: test
 
 lint: lint-go ## Run linter.

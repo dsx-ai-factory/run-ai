@@ -7,7 +7,6 @@ package services
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"time"
@@ -218,31 +217,6 @@ var _ = Describe("host path specific tests", func() {
 			SimpleMockClient: policies.SimpleMockClient{
 				EffectiveUpdatedAt: time.Now(),
 			},
-		})
-	})
-
-	Context("delete host path asset used by template(s)", func() {
-		It("should fail on precondition ", func() {
-			env, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-			hostPath, _, _ := createHostPathAsset(buildRandomProjectHostPathAsset(randoms), router, headerForAdmin(randoms))
-
-			templatePayload := buildRandomProjectTemplate(randoms, env.Meta.Id)
-			templatePayload.Spec.Assets.Datasources = []api.AssetIdAndKind{
-				{
-					Kind: api.ASSETKIND_HOST_PATH,
-					Id:   hostPath.Meta.Id,
-				},
-			}
-			template, _, _ := createTemplateAsset(templatePayload, router, headerForAdmin(randoms))
-
-			deleteHttpReq, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", urlHostPath, hostPath.Meta.Id), nil)
-			Expect(err).To(BeNil())
-			deleteHttpReq.Header = *headerForAdmin(randoms)
-
-			deleteHttpResp := httptest.NewRecorder()
-			router.ServeHTTP(deleteHttpResp, deleteHttpReq)
-			Expect(deleteHttpResp.Code).To(Equal(http.StatusPreconditionFailed))
-			Expect(deleteHttpResp.Body.String()).To(ContainSubstring(fmt.Sprintf("the requested hostPath asset is being used by template '%s'", template.Meta.Name)))
 		})
 	})
 

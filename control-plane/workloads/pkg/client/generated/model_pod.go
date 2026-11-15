@@ -49,6 +49,8 @@ type Pod struct {
 	NodeAffinity *PodNodeAffinity `json:"nodeAffinity,omitempty"`
 	// The workload structure elements this pod belongs to, ordered by hierarchy level.
 	Elements []PodElement `json:"elements,omitempty"`
+	// Per-pod DRA usage reported as-is from the cluster. One entry per `pod.spec.resourceClaims[]` member — either a reference to a `ResourceClaimTemplate` or a standalone `ResourceClaim` — enriched with the actual bound `ResourceClaim` name once published in `pod.status.resourceClaimStatuses[]`. Managed/ownership resolution against the k8s-object store happens at API read time, not here.
+	ResourceClaims []PodResourceClaim `json:"resourceClaims,omitempty"`
 	// The id of the tenant.
 	TenantId          int32        `json:"tenantId"`
 	K8sPhaseUpdatedAt time.Time    `json:"k8sPhaseUpdatedAt"`
@@ -785,6 +787,39 @@ func (o *Pod) SetElements(v []PodElement) {
 	o.Elements = v
 }
 
+// GetResourceClaims returns the ResourceClaims field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *Pod) GetResourceClaims() []PodResourceClaim {
+	if o == nil {
+		var ret []PodResourceClaim
+		return ret
+	}
+	return o.ResourceClaims
+}
+
+// GetResourceClaimsOk returns a tuple with the ResourceClaims field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Pod) GetResourceClaimsOk() ([]PodResourceClaim, bool) {
+	if o == nil || IsNil(o.ResourceClaims) {
+		return nil, false
+	}
+	return o.ResourceClaims, true
+}
+
+// HasResourceClaims returns a boolean if a field has been set.
+func (o *Pod) HasResourceClaims() bool {
+	if o != nil && !IsNil(o.ResourceClaims) {
+		return true
+	}
+
+	return false
+}
+
+// SetResourceClaims gets a reference to the given []PodResourceClaim and assigns it to the ResourceClaims field.
+func (o *Pod) SetResourceClaims(v []PodResourceClaim) {
+	o.ResourceClaims = v
+}
+
 // GetTenantId returns the TenantId field value
 func (o *Pod) GetTenantId() int32 {
 	if o == nil {
@@ -1020,6 +1055,9 @@ func (o Pod) ToMap() (map[string]interface{}, error) {
 	}
 	if o.Elements != nil {
 		toSerialize["elements"] = o.Elements
+	}
+	if o.ResourceClaims != nil {
+		toSerialize["resourceClaims"] = o.ResourceClaims
 	}
 	toSerialize["tenantId"] = o.TenantId
 	toSerialize["k8sPhaseUpdatedAt"] = o.K8sPhaseUpdatedAt

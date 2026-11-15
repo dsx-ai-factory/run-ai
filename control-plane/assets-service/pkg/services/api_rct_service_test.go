@@ -23,6 +23,7 @@ import (
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/authorization"
 	policies "github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/policies"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils"
@@ -557,6 +558,135 @@ var _ = Describe("Rct API tests", func() {
 
 			Expect(recorder.Code).To(Equal(http.StatusBadRequest), recorder.Body.String())
 			Expect(recorder.Body.String()).To(ContainSubstring("spec.objectMeta.labels"))
+		})
+	})
+
+	Context("workloads using the resource claim template (GetRctWorkloads)", func() {
+		var wsFactory workloadsServiceClient.SimpleMockClientFactory
+
+		BeforeEach(func() {
+			wsFactory = workloadsServiceClient.NewSimpleMockClientFactory()
+			workloadsServiceClient.SetMock(wsFactory)
+		})
+
+		getRctWorkloads := func(id string, header *http.Header) *httptest.ResponseRecorder {
+			httpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s/workloads", urlRct, id), nil)
+			Expect(err).To(BeNil())
+			httpReq.Header = *header
+			recorder := httptest.NewRecorder()
+			router.ServeHTTP(recorder, httpReq)
+			return recorder
+		}
+
+		DescribeTable("forwards the template name and the asset's scope to the workloads service",
+			func(build func(*testutils.RandomValues) api.RctCreationRequest, scopeType workloadsApi.ScopeType, scopeId func() string) {
+				created, _, _ := createRctAsset(build(randoms), router, headerForAdmin(randoms))
+
+				resp := getRctWorkloads(created.Meta.Id, headerForAdmin(randoms))
+				Expect(resp.Code).To(Equal(http.StatusOK), resp.Body.String())
+				Expect(wsFactory.ResourceClaimTemplateWorkloadsRequests).To(Equal([]workloadsApi.InternalResourceClaimTemplateWorkloadsRequest{
+					{Name: created.Meta.Name, ScopeType: scopeType, ScopeId: scopeId()},
+				}))
+			},
+			Entry("cluster scope", buildRandomClusterRctAsset, workloadsApi.SCOPETYPE_CLUSTER, func() string { return randoms.ClusterId }),
+			Entry("department scope", buildRandomDepartmentRctAsset, workloadsApi.SCOPETYPE_DEPARTMENT, func() string { return randoms.DepartmentId }),
+			Entry("project scope", buildRandomProjectRctAsset, workloadsApi.SCOPETYPE_PROJECT, func() string { return randoms.ProjectIdStr }),
+		)
+
+		It("returns the workloads, pods and bound claims reported by the workloads service", func() {
+			created, _, _ := createRctAsset(buildRandomClusterRctAsset(randoms), router, headerForAdmin(randoms))
+			wsFactory.ResourceClaimTemplateWorkloads = &workloadsApi.ResourceClaimTemplateWorkloadsResponse{
+				Next: convutils.Ref(int32(1)),
+				Workloads: []workloadsApi.ResourceClaimTemplateWorkload{{
+					WorkloadId: "workload-1",
+					Name:       "train",
+					Type:       "Training",
+					ProjectId:  randoms.ProjectIdStr,
+					Pods: []workloadsApi.ResourceClaimTemplateWorkloadPod{
+						{PodId: "pod-1", PodName: "train-0", ResourceClaims: []workloadsApi.PodResourceClaimBinding{
+							{Name: "gpu", ClaimName: *workloadsApi.NewNullableString(convutils.Ref("train-0-gpu-x7k2p"))},
+						}},
+						{PodId: "pod-2", PodName: "train-1", ResourceClaims: []workloadsApi.PodResourceClaimBinding{
+							{Name: "gpu"},
+						}},
+					},
+				}},
+			}
+
+			resp := getRctWorkloads(created.Meta.Id, headerForAdmin(randoms))
+			Expect(resp.Code).To(Equal(http.StatusOK), resp.Body.String())
+
+			var body api.ResourceClaimTemplateWorkloadsResponse
+			Expect(json.Unmarshal(resp.Body.Bytes(), &body)).To(Succeed())
+			Expect(body).To(Equal(api.ResourceClaimTemplateWorkloadsResponse{
+				Next: 1,
+				Workloads: []api.ResourceClaimTemplateWorkload{{
+					WorkloadId: "workload-1",
+					Name:       "train",
+					Type:       "Training",
+					ProjectId:  randoms.ProjectIdStr,
+					Pods: []api.ResourceClaimTemplateWorkloadPod{
+						{PodId: "pod-1", PodName: "train-0", ResourceClaims: []api.PodResourceClaimBinding{
+							{Name: "gpu", ClaimName: convutils.Ref("train-0-gpu-x7k2p")},
+						}},
+						{PodId: "pod-2", PodName: "train-1", ResourceClaims: []api.PodResourceClaimBinding{
+							{Name: "gpu"},
+						}},
+					},
+				}},
+			}))
+		})
+
+		It("returns 404 when the id belongs to a different asset kind", func() {
+			hostPath, _, _ := createHostPathAsset(buildRandomProjectHostPathAsset(randoms), router, headerForAdmin(randoms))
+
+			resp := getRctWorkloads(hostPath.Meta.Id, headerForAdmin(randoms))
+			Expect(resp.Code).To(Equal(http.StatusNotFound), resp.Body.String())
+			Expect(wsFactory.ResourceClaimTemplateWorkloadsRequests).To(BeEmpty())
+		})
+
+		It("returns 404 for a deleted resource claim template", func() {
+			created, _, _ := createRctAsset(buildRandomClusterRctAsset(randoms), router, headerForAdmin(randoms))
+			deleteReq, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", urlRct, created.Meta.Id), nil)
+			Expect(err).To(BeNil())
+			deleteReq.Header = *headerForAdmin(randoms)
+			deleteResp := httptest.NewRecorder()
+			router.ServeHTTP(deleteResp, deleteReq)
+			Expect(deleteResp.Code).To(Equal(http.StatusAccepted), deleteResp.Body.String())
+
+			resp := getRctWorkloads(created.Meta.Id, headerForAdmin(randoms))
+			Expect(resp.Code).To(Equal(http.StatusNotFound), resp.Body.String())
+			Expect(wsFactory.ResourceClaimTemplateWorkloadsRequests).To(BeEmpty())
+		})
+
+		It("returns 403 when the caller may not read the template's project", func() {
+			forbidden := randoms.
+				CloneWithDifferentProject().Forbidden().
+				CloneWithDifferentDepartment().Forbidden().
+				CloneWithDifferentCluster().Forbidden()
+			authorization.SetMock(testing.NewRandomsBasedAuthMockClient(randoms, forbidden))
+			org_unit.SetMock(org_unit.NewSimpleMock(randoms, forbidden))
+			checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
+				WithCluster(randoms.ClusterId, testing.BuildDisplayedCluster(randoms, testing.UnitTestDefaultClusterVersion, false)).
+				WithCluster(forbidden.ClusterId, testing.BuildDisplayedCluster(forbidden, testing.UnitTestDefaultClusterVersion, false)))
+			checker.InitClusterCapabilitiesChecker("", DefaultCheckerClusterConfig, "")
+			k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient().
+				WithDeviceClass(forbidden.ClusterId, rctDeviceClassForTests))
+
+			created, _, _ := createRctAsset(buildRandomProjectRctAsset(forbidden), router, headerForAdmin(randoms))
+
+			resp := getRctWorkloads(created.Meta.Id, headerForNonAdmin(randoms))
+			Expect(resp.Code).To(Equal(http.StatusForbidden), resp.Body.String())
+			Expect(wsFactory.ResourceClaimTemplateWorkloadsRequests).To(BeEmpty())
+		})
+
+		It("passes through the workloads service error", func() {
+			created, _, _ := createRctAsset(buildRandomClusterRctAsset(randoms), router, headerForAdmin(randoms))
+			wsFactory.ResourceClaimTemplateWorkloadsErr = workloadsApi.NewError(http.StatusServiceUnavailable, "workloads service is down")
+
+			resp := getRctWorkloads(created.Meta.Id, headerForAdmin(randoms))
+			Expect(resp.Code).To(Equal(http.StatusServiceUnavailable), resp.Body.String())
+			Expect(resp.Body.String()).To(ContainSubstring("workloads service is down"))
 		})
 	})
 })

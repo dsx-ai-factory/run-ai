@@ -1,0 +1,12 @@
+name: filterBy
+in: query
+required: false
+description: Filter results by a parameter. Use the format field-name operator value. Operators are `==` Equals, `!=` Not equals, `<=` Less than or equal, `>=` Greater than or equal, `=@` contains, `!@` Does not contain, `=^` Starts with and `=$` Ends with.
+schema:
+  type: array
+  maxItems: 10
+  items:
+    type: string
+    pattern: "^(type|name|clusterId|projectName|distributedFramework)(==|!=|<=|>=|=@|!@|=\\^|=\\$).+$"
+  example: ["name==some-workload-name", "projectName==proj-1"]
+explode: false

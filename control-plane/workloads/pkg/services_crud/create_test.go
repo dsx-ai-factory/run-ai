@@ -7,10 +7,11 @@ package services_crud
 
 import (
 	"context"
-	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 
 	csclient "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	clientsclusterservice "github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/clusterservice"
@@ -138,6 +139,52 @@ var _ = Describe("Workload composer validations", func() {
 	AfterEach(func() {
 		testing.CleanTables()
 	})
+
+	DescribeTable("GPU memory aliases survive workspace creation and retrieval",
+		func(legacy, canonical *float64, expectedCode int) {
+			request := api.WorkspaceCreationRequest{
+				Name: "memory-alias-test", ProjectId: randoms.ProjectIdStr, ClusterId: randoms.ClusterId,
+				Spec: api.WorkspaceSpecSpec{Image: convutils.Ref("ubuntu"), Compute: &api.WorkspaceSpecSpecAllOfCompute{
+					GpuRequestType:    convutils.Ref(api.GPUREQUESTTYPE_PORTION),
+					GpuPortionRequest: legacy, GpuMemoryPortionRequest: canonical,
+				}},
+			}
+			created, err := workspaceService.CreateWorkspace(ctx, request)
+			Expect(err).To(BeNil())
+			Expect(created.Code).To(Equal(expectedCode))
+			if expectedCode != http.StatusAccepted {
+				return
+			}
+			expectedValue := convutils.Deref(legacy, convutils.Deref(canonical, 0))
+			workload := created.Body.(workloadsApi.SupersetWorkload)
+			Expect(workload.Spec.Compute.Get().GetGpuPortionRequest()).To(Equal(expectedValue))
+			Expect(workload.Spec.Compute.Get().GpuMemoryPortionRequest.IsSet()).To(Equal(expectedValue <= 1))
+			if expectedValue <= 1 {
+				Expect(workload.Spec.Compute.Get().GetGpuMemoryPortionRequest()).To(Equal(expectedValue))
+			}
+			var stored models_crud.Workload
+			Expect(runaidb.DB().Where("id = ?", workload.WorkloadId).First(&stored)).To(Succeed())
+			Expect(stored.Spec.Compute.Get().GpuMemoryPortionRequest.IsSet()).To(BeFalse())
+			Expect(stored.Spec.Compute.Get().GetGpuPortionRequest()).To(Equal(expectedValue))
+			retrieved, err := workspaceService.GetWorkspace(ctx, workload.WorkloadId)
+			Expect(err).To(BeNil())
+			Expect(retrieved.Code).To(Equal(http.StatusOK))
+			response := retrieved.Body.(workloadsApi.SupersetWorkload)
+			Expect(response.Spec.Compute.Get().GetGpuPortionRequest()).To(Equal(expectedValue))
+			Expect(response.Spec.Compute.Get().GpuMemoryPortionRequest.IsSet()).To(Equal(expectedValue <= 1))
+			if expectedValue <= 1 {
+				Expect(response.Spec.Compute.Get().GetGpuMemoryPortionRequest()).To(Equal(expectedValue))
+			}
+		},
+		Entry("deprecated input", convutils.Ref(.25), nil, http.StatusAccepted),
+		Entry("canonical input", nil, convutils.Ref(.25), http.StatusAccepted),
+		Entry("equal aliases", convutils.Ref(.25), convutils.Ref(.25), http.StatusAccepted),
+		Entry("conflicting aliases", convutils.Ref(.25), convutils.Ref(.5), http.StatusBadRequest),
+		Entry("legacy whole GPU request", convutils.Ref(4.0), nil, http.StatusAccepted),
+		Entry("new whole GPU request rejected", nil, convutils.Ref(4.0), http.StatusBadRequest),
+		Entry("equal whole GPU aliases rejected", convutils.Ref(4.0), convutils.Ref(4.0), http.StatusBadRequest),
+		Entry("legacy non-integer above one rejected", convutils.Ref(4.5), nil, http.StatusBadRequest),
+	)
 
 	Context("fixed name vs prefix name", func() {
 		It("should create proper name", func() {
@@ -843,13 +890,14 @@ var _ = Describe("Workload composer validations", func() {
 			actualMasterAsMap, _ := gojsonq.LoadJson(payload.MasterSpec.Get().Compute.Get())
 
 			expectedWorkerAsMap, _ := gojsonq.LoadJson(api.WorkspaceSpecSpecAllOfCompute{
-				CpuCoreRequest:    convutils.Ref(0.1),
-				CpuCoreLimit:      convutils.Ref(0.5),
-				CpuMemoryRequest:  convutils.Ref("100M"),
-				CpuMemoryLimit:    convutils.Ref("300M"),
-				GpuPortionRequest: convutils.Ref(0.4),
-				GpuDevicesRequest: convutils.Ref(int32(1)),
-				GpuRequestType:    convutils.Ref(api.GPUREQUESTTYPE_PORTION),
+				CpuCoreRequest:          convutils.Ref(0.1),
+				CpuCoreLimit:            convutils.Ref(0.5),
+				CpuMemoryRequest:        convutils.Ref("100M"),
+				CpuMemoryLimit:          convutils.Ref("300M"),
+				GpuPortionRequest:       convutils.Ref(0.4),
+				GpuMemoryPortionRequest: convutils.Ref(0.4),
+				GpuDevicesRequest:       convutils.Ref(int32(1)),
+				GpuRequestType:          convutils.Ref(api.GPUREQUESTTYPE_PORTION),
 			})
 
 			Expect(actualWorkerAsMap).To(Equal(expectedWorkerAsMap))

@@ -103,6 +103,37 @@ func (client *OrgUnitClient) UpdateOrgUnitSettings(ctx context.Context, name str
 	return nil
 }
 
+func (client *OrgUnitClient) NodePoolSummary(ctx context.Context, nodePoolId string, summaryType openapi.OrgUnitsNodepoolSummaryType) ([]openapi.OrgUnitsNodepoolSummaryInner, error) {
+	response, resp, err := client.ApiClient.OrgUnitAPI.OrgsNodePoolSummary(ctx, nodePoolId).
+		NodepoolSummaryType(summaryType).Execute()
+	if err != nil {
+		return nil, fmt.Errorf("NodePoolSummary: %w", err)
+	}
+	if resp != nil && resp.StatusCode >= http.StatusBadRequest {
+		return nil, fmt.Errorf("NodePoolSummary returned status %d", resp.StatusCode)
+	}
+	if response == nil {
+		return nil, errors.New("NodePoolSummary returned an empty response")
+	}
+	return response.OrgUnitsNodepoolSummary, nil
+}
+
+func (client *OrgUnitClient) NodePoolResetResources(ctx context.Context, clusterId string, nodePoolId string, action openapi.NodepoolResourcesResetAction) error {
+	resp, err := client.ApiClient.OrgUnitAPI.NodePoolResetResources(ctx).
+		OrgUnitsNodepoolResourcesResetRequest(openapi.OrgUnitsNodepoolResourcesResetRequest{
+			ClusterId:  clusterId,
+			NodePoolId: nodePoolId,
+			Action:     action,
+		}).Execute()
+	if err != nil {
+		return fmt.Errorf("NodePoolResetResources: %w", err)
+	}
+	if resp != nil && resp.StatusCode >= http.StatusBadRequest {
+		return fmt.Errorf("NodePoolResetResources returned status %d", resp.StatusCode)
+	}
+	return nil
+}
+
 func (client *OrgUnitClient) NodePoolDeleted(ctx context.Context, clusterId string, nodePoolId string, nodePoolName string) error {
 	_, err := client.ApiClient.NotificationsAPI.NodePoolUpdated(ctx).Default_(false).NodePool(openapi.NodePool{
 		Id:        &nodePoolId,

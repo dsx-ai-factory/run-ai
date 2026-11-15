@@ -982,7 +982,7 @@ var _ = Describe("Parity API tests", Ordered, func() {
 				resources = append(resources, api.ResourcesNullable{
 					NodePool: department.Resources[i].NodePool,
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        department.Resources[i].Gpu.Deserved,
+						Deserved:        ptr.To(department.Resources[i].Gpu.Deserved),
 						Limit:           department.Resources[i].Gpu.Limit,
 						OverQuotaWeight: department.Resources[i].Gpu.OverQuotaWeight,
 					},
@@ -1109,7 +1109,7 @@ func getEffectiveDepartmentUpdateRequest(department api.Department) api.Departme
 		resources = append(resources, api.ResourcesNullable{
 			NodePool: department.Resources[i].NodePool,
 			Gpu: api.ResourcesNullableGpu{
-				Deserved:        department.Resources[i].Gpu.Deserved,
+				Deserved:        ptr.To(department.Resources[i].Gpu.Deserved),
 				Limit:           department.Resources[i].Gpu.Limit,
 				OverQuotaWeight: department.Resources[i].Gpu.OverQuotaWeight,
 			},

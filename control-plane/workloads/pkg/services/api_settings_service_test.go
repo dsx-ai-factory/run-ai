@@ -109,14 +109,6 @@ func allTransformTestCases() []transformTestCase {
 			stage:       "Alpha",
 		},
 		{
-			name:        "enableTemplatesV2",
-			setting:     &settings.EnableTemplatesV2{Enabled: true},
-			enabled:     true,
-			displayName: "Flexible workload templates",
-			description: "Enable to create workload templates via the new flexible form. For more information, see the <a data-doc-key='workloadTemplates' target='_blank'>Workload Templates guide</a>",
-			stage:       "GA",
-		},
-		{
 			name:        "enableHybridSubmission",
 			setting:     &settings.EnableHybridSubmission{Enabled: false},
 			enabled:     false,
@@ -171,12 +163,6 @@ func TestTransformSettingByKeyToResponse(t *testing.T) {
 				assert.Equal(t, tc.displayName, resp.DisplayName)
 				assert.Equal(t, tc.description, resp.Description)
 				assert.Equal(t, tc.stage, resp.Stage)
-			case api.GetEnableTemplatesV2:
-				require.NotNil(t, resp.Value.Enabled)
-				assert.Equal(t, tc.enabled, *resp.Value.Enabled)
-				assert.Equal(t, tc.displayName, resp.DisplayName)
-				assert.Equal(t, tc.description, resp.Description)
-				assert.Equal(t, tc.stage, resp.Stage)
 			case api.GetEnableHybridSubmission:
 				require.NotNil(t, resp.Value.Enabled)
 				assert.Equal(t, tc.enabled, *resp.Value.Enabled)
@@ -223,10 +209,6 @@ func TestTransformSettingsToResponse(t *testing.T) {
 	require.NotNil(t, response.WorkloadSubmissionV2Enabled.Value.Enabled)
 	assert.Equal(t, false, *response.WorkloadSubmissionV2Enabled.Value.Enabled)
 	assert.Equal(t, "Workload submission v2", response.WorkloadSubmissionV2Enabled.DisplayName)
-
-	require.NotNil(t, response.EnableTemplatesV2.Value.Enabled)
-	assert.Equal(t, true, *response.EnableTemplatesV2.Value.Enabled)
-	assert.Equal(t, "Flexible workload templates", response.EnableTemplatesV2.DisplayName)
 
 	require.NotNil(t, response.EnableHybridSubmission.Value.Enabled)
 	assert.Equal(t, false, *response.EnableHybridSubmission.Value.Enabled)
@@ -419,7 +401,7 @@ func TestGetWorkloadsServiceSettingByKey(t *testing.T) {
 		svc := newTestSettingsService(mgr)
 		ctx := ctxWithTenant(testTenantId)
 
-		resp, err := svc.GetWorkloadsServiceSettingByKey(ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_TEMPLATES_V2, "other-tenant")
+		resp, err := svc.GetWorkloadsServiceSettingByKey(ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_HYBRID_SUBMISSION, "other-tenant")
 		assert.NoError(t, err)
 		assertErrorResponse(t, resp, http.StatusUnauthorized)
 	})
@@ -491,10 +473,10 @@ func TestUpdateWorkloadsServiceSettingByKey(t *testing.T) {
 		ctx := ctxWithTenant(testTenantId)
 
 		updateReq := api.UpdateWorkloadsSettingByKeyRequest{Enabled: ptr.To(true)}
-		mgr.On("UpdateSettingByKey", ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_TEMPLATES_V2, testTenantId, updateReq).
-			Return(errors.New(settings.ErrValidationFailed + ": cannot enable enableTemplatesV2 while enableHybridSubmission is disabled"))
+		mgr.On("UpdateSettingByKey", ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_HYBRID_SUBMISSION, testTenantId, updateReq).
+			Return(errors.New(settings.ErrValidationFailed + ": invalid setting value"))
 
-		resp, err := svc.UpdateWorkloadsServiceSettingByKey(ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_TEMPLATES_V2, updateReq, "")
+		resp, err := svc.UpdateWorkloadsServiceSettingByKey(ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_HYBRID_SUBMISSION, updateReq, "")
 		assert.NoError(t, err)
 		assertErrorResponse(t, resp, http.StatusBadRequest)
 	})
@@ -530,9 +512,9 @@ func TestUpdateWorkloadsServiceSettingByKey(t *testing.T) {
 		ctx := managementCtxWithTenant("mgmt-tenant")
 
 		updateReq := api.UpdateWorkloadsSettingByKeyRequest{Enabled: ptr.To(true)}
-		mgr.On("UpdateSettingByKey", ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_TEMPLATES_V2, "target-tenant", updateReq).Return(nil)
+		mgr.On("UpdateSettingByKey", ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_HYBRID_SUBMISSION, "target-tenant", updateReq).Return(nil)
 
-		resp, err := svc.UpdateWorkloadsServiceSettingByKey(ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_TEMPLATES_V2, updateReq, "target-tenant")
+		resp, err := svc.UpdateWorkloadsServiceSettingByKey(ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_HYBRID_SUBMISSION, updateReq, "target-tenant")
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Equal(t, updateReq, resp.Body)

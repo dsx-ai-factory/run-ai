@@ -9,6 +9,7 @@ Method | HTTP request | Description
 [**DeleteApplication**](AIApplicationsAPI.md#DeleteApplication) | **Delete** /api/v1/ai-applications/{aiApplicationId} | Delete AI application.
 [**DownloadApplicationChart**](AIApplicationsAPI.md#DownloadApplicationChart) | **Get** /api/v1/ai-applications/charts/{chartId}/content | Download an uploaded Helm chart archive.
 [**GetApplication**](AIApplicationsAPI.md#GetApplication) | **Get** /api/v1/ai-applications/{aiApplicationId} | Get AI application. [Experimental]
+[**InspectApplicationChart**](AIApplicationsAPI.md#InspectApplicationChart) | **Post** /api/v1/ai-applications/charts/inspect | Inspect a Helm chart questions declaration.
 [**ListApplications**](AIApplicationsAPI.md#ListApplications) | **Get** /api/v1/ai-applications | List AI applications. [Experimental]
 [**RequestApplicationsUpdates**](AIApplicationsAPI.md#RequestApplicationsUpdates) | **Post** /api/v1/ai-applications/sync-report | Request applications updates
 [**SyncApplications**](AIApplicationsAPI.md#SyncApplications) | **Post** /api/v1/ai-applications/sync | Sync AI applications.
@@ -353,6 +354,72 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## InspectApplicationChart
+
+> AIApplicationChartInspectionResponse InspectApplicationChart(ctx).AIApplicationChartInspectionRequest(aIApplicationChartInspectionRequest).Execute()
+
+Inspect a Helm chart questions declaration.
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client"
+)
+
+func main() {
+	aIApplicationChartInspectionRequest := *openapiclient.NewAIApplicationChartInspectionRequest(*openapiclient.NewAIApplicationSpecChartRef()) // AIApplicationChartInspectionRequest | Chart source selection and optional saved credential reference, up to 64 KiB of JSON.
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.AIApplicationsAPI.InspectApplicationChart(context.Background()).AIApplicationChartInspectionRequest(aIApplicationChartInspectionRequest).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `AIApplicationsAPI.InspectApplicationChart``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `InspectApplicationChart`: AIApplicationChartInspectionResponse
+	fmt.Fprintf(os.Stdout, "Response from `AIApplicationsAPI.InspectApplicationChart`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiInspectApplicationChartRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **aIApplicationChartInspectionRequest** | [**AIApplicationChartInspectionRequest**](AIApplicationChartInspectionRequest.md) | Chart source selection and optional saved credential reference, up to 64 KiB of JSON. | 
+
+### Return type
+
+[**AIApplicationChartInspectionResponse**](AIApplicationChartInspectionResponse.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
 - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)

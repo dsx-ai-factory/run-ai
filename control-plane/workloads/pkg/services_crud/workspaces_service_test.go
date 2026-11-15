@@ -126,7 +126,7 @@ var _ = Describe("workspaces service validations", func() {
 		const subjectType = "ServiceAccount"
 		requestCtx := context.WithValue(ctx, runaictx.CfSubjectID, subject)
 		requestCtx = context.WithValue(requestCtx, runaictx.CfSubjectType, subjectType)
-		router := api.NewRouter(api.NewWorkspacesAPIController(workspacesService), api.NewEventsAPIController(services.NewEventsService()))
+		router := api.NewRouter(api.NewWorkspacesAPIController(workspacesService), api.NewWorkloadActionsAPIController(services.NewWorkloadActionsService()))
 		body, err := json.Marshal(createWorkspaceRequest("http-workspace", randoms.ProjectIdStr, randoms.ClusterId, "", ""))
 		Expect(err).NotTo(HaveOccurred())
 		request := httptest.NewRequest(http.MethodPost, "/api/v1/workloads/workspaces", bytes.NewReader(body)).WithContext(requestCtx)
@@ -189,7 +189,7 @@ var _ = Describe("workspaces service validations", func() {
 		created := response.Body.(workloadsApi.SupersetWorkload)
 		Expect(created.WorkloadId).To(Equal(id))
 		Expect(created.Name).To(Equal("manager-workspace"))
-		rows, _, apiErr := dao.DbGetWorkloadActions(ctx, uuid.MustParse(id), 0, 0)
+		rows, _, apiErr := dao.DbGetWorkloadActions(ctx, uuid.MustParse(id), 0, 0, "desc", "accepted_at", nil, "")
 		Expect(apiErr).To(BeNil())
 		Expect(rows).To(HaveLen(1))
 		Expect(rows[0].Action).To(Equal("create"))
@@ -229,7 +229,7 @@ var _ = Describe("workspaces service validations", func() {
 
 			createPayload := createResponse.Body.(workloadsApi.SupersetWorkload)
 			Expect(createPayload.WorkloadId).NotTo(BeNil())
-			actions, _, actionErr := dao.DbGetWorkloadActions(ctx, uuid.MustParse(createPayload.WorkloadId), 0, 0)
+			actions, _, actionErr := dao.DbGetWorkloadActions(ctx, uuid.MustParse(createPayload.WorkloadId), 0, 0, "desc", "accepted_at", nil, "")
 			Expect(actionErr).To(BeNil())
 			Expect(actions).To(HaveLen(1))
 			Expect(actions[0].Action).To(Equal("create"))

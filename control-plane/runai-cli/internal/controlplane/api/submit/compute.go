@@ -22,12 +22,15 @@ import (
 
 type Compute struct {
 	// GPU
-	GpuDeviceRequest  openapi.NullableInt32
-	GpuRequestType    string
-	GpuPortionRequest openapi.NullableFloat64
-	GpuPortionLimit   openapi.NullableFloat64
-	GpuMemoryRequest  string
-	GpuMemoryLimit    string
+	GpuDeviceRequest        openapi.NullableInt32
+	GpuRequestType          string
+	GpuPortionRequest       openapi.NullableFloat64
+	GpuPortionLimit         openapi.NullableFloat64
+	GpuMemoryPortionRequest openapi.NullableFloat64
+	GpuMemoryPortionLimit   openapi.NullableFloat64
+	GpuComputeMode          string
+	GpuMemoryRequest        string
+	GpuMemoryLimit          string
 	// CPU
 	CpuCoreRequest   openapi.NullableFloat64
 	CpuCoreLimit     openapi.NullableFloat64
@@ -38,25 +41,31 @@ type Compute struct {
 	// Extended
 	ExtendedResources []string
 	// Distributed Training (Master)
-	MasterGpuDeviceRequest  openapi.NullableInt32
-	MasterGpuPortionRequest openapi.NullableFloat64
-	MasterGpuPortionLimit   openapi.NullableFloat64
-	MasterExtendedResources []string
-	MasterCpuCoreRequest    openapi.NullableFloat64
-	MasterCpuCoreLimit      openapi.NullableFloat64
-	MasterCpuMemoryRequest  string
-	MasterCpuMemoryLimit    string
+	MasterGpuDeviceRequest        openapi.NullableInt32
+	MasterGpuPortionRequest       openapi.NullableFloat64
+	MasterGpuPortionLimit         openapi.NullableFloat64
+	MasterGpuMemoryPortionRequest openapi.NullableFloat64
+	MasterGpuMemoryPortionLimit   openapi.NullableFloat64
+	MasterGpuComputeMode          string
+	MasterExtendedResources       []string
+	MasterCpuCoreRequest          openapi.NullableFloat64
+	MasterCpuCoreLimit            openapi.NullableFloat64
+	MasterCpuMemoryRequest        string
+	MasterCpuMemoryLimit          string
 	// Distributed Inference (Worker)
-	WorkerGpuDevicesRequest openapi.NullableInt32
-	WorkerGpuPortionRequest openapi.NullableFloat64
-	WorkerGpuPortionLimit   openapi.NullableFloat64
-	WorkerGpuMemoryRequest  string
-	WorkerGpuMemoryLimit    string
-	WorkerCpuCoreRequest    openapi.NullableFloat64
-	WorkerCpuCoreLimit      openapi.NullableFloat64
-	WorkerCpuMemoryRequest  string
-	WorkerCpuMemoryLimit    string
-	WorkerExtendedResources []string
+	WorkerGpuDevicesRequest       openapi.NullableInt32
+	WorkerGpuPortionRequest       openapi.NullableFloat64
+	WorkerGpuPortionLimit         openapi.NullableFloat64
+	WorkerGpuMemoryPortionRequest openapi.NullableFloat64
+	WorkerGpuMemoryPortionLimit   openapi.NullableFloat64
+	WorkerGpuComputeMode          string
+	WorkerGpuMemoryRequest        string
+	WorkerGpuMemoryLimit          string
+	WorkerCpuCoreRequest          openapi.NullableFloat64
+	WorkerCpuCoreLimit            openapi.NullableFloat64
+	WorkerCpuMemoryRequest        string
+	WorkerCpuMemoryLimit          string
+	WorkerExtendedResources       []string
 }
 
 func (c *Compute) GenerateComputeSpec() (*openapi.WorkspaceSpecSpecAllOfCompute, error) {
@@ -75,6 +84,23 @@ func (c *Compute) GenerateComputeSpec() (*openapi.WorkspaceSpecSpecAllOfCompute,
 		return nil, err
 	}
 	fieldsSet = fieldsSet || compute.GpuRequestType.IsSet()
+
+	err = specset.SetGenericType[openapi.GpuComputeMode, openapi.NullableGpuComputeMode](
+		c.GpuComputeMode, openapi.NewGpuComputeModeFromValue,
+		&compute.GpuComputeMode, openapi.NewNullableGpuComputeMode)
+	if err != nil && !errors.Is(err, specset.ErrEmptyValue) {
+		return nil, err
+	}
+	fieldsSet = fieldsSet || compute.GpuComputeMode.IsSet()
+
+	if c.GpuMemoryPortionRequest.IsSet() {
+		compute.GpuMemoryPortionRequest = c.GpuMemoryPortionRequest
+		fieldsSet = true
+	}
+	if c.GpuMemoryPortionLimit.IsSet() {
+		compute.GpuMemoryPortionLimit = c.GpuMemoryPortionLimit
+		fieldsSet = true
+	}
 
 	if c.GpuPortionRequest.IsSet() {
 		specset.SetNullableFloat64(*c.GpuPortionRequest.Get(), &compute.GpuPortionRequest)
@@ -169,6 +195,8 @@ func ComputerFlagSet(flagsCompute *pflag.FlagSet, specCompute *Compute, getType 
 		flagsCompute.StringVar(&specCompute.CpuMemoryLimit, consts.AttributeNameCpuMemoryLimit, "", consts.AttributeUsageCpuMemoryLimit)
 	}
 
+	GpuMemoryAndModeFlagSet(flagsCompute, specCompute)
+
 	if getType != spectype.NimService {
 		flagsCompute.BoolVar(&specCompute.LargeShmRequest, consts.AttributeNameLargeShm, false, consts.AttributeUsageLargeShm)
 		flagsCompute.StringArrayVar(&specCompute.ExtendedResources, consts.AttributeNameExtendedResource,
@@ -185,7 +213,27 @@ func ComputerFlagSet(flagsCompute *pflag.FlagSet, specCompute *Compute, getType 
 		flagsCompute.Var(cli.NewNullableNonNegativeInt32Flag(&specCompute.MasterGpuDeviceRequest), consts.AttributeNameMasterGpuDeviceRequest, consts.AttributeUsageMasterGpuDeviceRequest)
 		flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&specCompute.MasterGpuPortionRequest), consts.AttributeNameMasterGpuPortionRequest, consts.AttributeUsageMasterGpuPortionRequest)
 		flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&specCompute.MasterGpuPortionLimit), consts.AttributeNameMasterGpuPortionLimit, consts.AttributeUsageMasterGpuPortionLimit)
+		flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&specCompute.MasterGpuMemoryPortionRequest), consts.AttributeNameMasterGpuMemoryPortionRequest, consts.AttributeUsageMasterGpuMemoryPortionRequest)
+		flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&specCompute.MasterGpuMemoryPortionLimit), consts.AttributeNameMasterGpuMemoryPortionLimit, consts.AttributeUsageMasterGpuMemoryPortionLimit)
+		flagsCompute.StringVar(&specCompute.MasterGpuComputeMode, consts.AttributeNameMasterGpuComputeMode, "", consts.AttributeUsageGpuComputeMode)
+		if err := flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuPortionRequest,
+			"use --"+consts.AttributeNameMasterGpuMemoryPortionRequest+" for GPU memory fractions, or --"+
+				consts.AttributeNameMasterGpuDeviceRequest+" for whole-GPU counts"); err != nil {
+			panic(err)
+		}
+		if err := flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuPortionLimit, "use --"+consts.AttributeNameMasterGpuMemoryPortionLimit+" instead"); err != nil {
+			panic(err)
+		}
 		if framework == api.MPI {
+			if err := flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuMemoryPortionRequest, consts.WarningSubmitMpuWithGpu); err != nil {
+				panic(err)
+			}
+			if err := flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuMemoryPortionLimit, consts.WarningSubmitMpuWithGpu); err != nil {
+				panic(err)
+			}
+			if err := flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuComputeMode, consts.WarningSubmitMpuWithGpu); err != nil {
+				panic(err)
+			}
 			_ = flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuDeviceRequest, consts.WarningSubmitMpuWithGpu)
 			_ = flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuPortionRequest, consts.WarningSubmitMpuWithGpu)
 			_ = flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuPortionLimit, consts.WarningSubmitMpuWithGpu)
@@ -197,5 +245,21 @@ func ComputerFlagSet(flagsCompute *pflag.FlagSet, specCompute *Compute, getType 
 		flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&specCompute.MasterCpuCoreLimit), consts.AttributeNameMasterCpuCoreLimit, consts.AttributeUsageMasterCpuCoreLimit)
 		flagsCompute.StringVar(&specCompute.MasterCpuMemoryRequest, consts.AttributeNameMasterCpuMemoryRequest, "", consts.AttributeUsageMasterCpuMemoryRequest)
 		flagsCompute.StringVar(&specCompute.MasterCpuMemoryLimit, consts.AttributeNameMasterCpuMemoryLimit, "", consts.AttributeUsageMasterCpuMemoryLimit)
+	}
+}
+
+func GpuMemoryAndModeFlagSet(flags *pflag.FlagSet, compute *Compute) {
+	flags.Var(cli.NewNullableNonNegativeFloat64Flag(&compute.GpuMemoryPortionRequest), consts.AttributeNameGpuMemoryPortionRequest, consts.AttributeUsageGpuMemoryPortionRequest)
+	flags.Var(cli.NewNullableNonNegativeFloat64Flag(&compute.GpuMemoryPortionLimit), consts.AttributeNameGpuMemoryPortionLimit, consts.AttributeUsageGpuMemoryPortionLimit)
+	flags.StringVar(&compute.GpuComputeMode, consts.AttributeNameGpuComputeMode, "", consts.AttributeUsageGpuComputeMode)
+	if flags.Lookup(consts.AttributeNameGpuPortionRequest) != nil {
+		if err := flags.MarkDeprecated(consts.AttributeNameGpuPortionRequest,
+			"use --"+consts.AttributeNameGpuMemoryPortionRequest+" for GPU memory fractions, or --"+
+				consts.AttributeNameGpuDeviceRequest+" for whole-GPU counts"); err != nil {
+			panic(err)
+		}
+		if err := flags.MarkDeprecated(consts.AttributeNameGpuPortionLimit, "use --"+consts.AttributeNameGpuMemoryPortionLimit+" instead"); err != nil {
+			panic(err)
+		}
 	}
 }

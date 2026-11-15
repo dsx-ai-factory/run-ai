@@ -50,6 +50,8 @@ Resource:
   $ref: "./Resource.yaml"
 NonNullResource:
   $ref: "./NonNullResource.yaml"
+GpuResourceRequest:
+  $ref: "./GpuResourceRequest.yaml"
 ResourcesPerNodePool:
   $ref: "./ResourcesPerNodePool.yaml"
 NodeType:

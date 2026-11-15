@@ -26,11 +26,13 @@ var (
 const (
 	ErrorMissingDependencies    = "runai-public config, is missing \"Dependencies\" field"
 	ErrorMissingOptional        = "runai-public config, is missing \"Optional\" field"
+	ErrorMissingConfiguration   = "runai-public config, is missing \"Configuration\" field"
 	ErrorRunAIPublicEmpty       = "failed to parse runai-public, got an empty config"
 	ErrorParsingRunAIPublic     = "failed to parse runai-public, %v"
 	ErrorFailedToGetClusterData = "failed to get cluster %s, data"
 	KnativeKey                  = "knative"
 	LwsKey                      = "lws"
+	SnapshotKey                 = "snapshot"
 )
 
 type Handler struct {
@@ -112,6 +114,43 @@ func (h *Handler) IsLwsAvailable() (bool, string, error) {
 	jobAvailable := ptr.Deref(lwsAvailableStatus.Available, false)
 
 	return jobAvailable, lwsAvailableStatus.Reason, nil
+}
+
+// IsSnapshotCRDInstalled reports whether the NVIDIA Snapshot CRDs are in the cluster.
+func (h *Handler) IsSnapshotCRDInstalled() (bool, string, error) {
+	if h.runaiPublic == nil {
+		err := h.getRunaiPublicConfigMap()
+		if err != nil {
+			return false, "", fmt.Errorf("read runai-public: %w", err)
+		}
+	}
+
+	if h.runaiPublic.Dependencies == nil {
+		return false, "", fmt.Errorf(ErrorMissingDependencies)
+	}
+	if h.runaiPublic.Dependencies.Optional == nil {
+		return false, "", fmt.Errorf(ErrorMissingOptional)
+	}
+
+	crdStatus := h.runaiPublic.Dependencies.Optional[SnapshotKey].Components[runv1.SnapshotComponentCRD]
+
+	return ptr.Deref(crdStatus.Available, false), crdStatus.Reason, nil
+}
+
+// SnapshotAgentNodeSelector is the node selector on the Snapshot agent DaemonSet.
+func (h *Handler) SnapshotAgentNodeSelector() (string, error) {
+	if h.runaiPublic == nil {
+		err := h.getRunaiPublicConfigMap()
+		if err != nil {
+			return "", fmt.Errorf("read runai-public: %w", err)
+		}
+	}
+
+	if h.runaiPublic.Configuration == nil {
+		return "", fmt.Errorf(ErrorMissingConfiguration)
+	}
+
+	return ptr.Deref(h.runaiPublic.Configuration.SnapshotAgentNodeSelector, ""), nil
 }
 
 func (h *Handler) IsDistributedJobAvailable(jobType string) (bool, string, bool, error) {

@@ -172,7 +172,6 @@ export enum ETableFilters {
   COMPUTE_RESOURCE = "compute-resource-table-filters",
   DATA_SOURCE = "data-source-table-filters",
   DATA_VOLUME = "data-volume-table-filters",
-  TEMPLATE = "template-table-filters",
   TEMPLATE_V2 = "template-table-filters-v2",
   ENVIRONMENT = "environment-table-filters",
   AUDIT = "audit-table-filters-advanced",
@@ -196,7 +195,6 @@ export const MULTI_CLUSTER_SUPPORTED_TABLE_FILTERS: ETableFilters[] = [
   ETableFilters.PROJECT,
   ETableFilters.COMPUTE_RESOURCE,
   ETableFilters.DATA_SOURCE,
-  ETableFilters.TEMPLATE,
   ETableFilters.ENVIRONMENT,
   ETableFilters.POLICY,
 ];

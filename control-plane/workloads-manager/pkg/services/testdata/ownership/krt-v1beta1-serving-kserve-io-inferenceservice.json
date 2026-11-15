@@ -1,0 +1,142 @@
+{
+  "apiVersion": "run.ai/v1alpha1",
+  "kind": "Karta",
+  "spec": {
+    "optimizationInstructions": {
+      "gangScheduling": {
+        "podGroups": [
+          {
+            "members": [
+              {
+                "componentName": "predictor",
+                "groupByKeyPaths": [
+                  ".metadata.labels[\"serving.kserve.io/inferenceservice\"]"
+                ]
+              },
+              {
+                "componentName": "transformer",
+                "groupByKeyPaths": [
+                  ".metadata.labels[\"serving.kserve.io/inferenceservice\"]"
+                ]
+              }
+            ],
+            "name": "service"
+          }
+        ]
+      }
+    },
+    "structureDefinition": {
+      "childComponents": [
+        {
+          "kind": {
+            "group": "apps",
+            "kind": "Deployment",
+            "version": "v1"
+          },
+          "name": "predictor",
+          "ownerRef": "inferenceservice",
+          "podSelector": {
+            "componentTypeSelector": {
+              "keyPath": ".metadata.labels[\"component\"]",
+              "value": "predictor"
+            }
+          },
+          "scaleDefinition": {
+            "maxReplicasPath": ".spec.predictor.maxReplicas",
+            "minReplicasPath": ".spec.predictor.minReplicas"
+          },
+          "specDefinition": {
+            "fragmentedPodSpecDefinition": {
+              "annotationsPath": ".spec.predictor.annotations",
+              "containerPath": ".spec.predictor | ( (.[]?  | select(type ==\"object\" and .storageUri )))",
+              "containersPath": ".spec.predictor.containers",
+              "labelsPath": ".spec.predictor.labels",
+              "nodeAffinityPath": ".spec.predictor.affinity.nodeAffinity",
+              "podAffinityPath": ".spec.predictor.affinity.podAffinity",
+              "priorityClassNamePath": ".spec.predictor.priorityClassName",
+              "schedulerNamePath": ".spec.predictor.schedulerName"
+            }
+          }
+        },
+        {
+          "kind": {
+            "group": "apps",
+            "kind": "Deployment",
+            "version": "v1"
+          },
+          "name": "transformer",
+          "ownerRef": "inferenceservice",
+          "podSelector": {
+            "componentTypeSelector": {
+              "keyPath": ".metadata.labels[\"component\"]",
+              "value": "transformer"
+            }
+          },
+          "scaleDefinition": {
+            "maxReplicasPath": ".spec.transformer.maxReplicas",
+            "minReplicasPath": ".spec.transformer.minReplicas"
+          },
+          "specDefinition": {
+            "metadataPath": ".spec.transformer",
+            "podSpecPath": ".spec.transformer"
+          }
+        }
+      ],
+      "rootComponent": {
+        "kind": {
+          "group": "serving.kserve.io",
+          "kind": "InferenceService",
+          "version": "v1beta1"
+        },
+        "name": "inferenceservice",
+        "statusDefinition": {
+          "conditionsDefinition": {
+            "messageFieldName": "message",
+            "path": ".status.conditions",
+            "reasonFieldName": "reason",
+            "statusFieldName": "status",
+            "typeFieldName": "type"
+          },
+          "statusMappings": {
+            "failed": [
+              {
+                "byConditions": [
+                  {
+                    "status": "False",
+                    "type": "PredictorReady"
+                  },
+                  {
+                    "status": "False",
+                    "type": "PredictorConfigurationReady"
+                  },
+                  {
+                    "status": "False",
+                    "type": "RoutesReady"
+                  }
+                ]
+              }
+            ],
+            "running": [
+              {
+                "byConditions": [
+                  {
+                    "status": "True",
+                    "type": "PredictorReady"
+                  },
+                  {
+                    "status": "True",
+                    "type": "RoutesReady"
+                  },
+                  {
+                    "status": "True",
+                    "type": "LatestDeploymentReady"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

@@ -612,7 +612,6 @@ export const AssetKind = {
     Nfs: 'nfs',
     Pvc: 'pvc',
     HostPath: 'hostPath',
-    WorkloadTemplate: 'workload-template',
     Model: 'model',
     ConfigMap: 'config-map',
     SecretVolume: 'secret-volume',
@@ -1114,12 +1113,6 @@ export interface AssetUsageInfo {
      */
     'inferences'?: Array<WorkloadRefAndStatus>;
     /**
-     * templates that rely on this asset.
-     * @type {Array<AssetRef>}
-     * @memberof AssetUsageInfo
-     */
-    'templates'?: Array<AssetRef>;
-    /**
      * 
      * @type {AssetsUsageRef}
      * @memberof AssetUsageInfo
@@ -1177,7 +1170,7 @@ export interface AssetsIds {
     'workloadVolumes'?: Array<string>;
 }
 /**
- * Reference information about a set of assets. used to describe - assets comprising a workspace - assets comprising a workspace template - assets that use other assets (e.g. s3 asset which uses access key).
+ * Reference information about a set of assets. used to describe - assets comprising a workspace - assets that use other assets (e.g. s3 asset which uses access key).
  * @export
  * @interface AssetsRef
  */
@@ -6827,7 +6820,7 @@ export interface GitsRules {
     'instances'?: ItemRules | null;
 }
 /**
- * GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.
+ * GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require Run:ai cluster version 3.0.14 or later.
  * @export
  * @enum {string}
  */
@@ -10042,6 +10035,25 @@ export interface PodAffinityTypeRules {
 /**
  * 
  * @export
+ * @interface PodResourceClaimBinding
+ */
+export interface PodResourceClaimBinding {
+    /**
+     * Pod-local name of the claim entry, as listed in `pod.spec.resourceClaims[].name` and referenced by containers in `resources.claims`.
+     * @type {string}
+     * @memberof PodResourceClaimBinding
+     */
+    'name': string;
+    /**
+     * Name of the ResourceClaim bound to the pod for this entry. For a claim generated from a template, this is null until Kubernetes creates and binds the claim.
+     * @type {string}
+     * @memberof PodResourceClaimBinding
+     */
+    'claimName'?: string | null;
+}
+/**
+ * 
+ * @export
  * @interface PolicyInfo
  */
 export interface PolicyInfo {
@@ -10170,7 +10182,7 @@ export type PortServiceType = typeof PortServiceType[keyof typeof PortServiceTyp
 
 
 /**
- * Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
+ * Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. Semi-preemptible is intended for multi-pod workloads. Replicas up to the configured minimum are non-preemptible, while replicas above that minimum are preemptible. On single-pod workloads with a fixed replica count of one, semi-preemptible behaves as non-preemptible. The API continues to accept semi-preemptible for these workloads. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
  * @export
  * @enum {string}
  */
@@ -10943,6 +10955,87 @@ export interface RequestInfo {
      * @memberof RequestInfo
      */
     'afterUpdate': number;
+}
+/**
+ * 
+ * @export
+ * @interface ResourceClaimTemplateWorkload
+ */
+export interface ResourceClaimTemplateWorkload {
+    /**
+     * A unique ID of the workload.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'workloadId': string;
+    /**
+     * The name of the workload.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'name': string;
+    /**
+     * The type of the workload. Any workload type the cluster reports, not only the NVIDIA Run:ai native ones.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'type': string;
+    /**
+     * The id of the project.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'projectId': string;
+    /**
+     * The pods of the workload that reference the resource claim template.
+     * @type {Array<ResourceClaimTemplateWorkloadPod>}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'pods': Array<ResourceClaimTemplateWorkloadPod>;
+}
+/**
+ * 
+ * @export
+ * @interface ResourceClaimTemplateWorkloadPod
+ */
+export interface ResourceClaimTemplateWorkloadPod {
+    /**
+     * The id of the pod.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkloadPod
+     */
+    'podId': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkloadPod
+     */
+    'podName': string;
+    /**
+     * The pod\'s claims that were generated from the resource claim template. A pod usually has one, but may list several when more than one of its claim entries references the same template.
+     * @type {Array<PodResourceClaimBinding>}
+     * @memberof ResourceClaimTemplateWorkloadPod
+     */
+    'resourceClaims': Array<PodResourceClaimBinding>;
+}
+/**
+ * 
+ * @export
+ * @interface ResourceClaimTemplateWorkloadsResponse
+ */
+export interface ResourceClaimTemplateWorkloadsResponse {
+    /**
+     * Offset for the next page of results. Present only when there are more workloads beyond the current page (i.e., the number of returned workloads equals the limit). 
+     * @type {number}
+     * @memberof ResourceClaimTemplateWorkloadsResponse
+     */
+    'next'?: number;
+    /**
+     * The workloads whose pods currently reference the resource claim template.
+     * @type {Array<ResourceClaimTemplateWorkload>}
+     * @memberof ResourceClaimTemplateWorkloadsResponse
+     */
+    'workloads': Array<ResourceClaimTemplateWorkload>;
 }
 /**
  * The lowest and highest update counts included in this bulk of updates. for example, it is possible that agent requester for afterUpdate=10 and received a bulk of four updates - 12, 13, 16, 18. in this case lowestUpdate=12, highestUpdate=18.
@@ -12019,26 +12112,7 @@ export interface SpecificRunConnections {
     'connections'?: Array<SpecificRunConnectionInfo> | null;
 }
 /**
- * The information needed for creating az template - a set of assets and an optional set of specific environment parameters.
- * @export
- * @interface SpecificRunCreationFields
- */
-export interface SpecificRunCreationFields {
-    /**
-     * 
-     * @type {AssetsIds}
-     * @memberof SpecificRunCreationFields
-     */
-    'assets': AssetsIds;
-    /**
-     * 
-     * @type {SpecificRunParams}
-     * @memberof SpecificRunCreationFields
-     */
-    'specificEnv'?: SpecificRunParams | null;
-}
-/**
- * Information about the set of assets which comprises a workspace, training or template, and an optional set of specific run parameters.
+ * Information about the set of assets which comprises a workspace or training workload, and an optional set of specific run parameters.
  * @export
  * @interface SpecificRunInfoFields
  */
@@ -14710,76 +14784,6 @@ export const WorkloadSupportedTypesDistFrameworkEnum = {
 
 export type WorkloadSupportedTypesDistFrameworkEnum = typeof WorkloadSupportedTypesDistFrameworkEnum[keyof typeof WorkloadSupportedTypesDistFrameworkEnum];
 
-/**
- * 
- * @export
- * @interface WorkloadTemplate
- */
-export interface WorkloadTemplate {
-    /**
-     * 
-     * @type {AssetMeta}
-     * @memberof WorkloadTemplate
-     */
-    'meta': AssetMeta;
-    /**
-     * 
-     * @type {SpecificRunInfoFields}
-     * @memberof WorkloadTemplate
-     */
-    'spec': SpecificRunInfoFields;
-}
-/**
- * 
- * @export
- * @interface WorkloadTemplateCreationRequest
- */
-export interface WorkloadTemplateCreationRequest {
-    /**
-     * 
-     * @type {AssetCreationRequest}
-     * @memberof WorkloadTemplateCreationRequest
-     */
-    'meta': AssetCreationRequest;
-    /**
-     * 
-     * @type {SpecificRunCreationFields}
-     * @memberof WorkloadTemplateCreationRequest
-     */
-    'spec': SpecificRunCreationFields;
-}
-/**
- * 
- * @export
- * @interface WorkloadTemplateListResponse
- */
-export interface WorkloadTemplateListResponse {
-    /**
-     * 
-     * @type {Array<WorkloadTemplate>}
-     * @memberof WorkloadTemplateListResponse
-     */
-    'entries': Array<WorkloadTemplate>;
-}
-/**
- * 
- * @export
- * @interface WorkloadTemplateUpdateRequest
- */
-export interface WorkloadTemplateUpdateRequest {
-    /**
-     * 
-     * @type {AssetUpdateRequest}
-     * @memberof WorkloadTemplateUpdateRequest
-     */
-    'meta': AssetUpdateRequest;
-    /**
-     * 
-     * @type {SpecificRunCreationFields}
-     * @memberof WorkloadTemplateUpdateRequest
-     */
-    'spec': SpecificRunCreationFields;
-}
 /**
  * the type of workload
  * @export
@@ -21127,11 +21131,10 @@ export const InferencesApiAxiosParamCreator = function (configuration?: Configur
          * @summary Get merged inference workload
          * @param {string} [projectId] The id of the project
          * @param {string} [workloadId] The id of the workload
-         * @param {string} [templateId] The id of the template
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getInferenceMerged: async (projectId?: string, workloadId?: string, templateId?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getInferenceMerged: async (projectId?: string, workloadId?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/v2/inference/merged`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -21154,10 +21157,6 @@ export const InferencesApiAxiosParamCreator = function (configuration?: Configur
 
             if (workloadId !== undefined) {
                 localVarQueryParameter['workloadId'] = workloadId;
-            }
-
-            if (templateId !== undefined) {
-                localVarQueryParameter['templateId'] = templateId;
             }
 
 
@@ -21252,12 +21251,11 @@ export const InferencesApiFp = function(configuration?: Configuration) {
          * @summary Get merged inference workload
          * @param {string} [projectId] The id of the project
          * @param {string} [workloadId] The id of the workload
-         * @param {string} [templateId] The id of the template
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getInferenceMerged(projectId?: string, workloadId?: string, templateId?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InferenceV2>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getInferenceMerged(projectId, workloadId, templateId, options);
+        async getInferenceMerged(projectId?: string, workloadId?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InferenceV2>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getInferenceMerged(projectId, workloadId, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     }
@@ -21335,12 +21333,11 @@ export const InferencesApiFactory = function (configuration?: Configuration, bas
          * @summary Get merged inference workload
          * @param {string} [projectId] The id of the project
          * @param {string} [workloadId] The id of the workload
-         * @param {string} [templateId] The id of the template
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getInferenceMerged(projectId?: string, workloadId?: string, templateId?: string, options?: any): AxiosPromise<InferenceV2> {
-            return localVarFp.getInferenceMerged(projectId, workloadId, templateId, options).then((request) => request(axios, basePath));
+        getInferenceMerged(projectId?: string, workloadId?: string, options?: any): AxiosPromise<InferenceV2> {
+            return localVarFp.getInferenceMerged(projectId, workloadId, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -21429,13 +21426,12 @@ export class InferencesApi extends BaseAPI {
      * @summary Get merged inference workload
      * @param {string} [projectId] The id of the project
      * @param {string} [workloadId] The id of the workload
-     * @param {string} [templateId] The id of the template
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof InferencesApi
      */
-    public getInferenceMerged(projectId?: string, workloadId?: string, templateId?: string, options?: AxiosRequestConfig) {
-        return InferencesApiFp(this.configuration).getInferenceMerged(projectId, workloadId, templateId, options).then((request) => request(this.axios, this.basePath));
+    public getInferenceMerged(projectId?: string, workloadId?: string, options?: AxiosRequestConfig) {
+        return InferencesApiFp(this.configuration).getInferenceMerged(projectId, workloadId, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -23945,6 +23941,54 @@ export const ResourceClaimTemplatesApiAxiosParamCreator = function (configuratio
             };
         },
         /**
+         * Use to list the workloads whose pods currently reference the resource claim template, with the pods that use it and the ResourceClaim each pod is bound to. Only workloads the caller is permitted to read are returned.
+         * @summary List the workloads using a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRctWorkloads: async (assetId: string, offset?: number, limit?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'assetId' is not null or undefined
+            assertParamExists('getRctWorkloads', 'assetId', assetId)
+            const localVarPath = `/api/v1/k8s-objects/resource-claim-templates/{AssetId}/workloads`
+                .replace(`{${"AssetId"}}`, encodeURIComponent(String(assetId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Use to retrieve a list of resource claim templates.
          * @summary List resource claim templates.
          * @param {number} [offset] The offset of the first item returned in the collection.
@@ -24105,6 +24149,19 @@ export const ResourceClaimTemplatesApiFp = function(configuration?: Configuratio
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
+         * Use to list the workloads whose pods currently reference the resource claim template, with the pods that use it and the ResourceClaim each pod is bound to. Only workloads the caller is permitted to read are returned.
+         * @summary List the workloads using a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getRctWorkloads(assetId: string, offset?: number, limit?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResourceClaimTemplateWorkloadsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getRctWorkloads(assetId, offset, limit, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
          * Use to retrieve a list of resource claim templates.
          * @summary List resource claim templates.
          * @param {number} [offset] The offset of the first item returned in the collection.
@@ -24174,6 +24231,18 @@ export const ResourceClaimTemplatesApiFactory = function (configuration?: Config
          */
         getRctById(assetId: string, statusInfo?: boolean, options?: any): AxiosPromise<Rct> {
             return localVarFp.getRctById(assetId, statusInfo, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Use to list the workloads whose pods currently reference the resource claim template, with the pods that use it and the ResourceClaim each pod is bound to. Only workloads the caller is permitted to read are returned.
+         * @summary List the workloads using a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRctWorkloads(assetId: string, offset?: number, limit?: number, options?: any): AxiosPromise<ResourceClaimTemplateWorkloadsResponse> {
+            return localVarFp.getRctWorkloads(assetId, offset, limit, options).then((request) => request(axios, basePath));
         },
         /**
          * Use to retrieve a list of resource claim templates.
@@ -24248,6 +24317,20 @@ export class ResourceClaimTemplatesApi extends BaseAPI {
      */
     public getRctById(assetId: string, statusInfo?: boolean, options?: AxiosRequestConfig) {
         return ResourceClaimTemplatesApiFp(this.configuration).getRctById(assetId, statusInfo, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Use to list the workloads whose pods currently reference the resource claim template, with the pods that use it and the ResourceClaim each pod is bound to. Only workloads the caller is permitted to read are returned.
+     * @summary List the workloads using a resource claim template.
+     * @param {string} assetId Unique identifier of the asset.
+     * @param {number} [offset] The offset of the first item returned in the collection.
+     * @param {number} [limit] The maximum number of entries to return.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResourceClaimTemplatesApi
+     */
+    public getRctWorkloads(assetId: string, offset?: number, limit?: number, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).getRctWorkloads(assetId, offset, limit, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -25852,499 +25935,6 @@ export class SynchronizationApi extends BaseAPI {
 
 
 /**
- * TemplateApi - axios parameter creator
- * @export
- */
-export const TemplateApiAxiosParamCreator = function (configuration?: Configuration) {
-    return {
-        /**
-         * Use to create a template.
-         * @summary Create a template.
-         * @param {WorkloadTemplateCreationRequest} [workloadTemplateCreationRequest] 
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        createTemplate: async (workloadTemplateCreationRequest?: WorkloadTemplateCreationRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/asset/workload-template`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(workloadTemplateCreationRequest, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Use to delete a template by id.
-         * @summary Delete a template.
-         * @param {string} assetId Unique identifier of the asset.
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        deleteTemplateById: async (assetId: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'assetId' is not null or undefined
-            assertParamExists('deleteTemplateById', 'assetId', assetId)
-            const localVarPath = `/api/v1/asset/workload-template/{AssetId}`
-                .replace(`{${"AssetId"}}`, encodeURIComponent(String(assetId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Retrieve the details of a template by id.
-         * @summary Get a template.
-         * @param {string} assetId Unique identifier of the asset.
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        getTemplateById: async (assetId: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'assetId' is not null or undefined
-            assertParamExists('getTemplateById', 'assetId', assetId)
-            const localVarPath = `/api/v1/asset/workload-template/{AssetId}`
-                .replace(`{${"AssetId"}}`, encodeURIComponent(String(assetId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Retrieve a list of templates.
-         * @summary List templates.
-         * @param {string} [name] Filter results by name.
-         * @param {string} [scope] Filters results by scope. Returns only assets that belong to the specified scope. Mutually exclusive with includeDescendants. Valid values: tenant, cluster, department, project.
-         * @param {number} [projectId] Filter results by project id. If scope filter is project, only assets from the specific project will be included in the response. Otherwise, the response will include project, department, cluster, tenant and system assets.
-         * @param {string} [departmentId] Filter results by department id. If scope filter is department, only assets from the specific department will be included in the response. Otherwise, the response will include department, cluster, tenant and system assets.
-         * @param {string} [clusterId] Filter results by Universally Unique Identifier (UUID) of the cluster. If scope filter is cluster, only assets from the specific cluster will be included in the response. Otherwise, the response will include cluster, tenant and system assets.
-         * @param {string} [distributedFramework] Filter results to workload of type distributed and distributedFramework.
-         * @param {boolean} [isDistributed] Filter results to workload of type distributed.
-         * @param {boolean} [isTraining] Filter results to workload of type training.
-         * @param {boolean} [isWorkspace] Filter results to workload of type workspace.
-         * @param {boolean} [isDistributedInference] Filter results to workload of type distributed inference.
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        listTemplates: async (name?: string, scope?: string, projectId?: number, departmentId?: string, clusterId?: string, distributedFramework?: string, isDistributed?: boolean, isTraining?: boolean, isWorkspace?: boolean, isDistributedInference?: boolean, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/asset/workload-template`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-            if (name !== undefined) {
-                localVarQueryParameter['name'] = name;
-            }
-
-            if (scope !== undefined) {
-                localVarQueryParameter['scope'] = scope;
-            }
-
-            if (projectId !== undefined) {
-                localVarQueryParameter['projectId'] = projectId;
-            }
-
-            if (departmentId !== undefined) {
-                localVarQueryParameter['departmentId'] = departmentId;
-            }
-
-            if (clusterId !== undefined) {
-                localVarQueryParameter['clusterId'] = clusterId;
-            }
-
-            if (distributedFramework !== undefined) {
-                localVarQueryParameter['distributedFramework'] = distributedFramework;
-            }
-
-            if (isDistributed !== undefined) {
-                localVarQueryParameter['isDistributed'] = isDistributed;
-            }
-
-            if (isTraining !== undefined) {
-                localVarQueryParameter['isTraining'] = isTraining;
-            }
-
-            if (isWorkspace !== undefined) {
-                localVarQueryParameter['isWorkspace'] = isWorkspace;
-            }
-
-            if (isDistributedInference !== undefined) {
-                localVarQueryParameter['isDistributedInference'] = isDistributedInference;
-            }
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Use to update the details of a template by id.
-         * @summary Update a template.
-         * @param {string} assetId Unique identifier of the asset.
-         * @param {WorkloadTemplateUpdateRequest} [workloadTemplateUpdateRequest] 
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        updateTemplate: async (assetId: string, workloadTemplateUpdateRequest?: WorkloadTemplateUpdateRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'assetId' is not null or undefined
-            assertParamExists('updateTemplate', 'assetId', assetId)
-            const localVarPath = `/api/v1/asset/workload-template/{AssetId}`
-                .replace(`{${"AssetId"}}`, encodeURIComponent(String(assetId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(workloadTemplateUpdateRequest, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-    }
-};
-
-/**
- * TemplateApi - functional programming interface
- * @export
- */
-export const TemplateApiFp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = TemplateApiAxiosParamCreator(configuration)
-    return {
-        /**
-         * Use to create a template.
-         * @summary Create a template.
-         * @param {WorkloadTemplateCreationRequest} [workloadTemplateCreationRequest] 
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        async createTemplate(workloadTemplateCreationRequest?: WorkloadTemplateCreationRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WorkloadTemplate>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.createTemplate(workloadTemplateCreationRequest, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * Use to delete a template by id.
-         * @summary Delete a template.
-         * @param {string} assetId Unique identifier of the asset.
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        async deleteTemplateById(assetId: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<HttpResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteTemplateById(assetId, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * Retrieve the details of a template by id.
-         * @summary Get a template.
-         * @param {string} assetId Unique identifier of the asset.
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        async getTemplateById(assetId: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WorkloadTemplate>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getTemplateById(assetId, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * Retrieve a list of templates.
-         * @summary List templates.
-         * @param {string} [name] Filter results by name.
-         * @param {string} [scope] Filters results by scope. Returns only assets that belong to the specified scope. Mutually exclusive with includeDescendants. Valid values: tenant, cluster, department, project.
-         * @param {number} [projectId] Filter results by project id. If scope filter is project, only assets from the specific project will be included in the response. Otherwise, the response will include project, department, cluster, tenant and system assets.
-         * @param {string} [departmentId] Filter results by department id. If scope filter is department, only assets from the specific department will be included in the response. Otherwise, the response will include department, cluster, tenant and system assets.
-         * @param {string} [clusterId] Filter results by Universally Unique Identifier (UUID) of the cluster. If scope filter is cluster, only assets from the specific cluster will be included in the response. Otherwise, the response will include cluster, tenant and system assets.
-         * @param {string} [distributedFramework] Filter results to workload of type distributed and distributedFramework.
-         * @param {boolean} [isDistributed] Filter results to workload of type distributed.
-         * @param {boolean} [isTraining] Filter results to workload of type training.
-         * @param {boolean} [isWorkspace] Filter results to workload of type workspace.
-         * @param {boolean} [isDistributedInference] Filter results to workload of type distributed inference.
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        async listTemplates(name?: string, scope?: string, projectId?: number, departmentId?: string, clusterId?: string, distributedFramework?: string, isDistributed?: boolean, isTraining?: boolean, isWorkspace?: boolean, isDistributedInference?: boolean, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WorkloadTemplateListResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listTemplates(name, scope, projectId, departmentId, clusterId, distributedFramework, isDistributed, isTraining, isWorkspace, isDistributedInference, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * Use to update the details of a template by id.
-         * @summary Update a template.
-         * @param {string} assetId Unique identifier of the asset.
-         * @param {WorkloadTemplateUpdateRequest} [workloadTemplateUpdateRequest] 
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        async updateTemplate(assetId: string, workloadTemplateUpdateRequest?: WorkloadTemplateUpdateRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WorkloadTemplate>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.updateTemplate(assetId, workloadTemplateUpdateRequest, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-    }
-};
-
-/**
- * TemplateApi - factory interface
- * @export
- */
-export const TemplateApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = TemplateApiFp(configuration)
-    return {
-        /**
-         * Use to create a template.
-         * @summary Create a template.
-         * @param {WorkloadTemplateCreationRequest} [workloadTemplateCreationRequest] 
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        createTemplate(workloadTemplateCreationRequest?: WorkloadTemplateCreationRequest, options?: any): AxiosPromise<WorkloadTemplate> {
-            return localVarFp.createTemplate(workloadTemplateCreationRequest, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Use to delete a template by id.
-         * @summary Delete a template.
-         * @param {string} assetId Unique identifier of the asset.
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        deleteTemplateById(assetId: string, options?: any): AxiosPromise<HttpResponse> {
-            return localVarFp.deleteTemplateById(assetId, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Retrieve the details of a template by id.
-         * @summary Get a template.
-         * @param {string} assetId Unique identifier of the asset.
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        getTemplateById(assetId: string, options?: any): AxiosPromise<WorkloadTemplate> {
-            return localVarFp.getTemplateById(assetId, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Retrieve a list of templates.
-         * @summary List templates.
-         * @param {string} [name] Filter results by name.
-         * @param {string} [scope] Filters results by scope. Returns only assets that belong to the specified scope. Mutually exclusive with includeDescendants. Valid values: tenant, cluster, department, project.
-         * @param {number} [projectId] Filter results by project id. If scope filter is project, only assets from the specific project will be included in the response. Otherwise, the response will include project, department, cluster, tenant and system assets.
-         * @param {string} [departmentId] Filter results by department id. If scope filter is department, only assets from the specific department will be included in the response. Otherwise, the response will include department, cluster, tenant and system assets.
-         * @param {string} [clusterId] Filter results by Universally Unique Identifier (UUID) of the cluster. If scope filter is cluster, only assets from the specific cluster will be included in the response. Otherwise, the response will include cluster, tenant and system assets.
-         * @param {string} [distributedFramework] Filter results to workload of type distributed and distributedFramework.
-         * @param {boolean} [isDistributed] Filter results to workload of type distributed.
-         * @param {boolean} [isTraining] Filter results to workload of type training.
-         * @param {boolean} [isWorkspace] Filter results to workload of type workspace.
-         * @param {boolean} [isDistributedInference] Filter results to workload of type distributed inference.
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        listTemplates(name?: string, scope?: string, projectId?: number, departmentId?: string, clusterId?: string, distributedFramework?: string, isDistributed?: boolean, isTraining?: boolean, isWorkspace?: boolean, isDistributedInference?: boolean, options?: any): AxiosPromise<WorkloadTemplateListResponse> {
-            return localVarFp.listTemplates(name, scope, projectId, departmentId, clusterId, distributedFramework, isDistributed, isTraining, isWorkspace, isDistributedInference, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Use to update the details of a template by id.
-         * @summary Update a template.
-         * @param {string} assetId Unique identifier of the asset.
-         * @param {WorkloadTemplateUpdateRequest} [workloadTemplateUpdateRequest] 
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        updateTemplate(assetId: string, workloadTemplateUpdateRequest?: WorkloadTemplateUpdateRequest, options?: any): AxiosPromise<WorkloadTemplate> {
-            return localVarFp.updateTemplate(assetId, workloadTemplateUpdateRequest, options).then((request) => request(axios, basePath));
-        },
-    };
-};
-
-/**
- * TemplateApi - object-oriented interface
- * @export
- * @class TemplateApi
- * @extends {BaseAPI}
- */
-export class TemplateApi extends BaseAPI {
-    /**
-     * Use to create a template.
-     * @summary Create a template.
-     * @param {WorkloadTemplateCreationRequest} [workloadTemplateCreationRequest] 
-     * @param {*} [options] Override http request option.
-     * @deprecated
-     * @throws {RequiredError}
-     * @memberof TemplateApi
-     */
-    public createTemplate(workloadTemplateCreationRequest?: WorkloadTemplateCreationRequest, options?: AxiosRequestConfig) {
-        return TemplateApiFp(this.configuration).createTemplate(workloadTemplateCreationRequest, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Use to delete a template by id.
-     * @summary Delete a template.
-     * @param {string} assetId Unique identifier of the asset.
-     * @param {*} [options] Override http request option.
-     * @deprecated
-     * @throws {RequiredError}
-     * @memberof TemplateApi
-     */
-    public deleteTemplateById(assetId: string, options?: AxiosRequestConfig) {
-        return TemplateApiFp(this.configuration).deleteTemplateById(assetId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Retrieve the details of a template by id.
-     * @summary Get a template.
-     * @param {string} assetId Unique identifier of the asset.
-     * @param {*} [options] Override http request option.
-     * @deprecated
-     * @throws {RequiredError}
-     * @memberof TemplateApi
-     */
-    public getTemplateById(assetId: string, options?: AxiosRequestConfig) {
-        return TemplateApiFp(this.configuration).getTemplateById(assetId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Retrieve a list of templates.
-     * @summary List templates.
-     * @param {string} [name] Filter results by name.
-     * @param {string} [scope] Filters results by scope. Returns only assets that belong to the specified scope. Mutually exclusive with includeDescendants. Valid values: tenant, cluster, department, project.
-     * @param {number} [projectId] Filter results by project id. If scope filter is project, only assets from the specific project will be included in the response. Otherwise, the response will include project, department, cluster, tenant and system assets.
-     * @param {string} [departmentId] Filter results by department id. If scope filter is department, only assets from the specific department will be included in the response. Otherwise, the response will include department, cluster, tenant and system assets.
-     * @param {string} [clusterId] Filter results by Universally Unique Identifier (UUID) of the cluster. If scope filter is cluster, only assets from the specific cluster will be included in the response. Otherwise, the response will include cluster, tenant and system assets.
-     * @param {string} [distributedFramework] Filter results to workload of type distributed and distributedFramework.
-     * @param {boolean} [isDistributed] Filter results to workload of type distributed.
-     * @param {boolean} [isTraining] Filter results to workload of type training.
-     * @param {boolean} [isWorkspace] Filter results to workload of type workspace.
-     * @param {boolean} [isDistributedInference] Filter results to workload of type distributed inference.
-     * @param {*} [options] Override http request option.
-     * @deprecated
-     * @throws {RequiredError}
-     * @memberof TemplateApi
-     */
-    public listTemplates(name?: string, scope?: string, projectId?: number, departmentId?: string, clusterId?: string, distributedFramework?: string, isDistributed?: boolean, isTraining?: boolean, isWorkspace?: boolean, isDistributedInference?: boolean, options?: AxiosRequestConfig) {
-        return TemplateApiFp(this.configuration).listTemplates(name, scope, projectId, departmentId, clusterId, distributedFramework, isDistributed, isTraining, isWorkspace, isDistributedInference, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Use to update the details of a template by id.
-     * @summary Update a template.
-     * @param {string} assetId Unique identifier of the asset.
-     * @param {WorkloadTemplateUpdateRequest} [workloadTemplateUpdateRequest] 
-     * @param {*} [options] Override http request option.
-     * @deprecated
-     * @throws {RequiredError}
-     * @memberof TemplateApi
-     */
-    public updateTemplate(assetId: string, workloadTemplateUpdateRequest?: WorkloadTemplateUpdateRequest, options?: AxiosRequestConfig) {
-        return TemplateApiFp(this.configuration).updateTemplate(assetId, workloadTemplateUpdateRequest, options).then((request) => request(this.axios, this.basePath));
-    }
-}
-
-
-/**
  * TrainingsApi - axios parameter creator
  * @export
  */
@@ -26553,13 +26143,12 @@ export const TrainingsApiAxiosParamCreator = function (configuration?: Configura
          * @summary Get merged training
          * @param {string} [projectId] The id of the project
          * @param {string} [workloadId] The id of the workload
-         * @param {string} [templateId] The id of the template
          * @param {boolean} [isDistributed] Filter results to workload of type distributed.
          * @param {boolean} [isDistributedInference] Filter results to workload of type distributed inference.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getTrainingMerged: async (projectId?: string, workloadId?: string, templateId?: string, isDistributed?: boolean, isDistributedInference?: boolean, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getTrainingMerged: async (projectId?: string, workloadId?: string, isDistributed?: boolean, isDistributedInference?: boolean, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/v2/training/merged`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -26582,10 +26171,6 @@ export const TrainingsApiAxiosParamCreator = function (configuration?: Configura
 
             if (workloadId !== undefined) {
                 localVarQueryParameter['workloadId'] = workloadId;
-            }
-
-            if (templateId !== undefined) {
-                localVarQueryParameter['templateId'] = templateId;
             }
 
             if (isDistributed !== undefined) {
@@ -26916,14 +26501,13 @@ export const TrainingsApiFp = function(configuration?: Configuration) {
          * @summary Get merged training
          * @param {string} [projectId] The id of the project
          * @param {string} [workloadId] The id of the workload
-         * @param {string} [templateId] The id of the template
          * @param {boolean} [isDistributed] Filter results to workload of type distributed.
          * @param {boolean} [isDistributedInference] Filter results to workload of type distributed inference.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getTrainingMerged(projectId?: string, workloadId?: string, templateId?: string, isDistributed?: boolean, isDistributedInference?: boolean, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TrainingV2>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getTrainingMerged(projectId, workloadId, templateId, isDistributed, isDistributedInference, options);
+        async getTrainingMerged(projectId?: string, workloadId?: string, isDistributed?: boolean, isDistributedInference?: boolean, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TrainingV2>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getTrainingMerged(projectId, workloadId, isDistributed, isDistributedInference, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -27059,14 +26643,13 @@ export const TrainingsApiFactory = function (configuration?: Configuration, base
          * @summary Get merged training
          * @param {string} [projectId] The id of the project
          * @param {string} [workloadId] The id of the workload
-         * @param {string} [templateId] The id of the template
          * @param {boolean} [isDistributed] Filter results to workload of type distributed.
          * @param {boolean} [isDistributedInference] Filter results to workload of type distributed inference.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getTrainingMerged(projectId?: string, workloadId?: string, templateId?: string, isDistributed?: boolean, isDistributedInference?: boolean, options?: any): AxiosPromise<TrainingV2> {
-            return localVarFp.getTrainingMerged(projectId, workloadId, templateId, isDistributed, isDistributedInference, options).then((request) => request(axios, basePath));
+        getTrainingMerged(projectId?: string, workloadId?: string, isDistributed?: boolean, isDistributedInference?: boolean, options?: any): AxiosPromise<TrainingV2> {
+            return localVarFp.getTrainingMerged(projectId, workloadId, isDistributed, isDistributedInference, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -27206,15 +26789,14 @@ export class TrainingsApi extends BaseAPI {
      * @summary Get merged training
      * @param {string} [projectId] The id of the project
      * @param {string} [workloadId] The id of the workload
-     * @param {string} [templateId] The id of the template
      * @param {boolean} [isDistributed] Filter results to workload of type distributed.
      * @param {boolean} [isDistributedInference] Filter results to workload of type distributed inference.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof TrainingsApi
      */
-    public getTrainingMerged(projectId?: string, workloadId?: string, templateId?: string, isDistributed?: boolean, isDistributedInference?: boolean, options?: AxiosRequestConfig) {
-        return TrainingsApiFp(this.configuration).getTrainingMerged(projectId, workloadId, templateId, isDistributed, isDistributedInference, options).then((request) => request(this.axios, this.basePath));
+    public getTrainingMerged(projectId?: string, workloadId?: string, isDistributed?: boolean, isDistributedInference?: boolean, options?: AxiosRequestConfig) {
+        return TrainingsApiFp(this.configuration).getTrainingMerged(projectId, workloadId, isDistributed, isDistributedInference, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -27666,11 +27248,10 @@ export const WorkspacesApiAxiosParamCreator = function (configuration?: Configur
          * @summary Get merged workspace
          * @param {string} [projectId] The id of the project
          * @param {string} [workloadId] The id of the workload
-         * @param {string} [templateId] The id of the template
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getWorkspaceMerged: async (projectId?: string, workloadId?: string, templateId?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getWorkspaceMerged: async (projectId?: string, workloadId?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/v2/workspace/merged`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -27693,10 +27274,6 @@ export const WorkspacesApiAxiosParamCreator = function (configuration?: Configur
 
             if (workloadId !== undefined) {
                 localVarQueryParameter['workloadId'] = workloadId;
-            }
-
-            if (templateId !== undefined) {
-                localVarQueryParameter['templateId'] = templateId;
             }
 
 
@@ -27940,12 +27517,11 @@ export const WorkspacesApiFp = function(configuration?: Configuration) {
          * @summary Get merged workspace
          * @param {string} [projectId] The id of the project
          * @param {string} [workloadId] The id of the workload
-         * @param {string} [templateId] The id of the template
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getWorkspaceMerged(projectId?: string, workloadId?: string, templateId?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WorkspaceV2>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkspaceMerged(projectId, workloadId, templateId, options);
+        async getWorkspaceMerged(projectId?: string, workloadId?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WorkspaceV2>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkspaceMerged(projectId, workloadId, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -28062,12 +27638,11 @@ export const WorkspacesApiFactory = function (configuration?: Configuration, bas
          * @summary Get merged workspace
          * @param {string} [projectId] The id of the project
          * @param {string} [workloadId] The id of the workload
-         * @param {string} [templateId] The id of the template
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getWorkspaceMerged(projectId?: string, workloadId?: string, templateId?: string, options?: any): AxiosPromise<WorkspaceV2> {
-            return localVarFp.getWorkspaceMerged(projectId, workloadId, templateId, options).then((request) => request(axios, basePath));
+        getWorkspaceMerged(projectId?: string, workloadId?: string, options?: any): AxiosPromise<WorkspaceV2> {
+            return localVarFp.getWorkspaceMerged(projectId, workloadId, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -28190,13 +27765,12 @@ export class WorkspacesApi extends BaseAPI {
      * @summary Get merged workspace
      * @param {string} [projectId] The id of the project
      * @param {string} [workloadId] The id of the workload
-     * @param {string} [templateId] The id of the template
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof WorkspacesApi
      */
-    public getWorkspaceMerged(projectId?: string, workloadId?: string, templateId?: string, options?: AxiosRequestConfig) {
-        return WorkspacesApiFp(this.configuration).getWorkspaceMerged(projectId, workloadId, templateId, options).then((request) => request(this.axios, this.basePath));
+    public getWorkspaceMerged(projectId?: string, workloadId?: string, options?: AxiosRequestConfig) {
+        return WorkspacesApiFp(this.configuration).getWorkspaceMerged(projectId, workloadId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

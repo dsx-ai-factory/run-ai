@@ -50,8 +50,9 @@ type Pod struct {
 	Tolerations                TolerationArray `gorm:"type:jsonb"`
 	Ip                         *string
 	Task                       *string
-	NodeAffinity               NodeAffinity    `gorm:"type:jsonb"`
-	NetworkTopologyLabelValues *pq.StringArray `gorm:"type:text[]"`
+	NodeAffinity               NodeAffinity          `gorm:"type:jsonb"`
+	NetworkTopologyLabelValues *pq.StringArray       `gorm:"type:text[]"`
+	ResourceClaims             PodResourceClaimArray `gorm:"type:jsonb"`
 	Elements                   []*PodElement
 }
 

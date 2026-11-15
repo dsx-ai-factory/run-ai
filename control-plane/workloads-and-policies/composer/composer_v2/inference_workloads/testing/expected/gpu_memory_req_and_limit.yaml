@@ -20,8 +20,8 @@ Service:
     template:
       metadata:
         annotations:
-          gpu-memory: "10"
           nvidia.com/container.my-llm.gpu-memory.limit: 11M
+          nvidia.com/container.my-llm.gpu-memory.request: 10M
         labels:
           app: service
           createdBy: Service

@@ -1,0 +1,15 @@
+type: object
+required:
+  - pods
+properties:
+  next:
+    type: integer
+    format: int32
+    description: >
+      Offset for the next page of results. Present only when there are more pods
+      beyond the current page (i.e., the number of returned pods equals the limit).
+  pods:
+    type: array
+    description: The pods of the workload that reference at least one claim.
+    items:
+      $ref: './WorkloadPodResourceClaims.yaml'

@@ -8,12 +8,14 @@ Name | Type | Description | Notes
 **SingleSignOnServiceUrl** | Pointer to **string** |  | [optional] 
 **EntityId** | Pointer to **string** |  | [optional] 
 **ServiceProviderMetadataUrl** | Pointer to **string** | Service Provider (SP) metadata url | [optional] 
+**ValidateSignature** | **bool** | Whether the signature of SAML responses from the identity provider is validated | 
+**CertificateExpirationDate** | Pointer to **time.Time** | The expiration date of the signing certificate | [optional] 
 
 ## Methods
 
 ### NewSamlData
 
-`func NewSamlData() *SamlData`
+`func NewSamlData(validateSignature bool, ) *SamlData`
 
 NewSamlData instantiates a new SamlData object
 This constructor will assign default values to properties that have it defined,
@@ -127,6 +129,51 @@ SetServiceProviderMetadataUrl sets ServiceProviderMetadataUrl field to given val
 `func (o *SamlData) HasServiceProviderMetadataUrl() bool`
 
 HasServiceProviderMetadataUrl returns a boolean if a field has been set.
+
+### GetValidateSignature
+
+`func (o *SamlData) GetValidateSignature() bool`
+
+GetValidateSignature returns the ValidateSignature field if non-nil, zero value otherwise.
+
+### GetValidateSignatureOk
+
+`func (o *SamlData) GetValidateSignatureOk() (*bool, bool)`
+
+GetValidateSignatureOk returns a tuple with the ValidateSignature field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetValidateSignature
+
+`func (o *SamlData) SetValidateSignature(v bool)`
+
+SetValidateSignature sets ValidateSignature field to given value.
+
+
+### GetCertificateExpirationDate
+
+`func (o *SamlData) GetCertificateExpirationDate() time.Time`
+
+GetCertificateExpirationDate returns the CertificateExpirationDate field if non-nil, zero value otherwise.
+
+### GetCertificateExpirationDateOk
+
+`func (o *SamlData) GetCertificateExpirationDateOk() (*time.Time, bool)`
+
+GetCertificateExpirationDateOk returns a tuple with the CertificateExpirationDate field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetCertificateExpirationDate
+
+`func (o *SamlData) SetCertificateExpirationDate(v time.Time)`
+
+SetCertificateExpirationDate sets CertificateExpirationDate field to given value.
+
+### HasCertificateExpirationDate
+
+`func (o *SamlData) HasCertificateExpirationDate() bool`
+
+HasCertificateExpirationDate returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

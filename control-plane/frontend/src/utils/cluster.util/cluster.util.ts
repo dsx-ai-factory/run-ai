@@ -28,7 +28,19 @@ export const clusterUtil = {
   isLwsInstalledInCluster,
   findClusterById,
   formatClusterNameWithVersion,
+  isClusterReachable,
 };
+
+// Degraded clusters are still live, so features that don't depend on what is degraded stay available.
+const REACHABLE_CLUSTER_STATES: ReadonlySet<ClusterState> = new Set<ClusterState>([
+  ClusterState.Connected,
+  ClusterState.MissingPrerequisites,
+  ClusterState.ServiceIssues,
+]);
+
+function isClusterReachable(state?: ClusterState): boolean {
+  return !!state && REACHABLE_CLUSTER_STATES.has(state);
+}
 
 function isKnativeInstalledInCluster(cluster: ClustersMinimalData): boolean {
   return cluster.dependenciesStatus?.optional?.knative?.available || false;

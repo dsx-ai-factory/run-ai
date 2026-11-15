@@ -7,8 +7,10 @@ import { describe, expect, it, vi } from "vitest";
 import { shallowMount } from "@vue/test-utils";
 import type { VueWrapper } from "@vue/test-utils";
 import { Quasar } from "quasar";
+import { createPinia, setActivePinia } from "pinia";
 
 import NotificationAlertBar from "./notification-alert-bar.vue";
+import { usePageBannerStore } from "@/stores/page-banner.store";
 import { RunaiHtmlWrapper } from "@/components/common/runai-html-wrapper";
 import { ENotificationBarVariant, variantConfig } from "./notification-alert-bar.model";
 import type { INotificationBarCta } from "./notification-alert-bar.model";
@@ -218,6 +220,35 @@ describe("notification-alert-bar.vue", () => {
     it("applies text-b-body1-md class to title", () => {
       const wrapper = getMountedComponent({ showH1Content: true, title: "Title" });
       expect(wrapper.find(".notification-alert-bar__title").classes()).toContain("text-b-body1-md");
+    });
+  });
+
+  describe("page banner registration", () => {
+    it("registers with the page banner store while mounted and unregisters on unmount", () => {
+      const pinia = createPinia();
+      setActivePinia(pinia);
+      const store = usePageBannerStore();
+      const wrapper = shallowMount(NotificationAlertBar, {
+        global: { plugins: [Quasar, pinia] },
+        props: { pageBanner: true },
+      });
+
+      expect(store.hasActiveBanner).toBe(true);
+
+      wrapper.unmount();
+
+      expect(store.hasActiveBanner).toBe(false);
+    });
+
+    it("does not register when it is not a page banner", () => {
+      const pinia = createPinia();
+      setActivePinia(pinia);
+      const store = usePageBannerStore();
+      shallowMount(NotificationAlertBar, {
+        global: { plugins: [Quasar, pinia] },
+      });
+
+      expect(store.hasActiveBanner).toBe(false);
     });
   });
 });

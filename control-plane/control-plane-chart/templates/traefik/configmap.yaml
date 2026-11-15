@@ -36,12 +36,6 @@ data:
           loadBalancer:
             servers:
             - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.tenantsManager.name ( $top.Values.tenantsManager.service.port | toString ) }}
-        {{- if $top.Values.redoc.docsSite.url }}
-        redoc-service:
-          loadBalancer:
-            servers:
-            - url: {{ $top.Values.redoc.docsSite.url | quote }}
-        {{- end }}
         identity-manager-service:
           loadBalancer:
             servers:
@@ -181,16 +175,6 @@ data:
           - runai-auth
           - no-cache
           priority: 3
-        {{- if $top.Values.redoc.docsSite.url }}
-        redoc-router:
-          rule: "Path(`/api/docs`) || PathPrefix(`/redoc`) || PathPrefix(`/api/redoc`) || PathPrefix(`/api/runai-logo-api`) || PathPrefix(`/runai-logo-api`)"
-          entryPoints:
-          - web
-          service: redoc-service
-          middlewares:
-          - redoc-redirect-external-docs
-          priority: 100
-        {{- end }}
         identity-manager-router:
           rule: {{ range $index, $rule := $top.Values.identityManager.exposedRules }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
           entryPoints:
@@ -486,11 +470,5 @@ data:
           headers:
             customResponseHeaders:
               X-Robots-Tag: "noindex, nofollow"
-        {{- end }}
-        {{- if $top.Values.redoc.docsSite.url }}
-        redoc-redirect-external-docs:
-          redirectRegex:
-            regex: ".*"
-            replacement: {{ $top.Values.redoc.docsSite.url | quote }}
         {{- end }}
   {{- end }}

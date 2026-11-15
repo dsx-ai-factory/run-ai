@@ -51,5 +51,5 @@ type AfterTableDisplayer interface {
 }
 
 type BeforeTableDisplayer interface {
-	DisplayBeforeTable()
+	DisplayBeforeTable(indent string)
 }

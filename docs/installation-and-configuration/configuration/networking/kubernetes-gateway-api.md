@@ -320,7 +320,7 @@ The following steps install Knative Serving and configure the HTTPRoute to conne
 
 <Tab title="Kubernetes">
 
-1.  Install Knative Serving. Follow the [Installing Knative](https://knative.dev/docs/install/operator/knative-with-operators/) instructions or run the following, updating `{VERSION}` with a `knative-operator` release that supports the Knative Serving version you are using:
+1.  Install Knative Serving. Follow the [Installing Knative](https://knative.dev/docs/install/operator/knative-with-operators/) instructions or run the following, updating `{VERSION}` with a `knative-operator` release in the [supported Knative Serving range](../../support-matrix.md) (operator and Serving versions match):
 
     ```bash
     helm repo add knative-operator https://knative.github.io/operator
@@ -593,15 +593,10 @@ Set `ingress.enabled: false` under `customHelmValues` for both the cluster and c
 ```yaml
 cluster:
   customHelmValues:
-    clusterConfig:
-      global:
-        ingress:
-          enabled: false
+    clusterConfig.global.ingress.enabled: false
 controlPlane:
   customHelmValues:
-    global:
-      ingress:
-        enabled: false
+    global.ingress.enabled: false
 ```
 
 Re-run `runai-installer install` with the updated `config.yaml` to apply the change. See [`cluster`](../../installation/guided-installation/configuration-reference.md#cluster-configuration) / [`controlPlane`](../../installation/guided-installation/configuration-reference.md#control-plane-configuration).

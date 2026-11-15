@@ -41,7 +41,7 @@ Includes: `../../../build/makefile/runai-cluster.mk`, `index.mk`.
 - **Artifact caching:** `artifact-metadata.json` sets `cache_artifacts: true`, `path_to_artifacts: bin/`.
 - **Config:** env-var driven via `runai-common-packages/config` (uppercase `mapstructure` tags in `pkg/config/config.go`); defaults in `SetDefaults()`. Key knobs: `MODE`, `RESTART_LIMIT`, `MAX_RETRIES_PER_ADVICE`, `METRICS_BIND_ADDRESS` (:8383).
 - **Testing:** uses controller-runtime envtest (`setup-envtest`, K8s 1.33) + Ginkgo; test CRDs/certs under `internal/tests/testdata/`. `test` runs privileged in Docker.
-- **Scheme/CRDs:** registers Heimdall `Advice` (`pkg/apis/heimdall/v1alpha1`, vendored ), `run.ai/v1alpha1` (RestartRequest), distributed-workload `v2alpha2`, and kubeflow types in `cmd/main.go`.
+- **Scheme/CRDs:** registers Heimdall `Advice` (imported from `github.com/dsx-ai-factory/nvidia-recovery/advice-operator/api/v1alpha1`; envtest loads the Advice CRD from that module's `config/crd/bases` via `go list -m`, so bumping the dependency also updates the test CRD), `run.ai/v1alpha1` (RestartRequest), distributed-workload `v2alpha2`, and kubeflow types in `cmd/main.go`.
 - **Chart wiring:** RBAC template at `runai-chart/templates/clusterroles/advice-restart-controller.yaml`.
 
 ## local-dev.sh iteration

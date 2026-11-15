@@ -40,6 +40,7 @@ type PublicConfiguration struct {
 	GitSyncImage                           *string                     `yaml:"gitSyncImage,omitempty"`
 	GitSyncResources                       *PublicResourceRequirements `yaml:"gitSyncResources,omitempty"`
 	S3FileSystemImage                      *string                     `yaml:"s3FileSystemImage,omitempty"`
+	S3FileSystemMountCheckImage            *string                     `yaml:"s3FileSystemMountCheckImage,omitempty"`
 	S3FileSystemResources                  *PublicResourceRequirements `yaml:"s3FileSystemResources,omitempty"`
 	FipsMode                               *string                     `yaml:"fipsMode,omitempty"`
 	RunaiOauth2ProxyImage                  *string                     `yaml:"runaiOauth2ProxyImage,omitempty"`
@@ -55,6 +56,9 @@ type PublicConfiguration struct {
 	CustomCAOauth2Proxy                    *CustomCAConfig             `yaml:"customCAOauth2Proxy,omitempty"`
 	ExternalAuthUrlEnabled                 *bool                       `yaml:"externalAuthUrlEnabled,omitempty"`
 	OpenshiftRouteTerminationPolicy        *string                     `yaml:"openshiftRouteTerminationPolicy,omitempty"`
+
+	// SnapshotAgentNodeSelector is the node selector on the NVIDIA Snapshot agent DaemonSet.
+	SnapshotAgentNodeSelector *string `yaml:"snapshotAgentNodeSelector,omitempty"`
 
 	// DistGPUNetworkAcceleration mirrors AnyWorkload's GPUNetworkAccelerationEnabled for distributed training.
 	DistGPUNetworkAcceleration *bool `yaml:"distGPUNetworkAcceleration,omitempty"`
@@ -92,5 +96,12 @@ const (
 	RunaiPublicJax              = "jax"
 	RunaiPublicGatewayAPI       = "gateway-api"
 	RunaiPublicAdvice           = "advice"
+	RunaiPublicSnapshot         = "snapshot"
 	DistributedFrameworkSuspend = "suspend"
+
+	SnapshotComponentCRD      = "snapshotjob-crd"
+	SnapshotComponentOperator = "operator"
+
+	SnapshotJobKind      = "SnapshotJob"
+	SnapshotGroupVersion = "nvidia.com/v1alpha1"
 )

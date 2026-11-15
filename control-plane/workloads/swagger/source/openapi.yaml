@@ -33,6 +33,9 @@ paths:
   /internal/workloads:
     $ref: './resources/InternalWorkloads.yaml'
 
+  /internal/workloads/actions:
+    $ref: './resources/InternalWorkloadActions.yaml'
+
   /internal/workloads/sync:
     $ref: './resources/InternalWorkloadsSync.yaml'
 
@@ -42,6 +45,9 @@ paths:
   /internal/workloads/clusters/{clusterId}/nodes/{nodeName}/pods:
     $ref: './resources/InternalUpdateNodePods.yaml'
 
+  /internal/workloads/resource-claim-templates/workloads:
+    $ref: './resources/InternalResourceClaimTemplateWorkloads.yaml'
+
   /internal/workloads/sync-report:
     $ref: './resources/InternalSyncReport.yaml'
 
@@ -50,6 +56,9 @@ paths:
 
   /api/v1/workloads:
     $ref: './resources/Workloads.yaml'
+
+  /api/v1/workloads/slim:
+    $ref: './resources/WorkloadsSlim.yaml'
 
   /internal/workloads/{workloadId}/ancestors:
     $ref: './resources/WorkloadAncestors.yaml'
@@ -241,6 +250,9 @@ paths:
   /api/v1/workloads/{workloadId}/elements/count:
     $ref: './resources/WorkloadElementsCount.yaml'
 
+  /api/v1/workloads/{workloadId}/resource-claims:
+    $ref: './resources/WorkloadResourceClaims.yaml'
+
   /api/v1/workload-categories:
     $ref: './resources/Categories.yaml'
 
@@ -310,6 +322,10 @@ paths:
 
   /api/v1/ai-applications/charts:
     $ref: "./resources/ApplicationCharts.yaml"
+
+  /api/v1/ai-applications/charts/inspect:
+    x-internal: true
+    $ref: "./resources/ApplicationChartInspection.yaml"
 
   /api/v1/ai-applications/charts/{chartId}/content:
     x-internal: true

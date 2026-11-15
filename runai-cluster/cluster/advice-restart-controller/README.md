@@ -51,7 +51,6 @@ The service is responsible for:
 ├── cmd/
 │   └── main.go                 # Entry point: config, scheme, manager, controller
 ├── pkg/
-│   ├── apis/heimdall/v1alpha1/ # Vendored Heimdall Advice CRD Go types
 │   ├── config/                 # AdviceRestartControllerConfig (env-var driven)
 │   └── controller/             # AdviceController: reconcile, events, constants
 ├── internal/

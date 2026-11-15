@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { legacyPolicyForForm } from "@/utils/gpu-memory-compat.util/gpu-memory-compat.util";
+
 import {
   ScopeType,
   type PolicyListEntry,
@@ -173,7 +175,7 @@ async function loadPolicyByMetaAndType(
 async function getTenantFallbackPolicy(): Promise<FallbackPolicy> {
   try {
     const response = await policyServiceApi.policyApi.getFallbackPolicy("tenant");
-    return response.data;
+    return legacyPolicyForForm(response.data);
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
   }
@@ -187,7 +189,7 @@ async function getWorkspacePolicyByScope(scopeProperties: IPolicyScopeProperties
       scopeProperties.projectId?.toString() || undefined,
       scopeProperties.clusterId || undefined,
     );
-    return response.data;
+    return legacyPolicyForForm(response.data);
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
   }
@@ -200,7 +202,7 @@ async function getTrainingPolicyByScope(scopeProperties: IPolicyScopeProperties)
       scopeProperties.projectId?.toString() || undefined,
       scopeProperties.clusterId || undefined,
     );
-    return response.data;
+    return legacyPolicyForForm(response.data);
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
   }
@@ -213,7 +215,7 @@ async function getDistributedPolicyByScope(scopeProperties: IPolicyScopeProperti
       scopeProperties.projectId?.toString() || undefined,
       scopeProperties.clusterId || undefined,
     );
-    return response.data;
+    return legacyPolicyForForm(response.data);
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
   }
@@ -227,7 +229,7 @@ async function getInferencePolicyByScope(scopeProperties: IPolicyScopeProperties
       scopeProperties.projectId?.toString() || undefined,
       scopeProperties.clusterId || undefined,
     );
-    return response.data;
+    return legacyPolicyForForm(response.data);
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
   }
@@ -243,7 +245,7 @@ async function getDistributedInferencePolicyByScope(
       scopeProperties.projectId?.toString() || undefined,
       scopeProperties.clusterId || undefined,
     );
-    return response.data;
+    return legacyPolicyForForm(response.data);
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
   }
@@ -317,7 +319,7 @@ async function updateTrainingPolicy(
       approveClusterDeletion,
       updatedPolicy,
     );
-    return response.data;
+    return legacyPolicyForForm(response.data);
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
   }
@@ -334,7 +336,7 @@ async function updateWorkspacePolicy(
       approveClusterDeletion,
       updatedPolicy,
     );
-    return response.data;
+    return legacyPolicyForForm(response.data);
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
   }
@@ -351,7 +353,7 @@ async function updateDistributedPolicy(
       approveClusterDeletion,
       updatedPolicy,
     );
-    return response.data;
+    return legacyPolicyForForm(response.data);
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
   }
@@ -368,7 +370,7 @@ async function updateInferencePolicy(
       approveClusterDeletion,
       updatedPolicy,
     );
-    return response.data;
+    return legacyPolicyForForm(response.data);
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
   }

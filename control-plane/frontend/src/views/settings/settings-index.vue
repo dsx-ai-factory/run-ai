@@ -8,7 +8,11 @@
     <analytics-section :analytics-section-settings="analyticsSectionSettings" v-if="shouldShowAnalyticsSection" />
     <resources-section :resource-settings="resourceSettings" v-if="canViewGeneralSettings" />
     <workloads-section :workload-section-settings="workloadSectionSettings" v-if="shouldShowWorkloadSection" />
-    <security-section :security-settings="securitySectionSettings" v-if="canViewSecuritySection" />
+    <security-section
+      :security-settings="securitySectionSettings"
+      :default-opened="shouldOpenSecuritySection"
+      v-if="canViewSecuritySection"
+    />
     <notifications-section v-if="canViewNotificationsSection" />
     <cluster-authentications-section v-if="canViewGeneralSettings" />
     <branding-section v-if="canViewBrandingSection" />
@@ -47,6 +51,7 @@ import { ResourcesSection } from "@/components/settings/sections/resources";
 import ClusterAuthenticationsSection from "@/components/settings/sections/cluster-authentication/cluster-autentications-section.vue";
 import { unleashService } from "@/services/infra/unleash.service/unleash.service";
 import { MIN_CLUSTER_VERSION_FOR_NGC_API_KEY } from "@/common/version.constant";
+import { SECURITY_SECTION_QUERY } from "@/router/settings.routes/settings.routes.constants";
 
 // Read is included intentionally: users with only Read permission should see
 // these sections with controls disabled, not a blank page.
@@ -102,7 +107,6 @@ export default defineComponent({
         nim: this.getSettingValue(SettingKeys.EnableNIM),
         allowGPT2Model: this.getSettingValue(SettingKeys.AllowGPT2Model),
         hybridSubmission: this.getSettingValue(SettingKeys.EnableHybridSubmission),
-        templatesV2: this.getSettingValue(SettingKeys.EnableTemplatesV2),
         dataVolumes: this.getSettingValue(SettingKeys.EnableDataVolumes),
         // The yaml submission setting is loaded inside the component, it is implemented in the new settings convention, not in the old backend.
         // This is a placeholder just to keep it in the right order - the value will be loaded inside the component
@@ -133,6 +137,9 @@ export default defineComponent({
           return value && value.key;
         })
       );
+    },
+    shouldOpenSecuritySection(): boolean {
+      return this.$route?.query?.section === SECURITY_SECTION_QUERY.section;
     },
     canViewSecuritySection(): boolean {
       return this.permissionStore.hasSomePermittedActions(ResourceType.SecuritySettings, ALL_CRUD_ACTIONS);

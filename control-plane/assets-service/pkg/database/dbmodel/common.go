@@ -42,8 +42,6 @@ func GetAssetModel(kind api.AssetKind) interface{} {
 		return &SecretAssetRec{}
 	case api.ASSETKIND_S3:
 		return &S3AssetRec{}
-	case api.ASSETKIND_WORKLOAD_TEMPLATE:
-		return &TemplateAssetRec{}
 	case api.ASSETKIND_NGC_API_KEY:
 		return &NgcApiKeyRecord{}
 	case api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE:

@@ -495,7 +495,7 @@ const DistributedAssetsEdit = defineComponent({
         this.updateCreatedPvc(createdDataSourceId, relevantForm);
       }
 
-      this.computeSectionOptions.applyPolicyDefaults = !!fromCopyId || !!this.trainingStore.templateId;
+      this.computeSectionOptions.applyPolicyDefaults = !!fromCopyId;
     } catch (error: unknown) {
       this.$q.notify(alertUtil.getError("Failed to load assets"));
       console.error(error);
@@ -1064,11 +1064,7 @@ const DistributedAssetsEdit = defineComponent({
     },
     async loadFromExistingTraining(trainingId: string): Promise<void> {
       try {
-        const trainingModel: TrainingV2 = await trainingService.getTrainingMergedWithPolicy(
-          undefined,
-          trainingId,
-          undefined,
-        );
+        const trainingModel: TrainingV2 = await trainingService.getTrainingMergedWithPolicy(undefined, trainingId);
         this.trainingStore.setLoadedTrainingModelWithDefaults(deepCopy(trainingModel));
         let uiVolumes: Array<IUIVolume> | undefined;
         if (trainingModel.assets.workloadVolumes?.length) {

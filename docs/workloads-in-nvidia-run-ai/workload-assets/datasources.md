@@ -206,6 +206,8 @@ After a private data source is created, check its status to monitor its proper c
 
 A [Host path](https://kubernetes.io/docs/concepts/storage/volumes/#hostpath) volume is a Kubernetes concept that enables mounting a host path file or a directory on the workload's file system. Like a PVC, the host path volume's data persists across workloads under various scopes. It also enables data serving from the hosting node.
 
+Administrators can restrict the use of host path data sources with a workload policy. See [Policy YAML examples](../../platform-management/policies/policy-yaml-examples.md) and [Security best practices](../../installation-and-configuration/configuration/security/security-best-practices.md).
+
 1. Select the **cluster** under which to create this data source
 2. Select a [**scope**](overview.md#asset-scope)
 3. Enter a **name** for the data source. The name must be unique.

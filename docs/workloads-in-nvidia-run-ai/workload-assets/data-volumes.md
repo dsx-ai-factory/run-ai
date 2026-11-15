@@ -6,6 +6,8 @@ Acting as a central repository for organizational data resources, data volumes c
 
 Once a data volume is created, it can be shared with additional multiple scopes and easily utilized by AI practitioners when submitting workloads. Shared data volumes are mounted with read-only permissions, ensuring data integrity. Any modifications to the data in a shared DV must be made by writing to the original volume of the PVC used to create the data volume.
 
+When a data volume is shared with additional scopes, NVIDIA Run:ai creates a PVC in each of those scopes. These PVCs are references to the same underlying physical storage (the same PV), so the data itself is not copied or replicated. Sharing a data volume does not consume additional storage capacity.
+
 <Note>
 
 **Note**
@@ -17,7 +19,7 @@ Data volumes is enabled by default and applies only to flexible workload submiss
 ## Why Use a Data Volume?
 
 1. **Sharing with multiple scopes** - Data volumes can be shared across different scopes in a cluster, including projects, departments. Using data volumes allows for data reuse and collaboration within the organization.
-2. **Storage saving** - A single copy of the data can be used across multiple [scopes](overview.md#asset-scope)
+2. **Storage saving** - A single copy of the data is used across multiple [scopes](overview.md#asset-scope). Sharing creates references to the same storage and does not duplicate the data.
 
 ## Typical Use Cases
 

@@ -9,9 +9,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database"
 	"net/http"
 	"time"
+
+	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database"
 
 	datavolumes_service "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/clients/datavolumes-service"
 	k8sObjectsTracker "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/clients/k8s-objects-tracker"
@@ -212,12 +213,7 @@ func (s *PVCApiService) DeletePvcAssetById(ctx context.Context, id string) (api.
 		return NewErrorResponse(api.NewError(int(rbacErr.Code), rbacErr.Message, errors.New(rbacErr.Details))), nil
 	}
 
-	validationError := validateNotBeingUsedByTemplate(ctx, id, assetKind)
-	if validationError != nil {
-		return NewErrorResponse(validationError), nil
-	}
-
-	if validationError = validatePvcNotBeingUsedByDatavolumes(ctx, pvcAsset); validationError != nil {
+	if validationError := validatePvcNotBeingUsedByDatavolumes(ctx, pvcAsset); validationError != nil {
 		return NewErrorResponse(validationError), nil
 	}
 
@@ -946,4 +942,18 @@ func addDeletionEvent(ctx context.Context, pvcAsset *api.PvcAsset) *api.Error {
 			&eventModel,
 		},
 	)
+}
+
+func composeBeingInUseMessage(resourceKind string, resourceNames []string, assetKind api.AssetKind, _ /*assetId*/ string) *api.Error {
+	msg := fmt.Sprintf("the requested %s asset is being used by ", assetKind)
+	if len(resourceNames) == 1 {
+		msg += fmt.Sprintf("%s '%s'", resourceKind, resourceNames[0])
+	} else {
+		etc := ""
+		if len(resourceNames) > 2 {
+			etc = ", etc."
+		}
+		msg += fmt.Sprintf("%d %ss (%s, %s%s)", len(resourceNames), resourceKind, resourceNames[0], resourceNames[1], etc)
+	}
+	return api.NewError(http.StatusPreconditionFailed, msg, nil)
 }

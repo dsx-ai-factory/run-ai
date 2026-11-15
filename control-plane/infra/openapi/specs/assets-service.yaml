@@ -539,6 +539,39 @@ paths:
           $ref: '#/components/responses/404NotFound'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/k8s-objects/resource-claim-templates/{AssetId}/workloads:
+    parameters:
+      - $ref: '#/components/parameters/AssetId'
+    get:
+      summary: List the workloads using a resource claim template.
+      description: Use to list the workloads whose pods currently reference the resource claim template, with the pods that use it and the ResourceClaim each pod is bound to. Only workloads the caller is permitted to read are returned.
+      operationId: get_rct_workloads
+      x-authorize:
+        resource-type: resource-claim-templates
+        action: read
+      x-service: assets-service
+      x-test-coverage:
+        - control-plane/assets-service/pkg/services/api_rct_service_test.go
+      tags:
+        - Resource Claim Templates
+      parameters:
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Request completed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceClaimTemplateWorkloadsResponse'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/k8s-objects/updates:
     post:
       summary: Allow cluster to request a list of k8sObjects updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
@@ -2999,182 +3032,6 @@ paths:
           $ref: '#/components/responses/404NotFound'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v1/asset/workload-template:
-    get:
-      summary: List templates.
-      description: Retrieve a list of templates.
-      operationId: list_templates
-      deprecated: true
-      x-service: assets-service
-      x-test-coverage:
-        - control-plane/assets-service/pkg/services/api_template_service_test.go
-        - control-plane/assets-service/pkg/services/api_workloads_service_test.go
-        - e2e/src/test/suites/parallel/workloads/workspaceTemplateUI.test.ts
-      x-no-authorization: true
-      tags:
-        - Template
-      parameters:
-        - $ref: '#/components/parameters/AssetNameFilter'
-        - $ref: '#/components/parameters/AssetScopeFilter'
-        - $ref: '#/components/parameters/AssetProjectFilter'
-        - $ref: '#/components/parameters/AssetDepartmentFilter'
-        - $ref: '#/components/parameters/AssetClusterFilter'
-        - $ref: '#/components/parameters/DistributedFrameworkQuery'
-        - $ref: '#/components/parameters/IsDistributedQuery'
-        - $ref: '#/components/parameters/IsTrainingQuery'
-        - $ref: '#/components/parameters/IsWorkspaceQuery'
-        - $ref: '#/components/parameters/IsDistributedInferenceQuery'
-      responses:
-        '200':
-          description: Request completed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WorkloadTemplateListResponse'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-    post:
-      summary: Create a template.
-      description: Use to create a template.
-      operationId: create_template
-      deprecated: true
-      x-service: assets-service
-      x-test-coverage:
-        - control-plane/assets-service/pkg/services/api_template_service_test.go
-        - control-plane/assets-service/pkg/services/api_workloads_service_test.go
-        - e2e/src/test/suites/parallel/workloads/workspaceTemplateUI.test.ts
-        - e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts
-        - e2e/src/test/suites/parallel/submitUI/connectToJupiterUI.test.ts
-      x-no-authorization: true
-      x-audit: true
-      tags:
-        - Template
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/WorkloadTemplateCreationRequest'
-      responses:
-        '202':
-          description: Request accepted successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WorkloadTemplate'
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '409':
-          $ref: '#/components/responses/409Conflict'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v1/asset/workload-template/{AssetId}:
-    parameters:
-      - $ref: '#/components/parameters/AssetId'
-    get:
-      summary: Get a template.
-      description: Retrieve the details of a template by id.
-      operationId: get_template_by_id
-      deprecated: true
-      x-service: assets-service
-      x-test-coverage:
-        - control-plane/assets-service/pkg/services/api_template_service_test.go
-        - control-plane/assets-service/pkg/services/api_workloads_service_test.go
-        - e2e/src/test/suites/parallel/workloads/workspaceTemplateUI.test.ts
-        - e2e/src/test/suites/parallel/submitUI/connectToJupiterUI.test.ts
-      x-authorize:
-        resource-type: templates
-        action: read
-      tags:
-        - Template
-      responses:
-        '200':
-          description: Request completed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WorkloadTemplate'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '404':
-          $ref: '#/components/responses/404NotFound'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-    put:
-      summary: Update a template.
-      description: Use to update the details of a template by id.
-      operationId: update_template
-      x-service: assets-service
-      deprecated: true
-      x-test-coverage:
-        - control-plane/assets-service/pkg/services/api_template_service_test.go
-        - control-plane/assets-service/pkg/services/api_workloads_service_test.go
-        - e2e/src/test/suites/parallel/workloads/workspaceTemplateUI.test.ts
-      x-authorize:
-        resource-type: templates
-        action: update
-      x-audit: true
-      tags:
-        - Template
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/WorkloadTemplateUpdateRequest'
-      responses:
-        '202':
-          description: Request accepted successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WorkloadTemplate'
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '409':
-          $ref: '#/components/responses/409Conflict'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-    delete:
-      summary: Delete a template.
-      description: Use to delete a template by id.
-      operationId: delete_template_by_id
-      deprecated: true
-      x-service: assets-service
-      x-test-coverage:
-        - control-plane/assets-service/pkg/services/api_template_service_test.go
-        - control-plane/assets-service/pkg/services/api_workloads_service_test.go
-        - e2e/src/test/suites/parallel/workloads/workspaceTemplateUI.test.ts
-        - e2e/src/test/suites/parallel/submitUI/connectToJupiterUI.test.ts
-      x-authorize:
-        resource-type: templates
-        action: delete
-      x-audit: true
-      tags:
-        - Template
-      responses:
-        '202':
-          $ref: '#/components/responses/202Accepted'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '404':
-          $ref: '#/components/responses/404NotFound'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
   /v1/k8s/clusters/{clusterUuid}/workspaces:
     parameters:
       - $ref: '#/components/parameters/ClusterUuid'
@@ -3650,7 +3507,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/ProjectIdOptional'
         - $ref: '#/components/parameters/WorkloadIdOptional'
-        - $ref: '#/components/parameters/TemplateIdOptional'
       responses:
         '200':
           description: Request completed successfully.
@@ -3778,7 +3634,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/ProjectIdOptional'
         - $ref: '#/components/parameters/WorkloadIdOptional'
-        - $ref: '#/components/parameters/TemplateIdOptional'
         - $ref: '#/components/parameters/IsDistributedQuery'
         - $ref: '#/components/parameters/IsDistributedInferenceQuery'
       responses:
@@ -3989,7 +3844,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/ProjectIdOptional'
         - $ref: '#/components/parameters/WorkloadIdOptional'
-        - $ref: '#/components/parameters/TemplateIdOptional'
       responses:
         '200':
           description: Request completed successfully.
@@ -4838,7 +4692,6 @@ components:
         - nfs
         - pvc
         - hostPath
-        - workload-template
         - model
         - config-map
         - secret-volume
@@ -5017,16 +4870,6 @@ components:
           description: The status of the workspace or training.
           type: string
           minLength: 1
-    AssetRef:
-      description: Reference information about an asset.
-      required:
-        - id
-        - name
-      properties:
-        id:
-          $ref: '#/components/schemas/AssetId'
-        name:
-          $ref: '#/components/schemas/AssetName'
     ToolType:
       description: Super set of Internal and External tool types.
       type: string
@@ -5059,6 +4902,16 @@ components:
           nullable: true
           items:
             $ref: '#/components/schemas/ToolType'
+    AssetRef:
+      description: Reference information about an asset.
+      required:
+        - id
+        - name
+      properties:
+        id:
+          $ref: '#/components/schemas/AssetId'
+        name:
+          $ref: '#/components/schemas/AssetName'
     AssetsUsageRefCompute:
       allOf:
         - $ref: '#/components/schemas/AssetRef'
@@ -5128,11 +4981,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/WorkloadRefAndStatus'
-        templates:
-          description: templates that rely on this asset.
-          type: array
-          items:
-            $ref: '#/components/schemas/AssetRef'
         assets:
           description: list of other assets that use this asset. specifically, accessKeys used by s3, and passwords used by git.
           $ref: '#/components/schemas/AssetsUsageRef'
@@ -5357,14 +5205,13 @@ components:
       maxItems: 1000
       nullable: true
     GpuComputeMode:
-      description: GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.
+      description: GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require Run:ai cluster version 3.0.14 or later.
       type: string
       minLength: 1
       enum:
         - time-slicing
         - sm-sharing
       nullable: true
-      x-gorm-ignore: true
     GpuDevicesRequest:
       description: Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
       type: integer
@@ -5702,6 +5549,85 @@ components:
           $ref: '#/components/schemas/AssetUpdateRequest'
         spec:
           $ref: '#/components/schemas/RctSpec'
+    ReportedWorkloadType:
+      description: The type of the workload. Any workload type the cluster reports, not only the NVIDIA Run:ai native ones.
+      type: string
+      example: Training
+    ProjectId:
+      description: The id of the project.
+      type: string
+      example: 1
+      pattern: .*
+    PodResourceClaimBinding:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Pod-local name of the claim entry, as listed in `pod.spec.resourceClaims[].name` and referenced by containers in `resources.claims`.
+          example: gpu-1
+        claimName:
+          type: string
+          nullable: true
+          description: Name of the ResourceClaim bound to the pod for this entry. For a claim generated from a template, this is null until Kubernetes creates and binds the claim.
+          example: bert-worker-0-gpu-1-mk4s8
+    ResourceClaimTemplateWorkloadPod:
+      type: object
+      required:
+        - podId
+        - podName
+        - resourceClaims
+      properties:
+        podId:
+          type: string
+          format: uuid
+          description: The id of the pod.
+        podName:
+          type: string
+          example: bert-worker-0
+        resourceClaims:
+          type: array
+          description: The pod's claims that were generated from the resource claim template. A pod usually has one, but may list several when more than one of its claim entries references the same template.
+          items:
+            $ref: '#/components/schemas/PodResourceClaimBinding'
+    ResourceClaimTemplateWorkload:
+      type: object
+      required:
+        - workloadId
+        - name
+        - type
+        - projectId
+        - pods
+      properties:
+        workloadId:
+          $ref: '#/components/schemas/WorkloadId'
+        name:
+          $ref: '#/components/schemas/WorkloadName'
+        type:
+          $ref: '#/components/schemas/ReportedWorkloadType'
+        projectId:
+          $ref: '#/components/schemas/ProjectId'
+        pods:
+          type: array
+          description: The pods of the workload that reference the resource claim template.
+          items:
+            $ref: '#/components/schemas/ResourceClaimTemplateWorkloadPod'
+    ResourceClaimTemplateWorkloadsResponse:
+      type: object
+      required:
+        - workloads
+      properties:
+        next:
+          type: integer
+          format: int32
+          description: |
+            Offset for the next page of results. Present only when there are more workloads beyond the current page (i.e., the number of returned workloads equals the limit).
+        workloads:
+          type: array
+          description: The workloads whose pods currently reference the resource claim template.
+          items:
+            $ref: '#/components/schemas/ResourceClaimTemplateWorkload'
     ClusterSyncReportUpdate:
       description: success/failure report of a single update attempt of the cluster
       properties:
@@ -7689,6 +7615,59 @@ components:
           $ref: '#/components/schemas/AssetUpdateRequest'
         spec:
           $ref: '#/components/schemas/S3AssetSpec'
+    TenantId:
+      description: The id of the tenant.
+      type: integer
+      format: int32
+      example: 1001
+    ProjectIdAsNumber:
+      description: The id of the project.
+      type: integer
+      format: int32
+    WorkloadState:
+      description: Reflects the status of the workload created for a workspace or a training. It does not reflect the status of the job created from the workload.
+      type: string
+      minLength: 1
+      enum:
+        - ''
+        - Submitted
+        - Failed
+    WorkloadMetaV1:
+      description: Metadata of the workspace and training.
+      required:
+        - id
+        - tenantId
+        - clusterId
+        - projectId
+        - name
+        - workload
+        - currentState
+        - desiredState
+        - createdBy
+        - updatedBy
+      properties:
+        id:
+          $ref: '#/components/schemas/WorkloadId'
+        tenantId:
+          $ref: '#/components/schemas/TenantId'
+        projectId:
+          $ref: '#/components/schemas/ProjectIdAsNumber'
+        clusterId:
+          $ref: '#/components/schemas/ClusterId'
+        name:
+          $ref: '#/components/schemas/WorkloadName'
+        desiredState:
+          $ref: '#/components/schemas/WorkloadState'
+        currentState:
+          $ref: '#/components/schemas/WorkloadState'
+        createdBy:
+          description: The user who created the workspace or training.
+          type: string
+          minLength: 1
+        updatedBy:
+          description: The recent user who updated the workspace or training.
+          type: string
+          minLength: 1
     AssetsRefCompute:
       allOf:
         - $ref: '#/components/schemas/AssetRef'
@@ -7710,7 +7689,7 @@ components:
         overrides:
           $ref: '#/components/schemas/DataSourceOverrides'
     AssetsRef:
-      description: Reference information about a set of assets. used to describe - assets comprising a workspace - assets comprising a workspace template - assets that use other assets (e.g. s3 asset which uses access key).
+      description: Reference information about a set of assets. used to describe - assets comprising a workspace - assets that use other assets (e.g. s3 asset which uses access key).
       required:
         - environment
       properties:
@@ -7985,7 +7964,7 @@ components:
           maxLength: 63
       nullable: true
     Preemptibility:
-      description: Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
+      description: Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. Semi-preemptible is intended for multi-pod workloads. Replicas up to the configured minimum are non-preemptible, while replicas above that minimum are preemptible. On single-pod workloads with a fixed replica count of one, semi-preemptible behaves as non-preemptible. The API continues to accept semi-preemptible for these workloads. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
       type: string
       minLength: 1
       enum:
@@ -8372,7 +8351,7 @@ components:
       nullable: true
       type: object
     SpecificRunInfoFields:
-      description: Information about the set of assets which comprises a workspace, training or template, and an optional set of specific run parameters.
+      description: Information about the set of assets which comprises a workspace or training workload, and an optional set of specific run parameters.
       required:
         - assets
       properties:
@@ -8382,104 +8361,6 @@ components:
           $ref: '#/components/schemas/SpecificRunParams'
         distributed:
           $ref: '#/components/schemas/InfoDistributed'
-    WorkloadTemplate:
-      required:
-        - meta
-        - spec
-      properties:
-        meta:
-          $ref: '#/components/schemas/AssetMeta'
-        spec:
-          $ref: '#/components/schemas/SpecificRunInfoFields'
-    WorkloadTemplateListResponse:
-      type: object
-      required:
-        - entries
-      properties:
-        entries:
-          type: array
-          items:
-            $ref: '#/components/schemas/WorkloadTemplate'
-    SpecificRunCreationFields:
-      description: The information needed for creating az template - a set of assets and an optional set of specific environment parameters.
-      required:
-        - assets
-      properties:
-        assets:
-          $ref: '#/components/schemas/AssetsIds'
-        specificEnv:
-          $ref: '#/components/schemas/SpecificRunParams'
-    WorkloadTemplateCreationRequest:
-      required:
-        - meta
-        - spec
-      properties:
-        meta:
-          $ref: '#/components/schemas/AssetCreationRequest'
-        spec:
-          $ref: '#/components/schemas/SpecificRunCreationFields'
-    WorkloadTemplateUpdateRequest:
-      required:
-        - meta
-        - spec
-      properties:
-        meta:
-          $ref: '#/components/schemas/AssetUpdateRequest'
-        spec:
-          $ref: '#/components/schemas/SpecificRunCreationFields'
-    TenantId:
-      description: The id of the tenant.
-      type: integer
-      format: int32
-      example: 1001
-    ProjectIdAsNumber:
-      description: The id of the project.
-      type: integer
-      format: int32
-    WorkloadState:
-      description: Reflects the status of the workload created for a workspace or a training. It does not reflect the status of the job created from the workload.
-      type: string
-      minLength: 1
-      enum:
-        - ''
-        - Submitted
-        - Failed
-    WorkloadMetaV1:
-      description: Metadata of the workspace and training.
-      required:
-        - id
-        - tenantId
-        - clusterId
-        - projectId
-        - name
-        - workload
-        - currentState
-        - desiredState
-        - createdBy
-        - updatedBy
-      properties:
-        id:
-          $ref: '#/components/schemas/WorkloadId'
-        tenantId:
-          $ref: '#/components/schemas/TenantId'
-        projectId:
-          $ref: '#/components/schemas/ProjectIdAsNumber'
-        clusterId:
-          $ref: '#/components/schemas/ClusterId'
-        name:
-          $ref: '#/components/schemas/WorkloadName'
-        desiredState:
-          $ref: '#/components/schemas/WorkloadState'
-        currentState:
-          $ref: '#/components/schemas/WorkloadState'
-        createdBy:
-          description: The user who created the workspace or training.
-          type: string
-          minLength: 1
-        updatedBy:
-          description: The recent user who updated the workspace or training.
-          type: string
-          minLength: 1
     InteractiveWorkload:
       description: An interactive workload ready for submission at the cluster. Further details at https://github.com/dsx-ai-factory/run-ai/runai-cluster/tree/master/workload-controller/config/crd"
       type: object
@@ -8729,11 +8610,6 @@ components:
       allOf:
         - $ref: '#/components/schemas/Error'
         - $ref: '#/components/schemas/ComplianceIssuesV2'
-    ProjectId:
-      description: The id of the project.
-      type: string
-      example: 1
-      pattern: .*
     DepartmentId:
       description: The id of the department.
       type: string
@@ -12086,15 +11962,6 @@ components:
       name: workloadId
       in: query
       description: The id of the workload
-      required: false
-      schema:
-        type: string
-        format: uuid
-        example: d73a738f-fab3-430a-8fa3-5241493d7128
-    TemplateIdOptional:
-      name: templateId
-      in: query
-      description: The id of the template
       required: false
       schema:
         type: string

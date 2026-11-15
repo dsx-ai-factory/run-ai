@@ -699,7 +699,7 @@ var _ = Describe("OrgUnit settings API", Ordered, func() {
 func validateResourcesCpu(resources api.Resources, expected api.ResourcesNullable, cpuResourcesTurnedToNull bool) {
 	ExpectWithOffset(1, resources.NodePool.Id).To(Equal(expected.NodePool.Id), "node pool id mismatch")
 	ExpectWithOffset(1, resources.NodePool.Name).To(Equal(expected.NodePool.Name), "node pool name mismatch")
-	ExpectWithOffset(1, resources.Gpu.Deserved).To(Equal(expected.Gpu.Deserved), "gpu deserved mismatch")
+	ExpectWithOffset(1, resources.Gpu.Deserved).To(Equal(ptr.Deref(expected.Gpu.Deserved, 0)), "gpu deserved mismatch")
 	ExpectWithOffset(1, resources.Gpu.Limit).To(Equal(expected.Gpu.Limit), "gpu limit mismatch")
 	ExpectWithOffset(1, resources.Gpu.OverQuotaWeight).To(Equal(expected.Gpu.OverQuotaWeight), "gpu over quota weight mismatch")
 	if cpuResourcesTurnedToNull {

@@ -36,3 +36,50 @@ tests:
       - equal:
           path: spec.anyworkload-controller.externalAuthUrlEnabled
           value: true
+
+  - it: preserves an explicit S3 readiness opt-out
+    set:
+      runai-operator.config.workload-controller.s3FileSystemMountCheckEnabled: false
+    asserts:
+      - equal:
+          path: spec.anyworkload-controller.s3FileSystemMountCheckEnabled
+          value: false
+      - notExists:
+          path: spec.workload-controller
+
+  - it: preserves an explicit S3 readiness opt-in
+    set:
+      runai-operator.config.workload-controller.s3FileSystemMountCheckEnabled: true
+    asserts:
+      - equal:
+          path: spec.anyworkload-controller.s3FileSystemMountCheckEnabled
+          value: true
+      - notExists:
+          path: spec.workload-controller
+
+  - it: keeps a destination opt-out over a legacy opt-in
+    set:
+      runai-operator.config.workload-controller.s3FileSystemMountCheckEnabled: true
+      runai-operator.config.anyworkload-controller.s3FileSystemMountCheckEnabled: false
+    asserts:
+      - equal:
+          path: spec.anyworkload-controller.s3FileSystemMountCheckEnabled
+          value: false
+      - notExists:
+          path: spec.workload-controller
+
+  - it: keeps a destination opt-in over a legacy opt-out
+    set:
+      runai-operator.config.workload-controller.s3FileSystemMountCheckEnabled: false
+      runai-operator.config.anyworkload-controller.s3FileSystemMountCheckEnabled: true
+    asserts:
+      - equal:
+          path: spec.anyworkload-controller.s3FileSystemMountCheckEnabled
+          value: true
+      - notExists:
+          path: spec.workload-controller
+
+  - it: leaves an unspecified S3 readiness override unset
+    asserts:
+      - notExists:
+          path: spec.anyworkload-controller.s3FileSystemMountCheckEnabled

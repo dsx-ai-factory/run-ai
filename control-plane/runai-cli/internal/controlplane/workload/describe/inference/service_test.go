@@ -16,6 +16,7 @@ import (
 	internalApi "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api"
 	cpworkloadmocks "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/autogenerate/mocks/controlplane/workload"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/api"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/client"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/describe"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/describe/displayer"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
@@ -240,7 +241,7 @@ var _ = Describe("Inference Workload Tests", func() {
 			}
 
 			mockWorkloadClient.EXPECT().GetWorkload(gomock.Any(), gomock.Any()).Return(mockWorkloadDetailed, nil)
-			mockWorkloadClient.EXPECT().List(ctx, gomock.Any(), gomock.Any(), gomock.Any(), false).Return(mockWorkloadList, nil)
+			mockWorkloadClient.EXPECT().ListSlim(ctx, gomock.Any(), gomock.Any(), gomock.Any()).Return(client.ToSlimResponse(mockWorkloadList), nil)
 			mockPodsClient.EXPECT().ListByLimit(ctx, testWorkloadId, podLimit).Return(mockPods, nil)
 			mockEventClient.EXPECT().ListByLimit(ctx, testWorkloadId, eventLimit).Return(mockEvents, nil)
 		})

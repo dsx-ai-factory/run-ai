@@ -1,0 +1,10 @@
+name: filterBy
+in: query
+description: Filter event, subject or accepted time using the standard field/operator/value syntax. Dates use ISO 8601 timestamps and only support ==, !=, <= and >= operators.
+schema:
+  type: array
+  maxItems: 10
+  items:
+    type: string
+    pattern: "^((action|subject)(==|!=|<=|>=|=@|!@|=\\^|=\\$)|acceptedAt(==|!=|<=|>=)).+$"
+explode: false

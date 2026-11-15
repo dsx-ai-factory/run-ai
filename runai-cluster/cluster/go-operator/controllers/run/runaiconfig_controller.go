@@ -109,6 +109,8 @@ type RunAIConfigReconciler struct {
 //+kubebuilder:rbac:groups=run.ai,resources=runaiconfigs/finalizers,verbs=update
 //+kubebuilder:rbac:namespace:runai,groups="",resources=configmaps,verbs=get;list;create;update;delete
 //+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get
+//+kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=get
+//+kubebuilder:rbac:groups=apiextensions.k8s.io,resources=customresourcedefinitions,resourceNames=snapshotjobs.nvidia.com,verbs=get
 
 // NewRunAIConfigReconciler creates a new RunAIConfigReconciler
 func NewRunAIConfigReconciler(localClusterClient kube_client.HybridClient,

@@ -9,7 +9,7 @@ const docsState = vi.hoisted(() => ({
   supportUrl: "",
   supportLabel: "Example support",
   numaAwareSchedulingUrl: "https://docs.example.test/numa-aware-scheduling",
-  prerequisitesUrl: "https://docs.example.test/system-requirements",
+  prerequisitesUrl: "https://docs.example.test/prerequisites-and-features",
 }));
 
 vi.mock("@/constants/docs", () => ({
@@ -28,7 +28,7 @@ vi.mock("@/constants/docs", () => ({
       },
     },
     INSTALLATION: {
-      get PREREQUISITES() {
+      get CLUSTER_PREREQUISITES() {
         return docsState.prerequisitesUrl;
       },
     },
@@ -92,12 +92,12 @@ describe("getNumaAwareSchedulingHTMLLink", () => {
 
 describe("prerequisites link", () => {
   afterEach(() => {
-    docsState.prerequisitesUrl = "https://docs.example.test/system-requirements";
+    docsState.prerequisitesUrl = "https://docs.example.test/prerequisites-and-features";
   });
 
   it("links to the prerequisites guide when the catalog has a destination", () => {
     expect(docsUtil.getPrerequisitesHTMLLink()).toBe(
-      'For more information, see the <a href="https://docs.example.test/system-requirements" ' +
+      'For more information, see the <a href="https://docs.example.test/prerequisites-and-features" ' +
         'target="_blank" rel="noopener noreferrer">Prerequisites guide.</a>',
     );
   });

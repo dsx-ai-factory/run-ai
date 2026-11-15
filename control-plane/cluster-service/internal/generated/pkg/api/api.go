@@ -134,6 +134,8 @@ type NodePoolsAPIRouter interface {
 // The NodesAPIRouter implementation should parse necessary information from the http request,
 // pass the data to a NodesAPIServicer to perform the required actions, then write the service results to the http response.
 type NodesAPIRouter interface {
+	GetNodeLabelKeys(http.ResponseWriter, *http.Request)
+	GetNodeLabelValues(http.ResponseWriter, *http.Request)
 	CountNodes(http.ResponseWriter, *http.Request)
 	UpsertNode(http.ResponseWriter, *http.Request)
 	DeleteNode(http.ResponseWriter, *http.Request)
@@ -275,6 +277,8 @@ type NodePoolsAPIServicer interface {
 // while the service implementation can be ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
 type NodesAPIServicer interface {
+	GetNodeLabelKeys(context.Context, string, int32, int32, string) (ImplResponse, error)
+	GetNodeLabelValues(context.Context, string, string, int32, int32, string) (ImplResponse, error)
 	CountNodes(context.Context, string, []string, string) (ImplResponse, error)
 	UpsertNode(context.Context, string, string, NodeInfo) (ImplResponse, error)
 	DeleteNode(context.Context, string, string) (ImplResponse, error)

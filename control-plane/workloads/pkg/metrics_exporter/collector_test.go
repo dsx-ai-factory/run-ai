@@ -13,6 +13,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/metrics_exporter/mocks"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/metrics_exporter/models"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/runaimetrics"
+	metrics_pkg "github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -117,6 +118,60 @@ var _ = Describe("MetricsCollector", Ordered, func() {
 			))
 		})
 
+		DescribeTable("fills clusterId from the cluster used for each query",
+			func(responseLabels map[string]string) {
+				stubPodMetricResponse(exportableMetric.Metric.GetName(), openapi.Result{
+					MetricLabels: responseLabels,
+					Measurements: []openapi.Measurement{{Value: "1"}},
+				})
+				clustersClienterMock.On("GetClusterIds", mock.Anything, int32(1001)).
+					Return([]string{"cluster-1", "cluster-2"}, nil)
+
+				records := collector.Collect(context.Background(), []int32{1001})
+
+				Expect(records).To(ConsistOf(
+					models.MetricRecord{
+						Labels: map[string]string{
+							"tenant_id":        "1001",
+							"mapped_clusterId": "cluster-1",
+							"mapped_podId":     "pod-1",
+						},
+						Value: 1,
+					},
+					models.MetricRecord{
+						Labels: map[string]string{
+							"tenant_id":        "1001",
+							"mapped_clusterId": "cluster-2",
+							"mapped_podId":     "pod-1",
+						},
+						Value: 1,
+					},
+				))
+			},
+			Entry("when clusterId is absent", map[string]string{"pod_uuid": "pod-1"}),
+			Entry("when clusterId is empty", map[string]string{"pod_uuid": "pod-1", "clusterId": ""}),
+		)
+
+		It("preserves a clusterId supplied by the metrics service", func() {
+			stubPodMetricResponse(exportableMetric.Metric.GetName(), openapi.Result{
+				MetricLabels: map[string]string{"pod_uuid": "pod-1", "clusterId": "reported-cluster"},
+				Measurements: []openapi.Measurement{{Value: "1"}},
+			})
+			clustersClienterMock.On("GetClusterIds", mock.Anything, int32(1001)).
+				Return([]string{"queried-cluster"}, nil)
+
+			records := collector.Collect(context.Background(), []int32{1001})
+
+			Expect(records).To(Equal([]models.MetricRecord{{
+				Labels: map[string]string{
+					"tenant_id":        "1001",
+					"mapped_clusterId": "reported-cluster",
+					"mapped_podId":     "pod-1",
+				},
+				Value: 1,
+			}}))
+		})
+
 		It("should stop collection and return early when context is done", func() {
 			ctx, cancel := context.WithCancel(context.Background())
 			cancel() // cancel immediately
@@ -124,6 +179,95 @@ var _ = Describe("MetricsCollector", Ordered, func() {
 			result := collector.Collect(ctx, []int32{1001})
 			Expect(result).To(BeEmpty())
 		})
+	})
+
+	Describe("pod metric export", func() {
+		var (
+			metric                 *models.ExportableMetric
+			exporter               *GaugeExporter
+			registry               metrics_pkg.MetricsRegistrar
+			crashingPod            openapi.Result
+			otherPod               openapi.Result
+			expectedOtherPodRecord models.MetricRecord
+		)
+
+		BeforeEach(func() {
+			metric = exportedMetrics[0]
+			crashingPod = podMetricResult("crashing-pod", "CrashLoopBackOff")
+			otherPod = podMetricResult("other-pod", "Error")
+			expectedOtherPodRecord = models.MetricRecord{
+				Labels: map[string]string{
+					"tenant_id":   "1011",
+					"cluster_id":  "test-cluster",
+					"node":        "test-node",
+					"pod_id":      "other-pod",
+					"workload_id": "test-workload",
+					"status":      "Error",
+				},
+				Value: 1,
+			}
+			clusters := mocks.NewClustersClienter(GinkgoT())
+			clusters.On("GetClusterIds", mock.Anything, int32(1011)).Return([]string{"test-cluster"}, nil)
+			collector := &MetricsCollector{
+				exportableMetric: metric, clustersClienter: clusters,
+				concurrentLimitCh: make(chan struct{}, 1),
+			}
+			registry = metrics_pkg.Registry("pod-metric-export-test-" + CurrentSpecReport().LeafNodeText)
+			registry.GaugeVec(metric.Name).Register(metric.Description, getLabels(metric))
+			exporter = &GaugeExporter{registry: registry, exportableMetric: metric, collector: collector}
+		})
+
+		exportAndGatherPodMetrics := func(results ...openapi.Result) []models.MetricRecord {
+			GinkgoHelper()
+			stubPodMetricResponse(metric.Metric.GetName(), results...)
+
+			Expect(func() { exporter.Export(context.Background(), []int32{1011}) }).NotTo(Panic())
+
+			families, err := registry.GetPrometheusRegistry().Gather()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(families).To(HaveLen(1))
+			var records []models.MetricRecord
+			for _, sample := range families[0].GetMetric() {
+				labels := map[string]string{}
+				for _, label := range sample.GetLabel() {
+					labels[label.GetName()] = label.GetValue()
+				}
+				records = append(records, models.MetricRecord{Labels: labels, Value: sample.GetGauge().GetValue()})
+			}
+			return records
+		}
+
+		It("exports both pods after restoring the missing clusterId", func() {
+			delete(crashingPod.MetricLabels, "clusterId")
+
+			records := exportAndGatherPodMetrics(crashingPod, otherPod)
+
+			Expect(records).To(ConsistOf(expectedOtherPodRecord, models.MetricRecord{
+				Labels: map[string]string{
+					"tenant_id":   "1011",
+					"cluster_id":  "test-cluster",
+					"node":        "test-node",
+					"pod_id":      "crashing-pod",
+					"workload_id": "test-workload",
+					"status":      "CrashLoopBackOff",
+				},
+				Value: 1,
+			}))
+		})
+
+		DescribeTable("skips the incomplete pod and exports the next pod",
+			func(missingLabel string) {
+				delete(crashingPod.MetricLabels, missingLabel)
+
+				records := exportAndGatherPodMetrics(crashingPod, otherPod)
+
+				Expect(records).To(Equal([]models.MetricRecord{expectedOtherPodRecord}))
+			},
+			Entry("when node is absent", "node"),
+			Entry("when pod_uuid is absent", "pod_uuid"),
+			Entry("when workload_id is absent", "workload_id"),
+			Entry("when detailed_status is absent", "detailed_status"),
+		)
 	})
 
 	Describe("queryMetric", func() {
@@ -172,3 +316,23 @@ var _ = Describe("MetricsCollector", Ordered, func() {
 		})
 	})
 })
+
+func stubPodMetricResponse(metricName string, results ...openapi.Result) {
+	GinkgoHelper()
+	previous := mockMetricServerResponseMap[metricName]
+	DeferCleanup(func() { mockMetricServerResponseMap[metricName] = previous })
+	mockMetricServerResponseMap[metricName] = openapi.GetMetrics200Response{Status: "success", Data: results}
+}
+
+func podMetricResult(podId, status string) openapi.Result {
+	return openapi.Result{
+		MetricLabels: map[string]string{
+			"clusterId":       "test-cluster",
+			"node":            "test-node",
+			"pod_uuid":        podId,
+			"workload_id":     "test-workload",
+			"detailed_status": status,
+		},
+		Measurements: []openapi.Measurement{{Value: "1"}},
+	}
+}

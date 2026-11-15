@@ -173,17 +173,17 @@ func TestAppendControlPlaneImagePullSecretIfNeeded(t *testing.T) {
 func TestFilterOutApplicativeRunaiRemoteWrite_FilterOutApplicativeRunai(t *testing.T) {
 	input := []cpclusterclient.ClusterControlPlaneConfigMetricsRemoteWrite{
 		{
-			Url:   ptr.To("https://aaa.runailabs.com/api/v1/receive"),
+			Url:   ptr.To("https://aaa.example.com/api/v1/receive"),
 			Label: ptr.To(string(rwlc.ClusterMetricsRemoteWriteLabel)),
 		},
 		{
-			Url:   ptr.To("https://app.runailabs.com/api/v1/receive"),
+			Url:   ptr.To("https://app.example.com/api/v1/receive"),
 			Label: ptr.To(rwlc.ApplicationMetricsRemoteWriteLabel),
 		},
 	}
 	expected := []cpclusterclient.ClusterControlPlaneConfigMetricsRemoteWrite{
 		{
-			Url:   ptr.To("https://aaa.runailabs.com/api/v1/receive"),
+			Url:   ptr.To("https://aaa.example.com/api/v1/receive"),
 			Label: ptr.To(rwlc.ClusterMetricsRemoteWriteLabel),
 		},
 	}
@@ -195,21 +195,21 @@ func TestFilterOutApplicativeRunaiRemoteWrite_FilterOutApplicativeRunai(t *testi
 func TestFilterOutApplicativeRunaiRemoteWrite_NoApplicativeRunaiToFilter(t *testing.T) {
 	input := []cpclusterclient.ClusterControlPlaneConfigMetricsRemoteWrite{
 		{
-			Url:   ptr.To("https://aaa.runailabs.com/api/v1/receive"),
+			Url:   ptr.To("https://aaa.example.com/api/v1/receive"),
 			Label: ptr.To(rwlc.ClusterMetricsRemoteWriteLabel),
 		},
 		{
-			Url:   ptr.To("https://bbb.runailabs.com/api/v1/receive"),
+			Url:   ptr.To("https://bbb.example.com/api/v1/receive"),
 			Label: ptr.To("other"),
 		},
 	}
 	expected := []cpclusterclient.ClusterControlPlaneConfigMetricsRemoteWrite{
 		{
-			Url:   ptr.To("https://aaa.runailabs.com/api/v1/receive"),
+			Url:   ptr.To("https://aaa.example.com/api/v1/receive"),
 			Label: ptr.To(rwlc.ClusterMetricsRemoteWriteLabel),
 		},
 		{
-			Url:   ptr.To("https://bbb.runailabs.com/api/v1/receive"),
+			Url:   ptr.To("https://bbb.example.com/api/v1/receive"),
 			Label: ptr.To("other"),
 		},
 	}
@@ -229,7 +229,7 @@ func TestFilterOutApplicativeRunaiRemoteWrite_EmptyInput(t *testing.T) {
 func TestFilterOutApplicativeRunaiRemoteWrite_OnlyApplicativeRunai(t *testing.T) {
 	input := []cpclusterclient.ClusterControlPlaneConfigMetricsRemoteWrite{
 		{
-			Url:   ptr.To("https://app.runailabs.com/api/v1/receive"),
+			Url:   ptr.To("https://app.example.com/api/v1/receive"),
 			Label: ptr.To(rwlc.ApplicationMetricsRemoteWriteLabel),
 		},
 	}
@@ -242,13 +242,13 @@ func TestFilterOutApplicativeRunaiRemoteWrite_OnlyApplicativeRunai(t *testing.T)
 func TestFilterOutApplicativeRunaiRemoteWrite_NilLabelShouldNotBeFiltered(t *testing.T) {
 	input := []cpclusterclient.ClusterControlPlaneConfigMetricsRemoteWrite{
 		{
-			Url:   ptr.To("https://app.runailabs.com/api/v1/receive"),
+			Url:   ptr.To("https://app.example.com/api/v1/receive"),
 			Label: nil,
 		},
 	}
 	expected := []cpclusterclient.ClusterControlPlaneConfigMetricsRemoteWrite{
 		{
-			Url:   ptr.To("https://app.runailabs.com/api/v1/receive"),
+			Url:   ptr.To("https://app.example.com/api/v1/receive"),
 			Label: nil,
 		},
 	}

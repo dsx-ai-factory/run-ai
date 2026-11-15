@@ -98,7 +98,7 @@ describe("documentation URL resolution", () => {
     }
   });
 
-  it.each(["systemRequirements", "networkRequirements", "customInstallation"] as const)(
+  it.each(["networkRequirements", "customInstallation"] as const)(
     "leaves unconfirmed v2 destination %s unavailable",
     (key) => {
       expect(getDocsLink(key)).toBeTruthy();
@@ -129,7 +129,7 @@ describe("embedded documentation references", () => {
     expect(anchor.attributes).toHaveLength(1);
   });
 
-  it.each(["missing", "constructor", "__proto__", "systemRequirements"])(
+  it.each(["missing", "constructor", "__proto__", "networkRequirements"])(
     "removes stale href values for unavailable key %s",
     (key) => {
       const anchor = resolvedAnchor(`<a href="/stale" data-doc-key="${key}">Guide</a>`);

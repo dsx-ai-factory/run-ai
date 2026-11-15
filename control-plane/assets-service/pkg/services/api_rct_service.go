@@ -20,6 +20,7 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/generated/pkg/api"
 	k8sObjectsTracker "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/clients/k8s-objects-tracker"
+	workloadsServiceClient "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/clients/workloads-service"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/dao"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/dbmodel"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/projects"
@@ -31,6 +32,7 @@ import (
 	audit "github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client"
 	backend "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
@@ -221,6 +223,61 @@ func (s *RctApiService) GetRctById(ctx context.Context, id string, statusInfo bo
 	}
 
 	return api.Response(http.StatusOK, asset), nil
+}
+
+// GetRctWorkloads - List the workloads using a resource claim template.
+func (s *RctApiService) GetRctWorkloads(ctx context.Context, id string, offset int32, limit int32) (api.ImplResponse, error) {
+	asset, actionError := dao.GetRctById(ctx, id, dao.RctOptions{})
+	if actionError != nil {
+		return NewErrorResponse(actionError), nil
+	}
+
+	if _, _, authError := query_types.ApplyRbacRulesGetById(ctx, asset.Meta); authError != nil {
+		return NewErrorResponse(authError), nil
+	}
+
+	// pods reference the template by its kubernetes name, which is the asset name.
+	scopeInfo := ScopeInfoOfMeta(&asset.Meta)
+	request := workloadsApi.NewInternalResourceClaimTemplateWorkloadsRequest(
+		asset.Meta.Name, workloadsApi.ScopeType(scopeInfo.Scope), scopeInfo.ScopeId)
+	workloads, workloadsErr := workloadsServiceClient.Get().Client().InternalGetResourceClaimTemplateWorkloads(ctx, request, offset, limit)
+	if workloadsErr != nil {
+		return NewErrorResponse(api.NewError(int(workloadsErr.Code), workloadsErr.Message, nil)), nil
+	}
+
+	return api.Response(http.StatusOK, toRctWorkloadsResponse(workloads)), nil
+}
+
+func toRctWorkloadsResponse(workloads *workloadsApi.ResourceClaimTemplateWorkloadsResponse) api.ResourceClaimTemplateWorkloadsResponse {
+	response := api.ResourceClaimTemplateWorkloadsResponse{
+		Next:      convutils.Deref(workloads.Next, 0),
+		Workloads: make([]api.ResourceClaimTemplateWorkload, 0, len(workloads.Workloads)),
+	}
+	for _, workload := range workloads.Workloads {
+		pods := make([]api.ResourceClaimTemplateWorkloadPod, 0, len(workload.Pods))
+		for _, pod := range workload.Pods {
+			claims := make([]api.PodResourceClaimBinding, 0, len(pod.ResourceClaims))
+			for _, claim := range pod.ResourceClaims {
+				claims = append(claims, api.PodResourceClaimBinding{
+					Name:      claim.Name,
+					ClaimName: claim.ClaimName.Get(),
+				})
+			}
+			pods = append(pods, api.ResourceClaimTemplateWorkloadPod{
+				PodId:          pod.PodId,
+				PodName:        pod.PodName,
+				ResourceClaims: claims,
+			})
+		}
+		response.Workloads = append(response.Workloads, api.ResourceClaimTemplateWorkload{
+			WorkloadId: workload.WorkloadId,
+			Name:       workload.Name,
+			Type:       workload.Type,
+			ProjectId:  workload.ProjectId,
+			Pods:       pods,
+		})
+	}
+	return response
 }
 
 // UpdateRctById - Update a resource claim template.

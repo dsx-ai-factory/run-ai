@@ -230,6 +230,7 @@ Class | Method | HTTP request | Description
  - [GetRanks200Response](docs/GetRanks200Response.md)
  - [GetSyncDepartments200Response](docs/GetSyncDepartments200Response.md)
  - [GetSyncProjects200Response](docs/GetSyncProjects200Response.md)
+ - [GpuResourceRequest](docs/GpuResourceRequest.md)
  - [HttpResponse](docs/HttpResponse.md)
  - [ListReports200Response](docs/ListReports200Response.md)
  - [MeasurementResponse](docs/MeasurementResponse.md)

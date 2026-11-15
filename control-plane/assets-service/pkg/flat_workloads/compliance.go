@@ -13,6 +13,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
+
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v2"
 	"github.com/google/uuid"
 
@@ -454,8 +456,6 @@ func ValidateComplianceOfAssets(ctx context.Context, assetsChan chan assetChanIn
 }
 
 func validateComplianceOfAsset(ctx context.Context, assetInfo assetChanInfo) {
-	assetId := assetInfo.patchingPtrs.Meta.Id
-
 	complianceErrors := make([]api.ComplianceInfoReason, 0)
 
 	//
@@ -508,6 +508,13 @@ func validateComplianceOfAsset(ctx context.Context, assetInfo assetChanInfo) {
 		//   will move under "security"
 		//
 		RearrangePayload(payloadMap)
+		canonicalPayload, aliasErr := gpucompat.NormalizeLegacyGPUFields(payloadMap)
+		if aliasErr != nil {
+			storeAssetCompliance(ctx, assetInfo, []api.ComplianceInfoReason{{Details: aliasErr.Error()}})
+			return
+		}
+
+		payloadMap = canonicalPayload
 
 		fieldsWithCantEditRule := make([]string, 0)
 		complianceResults := policy_compliance.ComplianceErrors{}
@@ -558,6 +565,11 @@ func validateComplianceOfAsset(ctx context.Context, assetInfo assetChanInfo) {
 		}
 	}
 
+	storeAssetCompliance(ctx, assetInfo, complianceErrors)
+}
+
+func storeAssetCompliance(ctx context.Context, assetInfo assetChanInfo, complianceErrors []api.ComplianceInfoReason) {
+	assetId := assetInfo.patchingPtrs.Meta.Id
 	isCompliant := len(complianceErrors) == 0
 
 	complianceInfo := api.ComplianceInfo{

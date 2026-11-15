@@ -11,6 +11,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
+
 	nimv1alpha1 "github.com/NVIDIA/k8s-nim-operator/api/apps/v1alpha1"
 	clustersApi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
@@ -21,7 +23,6 @@ import (
 	workloadsManagerApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 const (
@@ -33,8 +34,6 @@ const (
 
 	portNameHttp = "api"
 	portNameGrpc = "grpc"
-
-	bytesToMB = 1000000
 
 	autoscalingDefaultMinReplicas      = 1
 	autoscalingMetricCpuUtilization    = "cpu"
@@ -318,6 +317,15 @@ func (nsc *NimServiceComposer) processComputeFields(ctx context.Context, src *wo
 			return nil
 		}
 
+		portion, err := gpucompat.ResolveLegacyGPUMemory("Request", src.GpuPortionRequest.Get(), src.GpuMemoryPortionRequest.Get())
+		if err != nil {
+			return workloadsApi.NewError(http.StatusBadRequest, err.Error())
+		}
+		limit, err := gpucompat.ResolveLegacyGPUMemory("Limit", src.GpuPortionLimit.Get(), src.GpuMemoryPortionLimit.Get())
+		if err != nil {
+			return workloadsApi.NewError(http.StatusBadRequest, err.Error())
+		}
+
 		runner := &composer.StepRunner{}
 
 		if target.Resources == nil {
@@ -332,7 +340,7 @@ func (nsc *NimServiceComposer) processComputeFields(ctx context.Context, src *wo
 
 			nsc.fc.ComposeGpuRequestsAndLimits(ctx, src.GpuDevicesRequest.Get(),
 				composer.CastStruct[workloadsManagerApi.GpuRequestType, workloadsApi.GpuRequestType](src.GpuRequestType.Get()),
-				src.GpuPortionRequest.Get(), src.GpuPortionLimit.Get(),
+				portion, limit,
 				src.GpuMemoryRequest.Get(), src.GpuMemoryLimit.Get(), gpuSizingInfoSetter,
 				target.Resources, nil, gpuSizingInfo),
 		)
@@ -346,12 +354,46 @@ func (nsc *NimServiceComposer) processComputeFields(ctx context.Context, src *wo
 			if err != nil {
 				return workloadsApi.NewError(err.Code, fmt.Sprintf("compute: failed to validate gpu vendor is nvidia: %v", err.Message))
 			}
+			if src.GpuComputeMode.Get() != nil {
+				version := nsc.clusterInfo.GetVersion()
+				if version == "" {
+					return workloadsApi.NewError(http.StatusBadRequest, "compute.gpuComputeMode: cluster version is unknown")
+				}
+				capabilities, err := checker.NewClusterCapabilitiesCheckerForVersion(version)
+				if err != nil {
+					return workloadsApi.NewError(http.StatusBadRequest, fmt.Sprintf("cluster version: %v", err))
+				}
+				supported, err := capabilities.ValidateClusterCapability(ctx, checker.MinVersionGpuComputeMode)
+				if err != nil {
+					return workloadsApi.NewError(http.StatusInternalServerError, fmt.Sprintf("cluster capability check: %v", err))
+				}
+				nsc.fc.Options.GpuComputeModeSupported = supported
+			}
+
+			if gpuSizingInfo.MemoryRequest != nil && nsc.clusterInfo.GetVersion() != "" {
+				capabilities, err := checker.NewClusterCapabilitiesCheckerForVersion(nsc.clusterInfo.GetVersion())
+				if err != nil {
+					return workloadsApi.NewError(http.StatusBadRequest, fmt.Sprintf("cluster version: %v", err))
+				}
+				supported, err := capabilities.ValidateClusterCapability(ctx, checker.MinVersionGpuMemoryRequestAnnotations)
+				if err != nil {
+					return workloadsApi.NewError(http.StatusInternalServerError, fmt.Sprintf("cluster capability check: %v", err))
+				}
+				// NIM still uses environment limits on older clusters. Switch both
+				// fields together to avoid mixing legacy requests with annotation limits.
+				nsc.fc.Options.GpuMemoryRequestAnnotationsSupported = supported
+				nsc.fc.Options.GpuMemoryLimitAnnotationsSupported = supported
+			}
 		}
 
+		nimService := nimv1alpha1.NIMService{}
+		nimService.Name = nsc.fc.WorkloadName
 		runner.Batch(
-			nsc.composeMemoryLimitEnv(gpuSizingInfo, &target.Env, composer.StringToEnvVar, composer.GpuMemoryLimitEnvVar),
+			nsc.fc.ComposeGpuComputeMode(composer.EnumToString(src.GpuComputeMode.Get()), gpuSizingInfo, nimService.GetContainerName(), &target.Annotations, composer.StringToMapString),
+			nsc.fc.ComposeMemoryLimitEnv(gpuSizingInfo, &target.Env, composer.StringToEnvVar, composer.GpuMemoryLimitEnvVar),
+			nsc.fc.ComposeMemoryLimitAnnotation(gpuSizingInfo, nimService.GetContainerName(), &target.Annotations, composer.StringToMapString),
 			nsc.composePortionLimitEnv(gpuSizingInfo, &target.Env, composer.StringToEnvVar, composer.GpuMemoryLimitEnvVar),
-			nsc.composeMemoryReqAnnotation(gpuSizingInfo, &target.Annotations, composer.StringToMapString, composer.GpuMemoryAnnotation),
+			nsc.fc.ComposeMemoryReqAnnotation(gpuSizingInfo, nimService.GetContainerName(), &target.Annotations, composer.GpuMemoryRequestToAnnotations),
 			nsc.composePortionReqAnnotation(gpuSizingInfo, &target.Annotations, composer.StringToMapString, composer.GpuFractionAnnotation),
 			nsc.composeNumDevicesAnnotation(gpuSizingInfo, &target.Annotations, composer.StringToMapString, composer.GpuFractionDevicesAnnotation),
 		)
@@ -360,36 +402,11 @@ func (nsc *NimServiceComposer) processComputeFields(ctx context.Context, src *wo
 	}
 }
 
-func (nsc *NimServiceComposer) composeMemoryLimitEnv(src *composer.GpuSizingInfo, target any, setter composer.FnStringSetter, cookie any) func() *workloadsApi.Error {
-	return func() *workloadsApi.Error {
-		if src.MemoryLimit != nil && src.MemoryRequest != nil {
-			return setter(src.MemoryLimit, target, cookie)
-		}
-		return nil
-	}
-}
-
 func (nsc *NimServiceComposer) composePortionLimitEnv(src *composer.GpuSizingInfo, target any, setter composer.FnStringSetter, cookie any) func() *workloadsApi.Error {
 	return func() *workloadsApi.Error {
 		if src.PortionLimit != nil && src.PortionRequest != nil {
 			value := strconv.FormatFloat(*src.PortionLimit, 'f', -1, 64)
 			return setter(&value, target, cookie)
-		}
-		return nil
-	}
-}
-
-func (nsc *NimServiceComposer) composeMemoryReqAnnotation(src *composer.GpuSizingInfo, target any, setter composer.FnStringSetter, cookie any) func() *workloadsApi.Error {
-	return func() *workloadsApi.Error {
-		if src.MemoryRequest != nil {
-			gpuMemoryQuantity, err := resource.ParseQuantity(*src.MemoryRequest)
-			if err != nil { // not expected, already validated before
-				return workloadsApi.NewError(http.StatusBadRequest, fmt.Sprintf(composer.MemoryFormatError, "gpuMemoryLimit"))
-			}
-
-			quantityStr := strconv.Itoa(int(gpuMemoryQuantity.Value() / bytesToMB))
-
-			return setter(&quantityStr, target, cookie)
 		}
 		return nil
 	}

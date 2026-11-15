@@ -6,7 +6,7 @@ This guide explains how to create workspace templates for reuse during workload 
 
 **Note**
 
-Flexible workload templates is enabled by default and applies only to flexible workload submission (enabled by default). If unavailable, contact your administrator to enable it under **General settings** → Workloads → Flexible workload templates.
+Workload templates apply to flexible workload submission. If unavailable, contact your administrator to enable **Flexible workload submission** under **General settings** → **Workloads**.
 
 </Note>
 

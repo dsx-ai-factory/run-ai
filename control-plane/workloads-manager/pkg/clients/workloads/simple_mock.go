@@ -23,9 +23,15 @@ type SimpleMock struct {
 
 	ByWorkloadName      map[string][]*workloadsApi.Workload
 	SyncIssuesByCluster map[string]*workloadsApi.ClusterSyncReport
+	WorkloadActions     []workloadsApi.WorkloadActionRecordInput
 
 	// cluster id to valid priorities and categories
 	PriorityClassesAndCategories map[string]*workloadsApi.GetAvailablePrioritiesAndCategories200Response
+}
+
+func (sm *SimpleMock) CreateWorkloadActions(_ context.Context, request workloadsApi.CreateWorkloadActionsRequest) *workloadsApi.Error {
+	sm.WorkloadActions = append(sm.WorkloadActions, request.Actions...)
+	return nil
 }
 
 func NewSimpleMock() *SimpleMock {

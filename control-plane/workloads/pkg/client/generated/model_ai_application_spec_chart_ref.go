@@ -24,9 +24,9 @@ var _ MappedNullable = &AIApplicationSpecChartRef{}
 type AIApplicationSpecChartRef struct {
 	// The HTTP or HTTPS URL of the Helm repository that hosts the chart. This must match a repository that is accessible. Used together with `name` and `version`.
 	Repo *string `json:"repo,omitempty"`
-	// The name of the chart within the specified repository. This corresponds to the chart’s directory name.
+	// Helm chart name.
 	ChartName *string `json:"chartName,omitempty"`
-	// The specific Semantic Version (SemVer) of the chart to deploy.
+	// Helm chart version.
 	ChartVersion *string `json:"chartVersion,omitempty"`
 	// A direct HTTPS URL to a packaged Helm chart archive (.tgz). When provided, the chart is downloaded directly from this location instead of being resolved through a Helm repository reference.
 	ChartURL *string `json:"chartURL,omitempty"`

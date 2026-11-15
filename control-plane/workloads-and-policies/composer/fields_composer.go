@@ -72,13 +72,17 @@ type FieldsComposerOptions struct {
 	EmptyDirAsVolumeSupported        bool
 	FlexiblePriorityClassesSupported bool
 	GitSyncWithSshKeySupported       bool
+	GpuComputeModeSupported          bool
 	// GpuMemoryLimitAnnotationsSupported is set from checker.MinVersionGpuMemoryLimitAnnotations
 	// (cluster >= 3.0.0). When true, the composer emits the per-container CUDA/KAI GPU
-	// memory-limit annotations (nvidia.com/container.<name>.gpu-memory.limit and
+	// memory limit annotations (nvidia.com/container.<name>.gpu-memory.limit and
 	// kai.scheduler/container.<name>.gpu-memory.portion.limit). When false (older
 	// cluster), it falls back to the legacy RUNAI_GPU_MEMORY_LIMIT / RUNAI_GPU_PORTION_LIMIT
 	// container env vars.
-	GpuMemoryLimitAnnotationsSupported   bool
+	GpuMemoryLimitAnnotationsSupported bool
+	// GpuMemoryRequestAnnotationsSupported requires cluster readers that preserve
+	// quantities from per-container requests (cluster >= 3.1.0).
+	GpuMemoryRequestAnnotationsSupported bool
 	LauncherCreationPolicySupported      bool
 	NodeAffinitySupported                bool
 	OAuth2ProxyTemplatesSupported        bool
@@ -99,6 +103,8 @@ func OptionsForPolicy() FieldsComposerOptions {
 		FlexiblePriorityClassesSupported:     true,
 		GitSyncWithSshKeySupported:           true,
 		GpuMemoryLimitAnnotationsSupported:   true,
+		GpuMemoryRequestAnnotationsSupported: true,
+		GpuComputeModeSupported:              true,
 		LauncherCreationPolicySupported:      true,
 		NodeAffinitySupported:                true,
 		OAuth2ProxyTemplatesSupported:        true,

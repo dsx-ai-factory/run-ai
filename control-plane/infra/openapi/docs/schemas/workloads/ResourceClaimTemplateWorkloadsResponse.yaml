@@ -1,0 +1,15 @@
+type: object
+required:
+  - workloads
+properties:
+  next:
+    type: integer
+    format: int32
+    description: >
+      Offset for the next page of results. Present only when there are more workloads
+      beyond the current page (i.e., the number of returned workloads equals the limit).
+  workloads:
+    type: array
+    description: The workloads whose pods currently reference the resource claim template.
+    items:
+      $ref: './ResourceClaimTemplateWorkload.yaml'

@@ -938,13 +938,6 @@ func (c *TrainingsAPIController) GetTrainingMerged(w http.ResponseWriter, r *htt
 		workloadIdParam = param
 	} else {
 	}
-	var templateIdParam string
-	if query.Has("templateId") {
-		param := query.Get("templateId")
-
-		templateIdParam = param
-	} else {
-	}
 	var isDistributedParam bool
 	if query.Has("isDistributed") {
 		param, err := parseBoolParameter(
@@ -973,7 +966,7 @@ func (c *TrainingsAPIController) GetTrainingMerged(w http.ResponseWriter, r *htt
 		isDistributedInferenceParam = param
 	} else {
 	}
-	result, err := c.service.GetTrainingMerged(r.Context(), projectIdParam, workloadIdParam, templateIdParam, isDistributedParam, isDistributedInferenceParam)
+	result, err := c.service.GetTrainingMerged(r.Context(), projectIdParam, workloadIdParam, isDistributedParam, isDistributedInferenceParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)

@@ -3,10 +3,19 @@ labels:
   - name: Lbl1
     value: lbl1
   - name: Lbl22
+    value: unused
     exclude: true
   - name: ADDED1
     value: added1
   - name: NOT_EXIST
     exclude: true
   - name: NO_VALUE
-    value: 
+    value:
+  - name: example.com/empty
+    value: ""
+  - name: example.com/no-value
+  - name: app.kubernetes.io/part-of
+    value: example
+annotations:
+  - name: example.com/note
+    value: test

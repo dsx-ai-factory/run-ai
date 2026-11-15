@@ -84,6 +84,8 @@ type APIClient struct {
 
 	UnifiedAPI UnifiedAPI
 
+	WorkloadActionsAPI WorkloadActionsAPI
+
 	WorkloadPropertiesAPI WorkloadPropertiesAPI
 
 	WorkloadTemplatesAPI WorkloadTemplatesAPI
@@ -125,6 +127,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.SyncAPI = (*SyncAPIService)(&c.common)
 	c.TrainingsAPI = (*TrainingsAPIService)(&c.common)
 	c.UnifiedAPI = (*UnifiedAPIService)(&c.common)
+	c.WorkloadActionsAPI = (*WorkloadActionsAPIService)(&c.common)
 	c.WorkloadPropertiesAPI = (*WorkloadPropertiesAPIService)(&c.common)
 	c.WorkloadTemplatesAPI = (*WorkloadTemplatesAPIService)(&c.common)
 	c.WorkloadsAPI = (*WorkloadsAPIService)(&c.common)

@@ -23,6 +23,7 @@ type ClientInterface interface {
 
 	// CreateWorkload is a notification to workloads service, informing it about workload creation
 	CreateWorkload(ctx context.Context, workload workloadsApi.WorkloadCreationFields) (*workloadsApi.Workload, *workloadsApi.Error)
+	CreateWorkloadActions(ctx context.Context, request workloadsApi.CreateWorkloadActionsRequest) *workloadsApi.Error
 
 	CountWorkloads(ctx context.Context, filter []string, search string, includeDeleted bool, precise bool) (int64, *workloadsApi.Error)
 

@@ -1,0 +1,17 @@
+image: ubuntu
+labels:
+  - name: app
+    value: user-value
+  - name: createdBy
+    value: user-value
+  - name: project
+    value: user-value
+  - name: release
+    value: user-value
+  - name: workloadKind
+    value: user-value
+  - name: workloadName
+    value: user-value
+annotations:
+  - name: user
+    value: user-value

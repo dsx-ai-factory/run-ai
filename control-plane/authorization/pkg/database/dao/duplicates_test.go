@@ -23,7 +23,7 @@ func TestNoDuplicateResourceTypes(t *testing.T) {
 	// Map of all static roles to test
 	staticRoles := map[string]models.Role{
 		"Cloud operator":                    static_roles.CloudOperator,
-		"Cluster application":               static_roles.ClusterApp,
+		"Cluster service account":           static_roles.ClusterServiceAccount,
 		"Compute resource administrator":    static_legacy_roles.ComputeResourcesAdmin,
 		"Credentials administrator":         static_legacy_roles.CredentialsAdmin,
 		"Data source administrator":         static_legacy_roles.DataSourcesAdmin,
@@ -33,7 +33,7 @@ func TestNoDuplicateResourceTypes(t *testing.T) {
 		"Department viewer":                 static_roles.DepartmentViewer,
 		"Editor":                            static_roles.Editor,
 		"Environment administrator":         static_legacy_roles.EnvironmentAdmin,
-		"Installer application":             static_roles.InstallerApp,
+		"Installer service account":         static_roles.InstallerServiceAccount,
 		"L1 researcher":                     static_legacy_roles.Researcher,
 		"L2 researcher":                     static_legacy_roles.ResearcherL1,
 		"Integration metrics collector":     static_roles.IntegrationMetricsCollector,

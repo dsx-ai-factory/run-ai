@@ -12,6 +12,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
+
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
 	querydbenrich "github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi/dbenrich"
 
@@ -38,11 +40,18 @@ import (
 func DbUpsertWorkload(ctx context.Context, workload *models_crud.Workload) *api.Error {
 	dbErr := api.NewError(http.StatusServiceUnavailable, fmt.Sprintf("Failed to upsert workload %s", workload.Name), nil)
 
-	_, err := runaidb.DB().WithContext(ctx).Table(models_crud.WorkloadsTableName).Save(&workload)
+	stored := *workload
+	stored.Spec = gpucompat.LegacyWorkloadSpec(workload.Spec)
+	stored.MasterSpec = gpucompat.LegacyMasterSpec(workload.MasterSpec)
+
+	_, err := runaidb.DB().WithContext(ctx).Table(models_crud.WorkloadsTableName).Save(&stored)
 	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to upsert workload %s, err %v", workload.DebugInfo(), err)
 		return dbErr.WithDetails(err)
 	}
+
+	stored.Spec, stored.MasterSpec = workload.Spec, workload.MasterSpec
+	*workload = stored
 
 	return nil
 }

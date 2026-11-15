@@ -33,7 +33,7 @@ DistributedTarget:
           template:
             metadata:
               annotations:
-                gpu-memory: "100"
+                nvidia.com/container.pytorch.gpu-memory.request: 100M
                 runai-nodepools: master-node-pool-a master-node-pool-b
                 user: tester
               labels:

@@ -13,7 +13,13 @@
         :is-display-download-button="false"
         :disabled="readOnly"
         @updated="handleSamlFieldsUpdate"
+        @certificate-details="onCertificateDetails"
         ref="samlFieldsRef"
+      />
+      <saml-idp-details
+        :expiration-date="certificateDetails.expirationDate"
+        :show-expiration-date="certificateDetails.showExpirationDate"
+        :expiration-error="certificateDetails.expirationError"
       />
     </div>
 
@@ -29,11 +35,12 @@
 <script lang="ts">
 import { defineComponent, type PropType } from "vue";
 import SamlFields from "@/components/settings/sections/security/sso-settings/idps/saml/saml-fields/saml-fields.vue";
+import { SamlIdpDetails } from "@/components/settings/sections/security/sso-settings/idps/saml/saml-idp-details";
 import IdpMappers from "@/components/settings/sections/security/sso-settings/idps/idp-mappers/idp-mappers.vue";
 import { RunaiFoldingSubSection } from "@/components/common/runai-folding-sub-section";
 import type { SamlCreationData, Mappers, IdpResources } from "@/swagger-models/identity-manager-client";
 import { SamlCreationDataMetadataXmlTypeEnum } from "@/swagger-models/identity-manager-client";
-import type { IIdpMapperItem } from "@/models/setting.model";
+import type { IIdpMapperItem, SamlCertificateDetails } from "@/models/setting.model";
 
 import { settingsUtil } from "@/utils/settings.util";
 import { useIdpsStore } from "@/stores/idps.store";
@@ -47,7 +54,7 @@ export interface SamlMetadata {
 
 export default defineComponent({
   name: "saml-metadata",
-  components: { SamlFields, IdpMappers, RunaiFoldingSubSection },
+  components: { SamlFields, SamlIdpDetails, IdpMappers, RunaiFoldingSubSection },
   emits: ["update:metadata", "update:mappers"],
   props: {
     mappers: {
@@ -75,6 +82,11 @@ export default defineComponent({
       idpResources: {} as IdpResources, // Empty for new IDP in onboarding
       idpStore: useIdpsStore(),
       idpMappersItems: {} as Record<string, IIdpMapperItem>,
+      certificateDetails: {
+        showExpirationDate: false,
+        expirationDate: null,
+        expirationError: "",
+      } as SamlCertificateDetails,
     };
   },
   created(): void {
@@ -125,6 +137,11 @@ export default defineComponent({
     },
   },
   methods: {
+    // The certificate expiration date and its error are shown here, and keep the onboarding form invalid when expired
+    onCertificateDetails(details: SamlCertificateDetails): void {
+      this.certificateDetails = details;
+    },
+
     // Handle updates from saml-fields component (similar to saml-settings updateSamlFields)
     handleSamlFieldsUpdate(newSamlFields: SamlCreationData): void {
       if (JSON.stringify(this.samlFields) !== JSON.stringify(newSamlFields)) {

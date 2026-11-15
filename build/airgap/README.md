@@ -115,7 +115,7 @@ of a container built from this module.
 ```bash
 make -C build/airgap image-lock \
   VERSION=3.0.0 \
-  REPOSITORY=nvcr.io/nvidia/runai
+  REPOSITORY=nvcr.io/nvidia/runai-oss
 ```
 
 The combined target writes:
@@ -137,9 +137,9 @@ Control-plane and cluster accept independent versions and registries:
 ```bash
 make -C build/airgap image-lock-amd64 \
   CONTROL_PLANE_VERSION=3.0.0 \
-  CONTROL_PLANE_REPOSITORY=nvcr.io/nvidia/runai \
+  CONTROL_PLANE_REPOSITORY=nvcr.io/nvidia/runai-oss \
   CLUSTER_VERSION=3.0.0 \
-  CLUSTER_REPOSITORY=nvcr.io/nvidia/runai
+  CLUSTER_REPOSITORY=nvcr.io/nvidia/runai-oss
 ```
 
 `VERSION` and `REPOSITORY` are shared defaults. The generator does not discover
@@ -164,6 +164,7 @@ export NGC_API_KEY="<api-key>"
 
 make -C build/airgap artifact-lock \
   VERSION=3.0.0 \
+  NGC_HELM_BASE_URL=https://helm.ngc.nvidia.com/nvidia/runai-oss/charts \
   ARTIFACT_LOCK_IMAGE_LOCKS="\
 dist/image-locks/runai-control-plane-3.0.0-linux-amd64.yaml \
 dist/image-locks/runai-cluster-3.0.0-linux-amd64.yaml \

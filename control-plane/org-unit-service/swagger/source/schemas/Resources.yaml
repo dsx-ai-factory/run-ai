@@ -21,7 +21,7 @@ properties:
       - deserved
     allOf:
       - $ref: "./NonNullResource.yaml"
-      - description: Defines the GPU quota assignment, maximum GPU device allocation, and weight assigned that determines the fairshare of over-quota resources.
+      - description: Defines the GPU quota assignment, maximum GPU device allocation, and weight assigned that determines the fairshare of over-quota resources. For node pools with quota disabled, deserved is 0.
   cpu:
     type: object
     nullable: true

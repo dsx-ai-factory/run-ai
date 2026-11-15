@@ -1,0 +1,15 @@
+type: object
+required:
+  - name
+  - scopeType
+  - scopeId
+properties:
+  name:
+    type: string
+    minLength: 1
+    description: The name of the ResourceClaimTemplate, as referenced by pods.
+    example: single-gpu
+  scopeType:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/ScopeType.yaml'
+  scopeId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/ScopeId.yaml'

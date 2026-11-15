@@ -70,14 +70,14 @@ func (_e *Loggerer_Expecter) Debugf(format any, args ...any) *Loggerer_Debugf_Ca
 }
 
 func (_c *Loggerer_Debugf_Call) Run(run func(format string, args ...interface{})) *Loggerer_Debugf_Call {
-	_c.Call.Run(func(args mock.Arguments) {
+	_c.Call.Run(func(args1 mock.Arguments) {
 		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
+		if args1[0] != nil {
+			arg0 = args1[0].(string)
 		}
 		var arg1 []interface{}
-		variadicArgs := make([]interface{}, len(args)-1)
-		for i, a := range args[1:] {
+		variadicArgs := make([]interface{}, len(args1)-1)
+		for i, a := range args1[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
@@ -124,14 +124,14 @@ func (_e *Loggerer_Expecter) Errorf(format any, args ...any) *Loggerer_Errorf_Ca
 }
 
 func (_c *Loggerer_Errorf_Call) Run(run func(format string, args ...interface{})) *Loggerer_Errorf_Call {
-	_c.Call.Run(func(args mock.Arguments) {
+	_c.Call.Run(func(args1 mock.Arguments) {
 		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
+		if args1[0] != nil {
+			arg0 = args1[0].(string)
 		}
 		var arg1 []interface{}
-		variadicArgs := make([]interface{}, len(args)-1)
-		for i, a := range args[1:] {
+		variadicArgs := make([]interface{}, len(args1)-1)
+		for i, a := range args1[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
@@ -178,14 +178,14 @@ func (_e *Loggerer_Expecter) Infof(format any, args ...any) *Loggerer_Infof_Call
 }
 
 func (_c *Loggerer_Infof_Call) Run(run func(format string, args ...interface{})) *Loggerer_Infof_Call {
-	_c.Call.Run(func(args mock.Arguments) {
+	_c.Call.Run(func(args1 mock.Arguments) {
 		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
+		if args1[0] != nil {
+			arg0 = args1[0].(string)
 		}
 		var arg1 []interface{}
-		variadicArgs := make([]interface{}, len(args)-1)
-		for i, a := range args[1:] {
+		variadicArgs := make([]interface{}, len(args1)-1)
+		for i, a := range args1[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
@@ -232,14 +232,14 @@ func (_e *Loggerer_Expecter) Warnf(format any, args ...any) *Loggerer_Warnf_Call
 }
 
 func (_c *Loggerer_Warnf_Call) Run(run func(format string, args ...interface{})) *Loggerer_Warnf_Call {
-	_c.Call.Run(func(args mock.Arguments) {
+	_c.Call.Run(func(args1 mock.Arguments) {
 		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
+		if args1[0] != nil {
+			arg0 = args1[0].(string)
 		}
 		var arg1 []interface{}
-		variadicArgs := make([]interface{}, len(args)-1)
-		for i, a := range args[1:] {
+		variadicArgs := make([]interface{}, len(args1)-1)
+		for i, a := range args1[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}

@@ -1,0 +1,61 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+post:
+  summary: Inspect a Helm chart questions declaration.
+  description: |
+    Download or read the selected chart archive and inspect its root questions.yaml or questions.yml declaration
+    in the control plane. Uploaded charts reference an archive already stored by the chart upload API.
+    The response contains normalized question metadata and diagnostics; it does not contain the
+    complete chart defaults or credential values. Missing or unusable questions declarations return
+    a successful response so callers can offer raw YAML configuration. Download, authentication,
+    and invalid archive failures return an error and are not reported as absent questions.
+    Archives containing both root declaration filenames are rejected as ambiguous.
+  operationId: inspect_application_chart
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/ai_applications_chart_inspection_unit_test.go
+    - control-plane/workloads/pkg/services/ai_applications_chart_inspection_http_test.go
+  x-authorize:
+    resource-type: applications
+    action: create
+  tags:
+    - AI Applications
+  requestBody:
+    description: Chart source selection and optional saved credential reference, up to 64 KiB of JSON.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Applications/AIApplicationChartInspectionRequest.yaml'
+  responses:
+    200:
+      description: Chart inspected, including absent or unusable questions declarations.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Applications/AIApplicationChartInspectionResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    408:
+      description: The chart inspection request was cancelled or exceeded its deadline.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../infra/openapi/docs/responses/Error.yaml'
+    413:
+      $ref: '../../../../infra/openapi/docs/responses/413RequestEntityTooLarge.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      description: The upstream chart source is unavailable or inspection capacity is exhausted.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../infra/openapi/docs/responses/Error.yaml'

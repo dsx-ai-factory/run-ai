@@ -58,9 +58,10 @@ with pending workloads for reasons that are *not* unfair starvation:
 - **Waiting for capacity / reclaim** (pool full of others' usage, its deserved not
   yet freed) → THIS is genuine starvation.
 
-So STARVED detection must inspect the pending workloads' reason (via
-`get_workload_status`) and only count the "waiting for deserved capacity held by
-others" case. Report the reason category, never just "N pending."
+So STARVED detection must inspect the pending workloads' reason (IDs from
+`list_workloads(phase="Pending", projectName=…)`, then `phaseMessage` from
+`get_workload_status(workloadId=…)`) and only count the "waiting for deserved
+capacity held by others" case. Report the reason category, never just "N pending."
 
 ## Two causes of starvation — they need different fixes
 A project below its deserved with genuine (waiting-for-capacity) pending is starved,
@@ -114,7 +115,7 @@ is no trend or time-window analysis here.
 - OVER_BORROWING flags any over-quota allocation (`over_quota_used > 0`); whether to
   apply a materiality threshold (to ignore sub-GPU noise) is open — confirm with the
   Kai-scheduler team how they define "over-borrowing" and "starved."
-- Per-(project,pool) pending count is confirmed directly available:
-  `get_workloads_summary(orgType="project", orgName=…, nodePoolName=…)` →
-  `counts.pending` (folds Pending/Initializing/Creating/Resuming). No client-side
-  filtering needed.
+- Pending counts come from `get_workloads_summary(orgType="project", orgName=…)`
+  without `nodePoolName`: the pool filter matches current placement, so unscheduled
+  pending workloads drop out and the count reads 0. There is no per-pool pending
+  count; attribute pending demand to the project's under-deserved pools.

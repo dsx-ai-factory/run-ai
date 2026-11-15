@@ -9,7 +9,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/internal/generated/pkg/api"
 )
 
-// ClusterSnapshot is the in-memory aggregator of the 12 cluster-reported
+// ClusterSnapshot is the in-memory aggregator of cluster-reported
 // configuration values consumed by the anyworkload-path init container
 // constructors. Composers
 // read it at workload-composition time so they don't have to traverse the
@@ -19,6 +19,7 @@ import (
 type ClusterSnapshot struct {
 	GitSyncImage                           *string
 	S3FileSystemImage                      *string
+	S3FileSystemMountCheckImage            *string
 	FipsMode                               *string
 	RunaiOauth2ProxyImage                  *string
 	RunaiOauth2ProxyUsernameLoaderImage    *string
@@ -55,6 +56,7 @@ func NewClusterSnapshotFromCluster(cluster *api.DisplayedCluster) *ClusterSnapsh
 
 	snapshot.GitSyncImage = cfg.GitSyncImage
 	snapshot.S3FileSystemImage = cfg.S3FileSystemImage
+	snapshot.S3FileSystemMountCheckImage = cfg.S3FileSystemMountCheckImage
 	if cfg.FipsMode != nil {
 		fipsMode := string(*cfg.FipsMode)
 		snapshot.FipsMode = &fipsMode

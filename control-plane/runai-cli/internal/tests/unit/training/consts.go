@@ -39,19 +39,20 @@ const (
 
 // Compute flags
 const (
-	CpuCoreLimit           = "--cpu-core-limit"
-	CpuCoreRequest         = "--cpu-core-request"
-	CpuMemoryLimit         = "--cpu-memory-limit"
-	CpuMemoryRequest       = "--cpu-memory-request"
-	ExtendedResource       = "--extended-resource"
-	GpuDevicesRequest      = "--gpu-devices-request"
-	GpuMemoryLimit         = "--gpu-memory-limit"
-	GpuMemoryRequest       = "--gpu-memory-request"
-	GpuPortionLimit        = "--gpu-portion-limit"
-	GpuPortionRequest      = "--gpu-portion-request"
-	GpuRequestType         = "--gpu-request-type"
-	LargeShm               = "--large-shm"
-	MasterExtendedResource = "--master-extended-resource"
+	CpuCoreLimit            = "--cpu-core-limit"
+	CpuCoreRequest          = "--cpu-core-request"
+	CpuMemoryLimit          = "--cpu-memory-limit"
+	CpuMemoryRequest        = "--cpu-memory-request"
+	ExtendedResource        = "--extended-resource"
+	GpuDevicesRequest       = "--gpu-devices-request"
+	GpuMemoryLimit          = "--gpu-memory-limit"
+	GpuMemoryRequest        = "--gpu-memory-request"
+	GpuMemoryPortionLimit   = "--gpu-memory-portion-limit"
+	GpuMemoryPortionRequest = "--gpu-memory-portion-request"
+	GpuComputeMode          = "--gpu-compute-mode"
+	GpuRequestType          = "--gpu-request-type"
+	LargeShm                = "--large-shm"
+	MasterExtendedResource  = "--master-extended-resource"
 )
 
 // Storage flags

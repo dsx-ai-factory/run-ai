@@ -11,6 +11,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/ptr"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -292,6 +293,128 @@ var _ = Describe("Pod Parser", func() {
 			}
 			task := parsePodTask(pod)
 			Expect(task).To(BeNil())
+		})
+	})
+
+	Describe("parsePodResourceClaims", func() {
+		It("should return nil for a pod without resource claims", func() {
+			pod := &corev1.Pod{}
+			Expect(parsePodResourceClaims(pod)).To(BeNil())
+		})
+
+		It("should report a template-generated claim with no allocated name until bound", func() {
+			pod := &corev1.Pod{
+				Spec: corev1.PodSpec{
+					ResourceClaims: []corev1.PodResourceClaim{
+						{Name: "gpu-1", ResourceClaimTemplateName: ptr.To("single-gpu")},
+					},
+				},
+			}
+
+			claims := parsePodResourceClaims(pod)
+			Expect(claims).To(HaveLen(1))
+			Expect(claims[0].Name).To(Equal("gpu-1"))
+			Expect(claims[0].ResourceClaimTemplateName.Get()).To(Equal(ptr.To("single-gpu")))
+			Expect(claims[0].ResourceClaimName.Get()).To(BeNil())
+			Expect(claims[0].AllocatedResourceClaimName.Get()).To(BeNil())
+		})
+
+		It("should take the allocated name of a template-generated claim from the pod status", func() {
+			pod := &corev1.Pod{
+				Spec: corev1.PodSpec{
+					ResourceClaims: []corev1.PodResourceClaim{
+						{Name: "gpu-1", ResourceClaimTemplateName: ptr.To("single-gpu")},
+					},
+				},
+				Status: corev1.PodStatus{
+					ResourceClaimStatuses: []corev1.PodResourceClaimStatus{
+						{Name: "gpu-1", ResourceClaimName: ptr.To("dra-gpu-test-gpu-1-mk4s8")},
+					},
+				},
+			}
+
+			claims := parsePodResourceClaims(pod)
+			Expect(claims).To(HaveLen(1))
+			Expect(claims[0].ResourceClaimTemplateName.Get()).To(Equal(ptr.To("single-gpu")))
+			Expect(claims[0].AllocatedResourceClaimName.Get()).To(Equal(ptr.To("dra-gpu-test-gpu-1-mk4s8")))
+		})
+
+		It("should use the spec name as the allocated name of a standalone claim", func() {
+			pod := &corev1.Pod{
+				Spec: corev1.PodSpec{
+					ResourceClaims: []corev1.PodResourceClaim{
+						{Name: "ib", ResourceClaimName: ptr.To("shared-infiniband")},
+					},
+				},
+			}
+
+			claims := parsePodResourceClaims(pod)
+			Expect(claims).To(HaveLen(1))
+			Expect(claims[0].Name).To(Equal("ib"))
+			Expect(claims[0].ResourceClaimTemplateName.Get()).To(BeNil())
+			Expect(claims[0].ResourceClaimName.Get()).To(Equal(ptr.To("shared-infiniband")))
+			Expect(claims[0].AllocatedResourceClaimName.Get()).To(Equal(ptr.To("shared-infiniband")))
+		})
+
+		It("should report mixed template and standalone claims in spec order", func() {
+			pod := &corev1.Pod{
+				Spec: corev1.PodSpec{
+					ResourceClaims: []corev1.PodResourceClaim{
+						{Name: "gpu-1", ResourceClaimTemplateName: ptr.To("single-gpu")},
+						{Name: "ib", ResourceClaimName: ptr.To("shared-infiniband")},
+					},
+				},
+				Status: corev1.PodStatus{
+					ResourceClaimStatuses: []corev1.PodResourceClaimStatus{
+						{Name: "gpu-1", ResourceClaimName: ptr.To("pod-gpu-1-abcde")},
+					},
+				},
+			}
+
+			claims := parsePodResourceClaims(pod)
+			Expect(claims).To(HaveLen(2))
+			Expect(claims[0].Name).To(Equal("gpu-1"))
+			Expect(claims[0].AllocatedResourceClaimName.Get()).To(Equal(ptr.To("pod-gpu-1-abcde")))
+			Expect(claims[1].Name).To(Equal("ib"))
+			Expect(claims[1].AllocatedResourceClaimName.Get()).To(Equal(ptr.To("shared-infiniband")))
+		})
+
+		It("should report one entry per pod-level claim regardless of which containers consume it", func() {
+			pod := &corev1.Pod{
+				Spec: corev1.PodSpec{
+					ResourceClaims: []corev1.PodResourceClaim{
+						{Name: "gpu-1", ResourceClaimTemplateName: ptr.To("single-gpu")},
+					},
+					Containers: []corev1.Container{
+						{Name: "cuda", Resources: corev1.ResourceRequirements{Claims: []corev1.ResourceClaim{{Name: "gpu-1"}}}},
+						{Name: "sidecar", Resources: corev1.ResourceRequirements{Claims: []corev1.ResourceClaim{{Name: "gpu-1"}}}},
+						{Name: "ubuntu"},
+					},
+				},
+			}
+
+			claims := parsePodResourceClaims(pod)
+			Expect(claims).To(HaveLen(1))
+			Expect(claims[0].Name).To(Equal("gpu-1"))
+		})
+
+		It("should ignore status entries that do not match a spec claim", func() {
+			pod := &corev1.Pod{
+				Spec: corev1.PodSpec{
+					ResourceClaims: []corev1.PodResourceClaim{
+						{Name: "gpu-1", ResourceClaimTemplateName: ptr.To("single-gpu")},
+					},
+				},
+				Status: corev1.PodStatus{
+					ResourceClaimStatuses: []corev1.PodResourceClaimStatus{
+						{Name: "other", ResourceClaimName: ptr.To("stale-claim")},
+					},
+				},
+			}
+
+			claims := parsePodResourceClaims(pod)
+			Expect(claims).To(HaveLen(1))
+			Expect(claims[0].AllocatedResourceClaimName.Get()).To(BeNil())
 		})
 	})
 })

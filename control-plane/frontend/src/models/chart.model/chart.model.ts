@@ -207,6 +207,8 @@ export interface IChartWidgetOptions {
   adaptiveLegendLayout?: boolean;
   /** Prevent area zoom from showing fewer than this many canonical samples. */
   minimumZoomSampleCount?: number;
+  /** Keep the tooltip above the x-axis labels; needs a numeric `grid.bottom`. */
+  tooltipAboveXAxis?: boolean;
 }
 
 export interface ITooltipPoint {
@@ -360,6 +362,10 @@ export interface IGenericMetricWidgetConfig {
 }
 
 export const WIDGET_AVERAGE_LINE_LABEL = "Average";
+
+// `!=` maps to SQL IS DISTINCT FROM, which lets workloads with no idle data through; a small positive
+// lower bound excludes them while keeping fractional-GPU workloads.
+export const MIN_IDLE_GPUS_FILTER_VALUE = 0.01;
 
 export type THistogramMetricData = Record<string, Array<GroupedMeasurementResponseValuesInner>>;
 

@@ -34,35 +34,6 @@ func NewEventsAPIService() *EventsAPIService {
 	return &EventsAPIService{}
 }
 
-// GetWorkloadActionsHistory - Get workload action history.
-func (s *EventsAPIService) GetWorkloadActionsHistory(ctx context.Context, workloadId string, offset int32, limit int32) (ImplResponse, error) {
-	// TODO - update GetWorkloadActionsHistory with the required logic for this service method.
-	// Add api_events_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	// TODO: Uncomment the next line to return response Response(200, GetWorkloadActionsResponse{}) or use other options such as http.Ok ...
-	// return Response(200, GetWorkloadActionsResponse{}), nil
-
-	// TODO: Uncomment the next line to return response Response(400, Error{}) or use other options such as http.Ok ...
-	// return Response(400, Error{}), nil
-
-	// TODO: Uncomment the next line to return response Response(401, Error{}) or use other options such as http.Ok ...
-	// return Response(401, Error{}), nil
-
-	// TODO: Uncomment the next line to return response Response(403, Error{}) or use other options such as http.Ok ...
-	// return Response(403, Error{}), nil
-
-	// TODO: Uncomment the next line to return response Response(404, Error{}) or use other options such as http.Ok ...
-	// return Response(404, Error{}), nil
-
-	// TODO: Uncomment the next line to return response Response(500, Error{}) or use other options such as http.Ok ...
-	// return Response(500, Error{}), nil
-
-	// TODO: Uncomment the next line to return response Response(503, Error{}) or use other options such as http.Ok ...
-	// return Response(503, Error{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetWorkloadActionsHistory method not implemented")
-}
-
 // SyncEvents - Sync events.
 func (s *EventsAPIService) SyncEvents(ctx context.Context, eventsSyncRequest EventsSyncRequest) (ImplResponse, error) {
 	// TODO - update SyncEvents with the required logic for this service method.

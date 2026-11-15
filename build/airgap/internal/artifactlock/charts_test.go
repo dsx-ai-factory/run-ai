@@ -250,3 +250,55 @@ func archiveEntries(t *testing.T, files []archiveFile) []byte {
 	}
 	return buffer.Bytes()
 }
+
+func TestLockChartsResolvesRangedDependencies(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		declared string
+		want     string
+		wantErr  string
+	}{
+		{name: "tilde range", declared: "~1.2.0", want: "1.2.3"},
+		{name: "caret range", declared: "^1.0.0", want: "1.2.3"},
+		{name: "comparator range", declared: ">=1.2.0 <2.0.0", want: "1.2.3"},
+		{name: "exact version still matches itself", declared: "1.2.3", want: "1.2.3"},
+		{name: "exact version that did not ship", declared: "1.2.4", wantErr: "missing Helm dependency package"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			dependency := chartArchive(t, "dependency", "1.2.3", nil, false)
+			root := chartArchive(t, "published", "3.0.0", []chartDependencyDefinition{{
+				Name:       "dependency",
+				Version:    tc.declared,
+				Repository: "https://charts.example.com",
+			}}, false)
+			files, err := readTarGzip(root)
+			if err != nil {
+				t.Fatal(err)
+			}
+			files["published/charts/dependency-1.2.3.tgz"] = dependency
+			runner := &fakeHelmRunner{archive: archiveFiles(t, files), filename: "published-3.0.0.tgz"}
+
+			charts, err := LockCharts(
+				context.Background(),
+				[]string{"https://charts.example.com/published-3.0.0.tgz"},
+				[]string{"3.0.0"},
+				"",
+				"",
+				runner,
+			)
+			if tc.wantErr != "" {
+				if err == nil || !strings.Contains(err.Error(), tc.wantErr) {
+					t.Fatalf("err = %v, want %q", err, tc.wantErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			// The lock records what shipped, never the range that selected it.
+			if got := charts[0].Dependencies[0].Version; got != tc.want {
+				t.Fatalf("version = %q, want %q", got, tc.want)
+			}
+		})
+	}
+}

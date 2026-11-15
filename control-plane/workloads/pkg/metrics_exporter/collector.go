@@ -95,6 +95,11 @@ func (c *MetricsCollector) collectTenantMetricRecords(ctx context.Context, tenan
 		}
 
 		for _, result := range queryResponse.GetData() {
+			// Metrics responses can omit clusterId. Restore it from the query scope so the pod
+			// metric can be exported without triggering a Prometheus label-cardinality panic.
+			if labels := result.GetMetricLabels(); len(labels) > 0 && labels["clusterId"] == "" {
+				labels["clusterId"] = clusterId
+			}
 			metricRecord := c.parseMetricResult(ctx, tenantId, result)
 			if metricRecord == nil {
 				continue
@@ -121,6 +126,10 @@ func (c *MetricsCollector) parseMetricResult(ctx context.Context, tenantId int32
 	}
 
 	mappedLabels := mapLabels(c.exportableMetric.LabelsMapping, labels, c.exportableMetric.Metric.GetName())
+	if len(mappedLabels) != len(c.exportableMetric.LabelsMapping) {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Skipping metric %q for tenant %d: missing required labels", c.exportableMetric.Metric.GetName(), tenantId)
+		return nil
+	}
 	mappedLabels[tenantIdLabel] = strconv.Itoa(int(tenantId))
 
 	value, err := strconv.ParseFloat(measurements[0].GetValue(), 64)

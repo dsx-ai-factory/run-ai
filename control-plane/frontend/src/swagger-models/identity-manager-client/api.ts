@@ -443,7 +443,7 @@ export interface ClientRedirectUrisUpdateRequest {
     'redirectUris': Array<string>;
 }
 /**
- * 
+ * The kind of client to create. Application is a deprecated alias of ServiceAccount and is kept so existing callers keep working; use ServiceAccount.
  * @export
  * @enum {string}
  */
@@ -451,8 +451,9 @@ export interface ClientRedirectUrisUpdateRequest {
 export const ClientType = {
     Agent: 'Agent',
     WorkloadsAuth: 'WorkloadsAuth',
-    Application: 'Application',
-    Installer: 'Installer'
+    Installer: 'Installer',
+    ServiceAccount: 'ServiceAccount',
+    Application: 'Application'
 } as const;
 
 export type ClientType = typeof ClientType[keyof typeof ClientType];
@@ -782,6 +783,12 @@ export interface IdpCreationRequest {
      * @memberof IdpCreationRequest
      */
     'mappers'?: Mappers;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof IdpCreationRequest
+     */
+    'dryRun'?: boolean;
 }
 /**
  * 
@@ -810,6 +817,12 @@ export interface IdpPostResponse {
      * @memberof IdpPostResponse
      */
     'alias': string;
+    /**
+     * 
+     * @type {SamlData}
+     * @memberof IdpPostResponse
+     */
+    'samlData'?: SamlData | null;
 }
 /**
  * 
@@ -1619,6 +1632,18 @@ export interface SamlData {
      * @memberof SamlData
      */
     'serviceProviderMetadataUrl'?: string;
+    /**
+     * Whether the signature of SAML responses from the identity provider is validated
+     * @type {boolean}
+     * @memberof SamlData
+     */
+    'validateSignature': boolean;
+    /**
+     * The expiration date of the signing certificate
+     * @type {string}
+     * @memberof SamlData
+     */
+    'certificateExpirationDate'?: string;
 }
 /**
  * 

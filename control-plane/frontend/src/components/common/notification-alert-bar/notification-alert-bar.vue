@@ -49,8 +49,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onBeforeUnmount, onMounted } from "vue";
 import { RunaiHtmlWrapper } from "@/components/common/runai-html-wrapper";
+import { usePageBannerStore } from "@/stores/page-banner.store";
 import { ENotificationBarVariant, variantConfig } from "./notification-alert-bar.model";
 import type { INotificationBarCta } from "./notification-alert-bar.model";
 
@@ -67,6 +68,8 @@ const props = withDefaults(
     orientation?: "horizontal" | "vertical";
     ctAs?: INotificationBarCta[];
     iconOverride?: string;
+    // Set on page-level banners, so the lower-priority SAML signature banner is hidden while this one is shown.
+    pageBanner?: boolean;
   }>(),
   {
     variant: ENotificationBarVariant.Info,
@@ -78,12 +81,21 @@ const props = withDefaults(
     orientation: "horizontal",
     ctAs: undefined,
     iconOverride: undefined,
+    pageBanner: false,
   },
 );
 
 defineEmits<{
   close: [];
 }>();
+
+// The store is only touched for page banners, so other uses of this component don't need Pinia.
+onMounted(() => {
+  if (props.pageBanner) usePageBannerStore().register();
+});
+onBeforeUnmount(() => {
+  if (props.pageBanner) usePageBannerStore().unregister();
+});
 
 const config = computed(() => variantConfig[props.variant] ?? variantConfig[ENotificationBarVariant.Info]);
 

@@ -19,6 +19,7 @@ import (
 type ClientReconcilerHelperInterface interface {
 	ReconcileClient(ctx context.Context, realm string, client realm_client.Client) error
 	DeleteClientIfExists(ctx context.Context, realm string, clientID string) error
+	DisableClientIfExists(ctx context.Context, realm string, clientID string) error
 }
 
 type ClientReconcilerHelper struct {
@@ -81,6 +82,24 @@ func (rh *ClientReconcilerHelper) DeleteClientIfExists(ctx context.Context, real
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Client %s exists in realm %s, deleting", clientID, realm)
 	if err := rh.iamServices.ClientService.DeleteClient(ctx, realm, *existsClient.ID); err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to delete client %s in realm %s: %v", clientID, realm, err)
+		return err
+	}
+	return nil
+}
+
+// DisableClientIfExists disables the client and its direct access grants when it exists in the realm.
+func (rh *ClientReconcilerHelper) DisableClientIfExists(ctx context.Context, realm string, clientID string) error {
+	existsClient, err := rh.iamServices.ClientService.GetClientByClientId(ctx, realm, clientID)
+	if err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get client %s in realm %s: %v", clientID, realm, err)
+		return err
+	}
+	if existsClient == nil || existsClient.ID == nil {
+		return nil
+	}
+	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Client %s exists in realm %s, disabling", clientID, realm)
+	if err := rh.iamServices.ClientService.DisableClient(ctx, realm, *existsClient.ID); err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to disable client %s in realm %s: %v", clientID, realm, err)
 		return err
 	}
 	return nil

@@ -16,8 +16,7 @@ Targets come from the service `Makefile` plus the shared includes
 | `build-go` | `build-go-amd` + `build-go-arm` — both arch binaries |
 | `build-go-amd` | Compiles `cmd/main.go` for `GOOS=linux GOARCH=amd64` (FIPS `GOFIPS140=v1.0.0`) inside the Go builder container → `bin/metrics-service-amd64` |
 | `build-go-arm` | Same for `arm64` → `bin/metrics-service-arm64` |
-| `test` | `build` + `test-ginkgo` (unit) + `integration-tests` |
-| `test-ginkgo` | Runs the Ginkgo unit-test suites in the builder container |
+| `test` | `build` + `test-go` (unit) + `integration-tests` |
 | `integration-tests` | Builds the promtool agent + integration-test binary, then runs the docker-compose suite (`AGENT_PORT=8090`, abort-on-container-exit, torn down after) |
 | `integration-tests-debug` | Compose `run-setup` profile only (run tests from IDE) |
 | `build-integration-tests` | Compiles `integration-tests/tests` test binary + `docker compose build` |

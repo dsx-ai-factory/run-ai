@@ -52,6 +52,17 @@ func DistributedInferenceComputeFlagSet(flagsCompute *pflag.FlagSet, compute *Co
 	flagsCompute.Var(cli.NewNullableNonNegativeInt32Flag(&compute.WorkerGpuDevicesRequest), consts.AttributeNameWorkerGpuDevicesRequest, consts.AttributeUsageWorkerGpuDevicesRequest)
 	flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&compute.WorkerGpuPortionRequest), consts.AttributeNameWorkerGpuPortionRequest, consts.AttributeUsageWorkerGpuPortionRequest)
 	flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&compute.WorkerGpuPortionLimit), consts.AttributeNameWorkerGpuPortionLimit, consts.AttributeUsageWorkerGpuPortionLimit)
+	flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&compute.WorkerGpuMemoryPortionRequest), consts.AttributeNameWorkerGpuMemoryPortionRequest, consts.AttributeUsageWorkerGpuMemoryPortionRequest)
+	flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&compute.WorkerGpuMemoryPortionLimit), consts.AttributeNameWorkerGpuMemoryPortionLimit, consts.AttributeUsageWorkerGpuMemoryPortionLimit)
+	flagsCompute.StringVar(&compute.WorkerGpuComputeMode, consts.AttributeNameWorkerGpuComputeMode, "", consts.AttributeUsageGpuComputeMode)
+	if err := flagsCompute.MarkDeprecated(consts.AttributeNameWorkerGpuPortionRequest,
+		"use --"+consts.AttributeNameWorkerGpuMemoryPortionRequest+" for GPU memory fractions, or --"+
+			consts.AttributeNameWorkerGpuDevicesRequest+" for whole-GPU counts"); err != nil {
+		panic(err)
+	}
+	if err := flagsCompute.MarkDeprecated(consts.AttributeNameWorkerGpuPortionLimit, "use --"+consts.AttributeNameWorkerGpuMemoryPortionLimit+" instead"); err != nil {
+		panic(err)
+	}
 	flagsCompute.StringVar(&compute.WorkerGpuMemoryRequest, consts.AttributeNameWorkerGpuMemoryRequest, "", consts.AttributeUsageWorkerGpuMemoryRequest)
 	flagsCompute.StringVar(&compute.WorkerGpuMemoryLimit, consts.AttributeNameWorkerGpuMemoryLimit, "", consts.AttributeUsageWorkerGpuMemoryLimit)
 	flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&compute.WorkerCpuCoreRequest), consts.AttributeNameWorkerCpuCoreRequest, consts.AttributeUsageWorkerCpuCoreRequest)
@@ -92,7 +103,12 @@ func DistributedInferenceContainerFlagSet(flagsContainer *pflag.FlagSet, contain
 	flagsContainer.StringVar(&container.WorkerCommand, consts.AttributeNameWorkerCommand, "", consts.AttributeUsageWorkerCommand)
 	flagsContainer.StringVar(&container.WorkerArgs, consts.AttributeNameWorkerArgs, "", consts.AttributeUsageWorkerArgs)
 	flagsContainer.StringVar(&container.WorkerWorkingDir, consts.AttributeNameWorkerWorkingDir, "", consts.AttributeUsageWorkerWorkingDir)
-	flagsContainer.StringArrayVar(&container.WorkerEnvironmentVariables, consts.AttributeNameWorkerEnvironment, []string{}, consts.AttributeUsageWorkerEnvironment)
+	flagsContainer.StringArrayVar(&container.WorkerEnvironmentVariables, consts.AttributeNameWorkerEnvVariable, []string{}, consts.AttributeUsageWorkerEnvironment)
+	// Share the value so mixing the alias and canonical flag preserves every variable.
+	//nolint:staticcheck // Register the deprecated alias for backward compatibility.
+	flagsContainer.Var(flagsContainer.Lookup(consts.AttributeNameWorkerEnvVariable).Value, consts.AttributeNameWorkerEnvDeprecated, consts.AttributeUsageWorkerEnvironment)
+	//nolint:staticcheck // Mark the backward-compatible alias as deprecated.
+	_ = flagsContainer.MarkDeprecated(consts.AttributeNameWorkerEnvDeprecated, "use --worker-environment-variable instead")
 	flagsContainer.StringArrayVar(&container.WorkerFieldRef, consts.AttributeNameWorkerEnvPodFieldRef, []string{}, consts.AttributeUsageWorkerEnvPodFieldRef)
 	flagsContainer.StringArrayVar(&container.WorkerEnvSecret, consts.AttributeNameWorkerEnvSecret, []string{}, consts.AttributeUsageWorkerEnvSecret)
 	flagsContainer.BoolVar(&container.WorkerCreateHomeDir, consts.AttributeNameWorkerCreateHomeDir, false, consts.AttributeUsageWorkerCreateHomeDir)

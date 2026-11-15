@@ -12,8 +12,8 @@ import (
 
 	"k8s.io/client-go/tools/record"
 
+	heimdallv1alpha1 "github.com/dsx-ai-factory/nvidia-recovery/advice-operator/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/advice-restart-controller/internal/workloadtype"
-	heimdallv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/advice-restart-controller/pkg/apis/heimdall/v1alpha1"
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	runv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	kubeflowv1 "github.com/kubeflow/training-operator/pkg/apis/kubeflow.org/v1"

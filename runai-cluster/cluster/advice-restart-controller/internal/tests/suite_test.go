@@ -7,10 +7,12 @@ package tests
 
 import (
 	"context"
+	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 
-	heimdallv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/advice-restart-controller/pkg/apis/heimdall/v1alpha1"
+	heimdallv1alpha1 "github.com/dsx-ai-factory/nvidia-recovery/advice-operator/api/v1alpha1"
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	runv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	kubeflowv1 "github.com/kubeflow/training-operator/pkg/apis/kubeflow.org/v1"
@@ -22,6 +24,8 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
+
+const adviceOperatorModule = "github.com/dsx-ai-factory/nvidia-recovery/advice-operator"
 
 var (
 	cfg     *rest.Config
@@ -42,16 +46,20 @@ var _ = BeforeSuite(func() {
 
 	By("bootstrapping test environment")
 
+	// The Advice CRD ships with the advice-operator module, so it always matches the imported Go types.
+	adviceOperatorDir, err := exec.Command("go", "list", "-m", "-f", "{{.Dir}}", adviceOperatorModule).Output()
+	Expect(err).NotTo(HaveOccurred())
+
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
 			filepath.Join("..", "..", "..", "sdk", "config", "crd", "bases"),
 			filepath.Join("..", "..", "..", "runai-crd-upgrader", "crds"),
+			filepath.Join(strings.TrimSpace(string(adviceOperatorDir)), "config", "crd", "bases"),
 			filepath.Join("testdata", "crds"),
 		},
 		ErrorIfCRDPathMissing: true,
 	}
 
-	var err error
 	cfg, err = testEnv.Start()
 	Expect(err).NotTo(HaveOccurred())
 	Expect(cfg).NotTo(BeNil())

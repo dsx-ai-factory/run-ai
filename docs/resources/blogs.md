@@ -9,9 +9,6 @@ Explore the latest NVIDIA technical blogs featuring NVIDIA Run:ai, including tec
   <Card title="Numa-Aware Scheduling in NVIDIA Run:ai" src="../assets/blog-kai-scheduler-ray.webp" imagePosition="top" href="blogs/numa-aware-scheduling-in-nvidia-run-ai.md">
     July 17, 2026
   </Card>
-  <Card title="NVIDIA Run:ai Agent Simplifies GPU Provisioning, Job Management, and Troubleshooting" src="../assets/blog-gpu-optimization.webp" imagePosition="top" href="blogs/nvidia-run-ai-agent.md">
-    June 16, 2026
-  </Card>
   <Card title="NVIDIA DSX OS Delivers Open, Modular Software for Operating AI Factories at Scale" src="../assets/blog-dsx-os.jpg" imagePosition="top" href="https://developer.nvidia.com/blog/nvidia-dsx-os-delivers-open-modular-software-for-operating-ai-factories-at-scale/">
     May 31, 2026
   </Card>

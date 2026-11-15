@@ -39,7 +39,6 @@ func (p *WorkloadsProvider) FetchSettings(ctx context.Context, tenantID int) (ma
 
 	extractBool(resp.EnablePolicies, settings.SettingKeyEnablePolicies, result)
 	extractBool(resp.WorkloadSubmissionV2Enabled, settings.SettingKeyWorkloadSubmissionV2Enabled, result)
-	extractBool(resp.EnableTemplatesV2, settings.SettingKeyEnableTemplatesV2, result)
 	extractBool(resp.EnableHybridSubmission, settings.SettingKeyEnableHybridSubmission, result)
 	extractBool(resp.GpuOverProvisioning, settings.SettingKeyGpuOverProvisioning, result)
 

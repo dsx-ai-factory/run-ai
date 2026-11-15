@@ -8,12 +8,14 @@ package services_crud
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"sync"
+
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/dao_crud"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
-	"net/http"
-	"sync"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/models_crud"
 
@@ -32,9 +34,6 @@ import (
 const ComplianceTasksInParallel = 10
 
 var (
-	workloadJsonCracker = jsonutils.NewJsonCracker(api.DistributedWorkload{})
-	masterSpecField     = workloadJsonCracker.NameOf(&workloadJsonCracker.Struct().MasterSpec)
-
 	policyJsonCracker = jsonutils.NewJsonCracker(policyApi.DistributedPolicyDefaultsV2{})
 	masterSection     = policyJsonCracker.NameOf(&policyJsonCracker.Struct().Master)
 	workerSection     = policyJsonCracker.NameOf(&policyJsonCracker.Struct().Worker)
@@ -66,10 +65,10 @@ func validatePolicy(ctx context.Context, workload *models_crud.Workload) (map[st
 		}
 	}
 
-	return validatePolicyHelper(ctx, workload.WorkloadType, workload.ProjectId, values, convutils.BoolIsTrue(workload.MasterSameAsWorker))
+	return validatePolicyHelper(ctx, workload.WorkloadType, workload.ProjectId, values)
 }
 
-func validatePolicyHelper(ctx context.Context, workloadType string, projectId string, values map[string]interface{}, masterSameAsWorker bool) (map[string]interface{}, *workloadApi.SubmissionErrorV2) {
+func validatePolicyHelper(ctx context.Context, workloadType string, projectId string, values map[string]interface{}) (map[string]interface{}, *workloadApi.SubmissionErrorV2) {
 	effectivePolicy, getErr := policyCompliance.GetEffectivePolicyOfProject(ctx, policies.Get().Client(), projectId, workloadApi.WorkloadType(workloadType))
 	if getErr != nil {
 		return nil, &workloadApi.SubmissionErrorV2{
@@ -78,7 +77,7 @@ func validatePolicyHelper(ctx context.Context, workloadType string, projectId st
 		}
 	}
 
-	validationErr := validateSpecAgainstPolicy(workloadType, effectivePolicy.RulesV2, effectivePolicy.DefaultsV2, values, &effectivePolicy.DefaultFromOrder)
+	validationErr := validateSpecAgainstPolicy(workloadType, effectivePolicy.RulesV2, effectivePolicy.DefaultsV2, values)
 	if validationErr != nil {
 		return nil, validationErr
 	}
@@ -95,41 +94,10 @@ func validateSpecAgainstPolicy(
 	rules map[string]interface{},
 	defaults map[string]interface{},
 	mutatedSpec map[string]interface{},
-	defaultFromOrder *policyApi.DefaultFromOrder,
 ) *workloadApi.SubmissionErrorV2 {
-	fieldsWithCantEditRule := make([]string, 0)
-	complianceErrors := make(policyCompliance.ComplianceErrors, 0)
-
-	if workloadType != Distributed {
-		policyCompliance.ValidateCompliance("", rules, defaults, mutatedSpec, *defaultFromOrder.Worker,
-			&fieldsWithCantEditRule, nil, &complianceErrors)
-	} else {
-		// check the workers spec VS the workers policy
-		policyCompliance.ValidateCompliance("",
-			convutils.MapMe(rules[workerSection]),
-			convutils.MapMe(defaults[workerSection]),
-			convutils.MapMe(mutatedSpec[workerSection]),
-			*defaultFromOrder.Worker,
-			&fieldsWithCantEditRule, nil, &complianceErrors)
-
-		// if there is a master policy, we need to validate the master spec VS the master policy
-		// no need to validate master if no master is provided
-		if rules[masterSection] != nil && mutatedSpec[masterSection] != nil {
-			masterComplianceErrors := make(policyCompliance.ComplianceErrors, 0)
-
-			policyCompliance.ValidateCompliance("",
-				convutils.MapMe(rules[masterSection]),
-				convutils.MapMe(defaults[masterSection]),
-				convutils.MapMe(mutatedSpec[masterSection]),
-				*defaultFromOrder.Master,
-				&fieldsWithCantEditRule, nil, &masterComplianceErrors)
-
-			for _, err := range masterComplianceErrors {
-				complianceErrors.Add(err.Rule, err.Details,
-					convutils.DotUs(masterSpecField, err.WorkloadField),
-					convutils.DotUs(masterSpecField, err.PolicyField))
-			}
-		}
+	_, complianceErrors, err := policyCompliance.ValidateWorkloadCompliance(rules, defaults, mutatedSpec, workloadApi.WorkloadType(workloadType))
+	if err != nil {
+		return workloadApi.NewSubmissionErrorV2(http.StatusBadRequest, err.Error())
 	}
 
 	if len(complianceErrors) != 0 {
@@ -271,6 +239,13 @@ func validateComplianceOfTemplate(ctx context.Context, task patchingTaskInfo) {
 		defaultFromOrder = task.effectivePolicy.DefaultFromOrder.Worker
 		payloadAsMap, _ = gojsonq.LoadJson(task.template.CombinedSpec)
 	}
+
+	canonicalPayload, aliasErr := gpucompat.NormalizeLegacyGPUFields(payloadAsMap)
+	if aliasErr != nil {
+		task.template.ComplianceIssues = append(task.template.ComplianceIssues, api.ComplianceInfoReason{Details: aliasErr.Error()})
+		return
+	}
+	payloadAsMap = canonicalPayload
 
 	fieldsWithCantEditRule := make([]string, 0)
 	complianceResults := policyCompliance.ComplianceErrors{}

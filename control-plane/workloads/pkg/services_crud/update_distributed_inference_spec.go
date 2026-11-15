@@ -14,6 +14,8 @@ import (
 	"sort"
 	"time"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
+
 	authorization_client "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v1/runai_workloads"
@@ -258,13 +260,17 @@ func composeDistributedInferenceUpdateNative(
 	workload *models_crud.Workload,
 	options composer.FieldsComposerOptions,
 ) (composer.WorkloadRequirements, *workloadsApi.SubmissionErrorV2) {
+	if err := validateNativeGpuMode(workload.Spec); err != nil {
+		return composer.WorkloadRequirements{}, err
+	}
+
 	dInfComposer := runai_workloads.NewDinfWorkloadComposer(
 		workload.Name,
 		workload.CreatedBy,
 		nil,
 		options)
 
-	composerErr := dInfComposer.Compose(ctx, workload.Spec, &dinfwv1.DistributedInferenceWorkload{})
+	composerErr := dInfComposer.Compose(ctx, gpucompat.LegacyWorkloadSpec(workload.Spec), &dinfwv1.DistributedInferenceWorkload{})
 	if composerErr != nil {
 		return composer.WorkloadRequirements{}, NewSubmissionErrorWithDetails(composerErr.Code, composerErr.Message, composerErr.Details)
 	}

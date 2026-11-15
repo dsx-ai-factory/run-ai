@@ -140,9 +140,11 @@ describe("workload-yaml-new.vue", () => {
             emits: ["project-changed"],
           },
           GeneralSection: {
+            name: "GeneralSection",
             template: "<div aid='general-section'>General Section</div>",
             props: [
               "workloadFormType",
+              "singlePodWorkload",
               "generalModel",
               "supportPreemptibility",
               "workloadPriorityData",
@@ -220,6 +222,17 @@ describe("workload-yaml-new.vue", () => {
 
       expect(orgUnitService.getProjectsMetadata).toHaveBeenCalled();
     });
+  });
+
+  it("does not assume arbitrary YAML is single-pod based on the default training form type", async () => {
+    wrapper = createWrapper();
+    await flushPromises();
+    wrapper.vm.selectedClusterId = "cluster-1";
+    wrapper.vm.isClusterSectionValid = true;
+    wrapper.vm.yamlContent = "apiVersion: apps/v1\nkind: Deployment\nspec:\n  replicas: 3";
+    await flushPromises();
+
+    expect(wrapper.findComponent({ name: "GeneralSection" }).props("singlePodWorkload")).toBe(false);
   });
 
   describe("YAML Loaded Handling (File Upload/Paste)", () => {

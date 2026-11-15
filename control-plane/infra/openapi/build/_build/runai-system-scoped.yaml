@@ -3,10 +3,6 @@ info:
   version: 2.0.0
   description: "# Introduction\n\nThe NVIDIA Run:ai Management Interface API is a centralized API which enables platform owners to programmatically manage tenants, clusters, and access across a multi-tenant environment. This API is designed for use by host organizations operating the centralized control plane and is not accessible to individual tenants.\n\nNVIDIA Run:ai APIs are accessed using bearer tokens. To obtain a token, you need to create an Application using the `api/v1/apps` endpoint, which returns a `clientId` and `clientSecret`. Then, generate an access token using the `/api/v1/token` by sending a `client_credentials` grant request with those credentials. \n\nTo get your access token, follow the instructions in [API Access Setup](/run-ai/multi-tenant/reference/rest-api/getting-started/api-access-setup).\n"
   title: NVIDIA Run:ai
-  x-logo:
-    url: ./runai-logo-api.png
-    altText: NVIDIA Run:ai
-    href: https://run.ai
   license:
     name: NVIDIA Run:ai
     url: https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-software-license-agreement/
@@ -15,37 +11,18 @@ servers:
 security:
   - bearerAuth: []
 tags:
-  - name: Organizations
-  - name: Authentication and Authorization
-  - name: Audit
-  - name: Workloads
-  - name: Workload assets
-  - name: Policies
-  - name: Notifications
   - name: Clusters
-    x-parent: Organizations
   - name: Access Keys
-    x-parent: Authentication and Authorization
   - name: Access rules
-    x-parent: Authentication and Authorization
   - name: Service Accounts
-    x-parent: Authentication and Authorization
   - name: Roles
-    x-parent: Authentication and Authorization
   - name: Tokens
-    x-parent: Authentication and Authorization
   - name: Users
-    x-parent: Authentication and Authorization
   - name: Idps
-    x-parent: Authentication and Authorization
   - name: Me
-    x-parent: Authentication and Authorization
   - name: Permissions
-    x-parent: Authentication and Authorization
   - name: Settings
-    x-parent: Organizations
   - name: AuditLogs
-    x-parent: Audit
 paths:
   /api/v1/tenants:
     get:
@@ -2910,6 +2887,10 @@ components:
           example: gcr.io/runai/goofys:v0.24.0
         s3FileSystemResources:
           $ref: '#/components/schemas/ClusterReportedResourceRequirements'
+        s3FileSystemMountCheckImage:
+          type: string
+          nullable: true
+          description: The exact S3 image reference that supports goofys --ready-file and --check-ready. Omitted when support is unknown or disabled.
         fipsMode:
           $ref: '#/components/schemas/FipsModeEnum'
         runaiOauth2ProxyImage:
@@ -3255,6 +3236,12 @@ components:
         - nodePool
         - createdAt
       properties:
+        labels:
+          writeOnly: true
+          type: object
+          additionalProperties:
+            type: string
+          description: Labels assigned to the node.
         status:
           type: string
           enum:
@@ -3705,6 +3692,9 @@ components:
           type: string
           example: v100
           minLength: 1
+        description:
+          type: string
+          description: The description of the node pool.
         labelKey:
           type: string
           description: Label key for associated nodes to the Node Pool (with value as in labelValue)
@@ -4274,6 +4264,8 @@ components:
     SamlData:
       type: object
       nullable: true
+      required:
+        - validateSignature
       properties:
         signingCertificate:
           type: string
@@ -4284,6 +4276,13 @@ components:
         serviceProviderMetadataUrl:
           type: string
           description: Service Provider (SP) metadata url
+        validateSignature:
+          type: boolean
+          description: Whether the signature of SAML responses from the identity provider is validated
+        certificateExpirationDate:
+          type: string
+          format: date-time
+          description: The expiration date of the signing certificate
     MandatoryClaim:
       type: object
       nullable: true
@@ -4506,6 +4505,9 @@ components:
           $ref: '#/components/schemas/OcpCreationData'
         mappers:
           $ref: '#/components/schemas/Mappers'
+        dryRun:
+          type: boolean
+          default: false
     IdpPostResponse:
       type: object
       required:
@@ -4513,6 +4515,9 @@ components:
       properties:
         alias:
           type: string
+        samlData:
+          $ref: '#/components/schemas/SamlData'
+          description: Parsed SAML identity provider configuration. Returned when dryRun is true. Nothing is stored.
       example:
         alias: oidc
     IdpResources:
@@ -6268,6 +6273,26 @@ components:
         format: uuid
         minLength: 1
         example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+    Offset:
+      name: offset
+      in: query
+      required: false
+      description: The offset of the first item returned in the collection.
+      schema:
+        type: integer
+        format: int32
+        example: 100
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: The maximum number of entries to return.
+      schema:
+        type: integer
+        format: int32
+        default: 50
+        minimum: 1
+        maximum: 500
     Search:
       name: search
       in: query
@@ -6318,26 +6343,6 @@ components:
         example:
           - name==my-cluster
       explode: false
-    Offset:
-      name: offset
-      in: query
-      required: false
-      description: The offset of the first item returned in the collection.
-      schema:
-        type: integer
-        format: int32
-        example: 100
-    Limit:
-      name: limit
-      in: query
-      required: false
-      description: The maximum number of entries to return.
-      schema:
-        type: integer
-        format: int32
-        default: 50
-        minimum: 1
-        maximum: 500
     QueryForceDelete:
       name: force
       in: query
@@ -6786,22 +6791,3 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: Bearer authentication
-x-tagGroups:
-  - name: Organizations
-    tags:
-      - Settings
-      - Clusters
-  - name: Authentication and Authorization
-    tags:
-      - Access Keys
-      - Access rules
-      - Permissions
-      - Service Accounts
-      - Roles
-      - Tokens
-      - Users
-      - Idps
-      - Me
-  - name: Audit
-    tags:
-      - AuditLogs

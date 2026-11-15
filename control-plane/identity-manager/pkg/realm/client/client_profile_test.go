@@ -115,7 +115,7 @@ func TestApplyClientProfile(t *testing.T) {
 		},
 		{
 			name:       "AccessKey",
-			clientType: ClientTypeUserApp,
+			clientType: ClientTypeAccessKey,
 			expectedConfig: &iamModels.ClientConfig{
 				PublicClient:              ptr.To(false),
 				DirectAccessGrantsEnabled: ptr.To(false),
@@ -125,8 +125,8 @@ func TestApplyClientProfile(t *testing.T) {
 			expectedEmailScopeDefault: false,
 		},
 		{
-			name:       "TenantApp",
-			clientType: ClientTypeTenantApp,
+			name:       "ServiceAccount",
+			clientType: ClientTypeServiceAccount,
 			expectedConfig: &iamModels.ClientConfig{
 				PublicClient:              ptr.To(false),
 				DirectAccessGrantsEnabled: ptr.To(false),
@@ -171,7 +171,7 @@ func TestApplyClientProfile(t *testing.T) {
 func TestApplyClientProfile_TokenLifespan(t *testing.T) {
 	t.Run("service-account types get the default lifespan", func(t *testing.T) {
 		t.Parallel()
-		for _, clientType := range []string{ClientTypeUserApp, ClientTypeTenantApp} {
+		for _, clientType := range []string{ClientTypeAccessKey, ClientTypeServiceAccount} {
 			client := &iamModels.Client{}
 			ApplyClientProfile(client, clientType)
 			assert.NotNil(t, client.Attributes.TokenLifespan, clientType)
@@ -190,7 +190,7 @@ func TestApplyClientProfile_TokenLifespan(t *testing.T) {
 		t.Parallel()
 		custom := 5 * time.Minute
 		client := &iamModels.Client{Attributes: &iamModels.ClientAttributes{TokenLifespan: &custom}}
-		ApplyClientProfile(client, ClientTypeUserApp)
+		ApplyClientProfile(client, ClientTypeAccessKey)
 		assert.Equal(t, DefaultServiceAccountTokenLifespan, *client.Attributes.TokenLifespan)
 	})
 }
@@ -205,7 +205,7 @@ func TestApplyClientProfile_ExtraAttributes(t *testing.T) {
 	})
 
 	t.Run("type without extra attributes leaves Extra nil", func(t *testing.T) {
-		for _, clientType := range []string{ClientTypeUserApp, ClientTypeRunai} {
+		for _, clientType := range []string{ClientTypeAccessKey, ClientTypeRunai} {
 			client := &iamModels.Client{}
 			ApplyClientProfile(client, clientType)
 			assert.Nil(t, client.Attributes.Extra, clientType)

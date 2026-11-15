@@ -972,6 +972,34 @@ describe("workload.util", () => {
       );
     });
 
+    it("should keep the added ServingPort connection when clusterDomain is provided", () => {
+      const connections: Connection[] = [
+        {
+          name: "ChatbotUI",
+          toolType: "chatbot-ui",
+          connectionType: "ExternalUrl",
+          url: "https://cluster.example.com/p100/i100",
+        },
+      ];
+      const clusterDomain = "https://example.com";
+      const result = workloadUtil._getWorkloadConnectionsForInference(
+        connectionsMocks.inference,
+        connections,
+        clusterDomain,
+      );
+
+      expect(result).toHaveLength(2);
+      expect(result[0].url).toBe(
+        `${clusterDomain}/${connectionsMocks.inference.projectName}/${connectionsMocks.inference.name}`,
+      );
+      expect(result[1]).toMatchObject({
+        url: servingPortUrl,
+        name: "Serving Endpoint",
+        toolType: "custom",
+        connectionType: InternalConnectionType.ServingPort,
+      });
+    });
+
     it("should not add new connections if workload.urls has fewer or equal items as connections", () => {
       const currWorkload = {
         ...connectionsMocks.inference,
@@ -1004,6 +1032,46 @@ describe("workload.util", () => {
       expect(result[0].url).toBe("initial-url");
     });
 
+    it("should not add a ServingPort connection when several workload URLs are unclaimed", () => {
+      const currWorkload = {
+        ...connectionsMocks.inference,
+        urls: ["https://x/tool", "https://x/serve"],
+      };
+      const connections: Connection[] = [{ name: "ChatbotUI", toolType: "chatbot-ui", connectionType: "ExternalUrl" }];
+
+      const result = workloadUtil._getWorkloadConnectionsForInference(currWorkload, connections);
+
+      expect(result).toEqual(connections);
+    });
+
+    it("should not add a ServingPort connection when the workload has no URLs", () => {
+      const currWorkload = {
+        ...connectionsMocks.inference,
+        urls: undefined,
+      };
+      const connections: Connection[] = [];
+
+      const result = workloadUtil._getWorkloadConnectionsForInference(currWorkload, connections);
+
+      expect(result).toEqual([]);
+    });
+
+    it("should not mutate the input connections when clusterDomain is provided", () => {
+      const connections: Connection[] = [
+        {
+          name: "ChatbotUI",
+          toolType: "chatbot-ui",
+          connectionType: "ExternalUrl",
+          url: "https://cluster.example.com/p100/i100",
+        },
+      ];
+      const connectionsBefore = deepCopy(connections);
+
+      workloadUtil._getWorkloadConnectionsForInference(connectionsMocks.inference, connections, "https://example.com");
+
+      expect(connections).toEqual(connectionsBefore);
+    });
+
     it("should return the original list unchanged if no conditions are met", () => {
       const currWorkload = {
         ...connectionsMocks.inference,
@@ -1020,6 +1088,36 @@ describe("workload.util", () => {
       const result = workloadUtil._getWorkloadConnectionsForInference(currWorkload, connections);
 
       expect(result).toEqual(connections);
+    });
+  });
+
+  describe("getUnclaimedServingUrl", () => {
+    const toolUrl = "https://x/tool";
+    const serveUrl = "https://x/serve";
+
+    it("should return the only URL no connection claims", () => {
+      const connections: Connection[] = [
+        { name: "ChatbotUI", toolType: "chatbot-ui", connectionType: "ExternalUrl", url: toolUrl },
+        { name: "ServingPort", toolType: "custom", connectionType: "ServingPort", containerPort: 8000 },
+      ];
+
+      expect(workloadUtil.getUnclaimedServingUrl([toolUrl, serveUrl], connections)).toBe(serveUrl);
+    });
+
+    it("should treat known URLs as claimed", () => {
+      const connections: Connection[] = [{ name: "ChatbotUI", toolType: "chatbot-ui", connectionType: "ExternalUrl" }];
+
+      expect(workloadUtil.getUnclaimedServingUrl([toolUrl, serveUrl], connections, [toolUrl])).toBe(serveUrl);
+    });
+
+    it("should return undefined when several URLs are unclaimed", () => {
+      const connections: Connection[] = [{ name: "ChatbotUI", toolType: "chatbot-ui", connectionType: "ExternalUrl" }];
+
+      expect(workloadUtil.getUnclaimedServingUrl([toolUrl, serveUrl], connections)).toBeUndefined();
+    });
+
+    it("should return undefined when there are no URLs", () => {
+      expect(workloadUtil.getUnclaimedServingUrl(undefined, [])).toBeUndefined();
     });
   });
 

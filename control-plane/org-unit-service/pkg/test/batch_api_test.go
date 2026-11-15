@@ -42,7 +42,7 @@ func buildNodePoolPatchFromResources(orgUnitId string, res api.ResourcesNullable
 	}
 
 	gpu := &api.ResourcesPerNodePoolNullableGpu{
-		Deserved:        ptr.To(res.Gpu.Deserved),
+		Deserved:        res.Gpu.Deserved,
 		Limit:           res.Gpu.Limit,
 		OverQuotaWeight: res.Gpu.OverQuotaWeight,
 	}
@@ -230,7 +230,7 @@ var _ = Describe("Batch patch resources API tests", Ordered, func() {
 			onePoolPatch := []api.ResourcesNullable{
 				CreateNodePoolApiResources(false, defaultNodePoolId, defaultNodePoolName),
 			}
-			onePoolPatch[0].Gpu.Deserved = 1.5
+			onePoolPatch[0].Gpu.Deserved = ptr.To(float64(1.5))
 			req := api.BatchPatchNodePoolResourcesRequest{
 				PatchRequests: []api.NodePoolResourcesPatchRequest{
 					buildNodePoolPatchFromResources(departmentId, onePoolPatch[0]),
@@ -677,7 +677,7 @@ var _ = Describe("Batch patch resources API tests", Ordered, func() {
 				},
 			}
 			// Set department GPU quota to 2 on default pool
-			createDeptReq.Resources[0].Gpu.Deserved = 2
+			createDeptReq.Resources[0].Gpu.Deserved = ptr.To(float64(2))
 			createDeptReq.Resources[0].Gpu.Limit = ptr.To(float64(2))
 			createDeptReq.Resources[0].Gpu.OverQuotaWeight = ptr.To(float64(2))
 
@@ -696,7 +696,7 @@ var _ = Describe("Batch patch resources API tests", Ordered, func() {
 					Resources: []api.ResourcesNullable{CreateNodePoolApiResources(false, defaultNodePoolId, defaultNodePoolName)},
 				}
 				// initial 0
-				req.Resources[0].Gpu.Deserved = 0
+				req.Resources[0].Gpu.Deserved = ptr.To(float64(0))
 				req.Resources[0].Gpu.Limit = ptr.To(float64(0))
 				resp, err := projectApiService.CreateProject(ctx, req)
 				Expect(err).To(BeNil())
@@ -871,7 +871,7 @@ var _ = Describe("Batch patch resources API tests", Ordered, func() {
 				Resources: []api.ResourcesNullable{CreateNodePoolApiResources(true, defaultNodePoolId, defaultNodePoolName)},
 			}
 			// initial desired 1 to match allocated we will set
-			projReq.Resources[0].Gpu.Deserved = 1
+			projReq.Resources[0].Gpu.Deserved = ptr.To(float64(1))
 			projReq.Resources[0].Gpu.Limit = ptr.To(float64(1))
 			projResp, err := projectApiService.CreateProject(ctx, projReq)
 			Expect(err).To(BeNil())
@@ -946,7 +946,7 @@ var _ = Describe("Batch patch resources API tests", Ordered, func() {
 					ClusterId: clusterId,
 					Resources: []api.ResourcesNullable{CreateNodePoolApiResources(false, defaultNodePoolId, defaultNodePoolName)},
 				}
-				req.Resources[0].Gpu.Deserved = quota
+				req.Resources[0].Gpu.Deserved = ptr.To(quota)
 				req.Resources[0].Gpu.Limit = ptr.To(quota)
 				req.Resources[0].Gpu.OverQuotaWeight = ptr.To(quota)
 				resp, err := departmentApiService.CreateDepartment(ctx, req)
@@ -964,7 +964,7 @@ var _ = Describe("Batch patch resources API tests", Ordered, func() {
 						ParentId:  &parent,
 						Resources: []api.ResourcesNullable{CreateNodePoolApiResources(false, defaultNodePoolId, defaultNodePoolName)},
 					}
-					req.Resources[0].Gpu.Deserved = 0
+					req.Resources[0].Gpu.Deserved = ptr.To(float64(0))
 					req.Resources[0].Gpu.Limit = ptr.To(float64(0))
 					req.Resources[0].Gpu.OverQuotaWeight = ptr.To(float64(0))
 					resp, err := projectApiService.CreateProject(ctx, req)
@@ -1097,7 +1097,7 @@ var _ = Describe("Batch patch resources API tests", Ordered, func() {
 			onePoolPatch := []api.ResourcesNullable{
 				CreateNodePoolApiResources(false, defaultNodePoolId, defaultNodePoolName),
 			}
-			onePoolPatch[0].Gpu.Deserved = 1.5
+			onePoolPatch[0].Gpu.Deserved = ptr.To(float64(1.5))
 			req := api.BatchPatchNodePoolResourcesRequest{
 				PatchRequests: []api.NodePoolResourcesPatchRequest{
 					buildNodePoolPatchFromResources(projectId, onePoolPatch[0]),
@@ -1504,7 +1504,7 @@ var _ = Describe("Batch patch resources API tests", Ordered, func() {
 			updateResources := []api.ResourcesNullable{
 				CreateNodePoolApiResources(false, defaultNodePoolId, defaultNodePoolName),
 			}
-			updateResources[0].Gpu.Deserved = 1.25
+			updateResources[0].Gpu.Deserved = ptr.To(float64(1.25))
 			resp, err := departmentApiService.PatchDepartmentResources(ctx, departmentId, updateResources)
 			Expect(err).To(BeNil())
 			Expect(resp.Code).To(Equal(http.StatusOK))

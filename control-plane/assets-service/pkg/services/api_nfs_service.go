@@ -90,11 +90,6 @@ func (s *NFSApiService) DeleteNfsAssetById(ctx context.Context, id string) (api.
 		return NewErrorResponse(api.NewError(int(rbacErr.Code), rbacErr.Message, errors.New(rbacErr.Details))), nil
 	}
 
-	validationError := validateNotBeingUsedByTemplate(ctx, id, assetKind)
-	if validationError != nil {
-		return NewErrorResponse(validationError), nil
-	}
-
 	actionError := dao.DeleteNFSAsset(ctx, assetMeta, dao.HardDelete)
 	if actionError != nil {
 		return NewErrorResponse(actionError), nil

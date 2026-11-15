@@ -364,7 +364,7 @@ Name | Type | Description  | Notes
 
 ## GetTrainingMerged
 
-> TrainingV2 GetTrainingMerged(ctx).ProjectId(projectId).WorkloadId(workloadId).TemplateId(templateId).IsDistributed(isDistributed).IsDistributedInference(isDistributedInference).Execute()
+> TrainingV2 GetTrainingMerged(ctx).ProjectId(projectId).WorkloadId(workloadId).IsDistributed(isDistributed).IsDistributedInference(isDistributedInference).Execute()
 
 Get merged training
 
@@ -385,13 +385,12 @@ import (
 func main() {
 	projectId := "4500001" // string | The id of the project (optional)
 	workloadId := "d73a738f-fab3-430a-8fa3-5241493d7128" // string | The id of the workload (optional)
-	templateId := "d73a738f-fab3-430a-8fa3-5241493d7128" // string | The id of the template (optional)
 	isDistributed := true // bool | Filter results to workload of type distributed. (optional)
 	isDistributedInference := true // bool | Filter results to workload of type distributed inference. (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.TrainingsAPI.GetTrainingMerged(context.Background()).ProjectId(projectId).WorkloadId(workloadId).TemplateId(templateId).IsDistributed(isDistributed).IsDistributedInference(isDistributedInference).Execute()
+	resp, r, err := apiClient.TrainingsAPI.GetTrainingMerged(context.Background()).ProjectId(projectId).WorkloadId(workloadId).IsDistributed(isDistributed).IsDistributedInference(isDistributedInference).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `TrainingsAPI.GetTrainingMerged``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -414,7 +413,6 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **projectId** | **string** | The id of the project | 
  **workloadId** | **string** | The id of the workload | 
- **templateId** | **string** | The id of the template | 
  **isDistributed** | **bool** | Filter results to workload of type distributed. | 
  **isDistributedInference** | **bool** | Filter results to workload of type distributed inference. | 
 
