@@ -268,6 +268,12 @@ validate-mockery: git-config-command
 	${SUCCESS_MESSAGE_HANDLER}
 .PHONY: validate-mockery
 
+# The golangci-lint version above, for CI that lints without make
+# (pr-checks.yaml go-lint), so both run the same Renovate-managed version.
+print-golangci-lint-version:
+	@echo $(GOLANGCI_LINT_VERSION)
+.PHONY: print-golangci-lint-version
+
 lint-go: git-config-command gocache
 	@ echo $(GREEN_CONSOLE) "${CONSOLE_PREFIX} Running golangci linter for ${SERVICE_NAME}" $(BASE_CONSOLE); \
 		if [ -n "$(LINT_NEW_FROM_REV)" ]; then git fetch origin $(LINT_BASE_BRANCH) --depth=1 2>/dev/null || true; fi; \
