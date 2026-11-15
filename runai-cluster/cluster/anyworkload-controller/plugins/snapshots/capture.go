@@ -86,7 +86,7 @@ func (p *Plugin) HandleAdditionalResources(
 	k8sClient client.Client,
 	state *reconcile.State,
 ) error {
-	if !p.snapshotInstalled || !optedIn(resource) {
+	if !p.captureEnabled || !p.snapshotInstalled || !optedIn(resource) {
 		return nil
 	}
 	if err := checkEligibility(ctx, resource, karta); err != nil {

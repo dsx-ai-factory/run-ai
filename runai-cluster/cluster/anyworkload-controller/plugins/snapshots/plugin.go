@@ -18,6 +18,9 @@ import (
 // PluginName identifies the plugin in the registry and in status.plugins.
 const PluginName = "snapshot-plugin"
 
+// captureEnabled is off until the workload shows a capture's progress and failures.
+const captureEnabled = false
+
 // kartaGetter is the Karta lookup the plugin needs, narrowed so tests can stub it.
 type kartaGetter interface {
 	GetKartaForGVK(ctx context.Context, gvk schema.GroupVersionKind) (*kartav1alpha1.Karta, error)
@@ -42,6 +45,7 @@ type Plugin struct {
 	kartas            kartaGetter
 	parser            *templateutils.Parser
 	snapshotInstalled bool
+	captureEnabled    bool
 	agentNodeSelector map[string]string
 }
 
@@ -57,7 +61,12 @@ func NewBuilder(snapshotInstalled bool, agentNodeSelector map[string]string) fra
 }
 
 func newPlugin(kartas kartaGetter, snapshotInstalled bool) *Plugin {
-	return &Plugin{kartas: kartas, parser: templateutils.NewParser(), snapshotInstalled: snapshotInstalled}
+	return &Plugin{
+		kartas:            kartas,
+		parser:            templateutils.NewParser(),
+		snapshotInstalled: snapshotInstalled,
+		captureEnabled:    captureEnabled,
+	}
 }
 
 func (p *Plugin) Name() string {

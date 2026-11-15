@@ -109,6 +109,8 @@ var _ = Describe("HandleAdditionalResources", func() {
 
 	notInstalled := capturePlugin()
 	notInstalled.snapshotInstalled = false
+	captureOff := capturePlugin()
+	captureOff.captureEnabled = false
 
 	DescribeTable("stays off",
 		func(plugin *Plugin, workload func() *unstructured.Unstructured) {
@@ -118,6 +120,7 @@ var _ = Describe("HandleAdditionalResources", func() {
 			Expect(snapshotJobs(ctx, c)).To(BeEmpty())
 		},
 		Entry("Snapshot not installed", notInstalled, optedIn),
+		Entry("capture turned off", captureOff, optedIn),
 		Entry("not opted in", capturePlugin(),
 			func() *unstructured.Unstructured { return deployment(nil, gpu) }),
 		Entry("ineligible", capturePlugin(),
@@ -284,6 +287,7 @@ func testRunner() *dromosv1alpha1.WorkloadRunner {
 
 func capturePlugin() *Plugin {
 	plugin := newPlugin(kartaStub{}, true)
+	plugin.captureEnabled = true
 	plugin.agentNodeSelector = agentSelector
 	return plugin
 }
