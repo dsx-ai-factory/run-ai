@@ -6,14 +6,37 @@
 package kartaparser
 
 import (
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
-	kartav1alpha1 "github.com/run-ai/karta/pkg/api/runai/v1alpha1"
-	"k8s.io/utils/ptr"
+	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	kartav1alpha1 "github.com/run-ai/karta/pkg/api/runai/v1alpha1"
+	kartaresource "github.com/run-ai/karta/pkg/resource"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
+	"k8s.io/utils/ptr"
 )
+
+func TestKartaParsers(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Karta parsers")
+}
+
+var _ = Describe("replica resource totals", func() {
+	DescribeTable("distinguishes omitted replicas from zero",
+		func(scale *kartaresource.Scale, expected string) {
+			ew := &v1alpha1.ExternalWorkload{}
+			ew.Spec.RequestedResources.Requests = corev1.ResourceList{corev1.ResourceCPU: resource.MustParse("1")}
+			result := (&EWConverter{}).fillReplicasAndMultiplyResources(kartaresource.ExtractedInstance{Scale: scale}, ew)
+			Expect(result.Requests.Cpu().String()).To(Equal(expected))
+		},
+		Entry("omitted replicas", nil, "1"),
+		Entry("explicit zero", &kartaresource.Scale{Replicas: ptr.To(int32(0))}, "0"),
+		Entry("zero overrides minimum", &kartaresource.Scale{Replicas: ptr.To(int32(0)), MinReplicas: ptr.To(int32(2))}, "0"),
+		Entry("minimum without replicas", &kartaresource.Scale{MinReplicas: ptr.To(int32(2))}, "2"),
+	)
+})
 
 var _ = Describe("TestRidHandler", Ordered, func() {
 	Describe("Other funcs tests", func() {
