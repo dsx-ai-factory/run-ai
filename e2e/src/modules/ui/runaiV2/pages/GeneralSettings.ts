@@ -214,7 +214,7 @@ export class GeneralSettings extends BaseV2Page {
         this.securityInvalidIcon = '[aid="security-expansion-toggle"] .text-red';
         this.securityWarningIcon = '[aid="security-expansion-toggle"] .text-warning';
         this.certificateWarningBannerTitle = '.certificate-warning .notification-alert-bar__title';
-        this.certificateFieldErrorMessage = '.q-field--error .q-field__messages:has-text("Certificate expired")';
+        this.certificateFieldErrorMessage = '.q-field--error .q-field__messages';
         this.cancelIdpEditButton = '//span[contains(text(),"Cancel")]';
     }
 
@@ -483,8 +483,10 @@ export class GeneralSettings extends BaseV2Page {
         return this.page.locator(this.certificateWarningBannerTitle).textContent();
     }
 
-    async isCertificateFieldInvalid(): Promise<boolean> {
-        return this.waitForSelectorVisible(this.certificateFieldErrorMessage);
+    async isCertificateFieldInvalid(expectedErrorMessage = 'Certificate expired'): Promise<boolean> {
+        return this.waitForSelectorVisible(
+            `${this.certificateFieldErrorMessage}:has-text("${expectedErrorMessage}")`
+        );
     }
 
     async isIdentityProviderSaved(): Promise<boolean> {
