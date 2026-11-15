@@ -11,23 +11,13 @@ export function useNodePoolSchedulingDraft(initial: SchedulingSnapshot) {
   const pendingMode = ref<SchedulingMode>();
   const resetRevision = ref(0);
   const isDirty = computed(() => JSON.stringify(draft.value) !== JSON.stringify(baseline));
-  let modeBaseline = createSchedulingDraft(initial);
-  const hasConfigurationEdits = () => JSON.stringify(draft.value) !== JSON.stringify(modeBaseline);
-  function applyMode(mode: SchedulingMode) {
-    draft.value = createSchedulingDraft(baseline);
-    draft.value.mode = mode;
-    draft.value.automaticWeights = mode === "guaranteed";
-    draft.value.cpuQuota = false;
-    modeBaseline = createSchedulingDraft(draft.value);
-    resetRevision.value++;
-  }
   function requestMode(mode: SchedulingMode) {
-    if (mode === draft.value.mode) return;
-    if (hasConfigurationEdits()) pendingMode.value = mode;
-    else applyMode(mode);
+    // Nov 12 requirements supersede the original discard-on-mode-change design.
+    // Keep inactive values in the draft; request mapping omits inactive fields.
+    draft.value.mode = mode;
   }
   function confirmModeChange() {
-    if (pendingMode.value) applyMode(pendingMode.value);
+    if (pendingMode.value) requestMode(pendingMode.value);
     pendingMode.value = undefined;
   }
   function cancelModeChange() {
@@ -35,7 +25,6 @@ export function useNodePoolSchedulingDraft(initial: SchedulingSnapshot) {
   }
   function acceptSnapshot(snapshot: SchedulingSnapshot) {
     baseline = createSchedulingDraft(snapshot);
-    modeBaseline = createSchedulingDraft(snapshot);
     draft.value = createSchedulingDraft(snapshot);
     pendingMode.value = undefined;
   }

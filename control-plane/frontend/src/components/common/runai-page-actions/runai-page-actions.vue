@@ -68,6 +68,7 @@
         ></runai-page-filter>
         <runai-advanced-filters
           :menu-width="filterMenuWidth"
+          :menu-max-height="filterMenuMaxHeight"
           v-else
           @update-filter-by="updateFilterBy($event)"
           :filter-options="advancedFilterOptions"
@@ -221,6 +222,7 @@ export default defineComponent({
   ],
   props: {
     filterMenuWidth: { type: String, default: undefined },
+    filterMenuMaxHeight: { type: String, default: undefined },
     advancedFilters: {
       type: Boolean as PropType<boolean>,
       default: false,

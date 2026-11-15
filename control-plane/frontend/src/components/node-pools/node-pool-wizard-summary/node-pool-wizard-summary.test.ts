@@ -7,7 +7,8 @@ import { describe, expect, it } from "vitest";
 import { Quasar } from "quasar";
 import { getSchedulingMode } from "@/models/node-pool.model";
 import NodePoolWizardSummary from "./node-pool-wizard-summary.vue";
-import { createNodePoolDraft } from "@/utils/node-pool.util/node-pool.util";
+import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
+const { createNodePoolDraft } = nodePoolUtil;
 import { NodepoolGPUNetworkAccelerationDetection, PlacementStrategy } from "@/swagger-models/cluster-service-client";
 
 describe("node pool wizard summary", () => {

@@ -40,6 +40,7 @@
         @close="selectFilter(null)"
         @save="saveFilter"
         :filter="selectedFilter"
+        :max-height="menuMaxHeight"
         :is="filterComponent(selectedFilter.name)"
       />
     </q-btn>
@@ -93,6 +94,7 @@ export default defineComponent({
   emits: ["update-filter-by"],
   props: {
     menuWidth: { type: String, default: undefined },
+    menuMaxHeight: { type: String, default: undefined },
     initialFiltersModel: {
       type: Array as PropType<Array<IAdvancedFilterModel>>,
       default: () => [],

@@ -262,8 +262,10 @@ export function getSchedulingMode(capabilities?: SchedulingCapabilitiesNullable)
 }
 
 export const SCHEDULING_MODE_DESCRIPTIONS: Partial<Record<ENodePoolSchedulingMode, string>> = {
-  Ranked: "Higher-ranked departments and projects receive GPU resources first. Remaining capacity goes to lower-ranked ones, in rank order.",
-  "Guaranteed quota": "Each department has a guaranteed GPU quota. Any unused quota is redistributed by rank and weight.",
+  Ranked:
+    "Higher-ranked departments and projects receive GPU resources first. Remaining capacity goes to lower-ranked ones, in rank order.",
+  "Guaranteed quota":
+    "Each department has a guaranteed GPU quota. Any unused quota is redistributed by rank and weight.",
   Proportional: "GPU resources are distributed proportionally according to each department's and project's weight.",
 };
 

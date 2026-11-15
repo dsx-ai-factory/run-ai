@@ -132,7 +132,6 @@ import {
   ResourceType,
   SubjectType,
   SubjectTypeExtended,
-  type Role,
   type AccessRule,
   AccessRulesSortFilterFields,
   type AccessRulesBatchCreateResponse,
@@ -142,12 +141,11 @@ import type { ISelectOption } from "@/models/global.model";
 
 // Services
 import { accessRuleService } from "@/services/control-plane/rbac/access-rule.service/access-rule.service";
-import { rolesService } from "@/services/control-plane/rbac/roles.service/roles.service";
+import { useAccessRuleRoles } from "@/composables/access-rule/use-access-rule-roles.composable";
 import { permissionService } from "@/services/authorization/permission.service/permission.service";
 
 // Stores
 import { usePermissionStore } from "@/stores/permissions.store";
-import { useRoleStore } from "@/stores/role.store";
 import { useAuthStore } from "@/stores/auth.store";
 
 // Utils
@@ -174,7 +172,7 @@ const emit = defineEmits<{
 
 // Composables
 const $q = useQuasar();
-const roleStore = useRoleStore();
+const { roleOptions: rolesOptions, canReadRoles: hasReadRolesPermission, loadRoles } = useAccessRuleRoles();
 const permissionStore = usePermissionStore();
 const authStore = useAuthStore();
 
@@ -225,25 +223,11 @@ const noAccessRules = computed(
 
 const disableAccessRuleBtn = computed(() => !hasReadRolesPermission.value);
 
-const hasReadRolesPermission = computed(() => permissionStore.hasPermission(ResourceType.Roles, Action.Read));
-
 const hasCreateAccessRulesPermission = computed(() =>
   permissionStore.hasPermission(ResourceType.AccessRules, Action.Create),
 );
 
 const subjects = computed<ISelectOption[]>(() => (isSso.value ? subjectTypeOptionsWithSSO : subjectTypeOptions));
-
-const roles = computed<Role[]>(() =>
-  roleStore.roleList.filter((role: Role) => rolesService.isPermittedRole(role, permissionStore.permissionsList)),
-);
-
-const rolesOptions = computed<ISelectOption[]>(() =>
-  roles.value.map((role: Role) => ({
-    label: role.name,
-    value: role.id,
-    roleStageBadge: role.name, // Pass role name for badge lookup
-  })),
-);
 
 const isSso = computed(() => authStore.isSSO);
 
@@ -387,9 +371,7 @@ async function submitForm(): Promise<void> {
 async function initialize() {
   try {
     initialLoader.value = true;
-    if (hasReadRolesPermission.value && roleStore.roleList.length === 0) {
-      await roleStore.loadRoles();
-    }
+    await loadRoles();
     if (hasCreateAccessRulesPermission.value) {
       const permittedScopesByAction = await permissionService.getPermittedScopesForAction(ResourceType.AccessRules);
       allowedCreateScopes.value = permittedScopesByAction?.[Action.Create] || {};

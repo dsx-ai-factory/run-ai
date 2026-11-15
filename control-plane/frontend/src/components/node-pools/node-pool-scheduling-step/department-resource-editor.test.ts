@@ -112,6 +112,24 @@ describe("department resource editor", () => {
     expect(wrapper.emitted("apply")?.[1]).toEqual([5.5]);
     wrapper.unmount();
   });
+  it("enforces the Figma weight range and separates percentage from the input", async () => {
+    const wrapper = mount(Editor, {
+      props: { value: 2, kind: "weight", id: "a", previewWeightPercentage: (weight: number) => weight * 5 },
+      global: { plugins: [Quasar], stubs: { EditableCellPopup: popup } },
+    });
+    expect(wrapper.get(".weight-percentage").text()).toBe("(10%)");
+    expect(wrapper.find(".q-field__suffix").exists()).toBe(false);
+    for (const value of ["-2", "0.5", "21"]) {
+      await wrapper.get("input").setValue(value);
+      expect(wrapper.text()).toContain("Enter a whole number from 0 to 20");
+      wrapper.findComponent(popup).vm.$emit("apply");
+    }
+    expect(wrapper.emitted("apply")).toBeUndefined();
+    await wrapper.get("input").setValue("20");
+    wrapper.findComponent(popup).vm.$emit("apply");
+    expect(wrapper.emitted("apply")).toEqual([[20]]);
+    wrapper.unmount();
+  });
   it("only applies valid values, and cancel resets without mutation", async () => {
     const wrapper = mount(Editor, {
       props: { value: 2, kind: "weight", id: "a" },

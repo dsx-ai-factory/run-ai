@@ -30,6 +30,10 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
   const permissionStore = usePermissionStore();
   const settingStore = useSettingStore();
   const authStore = useAuthStore();
+  const projectScopes = ref<Partial<Record<Action, PermittedScopes>>>({});
+  const canResetResources = computed(
+    () => coversCluster(departmentScopes.value[Action.Update]) && coversCluster(projectScopes.value[Action.Update]),
+  );
   const departmentScopes = ref<Partial<Record<Action, PermittedScopes>>>({});
   function coversCluster(scopes?: PermittedScopes): boolean {
     return !!(
@@ -155,7 +159,30 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
       if (loadingRanks.get(rankValue) === requestIdentity) loadingRanks.delete(rankValue);
     }
   }
+  let capacityRetry: ReturnType<typeof setTimeout> | undefined;
+  const scoped = !!getCurrentScope();
+  function stopCapacityRetry() {
+    clearTimeout(capacityRetry);
+    capacityRetry = undefined;
+  }
+  async function refreshCapacity(pool: Nodepool, version: number, reloadPool = false) {
+    try {
+      const latest = reloadPool ? await loadSchedulingPool(pool.id) : pool;
+      if (scopeVersion !== version) return;
+      const result = await loadSchedulingResources(latest);
+      if (scopeVersion !== version) return;
+      resources.value = result;
+      telemetryError.value = result.gpus == null ? "Capacity is not available yet. Retrying automatically." : "";
+    } catch (error) {
+      if (scopeVersion !== version) return;
+      telemetryError.value = extractErrorMessages(error, "Capacity is unavailable. Retrying automatically.").join(" ");
+    }
+    // Refresh only inventory, never the saved scheduling snapshot or the user's draft.
+    if (scoped && scopeVersion === version && resources.value?.gpus == null)
+      capacityRetry = setTimeout(() => void refreshCapacity(pool, version, true), 5000);
+  }
   async function refresh() {
+    stopCapacityRetry();
     completedQuery.value = undefined;
     rowsLoading.value = false;
     const current = ++scopeVersion;
@@ -170,11 +197,14 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
       rank.value = undefined;
     }
     pages.value = [];
+    baselineRows.value = [];
+    count.value = 0;
     aggregates.value = {};
     rankCounts.value = {};
     resources.value = undefined;
     quotaPolicy.value = undefined;
     departmentScopes.value = {};
+    projectScopes.value = {};
     loadError.value = "";
     telemetryError.value = "";
     policyError.value = "";
@@ -184,15 +214,6 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
       if (scopeVersion !== current) return;
       snapshot.value = pool;
       const scope = { poolId: id, clusterId: pool.clusterId };
-      const telemetry = async () => {
-        try {
-          const result = await loadSchedulingResources(pool);
-          if (scopeVersion === current) resources.value = result;
-        } catch (error) {
-          if (scopeVersion === current)
-            telemetryError.value = extractErrorMessages(error, "Capacity is unavailable.").join(" ");
-        }
-      };
       const policy = async () => {
         try {
           const result = await orgUnitSettingsService.getLimitQuotaOverSubscription();
@@ -207,7 +228,7 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
       };
       const departments = async () => {
         if (!permissions.value.view) return;
-        const [totals, counts, departmentSnapshot, scopes] = await Promise.all([
+        const [totals, counts, departmentSnapshot, scopes, projects] = await Promise.all([
           Promise.all([
             loadSchedulingTotals(scope),
             ...ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => loadSchedulingTotals({ ...scope, rank: option.value })),
@@ -219,9 +240,11 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
           ),
           loadSchedulingDepartmentSnapshot(scope, pool.schedulingCapabilities?.adjustableWeights === true),
           permissionService.getPermittedScopesForAction(ResourceType.Department),
+          permissionService.getPermittedScopesForAction(ResourceType.Project).catch(() => ({})),
         ]);
         if (scopeVersion !== current) return;
         departmentScopes.value = scopes;
+        projectScopes.value = projects;
         const weightTotals = departmentSnapshot.totals;
         baselineRows.value = departmentSnapshot.rows;
         aggregates.value = Object.fromEntries([
@@ -245,7 +268,7 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
         );
         await loadRows();
       };
-      await Promise.all([telemetry(), policy(), departments()]);
+      await Promise.all([refreshCapacity(pool, current), policy(), departments()]);
     } catch (error) {
       if (scopeVersion === current)
         loadError.value = extractErrorMessages(error, "Failed to load scheduling data.").join(" ");
@@ -260,6 +283,7 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
   });
   if (getCurrentScope())
     onScopeDispose(() => {
+      stopCapacityRetry();
       scopeVersion++;
       rowsVersion++;
     });
@@ -274,6 +298,7 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
     permissions,
     totalsComplete,
     canEditDepartment,
+    canResetResources,
     quotaPolicy,
     policyError,
     loadError,

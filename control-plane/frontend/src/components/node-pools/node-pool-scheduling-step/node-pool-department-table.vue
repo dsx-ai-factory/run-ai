@@ -4,11 +4,15 @@
 -->
 <template>
   <section class="department-section" aria-label="Department scheduling">
-    <q-banner v-if="quotaExcess != null" class="quota-warning" role="status">
-      <template #avatar><q-icon name="ph ph-warning-circle" size="20px" class="quota-warning-icon" /></template>
-      The total assigned quota exceeds the node pool’s total by {{ quotaExcess }} GPUs. Departments may not receive their
+    <notification-alert-bar
+      v-if="quotaExcess != null"
+      class="quota-warning"
+      role="status"
+      :variant="ENotificationBarVariant.Warning"
+    >
+      The total assigned quota exceeds the node pool's total by {{ quotaExcess }} GPUs. Departments may not receive their
       full guaranteed quota.
-    </q-banner>
+    </notification-alert-bar>
     <runai-page-actions
       class="scheduling-actions"
       :class="{ 'actions-readonly': readonly }"
@@ -17,13 +21,14 @@
       advanced-filters
       search-tooltip-text="Search departments"
       filter-menu-width="208px"
+      filter-menu-max-height="280px"
       hide-cluster-filter
       hide-columns-btn
       hide-export-csv
       :show-search="canView"
       :support-refresh="canView"
       :primary-btn-disable="readonly"
-      :selected-rows-amount="selected.size"
+      :selected-rows-amount="ranked ? selected.size : 0"
       :disable-actions="readonly"
       @filters-changed="updateFilters"
       @refresh-data="emit('refresh')"
@@ -33,7 +38,7 @@
         ><runai-btn
           aid="new-department"
           color="primary"
-          icon="ph ph-plus"
+          icon="ph-bold ph-plus"
           label="New department"
           :disable="readonly"
           @click="emit('new-department')"
@@ -48,14 +53,29 @@
           flat
           stack
           size="sm"
-          icon="ph ph-gear-six"
+          icon="ph-bold ph-gear-six"
           :label="props.searchTerm || noMatchingDepartments ? 'Show settings' : 'Advanced settings'"
           :disable="readonly"
           @click="emit('advanced-settings')"
-      /></template>
+          ><q-menu
+            :model-value="settingsOpen"
+            no-parent-event
+            anchor="bottom right"
+            self="top right"
+            :offset="[0, 8]"
+            max-height="70vh"
+            class="scheduling-settings-popup"
+            @update:model-value="!$event && emit('close-settings')"
+          >
+            <slot name="settings" /> </q-menu></q-btn
+      ></template>
     </runai-page-actions>
-    <div class="table-settings-layout" :class="{ 'settings-open': settingsOpen }">
-      <div class="department-table-content">
+    <div class="table-settings-layout">
+      <div
+        class="department-table-content"
+        :style="preserveTableSpace ? { minHeight: `${unfilteredHeight}px` } : undefined"
+      >
+        <q-resize-observer @resize="rememberTableHeight" />
         <q-table
           flat
           square
@@ -80,7 +100,7 @@
                     aria-label="Select all departments"
                     @update:model-value="selectAll"
                   />
-                  <q-icon v-else name="ph-fill ph-question" size="18px"
+                  <q-icon v-else name="ph-fill ph-question" size="20px"
                     ><q-tooltip>{{ headerTooltips.selection }}</q-tooltip></q-icon
                   >
                 </template>
@@ -88,7 +108,7 @@
                   <div v-if="order(col.name)" :class="`column-order order-${col.name}`">{{ order(col.name) }}</div>
                   <div class="column-label">
                     {{ col.label }}
-                    <q-icon v-if="col.name !== 'department' || ranked" name="ph ph-question" size="16px"
+                    <q-icon v-if="col.name !== 'department' || ranked" name="ph-bold ph-question" size="16px"
                       ><q-tooltip max-width="340px">{{ headerTooltips[col.name] }}</q-tooltip></q-icon
                     >
                   </div>
@@ -98,7 +118,7 @@
                       v-model="simulation"
                       dense
                       size="30px"
-                      :disable="readonly"
+                      :disable="!canView"
                       aid="simulate-demand"
                       aria-label="Simulate workload demand"
                     />
@@ -114,7 +134,7 @@
                     flat
                     round
                     dense
-                    :icon="expanded.has(row.rank) ? 'ph ph-caret-up' : 'ph ph-caret-down'"
+                    :icon="expanded.has(row.rank) ? 'ph-bold ph-caret-up' : 'ph-bold ph-caret-down'"
                     :aid="`rank-${row.rank}`"
                     :aria-label="`${expanded.has(row.rank) ? 'Collapse' : 'Expand'} ${row.name}`"
                     :aria-expanded="expanded.has(row.rank)"
@@ -124,7 +144,9 @@
                     >{{ row.name }} ({{ row.count }} {{ row.count === 1 ? "department" : "departments" }})</span
                   >
                   <runai-btn
-                    v-if="expanded.has(row.rank) && rows.filter((item) => item.rank === row.rank).length < row.count"
+                    v-if="
+                      expanded.has(row.rank) && effectiveRows.filter((item) => item.rank === row.rank).length < row.count
+                    "
                     :aid="`load-rank-${row.rank}`"
                     flat
                     label="Load more"
@@ -147,7 +169,7 @@
                 :id="row.id"
                 kind="quota"
                 :value="row.quota"
-                :limit="row.limit"
+                :limit="draft.maxAllocation ? row.limit : undefined"
                 :disabled="readonly || canEditDepartment?.(row.id) === false"
                 :load-context="() => quotaContext(row)"
                 @apply="emit('edit', { id: row.id, quota: $event })"
@@ -159,6 +181,7 @@
                 :title="ranked ? 'Weight within rank' : 'Weight'"
                 :value="row.weight"
                 :display-value="percentage(row)"
+                :preview-weight-percentage="(weight) => previewWeightPercentage(row, weight)"
                 :disabled="readonly || automatic || canEditDepartment?.(row.id) === false"
                 :disabled-tooltip="
                   automatic
@@ -172,7 +195,7 @@
                 :id="row.id"
                 kind="limit"
                 :value="row.limit ?? -1"
-                :quota="row.quota"
+                :quota="draft.mode === 'guaranteed' ? row.quota : undefined"
                 :disabled="readonly || canEditDepartment?.(row.id) === false"
                 @apply="emit('edit', { id: row.id, limit: $event })"
               />
@@ -181,10 +204,17 @@
                   <template v-if="simulation && simulationResults?.[row.id]">
                     <span
                       class="allocated"
-                      :style="{ width: `${(simulationResults[row.id].allocated / (capacity || 1)) * 100}%` }"
-                      >{{ simulationResults[row.id].allocated }}</span
+                      :style="{
+                        width: `${Math.min(100, (simulationResults[row.id].allocated / (capacity || 1)) * 100)}%`,
+                        background: allocationBackground(row),
+                      }"
+                      >{{ Number(simulationResults[row.id].allocated.toFixed(2)) }}</span
                     >
-                    <span class="unmet">{{ simulationResults[row.id].unmet }}</span>
+                    <span
+                      class="unmet"
+                      :style="{ width: `${Math.min(100, (simulationResults[row.id].unmet / (capacity || 1)) * 100)}%` }"
+                      >{{ Number(simulationResults[row.id].unmet.toFixed(2)) }}</span
+                    >
                   </template>
                   <span
                     v-else-if="percentage(row) !== 'Unknown'"
@@ -193,46 +223,34 @@
                       left: `${Math.min(100, Math.max(0, parseFloat(percentage(row))))}%`,
                     }"
                   />
-                  <q-tooltip max-width="320px">
-                    <strong>{{ row.name }}</strong
-                    ><br />{{ ranked ? "Weight within rank" : "Weight" }}: {{ percentage(row) }}
-                    <template v-if="draft.mode === 'guaranteed'"
-                      ><br />Guaranteed GPU allocation:
-                      {{ row.quota === -1 ? "Unlimited" : (row.quota ?? "Unknown") }}</template
-                    >
-                    <template v-if="draft.maxAllocation"
-                      ><br />Max GPU allocation:
-                      {{ row.limit == null || row.limit === -1 ? "Unlimited" : row.limit }}</template
-                    >
-                    <template v-if="simulation"
-                      ><br />Simulation preview — mock results
-                      <template v-if="simulationResults?.[row.id]">
-                        <br />{{
-                          draft.mode === "guaranteed" ? "Expected over-quota GPU allocation" : "Expected GPU allocation"
-                        }}:
-                        {{
-                          draft.mode === "guaranteed"
-                            ? simulationResults[row.id].overQuota
-                            : simulationResults[row.id].allocated
-                        }}
-                        <template v-if="simulationResults[row.id].guaranteed"
-                          ><br />Expected guaranteed GPU allocation: {{ simulationResults[row.id].guaranteed }}</template
+                  <q-tooltip class="tooltip-dark scheduling-result-tooltip" max-width="380px">
+                    <div class="result-tooltip-title">{{ row.name }}</div>
+                    <div class="result-tooltip-legend">
+                      <div v-for="entry in resultLegend(row)" :key="entry.label" class="result-tooltip-entry">
+                        <span v-if="entry.image" class="result-tooltip-line" aria-hidden="true">
+                          <img :src="entry.image" alt="" width="4" height="38" />
+                        </span>
+                        <span v-else class="result-tooltip-swatch" :class="`swatch-${entry.kind}`" aria-hidden="true" />
+                        <span
+                          >{{ entry.label }} <strong>{{ entry.value }}</strong></span
                         >
-                        <br />Unmet GPU demand: {{ simulationResults[row.id].unmet }} <br />Simulated real-time GPU
-                        demand: {{ demand[row.id] ?? capacity }} <br />Authored example scenario; not a scheduler
-                        prediction.
-                      </template>
-                      <template v-else><br />Mock preview not available for these values.</template>
-                    </template>
+                      </div>
+                    </div>
+                    <div v-if="simulation && !simulationResults?.[row.id]" class="result-tooltip-unavailable">
+                      {{ simulationMessage || "Simulation results are not available yet." }}
+                    </div>
                   </q-tooltip>
                   <input
                     v-if="simulation"
                     @input="demand[row.id] = Number(($event.target as HTMLInputElement).value)"
                     type="range"
+                    step="any"
                     min="0"
                     :max="capacity ?? 0"
-                    :value="demand[row.id] ?? capacity"
-                    :disabled="readonly || capacity == null"
+                    :value="
+                      demand[row.id] ?? simulationResults?.[row.id]?.demand ?? defaultSimulationDemand(capacity ?? 0)
+                    "
+                    :disabled="!canView || capacity == null"
                     :aria-label="`Simulated GPU demand for ${row.name}`"
                     class="demand-slider"
                   />
@@ -256,22 +274,25 @@
             </div></template
           >
         </q-table>
-        <div v-if="simulation" class="simulation-notice" role="status">
-          Simulation preview — mock results
-          <q-icon name="ph ph-info"
-            ><q-tooltip>{{
-              simulationResults
-                ? "Authored example scenario; not a scheduler prediction."
-                : "Mock preview not available for these values. Demand controls are a preview only."
-            }}</q-tooltip></q-icon
-          >
+        <div v-if="simulation" class="simulation-notice" role="status" aria-live="polite">
+          <span v-if="preview">Simulation preview — mock results. Authored examples, not scheduler predictions.</span>
+          <span v-if="simulationStatus === 'loading'">Calculating simulation…</span>
+          <span v-else-if="simulationMessage">{{ simulationMessage }}</span>
+          <runai-btn
+            v-if="simulationStatus === 'error' || simulationStatus === 'unavailable'"
+            flat
+            label="Retry"
+            aid="retry-simulation"
+            @click="retrySimulation"
+          />
+          <span v-if="draft.timeFairshare">Time-based fairshare is not included in this simulation.</span>
         </div>
-        <div v-if="totalsComplete === false" class="data-notice" role="status">
+        <div v-if="totalsComplete === false && !simulationResults" class="data-notice" role="status">
           Weight percentages are unavailable because you cannot view every department in this node pool.
         </div>
         <div v-if="!automatic && !rawWeightsAvailable" class="data-notice" role="status">
-          Raw weights are unavailable while the saved mode uses automatic weighting. Percentages remain unknown. Apply a
-          value to add a draft weight.
+          Raw weights are unavailable while the saved mode uses automatic weighting. Percentages require a complete set
+          of custom weights.
         </div>
         <div v-if="hasMore" class="q-pa-md text-center">
           <runai-btn
@@ -283,7 +304,6 @@
           />
         </div>
       </div>
-      <slot name="settings" />
     </div>
     <move-to-rank-modal
       v-if="showMove"
@@ -299,20 +319,19 @@
   </section>
 </template>
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { NotificationAlertBar, ENotificationBarVariant } from "@/components/common/notification-alert-bar";
+import weightLegend from "@/assets/icons/scheduling/weight-legend.png";
+import maximumLegend from "@/assets/icons/scheduling/maximum-legend.png";
+import { computed, inject, ref, watch } from "vue";
 import type { QTableColumn } from "quasar";
 import { RunaiPageActions } from "@/components/common/runai-page-actions";
 import { RunaiActionButton } from "@/components/common/runai-page-actions/runai-action-button";
 import { EColumnFilterType, EFilterOperator, type IFilterBy } from "@/models/filter.model";
 import type { ITableColumn } from "@/models/table.model";
 import { matchesSchedulingFilters } from "./node-pool-scheduling-filters";
-import {
-  getMockSchedulingResult,
-  MOCK_SCHEDULING_IDS,
-  MOCK_SCHEDULING_TEN_IDS,
-  MOCK_GUARANTEED_AUTOMATIC_QUOTAS,
-  MOCK_GUARANTEED_OVERCOMMIT_QUOTAS,
-} from "./node-pool-scheduling-simulation.mock";
+import { useNodePoolSimulation } from "./use-node-pool-simulation.composable";
+import { simulateNodePool, simulationPreviewKey } from "./node-pool-simulation.service";
+import { defaultSimulationDemand } from "./node-pool-simulation.util";
 import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
 import MoveToRankModal from "@/components/org-unit/v2/common/peer-org-unit-rank-list/move-to-rank-modal/move-to-rank-modal.vue";
 import {
@@ -333,6 +352,7 @@ import {
 } from "./node-pool-scheduling.model";
 const props = withDefaults(
   defineProps<{
+    poolId?: string;
     rows: DepartmentNodePoolResources[];
     baselineRows?: DepartmentNodePoolResources[];
     draft: SchedulingDraft;
@@ -364,6 +384,7 @@ const emit = defineEmits<{
   refresh: [];
   "new-department": [];
   "advanced-settings": [];
+  "close-settings": [];
   "automatic-weights": [boolean];
 }>();
 const baseline = ref<Record<string, DepartmentSchedulingEdit>>({});
@@ -401,6 +422,23 @@ const expanded = ref(new Set<string>([ENTITY_PRIORITY_DEFAULT_VALUE]));
 const showMove = ref(false);
 const ranked = computed(() => props.draft.mode === "ranked" || props.draft.mode === "guaranteed");
 const automatic = computed(() => props.draft.mode === "guaranteed" && props.draft.automaticWeights);
+const completeCustomWeightTotals = computed(() => {
+  const sums = new Map<string, number | undefined>();
+  if (automatic.value || props.totalsComplete === false || !props.baselineRows) return sums;
+  // A saved Automatic pool exposes no raw weights. Drafts can establish a total only when every peer is known.
+  for (const source of props.baselineRows) {
+    const row = { ...baselineRecord(source), ...props.draft.departments[source.orgUnitId] };
+    for (const key of ["all", row.rank ?? ""]) {
+      if (!sums.has(key)) sums.set(key, 0);
+      const current = sums.get(key);
+      const weight = row.weight;
+      if (weight == null || !Number.isFinite(weight) || !Number.isInteger(weight) || weight < 0)
+        sums.set(key, undefined);
+      else if (current !== undefined) sums.set(key, current + weight);
+    }
+  }
+  return sums;
+});
 const totals = computed(() =>
   schedulingTotalsWithEdits(props.aggregates, baseline.value, props.draft.departments, automatic.value),
 );
@@ -443,6 +481,13 @@ watch(
   { immediate: true },
 );
 const filters = ref<IFilterBy>({ advancedFilters: [], displayedColumns: [] });
+const unfilteredHeight = ref(0);
+const preserveTableSpace = computed(
+  () => props.loading || !!props.searchTerm || !!props.rankFilter || !!filters.value.advancedFilters?.length,
+);
+function rememberTableHeight(size: { height: number }) {
+  if (!preserveTableSpace.value) unfilteredHeight.value = size.height;
+}
 const filterColumns = computed<ITableColumn[]>(() => [
   {
     name: "department",
@@ -495,40 +540,6 @@ const columns = computed<QTableColumn[]>(() => [
 ]);
 const simulation = ref(false);
 const demand = ref<Record<string, number>>({});
-const simulationResults = computed(() => {
-  if (
-    !props.draft.mode ||
-    props.draft.cpuQuota ||
-    props.draft.timeFairshare ||
-    (props.draft.historicalWeight != null && props.draft.historicalWeight !== 0) ||
-    Object.values(props.draft.historicalWindow ?? {}).some((value) => value != null && value !== 0) ||
-    Object.values(props.draft.minimumRuntime ?? {}).some((value) => value != null && value !== 0) ||
-    Object.keys(props.draft.departments).length ||
-    Object.values(baseline.value).some(
-      (row) => row.weight !== 2 || row.rank !== "MediumLow" || (row.limit != null && row.limit !== -1),
-    )
-  )
-    return undefined;
-  const ids = Object.keys(baseline.value);
-  const zeroQuota = !props.draft.automaticWeights && Object.values(baseline.value).every((row) => row.quota === 0);
-  const guaranteedOvercommit =
-    props.draft.mode === "guaranteed" &&
-    !props.draft.automaticWeights &&
-    ids.length === 10 &&
-    MOCK_SCHEDULING_TEN_IDS.every((id) => baseline.value[id]?.quota === MOCK_GUARANTEED_OVERCOMMIT_QUOTAS[id]);
-  const guaranteedAutomatic =
-    props.draft.mode === "guaranteed" &&
-    props.draft.automaticWeights &&
-    ids.length === 5 &&
-    MOCK_SCHEDULING_IDS.every((id) => baseline.value[id]?.quota === MOCK_GUARANTEED_AUTOMATIC_QUOTAS[id]);
-  if (!zeroQuota && !guaranteedOvercommit && !guaranteedAutomatic) return undefined;
-  return getMockSchedulingResult(
-    ids,
-    props.capacity,
-    demand.value,
-    guaranteedOvercommit ? "guaranteed-overcommit" : guaranteedAutomatic ? "guaranteed-automatic" : "zero-quota",
-  );
-});
 const currentRank = computed(() => {
   const ranks = new Set([...selected.value].map((id) => props.draft.departments[id]?.rank ?? baseline.value[id]?.rank));
   return ranks.size === 1 ? [...ranks][0] : undefined;
@@ -631,13 +642,100 @@ const displayRows = computed(() => {
     ];
   });
 });
+const preview = inject(simulationPreviewKey, undefined);
+const scenario = computed(() =>
+  simulation.value && props.canView && props.poolId && props.capacity != null
+    ? {
+        poolId: props.poolId,
+        capacity: props.capacity,
+        draft: props.draft,
+        ids: displayRows.value.flatMap((row) => ("id" in row ? [row.id] : [])),
+        demand: demand.value,
+      }
+    : undefined,
+);
+const {
+  results: simulationResults,
+  status: simulationStatus,
+  message: simulationMessage,
+  retry: retrySimulation,
+} = useNodePoolSimulation(scenario, preview?.transport ?? simulateNodePool);
+function allocationBackground(row: DepartmentSchedulingEdit) {
+  const result = simulationResults.value?.[row.id];
+  if (props.draft.mode !== "guaranteed" || !result?.allocated) return "#42a5f5";
+  const guaranteed = (result.guaranteed / result.allocated) * 100;
+  return `linear-gradient(to right, #42a5f5 ${guaranteed}%, #90caf9 ${guaranteed}%)`;
+}
+function resultLegend(row: DepartmentSchedulingEdit) {
+  const entries: { label: string; value: string | number; kind: string; image?: string }[] = [];
+  if (props.draft.mode === "guaranteed")
+    entries.push({
+      label: "Guaranteed GPU allocation",
+      value: row.quota === -1 ? "Unlimited" : (row.quota ?? "Unknown"),
+      kind: "guaranteed",
+    });
+  entries.push({
+    label: ranked.value ? "Weight within rank" : "Weight",
+    value: percentage(row),
+    kind: "weight",
+    image: weightLegend,
+  });
+  if (props.draft.maxAllocation)
+    entries.push({
+      label: "Max GPU allocation",
+      value: row.limit == null || row.limit === -1 ? "Unlimited" : row.limit,
+      kind: "maximum",
+      image: maximumLegend,
+    });
+  const result = simulation.value ? simulationResults.value?.[row.id] : undefined;
+  if (result) {
+    const guaranteed = props.draft.mode === "guaranteed";
+    if (guaranteed)
+      entries.push({ label: "Expected guaranteed GPU allocation", value: result.guaranteed, kind: "guaranteed" });
+    entries.push({
+      label: guaranteed ? "Expected over-quota GPU allocation" : "Expected GPU allocation",
+      value: guaranteed ? result.overQuota : result.allocated,
+      kind: guaranteed ? "over-quota" : "guaranteed",
+    });
+    entries.push({ label: "Unmet GPU demand", value: result.unmet, kind: "unmet" });
+    entries.push({
+      label: "Simulated real-time GPU demand",
+      value: result.demand,
+      kind: "demand",
+    });
+  }
+  return entries.map((entry) => ({
+    ...entry,
+    value: typeof entry.value === "number" ? Number(entry.value.toFixed(2)) : entry.value,
+  }));
+}
+function weightTotal(row: DepartmentSchedulingEdit) {
+  const key = ranked.value ? (row.rank ?? "") : "all";
+  return totals.value[key]?.weightsSum ?? completeCustomWeightTotals.value.get(key);
+}
+function previewWeightPercentage(row: DepartmentSchedulingEdit, weight: number) {
+  if (automatic.value || props.totalsComplete === false) return undefined;
+  const total = weightTotal(row);
+  if (total != null && Number.isFinite(total) && row.weight != null && row.weight >= 0 && total >= row.weight)
+    return weightPercentage(weight, total - row.weight + weight);
+  if (!props.baselineRows) return undefined;
+  // The proposed value can complete a Custom scenario whose applied row weight is still unknown.
+  let otherWeights = 0;
+  for (const source of props.baselineRows) {
+    const peer = { ...baselineRecord(source), ...props.draft.departments[source.orgUnitId] };
+    if (peer.id === row.id || (ranked.value && peer.rank !== row.rank)) continue;
+    if (peer.weight == null || !Number.isFinite(peer.weight) || !Number.isInteger(peer.weight) || peer.weight < 0)
+      return undefined;
+    otherWeights += peer.weight;
+  }
+  return weightPercentage(weight, otherWeights + weight);
+}
 function percentage(row: DepartmentSchedulingEdit) {
+  const simulated = simulation.value ? simulationResults.value?.[row.id] : undefined;
+  if (simulated) return `${Number(simulated.weightPercentage.toFixed(2))}%`;
   if (props.totalsComplete === false) return "Unknown";
   const value = automatic.value ? Math.max(0, row.quota ?? 0) : row.weight;
-  const percent =
-    value == null
-      ? undefined
-      : weightPercentage(value, totals.value[ranked.value ? (row.rank ?? "") : "all"]?.weightsSum);
+  const percent = value == null ? undefined : weightPercentage(value, weightTotal(row));
   return percent == null ? "Unknown" : `${Number(percent.toFixed(2))}%`;
 }
 function toggle(rank: string) {
@@ -758,6 +856,9 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
 .scheduling-actions :deep([aid="refresh-data-button"]) {
   margin-inline: 16px;
 }
+.scheduling-actions :deep([aid="advanced-settings"]) {
+  width: 128px;
+}
 .scheduling-actions :deep(.right-actions-container) {
   flex-shrink: 0;
 }
@@ -776,15 +877,6 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   width: 100%;
   max-width: 100%;
 }
-.settings-open .scheduling-table :deep(th.column-selection) {
-  border-right: 1px solid var(--border-subtle);
-}
-.scheduling-table :deep(.column-department) {
-  width: 150px;
-}
-.settings-open .rank-row .rank-label-quota {
-  margin-left: 150px;
-}
 .scheduling-table :deep(table) {
   min-width: var(--scheduling-table-min-width);
   table-layout: fixed;
@@ -792,12 +884,14 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
 }
 .scheduling-table :deep(th) {
   height: 60px;
-  padding: 6px 10px;
+  padding: 10px;
+  vertical-align: bottom;
+  line-height: 16.8px;
   text-align: left;
   font-size: 12px;
   background: white;
   white-space: normal;
-  font-weight: 400;
+  font-weight: 500;
 }
 .scheduling-table :deep(td) {
   height: 60px;
@@ -810,6 +904,11 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   overflow-x: auto;
   min-width: 0;
   max-width: 100%;
+}
+.scheduling-table :deep(th.column-selection) {
+  vertical-align: middle;
+  text-align: center;
+  border-right: 1px solid var(--border-subtle);
 }
 .scheduling-table :deep(.column-selection) {
   width: 56px;
@@ -829,7 +928,7 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
 }
 .column-order {
   font-weight: 500;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 .order-quota {
   color: #2196f3;
@@ -841,6 +940,7 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   color: #ff6d00;
 }
 .column-label {
+  min-height: 21px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -853,7 +953,7 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   align-items: center;
   gap: 8px;
   font-weight: 400;
-  margin-top: 5px;
+  margin-top: 3px;
   white-space: nowrap;
 }
 .rank-header td {
@@ -901,6 +1001,9 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   border: 1px solid #bdbdbd;
   border-radius: 3px;
   overflow: visible;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
 }
 .result-bar:not(.simulation-bar) {
   height: 18px;
@@ -919,16 +1022,17 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
 }
 .unmet {
   background: #ffe082;
-  flex: 1;
+  flex: 0 0 auto;
   text-align: center;
   height: 100%;
 }
 .demand-slider {
   appearance: none;
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: -5px;
   margin: 0;
-  width: 100%;
+  width: calc(100% + 10px);
   height: 100%;
   background: transparent;
   cursor: pointer;
@@ -939,15 +1043,15 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   height: 20px;
   border: 1px solid white;
   border-radius: 50%;
-  background: #242219;
-  box-shadow: 0 1px 3px #0006;
+  background: rgba(0, 0, 0, 0.87);
+  box-shadow: 0 2px 2px #0004;
 }
 .demand-slider::-moz-range-thumb {
   width: 18px;
   height: 18px;
   border: 1px solid white;
   border-radius: 50%;
-  background: #242219;
+  background: rgba(0, 0, 0, 0.87);
 }
 .scheduling-empty {
   width: 100%;
@@ -964,20 +1068,80 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   font-size: 12px;
 }
 .quota-warning {
-  background: #ffeecc;
-  color: var(--b-text-main);
-  min-height: 50px;
-  padding: 0 16px;
+  border-radius: 0;
+}
+.scheduling-table :deep(.result-cell) {
+  padding-right: 20px;
+}
+.allocated,
+.unmet {
+  text-shadow:
+    -1px 0 white,
+    1px 0 white,
+    0 -1px white,
+    0 1px white;
+}
+:global(.q-tooltip.scheduling-result-tooltip) {
+  background: rgba(0, 0, 0, 0.87);
+  color: white;
+  padding: 10px;
+  border-radius: 3px;
   font-size: 12px;
   line-height: 16.8px;
+  box-shadow: -1px 0 7px #00000026;
+}
+.result-tooltip-title {
+  margin-bottom: 7px;
+  font-weight: 400;
+}
+.result-tooltip-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.result-tooltip-entry {
+  display: flex;
   align-items: center;
+  gap: 7px;
+  white-space: nowrap;
 }
-.quota-warning :deep(.q-banner__avatar) {
-  min-width: 20px;
-  padding-right: 10px;
-  align-self: center;
+.result-tooltip-entry strong {
+  font-weight: 800;
+  margin-left: 5px;
 }
-.quota-warning-icon {
-  color: #ffab00;
+.result-tooltip-line {
+  width: 20px;
+  height: 20px;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+.result-tooltip-line img {
+  position: absolute;
+  left: 4px;
+  top: -9px;
+}
+.result-tooltip-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.swatch-guaranteed {
+  background: #42a5f5;
+}
+.swatch-over-quota {
+  background: #90caf9;
+}
+.swatch-unmet {
+  background: #ffe082;
+}
+.swatch-demand {
+  background: rgba(0, 0, 0, 0.87);
+  border: 2px solid white;
+  border-radius: 50%;
+}
+.result-tooltip-unavailable {
+  margin-top: 7px;
 }
 </style>

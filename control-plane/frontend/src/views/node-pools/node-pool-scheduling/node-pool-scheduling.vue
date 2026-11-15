@@ -27,6 +27,8 @@
     :telemetry-error="telemetryError"
     :can-view-departments="permissions.view"
     :can-edit-departments="permissions.edit"
+    :can-save-pool="canSavePool"
+    :can-reset-resources="canResetResources"
     :totals-complete="totalsComplete"
     :can-edit-department="canEditDepartment"
     :has-more="hasMore"
@@ -40,12 +42,15 @@
     @load-more="loadMore"
     @load-rank="loadRank"
     @leave-approved="leaveApproved = true"
+    @saving="saving = $event"
+    @pool-saved="pool = $event"
+    @saved="onSaved"
   />
 </template>
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from "vue";
-import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute } from "vue-router";
+import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
 import NodePoolSchedulingStep from "@/components/node-pools/node-pool-scheduling-step/node-pool-scheduling-step.vue";
 import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
 import RunaiFormWrapper from "@/components/common/runai-form-wrapper/runai-form-wrapper.vue";
@@ -55,7 +60,22 @@ import { ENTITY_PRIORITY_SELECT_OPTIONS } from "@/models/org-unit.model";
 import { useAppStore } from "@/stores/app.store";
 import { requestToLeave } from "@/services/infra/router.service/router.service";
 
+import { usePermissionStore } from "@/stores/permissions.store";
+import { Action, ResourceType } from "@/swagger-models/authorization-client";
+import { NODE_POOL_ROUTE_NAMES } from "@/router/node-pool.routes/node-pool.routes.names";
+import { useQuasar } from "quasar";
+import { alertUtil } from "@/utils/alert.util/alert.util";
 const route = useRoute();
+const router = useRouter();
+const $q = useQuasar();
+const permissionStore = usePermissionStore();
+const canSavePool = computed(() => permissionStore.hasPermission(ResourceType.Nodepools, Action.Update));
+const saving = ref(false);
+async function onSaved() {
+  leaveApproved.value = true;
+  $q.notify(alertUtil.getSuccess("Node pool scheduling saved"));
+  await router.push({ name: NODE_POOL_ROUTE_NAMES.NODE_POOL_INDEX });
+}
 const appStore = useAppStore();
 const poolId = computed(() => (typeof route.params.id === "string" ? route.params.id : ""));
 const {
@@ -69,6 +89,7 @@ const {
   permissions,
   totalsComplete,
   canEditDepartment,
+  canResetResources,
   quotaPolicy,
   policyError,
   loadError,
@@ -93,7 +114,7 @@ watch(
   pool,
   (value) => {
     appStore.setPageLoading(false);
-    appStore.setPageTitleOverride(value ? `New node pool: ${value.name}` : null);
+    appStore.setPageTitleOverride(value ? `Edit node pool: ${value.name}` : null);
   },
   { immediate: true },
 );
@@ -101,6 +122,7 @@ watch(poolId, () => {
   leaveApproved.value = false;
 });
 function canLeave() {
+  if (saving.value) return false;
   return leaveApproved.value || !pool.value || requestToLeave();
 }
 onBeforeRouteLeave(canLeave);

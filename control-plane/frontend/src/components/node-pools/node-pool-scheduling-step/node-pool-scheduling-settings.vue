@@ -3,18 +3,32 @@
   SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-  <aside class="scheduling-settings" aria-label="Advanced settings">
+  <aside
+    class="scheduling-settings"
+    :class="{ 'scheduling-settings--compact': draft.mode === 'proportional' }"
+    aria-label="Advanced settings"
+  >
     <header>
       <span>Advanced settings</span
-      ><q-btn flat round dense icon="ph ph-x" aria-label="Hide Advanced settings" @click="emit('close')" />
+      ><q-btn flat round dense icon="ph-bold ph-x" aria-label="Hide Advanced settings" @click="emit('close')">
+        <q-tooltip>Hide Advanced settings</q-tooltip>
+      </q-btn>
     </header>
     <div class="settings-body">
       <section v-if="draft.mode === 'guaranteed'">
         <runai-section-title
           title="Weight within rank"
-          tooltip-icon="ph ph-info"
-          tooltip-text="Set the proportion of unused resources a project or department can get on top of its quota."
-        />
+          interactive-tooltip
+          tooltip-icon="ph-bold ph-info"
+          tooltip-text="For more information, see The NVIDIA Run:ai Scheduler: Concepts and Principles guide"
+        >
+          <template #tooltip-content>
+            For more information, see
+            <a :href="DOCS.PLATFORM_MANAGEMENT.SCHEDULING_CONCEPTS" target="_blank" rel="noopener noreferrer"
+              >The NVIDIA Run:ai Scheduler: Concepts and Principles guide</a
+            >
+          </template>
+        </runai-section-title>
         <runai-radio-options
           :model-value="draft.automaticWeights ? 'automatic' : 'custom'"
           :options="weightOptions"
@@ -23,22 +37,39 @@
         />
       </section>
       <section class="toggle-section">
-        <runai-section-title title="Max GPU allocation" tooltip-icon="ph ph-info" :tooltip-text="maxHelp" />
+        <runai-section-title title="Max GPU allocation" tooltip-icon="ph-bold ph-info" :tooltip-text="maxHelp" />
         <runai-toggle
           :model-value="!!draft.maxAllocation"
-          :disable="readonly"
+          :disable="readonly || (!canResetResources && (savedMaxAllocation ?? draft.maxAllocation))"
           aid="max-allocation-toggle"
           @update:model-value="setMax"
         />
       </section>
+      <p v-if="draft.maxAllocation && draft.mode !== 'guaranteed'" class="text-b-caption" role="status">
+        Preview only: Max GPU allocation in this mode is not supported by the backend yet.
+      </p>
       <section>
         <div class="toggle-section">
           <runai-section-title
             title="Time-based fairshare"
-            tooltip-icon="ph ph-info"
+            interactive-tooltip
+            tooltip-icon="ph-bold ph-info"
             width="425px"
             tooltip-text="When enabled, the Scheduler adjusts fairshare scores based on each project's weight and historical usage records. To use this feature, persistent data must be enabled. When disabled, the Scheduler uses the default fairshare, with scheduling fairness based on the current project's weight and resource usage. For more information, see the Time-based fairshare guide."
-          />
+          >
+            <template #tooltip-content>
+              When enabled, the Scheduler adjusts fairshare scores based on each project's weight and historical usage
+              records.<br />
+              To use this feature,
+              <a :href="DOCS.NODE_POOLS.PERSISTENT_DATA" target="_blank" rel="noopener noreferrer">persistent data</a>
+              must be enabled.<br />
+              When disabled, the Scheduler uses the default fairshare, with scheduling fairness based on the current
+              project's weight and resource usage. For more information, see the
+              <a :href="DOCS.NODE_POOLS.TIME_BASED_FAIR_SHARE" target="_blank" rel="noopener noreferrer"
+                >Time-based fairshare guide</a
+              >.
+            </template>
+          </runai-section-title>
           <runai-toggle
             :model-value="!!draft.timeFairshare"
             :disable="readonly"
@@ -75,7 +106,7 @@
                 label="Historical usage weight"
                 :disable="readonly"
                 :error="invalid(draft.historicalWeight)"
-                error-message="Enter a value equal to or above 0"
+                error-message="Enter a value equal to or above 0.0"
                 no-error-icon
               />
             </div>
@@ -93,6 +124,7 @@
                 :key="unit"
                 :model-value="draft.historicalWindow?.[unit] ?? 0"
                 @update:model-value="setDuration('historicalWindow', unit, $event)"
+                stack-label
                 type="number"
                 min="0"
                 :label="unit"
@@ -108,7 +140,7 @@
       <section class="runtime-section">
         <runai-section-title
           title="Set the minimum guaranteed runtime"
-          tooltip-icon="ph ph-info"
+          tooltip-icon="ph-bold ph-info"
           tooltip-text="This defines the minimum time a preemptible workload is guaranteed to run once it is scheduled in this node pool, before it can be preempted and its resources reallocated to other workloads."
         />
         <div class="duration-grid">
@@ -117,6 +149,7 @@
             :key="unit"
             :model-value="draft.minimumRuntime?.[unit] ?? 0"
             @update:model-value="setDuration('minimumRuntime', unit, $event)"
+            stack-label
             type="number"
             min="0"
             :label="unit"
@@ -131,31 +164,24 @@
         <section class="toggle-section">
           <runai-section-title
             title="CPU quota"
-            tooltip-icon="ph ph-info"
+            interactive-tooltip
+            tooltip-icon="ph-bold ph-info"
             tooltip-text="When enabled, CPU resources can be set per department or project. For more information, see the Departments guide and Projects guide."
-          />
+          >
+            <template #tooltip-content>
+              When enabled, CPU resources can be set per department or project. For more information, see the
+              <a :href="DOCS.PLATFORM_MANAGEMENT.DEPARTMENTS" target="_blank" rel="noopener noreferrer"
+                >Departments guide</a
+              >
+              and
+              <a :href="DOCS.PLATFORM_MANAGEMENT.PROJECTS" target="_blank" rel="noopener noreferrer">Projects guide</a>.
+            </template>
+          </runai-section-title>
           <runai-toggle
             :model-value="draft.cpuQuota"
-            :disable="readonly"
+            :disable="readonly || (!canResetResources && (savedCpuQuota ?? draft.cpuQuota))"
             aid="cpu-quota-toggle"
             @update:model-value="setCpu"
-          />
-        </section>
-        <section class="toggle-section quota-policy-section">
-          <runai-section-title
-            title="Limit projects from exceeding department quota"
-            tooltip-icon="ph ph-info"
-            tooltip-text="When enabled, the projects' total quota cannot exceed the department's quota or be less than the total usage by non-preemptible workloads. For more information, see The NVIDIA Run:ai Scheduler: Concepts and Principles guide."
-          />
-          <runai-toggle
-            :model-value="quotaPolicy ?? false"
-            disable
-            aid="project-quota-policy"
-            :tooltip="
-              quotaPolicy === undefined
-                ? 'Quota policy is unavailable.'
-                : 'This organization-wide policy is read-only here.'
-            "
           />
         </section>
       </template>
@@ -172,8 +198,8 @@
       }}</template>
       <template #body>{{
         confirmation === "maxAllocation"
-          ? "You have unsaved changes. If you disable max GPU allocation, they will be lost."
-          : "Departments and projects using this node pool will lose any assigned CPU quota."
+          ? "On save, the backend removes existing department and project limits. Unsaved values remain in this draft."
+          : "The CPU compute and CPU memory quotas of departments and projects in this node pool will be removed. Their limit will be set to Auto, and workloads can use up to the node pool’s maximum available CPU resources. Running workloads are not affected."
       }}</template>
       <template #footer
         ><runai-btn
@@ -192,13 +218,20 @@
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
+import { DOCS } from "@/constants/docs";
 import { RunaiSectionTitle } from "@/components/common/runai-section-title";
 import { RunaiRadioOptions } from "@/components/common/runai-radio-options";
 import { RunaiToggle } from "@/components/common/runai-toggle";
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
 import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
 import type { SchedulingDraft } from "./node-pool-scheduling.model";
-const props = defineProps<{ draft: SchedulingDraft; quotaPolicy?: boolean; readonly?: boolean }>();
+const props = defineProps<{
+  draft: SchedulingDraft;
+  readonly?: boolean;
+  canResetResources?: boolean;
+  savedMaxAllocation?: boolean;
+  savedCpuQuota?: boolean;
+}>();
 const emit = defineEmits<{ close: []; patch: [Partial<SchedulingDraft>] }>();
 const weightOptions = [
   {
@@ -214,7 +247,7 @@ const weightOptions = [
   },
 ];
 const maxHelp =
-  "When enabled, the maximum GPU device allocation each department and project can get from this node pool, representing the maximum sum of assigned quota and over-quota GPUs, can be set. When disabled, the maximum is unlimited.";
+  'When enabled, the maximum GPU device allocation each department and project can get from this node pool, representing the maximum sum of assigned quota and over-quota GPUs, can be set. When disabled, the maximum is "unlimited."';
 const runtimeUnits = ["Days", "Hours", "Minutes", "Seconds"];
 const windowUnits = ["Days", "Hours", "Minutes"];
 const confirmation = ref<"maxAllocation" | "cpuQuota">();
@@ -231,24 +264,21 @@ function setDuration(field: "historicalWindow" | "minimumRuntime", unit: string,
   patch({ [field]: { ...props.draft[field], [unit]: number(value) } });
 }
 function setMax(value: boolean) {
-  if (!value && Object.values(props.draft.departments).some((edit) => edit.limit !== undefined))
-    confirmation.value = "maxAllocation";
+  if (props.readonly || (!value && (props.savedMaxAllocation ?? props.draft.maxAllocation) && !props.canResetResources))
+    return;
+  if (!value && (props.savedMaxAllocation ?? props.draft.maxAllocation)) confirmation.value = "maxAllocation";
   else patch({ maxAllocation: value });
 }
 function setCpu(value: boolean) {
-  if (!value) confirmation.value = "cpuQuota";
-  else patch({ cpuQuota: true });
+  if (props.readonly || (!value && (props.savedCpuQuota ?? props.draft.cpuQuota) && !props.canResetResources)) return;
+  if (!value && (props.savedCpuQuota ?? props.draft.cpuQuota)) confirmation.value = "cpuQuota";
+  else patch({ cpuQuota: value });
 }
 function confirmDisable() {
   if (confirmation.value === "maxAllocation") {
-    const departments = Object.fromEntries(
-      Object.entries(props.draft.departments).map(([id, edit]) => {
-        const rest = { ...edit };
-        delete rest.limit;
-        return [id, rest];
-      }),
-    );
-    patch({ maxAllocation: false, departments });
+    // The backend resets stored limits on save. Keep inactive draft limits so
+    // switching the toggle back on restores the user's unsaved values.
+    patch({ maxAllocation: false });
   } else patch({ cpuQuota: false });
   confirmation.value = undefined;
 }
@@ -258,6 +288,10 @@ function confirmDisable() {
   width: 380px;
   flex: 0 0 380px;
   border-left: 1px solid var(--border-subtle);
+}
+.scheduling-settings--compact {
+  align-self: flex-start;
+  border-bottom: 1px solid var(--border-subtle);
 }
 header {
   height: 55px;
@@ -270,6 +304,13 @@ header {
 }
 header .q-btn {
   color: var(--icon-default);
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  min-height: 32px;
+}
+header :deep(.q-icon) {
+  font-size: 20px;
 }
 .settings-body {
   padding: 20px;
@@ -287,6 +328,10 @@ header .q-btn {
 .settings-body > section:last-child {
   border-bottom: 0;
   padding-bottom: 0;
+}
+.settings-body > .toggle-section:last-child {
+  padding-bottom: 26px;
+  border-bottom: 1px solid var(--border-subtle);
 }
 .toggle-section {
   display: flex;
@@ -315,9 +360,6 @@ header .q-btn {
   min-height: 20px;
   padding: 0;
 }
-.quota-policy-section :deep(.runai-section-title) {
-  max-width: 245px;
-}
 .settings-body > .runtime-section:last-child {
   padding-bottom: 12px !important;
 }
@@ -333,7 +375,7 @@ header .q-btn {
   line-height: 20px;
 }
 .duration-grid :deep(.q-field--with-bottom) {
-  padding-bottom: 16px;
+  padding: 5px 0 29px;
 }
 .duration-grid :deep(input[type="number"]::-webkit-inner-spin-button) {
   opacity: 1;
@@ -345,16 +387,18 @@ header .q-btn {
 .duration-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 18px 20px;
-  margin-top: 12px;
+  gap: 0 20px;
+  align-items: center;
+  margin-top: 10px;
 }
 .historical-window {
+  align-items: start;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   margin-top: 0;
 }
 .runtime-section {
-  padding-bottom: 36px !important;
+  padding-bottom: 26px !important;
 }
 .historical-fields {
   margin-top: 26px;
@@ -442,8 +486,28 @@ header .q-btn {
   font-size: 12px;
   line-height: 16.8px;
 }
+.duration-grid :deep(.q-field__control) {
+  height: 53px;
+  min-height: 53px;
+}
 .duration-grid :deep(.q-field__label) {
-  font-size: 16px;
+  top: 0;
+  transform: none;
+  font-size: 12px;
+  line-height: 16.8px;
+}
+.duration-grid :deep(.q-field__native) {
+  min-height: 0;
+  padding: 22px 0 10px;
+  font-size: 14px;
+  line-height: 19.5px;
+}
+.duration-grid :deep(.q-field--error) {
+  padding: 5px 0;
+}
+.runtime-section > :deep(.runai-section-title) {
+  margin-bottom: 0;
+  min-height: 32px;
 }
 </style>
 <style lang="scss">

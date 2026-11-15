@@ -4,7 +4,8 @@
  */
 import type { SchedulingCapabilitiesNullable } from "@/swagger-models/cluster-service-client";
 
-export type SchedulingMode = "proportional" | "ranked" | "guaranteed";
+import { PROPORTIONAL_CAPABILITIES, type NodePoolSchedulingMode } from "@/models/node-pool.model";
+export type SchedulingMode = NodePoolSchedulingMode;
 export interface DepartmentSchedulingEdit {
   id: string;
   weight?: number;
@@ -30,10 +31,12 @@ export function createSchedulingDraft(snapshot: SchedulingSnapshot): SchedulingD
 }
 export function toSchedulingCapabilities(draft: SchedulingDraft): SchedulingCapabilitiesNullable {
   if (!draft.mode) return { ...draft.capabilities };
+  if (draft.mode === "proportional") return { ...PROPORTIONAL_CAPABILITIES };
   return {
     adjustableWeights: draft.mode !== "guaranteed" || !draft.automaticWeights,
     quota: draft.mode === "guaranteed",
-    ranks: draft.mode !== "proportional",
+    ranks: true,
+    limits: draft.mode === "guaranteed" && !!draft.maxAllocation,
     cpuQuota: draft.mode === "guaranteed" && draft.cpuQuota,
   };
 }
@@ -89,9 +92,10 @@ export function validateDepartmentEdit(edit: DepartmentSchedulingEdit, context: 
     (typeof edit.weight !== "number" ||
       !Number.isFinite(edit.weight) ||
       edit.weight < 0 ||
+      edit.weight > 20 ||
       !Number.isInteger(edit.weight))
   )
-    errors.push("Weight must be a whole number of 0 or greater.");
+    errors.push("Weight must be a whole number from 0 to 20.");
   if (edit.quota !== undefined) {
     if (typeof edit.quota !== "number" || !Number.isFinite(edit.quota) || edit.quota < 0)
       errors.push("Guaranteed GPUs must be 0 or greater.");

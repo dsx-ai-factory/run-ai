@@ -1,0 +1,121 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+import { describe, it, expect, vi } from "vitest";
+import { buildSchedulingSave, createSchedulingSaver } from "./node-pool-scheduling-save";
+import type { Nodepool } from "@/swagger-models/cluster-service-client";
+import type { SchedulingDraft } from "./node-pool-scheduling.model";
+const pool = {
+  id: "17",
+  schedulingCapabilities: { quota: false, ranks: false, adjustableWeights: true, cpuQuota: false, limits: false },
+  schedulingConfiguration: { gpuPodsPlacementStrategy: { node: "spread" } },
+} as Nodepool;
+const draft = (): SchedulingDraft => ({
+  mode: "proportional",
+  automaticWeights: false,
+  cpuQuota: false,
+  departments: { a: { id: "a", weight: 3, quota: 8, limit: 9, rank: "High" } },
+});
+const success = (ids: string[]) => ({
+  id: "batch",
+  succeeded: ids.map((orgUnitId) => ({ orgUnitId, nodePoolId: "17" })),
+  totalRequested: ids.length,
+  totalSuccessful: ids.length,
+  totalFailed: 0,
+});
+describe("scheduling persistence", () => {
+  it("maps only active resource fields and preserves unrelated pool settings", () => {
+    const result = buildSchedulingSave(pool, draft());
+    expect(result.departments).toEqual([
+      { orgUnitId: "a", nodePoolId: "17", resources: { gpu: { overQuotaWeight: 3 } } },
+    ]);
+    expect(result.pool.schedulingConfiguration).not.toHaveProperty("gpuPodsPlacementStrategy");
+    expect(result.pool).not.toHaveProperty("labelKey");
+  });
+  it("rejects preview-only limits, downgrade and invalid durations before any writes", () => {
+    expect(() => buildSchedulingSave(pool, { ...draft(), maxAllocation: true })).toThrow(/preview-only/);
+    expect(() =>
+      buildSchedulingSave(
+        {
+          ...pool,
+          schedulingCapabilities: { adjustableWeights: true, ranks: false, quota: true, cpuQuota: false, limits: false },
+        },
+        draft(),
+      ),
+    ).toThrow(/downgrade/);
+    expect(() => buildSchedulingSave(pool, { ...draft(), minimumRuntime: { Days: -1 } })).toThrow(/duration/);
+  });
+  it("omits stale fairshare fields when disabled and rejects negative fractional limits", () => {
+    const saved = {
+      ...pool,
+      schedulingConfiguration: { timeBasedFairShare: { enabled: true, historicalUsageWeight: 2, windowDuration: "7d" } },
+    };
+    expect(
+      buildSchedulingSave(saved, { ...draft(), timeFairshare: false, historicalWeight: 2 }).pool.schedulingConfiguration
+        ?.timeBasedFairShare,
+    ).toEqual({ enabled: false });
+    expect(() =>
+      buildSchedulingSave(pool, {
+        ...draft(),
+        mode: "guaranteed",
+        maxAllocation: true,
+        departments: { a: { id: "a", limit: -0.5 } },
+      }),
+    ).toThrow(/Maximum allocation/);
+  });
+  it("saves pool first and retries only unsuccessful department patches, preserving draft", async () => {
+    const update = vi.fn().mockImplementation(async (_id, payload) => ({ ...pool, ...payload }));
+    const batch = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ...success(["a"]),
+        totalRequested: 2,
+        totalFailed: 1,
+        failed: [{ payload: { orgUnitId: "b", nodePoolId: "17" }, message: "quota conflict" }],
+      })
+      .mockResolvedValueOnce(success(["b"]));
+    const saver = createSchedulingSaver({ patchPool: update, patchDepartments: batch });
+    const value = draft();
+    value.departments.b = { id: "b", weight: 4 };
+    const before = JSON.stringify(value);
+    await expect(saver.save(pool, value)).rejects.toThrow(/quota conflict/);
+    await saver.save(pool, value);
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(batch.mock.calls[1][0].patchRequests.map((row: { orgUnitId: string }) => row.orgUnitId)).toEqual(["b"]);
+    expect(update.mock.invocationCallOrder[0]).toBeLessThan(batch.mock.invocationCallOrder[0]);
+    expect(JSON.stringify(value)).toBe(before);
+  });
+  it("chunks department patches at 100 and does not write them when pool update fails", async () => {
+    const value = draft();
+    value.departments = Object.fromEntries(
+      Array.from({ length: 201 }, (_, i) => [String(i), { id: String(i), weight: 2 }]),
+    );
+    const update = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("permission denied"))
+      .mockImplementation(async (_id, payload) => ({ ...pool, ...payload }));
+    const batch = vi
+      .fn()
+      .mockImplementation(async (request) =>
+        success(request.patchRequests.map((r: { orgUnitId: string }) => r.orgUnitId)),
+      );
+    const saver = createSchedulingSaver({ patchPool: update, patchDepartments: batch });
+    await expect(saver.save(pool, value)).rejects.toThrow(/permission denied/);
+    expect(batch).not.toHaveBeenCalled();
+    await saver.save(pool, value);
+    expect(batch.mock.calls.map((c) => c[0].patchRequests.length)).toEqual([100, 100, 1]);
+  });
+  it("rejects a server that ignores capabilities and suppresses duplicate submissions", async () => {
+    let finish!: (value: Nodepool) => void;
+    const update = vi.fn(() => new Promise<Nodepool>((resolve) => (finish = resolve)));
+    const batch = vi.fn();
+    const saver = createSchedulingSaver({ patchPool: update, patchDepartments: batch });
+    const value = { ...draft(), mode: "ranked" as const };
+    const pending = saver.save(pool, value);
+    await expect(saver.save(pool, value)).rejects.toThrow(/already/);
+    finish(pool);
+    await expect(pending).rejects.toThrow(/capabilities/);
+    expect(batch).not.toHaveBeenCalled();
+  });
+});

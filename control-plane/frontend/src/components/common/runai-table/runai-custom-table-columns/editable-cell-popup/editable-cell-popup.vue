@@ -39,7 +39,14 @@
         </q-card-section>
 
         <q-card-section class="row justify-end q-py-sm">
-          <q-btn flat color="primary" label="APPLY" @click="handleApplyClick" v-close-popup="!isSubmitDisabled" />
+          <q-btn
+            flat
+            color="primary"
+            label="APPLY"
+            :disable="isSubmitDisabled"
+            @click="handleApplyClick"
+            v-close-popup="!isSubmitDisabled"
+          />
         </q-card-section>
       </q-card>
     </q-menu>

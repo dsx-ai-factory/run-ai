@@ -15,6 +15,7 @@ describe("scheduling draft", () => {
       quota: false,
       ranks: false,
       cpuQuota: false,
+      limits: false,
     });
     draft.mode = "ranked";
     expect(toSchedulingCapabilities(draft).ranks).toBe(true);
@@ -25,25 +26,18 @@ describe("scheduling draft", () => {
       quota: true,
       ranks: true,
       cpuQuota: false,
+      limits: false,
     });
   });
-  it("cancels or discards field edits, with no per-mode cache", () => {
+  it("preserves all entered values when switching modes", () => {
     const state = useNodePoolSchedulingDraft(snapshot());
-    state.draft.value.departments.a = { id: "a", weight: 5 };
+    state.draft.value.departments.a = { id: "a", weight: 5, quota: 8, limit: 10, rank: "High" };
+    state.requestMode("ranked");
+    state.requestMode("guaranteed");
     state.requestMode("proportional");
     expect(state.pendingMode.value).toBeUndefined();
-    state.requestMode("ranked");
-    expect(state.draft.value.mode).toBe("proportional");
-    state.cancelModeChange();
-    expect(state.draft.value.departments.a.weight).toBe(5);
-    state.requestMode("ranked");
-    state.confirmModeChange();
-    expect(state.draft.value.departments).toEqual({});
-    expect(state.draft.value.mode).toBe("ranked");
-    expect(state.resetRevision.value).toBe(1);
-    state.requestMode("proportional");
-    expect(state.pendingMode.value).toBeUndefined();
-    expect(state.draft.value.departments).toEqual({});
+    expect(state.draft.value.departments.a).toEqual({ id: "a", weight: 5, quota: 8, limit: 10, rank: "High" });
+    expect(state.resetRevision.value).toBe(0);
   });
   it("switches repeatedly without a dialog when only modes changed", () => {
     const state = useNodePoolSchedulingDraft(snapshot());
@@ -52,12 +46,12 @@ describe("scheduling draft", () => {
     expect(state.pendingMode.value).toBeUndefined();
     expect(state.draft.value.mode).toBe("ranked");
   });
-  it("discards to the latest saved checkpoint", () => {
+  it("preserves edits after accepting a saved checkpoint", () => {
     const state = useNodePoolSchedulingDraft(snapshot());
     state.acceptSnapshot({ ...snapshot(), departments: { a: { id: "a", weight: 3 } } });
     state.draft.value.departments.a.weight = 8;
     state.requestMode("ranked");
     state.confirmModeChange();
-    expect(state.draft.value.departments.a.weight).toBe(3);
+    expect(state.draft.value.departments.a.weight).toBe(8);
   });
 });

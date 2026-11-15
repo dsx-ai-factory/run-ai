@@ -14,6 +14,7 @@
         :icon="tooltipIcon"
         :width="width"
         :tooltip-position="tooltipPosition"
+        :interactive="interactiveTooltip"
       >
         <template v-if="$slots['tooltip-content']" #content><slot name="tooltip-content" /></template>
       </runai-tooltip>
@@ -34,6 +35,7 @@ export default defineComponent({
     RunaiTooltip,
   },
   props: {
+    interactiveTooltip: { type: Boolean, default: false },
     title: {
       type: String as PropType<string>,
       required: false, // if no title is provided, the slot will be used

@@ -132,11 +132,6 @@ export default defineComponent({
       return this.$route.params.id as string;
     },
   },
-  watch: {
-    schedulingFlowEnabled(enabled: boolean) {
-      if (!enabled && !this.newFlowEnabled && !this.nodePool) void this.loadNodePool();
-    },
-  },
   methods: {
     async loadNodePool(): Promise<void> {
       if (this.isNewNodePool) {
@@ -242,6 +237,11 @@ export default defineComponent({
       } finally {
         this.loading = false;
       }
+    },
+  },
+  watch: {
+    schedulingFlowEnabled(enabled: boolean) {
+      if (!enabled && !this.newFlowEnabled && !this.nodePool) void this.loadNodePool();
     },
   },
   unmounted() {

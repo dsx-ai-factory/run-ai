@@ -340,6 +340,10 @@ async function submit(target: ENodePoolFormDestination) {
 }
 </script>
 <style scoped lang="scss">
+:deep([aria-current="step"] .wizard-step-title) {
+  font-weight: 700;
+}
+
 .node-pool-edit-form-v2 {
   padding: 0 20px 26px;
 }

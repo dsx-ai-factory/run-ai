@@ -2,15 +2,17 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { mount } from "@vue/test-utils";
+import { flushPromises, mount } from "@vue/test-utils";
 import { describe, expect, it, vi } from "vitest";
 import { createTestingPinia } from "@pinia/testing";
-import { QCheckbox, QToggle, Quasar } from "quasar";
+import { QCheckbox, QToggle, QResizeObserver, Quasar } from "quasar";
 import type { SchedulingDraft } from "./node-pool-scheduling.model";
 import type { DepartmentNodePoolResources } from "@/swagger-models/org-unit-service-client";
 import MoveToRankModal from "@/components/org-unit/v2/common/peer-org-unit-rank-list/move-to-rank-modal/move-to-rank-modal.vue";
 import { RunaiPageActions } from "@/components/common/runai-page-actions";
+import { simulationPreviewKey } from "./node-pool-simulation.service";
 import Table from "./node-pool-department-table.vue";
+import DepartmentResourceEditor from "./department-resource-editor.vue";
 const rows: DepartmentNodePoolResources[] = [
   {
     id: "resource-a",
@@ -25,63 +27,253 @@ const rows: DepartmentNodePoolResources[] = [
 ];
 const draft: SchedulingDraft = { mode: "proportional", automaticWeights: false, cpuQuota: false, departments: {} };
 describe("scheduling department table", () => {
-  it("renders the exact Guaranteed Automatic profile with truthful quota-derived percentages only", async () => {
-    const profile = Array.from({ length: 5 }, (_, index) => ({
-      ...rows[0],
-      id: `fixture-auto-${index + 1}`,
-      orgUnitId: `preview-department-${index + 1}`,
-      orgUnitName: `department ${index + 1}`,
-      resources: { gpu: { deserved: 20, overQuotaWeight: 2, limit: -1 } },
-    }));
-    const automatic = { ...draft, mode: "guaranteed" as const, automaticWeights: true };
+  const weightPopup = {
+    template: '<td><span class="applied-weight">{{ displayValue }}</span><slot name="input" /></td>',
+    props: ["displayValue", "isSubmitDisabled"],
+    emits: ["apply", "reset", "opened"],
+  };
+  it("preserves table space while filtering and releases it when cleared", async () => {
     const wrapper = mount(Table, {
-      props: {
-        rows: profile,
-        baselineRows: profile,
-        draft: automatic,
-        capacity: 144,
-        aggregates: { all: { weightsSum: 10, deservedSum: 100 }, MediumLow: { weightsSum: 10, deservedSum: 100 } },
-        ranks: ["MediumLow"],
-        readonly: false,
-        loading: false,
-      },
+      props: { rows, draft, aggregates: {}, ranks: [], readonly: false, loading: false },
       global: {
         plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
         directives: { "click-outside": {}, permission: {} },
       },
     });
-    wrapper.findComponent(QToggle).vm.$emit("update:modelValue", true);
+    wrapper.findComponent(QResizeObserver).vm.$emit("resize", { height: 420, width: 1000 });
+    await wrapper.setProps({ searchTerm: "missing", rows: [] });
+    expect(wrapper.get(".department-table-content").attributes("style")).toContain("min-height: 420px");
+    wrapper.findComponent(QResizeObserver).vm.$emit("resize", { height: 100, width: 1000 });
     await wrapper.vm.$nextTick();
-    expect(wrapper.findAll(".allocated")).toHaveLength(5);
-    expect(wrapper.text()).toContain("20%");
-    await wrapper.setProps({ draft: { ...automatic, automaticWeights: false } });
-    expect(wrapper.findAll(".allocated")).toHaveLength(0);
-    const nearby = profile.map((row, index) =>
-      index ? row : { ...row, resources: { gpu: { ...row.resources.gpu, deserved: 21 } } },
-    );
-    await wrapper.setProps({ rows: nearby, baselineRows: nearby, draft: automatic });
-    expect(wrapper.findAll(".allocated")).toHaveLength(0);
-    const live = profile.map((row, index) => ({ ...row, orgUnitId: `live-auto-${index + 1}` }));
-    await wrapper.setProps({ rows: live, baselineRows: live });
-    expect(wrapper.findAll(".allocated")).toHaveLength(0);
+    expect(wrapper.get(".department-table-content").attributes("style")).toContain("420px");
+    await wrapper.setProps({ searchTerm: "", rows });
+    expect(wrapper.get(".department-table-content").attributes("style") ?? "").not.toContain("min-height");
     wrapper.unmount();
   });
-  it("renders only the exact authored overcommit profile and clears bars for nearby quotas, modes and live IDs", async () => {
-    const profile = Array.from({ length: 10 }, (_, index) => ({
-      ...rows[0],
-      id: `fixture-resource-${index + 1}`,
-      orgUnitId: `preview-department-${index + 1}`,
-      orgUnitName: `department ${index + 1}`,
-      resources: { gpu: { deserved: index === 0 ? 24 : 16, overQuotaWeight: 2, limit: -1 } },
-    }));
-    const guaranteed = { ...draft, mode: "guaranteed" as const };
+  it.each([
+    ["proportional", "6.09%"],
+    ["ranked", "46.67%"],
+    ["guaranteed", "46.67%"],
+  ] as const)(
+    "previews the proposed weight share in %s without changing applied table values",
+    async (mode, proposed) => {
+      const peers = [
+        rows[0],
+        { ...rows[0], orgUnitId: "b", orgUnitName: "Beta", resources: { gpu: { overQuotaWeight: 1 } } },
+        { ...rows[0], orgUnitId: "c", orgUnitName: "Gamma", resources: { gpu: { overQuotaWeight: 7 } } },
+        { ...rows[0], orgUnitId: "d", orgUnitName: "Delta", resources: { gpu: { overQuotaWeight: 0 } } },
+        {
+          ...rows[0],
+          orgUnitId: "h",
+          orgUnitName: "Higher",
+          rank: "High",
+          resources: { gpu: { overQuotaWeight: 100 } },
+        },
+      ];
+      const currentDraft: SchedulingDraft = { ...draft, mode };
+      const wrapper = mount(Table, {
+        props: {
+          rows: peers,
+          baselineRows: peers,
+          draft: currentDraft,
+          aggregates: {
+            all: { weightsSum: 110, deservedSum: 3 },
+            MediumLow: { weightsSum: 10, deservedSum: 3 },
+            High: { weightsSum: 100, deservedSum: 0 },
+          },
+          ranks: ["High", "MediumLow"],
+          readonly: false,
+          loading: false,
+        },
+        global: {
+          plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+          directives: { "click-outside": {}, permission: {} },
+          stubs: { EditableCellPopup: weightPopup },
+        },
+      });
+      const editor = wrapper
+        .findAllComponents(DepartmentResourceEditor)
+        .find((item) => item.props("kind") === "weight" && item.props("id") === "a");
+      if (!editor) throw new Error("Weight editor is unavailable.");
+      const applied = editor.get(".applied-weight").text();
+      const markerBefore = wrapper.findAll(".quota-marker").map((marker) => marker.attributes("style"));
+      editor.findComponent(weightPopup).vm.$emit("opened");
+      await editor.get("input").setValue("7");
+      expect(editor.get(".weight-percentage").text()).toBe(`(${proposed})`);
+      expect(editor.get(".applied-weight").text()).toBe(applied);
+      expect(wrapper.findAll(".quota-marker").map((marker) => marker.attributes("style"))).toEqual(markerBefore);
+      expect(wrapper.emitted("edit")).toBeUndefined();
+      editor.findComponent(weightPopup).vm.$emit("reset");
+      await wrapper.vm.$nextTick();
+      expect((editor.get("input").element as HTMLInputElement).value).toBe("2");
+      expect(editor.get(".weight-percentage").text()).toBe(`(${applied})`);
+      await editor.get("input").setValue("7");
+      editor.findComponent(weightPopup).vm.$emit("apply");
+      expect(wrapper.emitted("edit")).toEqual([[{ id: "a", weight: 7 }]]);
+      await wrapper.setProps({ draft: { ...currentDraft, departments: { a: { id: "a", weight: 7 } } } });
+      expect(editor.get(".applied-weight").text()).toBe(proposed);
+      wrapper.unmount();
+    },
+  );
+  it("previews zero weights and avoids a stale percentage for invalid input", async () => {
+    const zero = { ...rows[0], resources: { gpu: { overQuotaWeight: 0 } } };
     const wrapper = mount(Table, {
       props: {
-        rows: profile,
-        baselineRows: profile,
-        draft: guaranteed,
-        capacity: 144,
-        aggregates: { all: { weightsSum: 20, deservedSum: 168 }, MediumLow: { weightsSum: 20, deservedSum: 168 } },
+        rows: [zero],
+        baselineRows: [zero],
+        draft,
+        aggregates: { all: { weightsSum: 0, deservedSum: 0 } },
+        ranks: [],
+        readonly: false,
+        loading: false,
+      },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+        stubs: { EditableCellPopup: weightPopup },
+      },
+    });
+    const editor = wrapper.findComponent(DepartmentResourceEditor);
+    expect(editor.get(".weight-percentage").text()).toBe("(0%)");
+    await editor.get("input").setValue("5");
+    expect(editor.get(".weight-percentage").text()).toBe("(100%)");
+    for (const invalid of ["", "-1", "0.5"]) {
+      await editor.get("input").setValue(invalid);
+      expect(editor.get(".weight-percentage").text()).toBe("(Unknown)");
+      editor.findComponent(weightPopup).vm.$emit("apply");
+    }
+    expect(wrapper.emitted("edit")).toBeUndefined();
+    wrapper.unmount();
+  });
+  it("previews the final unknown custom weight only when every other peer is known with full visibility", async () => {
+    const peers = [rows[0], { ...rows[0], orgUnitId: "b", orgUnitName: "Beta" }];
+    const currentDraft: SchedulingDraft = { ...draft, departments: { b: { id: "b", weight: 3 } } };
+    const wrapper = mount(Table, {
+      props: {
+        rows: peers,
+        baselineRows: peers,
+        draft: currentDraft,
+        aggregates: { all: { weightsSum: 6, deservedSum: 6, rawWeightsSum: undefined } },
+        ranks: [],
+        rawWeightsAvailable: false,
+        readonly: false,
+        loading: false,
+      },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+        stubs: { EditableCellPopup: weightPopup },
+      },
+    });
+    const editor = wrapper.findAllComponents(DepartmentResourceEditor).find((item) => item.props("id") === "a");
+    if (!editor) throw new Error("Weight editor is unavailable.");
+    editor.findComponent(weightPopup).vm.$emit("opened");
+    await editor.get("input").setValue("7");
+    expect(editor.get(".weight-percentage").text()).toBe("(70%)");
+    expect(editor.get(".applied-weight").text()).toBe("Unknown");
+    await wrapper.setProps({ totalsComplete: false });
+    expect(editor.get(".weight-percentage").text()).toBe("(Unknown)");
+    await wrapper.setProps({ totalsComplete: true, baselineRows: undefined });
+    expect(editor.get(".weight-percentage").text()).toBe("(Unknown)");
+    await wrapper.setProps({ baselineRows: peers, draft });
+    expect(editor.get(".weight-percentage").text()).toBe("(Unknown)");
+    expect(wrapper.emitted("edit")).toBeUndefined();
+    wrapper.unmount();
+  });
+  it("allows quota above a preserved limit only after maximum allocation is disabled", async () => {
+    const resourcePopup = {
+      template: '<td><slot name="input" /></td>',
+      emits: ["apply", "reset", "opened"],
+    };
+    const currentDraft: SchedulingDraft = {
+      ...draft,
+      mode: "guaranteed",
+      maxAllocation: true,
+      departments: { a: { id: "a", quota: 20, limit: 30 } },
+    };
+    const wrapper = mount(Table, {
+      props: {
+        rows,
+        draft: currentDraft,
+        aggregates: { all: { weightsSum: 2, deservedSum: 3 } },
+        ranks: ["MediumLow"],
+        capacity: 100,
+        readonly: false,
+        loading: false,
+        loadQuotaContext: async () => ({ childQuotaSum: 0 }),
+      },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+        stubs: { EditableCellPopup: resourcePopup },
+      },
+    });
+    const quota = wrapper.findAllComponents(DepartmentResourceEditor).find((editor) => editor.props("kind") === "quota");
+    if (!quota) throw new Error("Quota editor is unavailable.");
+    quota.findComponent(resourcePopup).vm.$emit("opened");
+    await flushPromises();
+    await quota.get("input").setValue("40");
+    quota.findComponent(resourcePopup).vm.$emit("apply");
+    expect(wrapper.emitted("edit")).toBeUndefined();
+    await wrapper.setProps({ draft: { ...currentDraft, maxAllocation: false } });
+    quota.findComponent(resourcePopup).vm.$emit("apply");
+    expect(wrapper.emitted("edit")).toEqual([[{ id: "a", quota: 40 }]]);
+    expect(wrapper.props("draft").departments.a.limit).toBe(30);
+    await wrapper.setProps({ draft: currentDraft });
+    quota.findComponent(resourcePopup).vm.$emit("apply");
+    expect(wrapper.emitted("edit")).toHaveLength(1);
+    wrapper.unmount();
+  });
+  it.each(["proportional", "ranked"] as const)(
+    "allows a maximum preview below an inactive quota in %s mode",
+    async (mode) => {
+      const resourcePopup = { template: '<td><slot name="input" /></td>', emits: ["apply", "reset", "opened"] };
+      const currentDraft: SchedulingDraft = {
+        ...draft,
+        mode,
+        maxAllocation: true,
+        departments: { a: { id: "a", quota: 20, limit: 30 } },
+      };
+      const wrapper = mount(Table, {
+        props: {
+          rows,
+          draft: currentDraft,
+          aggregates: {},
+          ranks: ["MediumLow"],
+          readonly: false,
+          loading: false,
+        },
+        global: {
+          plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+          directives: { "click-outside": {}, permission: {} },
+          stubs: { EditableCellPopup: resourcePopup },
+        },
+      });
+      const maximum = wrapper
+        .findAllComponents(DepartmentResourceEditor)
+        .find((editor) => editor.props("kind") === "limit");
+      if (!maximum) throw new Error("Maximum allocation editor is unavailable.");
+      await maximum.get("input").setValue("10");
+      maximum.findComponent(resourcePopup).vm.$emit("apply");
+      expect(wrapper.emitted("edit")).toEqual([[{ id: "a", limit: 10 }]]);
+      expect(wrapper.props("draft").departments.a.quota).toBe(20);
+      await wrapper.setProps({ draft: { ...currentDraft, mode: "guaranteed" } });
+      maximum.findComponent(resourcePopup).vm.$emit("apply");
+      expect(wrapper.emitted("edit")).toHaveLength(1);
+      wrapper.unmount();
+    },
+  );
+  it("hides the rank action in Proportional and restores the selection when returning to Ranked", async () => {
+    const currentDraft: SchedulingDraft = {
+      ...draft,
+      mode: "ranked",
+      departments: { a: { id: "a", rank: "MediumLow" } },
+    };
+    const wrapper = mount(Table, {
+      props: {
+        rows,
+        draft: currentDraft,
+        aggregates: {},
         ranks: ["MediumLow"],
         readonly: false,
         loading: false,
@@ -91,22 +283,102 @@ describe("scheduling department table", () => {
         directives: { "click-outside": {}, permission: {} },
       },
     });
-    wrapper.findComponent(QToggle).vm.$emit("update:modelValue", true);
+    const alpha = wrapper.findAllComponents(QCheckbox).find((item) => item.attributes("aria-label") === "Select Alpha");
+    if (!alpha) throw new Error("Department selection is unavailable.");
+    alpha.vm.$emit("update:modelValue", true);
     await wrapper.vm.$nextTick();
-    expect(wrapper.findAll(".allocated")).toHaveLength(10);
-    expect(wrapper.get(".quota-warning").text()).toContain("exceeds");
-    expect(wrapper.get(".quota-warning").text()).toContain("by 24 GPUs");
-    expect(wrapper.text()).toContain("Simulation preview — mock results");
-    const nearby = profile.map((row, index) =>
-      index ? row : { ...row, resources: { gpu: { ...row.resources.gpu, deserved: 25 } } },
-    );
-    await wrapper.setProps({ rows: nearby, baselineRows: nearby });
-    expect(wrapper.findAll(".allocated")).toHaveLength(0);
-    await wrapper.setProps({ rows: profile, baselineRows: profile, draft: { ...guaranteed, mode: "ranked" } });
-    expect(wrapper.findAll(".allocated")).toHaveLength(0);
-    const live = profile.map((row, index) => ({ ...row, orgUnitId: `live-department-${index + 1}` }));
-    await wrapper.setProps({ rows: live, baselineRows: live, draft: guaranteed });
-    expect(wrapper.findAll(".allocated")).toHaveLength(0);
+    expect(wrapper.get('[aid="move-departments"]').isVisible()).toBe(true);
+    await wrapper.setProps({ draft: { ...currentDraft, mode: "proportional" } });
+    expect(wrapper.find('[aid="move-departments"]').exists()).toBe(false);
+    expect(wrapper.find(".selected-rows-actions").exists()).toBe(false);
+    expect(wrapper.get('[aid="advanced-settings"]').isVisible()).toBe(true);
+    expect(wrapper.props("draft").departments.a.rank).toBe("MediumLow");
+    await wrapper.setProps({ draft: currentDraft });
+    expect(wrapper.get('[aid="move-departments"]').isVisible()).toBe(true);
+    expect(wrapper.get(".selected-rows-actions").text()).toContain("1 selected");
+    const restored = wrapper
+      .findAllComponents(QCheckbox)
+      .find((item) => item.attributes("aria-label") === "Select Alpha");
+    expect(restored?.props("modelValue")).toBe(true);
+    wrapper.unmount();
+  });
+  it("recovers custom percentages only from a complete set of known draft peer weights", async () => {
+    const peers = [
+      rows[0],
+      { ...rows[0], orgUnitId: "b", orgUnitName: "Beta" },
+      { ...rows[0], orgUnitId: "c", orgUnitName: "Gamma" },
+      { ...rows[0], orgUnitId: "d", orgUnitName: "Delta" },
+    ];
+    const currentDraft: SchedulingDraft = {
+      ...draft,
+      mode: "guaranteed",
+      departments: { a: { id: "a", weight: 0 }, b: { id: "b", weight: 1 }, c: { id: "c", weight: 2 } },
+    };
+    const wrapper = mount(Table, {
+      props: {
+        rows: peers,
+        baselineRows: peers,
+        draft: currentDraft,
+        aggregates: { MediumLow: { weightsSum: 12, deservedSum: 12, rawWeightsSum: undefined } },
+        ranks: ["MediumLow"],
+        rawWeightsAvailable: false,
+        readonly: false,
+        loading: false,
+      },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+      },
+    });
+    const displayedWeights = () =>
+      wrapper
+        .findAllComponents(DepartmentResourceEditor)
+        .filter((editor) => editor.props("kind") === "weight")
+        .map((editor) => editor.get('[role="button"]').text());
+    expect(displayedWeights()).toEqual(["Unknown", "Unknown", "Unknown", "Unknown"]);
+    const completeDraft = { ...currentDraft, departments: { ...currentDraft.departments, d: { id: "d", weight: 7 } } };
+    await wrapper.setProps({ draft: completeDraft });
+    expect(displayedWeights()).toEqual(["0%", "10%", "20%", "70%"]);
+    await wrapper.setProps({ rows: [peers[1]], searchTerm: "Beta" });
+    expect(displayedWeights()).toEqual(["10%"]);
+    await wrapper.setProps({
+      draft: {
+        ...completeDraft,
+        departments: { ...completeDraft.departments, d: { id: "d", weight: 7, rank: "High" } },
+      },
+    });
+    expect(displayedWeights()).toEqual(["33.33%"]);
+    await wrapper.setProps({ totalsComplete: false });
+    expect(displayedWeights()).toEqual(["Unknown"]);
+    await wrapper.setProps({ totalsComplete: true, baselineRows: undefined });
+    expect(displayedWeights()).toEqual(["Unknown"]);
+    wrapper.unmount();
+  });
+  it("counts draft rank moves before offering to load more departments", async () => {
+    const wrapper = mount(Table, {
+      props: {
+        rows: [...rows, { ...rows[0], id: "resource-b", orgUnitId: "b", orgUnitName: "Beta", rank: "High" }],
+        draft: { ...draft, mode: "ranked", departments: { a: { id: "a", rank: "High" } } },
+        aggregates: {},
+        ranks: ["High", "MediumLow"],
+        rankCounts: { High: 1, MediumLow: 1 },
+        readonly: false,
+        loading: false,
+      },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+      },
+    });
+    await wrapper.get('[aid="rank-High"]').trigger("click");
+    expect(wrapper.text()).toContain("High (2 departments)");
+    expect(wrapper.text()).toContain("Alpha");
+    expect(wrapper.text()).toContain("Beta");
+    expect(wrapper.find('[aid="load-rank-High"]').exists()).toBe(false);
+    await wrapper.setProps({ rankCounts: { High: 3, MediumLow: 1 } });
+    expect(wrapper.text()).toContain("High (4 departments)");
+    await wrapper.get('[aid="load-rank-High"]').trigger("click");
+    expect(wrapper.emitted("load-rank")).toEqual([["High"], ["High"]]);
     wrapper.unmount();
   });
   it("uses the reference zero-state copy and uses Show settings during search, including matching rows", async () => {
@@ -127,76 +399,48 @@ describe("scheduling department table", () => {
     expect(wrapper.get('[aid="advanced-settings"]').text()).toBe("Show settings");
     wrapper.unmount();
   });
-  it.each([
-    { automaticWeights: true },
-    { cpuQuota: true },
-    { timeFairshare: true },
-    { historicalWeight: 1 },
-    { historicalWindow: { Days: 1 } },
-    { minimumRuntime: { Minutes: 1 } },
-  ])("clears authored results when advanced inputs no longer match: %j", async (patch) => {
-    const fixtureRows = Array.from({ length: 5 }, (_, index) => ({
-      ...rows[0],
-      orgUnitId: `preview-department-${index + 1}`,
-      orgUnitName: `department ${index + 1}`,
-      resources: { gpu: { deserved: 0, overQuotaWeight: 2, limit: -1 } },
-    }));
+  it("renders API results, defaults demand to half capacity, and preserves drafts on errors", async () => {
+    vi.useFakeTimers();
+    const transport = vi.fn().mockResolvedValue({
+      capacity: { gpu: 144 },
+      orgUnits: [
+        {
+          id: "a",
+          fairShare: { gpu: 12 },
+          guaranteed: { gpu: 0 },
+          overQuota: { gpu: 12 },
+          unmet: { gpu: 60 },
+          demand: { gpu: 72 },
+          weightShareInRank: 0.25,
+        },
+      ],
+    });
     const wrapper = mount(Table, {
-      props: {
-        rows: fixtureRows,
-        baselineRows: fixtureRows,
-        draft,
-        capacity: 144,
-        aggregates: { all: { weightsSum: 10, deservedSum: 0 } },
-        ranks: [],
-        readonly: false,
-        loading: false,
-      },
+      props: { poolId: "17", rows, draft, capacity: 144, aggregates: {}, ranks: [], readonly: true, loading: false },
       global: {
         plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
         directives: { "click-outside": {}, permission: {} },
+        provide: { [simulationPreviewKey as symbol]: { transport } },
       },
     });
+    expect(wrapper.findComponent(QToggle).props("disable")).toBe(false);
     wrapper.findComponent(QToggle).vm.$emit("update:modelValue", true);
     await wrapper.vm.$nextTick();
-    expect(wrapper.findAll(".allocated")).toHaveLength(5);
-    await wrapper.setProps({ draft: { ...draft, ...patch } });
-    expect(wrapper.findAll(".allocated")).toHaveLength(0);
+    await vi.advanceTimersByTimeAsync(300);
+    expect((wrapper.get(".demand-slider").element as HTMLInputElement).value).toBe("72");
+    expect(wrapper.get(".allocated").text()).toBe("12");
+    expect(wrapper.get(".unmet").attributes("style")).toContain("41.666");
+    expect(wrapper.get(".demand-slider").attributes("disabled")).toBeUndefined();
+    expect(wrapper.text()).toContain("25%");
+    expect(wrapper.text()).toContain("mock results");
+    transport.mockRejectedValue({ response: { status: 501 } });
+    await wrapper.setProps({ draft: { ...draft, departments: { a: { id: "a", weight: 8 } } } });
+    await vi.advanceTimersByTimeAsync(300);
+    expect(wrapper.find(".allocated").exists()).toBe(false);
+    expect(wrapper.text()).toContain("not available on this backend");
+    expect(wrapper.props("draft").departments.a.weight).toBe(8);
     wrapper.unmount();
-  });
-  it("initializes keyboard demand controls at capacity and clears fixture results after any configuration edit", async () => {
-    const fixtureRows = Array.from({ length: 5 }, (_, index) => ({
-      ...rows[0],
-      orgUnitId: `preview-department-${index + 1}`,
-      orgUnitName: `department ${index + 1}`,
-      resources: { gpu: { deserved: 0, overQuotaWeight: 2, limit: -1 } },
-    }));
-    const wrapper = mount(Table, {
-      props: {
-        rows: fixtureRows,
-        baselineRows: fixtureRows,
-        draft,
-        capacity: 144,
-        aggregates: { all: { weightsSum: 10, deservedSum: 0 } },
-        ranks: [],
-        readonly: false,
-        loading: false,
-      },
-      global: {
-        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
-        directives: { "click-outside": {}, permission: {} },
-      },
-    });
-    wrapper.findComponent(QToggle).vm.$emit("update:modelValue", true);
-    await wrapper.vm.$nextTick();
-    expect(wrapper.findAll(".allocated")).toHaveLength(5);
-    expect((wrapper.get('input[type="range"]').element as HTMLInputElement).value).toBe("144");
-    await wrapper.setProps({
-      draft: { ...draft, departments: { "preview-department-1": { id: "preview-department-1", weight: 4 } } },
-    });
-    expect(wrapper.findAll(".allocated")).toHaveLength(0);
-    expect(wrapper.text()).toContain("Simulation preview — mock results");
-    wrapper.unmount();
+    vi.useRealTimers();
   });
   it("displays a whole-pool percentage and preserves pending edits when pages change", async () => {
     const wrapper = mount(Table, {

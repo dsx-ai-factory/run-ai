@@ -29,7 +29,7 @@
             :disable="isInputDisabled"
             :model-value="departmentName"
             @update:model-value="$emit('update:departmentName', $event)"
-            :rules="[isValidEntityName, isNameUnique]"
+            :rules="compact ? compactNameRules : [isValidEntityName, isNameUnique]"
           />
         </runai-tooltip-wrapper>
       </div>
@@ -57,6 +57,7 @@
 import { RunaiExpansionItem } from "@/components/common/runai-expansion-item";
 import { RunaiNameValidation } from "@/components/common/runai-name-validation";
 import { defineComponent, type PropType } from "vue";
+import type { ValidationRule } from "quasar";
 import { isValidEntityName } from "@/common/form.validators";
 import { errorMessages } from "@/common/error-message.constant";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
@@ -101,6 +102,10 @@ export default defineComponent({
     };
   },
   computed: {
+    compactNameRules(): ValidationRule[] {
+      // Keep async name validation stable while description and role fields change.
+      return [this.isValidEntityName, this.isNameUnique];
+    },
     sectionInvalid(): boolean {
       return !isValidEntityName(this.departmentName) || !this.isDepartmentNameUnique;
     },
@@ -174,6 +179,9 @@ export default defineComponent({
 .department-name-section--compact :deep(.q-field__control) {
   height: auto;
   min-height: 31px;
+}
+.department-name-section--compact :deep(.q-field__marginal) {
+  height: 31px;
 }
 .department-name-section--compact :deep(.q-field__native) {
   min-height: 0;

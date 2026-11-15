@@ -4,6 +4,7 @@
 -->
 <template>
   <editable-cell-popup
+    :class="{ 'unlimited-allocation': kind === 'limit' && (value == null || value === -1) }"
     :title="editorTitle"
     popup-class="scheduling-resource-popup"
     :popup-width="kind === 'weight' ? '274px' : '200px'"
@@ -34,27 +35,41 @@
         <runai-tooltip
           v-if="kind === 'weight'"
           class="weight-editor-help q-ml-xs"
-          icon="ph ph-question"
+          icon="ph-bold ph-question"
           width="320px"
           :tooltip-text="weightHelp"
-        />
+          tooltip-position="right"
+          :tooltip-offset="rankedWeight ? [120, 0] : [180, 0]"
+          ><template #content
+            ><strong>Weight</strong> determines a department’s share relative to the other departments{{
+              rankedWeight ? " in the same rank" : ""
+            }}. A higher weight means a larger portion of the resources.
+            <strong>The weight is expressed as a percentage</strong>, calculated as the weight divided by the total
+            weight of all departments{{ rankedWeight ? " in the rank" : "" }}.<br />For example, a department with a
+            weight of 2{{ rankedWeight ? " in a rank" : "" }} where the weights total 20 receives 10%.</template
+          ></runai-tooltip
+        >
       </span>
     </template>
     <template #input>
-      <q-input
-        v-model="input"
-        :type="kind === 'limit' ? 'text' : 'number'"
-        min="0"
-        dense
-        :aria-label="editorTitle"
-        :suffix="kind === 'weight' && displayValue ? `(${displayValue})` : undefined"
-        :placeholder="kind === 'limit' ? 'Unlimited' : undefined"
-        :error="validation.errors.length > 0"
-        :color="!validation.errors.length && validation.warnings.length ? 'warning' : 'primary'"
-        :class="{ 'resource-input-warning': !validation.errors.length && validation.warnings.length }"
-        :error-message="errorMessage"
-        no-error-icon
-      />
+      <div :class="{ 'weight-input-row': kind === 'weight' }">
+        <q-input
+          v-model="input"
+          :type="kind === 'limit' ? 'text' : 'number'"
+          min="0"
+          dense
+          :aria-label="editorTitle"
+          :max="kind === 'weight' ? 20 : undefined"
+          :step="kind === 'weight' ? 1 : undefined"
+          :placeholder="kind === 'limit' ? 'Unlimited' : undefined"
+          :error="validation.errors.length > 0"
+          :color="!validation.errors.length && validation.warnings.length ? 'warning' : 'primary'"
+          :class="{ 'resource-input-warning': !validation.errors.length && validation.warnings.length }"
+          :error-message="errorMessage"
+          no-error-icon
+        />
+        <span v-if="kind === 'weight'" class="weight-percentage">({{ proposedWeightPercentage }})</span>
+      </div>
       <p
         v-if="kind === 'quota' && !loading && !validation.errors.length && !validation.warnings.length"
         class="quota-hint"
@@ -94,6 +109,7 @@ const props = defineProps<{
   title?: string;
   quota?: number;
   displayValue?: string;
+  previewWeightPercentage?: (weight: number) => number | undefined;
   disabled?: boolean;
   disabledTooltip?: string;
   limit?: number | null;
@@ -106,9 +122,10 @@ const editorTitle = computed(
     props.title ??
     (props.kind === "weight" ? "Weight" : props.kind === "limit" ? "Max GPU allocation" : "Guaranteed GPUs"),
 );
+const rankedWeight = computed(() => props.title === "Weight within rank");
 const weightHelp = computed(
   () =>
-    `Weight determines a department’s share relative to the other departments${props.title === "Weight within rank" ? " in the same rank" : ""}. A higher weight means a larger portion of the resources. The percentage is calculated from the total weight.`,
+    `Weight determines a department’s share relative to the other departments${rankedWeight.value ? " in the same rank" : ""}. A higher weight means a larger portion of the resources. The weight is expressed as a percentage, calculated as the weight divided by the total weight of all departments${rankedWeight.value ? " in the rank" : ""}. For example, a department with a weight of 2${rankedWeight.value ? " in a rank" : ""} where the weights total 20 receives 10%.`,
 );
 const initialInput = () =>
   props.kind === "limit" && (props.value == null || props.value === -1) ? "Unlimited" : (props.value ?? "");
@@ -120,14 +137,19 @@ const parsedValue = () =>
       ? NaN
       : Number(input.value);
 const input = ref<string | number>(props.value ?? "");
+const proposedWeightPercentage = computed(() => {
+  const value = parsedValue();
+  if (!Number.isInteger(value) || value < 0 || value > 20) return "Unknown";
+  const percentage = props.previewWeightPercentage?.(value);
+  return percentage == null || !Number.isFinite(percentage) ? "Unknown" : `${Number(percentage.toFixed(2))}%`;
+});
 const context = ref<DepartmentValidationContext>(props.context ?? {});
 const recommendedMinimum = computed(() => recommendedDepartmentQuotaMinimum(context.value));
 const quotaBudget = computed(() => departmentQuotaBudget(props.value, context.value));
 const errorMessage = computed(() =>
   validation.value.errors
     .map((message) => {
-      if (message === "Weight must be a whole number of 0 or greater.")
-        return "Enter a whole number equal to or above 0";
+      if (message === "Weight must be a whole number from 0 to 20.") return "Enter a whole number from 0 to 20";
       if (message === "Guaranteed GPUs must be 0 or greater.") return "Enter a value equal to or above 0";
       if (message === "Guaranteed GPUs are below the child project quota sum.") return childQuotaMessage();
       return message;
@@ -208,6 +230,28 @@ watch(() => props.value, reset);
 </script>
 
 <style scoped lang="scss">
+.unlimited-allocation :deep(.cell-trigger) {
+  color: var(--text-placeholder);
+  font-style: italic;
+}
+.weight-input-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  .q-input {
+    width: 168px;
+    flex: 0 0 168px;
+  }
+}
+.weight-percentage {
+  min-width: 48px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 14px;
+  color: var(--b-text-main);
+}
 .resource-editor-title {
   display: inline-flex;
   align-items: center;
