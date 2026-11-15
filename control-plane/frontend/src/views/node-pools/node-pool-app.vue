@@ -4,5 +4,5 @@
 -->
 
 <template>
-  <router-view />
+  <router-view :key="`${String($route.name)}:${$route.params.id ?? ''}`" />
 </template>

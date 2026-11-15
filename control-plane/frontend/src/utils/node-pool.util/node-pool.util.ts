@@ -4,6 +4,12 @@
  */
 
 import {
+  type INodePoolFormDraft,
+  binPackLabel,
+  spreadLabel,
+  NODE_POOL_LABEL_REGEX,
+  PROPORTIONAL_CAPABILITIES,
+  NODE_POOL_CONFIGURATION_DEFAULTS,
   EMPTY_PRIORITY_LABEL,
   NodePoolPhaseMap,
   NodePoolStatusMessageMap,
@@ -17,11 +23,10 @@ import {
   type NodepoolCreateFields,
   type NodepoolUpdateFields,
   NodeTelemetryType,
+  PlacementStrategy,
   type TelemetryResponse,
   type TelemetryResponseValuesInner,
 } from "@/swagger-models/cluster-service-client";
-import { binPackLabel, spreadLabel } from "@/models/node-pool.model";
-import { PlacementStrategy } from "@/swagger-models/cluster-service-client";
 
 import type { IStatusColOptions } from "@/models/table.model";
 import { tableUtil } from "@/utils/table.util";
@@ -31,11 +36,19 @@ import type { INodeTable } from "@/table-models/node.table-model";
 import { deepCopy } from "@/utils/common.util";
 import { DEFAULT_NODE_POOL_NAME } from "@/models/resource.model";
 import { stringUtil } from "@/utils/string.util";
+import { isValidRegExp } from "@/common/form.validators";
+import { errorMessages } from "@/common/error-message.constant";
 
 // Matches the Status legend tooltip width in the Node Pools Figma design (RUN-40875).
 const NODE_POOL_STATUS_TOOLTIP_MAX_WIDTH = "300px";
 
 export const nodePoolUtil = {
+  createNodePoolDraft,
+  validateDescription,
+  validateName,
+  validateLabelKey,
+  validateLabelValue,
+  labelOptions,
   placementStrategyText,
   getNodePoolPriorityByName,
   getStatusColOptions,
@@ -225,4 +238,50 @@ function getNodePoolUpdateRequest(nodePool: Nodepool): NodepoolUpdateFields {
     labelValue: nodePool.labelValue,
     networkTopologyId: nodePool.networkTopologyId,
   };
+}
+
+function createNodePoolDraft(clusterId = ""): INodePoolFormDraft {
+  const pool = getEmptyNodePool(clusterId);
+  return {
+    ...pool,
+    description: "",
+    schedulingCapabilities: { ...PROPORTIONAL_CAPABILITIES },
+    schedulingConfiguration: {
+      ...pool.schedulingConfiguration,
+      gpuPodsPlacementStrategy: { node: NODE_POOL_CONFIGURATION_DEFAULTS.gpuNodePlacement },
+      cpuPodsPlacementStrategy: { node: NODE_POOL_CONFIGURATION_DEFAULTS.cpuNodePlacement },
+    },
+  };
+}
+
+function validateDescription(value: string): true | string {
+  // The API's shared max-length validator counts UTF-8 bytes rather than characters.
+  return new TextEncoder().encode(value).length <= 250 || errorMessages.DESCRIPTION_MAX_BYTES;
+}
+function validateName(value: string): true | string {
+  if (!value) return errorMessages.NAME_NOT_EMPTY;
+  return (value.length <= 40 && /^[a-z][a-z0-9-]*$/.test(value) && !value.endsWith("-")) || errorMessages.VALID_FORMAT;
+}
+function validateLabelKey(value: string): true | string {
+  if (!value) return errorMessages.KEY_NOT_EMPTY;
+  return (
+    (value.length <= 253 && isValidRegExp(value, NODE_POOL_LABEL_REGEX.labelKey)) ||
+    errorMessages.KEY_REGEXP_VALIDATION + " " + NODE_POOL_LABEL_REGEX.labelKey
+  );
+}
+function validateLabelValue(value: string): true | string {
+  if (!value) return errorMessages.SELECT_A_VALUE;
+  return (
+    (value.length <= 63 && isValidRegExp(value, NODE_POOL_LABEL_REGEX.labelValue)) ||
+    errorMessages.VALUE_REGEXP_VALIDATION + " " + NODE_POOL_LABEL_REGEX.labelValue
+  );
+}
+function labelOptions(values: string[], search: string, unavailable: string[], kind = "value") {
+  const options = [...new Set([...values, ...unavailable])]
+    .filter((value) => value.toLowerCase().includes(search.toLowerCase()))
+    .map((value) => ({ label: value, value, disable: unavailable.includes(value) }));
+  if (search && ![...values, ...unavailable].includes(search)) {
+    options.push({ label: `${search} (new ${kind})`, value: search, disable: false });
+  }
+  return options;
 }
