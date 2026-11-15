@@ -3,8 +3,8 @@ module github.com/dsx-ai-factory/run-ai/control-plane/notifications-proxy/pkg/cl
 go 1.27.4
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.12
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.33
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.13
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.34
 )
 
 require (
