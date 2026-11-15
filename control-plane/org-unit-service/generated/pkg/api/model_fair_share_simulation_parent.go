@@ -20,7 +20,7 @@ var dummyFairShareSimulationParent = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// FairShareSimulationParent - The department whose projects are simulated, with its unsaved changes. Required when orgUnitType is project; not allowed for departments. Each field replaces the stored value on its own; omitted fields keep it.
+// FairShareSimulationParent - The department whose projects are simulated, with its unsaved changes. Required when orgUnitType is project; not allowed for departments. It needn't be readable by the caller. Each field replaces the stored value on its own; omitted fields keep it.
 type FairShareSimulationParent struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
@@ -28,10 +28,10 @@ type FairShareSimulationParent struct {
 	Id string `json:"id" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Highest … Lowest. Only while ranks is on.
+	// An unsaved rank. Only while ranks is on. Omitted or null keeps the stored rank.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Rank *string `json:"rank,omitempty"`
-	Rank *string `json:"rank,omitempty" gorm:""`
+	//Rank *FairShareSimulationRank `json:"rank,omitempty"`
+	Rank *FairShareSimulationRank `json:"rank,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
@@ -69,6 +69,12 @@ func AssertFairShareSimulationParentConstraints(obj FairShareSimulationParent) e
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	if obj.Rank != nil {
+		if okValue := obj.Rank.IsValid(); !okValue {
+			return &UnsupportedValueError{Field: "Rank", Value: string(*obj.Rank)}
+		}
+	}
 
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////

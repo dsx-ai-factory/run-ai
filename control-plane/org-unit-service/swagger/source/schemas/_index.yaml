@@ -212,6 +212,8 @@ FairShareSimulationNodePool:
   $ref: "./fairShareSimulation/FairShareSimulationNodePool.yaml"
 FairShareSimulationParent:
   $ref: "./fairShareSimulation/FairShareSimulationParent.yaml"
+FairShareSimulationRank:
+  $ref: "./fairShareSimulation/FairShareSimulationRank.yaml"
 FairShareSimulationResponse:
   $ref: "./fairShareSimulation/FairShareSimulationResponse.yaml"
 FairShareSimulationResult:

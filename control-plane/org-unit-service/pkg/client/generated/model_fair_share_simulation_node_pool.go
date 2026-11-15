@@ -24,9 +24,10 @@ var _ MappedNullable = &FairShareSimulationNodePool{}
 
 // FairShareSimulationNodePool The node pool as it is in the form.
 type FairShareSimulationNodePool struct {
-	// GPUs to split. 0 is valid; quotas are still granted, as the scheduler does, and nothing is given above them.
-	Capacity               FairShareSimulationResources              `json:"capacity"`
-	SchedulingCapabilities FairShareSimulationSchedulingCapabilities `json:"schedulingCapabilities"`
+	// GPUs to split. 0 is valid; quotas are still granted, as the scheduler does, and nothing is given above them. Required; null is rejected.
+	Capacity NullableFairShareSimulationResources `json:"capacity"`
+	// Required; null is rejected.
+	SchedulingCapabilities NullableFairShareSimulationSchedulingCapabilities `json:"schedulingCapabilities"`
 }
 
 type _FairShareSimulationNodePool FairShareSimulationNodePool
@@ -35,7 +36,7 @@ type _FairShareSimulationNodePool FairShareSimulationNodePool
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewFairShareSimulationNodePool(capacity FairShareSimulationResources, schedulingCapabilities FairShareSimulationSchedulingCapabilities) *FairShareSimulationNodePool {
+func NewFairShareSimulationNodePool(capacity NullableFairShareSimulationResources, schedulingCapabilities NullableFairShareSimulationSchedulingCapabilities) *FairShareSimulationNodePool {
 	this := FairShareSimulationNodePool{}
 	this.Capacity = capacity
 	this.SchedulingCapabilities = schedulingCapabilities
@@ -51,51 +52,55 @@ func NewFairShareSimulationNodePoolWithDefaults() *FairShareSimulationNodePool {
 }
 
 // GetCapacity returns the Capacity field value
+// If the value is explicit nil, the zero value for FairShareSimulationResources will be returned
 func (o *FairShareSimulationNodePool) GetCapacity() FairShareSimulationResources {
-	if o == nil {
+	if o == nil || o.Capacity.Get() == nil {
 		var ret FairShareSimulationResources
 		return ret
 	}
 
-	return o.Capacity
+	return *o.Capacity.Get()
 }
 
 // GetCapacityOk returns a tuple with the Capacity field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *FairShareSimulationNodePool) GetCapacityOk() (*FairShareSimulationResources, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Capacity, true
+	return o.Capacity.Get(), o.Capacity.IsSet()
 }
 
 // SetCapacity sets field value
 func (o *FairShareSimulationNodePool) SetCapacity(v FairShareSimulationResources) {
-	o.Capacity = v
+	o.Capacity.Set(&v)
 }
 
 // GetSchedulingCapabilities returns the SchedulingCapabilities field value
+// If the value is explicit nil, the zero value for FairShareSimulationSchedulingCapabilities will be returned
 func (o *FairShareSimulationNodePool) GetSchedulingCapabilities() FairShareSimulationSchedulingCapabilities {
-	if o == nil {
+	if o == nil || o.SchedulingCapabilities.Get() == nil {
 		var ret FairShareSimulationSchedulingCapabilities
 		return ret
 	}
 
-	return o.SchedulingCapabilities
+	return *o.SchedulingCapabilities.Get()
 }
 
 // GetSchedulingCapabilitiesOk returns a tuple with the SchedulingCapabilities field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *FairShareSimulationNodePool) GetSchedulingCapabilitiesOk() (*FairShareSimulationSchedulingCapabilities, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.SchedulingCapabilities, true
+	return o.SchedulingCapabilities.Get(), o.SchedulingCapabilities.IsSet()
 }
 
 // SetSchedulingCapabilities sets field value
 func (o *FairShareSimulationNodePool) SetSchedulingCapabilities(v FairShareSimulationSchedulingCapabilities) {
-	o.SchedulingCapabilities = v
+	o.SchedulingCapabilities.Set(&v)
 }
 
 func (o FairShareSimulationNodePool) MarshalJSON() ([]byte, error) {
@@ -108,8 +113,8 @@ func (o FairShareSimulationNodePool) MarshalJSON() ([]byte, error) {
 
 func (o FairShareSimulationNodePool) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["capacity"] = o.Capacity
-	toSerialize["schedulingCapabilities"] = o.SchedulingCapabilities
+	toSerialize["capacity"] = o.Capacity.Get()
+	toSerialize["schedulingCapabilities"] = o.SchedulingCapabilities.Get()
 	return toSerialize, nil
 }
 

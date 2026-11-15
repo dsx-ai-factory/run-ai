@@ -5,7 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** |  | 
-**Rank** | Pointer to **NullableString** | Highest … Lowest. Only while ranks is on. | [optional] 
+**Rank** | Pointer to [**NullableFairShareSimulationRank**](FairShareSimulationRank.md) | An unsaved rank. Only while ranks is on. Omitted or null keeps the stored rank. | [optional] 
 **Gpu** | Pointer to [**NullableFairShareSimulationGpuSettings**](FairShareSimulationGpuSettings.md) |  | [optional] 
 
 ## Methods
@@ -49,20 +49,20 @@ SetId sets Id field to given value.
 
 ### GetRank
 
-`func (o *FairShareSimulationParent) GetRank() string`
+`func (o *FairShareSimulationParent) GetRank() FairShareSimulationRank`
 
 GetRank returns the Rank field if non-nil, zero value otherwise.
 
 ### GetRankOk
 
-`func (o *FairShareSimulationParent) GetRankOk() (*string, bool)`
+`func (o *FairShareSimulationParent) GetRankOk() (*FairShareSimulationRank, bool)`
 
 GetRankOk returns a tuple with the Rank field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetRank
 
-`func (o *FairShareSimulationParent) SetRank(v string)`
+`func (o *FairShareSimulationParent) SetRank(v FairShareSimulationRank)`
 
 SetRank sets Rank field to given value.
 

@@ -77,6 +77,7 @@ docs/FairShareSimulationGpuSettings.md
 docs/FairShareSimulationNodePool.md
 docs/FairShareSimulationOrgUnit.md
 docs/FairShareSimulationParent.md
+docs/FairShareSimulationRank.md
 docs/FairShareSimulationRequest.md
 docs/FairShareSimulationResources.md
 docs/FairShareSimulationResponse.md
@@ -294,6 +295,7 @@ model_fair_share_simulation_gpu_settings.go
 model_fair_share_simulation_node_pool.go
 model_fair_share_simulation_org_unit.go
 model_fair_share_simulation_parent.go
+model_fair_share_simulation_rank.go
 model_fair_share_simulation_request.go
 model_fair_share_simulation_resources.go
 model_fair_share_simulation_response.go

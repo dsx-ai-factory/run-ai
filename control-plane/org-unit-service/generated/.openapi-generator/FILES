@@ -86,6 +86,7 @@ pkg/api/model_fair_share_simulation_gpu_settings.go
 pkg/api/model_fair_share_simulation_node_pool.go
 pkg/api/model_fair_share_simulation_org_unit.go
 pkg/api/model_fair_share_simulation_parent.go
+pkg/api/model_fair_share_simulation_rank.go
 pkg/api/model_fair_share_simulation_request.go
 pkg/api/model_fair_share_simulation_resources.go
 pkg/api/model_fair_share_simulation_response.go

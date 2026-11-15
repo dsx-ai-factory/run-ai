@@ -4,14 +4,14 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Capacity** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | GPUs to split. 0 is valid; quotas are still granted, as the scheduler does, and nothing is given above them. | 
-**SchedulingCapabilities** | [**FairShareSimulationSchedulingCapabilities**](FairShareSimulationSchedulingCapabilities.md) |  | 
+**Capacity** | [**NullableFairShareSimulationResources**](FairShareSimulationResources.md) | GPUs to split. 0 is valid; quotas are still granted, as the scheduler does, and nothing is given above them. Required; null is rejected.  | 
+**SchedulingCapabilities** | [**NullableFairShareSimulationSchedulingCapabilities**](FairShareSimulationSchedulingCapabilities.md) | Required; null is rejected. | 
 
 ## Methods
 
 ### NewFairShareSimulationNodePool
 
-`func NewFairShareSimulationNodePool(capacity FairShareSimulationResources, schedulingCapabilities FairShareSimulationSchedulingCapabilities, ) *FairShareSimulationNodePool`
+`func NewFairShareSimulationNodePool(capacity NullableFairShareSimulationResources, schedulingCapabilities NullableFairShareSimulationSchedulingCapabilities, ) *FairShareSimulationNodePool`
 
 NewFairShareSimulationNodePool instantiates a new FairShareSimulationNodePool object
 This constructor will assign default values to properties that have it defined,
@@ -46,6 +46,16 @@ and a boolean to check if the value has been set.
 SetCapacity sets Capacity field to given value.
 
 
+### SetCapacityNil
+
+`func (o *FairShareSimulationNodePool) SetCapacityNil(b bool)`
+
+ SetCapacityNil sets the value for Capacity to be an explicit nil
+
+### UnsetCapacity
+`func (o *FairShareSimulationNodePool) UnsetCapacity()`
+
+UnsetCapacity ensures that no value is present for Capacity, not even an explicit nil
 ### GetSchedulingCapabilities
 
 `func (o *FairShareSimulationNodePool) GetSchedulingCapabilities() FairShareSimulationSchedulingCapabilities`
@@ -66,6 +76,16 @@ and a boolean to check if the value has been set.
 SetSchedulingCapabilities sets SchedulingCapabilities field to given value.
 
 
+### SetSchedulingCapabilitiesNil
+
+`func (o *FairShareSimulationNodePool) SetSchedulingCapabilitiesNil(b bool)`
+
+ SetSchedulingCapabilitiesNil sets the value for SchedulingCapabilities to be an explicit nil
+
+### UnsetSchedulingCapabilities
+`func (o *FairShareSimulationNodePool) UnsetSchedulingCapabilities()`
+
+UnsetSchedulingCapabilities ensures that no value is present for SchedulingCapabilities, not even an explicit nil
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

@@ -1,5 +1,5 @@
 type: object
-description: The node pool's scheduling capabilities to simulate. Defaults to the node pool's saved capabilities.
+description: The node pool's scheduling capabilities as set in the form, saved or not.
 required:
   - quota
   - ranks

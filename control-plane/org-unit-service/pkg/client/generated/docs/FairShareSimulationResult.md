@@ -5,12 +5,12 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** |  | 
-**Demand** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | The GPUs the org unit asked for in this scenario, after the default demand and the limit were applied. | 
-**FairShare** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | GPUs the scheduler would give the org unit, the sum of guaranteed and overQuota. | 
-**Guaranteed** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | The part of the fair share within the org unit&#39;s quota. | 
-**OverQuota** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | The part of the fair share above the org unit&#39;s quota. | 
-**Unmet** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | demand minus fairShare. | 
-**WeightShareInRank** | **float64** | The org unit&#39;s over-quota weight divided by the total weight of its rank among its siblings, including ones the caller can&#39;t read. With ranks off, among all siblings. | 
+**Demand** | [**FairShareSimulationResources**](FairShareSimulationResources.md) |  | 
+**FairShare** | [**FairShareSimulationResources**](FairShareSimulationResources.md) |  | 
+**Guaranteed** | [**FairShareSimulationResources**](FairShareSimulationResources.md) |  | 
+**OverQuota** | [**FairShareSimulationResources**](FairShareSimulationResources.md) |  | 
+**Unmet** | [**FairShareSimulationResources**](FairShareSimulationResources.md) |  | 
+**WeightShareInRank** | **float64** | The org unit&#39;s effective over-quota weight (the quota while adjustableWeights is off) divided by the total of its rank among its siblings, including ones the caller can&#39;t read. With ranks off, among all siblings.  | 
 
 ## Methods
 

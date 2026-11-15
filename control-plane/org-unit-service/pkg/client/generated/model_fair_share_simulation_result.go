@@ -22,20 +22,15 @@ import (
 // checks if the FairShareSimulationResult type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &FairShareSimulationResult{}
 
-// FairShareSimulationResult Values may be fractional, as in the scheduler; the client rounds.
+// FairShareSimulationResult The simulated result of one org unit, in GPUs. Values may be fractional, as in the scheduler; the client rounds. - `demand`: what the org unit asked for, after the default demand and the limit were applied. - `fairShare`: what the scheduler would give it, the sum of `guaranteed` and `overQuota`. - `guaranteed`: the part of the fair share within its quota. - `overQuota`: the part of the fair share above its quota. - `unmet`: `demand` minus `fairShare`, never below 0.
 type FairShareSimulationResult struct {
-	Id string `json:"id"`
-	// The GPUs the org unit asked for in this scenario, after the default demand and the limit were applied.
-	Demand FairShareSimulationResources `json:"demand"`
-	// GPUs the scheduler would give the org unit, the sum of guaranteed and overQuota.
-	FairShare FairShareSimulationResources `json:"fairShare"`
-	// The part of the fair share within the org unit's quota.
+	Id         string                       `json:"id"`
+	Demand     FairShareSimulationResources `json:"demand"`
+	FairShare  FairShareSimulationResources `json:"fairShare"`
 	Guaranteed FairShareSimulationResources `json:"guaranteed"`
-	// The part of the fair share above the org unit's quota.
-	OverQuota FairShareSimulationResources `json:"overQuota"`
-	// demand minus fairShare.
-	Unmet FairShareSimulationResources `json:"unmet"`
-	// The org unit's over-quota weight divided by the total weight of its rank among its siblings, including ones the caller can't read. With ranks off, among all siblings.
+	OverQuota  FairShareSimulationResources `json:"overQuota"`
+	Unmet      FairShareSimulationResources `json:"unmet"`
+	// The org unit's effective over-quota weight (the quota while adjustableWeights is off) divided by the total of its rank among its siblings, including ones the caller can't read. With ranks off, among all siblings.
 	WeightShareInRank float64 `json:"weightShareInRank"`
 }
 

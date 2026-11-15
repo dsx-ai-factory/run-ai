@@ -13,6 +13,10 @@
 
 package api
 
+import (
+	"errors"
+)
+
 ////////////////////////// RUNAI START (18.1) ////////////////////////////
 import runaihttp "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp"
 
@@ -44,6 +48,9 @@ func AssertFairShareSimulationResourcesRequired(obj FairShareSimulationResources
 
 // AssertFairShareSimulationResourcesConstraints checks if the values respects the defined constraints
 func AssertFairShareSimulationResourcesConstraints(obj FairShareSimulationResources) error {
+	if obj.Gpu < 0 {
+		return &ParsingError{Param: "Gpu", Err: errors.New(errMsgMinValueConstraint)}
+	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////

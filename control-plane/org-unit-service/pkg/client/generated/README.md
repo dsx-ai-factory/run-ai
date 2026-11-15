@@ -222,6 +222,7 @@ Class | Method | HTTP request | Description
  - [FairShareSimulationNodePool](docs/FairShareSimulationNodePool.md)
  - [FairShareSimulationOrgUnit](docs/FairShareSimulationOrgUnit.md)
  - [FairShareSimulationParent](docs/FairShareSimulationParent.md)
+ - [FairShareSimulationRank](docs/FairShareSimulationRank.md)
  - [FairShareSimulationRequest](docs/FairShareSimulationRequest.md)
  - [FairShareSimulationResources](docs/FairShareSimulationResources.md)
  - [FairShareSimulationResponse](docs/FairShareSimulationResponse.md)

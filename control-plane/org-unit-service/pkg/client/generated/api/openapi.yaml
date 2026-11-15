@@ -5343,10 +5343,18 @@ paths:
     post:
       description: |
         Computes the GPUs the scheduler would give org units of a node pool for a scenario: the node pool's capacity and
-        scheduling capabilities and the org units to return with their unsaved changes. The calculation covers every
-        department of the node pool, and for projects every project of the parent, including ones the caller can't read;
-        the response holds only the requested org units. Every org unit not in the request keeps its stored values. Nothing
-        is saved. The same scenario gives the same result for every caller.
+        scheduling capabilities as set in the form, and the org units to return with their unsaved changes. The calculation
+        covers every department of the node pool, and for projects every project of the parent, including ones the caller
+        can't read; the response holds only the requested org units. Org units not in the request keep their stored
+        settings and ask for half the capacity. Nothing is saved. The same scenario gives the same result for every caller.
+
+        Only saved org units can be simulated; the department and project create forms are out of scope.
+
+        400 covers, besides the schema: `parent` missing for projects or set for departments; a rank, limit or weight
+        the capabilities turn off; a quota or limit between -1 and 0; a limit below the quota; a duplicate id; and an org
+        unit that isn't on the node pool, isn't readable by the caller, or (for projects) isn't the parent's. These all
+        return the same message as an unknown id, so hidden org units aren't revealed: an unreadable org unit is a 400,
+        not a 403.
       operationId: simulate_node_pool_fair_share
       parameters:
       - description: The unique id identifying the Node Pool.
@@ -10791,22 +10799,20 @@ components:
       - weightsSum
       type: object
     FairShareSimulationResources:
+      example:
+        gpu: 4
       properties:
         gpu:
           example: 4
           format: double
+          minimum: 0
           type: number
       required:
       - gpu
       type: object
     FairShareSimulationSchedulingCapabilities:
-      description: The node pool's scheduling capabilities to simulate. Defaults to
-        the node pool's saved capabilities.
-      example:
-        adjustableWeights: true
-        ranks: true
-        quota: true
-        limits: true
+      description: "The node pool's scheduling capabilities as set in the form, saved\
+        \ or not."
       properties:
         quota:
           type: boolean
@@ -10825,98 +10831,120 @@ components:
       type: object
     FairShareSimulationNodePool:
       description: The node pool as it is in the form.
-      example:
-        schedulingCapabilities:
-          adjustableWeights: true
-          ranks: true
-          quota: true
-          limits: true
-        capacity: ""
       properties:
         capacity:
           allOf:
           - $ref: '#/components/schemas/FairShareSimulationResources'
-          description: "GPUs to split. 0 is valid; quotas are still granted, as the\
-            \ scheduler does, and nothing is given above them."
+          description: |
+            GPUs to split. 0 is valid; quotas are still granted, as the scheduler does, and nothing is given above them.
+            Required; null is rejected.
+          nullable: true
         schedulingCapabilities:
-          $ref: '#/components/schemas/FairShareSimulationSchedulingCapabilities'
+          allOf:
+          - $ref: '#/components/schemas/FairShareSimulationSchedulingCapabilities'
+          description: Required; null is rejected.
+          nullable: true
       required:
       - capacity
       - schedulingCapabilities
       type: object
+    FairShareSimulationRank:
+      description: An unsaved rank. Only while ranks is on.
+      enum:
+      - Highest
+      - VeryHigh
+      - High
+      - MediumHigh
+      - Medium
+      - MediumLow
+      - Low
+      - VeryLow
+      - Lowest
+      example: High
+      type: string
     FairShareSimulationGpuSettings:
-      description: GPU settings that replace the stored ones. Omitted or null fields
-        keep their stored values.
+      description: |
+        GPU settings that replace the stored ones. An omitted or null field keeps its stored value; unlike the org unit
+        APIs, null doesn't mean unlimited here: send -1.
       properties:
         deserved:
-          description: The GPU quota; -1 means unlimited.
+          description: The GPU quota; -1 means unlimited. Values between -1 and 0
+            are rejected.
           example: 4
           format: double
+          minimum: -1
           nullable: true
           type: number
         limit:
-          description: The maximum GPU allocation; -1 means unlimited. Only while
-            limits is on.
+          description: |
+            The maximum GPU allocation; -1 means unlimited. Values between -1 and 0 are rejected. Only while limits is on,
+            and not below the quota.
           example: -1
           format: double
+          minimum: -1
           nullable: true
           type: number
         overQuotaWeight:
+          description: "The over-quota weight within the rank. Ignored while adjustableWeights\
+            \ is off, where the weight is the quota."
           example: 2
           format: double
+          minimum: 0
           nullable: true
           type: number
       type: object
     FairShareSimulationParent:
       description: |
         The department whose projects are simulated, with its unsaved changes. Required when orgUnitType is project; not
-        allowed for departments. Each field replaces the stored value on its own; omitted fields keep it.
+        allowed for departments. It needn't be readable by the caller. Each field replaces the stored value on its own;
+        omitted fields keep it.
       properties:
         id:
           example: "4500014"
           type: string
         rank:
-          description: Highest … Lowest. Only while ranks is on.
-          example: High
+          allOf:
+          - $ref: '#/components/schemas/FairShareSimulationRank'
+          description: An unsaved rank. Only while ranks is on. Omitted or null keeps
+            the stored rank.
           nullable: true
-          type: string
         gpu:
           allOf:
           - $ref: '#/components/schemas/FairShareSimulationGpuSettings'
           nullable: true
-          type: object
       required:
       - id
       type: object
     FairShareSimulationOrgUnit:
-      description: A requested org unit. Each field replaces the stored value on its
-        own; omitted fields keep it.
+      description: |
+        A requested org unit with its unsaved changes. Each field replaces the stored value on its own; omitted fields keep
+        it. `demand` is the GPUs the org unit asks for (the dragged slider), capped by its limit; without it, half the node
+        pool's capacity.
       example:
-        rank: High
+        rank: ""
         id: "4500014"
-        gpu: "{}"
-        demand: "{}"
+        gpu: ""
+        demand: ""
       properties:
         id:
           example: "4500014"
           type: string
         rank:
-          description: Highest … Lowest. Only while ranks is on.
-          example: High
+          allOf:
+          - $ref: '#/components/schemas/FairShareSimulationRank'
+          description: An unsaved rank. Only while ranks is on. Omitted or null keeps
+            the stored rank.
           nullable: true
-          type: string
         gpu:
           allOf:
           - $ref: '#/components/schemas/FairShareSimulationGpuSettings'
           nullable: true
-          type: object
         demand:
           allOf:
           - $ref: '#/components/schemas/FairShareSimulationResources'
-          description: "GPUs the org unit asks for (the dragged slider). Above the\
-            \ limit it is capped. Without it, half the node pool's capacity."
+          description: "The dragged slider, capped by the limit. Omitted or null asks\
+            \ for half the capacity."
           nullable: true
-          type: object
       required:
       - id
       type: object
@@ -10927,39 +10955,36 @@ components:
         departments, every department competes. For projects, the other departments ask for nothing, and the parent asks
         for the sum of its projects' demand.
       example:
-        nodePool:
-          schedulingCapabilities:
-            adjustableWeights: true
-            ranks: true
-            quota: true
-            limits: true
-          capacity: ""
+        nodePool: ""
         parent: ""
         orgUnits:
-        - rank: High
+        - rank: ""
           id: "4500014"
-          gpu: "{}"
-          demand: "{}"
-        - rank: High
+          gpu: ""
+          demand: ""
+        - rank: ""
           id: "4500014"
-          gpu: "{}"
-          demand: "{}"
-        - rank: High
+          gpu: ""
+          demand: ""
+        - rank: ""
           id: "4500014"
-          gpu: "{}"
-          demand: "{}"
-        - rank: High
+          gpu: ""
+          demand: ""
+        - rank: ""
           id: "4500014"
-          gpu: "{}"
-          demand: "{}"
-        - rank: High
+          gpu: ""
+          demand: ""
+        - rank: ""
           id: "4500014"
-          gpu: "{}"
-          demand: "{}"
+          gpu: ""
+          demand: ""
         orgUnitType: department
       properties:
         nodePool:
-          $ref: '#/components/schemas/FairShareSimulationNodePool'
+          allOf:
+          - $ref: '#/components/schemas/FairShareSimulationNodePool'
+          description: Required; null is rejected.
+          nullable: true
         orgUnitType:
           description: The type of the requested org units. One type per request.
           enum:
@@ -10969,10 +10994,12 @@ components:
         parent:
           allOf:
           - $ref: '#/components/schemas/FairShareSimulationParent'
+          description: Required for projects; not allowed for departments.
           nullable: true
         orgUnits:
-          description: "The org units to return, with their unsaved changes. Send\
-            \ the rows the screen shows and every edited row."
+          description: |
+            The org units to return, with their unsaved changes. Send the rows the screen shows and every edited row: an edit
+            that isn't sent is lost.
           items:
             $ref: '#/components/schemas/FairShareSimulationOrgUnit'
           maxItems: 500
@@ -10984,45 +11011,44 @@ components:
       - orgUnits
       type: object
     FairShareSimulationResult:
-      description: "Values may be fractional, as in the scheduler; the client rounds."
+      description: |
+        The simulated result of one org unit, in GPUs. Values may be fractional, as in the scheduler; the client rounds.
+        - `demand`: what the org unit asked for, after the default demand and the limit were applied.
+        - `fairShare`: what the scheduler would give it, the sum of `guaranteed` and `overQuota`.
+        - `guaranteed`: the part of the fair share within its quota.
+        - `overQuota`: the part of the fair share above its quota.
+        - `unmet`: `demand` minus `fairShare`, never below 0.
       example:
-        fairShare: ""
-        overQuota: ""
-        unmet: ""
-        guaranteed: ""
+        fairShare:
+          gpu: 4
+        overQuota:
+          gpu: 4
+        unmet:
+          gpu: 4
+        guaranteed:
+          gpu: 4
         weightShareInRank: 0.25
         id: "4500014"
-        demand: ""
+        demand:
+          gpu: 4
       properties:
         id:
           example: "4500014"
           type: string
         demand:
-          allOf:
-          - $ref: '#/components/schemas/FairShareSimulationResources'
-          description: "The GPUs the org unit asked for in this scenario, after the\
-            \ default demand and the limit were applied."
+          $ref: '#/components/schemas/FairShareSimulationResources'
         fairShare:
-          allOf:
-          - $ref: '#/components/schemas/FairShareSimulationResources'
-          description: "GPUs the scheduler would give the org unit, the sum of guaranteed\
-            \ and overQuota."
+          $ref: '#/components/schemas/FairShareSimulationResources'
         guaranteed:
-          allOf:
-          - $ref: '#/components/schemas/FairShareSimulationResources'
-          description: The part of the fair share within the org unit's quota.
+          $ref: '#/components/schemas/FairShareSimulationResources'
         overQuota:
-          allOf:
-          - $ref: '#/components/schemas/FairShareSimulationResources'
-          description: The part of the fair share above the org unit's quota.
+          $ref: '#/components/schemas/FairShareSimulationResources'
         unmet:
-          allOf:
-          - $ref: '#/components/schemas/FairShareSimulationResources'
-          description: demand minus fairShare.
+          $ref: '#/components/schemas/FairShareSimulationResources'
         weightShareInRank:
-          description: "The org unit's over-quota weight divided by the total weight\
-            \ of its rank among its siblings, including ones the caller can't read.\
-            \ With ranks off, among all siblings."
+          description: |
+            The org unit's effective over-quota weight (the quota while adjustableWeights is off) divided by the total of its
+            rank among its siblings, including ones the caller can't read. With ranks off, among all siblings.
           example: 0.25
           format: double
           type: number
@@ -11038,20 +11064,30 @@ components:
     FairShareSimulationResponse:
       example:
         orgUnits:
-        - fairShare: ""
-          overQuota: ""
-          unmet: ""
-          guaranteed: ""
+        - fairShare:
+            gpu: 4
+          overQuota:
+            gpu: 4
+          unmet:
+            gpu: 4
+          guaranteed:
+            gpu: 4
           weightShareInRank: 0.25
           id: "4500014"
-          demand: ""
-        - fairShare: ""
-          overQuota: ""
-          unmet: ""
-          guaranteed: ""
+          demand:
+            gpu: 4
+        - fairShare:
+            gpu: 4
+          overQuota:
+            gpu: 4
+          unmet:
+            gpu: 4
+          guaranteed:
+            gpu: 4
           weightShareInRank: 0.25
           id: "4500014"
-          demand: ""
+          demand:
+            gpu: 4
       properties:
         orgUnits:
           description: "One result per requested org unit, in the request's order."

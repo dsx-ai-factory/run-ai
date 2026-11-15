@@ -20,7 +20,7 @@ var dummyFairShareSimulationResult = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// FairShareSimulationResult - Values may be fractional, as in the scheduler; the client rounds.
+// FairShareSimulationResult - The simulated result of one org unit, in GPUs. Values may be fractional, as in the scheduler; the client rounds. - `demand`: what the org unit asked for, after the default demand and the limit were applied. - `fairShare`: what the scheduler would give it, the sum of `guaranteed` and `overQuota`. - `guaranteed`: the part of the fair share within its quota. - `overQuota`: the part of the fair share above its quota. - `unmet`: `demand` minus `fairShare`, never below 0.
 type FairShareSimulationResult struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
@@ -28,37 +28,32 @@ type FairShareSimulationResult struct {
 	Id string `json:"id" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// The GPUs the org unit asked for in this scenario, after the default demand and the limit were applied.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Demand FairShareSimulationResources `json:"demand"`
 	Demand FairShareSimulationResources `json:"demand" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// GPUs the scheduler would give the org unit, the sum of guaranteed and overQuota.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//FairShare FairShareSimulationResources `json:"fairShare"`
 	FairShare FairShareSimulationResources `json:"fairShare" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// The part of the fair share within the org unit's quota.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Guaranteed FairShareSimulationResources `json:"guaranteed"`
 	Guaranteed FairShareSimulationResources `json:"guaranteed" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// The part of the fair share above the org unit's quota.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//OverQuota FairShareSimulationResources `json:"overQuota"`
 	OverQuota FairShareSimulationResources `json:"overQuota" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// demand minus fairShare.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Unmet FairShareSimulationResources `json:"unmet"`
 	Unmet FairShareSimulationResources `json:"unmet" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// The org unit's over-quota weight divided by the total weight of its rank among its siblings, including ones the caller can't read. With ranks off, among all siblings.
+	// The org unit's effective over-quota weight (the quota while adjustableWeights is off) divided by the total of its rank among its siblings, including ones the caller can't read. With ranks off, among all siblings.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//WeightShareInRank float64 `json:"weightShareInRank"`
 	WeightShareInRank float64 `json:"weightShareInRank" gorm:"not null;"`

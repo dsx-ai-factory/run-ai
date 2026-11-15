@@ -20,7 +20,7 @@ var dummyFairShareSimulationOrgUnit = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// FairShareSimulationOrgUnit - A requested org unit. Each field replaces the stored value on its own; omitted fields keep it.
+// FairShareSimulationOrgUnit - A requested org unit with its unsaved changes. Each field replaces the stored value on its own; omitted fields keep it. `demand` is the GPUs the org unit asks for (the dragged slider), capped by its limit; without it, half the node pool's capacity.
 type FairShareSimulationOrgUnit struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
@@ -28,10 +28,10 @@ type FairShareSimulationOrgUnit struct {
 	Id string `json:"id" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Highest … Lowest. Only while ranks is on.
+	// An unsaved rank. Only while ranks is on. Omitted or null keeps the stored rank.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Rank *string `json:"rank,omitempty"`
-	Rank *string `json:"rank,omitempty" gorm:""`
+	//Rank *FairShareSimulationRank `json:"rank,omitempty"`
+	Rank *FairShareSimulationRank `json:"rank,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
@@ -39,7 +39,7 @@ type FairShareSimulationOrgUnit struct {
 	Gpu *FairShareSimulationGpuSettings `json:"gpu,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// GPUs the org unit asks for (the dragged slider). Above the limit it is capped. Without it, half the node pool's capacity.
+	// The dragged slider, capped by the limit. Omitted or null asks for half the capacity.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Demand *FairShareSimulationResources `json:"demand,omitempty"`
 	Demand *FairShareSimulationResources `json:"demand,omitempty" gorm:"serializer:json; type:jsonb;"`
@@ -80,6 +80,12 @@ func AssertFairShareSimulationOrgUnitConstraints(obj FairShareSimulationOrgUnit)
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	if obj.Rank != nil {
+		if okValue := obj.Rank.IsValid(); !okValue {
+			return &UnsupportedValueError{Field: "Rank", Value: string(*obj.Rank)}
+		}
+	}
 
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////

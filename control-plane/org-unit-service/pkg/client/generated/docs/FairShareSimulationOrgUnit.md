@@ -5,9 +5,9 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** |  | 
-**Rank** | Pointer to **NullableString** | Highest … Lowest. Only while ranks is on. | [optional] 
+**Rank** | Pointer to [**NullableFairShareSimulationRank**](FairShareSimulationRank.md) | An unsaved rank. Only while ranks is on. Omitted or null keeps the stored rank. | [optional] 
 **Gpu** | Pointer to [**NullableFairShareSimulationGpuSettings**](FairShareSimulationGpuSettings.md) |  | [optional] 
-**Demand** | Pointer to [**NullableFairShareSimulationResources**](FairShareSimulationResources.md) | GPUs the org unit asks for (the dragged slider). Above the limit it is capped. Without it, half the node pool&#39;s capacity. | [optional] 
+**Demand** | Pointer to [**NullableFairShareSimulationResources**](FairShareSimulationResources.md) | The dragged slider, capped by the limit. Omitted or null asks for half the capacity. | [optional] 
 
 ## Methods
 
@@ -50,20 +50,20 @@ SetId sets Id field to given value.
 
 ### GetRank
 
-`func (o *FairShareSimulationOrgUnit) GetRank() string`
+`func (o *FairShareSimulationOrgUnit) GetRank() FairShareSimulationRank`
 
 GetRank returns the Rank field if non-nil, zero value otherwise.
 
 ### GetRankOk
 
-`func (o *FairShareSimulationOrgUnit) GetRankOk() (*string, bool)`
+`func (o *FairShareSimulationOrgUnit) GetRankOk() (*FairShareSimulationRank, bool)`
 
 GetRankOk returns a tuple with the Rank field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetRank
 
-`func (o *FairShareSimulationOrgUnit) SetRank(v string)`
+`func (o *FairShareSimulationOrgUnit) SetRank(v FairShareSimulationRank)`
 
 SetRank sets Rank field to given value.
 

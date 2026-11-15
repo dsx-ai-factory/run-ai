@@ -20,12 +20,13 @@ import (
 // checks if the FairShareSimulationGpuSettings type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &FairShareSimulationGpuSettings{}
 
-// FairShareSimulationGpuSettings GPU settings that replace the stored ones. Omitted or null fields keep their stored values.
+// FairShareSimulationGpuSettings GPU settings that replace the stored ones. An omitted or null field keeps its stored value; unlike the org unit APIs, null doesn't mean unlimited here: send -1.
 type FairShareSimulationGpuSettings struct {
-	// The GPU quota; -1 means unlimited.
+	// The GPU quota; -1 means unlimited. Values between -1 and 0 are rejected.
 	Deserved NullableFloat64 `json:"deserved,omitempty"`
-	// The maximum GPU allocation; -1 means unlimited. Only while limits is on.
-	Limit           NullableFloat64 `json:"limit,omitempty"`
+	// The maximum GPU allocation; -1 means unlimited. Values between -1 and 0 are rejected. Only while limits is on, and not below the quota.
+	Limit NullableFloat64 `json:"limit,omitempty"`
+	// The over-quota weight within the rank. Ignored while adjustableWeights is off, where the weight is the quota.
 	OverQuotaWeight NullableFloat64 `json:"overQuotaWeight,omitempty"`
 }
 

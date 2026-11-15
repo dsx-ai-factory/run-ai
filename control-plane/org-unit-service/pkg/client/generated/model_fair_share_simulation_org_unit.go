@@ -22,13 +22,13 @@ import (
 // checks if the FairShareSimulationOrgUnit type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &FairShareSimulationOrgUnit{}
 
-// FairShareSimulationOrgUnit A requested org unit. Each field replaces the stored value on its own; omitted fields keep it.
+// FairShareSimulationOrgUnit A requested org unit with its unsaved changes. Each field replaces the stored value on its own; omitted fields keep it. `demand` is the GPUs the org unit asks for (the dragged slider), capped by its limit; without it, half the node pool's capacity.
 type FairShareSimulationOrgUnit struct {
 	Id string `json:"id"`
-	// Highest … Lowest. Only while ranks is on.
-	Rank NullableString                         `json:"rank,omitempty"`
+	// An unsaved rank. Only while ranks is on. Omitted or null keeps the stored rank.
+	Rank NullableFairShareSimulationRank        `json:"rank,omitempty"`
 	Gpu  NullableFairShareSimulationGpuSettings `json:"gpu,omitempty"`
-	// GPUs the org unit asks for (the dragged slider). Above the limit it is capped. Without it, half the node pool's capacity.
+	// The dragged slider, capped by the limit. Omitted or null asks for half the capacity.
 	Demand NullableFairShareSimulationResources `json:"demand,omitempty"`
 }
 
@@ -77,9 +77,9 @@ func (o *FairShareSimulationOrgUnit) SetId(v string) {
 }
 
 // GetRank returns the Rank field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *FairShareSimulationOrgUnit) GetRank() string {
+func (o *FairShareSimulationOrgUnit) GetRank() FairShareSimulationRank {
 	if o == nil || IsNil(o.Rank.Get()) {
-		var ret string
+		var ret FairShareSimulationRank
 		return ret
 	}
 	return *o.Rank.Get()
@@ -88,7 +88,7 @@ func (o *FairShareSimulationOrgUnit) GetRank() string {
 // GetRankOk returns a tuple with the Rank field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *FairShareSimulationOrgUnit) GetRankOk() (*string, bool) {
+func (o *FairShareSimulationOrgUnit) GetRankOk() (*FairShareSimulationRank, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -104,8 +104,8 @@ func (o *FairShareSimulationOrgUnit) HasRank() bool {
 	return false
 }
 
-// SetRank gets a reference to the given NullableString and assigns it to the Rank field.
-func (o *FairShareSimulationOrgUnit) SetRank(v string) {
+// SetRank gets a reference to the given NullableFairShareSimulationRank and assigns it to the Rank field.
+func (o *FairShareSimulationOrgUnit) SetRank(v FairShareSimulationRank) {
 	o.Rank.Set(&v)
 }
 

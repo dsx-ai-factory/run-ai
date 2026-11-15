@@ -5,4 +5,5 @@ properties:
   gpu:
     type: number
     format: double
+    minimum: 0
     example: 4

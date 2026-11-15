@@ -4,16 +4,16 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**NodePool** | [**FairShareSimulationNodePool**](FairShareSimulationNodePool.md) |  | 
+**NodePool** | [**NullableFairShareSimulationNodePool**](FairShareSimulationNodePool.md) | Required; null is rejected. | 
 **OrgUnitType** | **string** | The type of the requested org units. One type per request. | 
-**Parent** | Pointer to [**NullableFairShareSimulationParent**](FairShareSimulationParent.md) |  | [optional] 
-**OrgUnits** | [**[]FairShareSimulationOrgUnit**](FairShareSimulationOrgUnit.md) | The org units to return, with their unsaved changes. Send the rows the screen shows and every edited row. | 
+**Parent** | Pointer to [**NullableFairShareSimulationParent**](FairShareSimulationParent.md) | Required for projects; not allowed for departments. | [optional] 
+**OrgUnits** | [**[]FairShareSimulationOrgUnit**](FairShareSimulationOrgUnit.md) | The org units to return, with their unsaved changes. Send the rows the screen shows and every edited row: an edit that isn&#39;t sent is lost.  | 
 
 ## Methods
 
 ### NewFairShareSimulationRequest
 
-`func NewFairShareSimulationRequest(nodePool FairShareSimulationNodePool, orgUnitType string, orgUnits []FairShareSimulationOrgUnit, ) *FairShareSimulationRequest`
+`func NewFairShareSimulationRequest(nodePool NullableFairShareSimulationNodePool, orgUnitType string, orgUnits []FairShareSimulationOrgUnit, ) *FairShareSimulationRequest`
 
 NewFairShareSimulationRequest instantiates a new FairShareSimulationRequest object
 This constructor will assign default values to properties that have it defined,
@@ -48,6 +48,16 @@ and a boolean to check if the value has been set.
 SetNodePool sets NodePool field to given value.
 
 
+### SetNodePoolNil
+
+`func (o *FairShareSimulationRequest) SetNodePoolNil(b bool)`
+
+ SetNodePoolNil sets the value for NodePool to be an explicit nil
+
+### UnsetNodePool
+`func (o *FairShareSimulationRequest) UnsetNodePool()`
+
+UnsetNodePool ensures that no value is present for NodePool, not even an explicit nil
 ### GetOrgUnitType
 
 `func (o *FairShareSimulationRequest) GetOrgUnitType() string`

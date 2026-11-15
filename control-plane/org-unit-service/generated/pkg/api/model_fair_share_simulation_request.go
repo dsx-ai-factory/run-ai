@@ -23,9 +23,10 @@ var dummyFairShareSimulationRequest = runaihttp.AssertPattern
 // FairShareSimulationRequest - A scenario to simulate: the node pool as it is in the form and the org units the form shows, with their unsaved changes. Every org unit without a demand asks for half the node pool's capacity, capped by its limit. For departments, every department competes. For projects, the other departments ask for nothing, and the parent asks for the sum of its projects' demand.
 type FairShareSimulationRequest struct {
 
+	// Required; null is rejected.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//NodePool FairShareSimulationNodePool `json:"nodePool"`
-	NodePool FairShareSimulationNodePool `json:"nodePool" gorm:"serializer:json; type:jsonb;not null;"`
+	//NodePool *FairShareSimulationNodePool `json:"nodePool"`
+	NodePool *FairShareSimulationNodePool `json:"nodePool" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	// The type of the requested org units. One type per request.
@@ -34,12 +35,13 @@ type FairShareSimulationRequest struct {
 	OrgUnitType string `json:"orgUnitType" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Required for projects; not allowed for departments.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Parent *FairShareSimulationParent `json:"parent,omitempty"`
 	Parent *FairShareSimulationParent `json:"parent,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// The org units to return, with their unsaved changes. Send the rows the screen shows and every edited row.
+	// The org units to return, with their unsaved changes. Send the rows the screen shows and every edited row: an edit that isn't sent is lost.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//OrgUnits []FairShareSimulationOrgUnit `json:"orgUnits"`
 	OrgUnits []FairShareSimulationOrgUnit `json:"orgUnits" gorm:"serializer:json; type:jsonb;not null;"`
@@ -59,8 +61,10 @@ func AssertFairShareSimulationRequestRequired(obj FairShareSimulationRequest) er
 		}
 	}
 
-	if err := AssertFairShareSimulationNodePoolRequired(obj.NodePool); err != nil {
-		return err
+	if obj.NodePool != nil {
+		if err := AssertFairShareSimulationNodePoolRequired(*obj.NodePool); err != nil {
+			return err
+		}
 	}
 	if obj.Parent != nil {
 		if err := AssertFairShareSimulationParentRequired(*obj.Parent); err != nil {
@@ -82,8 +86,10 @@ func AssertFairShareSimulationRequestConstraints(obj FairShareSimulationRequest)
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
-	if err := AssertFairShareSimulationNodePoolConstraints(obj.NodePool); err != nil {
-		return err
+	if obj.NodePool != nil {
+		if err := AssertFairShareSimulationNodePoolConstraints(*obj.NodePool); err != nil {
+			return err
+		}
 	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////

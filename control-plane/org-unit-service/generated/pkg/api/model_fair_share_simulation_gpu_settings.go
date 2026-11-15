@@ -13,6 +13,10 @@
 
 package api
 
+import (
+	"errors"
+)
+
 ////////////////////////// RUNAI START (18.1) ////////////////////////////
 import runaihttp "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp"
 
@@ -20,21 +24,22 @@ var dummyFairShareSimulationGpuSettings = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// FairShareSimulationGpuSettings - GPU settings that replace the stored ones. Omitted or null fields keep their stored values.
+// FairShareSimulationGpuSettings - GPU settings that replace the stored ones. An omitted or null field keeps its stored value; unlike the org unit APIs, null doesn't mean unlimited here: send -1.
 type FairShareSimulationGpuSettings struct {
 
-	// The GPU quota; -1 means unlimited.
+	// The GPU quota; -1 means unlimited. Values between -1 and 0 are rejected.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Deserved *float64 `json:"deserved,omitempty"`
 	Deserved *float64 `json:"deserved,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// The maximum GPU allocation; -1 means unlimited. Only while limits is on.
+	// The maximum GPU allocation; -1 means unlimited. Values between -1 and 0 are rejected. Only while limits is on, and not below the quota.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Limit *float64 `json:"limit,omitempty"`
 	Limit *float64 `json:"limit,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// The over-quota weight within the rank. Ignored while adjustableWeights is off, where the weight is the quota.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//OverQuotaWeight *float64 `json:"overQuotaWeight,omitempty"`
 	OverQuotaWeight *float64 `json:"overQuotaWeight,omitempty" gorm:""`
@@ -48,16 +53,25 @@ func AssertFairShareSimulationGpuSettingsRequired(obj FairShareSimulationGpuSett
 
 // AssertFairShareSimulationGpuSettingsConstraints checks if the values respects the defined constraints
 func AssertFairShareSimulationGpuSettingsConstraints(obj FairShareSimulationGpuSettings) error {
+	if obj.Deserved != nil && *obj.Deserved < -1 {
+		return &ParsingError{Param: "Deserved", Err: errors.New(errMsgMinValueConstraint)}
+	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
+	if obj.Limit != nil && *obj.Limit < -1 {
+		return &ParsingError{Param: "Limit", Err: errors.New(errMsgMinValueConstraint)}
+	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
+	if obj.OverQuotaWeight != nil && *obj.OverQuotaWeight < 0 {
+		return &ParsingError{Param: "OverQuotaWeight", Err: errors.New(errMsgMinValueConstraint)}
+	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
