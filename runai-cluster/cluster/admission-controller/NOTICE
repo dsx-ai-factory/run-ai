@@ -39,7 +39,7 @@ Dependencies
 | `github.com/gabriel-vasile/mimetype` | v1.4.16 | MIT | https://github.com/gabriel-vasile/mimetype/blob/v1.4.16/LICENSE |
 | `github.com/go-logr/logr` | v1.4.4 | Apache-2.0 | https://github.com/go-logr/logr/blob/v1.4.4/LICENSE |
 | `github.com/go-openapi/jsonpointer` | v1.0.2 | Apache-2.0 | https://github.com/go-openapi/jsonpointer/blob/v1.0.2/LICENSE |
-| `github.com/go-openapi/jsonreference` | v1.0.0 | Apache-2.0 | https://github.com/go-openapi/jsonreference/blob/v1.0.0/LICENSE |
+| `github.com/go-openapi/jsonreference` | v1.0.3 | Apache-2.0 | https://github.com/go-openapi/jsonreference/blob/v1.0.3/LICENSE |
 | `github.com/go-openapi/swag` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/v0.29.2/LICENSE |
 | `github.com/go-openapi/swag/cmdutils` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/cmdutils/v0.29.2/cmdutils/LICENSE |
 | `github.com/go-openapi/swag/conv` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/conv/v0.29.2/conv/LICENSE |
@@ -91,7 +91,7 @@ Dependencies
 | `go.yaml.in/yaml/v2` | v2.4.5 | Apache-2.0 | https://pkg.go.dev/go.yaml.in/yaml/v2@v2.4.5?tab=licenses |
 | `go.yaml.in/yaml/v3` | v3.0.6 | MIT | https://pkg.go.dev/go.yaml.in/yaml/v3@v3.0.6?tab=licenses |
 | `golang.org/x/crypto/sha3` | v0.59.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/crypto@v0.59.0?tab=licenses |
-| `golang.org/x/exp/slices` | v0.0.0-20261109185158-a52e3aef5920 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/exp@v0.0.0-20261109185158-a52e3aef5920?tab=licenses |
+| `golang.org/x/exp/slices` | v0.0.0-20261112173441-d10d3b464990 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/exp@v0.0.0-20261112173441-d10d3b464990?tab=licenses |
 | `golang.org/x/net` | v0.62.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/net@v0.62.0?tab=licenses |
 | `golang.org/x/oauth2` | v0.38.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/oauth2@v0.38.0?tab=licenses |
 | `golang.org/x/sync/errgroup` | v0.25.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sync@v0.25.0?tab=licenses |
@@ -3707,7 +3707,7 @@ limitations under the License.
 
 --------------------------------------------------------------------------------
 Notice of:
-  - `github.com/go-openapi/jsonreference` v1.0.0
+  - `github.com/go-openapi/jsonreference` v1.0.3
 --------------------------------------------------------------------------------
 
 Copyright 2015-2025 go-swagger maintainers

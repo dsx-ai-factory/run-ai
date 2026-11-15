@@ -58,6 +58,7 @@ func getKartasToMigrate() []source.KartaConfiguration {
 		nvidia.GetNIMCacheRIConfiguration(),
 		nvidia.GetNIMServiceRIConfiguration(),
 		nvidia.GetNVCFSPOTRequestRIConfiguration(),
+		nvidia.GetSnapshotJobRIConfiguration(),
 
 		// Kubeflow
 		source.GetKubeflowScheduledWorkflowRIConfiguration(),
