@@ -40,7 +40,7 @@ func buildDynamoGraphDeploymentV1alpha1SpecSelectors() map[string]api.SpecSelect
 			Query: `(
 			  .spec
 			)`,
-			FieldGroups: []string{SystemDynamoGraphDeploymentSpecFgName},
+			FieldGroups: []string{SystemDynamoGraphDeploymentV1alpha1SpecFgName},
 			Dependency: &api.SpecSelectorDependency{
 				Path: "spec",
 			},
@@ -63,7 +63,7 @@ func buildDynamoGraphDeploymentV1alpha1SpecSelectors() map[string]api.SpecSelect
 			Query: `(
 			  .spec.services | to_entries[] | .value
 			)`,
-			FieldGroups: []string{SystemDynamoServiceSpecFgName},
+			FieldGroups: []string{SystemDynamoServiceV1alpha1SpecFgName},
 			Dependency: &api.SpecSelectorDependency{
 				SpecSelector: convutils.Ref("workloadSpec"),
 				Path:         "services",
@@ -79,7 +79,7 @@ func buildDynamoGraphDeploymentV1alpha1SpecSelectors() map[string]api.SpecSelect
 			ArgsInfo: map[string]api.MappingFieldType{
 				"serviceName": api.MAPPINGFIELDTYPE_STRING,
 			},
-			FieldGroups: []string{SystemDynamoServiceSpecFgName},
+			FieldGroups: []string{SystemDynamoServiceV1alpha1SpecFgName},
 			Dependency: &api.SpecSelectorDependency{
 				SpecSelector: convutils.Ref("workloadSpec"),
 				Path:         "services",

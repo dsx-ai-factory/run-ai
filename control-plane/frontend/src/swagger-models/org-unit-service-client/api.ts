@@ -3827,7 +3827,8 @@ export interface NodeTypesPerWorkload {
  */
 
 export const NodepoolResourcesResetAction = {
-    CpuQuotasToDefault: 'CPU_QUOTAS_TO_DEFAULT'
+    CpuQuotasToDefault: 'CPU_QUOTAS_TO_DEFAULT',
+    LimitsToDefault: 'LIMITS_TO_DEFAULT'
 } as const;
 
 export type NodepoolResourcesResetAction = typeof NodepoolResourcesResetAction[keyof typeof NodepoolResourcesResetAction];
@@ -4128,7 +4129,8 @@ export type OrgUnitsNodepoolSummaryInnerTypeEnum = typeof OrgUnitsNodepoolSummar
 
 export const OrgUnitsNodepoolSummaryType = {
     HasQuota: 'HAS_QUOTA',
-    NonDefaultRank: 'NON_DEFAULT_RANK'
+    NonDefaultRank: 'NON_DEFAULT_RANK',
+    HasLimit: 'HAS_LIMIT'
 } as const;
 
 export type OrgUnitsNodepoolSummaryType = typeof OrgUnitsNodepoolSummaryType[keyof typeof OrgUnitsNodepoolSummaryType];
@@ -7292,7 +7294,8 @@ export const ResourcesResetAction = {
     QuotasToDefault: 'QUOTAS_TO_DEFAULT',
     RanksToDefault: 'RANKS_TO_DEFAULT',
     WeightsToDefault: 'WEIGHTS_TO_DEFAULT',
-    WeightsToDeserved: 'WEIGHTS_TO_DESERVED'
+    WeightsToDeserved: 'WEIGHTS_TO_DESERVED',
+    LimitsToDefault: 'LIMITS_TO_DEFAULT'
 } as const;
 
 export type ResourcesResetAction = typeof ResourcesResetAction[keyof typeof ResourcesResetAction];

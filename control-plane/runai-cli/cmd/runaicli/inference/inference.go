@@ -74,6 +74,7 @@ func InitInferenceCmd() {
 	Cmd.AddCommand(standard.Cmd)
 	Cmd.AddCommand(distributed.Cmd)
 	Cmd.AddCommand(nim.Cmd)
+	Cmd.AddCommand(newRecommendCommand())
 }
 
 func init() {

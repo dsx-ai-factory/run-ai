@@ -137,7 +137,8 @@ func npSchedCapabilities(cpuQuota, weights bool, quota, ranks bool) *openapi.Sch
 		AdjustableWeights: weights,
 		CpuQuota:          cpuQuota,
 
-		Quota: quota,
-		Ranks: ranks,
+		Quota:  quota,
+		Ranks:  ranks,
+		Limits: quota,
 	}
 }
