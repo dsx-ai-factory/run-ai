@@ -1,6 +1,15 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+# Shared build infrastructure, as every other service uses it: Go version from
+# go.mod, golangci-lint version (Renovate-managed in golang.mk), containerised
+# lint and test. The default WORKSPACE_HOST_PATH (${PWD}/../..) mounts the repo
+# root, which go.mod's replaces of ../../control-plane/... need.
+DOCKER_WORK_DIR?=/local/runai-installer/installer
+GOLANG_LINTER_CONFIG_PATH?=.golangci.yaml
+
+include ../../build/makefile/index.mk
+
 ##@ Basic Commands
 
 SERVICE_NAME=runai-installer
@@ -17,44 +26,20 @@ BUILD_TAGS?=
 INTERNAL_TAG=runai_internal
 INTERNAL_BIN_REL_PATH?=bin-internal
 
-# Derive the Go runtime version from go.mod so the linter is always built
-# with a toolchain new enough for whatever go.mod currently requires.
-GO_VERSION_BASE?=$(shell awk '$$1=="go"{print $$2;exit}' go.mod)
-GOLANGCI_LINT_VERSION=v2.9.0
-DOCKERHUB_PROXY?=
-
-# Ensure ~/.gitconfig exists before any container bind-mounts it. Docker creates a
-# root-owned DIRECTORY at the mount source when the path is missing, which then breaks
-# every git command for the user (see DOCKER_GO_BASE_COMMAND in golang.mk).
-git-config-command:
-	@touch $(HOME)/.gitconfig
-ifdef GITHUB_TOKEN
-	@echo Creating gitconfig with github token
-	git config --file $(HOME)/.gitconfig url.https://$(GITHUB_TOKEN)@github.com/.insteadOf https://github.com/
-endif
-.PHONY: git-config-command
-
-test: git-config-command
-	go test -tags "$(BUILD_TAGS)" ./...
+# Unit tests in the shared Go container. Keeps the previous flags (no -short);
+# the tags select the released or internal command set.
+GO_TEST_FLAGS=$(if $(BUILD_TAGS),-tags "$(BUILD_TAGS)",)
+test: test-go ## Run unit tests.
 .PHONY: test
 
 test-internal: git-config-command
 	BUILD_TAGS="$(INTERNAL_TAG)" $(MAKE) test
 .PHONY: test-internal
 
-lint: git-config-command
-	docker run --rm \
-		-u $(shell id -u):$(shell id -g) \
-		-v "$(abspath $(CURDIR)/..):/workspace" \
-		-v "$(HOME)/.gitconfig:/.gitconfig:ro" \
-		-w /workspace/installer \
-		-e HOME=/tmp \
-		-e GOPRIVATE=$(GOPRIVATE) \
-		-e GOFLAGS=-buildvcs=false \
-		-e GIT_CONFIG_GLOBAL=/.gitconfig \
-		--entrypoint /bin/sh \
-		$(DOCKERHUB_PROXY)library/golang:$(GO_VERSION_BASE) \
-		-c 'go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) && golangci-lint run -c .golangci.yaml $(if $(BUILD_TAGS),--build-tags "$(BUILD_TAGS)",)'
+# GO_BUILD_TAGS makes lint-go see the files behind BUILD_TAGS, so
+# lint-internal covers the internal-only commands.
+GO_BUILD_TAGS=$(BUILD_TAGS)
+lint: lint-go ## Run linter.
 .PHONY: lint
 
 lint-internal: git-config-command

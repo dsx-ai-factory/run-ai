@@ -125,6 +125,10 @@ GO_ACC_COMMAND=go install github.com/ory/go-acc@v0.2.8 && \
 
 GO_LDFLAGS=''
 
+# Build tags golangci-lint type-checks with (--build-tags), for services whose
+# code is split by tags. Empty by default.
+GO_BUILD_TAGS?=
+
 # Restrict golangci-lint to changes since the PR's base branch
 # (--new-from-rev), so a PR is judged on the code it actually touched.
 # Override to empty in a service Makefile to lint every file.
@@ -272,7 +276,7 @@ lint-go: git-config-command gocache
 	@ echo $(GREEN_CONSOLE) "${CONSOLE_PREFIX} Running golangci linter for ${SERVICE_NAME}" $(BASE_CONSOLE); \
 		if [ -n "$(LINT_NEW_FROM_REV)" ]; then git fetch origin $(LINT_BASE_BRANCH) --depth=1 2>/dev/null || true; fi; \
 		$(DOCKER_GO_LINTER_COMMAND) \
-		golangci-lint run -v -c $(GOLANG_LINTER_CONFIG_PATH) $(if $(LINT_NEW_FROM_REV),--new-from-rev=$(LINT_NEW_FROM_REV),)' || $(FAILURE_MESSAGE_HANDLER)
+		golangci-lint run -v -c $(GOLANG_LINTER_CONFIG_PATH) $(if $(GO_BUILD_TAGS),--build-tags "$(GO_BUILD_TAGS)",) $(if $(LINT_NEW_FROM_REV),--new-from-rev=$(LINT_NEW_FROM_REV),)' || $(FAILURE_MESSAGE_HANDLER)
 .PHONY: lint-go
 
 .PHONY: build-go
