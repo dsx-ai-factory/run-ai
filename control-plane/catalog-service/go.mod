@@ -3,27 +3,27 @@ module github.com/dsx-ai-factory/run-ai/control-plane/catalog-service
 go 1.27.4
 
 require (
-	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.15
+	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.16
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.1.1
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
-	github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/client v1.0.9
+	github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/client v1.0.10
 	github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies v0.0.0
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.9
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.8
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.10
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.9
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/scopeinfo v1.1.9
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/scopeinfo v1.1.10
 	github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client v0.0.0
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.11
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.4
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.6
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.10
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.20
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.10
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.12
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.22
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.13
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/setting v1.2.8
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.33
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.12
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.5
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.7
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.11
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.21
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.11
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.13
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.23
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.14
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/setting v1.2.9
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.34
 	github.com/go-chi/chi/v5 v5.5.0
 	github.com/google/uuid v1.6.0
 	github.com/onsi/ginkgo/v2 v2.34.0
@@ -61,9 +61,9 @@ require (
 	github.com/docker/go-connections v0.8.2 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.5 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils v1.0.10 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.10 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.6 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils v1.0.11 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.11 // indirect
 	github.com/ebitengine/purego v0.11.3 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
@@ -104,8 +104,8 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/go-archive v0.3.3 // indirect
-	github.com/moby/moby/api v1.56.1 // indirect
-	github.com/moby/moby/client v0.6.2 // indirect
+	github.com/moby/moby/api v1.57.0 // indirect
+	github.com/moby/moby/client v0.6.3 // indirect
 	github.com/moby/patternmatcher v0.6.1 // indirect
 	github.com/moby/sys/sequential v0.7.0 // indirect
 	github.com/moby/sys/user v0.4.1 // indirect
@@ -164,13 +164,13 @@ require (
 	go.yaml.in/yaml/v2 v2.4.5 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/crypto v0.59.0 // indirect
-	golang.org/x/exp v0.0.0-20261112173441-d10d3b464990 // indirect
+	golang.org/x/exp v0.0.0-20261113113407-e3970619a1a4 // indirect
 	golang.org/x/mod v0.43.0 // indirect
 	golang.org/x/net v0.62.0 // indirect
 	golang.org/x/sync v0.25.0 // indirect
 	golang.org/x/sys v0.50.0 // indirect
 	golang.org/x/text v0.44.0 // indirect
-	golang.org/x/tools v0.52.1-0.20261112212842-4dd740f845db // indirect
+	golang.org/x/tools v0.52.1-0.20261113204035-cba9b8046c90 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20261110000943-09e21b237f2c // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20261110000943-09e21b237f2c // indirect
