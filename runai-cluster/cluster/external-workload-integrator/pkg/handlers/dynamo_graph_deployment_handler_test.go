@@ -7,6 +7,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	dynamov1alpha1 "github.com/ai-dynamo/dynamo/deploy/operator/api/v1alpha1"
@@ -21,11 +22,14 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	kubefake "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 )
 
 var _ = Describe("TestDynamoGraphDeploymentHandler", Ordered, func() {
@@ -483,6 +487,71 @@ var _ = Describe("TestDynamoGraphDeploymentHandler", Ordered, func() {
 		Expect(*ew.Spec.RequestedPods.Replicas).To(BeZero())
 		Expect(ew.Spec.RequestedResources.Requests.Cpu().IsZero()).To(BeTrue())
 	})
+
+	DescribeTable("counts role templates from the original beta object",
+		func(replicas *int32, nodeCount int32, explicitRoleReplicas, sharedTemplate bool, expectedPods int32, expectedCPU string) {
+			object := &unstructured.Unstructured{}
+			Expect(json.Unmarshal([]byte(`{
+				"apiVersion": "nvidia.com/v1beta1",
+				"kind": "DynamoGraphDeployment",
+				"metadata": {"name": "roles"},
+				"spec": {"components": [{
+					"name": "worker", "type": "worker",
+					"roles": [
+						{"name": "leader", "podTemplate": {"spec": {"containers": [
+							{"name": "main", "image": "leader:test", "resources": {"requests": {"cpu": "100m"}}}
+						]}}},
+						{"name": "worker", "podTemplate": {"spec": {"containers": [
+							{"name": "main", "image": "worker:test", "resources": {"requests": {"cpu": "200m"}}}
+						]}}}
+					]
+				}]}
+			}`), &object.Object)).To(Succeed())
+			component := object.Object["spec"].(map[string]interface{})["components"].([]interface{})[0].(map[string]interface{})
+			if replicas != nil {
+				component["replicas"] = int64(*replicas)
+			}
+			component["multinode"] = map[string]interface{}{}
+			if nodeCount != 0 {
+				component["multinode"].(map[string]interface{})["nodeCount"] = int64(nodeCount)
+			}
+			if explicitRoleReplicas {
+				roles := component["roles"].([]interface{})
+				roles[0].(map[string]interface{})["replicas"] = int64(1)
+				roles[1].(map[string]interface{})["replicas"] = int64(nodeCount - 1)
+			}
+			if sharedTemplate {
+				roles := component["roles"].([]interface{})
+				component["podTemplate"] = roles[0].(map[string]interface{})["podTemplate"]
+				for _, role := range roles {
+					delete(role.(map[string]interface{}), "podTemplate")
+				}
+			}
+			// The fake tracker decodes registered types on storage and would drop roles.
+			roleClient := fake.NewClientBuilder().WithScheme(scheme_init.Scheme()).WithInterceptorFuncs(interceptor.Funcs{
+				Get: func(ctx context.Context, c client.WithWatch, key client.ObjectKey, out client.Object, opts ...client.GetOption) error {
+					if key == client.ObjectKeyFromObject(object) {
+						return runtime.DefaultUnstructuredConverter.FromUnstructured(object.DeepCopy().Object, out)
+					}
+					return c.Get(ctx, key, out, opts...)
+				},
+			}).Build()
+			handler := NewDynamoGraphDeploymentTopOwnerHandler(roleClient, nil, func() client.Object { return &dynamov1beta1.DynamoGraphDeployment{} })
+			fetched, err := handler.GetObject(ctx, object.GetName(), object.GetNamespace())
+			Expect(err).NotTo(HaveOccurred())
+			original := fetched.DeepCopyObject()
+			ew := &v1alpha1.ExternalWorkload{}
+			Expect(handler.Parse(ctx, fetched, ew)).To(Succeed())
+			Expect(*ew.Spec.RequestedPods.Replicas).To(Equal(expectedPods))
+			Expect(ew.Spec.RequestedResources.Requests.Cpu().String()).To(Equal(expectedCPU))
+			Expect(fetched).To(Equal(original))
+		},
+		Entry("multiple component replicas", ptr.To(int32(2)), int32(3), false, false, int32(6), "1"),
+		Entry("default replicas and node count", nil, int32(0), false, false, int32(2), "300m"),
+		Entry("explicit role replicas", ptr.To(int32(2)), int32(3), true, false, int32(6), "1"),
+		Entry("shared template with role overrides", ptr.To(int32(2)), int32(3), false, true, int32(6), "600m"),
+		Entry("zero component replicas", ptr.To(int32(0)), int32(3), false, false, int32(0), "0"),
+	)
 
 	It("DRA GPU resources from ExtraPodSpec ResourceClaims", func() {
 		draFakeClient := fake.NewClientBuilder().WithScheme(scheme_init.Scheme()).WithObjects(test.TestDRAGpuClaim.DeepCopy(), test.TestDRAGpuClaimTemplate.DeepCopy()).Build()

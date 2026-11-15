@@ -23,6 +23,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -52,6 +53,10 @@ func NewDynamoGraphDeploymentTopOwnerHandler(cachedClient client.Client, draPars
 func (h *DynamoGraphDeploymentTopOwnerHandler) Parse(ctx context.Context, object client.Object,
 	externalWorkload *v1alpha1.ExternalWorkload,
 ) error {
+	object, err := expandDynamoV1beta1RoleTemplates(object)
+	if err != nil {
+		return err
+	}
 	dynamoGraphDeploymentAlpha1, ok := object.(*dynamov1alpha1.DynamoGraphDeployment)
 	if !ok {
 		dynamoGraphDeploymentBeta1, okBeta1 := object.(*dynamov1beta1.DynamoGraphDeployment)
@@ -455,7 +460,17 @@ func fillObservedStatus(state string, conditions []metav1.Condition,
 }
 
 func (h *DynamoGraphDeploymentTopOwnerHandler) GetObject(ctx context.Context, name, namespace string) (client.Object, error) {
-	return utils.GetObject(ctx, h.cachedClient, name, namespace, h.getEmptyObject)
+	// Fetch beta workloads as unstructured objects so roles are not dropped by the
+	// older Dynamo Go types before parsing.
+	empty := h.getEmptyObject
+	if _, beta := empty().(*dynamov1beta1.DynamoGraphDeployment); beta {
+		empty = func() client.Object {
+			object := &unstructured.Unstructured{}
+			object.SetGroupVersionKind(dynamov1beta1.GroupVersion.WithKind("DynamoGraphDeployment"))
+			return object
+		}
+	}
+	return utils.GetObject(ctx, h.cachedClient, name, namespace, empty)
 }
 
 func tryAddQuantity(resourcesList *corev1.ResourceList, quantityValue string, resourceName corev1.ResourceName, replicas int32) error {
