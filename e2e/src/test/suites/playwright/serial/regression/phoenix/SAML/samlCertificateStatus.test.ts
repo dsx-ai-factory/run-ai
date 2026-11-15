@@ -100,7 +100,7 @@ test.describe('SAML certificate status', { tag: [tags.teams.phoenix, tags.suites
             const fixture = samlCertificateFixtures.malformed();
             await generalSettings.uploadIdentityProviderMetadataFile(fixture.fileName, fixture.buffer);
             expect(
-                await generalSettings.isCertificateFieldInvalid(),
+                await generalSettings.isCertificateFieldInvalid('Invalid SAML metadata'),
                 'the certificate expiration field should show an inline error for a malformed certificate, not silently accept it'
             ).toBe(true);
             expect(
