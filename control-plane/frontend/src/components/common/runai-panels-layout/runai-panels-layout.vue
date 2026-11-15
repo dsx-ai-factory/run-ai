@@ -4,7 +4,11 @@
 -->
 
 <template>
-  <div class="runai-panels-layout-wrapper" :style="layoutStyle">
+  <div
+    class="runai-panels-layout-wrapper"
+    :class="{ 'runai-panels-layout-wrapper--responsive': responsiveLayout }"
+    :style="layoutStyle"
+  >
     <section
       class="runai-panels-layout"
       :class="{ 'runai-panels-layout--hide-right': hideRight, 'runai-panels-layout--responsive': responsiveLayout }"
@@ -99,23 +103,49 @@ const layoutStyle = computed(() => ({
 
 <style scoped lang="scss">
 .runai-panels-layout-wrapper {
-  // Give shrink-to-fit parents the preferred width, while fitting constrained containers.
-  width: var(--layout-width);
-  max-width: 100%;
-  margin-inline: auto;
-  min-width: v-bind("responsiveLayout ? '0' : '1300px'");
+  width: 100%;
   display: flex;
   justify-content: center;
+
+  &--responsive {
+    // Only opted-in flows give shrink-to-fit parents a preferred width.
+    width: var(--layout-width);
+    max-width: 100%;
+    margin-inline: auto;
+    min-width: 0;
+  }
 }
 
 .runai-panels-layout {
   margin-top: v-bind(marginTop);
   display: grid;
-  grid-template-columns: var(--layout-left-width) minmax(0, 1fr) var(--layout-right-width);
+  grid-template-columns: var(--layout-left-width) 1fr var(--layout-right-width);
   gap: 20px;
   align-items: flex-start;
-  width: 100%;
-  max-width: var(--layout-width);
+  min-width: 1300px;
+
+  &--responsive {
+    grid-template-columns: var(--layout-left-width) minmax(0, 1fr) var(--layout-right-width);
+    width: 100%;
+    min-width: 0;
+    max-width: var(--layout-width);
+
+    .panel-main {
+      grid-column: 2;
+      min-width: 0;
+      width: auto;
+    }
+
+    .panel-left {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .panel-right {
+      grid-column: 3;
+      grid-row: 1;
+    }
+  }
 
   &--hide-right {
     grid-template-columns: var(--layout-left-width) minmax(0, 1fr);
@@ -123,14 +153,8 @@ const layoutStyle = computed(() => ({
 }
 
 .panel-main {
-  grid-column: 2;
-  min-width: v-bind("responsiveLayout ? '0' : '600px'");
-  width: v-bind("responsiveLayout ? 'auto' : props.width");
-}
-
-.panel-left {
-  grid-column: 1;
-  grid-row: 1;
+  min-width: 600px;
+  width: v-bind("props.width");
 }
 
 .panel-left-content {
@@ -140,11 +164,6 @@ const layoutStyle = computed(() => ({
 .panel-left--expanded {
   // The grid keeps the mini rail's width while the content overlays its neighbour.
   z-index: 2;
-}
-
-.panel-right {
-  grid-column: 3;
-  grid-row: 1;
 }
 
 .panel-sticky {

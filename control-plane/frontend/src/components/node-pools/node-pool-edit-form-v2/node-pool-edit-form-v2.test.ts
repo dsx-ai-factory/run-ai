@@ -4,13 +4,14 @@
  */
 import { mount, shallowMount, flushPromises } from "@vue/test-utils";
 import { createTestingPinia } from "@pinia/testing";
-import { Quasar, QSelect, QInput } from "quasar";
-import { describe, it, expect, vi } from "vitest";
+import { Quasar, QSelect, QInput, Notify } from "quasar";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { nodeLabelsService } from "@/services/control-plane/node-labels.service/node-labels.service";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import RunaiNameValidation from "@/components/common/runai-name-validation/runai-name-validation.vue";
 import RunaiDescriptionInput from "@/components/common/runai-description-input/runai-description-input.vue";
 import NodePoolEditFormV2 from "./node-pool-edit-form-v2.vue";
+import { BadRequestError } from "@/models/http-response.model";
 import { ENABLE_NODE_POOL_CREATE_FLOW } from "@/constants/node-pool.constants";
 vi.mock("@/services/control-plane/cluster.service/cluster.service", () => ({
   clusterService: { getNodepools: vi.fn().mockResolvedValue([]), createNodepool: vi.fn() },
@@ -19,11 +20,12 @@ vi.mock("@/services/control-plane/node-labels.service/node-labels.service", () =
   nodeLabelsService: { keys: vi.fn().mockResolvedValue([]), values: vi.fn().mockResolvedValue([]) },
 }));
 describe("Step 1 form", () => {
+  beforeEach(() => vi.clearAllMocks());
   it("keeps the new flow disabled by default", () => expect(ENABLE_NODE_POOL_CREATE_FLOW).toBe(false));
   it("shows description and reveals the value field only after a key is selected", async () => {
     const wrapper = shallowMount(NodePoolEditFormV2, {
       global: {
-        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        plugins: [[Quasar, { plugins: { Notify } }], createTestingPinia({ createSpy: vi.fn })],
         renderStubDefaultSlot: true,
         stubs: {
           QInput: { props: ["prefix"], template: "<div />" },
@@ -34,7 +36,7 @@ describe("Step 1 form", () => {
     expect(wrapper.findComponent(RunaiDescriptionInput).props("customAid")).toBe("node-pool-description");
     expect(wrapper.find('[aid="node-pool-label-value"]').exists()).toBe(false);
     wrapper.findComponent(QSelect).vm.$emit("update:model-value", "node-type");
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(wrapper.find('[aid="node-pool-label-value"]').exists()).toBe(true);
     wrapper.unmount();
   });
@@ -42,7 +44,7 @@ describe("Step 1 form", () => {
     return mount(NodePoolEditFormV2, {
       props: { initialClusterId },
       global: {
-        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        plugins: [[Quasar, { plugins: { Notify } }], createTestingPinia({ createSpy: vi.fn })],
         mocks: { $route: { query: {} } },
         stubs: {
           RunaiWizardLayout: { template: '<div><slot /><slot name="content-footer" /></div>' },
@@ -114,6 +116,42 @@ describe("Step 1 form", () => {
     await wrapper.find('[aid="create-node-pool-continue"]').trigger("click");
     await flushPromises();
     expect(wrapper.text()).toContain("Select a value");
+    wrapper.unmount();
+  });
+  it("shows the backend error detail, preserves input and clears the error on successful retry", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.mocked(clusterService.createNodepool)
+      .mockRejectedValueOnce(new BadRequestError("This label is reserved by the cluster administrator"))
+      .mockResolvedValueOnce({ id: "created-pool", name: "valid-pool", clusterId: "cluster" } as never);
+    const wrapper = renderForm("cluster");
+    const notify = vi.spyOn(wrapper.vm.$q, "notify").mockImplementation(() => () => {});
+    await flushPromises();
+    wrapper.findComponent(RunaiNameValidation).vm.$emit("update:modelValue", "valid-pool");
+    wrapper.findComponent(RunaiDescriptionInput).vm.$emit("update:modelValue", "Keep this description");
+    wrapper
+      .findAllComponents(QSelect)
+      .find((c) => c.props("label") === "Key")
+      ?.vm.$emit("update:modelValue", "node-type");
+    await flushPromises();
+    wrapper
+      .findAllComponents(QSelect)
+      .find((c) => c.props("label") === "Value")
+      ?.vm.$emit("update:modelValue", "training");
+    await flushPromises();
+    await wrapper.find('[aid="create-node-pool-continue"]').trigger("click");
+    await flushPromises();
+    expect(wrapper.get('[role="alert"]').text()).toContain("This label is reserved by the cluster administrator");
+    expect(notify).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "Node pool valid-pool couldn't be created" }),
+    );
+    expect(wrapper.findComponent(RunaiNameValidation).props("modelValue")).toBe("valid-pool");
+    expect(wrapper.findComponent(RunaiDescriptionInput).props("modelValue")).toBe("Keep this description");
+    expect(wrapper.findComponent(RunaiNameValidation).findComponent(QInput).props("disable")).toBe(false);
+    await wrapper.find('[aid="create-node-pool-continue"]').trigger("click");
+    await flushPromises();
+    expect(wrapper.text()).not.toContain("This label is reserved by the cluster administrator");
+    expect(wrapper.emitted("created")).toHaveLength(1);
+    expect(clusterService.createNodepool).toHaveBeenCalledTimes(2);
     wrapper.unmount();
   });
   it("shows name-format and cluster-specific duplicate-name errors", async () => {

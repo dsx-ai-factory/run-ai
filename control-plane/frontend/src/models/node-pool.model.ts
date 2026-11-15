@@ -4,10 +4,19 @@
  */
 
 import type { IStatusColOptions } from "@/models/table.model";
-import { NodepoolGPUNetworkAccelerationDetection, NodepoolPhase } from "@/swagger-models/cluster-service-client";
+import {
+  type NodepoolCreateFields,
+  type SchedulingCapabilitiesNullable,
+  NodepoolGPUNetworkAccelerationDetection,
+  NodepoolPhase,
+} from "@/swagger-models/cluster-service-client";
 import type { ISelectOption } from "@/models/global.model";
 import { docsUtil } from "@/utils/docs.util/docs.util";
 import DOCS from "@/constants/docs";
+
+export interface INodePoolFormDraft extends NodepoolCreateFields {
+  description: string;
+}
 
 export enum PlacementStrategy {
   Binpack = "binpack",
@@ -188,7 +197,6 @@ export const NODE_POOL_NETWORK_DISCOVERY_OPTIONS: ISelectOption[] = [
 
 export const EMPTY_PRIORITY_LABEL = "empty";
 
-import type { NodepoolCreateFields, SchedulingCapabilitiesNullable } from "@/swagger-models/cluster-service-client";
 export const PROPORTIONAL_CAPABILITIES = Object.freeze({
   limits: false,
   adjustableWeights: true,

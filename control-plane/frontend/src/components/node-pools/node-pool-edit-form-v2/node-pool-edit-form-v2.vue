@@ -34,7 +34,7 @@
               :debounce="0"
               dense
               :disable="locked"
-              :rules="[validateName, uniqueName, nameConflictRule]"
+              :rules="[nodePoolUtil.validateName, uniqueName, nameConflictRule]"
               :maxlength="40"
             />
             <!-- maxlength is the shared character cap; the rule also enforces the API UTF-8 byte limit. -->
@@ -45,7 +45,7 @@
               dense
               :disable="locked"
               :debounce="0"
-              :rules="[validateDescription]"
+              :rules="[nodePoolUtil.validateDescription]"
               no-error-icon
             />
           </runai-expansion-item>
@@ -79,7 +79,7 @@
               map-options
               input-debounce="250"
               :disable="locked || !draft.clusterId || !!loadError"
-              :rules="[validateLabelKey]"
+              :rules="[nodePoolUtil.validateLabelKey]"
               no-error-icon
               @filter="filterKeys"
               @new-value="addKey"
@@ -113,7 +113,7 @@
               map-options
               input-debounce="250"
               :disable="locked || !!loadError"
-              :rules="[validateLabelValue, uniqueLabel]"
+              :rules="[nodePoolUtil.validateLabelValue, uniqueLabel]"
               reactive-rules
               no-error-icon
               @filter="filterValues"
@@ -122,7 +122,7 @@
               <template #option="scope">
                 <q-item v-bind="scope.itemProps">
                   <q-item-section>{{ scope.opt.label }}</q-item-section>
-                  <q-tooltip v-if="scope.opt.disable">{{ nodePoolErrors.NODE_POOL_LABEL_IN_USE }}</q-tooltip>
+                  <q-tooltip v-if="scope.opt.disable">{{ errorMessages.NODE_POOL_LABEL_IN_USE }}</q-tooltip>
                 </q-item>
               </template>
             </q-select>
@@ -130,6 +130,9 @@
         </runai-expansion-wrapper>
       </runai-form-wrapper>
       <template #content-footer>
+        <q-banner v-if="submitError" class="bg-red-1 text-negative q-mt-md" role="alert">
+          {{ submitError }}
+        </q-banner>
         <div class="creation-footer">
           <div class="row justify-end q-gutter-md">
             <runai-btn
@@ -184,15 +187,9 @@ import { alertUtil } from "@/utils/alert.util";
 import { deepCopy } from "@/utils/common.util";
 import type { Nodepool } from "@/swagger-models/cluster-service-client";
 import { useNodePoolForm } from "@/composables/node-pool/use-node-pool-form.composable";
-import {
-  labelOptions,
-  validateName,
-  validateDescription,
-  validateLabelKey,
-  validateLabelValue,
-} from "@/utils/node-pool.util/node-pool.util";
-import { errorMessages as nodePoolErrors, errorMessages } from "@/common/error-message.constant";
-import { type INodePoolFormDraft } from "@/components/node-pools/node-pool-edit-form-v2/node-pool-edit-form-v2.model";
+import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
+import { errorMessages } from "@/common/error-message.constant";
+import type { INodePoolFormDraft } from "@/models/node-pool.model";
 
 import { ENodePoolFormDestination } from "./node-pool-edit-form-v2.model";
 import { useNodeLabelOptions } from "@/composables/node-pool/use-node-label-options.composable";
@@ -274,9 +271,9 @@ const unavailableValues = computed(() =>
     .map((p) => p.labelValue)
     .filter((v): v is string => typeof v === "string"),
 );
-const keyOptions = computed(() => labelOptions(labels.keys.options, keySearch.value, [], "key"));
+const keyOptions = computed(() => nodePoolUtil.labelOptions(labels.keys.options, keySearch.value, [], "key"));
 const valueOptions = computed(() =>
-  labelOptions(
+  nodePoolUtil.labelOptions(
     labels.values.options,
     valueSearch.value,
     unavailableValues.value.filter((value) => value.includes(valueSearch.value)),
@@ -305,7 +302,7 @@ function addValue(value: string, done: (value: string, mode: "add-unique") => vo
   if (!unavailableValues.value.includes(value)) done(value, "add-unique");
 }
 function uniqueLabel(value: string) {
-  return !unavailableValues.value.includes(value) || nodePoolErrors.NODE_POOL_LABEL_IN_USE;
+  return !unavailableValues.value.includes(value) || errorMessages.NODE_POOL_LABEL_IN_USE;
 }
 function uniqueName(value: string) {
   return !pools.value.some((p) => p.name === value) || errorMessages.NAME_ALREADY_EXIST;
