@@ -50,7 +50,7 @@ export class SupersetSpec {
     'nodePools'?: Array<string> | null;
     'preemptibility'?: Preemptibility | null;
     /**
-    * Specifies the priority class for the workload.  The default value depends on the workload type:  high for workspace workloads, low for training/distributed training workloads, and very-high for inference workloads. You can change it to any of the following valid values to adjust the workload\'s scheduling behavior: very-low, low, medium-low, medium, medium-high, high, very-high.
+    * Specifies the priority class for the workload, which determines its scheduling behavior. Valid values are: very-low, low, medium-low, medium, medium-high, high, and very-high. Each workload type has a default priority. To view the default priority for each workload type, use the GET /workload-types endpoint. Once you change the priority from the default value defined for that workload type, the preemptibility field is not automatically updated. Make sure to set the desired preemptibility value.
     */
     'priorityClass'?: string | null;
     'restartPolicy'?: string | null;
@@ -129,7 +129,7 @@ export class SupersetSpec {
     'mpiLauncherCreationPolicy'?: MpiLauncherCreationPolicy | null;
     'nodeAffinityRequired'?: NodeAffinityRequired | null;
     /**
-    * Nodes (machines), or a group of nodes on which the workload will run. To use this feature, your Administrator will need to label nodes. For more information, see [Group Nodes](https://docs.run.ai/latest/admin/researcher-setup/limit-to-node-group). When using this flag with with Project-based affinity, it refines the list of allowable node groups set in the Project. For more information, see [Projects](https://docshub.run.ai/guides/platform-management/aiinitiatives/organization/projects).
+    * Deprecated: use a workload policy node selector to target node types instead. Nodes (machines), or a group of nodes on which the workload will run. To use this feature, your Administrator will need to label nodes. For more information, see [Group Nodes](https://docs.run.ai/latest/admin/researcher-setup/limit-to-node-group). When using this flag with with Project-based affinity, it refines the list of allowable node groups set in the Project. For more information, see [Projects](https://docshub.run.ai/guides/platform-management/aiinitiatives/organization/projects).
     */
     'nodeType'?: string | null;
     /**
@@ -151,6 +151,10 @@ export class SupersetSpec {
     */
     'relatedUrls'?: Array<RelatedUrl> | null;
     'security'?: SupersetSpecAllOfSecurity | null;
+    /**
+    * The number of workers per topology segment. Workers in the same segment will be placed on nodes that are as close as possible, reducing latency between them. Set this to match your application\'s parallel segment size. Omit this field to disable segmentation. 
+    */
+    'segmentSize'?: number | null;
     /**
     * Specifies the number of slots per worker used in hostfile. Defaults to 1. (applicable only for MPI)
     */
@@ -392,6 +396,11 @@ export class SupersetSpec {
             "name": "security",
             "baseName": "security",
             "type": "SupersetSpecAllOfSecurity"
+        },
+        {
+            "name": "segmentSize",
+            "baseName": "segmentSize",
+            "type": "number"
         },
         {
             "name": "slotsPerWorker",

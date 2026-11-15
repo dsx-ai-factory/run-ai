@@ -11,6 +11,7 @@
  */
 
 import { RequestFile } from './models';
+import { WorkloadV2MetadataUpdateParamsConfiguration } from './workloadV2MetadataUpdateParamsConfiguration';
 
 export class WorkloadV2MetadataUpdateParams {
     /**
@@ -21,6 +22,7 @@ export class WorkloadV2MetadataUpdateParams {
     * Specify the workload category assigned to the workload. Categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform.
     */
     'category'?: string | null;
+    'configuration'?: WorkloadV2MetadataUpdateParamsConfiguration | null;
 
     static discriminator: string | undefined = undefined;
 
@@ -34,6 +36,11 @@ export class WorkloadV2MetadataUpdateParams {
             "name": "category",
             "baseName": "category",
             "type": "string"
+        },
+        {
+            "name": "configuration",
+            "baseName": "configuration",
+            "type": "WorkloadV2MetadataUpdateParamsConfiguration"
         }    ];
 
     static getAttributeTypeMap() {

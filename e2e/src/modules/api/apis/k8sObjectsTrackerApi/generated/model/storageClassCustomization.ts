@@ -16,12 +16,15 @@ import { ClaimSizeCustomization } from './claimSizeCustomization';
 import { PvcAddedAttribute } from './pvcAddedAttribute';
 import { VolumeModeCustomization } from './volumeModeCustomization';
 
+/**
+* Optional UI/policy controls that define defaults and requirements when creating PVCs with this storage class.
+*/
 export class StorageClassCustomization {
     'accessMode'?: AccessModeCustomization | null;
     'volumeMode'?: VolumeModeCustomization | null;
     'claimSize'?: ClaimSizeCustomization | null;
     /**
-    * added attributes that needs to be populated to any PVC created under this storage class.
+    * Defines additional annotation attributes to be applied to PVCs created under this storage class. Each attribute describes an annotation key and its expected value format, display name, and purpose.
     */
     'attributes'?: Array<PvcAddedAttribute>;
 

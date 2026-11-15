@@ -11,11 +11,11 @@
  */
 
 import { RequestFile } from './models';
-import { DetailedSlackNotificationStateSettings } from './detailedSlackNotificationStateSettings';
+import { SlackDetailsSettings } from './slackDetailsSettings';
 
 export class DetailedNotificationStateSlack {
     'enabled'?: boolean | null;
-    'settings'?: DetailedSlackNotificationStateSettings;
+    'settings'?: SlackDetailsSettings;
 
     static discriminator: string | undefined = undefined;
 
@@ -28,7 +28,7 @@ export class DetailedNotificationStateSlack {
         {
             "name": "settings",
             "baseName": "settings",
-            "type": "DetailedSlackNotificationStateSettings"
+            "type": "SlackDetailsSettings"
         }    ];
 
     static getAttributeTypeMap() {

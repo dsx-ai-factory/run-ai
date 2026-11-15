@@ -10,9 +10,7 @@ export * from './metricStore';
 export * from './metricStoreEndpoint';
 export * from './metricStoreEndpointAuth';
 export * from './metricStoreEndpointAuthBasic';
-export * from './metricStorePatchRequest';
 export * from './modelError';
-export * from './postTenantEulaRequest';
 export * from './roles';
 export * from './submissionError';
 export * from './tenant';
@@ -46,9 +44,7 @@ import { MetricStore } from './metricStore';
 import { MetricStoreEndpoint } from './metricStoreEndpoint';
 import { MetricStoreEndpointAuth } from './metricStoreEndpointAuth';
 import { MetricStoreEndpointAuthBasic } from './metricStoreEndpointAuthBasic';
-import { MetricStorePatchRequest } from './metricStorePatchRequest';
 import { ModelError } from './modelError';
-import { PostTenantEulaRequest } from './postTenantEulaRequest';
 import { Roles } from './roles';
 import { SubmissionError } from './submissionError';
 import { Tenant } from './tenant';
@@ -90,9 +86,7 @@ let typeMap: {[index: string]: any} = {
     "MetricStoreEndpoint": MetricStoreEndpoint,
     "MetricStoreEndpointAuth": MetricStoreEndpointAuth,
     "MetricStoreEndpointAuthBasic": MetricStoreEndpointAuthBasic,
-    "MetricStorePatchRequest": MetricStorePatchRequest,
     "ModelError": ModelError,
-    "PostTenantEulaRequest": PostTenantEulaRequest,
     "SubmissionError": SubmissionError,
     "Tenant": Tenant,
     "TenantCreationRequest": TenantCreationRequest,

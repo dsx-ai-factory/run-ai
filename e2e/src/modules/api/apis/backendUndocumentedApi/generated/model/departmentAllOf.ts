@@ -66,7 +66,7 @@ export class DepartmentAllOf {
         {
             "name": "projects",
             "baseName": "projects",
-            "type": "Array"
+            "type": "Array<any>"
         },
         {
             "name": "projectsDeservedGpus",

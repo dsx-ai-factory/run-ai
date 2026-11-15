@@ -42,6 +42,10 @@ export class S3Instance {
     */
     'secretKeyOfSecretKey'?: string | null;
     /**
+    * An AWS session token. It should be provided (in addition to the access key ID and secret access key) to authenticate to a bucket that is configured to use AWS Security Token Service (STS).
+    */
+    'awsSessionToken'?: string | null;
+    /**
     * Use \'true\' in case the item is defined in defaults of the policy, and you wish to exclude it from the workload.
     */
     'exclude'?: boolean | null = false;
@@ -82,6 +86,11 @@ export class S3Instance {
         {
             "name": "secretKeyOfSecretKey",
             "baseName": "secretKeyOfSecretKey",
+            "type": "string"
+        },
+        {
+            "name": "awsSessionToken",
+            "baseName": "awsSessionToken",
             "type": "string"
         },
         {

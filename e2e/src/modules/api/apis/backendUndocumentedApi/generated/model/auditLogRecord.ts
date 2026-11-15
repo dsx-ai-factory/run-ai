@@ -11,7 +11,6 @@
  */
 
 import { RequestFile } from './models';
-import { AuditLogRecordAllOf } from './auditLogRecordAllOf';
 
 export class AuditLogRecord {
     /**

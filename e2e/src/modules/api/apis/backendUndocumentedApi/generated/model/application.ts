@@ -11,8 +11,6 @@
  */
 
 import { RequestFile } from './models';
-import { ApplicationAllOf } from './applicationAllOf';
-import { AuthEntity } from './authEntity';
 import { AuthEntityType } from './authEntityType';
 import { Role } from './role';
 

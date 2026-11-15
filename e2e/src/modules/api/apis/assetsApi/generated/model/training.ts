@@ -19,7 +19,7 @@ export class Training {
     'meta': WorkloadMetaV1;
     'spec': SpecificRunInfoFields;
     /**
-    * A training workload ready for submission at the cluster.
+    * A training workload ready for submission at the cluster. Further details at https://github.com/dsx-ai-factory/run-ai/runai-cluster/tree/master/workload-controller/config/crd\"
     */
     'workload'?: object;
     'job'?: DisplayedJob;

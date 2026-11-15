@@ -134,6 +134,7 @@ components:
                           example: 2
                       projects:
                           type: array
+                          items: {}
                           description: Projects under this department.
                           example:
                               - id: 16
@@ -588,9 +589,9 @@ components:
                 value:
                     type: array
                     items:
-                        type:
-                            - string
-                            - number
+                        oneOf:
+                            - type: string
+                            - type: number
         GrafanaMetric:
             title: GrafanaMetric
             x-stoplight:
@@ -1157,7 +1158,7 @@ paths:
                   description: The unique uuid identifying the cluster.
                   example: 9f55255e-11ed-47c7-acef-fc4054768dbc
                 - in: path
-                  name: id
+                  name: project-id
                   schema:
                       type: integer
                   required: true

@@ -18,20 +18,30 @@ export class DatavolumeInnerFields {
     'updatedAt'?: Date;
     'createdBy'?: string;
     'updatedBy'?: string;
+    /**
+    * The name of the new data volume.
+    */
     'name': string;
+    /**
+    * A brief description of the data volume and its purpose.
+    */
     'description'?: string;
     /**
-    * The name of the PVC that the datavolume is based on
+    * The name of the existing PVC that the new data volume is based on.
     */
     'originPvcName': string;
     /**
-    * The ID of the project that in its namespace the origin pvc is located
+    * The ID of the project whose namespace contains the origin PVC.
     */
     'projectId': string;
     /**
-    * If true, the original storage volume will be deleted together with the datavolume
+    * True is not supported. This parameter will be removed in a future release.
     */
     'shouldDeleteOriginalVolume'?: boolean = false;
+    /**
+    * If true, the original storage volume will be used together with the data volume. Default true as long as \"shouldDeleteOriginalVolume\" is false.
+    */
+    'useOriginalVolume'?: boolean | null = true;
     'projectName': string;
     'departmentId'?: string;
     /**
@@ -90,6 +100,11 @@ export class DatavolumeInnerFields {
         {
             "name": "shouldDeleteOriginalVolume",
             "baseName": "shouldDeleteOriginalVolume",
+            "type": "boolean"
+        },
+        {
+            "name": "useOriginalVolume",
+            "baseName": "useOriginalVolume",
             "type": "boolean"
         },
         {

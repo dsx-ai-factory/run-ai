@@ -5,9 +5,7 @@ export * from './accessKeyCreationRequest';
 export * from './accessKeyCreationSpec';
 export * from './accessKeyListResponse';
 export * from './accessKeySpec';
-export * from './accessKeyToAddOrUpdate';
 export * from './accessKeyUpdateRequest';
-export * from './accessKeysSyncResponse';
 export * from './activationReplicasField';
 export * from './allowOverQuota';
 export * from './annotation';
@@ -30,13 +28,11 @@ export * from './assetMetaForSync';
 export * from './assetMetaForSyncAllOf';
 export * from './assetMetaForSyncAllOf1';
 export * from './assetMetaForSyncAllOf2';
-export * from './assetNameAndChecksum';
 export * from './assetPhaseUpdate';
 export * from './assetReadOnlyFields';
 export * from './assetRef';
 export * from './assetResourcesIdsItem';
 export * from './assetResourcesIdsSyncRequest';
-export * from './assetStatus';
 export * from './assetSyncStatusEnum';
 export * from './assetUpdatableFields';
 export * from './assetUpdateRequest';
@@ -76,8 +72,8 @@ export * from './clusterSyncReport';
 export * from './clusterSyncReportUpdate';
 export * from './complianceInfo';
 export * from './complianceInfoReason';
-export * from './complianceIssues';
-export * from './complianceIssuesComplianceIssuesInner';
+export * from './complianceIssuesV2';
+export * from './complianceIssuesV2ComplianceIssuesInner';
 export * from './computeAsset';
 export * from './computeAssetSpec';
 export * from './computeCreationRequest';
@@ -172,8 +168,6 @@ export * from './dockerRegistryCreationRequest';
 export * from './dockerRegistryCreationSpec';
 export * from './dockerRegistryListResponse';
 export * from './dockerRegistrySpec';
-export * from './dockerRegistrySyncResponse';
-export * from './dockerRegistryToAddOrUpdate';
 export * from './dockerRegistryUpdateRequest';
 export * from './emptyDir';
 export * from './emptyDirInstance';
@@ -207,8 +201,6 @@ export * from './genericSecretCreationRequest';
 export * from './genericSecretCreationSpec';
 export * from './genericSecretListResponse';
 export * from './genericSecretSpec';
-export * from './genericSecretSyncResponse';
-export * from './genericSecretToAddOrUpdate';
 export * from './genericSecretUpdateRequest';
 export * from './gitAsset';
 export * from './gitAssetSpec';
@@ -280,7 +272,6 @@ export * from './matchExpression';
 export * from './matchExpressionOperator';
 export * from './metricThresholdField';
 export * from './metricThresholdPercentageField';
-export * from './migProfile';
 export * from './modelAsset';
 export * from './modelAssetSpec';
 export * from './modelCreationRequest';
@@ -306,6 +297,7 @@ export * from './nfssRules';
 export * from './ngcApiKey';
 export * from './ngcApiKeyCreationRequest';
 export * from './ngcApiKeyCreationSpec';
+export * from './ngcApiKeyInternal';
 export * from './ngcApiKeyListResponse';
 export * from './ngcApiKeySpec';
 export * from './ngcApiKeyUpdateRequest';
@@ -323,21 +315,13 @@ export * from './pVCAssetSpec';
 export * from './pVCCreationRequest';
 export * from './pVCHistoryResponse';
 export * from './pVCListResponse';
-export * from './pVCStatusRequest';
-export * from './pVCStatusRequestItem';
-export * from './pVCStatusSyncStatusInfo';
-export * from './pVCSyncDetails';
-export * from './pVCToAddOrUpdate';
 export * from './pVCUpdateRequest';
-export * from './pVCsSyncResponse';
 export * from './password';
 export * from './passwordCreationRequest';
 export * from './passwordCreationSpec';
 export * from './passwordListResponse';
 export * from './passwordSpec';
-export * from './passwordToAddOrUpdate';
 export * from './passwordUpdateRequest';
-export * from './passwordsSyncResponse';
 export * from './phase';
 export * from './podAffinity';
 export * from './podAffinityRules';
@@ -348,6 +332,7 @@ export * from './podAffinityTypeRules';
 export * from './policyInfo';
 export * from './policyInfoAllOf';
 export * from './policyInfoAllOf1';
+export * from './policyRuleEnum';
 export * from './port';
 export * from './portServiceType';
 export * from './preemptibility';
@@ -439,19 +424,13 @@ export * from './stringOption';
 export * from './stringRules';
 export * from './stringRulesCommon';
 export * from './stringRulesOptions';
-export * from './submissionError';
+export * from './submissionErrorV2';
 export * from './supersetServingPort';
 export * from './supersetSpec';
 export * from './supersetSpecAllOf';
 export * from './supersetSpecAllOfCompute';
 export * from './supersetSpecAllOfSecurity';
 export * from './supersetSpecAllOfStorage';
-export * from './syncInfoResponse';
-export * from './syncInfoResponseItem';
-export * from './syncInfoResponseItemV2';
-export * from './syncInfoResponseV2';
-export * from './syncRequest';
-export * from './syncRequestV2';
 export * from './systemInfo';
 export * from './toleration';
 export * from './tolerationEffect';
@@ -481,6 +460,7 @@ export * from './workloadMeta';
 export * from './workloadMetaV1';
 export * from './workloadRefAndStatus';
 export * from './workloadState';
+export * from './workloadStatusUpdate';
 export * from './workloadSupportedTypes';
 export * from './workloadTemplate';
 export * from './workloadTemplateCreationRequest';
@@ -512,9 +492,7 @@ import { AccessKeyCreationRequest } from './accessKeyCreationRequest';
 import { AccessKeyCreationSpec } from './accessKeyCreationSpec';
 import { AccessKeyListResponse } from './accessKeyListResponse';
 import { AccessKeySpec } from './accessKeySpec';
-import { AccessKeyToAddOrUpdate } from './accessKeyToAddOrUpdate';
 import { AccessKeyUpdateRequest } from './accessKeyUpdateRequest';
-import { AccessKeysSyncResponse } from './accessKeysSyncResponse';
 import { ActivationReplicasField } from './activationReplicasField';
 import { AllowOverQuota } from './allowOverQuota';
 import { Annotation } from './annotation';
@@ -537,13 +515,11 @@ import { AssetMetaForSync } from './assetMetaForSync';
 import { AssetMetaForSyncAllOf } from './assetMetaForSyncAllOf';
 import { AssetMetaForSyncAllOf1 } from './assetMetaForSyncAllOf1';
 import { AssetMetaForSyncAllOf2 } from './assetMetaForSyncAllOf2';
-import { AssetNameAndChecksum } from './assetNameAndChecksum';
 import { AssetPhaseUpdate } from './assetPhaseUpdate';
 import { AssetReadOnlyFields } from './assetReadOnlyFields';
 import { AssetRef } from './assetRef';
 import { AssetResourcesIdsItem } from './assetResourcesIdsItem';
 import { AssetResourcesIdsSyncRequest } from './assetResourcesIdsSyncRequest';
-import { AssetStatus } from './assetStatus';
 import { AssetSyncStatusEnum } from './assetSyncStatusEnum';
 import { AssetUpdatableFields } from './assetUpdatableFields';
 import { AssetUpdateRequest } from './assetUpdateRequest';
@@ -583,8 +559,8 @@ import { ClusterSyncReport } from './clusterSyncReport';
 import { ClusterSyncReportUpdate } from './clusterSyncReportUpdate';
 import { ComplianceInfo } from './complianceInfo';
 import { ComplianceInfoReason } from './complianceInfoReason';
-import { ComplianceIssues } from './complianceIssues';
-import { ComplianceIssuesComplianceIssuesInner } from './complianceIssuesComplianceIssuesInner';
+import { ComplianceIssuesV2 } from './complianceIssuesV2';
+import { ComplianceIssuesV2ComplianceIssuesInner } from './complianceIssuesV2ComplianceIssuesInner';
 import { ComputeAsset } from './computeAsset';
 import { ComputeAssetSpec } from './computeAssetSpec';
 import { ComputeCreationRequest } from './computeCreationRequest';
@@ -679,8 +655,6 @@ import { DockerRegistryCreationRequest } from './dockerRegistryCreationRequest';
 import { DockerRegistryCreationSpec } from './dockerRegistryCreationSpec';
 import { DockerRegistryListResponse } from './dockerRegistryListResponse';
 import { DockerRegistrySpec } from './dockerRegistrySpec';
-import { DockerRegistrySyncResponse } from './dockerRegistrySyncResponse';
-import { DockerRegistryToAddOrUpdate } from './dockerRegistryToAddOrUpdate';
 import { DockerRegistryUpdateRequest } from './dockerRegistryUpdateRequest';
 import { EmptyDir } from './emptyDir';
 import { EmptyDirInstance } from './emptyDirInstance';
@@ -714,8 +688,6 @@ import { GenericSecretCreationRequest } from './genericSecretCreationRequest';
 import { GenericSecretCreationSpec } from './genericSecretCreationSpec';
 import { GenericSecretListResponse } from './genericSecretListResponse';
 import { GenericSecretSpec } from './genericSecretSpec';
-import { GenericSecretSyncResponse } from './genericSecretSyncResponse';
-import { GenericSecretToAddOrUpdate } from './genericSecretToAddOrUpdate';
 import { GenericSecretUpdateRequest } from './genericSecretUpdateRequest';
 import { GitAsset } from './gitAsset';
 import { GitAssetSpec } from './gitAssetSpec';
@@ -787,7 +759,6 @@ import { MatchExpression } from './matchExpression';
 import { MatchExpressionOperator } from './matchExpressionOperator';
 import { MetricThresholdField } from './metricThresholdField';
 import { MetricThresholdPercentageField } from './metricThresholdPercentageField';
-import { MigProfile } from './migProfile';
 import { ModelAsset } from './modelAsset';
 import { ModelAssetSpec } from './modelAssetSpec';
 import { ModelCreationRequest } from './modelCreationRequest';
@@ -813,6 +784,7 @@ import { NfssRules } from './nfssRules';
 import { NgcApiKey } from './ngcApiKey';
 import { NgcApiKeyCreationRequest } from './ngcApiKeyCreationRequest';
 import { NgcApiKeyCreationSpec } from './ngcApiKeyCreationSpec';
+import { NgcApiKeyInternal } from './ngcApiKeyInternal';
 import { NgcApiKeyListResponse } from './ngcApiKeyListResponse';
 import { NgcApiKeySpec } from './ngcApiKeySpec';
 import { NgcApiKeyUpdateRequest } from './ngcApiKeyUpdateRequest';
@@ -830,21 +802,13 @@ import { PVCAssetSpec } from './pVCAssetSpec';
 import { PVCCreationRequest } from './pVCCreationRequest';
 import { PVCHistoryResponse } from './pVCHistoryResponse';
 import { PVCListResponse } from './pVCListResponse';
-import { PVCStatusRequest } from './pVCStatusRequest';
-import { PVCStatusRequestItem } from './pVCStatusRequestItem';
-import { PVCStatusSyncStatusInfo } from './pVCStatusSyncStatusInfo';
-import { PVCSyncDetails } from './pVCSyncDetails';
-import { PVCToAddOrUpdate } from './pVCToAddOrUpdate';
 import { PVCUpdateRequest } from './pVCUpdateRequest';
-import { PVCsSyncResponse } from './pVCsSyncResponse';
 import { Password } from './password';
 import { PasswordCreationRequest } from './passwordCreationRequest';
 import { PasswordCreationSpec } from './passwordCreationSpec';
 import { PasswordListResponse } from './passwordListResponse';
 import { PasswordSpec } from './passwordSpec';
-import { PasswordToAddOrUpdate } from './passwordToAddOrUpdate';
 import { PasswordUpdateRequest } from './passwordUpdateRequest';
-import { PasswordsSyncResponse } from './passwordsSyncResponse';
 import { Phase } from './phase';
 import { PodAffinity } from './podAffinity';
 import { PodAffinityRules } from './podAffinityRules';
@@ -855,6 +819,7 @@ import { PodAffinityTypeRules } from './podAffinityTypeRules';
 import { PolicyInfo } from './policyInfo';
 import { PolicyInfoAllOf } from './policyInfoAllOf';
 import { PolicyInfoAllOf1 } from './policyInfoAllOf1';
+import { PolicyRuleEnum } from './policyRuleEnum';
 import { Port } from './port';
 import { PortServiceType } from './portServiceType';
 import { Preemptibility } from './preemptibility';
@@ -946,19 +911,13 @@ import { StringOption } from './stringOption';
 import { StringRules } from './stringRules';
 import { StringRulesCommon } from './stringRulesCommon';
 import { StringRulesOptions } from './stringRulesOptions';
-import { SubmissionError } from './submissionError';
+import { SubmissionErrorV2 } from './submissionErrorV2';
 import { SupersetServingPort } from './supersetServingPort';
 import { SupersetSpec } from './supersetSpec';
 import { SupersetSpecAllOf } from './supersetSpecAllOf';
 import { SupersetSpecAllOfCompute } from './supersetSpecAllOfCompute';
 import { SupersetSpecAllOfSecurity } from './supersetSpecAllOfSecurity';
 import { SupersetSpecAllOfStorage } from './supersetSpecAllOfStorage';
-import { SyncInfoResponse } from './syncInfoResponse';
-import { SyncInfoResponseItem } from './syncInfoResponseItem';
-import { SyncInfoResponseItemV2 } from './syncInfoResponseItemV2';
-import { SyncInfoResponseV2 } from './syncInfoResponseV2';
-import { SyncRequest } from './syncRequest';
-import { SyncRequestV2 } from './syncRequestV2';
 import { SystemInfo } from './systemInfo';
 import { Toleration } from './toleration';
 import { TolerationEffect } from './tolerationEffect';
@@ -988,6 +947,7 @@ import { WorkloadMeta } from './workloadMeta';
 import { WorkloadMetaV1 } from './workloadMetaV1';
 import { WorkloadRefAndStatus } from './workloadRefAndStatus';
 import { WorkloadState } from './workloadState';
+import { WorkloadStatusUpdate } from './workloadStatusUpdate';
 import { WorkloadSupportedTypes } from './workloadSupportedTypes';
 import { WorkloadTemplate } from './workloadTemplate';
 import { WorkloadTemplateCreationRequest } from './workloadTemplateCreationRequest';
@@ -1016,7 +976,6 @@ let primitives = [
 let enumsMap: {[index: string]: any} = {
         "AssetClusterStatusIssueEnum": AssetClusterStatusIssueEnum,
         "AssetKind": AssetKind,
-        "AssetStatus": AssetStatus,
         "AssetSyncStatusEnum": AssetSyncStatusEnum,
         "AuthorizationType": AuthorizationType,
         "Capability": Capability,
@@ -1036,11 +995,10 @@ let enumsMap: {[index: string]: any} = {
         "InternalConnectionType": InternalConnectionType,
         "InternalToolType": InternalToolType,
         "MatchExpressionOperator": MatchExpressionOperator,
-        "MigProfile": MigProfile,
         "MpiLauncherCreationPolicy": MpiLauncherCreationPolicy,
-        "PVCSyncDetails.VolumeModeEnum": PVCSyncDetails.VolumeModeEnum,
         "Phase": Phase,
         "PodAffinityType": PodAffinityType,
+        "PolicyRuleEnum": PolicyRuleEnum,
         "PortServiceType": PortServiceType,
         "Preemptibility": Preemptibility,
         "ProbeHandlerScheme": ProbeHandlerScheme,
@@ -1068,9 +1026,7 @@ let typeMap: {[index: string]: any} = {
     "AccessKeyCreationSpec": AccessKeyCreationSpec,
     "AccessKeyListResponse": AccessKeyListResponse,
     "AccessKeySpec": AccessKeySpec,
-    "AccessKeyToAddOrUpdate": AccessKeyToAddOrUpdate,
     "AccessKeyUpdateRequest": AccessKeyUpdateRequest,
-    "AccessKeysSyncResponse": AccessKeysSyncResponse,
     "ActivationReplicasField": ActivationReplicasField,
     "AllowOverQuota": AllowOverQuota,
     "Annotation": Annotation,
@@ -1091,7 +1047,6 @@ let typeMap: {[index: string]: any} = {
     "AssetMetaForSyncAllOf": AssetMetaForSyncAllOf,
     "AssetMetaForSyncAllOf1": AssetMetaForSyncAllOf1,
     "AssetMetaForSyncAllOf2": AssetMetaForSyncAllOf2,
-    "AssetNameAndChecksum": AssetNameAndChecksum,
     "AssetPhaseUpdate": AssetPhaseUpdate,
     "AssetReadOnlyFields": AssetReadOnlyFields,
     "AssetRef": AssetRef,
@@ -1132,8 +1087,8 @@ let typeMap: {[index: string]: any} = {
     "ClusterSyncReportUpdate": ClusterSyncReportUpdate,
     "ComplianceInfo": ComplianceInfo,
     "ComplianceInfoReason": ComplianceInfoReason,
-    "ComplianceIssues": ComplianceIssues,
-    "ComplianceIssuesComplianceIssuesInner": ComplianceIssuesComplianceIssuesInner,
+    "ComplianceIssuesV2": ComplianceIssuesV2,
+    "ComplianceIssuesV2ComplianceIssuesInner": ComplianceIssuesV2ComplianceIssuesInner,
     "ComputeAsset": ComputeAsset,
     "ComputeAssetSpec": ComputeAssetSpec,
     "ComputeCreationRequest": ComputeCreationRequest,
@@ -1222,8 +1177,6 @@ let typeMap: {[index: string]: any} = {
     "DockerRegistryCreationSpec": DockerRegistryCreationSpec,
     "DockerRegistryListResponse": DockerRegistryListResponse,
     "DockerRegistrySpec": DockerRegistrySpec,
-    "DockerRegistrySyncResponse": DockerRegistrySyncResponse,
-    "DockerRegistryToAddOrUpdate": DockerRegistryToAddOrUpdate,
     "DockerRegistryUpdateRequest": DockerRegistryUpdateRequest,
     "EmptyDir": EmptyDir,
     "EmptyDirInstance": EmptyDirInstance,
@@ -1256,8 +1209,6 @@ let typeMap: {[index: string]: any} = {
     "GenericSecretCreationSpec": GenericSecretCreationSpec,
     "GenericSecretListResponse": GenericSecretListResponse,
     "GenericSecretSpec": GenericSecretSpec,
-    "GenericSecretSyncResponse": GenericSecretSyncResponse,
-    "GenericSecretToAddOrUpdate": GenericSecretToAddOrUpdate,
     "GenericSecretUpdateRequest": GenericSecretUpdateRequest,
     "GitAsset": GitAsset,
     "GitAssetSpec": GitAssetSpec,
@@ -1345,6 +1296,7 @@ let typeMap: {[index: string]: any} = {
     "NgcApiKey": NgcApiKey,
     "NgcApiKeyCreationRequest": NgcApiKeyCreationRequest,
     "NgcApiKeyCreationSpec": NgcApiKeyCreationSpec,
+    "NgcApiKeyInternal": NgcApiKeyInternal,
     "NgcApiKeyListResponse": NgcApiKeyListResponse,
     "NgcApiKeySpec": NgcApiKeySpec,
     "NgcApiKeyUpdateRequest": NgcApiKeyUpdateRequest,
@@ -1362,21 +1314,13 @@ let typeMap: {[index: string]: any} = {
     "PVCCreationRequest": PVCCreationRequest,
     "PVCHistoryResponse": PVCHistoryResponse,
     "PVCListResponse": PVCListResponse,
-    "PVCStatusRequest": PVCStatusRequest,
-    "PVCStatusRequestItem": PVCStatusRequestItem,
-    "PVCStatusSyncStatusInfo": PVCStatusSyncStatusInfo,
-    "PVCSyncDetails": PVCSyncDetails,
-    "PVCToAddOrUpdate": PVCToAddOrUpdate,
     "PVCUpdateRequest": PVCUpdateRequest,
-    "PVCsSyncResponse": PVCsSyncResponse,
     "Password": Password,
     "PasswordCreationRequest": PasswordCreationRequest,
     "PasswordCreationSpec": PasswordCreationSpec,
     "PasswordListResponse": PasswordListResponse,
     "PasswordSpec": PasswordSpec,
-    "PasswordToAddOrUpdate": PasswordToAddOrUpdate,
     "PasswordUpdateRequest": PasswordUpdateRequest,
-    "PasswordsSyncResponse": PasswordsSyncResponse,
     "PodAffinity": PodAffinity,
     "PodAffinityRules": PodAffinityRules,
     "PodAffinityTypeOptions": PodAffinityTypeOptions,
@@ -1466,19 +1410,13 @@ let typeMap: {[index: string]: any} = {
     "StringRules": StringRules,
     "StringRulesCommon": StringRulesCommon,
     "StringRulesOptions": StringRulesOptions,
-    "SubmissionError": SubmissionError,
+    "SubmissionErrorV2": SubmissionErrorV2,
     "SupersetServingPort": SupersetServingPort,
     "SupersetSpec": SupersetSpec,
     "SupersetSpecAllOf": SupersetSpecAllOf,
     "SupersetSpecAllOfCompute": SupersetSpecAllOfCompute,
     "SupersetSpecAllOfSecurity": SupersetSpecAllOfSecurity,
     "SupersetSpecAllOfStorage": SupersetSpecAllOfStorage,
-    "SyncInfoResponse": SyncInfoResponse,
-    "SyncInfoResponseItem": SyncInfoResponseItem,
-    "SyncInfoResponseItemV2": SyncInfoResponseItemV2,
-    "SyncInfoResponseV2": SyncInfoResponseV2,
-    "SyncRequest": SyncRequest,
-    "SyncRequestV2": SyncRequestV2,
     "SystemInfo": SystemInfo,
     "Toleration": Toleration,
     "TolerationEffectOptions": TolerationEffectOptions,
@@ -1502,6 +1440,7 @@ let typeMap: {[index: string]: any} = {
     "WorkloadMeta": WorkloadMeta,
     "WorkloadMetaV1": WorkloadMetaV1,
     "WorkloadRefAndStatus": WorkloadRefAndStatus,
+    "WorkloadStatusUpdate": WorkloadStatusUpdate,
     "WorkloadSupportedTypes": WorkloadSupportedTypes,
     "WorkloadTemplate": WorkloadTemplate,
     "WorkloadTemplateCreationRequest": WorkloadTemplateCreationRequest,

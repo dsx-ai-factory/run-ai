@@ -4,6 +4,7 @@ api.ts
 api/apis.ts
 api/clusterObjectsStatusApi.ts
 api/configMapsApi.ts
+api/deviceClassesApi.ts
 api/healthApi.ts
 api/pVCsApi.ts
 api/secretsApi.ts
@@ -24,6 +25,8 @@ model/configMapListInfo.ts
 model/configMaps.ts
 model/configMapsListResponse.ts
 model/createClusterWidePvcV1Request.ts
+model/deviceClass.ts
+model/deviceClasses.ts
 model/issue.ts
 model/modelError.ts
 model/models.ts

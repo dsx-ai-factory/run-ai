@@ -11,8 +11,10 @@
  */
 
 import { RequestFile } from './models';
+import { ArrayRules } from './arrayRules';
 import { BooleanRules } from './booleanRules';
 import { IntegerRules } from './integerRules';
+import { NimServiceServingPortAuthorizationTypeRules } from './nimServiceServingPortAuthorizationTypeRules';
 import { ServingPortExposedProtocolRules } from './servingPortExposedProtocolRules';
 import { ServingPortServiceTypeRules } from './servingPortServiceTypeRules';
 import { StringRules } from './stringRules';
@@ -28,6 +30,9 @@ export class NimServiceServingPortRules {
     'exposeExternally'?: BooleanRules | null;
     'exposedUrl'?: StringRules | null;
     'exposedProtocol'?: ServingPortExposedProtocolRules | null;
+    'authorizationType'?: NimServiceServingPortAuthorizationTypeRules | null;
+    'authorizedUsers'?: ArrayRules | null;
+    'authorizedGroups'?: ArrayRules | null;
 
     static discriminator: string | undefined = undefined;
 
@@ -66,6 +71,21 @@ export class NimServiceServingPortRules {
             "name": "exposedProtocol",
             "baseName": "exposedProtocol",
             "type": "ServingPortExposedProtocolRules"
+        },
+        {
+            "name": "authorizationType",
+            "baseName": "authorizationType",
+            "type": "NimServiceServingPortAuthorizationTypeRules"
+        },
+        {
+            "name": "authorizedUsers",
+            "baseName": "authorizedUsers",
+            "type": "ArrayRules"
+        },
+        {
+            "name": "authorizedGroups",
+            "baseName": "authorizedGroups",
+            "type": "ArrayRules"
         }    ];
 
     static getAttributeTypeMap() {

@@ -13,7 +13,7 @@
 import { RequestFile } from './models';
 
 /**
-* The distributed training framework used in the workload.
+* The distributed training framework used in the workload. Note: The TF, XGBoost and JAX frameworks are deprecated and will be removed in a future release. 
 */
 export enum DistributedFramework {
     Mpi = <any> 'MPI',

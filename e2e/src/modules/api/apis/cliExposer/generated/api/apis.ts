@@ -1,20 +1,14 @@
-export * from './cLIApi';
-import { CLIApi } from './cLIApi';
 export * from './healthApi';
 import { HealthApi } from './healthApi';
-import * as http from 'http';
-
-export class HttpError extends Error {
-    constructor (public response: http.IncomingMessage, public body: any, public statusCode?: number, requestOptions?: any) {
-        /////Start: Modified by @Run.AI /////
-        super(`HTTP request failed with the following statusCode ${statusCode},\n Request: ${JSON.stringify(requestOptions)},\n Response: ${JSON.stringify(body)}`);
-        /////End: Modified by @Run.AI /////
-        this.name = 'HttpError';
-    }
-}
+export * from './researcherCommandLineInterfaceApi';
+import { ResearcherCommandLineInterfaceApi } from './researcherCommandLineInterfaceApi';
+export * from './researcherCommandLineInterfaceDeprecatedApi';
+import { ResearcherCommandLineInterfaceDeprecatedApi } from './researcherCommandLineInterfaceDeprecatedApi';
+import { HttpError } from './httpError';
+export { HttpError };
 
 export type { RequestFile } from '../model/models';
 
-export const APIS = [CLIApi, HealthApi];
+export const APIS = [HealthApi, ResearcherCommandLineInterfaceApi, ResearcherCommandLineInterfaceDeprecatedApi];
 
 

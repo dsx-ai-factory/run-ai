@@ -24,6 +24,7 @@ export class IdpCreationRequest {
     'oidcData'?: OidcCreationData | null;
     'ocpData'?: OcpCreationData | null;
     'mappers'?: Mappers;
+    'dryRun'?: boolean = false;
 
     static discriminator: string | undefined = undefined;
 
@@ -57,6 +58,11 @@ export class IdpCreationRequest {
             "name": "mappers",
             "baseName": "mappers",
             "type": "Mappers"
+        },
+        {
+            "name": "dryRun",
+            "baseName": "dryRun",
+            "type": "boolean"
         }    ];
 
     static getAttributeTypeMap() {

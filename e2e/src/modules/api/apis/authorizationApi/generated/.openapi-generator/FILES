@@ -12,10 +12,13 @@ api/settingsApi.ts
 git_push.sh
 model/accessRule.ts
 model/accessRuleAllOf.ts
+model/accessRuleAllOf1.ts
 model/accessRuleById.ts
 model/accessRuleByIdAllOf.ts
 model/accessRuleClusterPhase.ts
 model/accessRuleCreationFields.ts
+model/accessRuleCreationFieldsAllOf.ts
+model/accessRuleCreationFieldsInternal.ts
 model/accessRuleDeletionBatchResponse.ts
 model/accessRuleDeletionBatchResponseFailureItem.ts
 model/accessRuleForSync.ts
@@ -42,6 +45,7 @@ model/accessRulesMigrateDeprecatedResponseSucceeded.ts
 model/accessRulesSortFilterFields.ts
 model/action.ts
 model/allowedInternalCreateRoles.ts
+model/authenticatedUsersAccessRuleCreationFields.ts
 model/authorizationSettingsGetResponse.ts
 model/authorizationSettingsKeyEnum.ts
 model/backendEvaluationRequest.ts
@@ -86,11 +90,10 @@ model/roleCreationFieldsKubernetesPermissions.ts
 model/roleEnabledDisabledFields.ts
 model/rolePermission.ts
 model/rolePermissionSet.ts
-model/roleV1.ts
 model/rolesSortFilterFields.ts
 model/scopeType.ts
 model/subjectType.ts
+model/subjectTypeExtended.ts
 model/submissionError.ts
-model/tenantIsCspManagedSetting.ts
 model/updateAuthorizationSettingByKeyRequest.ts
 model/updateScopeAccessRulesRequest.ts

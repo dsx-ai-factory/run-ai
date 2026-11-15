@@ -15,7 +15,7 @@ import { ClaimInfo } from './claimInfo';
 
 export class PvcFieldsNonUpdatable {
     /**
-    * Verify existing PVC. PVC is assumed to exist when set to `true`. If set to `false`, the PVC will be created, if it does not exist.
+    * Verify existing PVC. PVC is assumed to exist when set to `true`. If set to `false`, the PVC will be created, if it does not exist. Cannot be set to `true` when `dataSharing` is `true`.
     */
     'existingPvc'?: boolean | null = false;
     /**
@@ -32,7 +32,7 @@ export class PvcFieldsNonUpdatable {
     'ephemeral'?: boolean | null = false;
     'claimInfo'?: ClaimInfo | null;
     /**
-    * use `true` to share the PVC data to all projects under the selected scope.
+    * Use `true` to share the PVC data to all projects under the selected scope. Cannot be set to `true` when `existingPvc` is `true`.
     */
     'dataSharing'?: boolean | null = false;
 

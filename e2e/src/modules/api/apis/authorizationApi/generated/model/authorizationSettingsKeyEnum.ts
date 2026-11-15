@@ -13,6 +13,5 @@
 import { RequestFile } from './models';
 
 export enum AuthorizationSettingsKeyEnum {
-    EnableScopedAuthorization = <any> 'enableScopedAuthorization',
-    TenantIsCspManaged = <any> 'tenantIsCspManaged'
+    EnableScopedAuthorization = <any> 'enableScopedAuthorization'
 }

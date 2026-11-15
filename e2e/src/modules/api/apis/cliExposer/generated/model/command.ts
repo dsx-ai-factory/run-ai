@@ -1,6 +1,6 @@
 /**
  * cli-exposer
- * An API for managing RunAI researcher CLI
+ * An API for managing RunAI Researcher Command Line Interface
  *
  * The version of the OpenAPI document: 2.0.0
  * Contact: support@run.ai
@@ -14,7 +14,7 @@ import { RequestFile } from './models';
 
 export class Command {
     /**
-    * The commands that can be used to install the Run:AI CLI.
+    * The commands that can be used to install the Run:ai CLI.
     */
     'command': string;
 

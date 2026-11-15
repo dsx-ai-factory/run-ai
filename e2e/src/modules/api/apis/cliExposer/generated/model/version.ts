@@ -1,6 +1,6 @@
 /**
  * cli-exposer
- * An API for managing RunAI researcher CLI
+ * An API for managing RunAI Researcher Command Line Interface
  *
  * The version of the OpenAPI document: 2.0.0
  * Contact: support@run.ai
@@ -14,9 +14,13 @@ import { RequestFile } from './models';
 
 export class Version {
     /**
-    * The version of the CLI
+    * The version of the CLI SDK
     */
-    'version': string;
+    'sdkVersion': string;
+    /**
+    * The version of the CP
+    */
+    'cpVersion': string;
     /**
     * Whether the CLI needs to be upgraded
     */
@@ -26,8 +30,13 @@ export class Version {
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "version",
-            "baseName": "version",
+            "name": "sdkVersion",
+            "baseName": "sdkVersion",
+            "type": "string"
+        },
+        {
+            "name": "cpVersion",
+            "baseName": "cpVersion",
             "type": "string"
         },
         {

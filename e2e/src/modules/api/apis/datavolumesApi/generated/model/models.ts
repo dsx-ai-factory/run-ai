@@ -5,6 +5,7 @@ export * from './baseFields';
 export * from './complianceIssues';
 export * from './complianceIssuesComplianceIssuesInner';
 export * from './condition';
+export * from './countDatavolumes200Response';
 export * from './datavolume';
 export * from './datavolumeAllOf';
 export * from './datavolumeCreationFields';
@@ -16,16 +17,26 @@ export * from './datavolumeNoSharedScopesAllOf';
 export * from './datavolumePatchFields';
 export * from './datavolumePhase';
 export * from './datavolumeRequestType';
+export * from './datavolumeSortFilterFields';
 export * from './datavolumeStatus';
 export * from './datavolumeStatusForSync';
 export * from './datavolumeStatusForSyncAllOf';
 export * from './datavolumeStatusInternal';
 export * from './datavolumeStatusInternalAllOf';
+export * from './datavolumesSettingsGetResponse';
+export * from './datavolumesSettingsKeyEnum';
 export * from './datavolumesSyncRequest';
+export * from './enableDataVolumesSetting';
 export * from './enrichmentDataFields';
 export * from './getDatavolumes200Response';
 export * from './getDatavolumesInternal200Response';
+export * from './getEnableDataVolumes';
+export * from './getEnableDataVolumesValue';
+export * from './getUsedPvcsFromDatavolumes200Response';
 export * from './httpResponse';
+export * from './internalDatavolume';
+export * from './internalDatavolumeCreationFields';
+export * from './internalEnrichmentDataFields';
 export * from './modelError';
 export * from './scopeType';
 export * from './sharedScope';
@@ -33,6 +44,7 @@ export * from './sharedScopeAllOf';
 export * from './sharedScopeBase';
 export * from './sharedScopesPatchRequest';
 export * from './submissionError';
+export * from './updateDatavolumesSettingByKeyRequest';
 
 import * as fs from 'fs';
 
@@ -52,6 +64,7 @@ import { BaseFields } from './baseFields';
 import { ComplianceIssues } from './complianceIssues';
 import { ComplianceIssuesComplianceIssuesInner } from './complianceIssuesComplianceIssuesInner';
 import { Condition } from './condition';
+import { CountDatavolumes200Response } from './countDatavolumes200Response';
 import { Datavolume } from './datavolume';
 import { DatavolumeAllOf } from './datavolumeAllOf';
 import { DatavolumeCreationFields } from './datavolumeCreationFields';
@@ -63,16 +76,26 @@ import { DatavolumeNoSharedScopesAllOf } from './datavolumeNoSharedScopesAllOf';
 import { DatavolumePatchFields } from './datavolumePatchFields';
 import { DatavolumePhase } from './datavolumePhase';
 import { DatavolumeRequestType } from './datavolumeRequestType';
+import { DatavolumeSortFilterFields } from './datavolumeSortFilterFields';
 import { DatavolumeStatus } from './datavolumeStatus';
 import { DatavolumeStatusForSync } from './datavolumeStatusForSync';
 import { DatavolumeStatusForSyncAllOf } from './datavolumeStatusForSyncAllOf';
 import { DatavolumeStatusInternal } from './datavolumeStatusInternal';
 import { DatavolumeStatusInternalAllOf } from './datavolumeStatusInternalAllOf';
+import { DatavolumesSettingsGetResponse } from './datavolumesSettingsGetResponse';
+import { DatavolumesSettingsKeyEnum } from './datavolumesSettingsKeyEnum';
 import { DatavolumesSyncRequest } from './datavolumesSyncRequest';
+import { EnableDataVolumesSetting } from './enableDataVolumesSetting';
 import { EnrichmentDataFields } from './enrichmentDataFields';
 import { GetDatavolumes200Response } from './getDatavolumes200Response';
 import { GetDatavolumesInternal200Response } from './getDatavolumesInternal200Response';
+import { GetEnableDataVolumes } from './getEnableDataVolumes';
+import { GetEnableDataVolumesValue } from './getEnableDataVolumesValue';
+import { GetUsedPvcsFromDatavolumes200Response } from './getUsedPvcsFromDatavolumes200Response';
 import { HttpResponse } from './httpResponse';
+import { InternalDatavolume } from './internalDatavolume';
+import { InternalDatavolumeCreationFields } from './internalDatavolumeCreationFields';
+import { InternalEnrichmentDataFields } from './internalEnrichmentDataFields';
 import { ModelError } from './modelError';
 import { ScopeType } from './scopeType';
 import { SharedScope } from './sharedScope';
@@ -80,6 +103,7 @@ import { SharedScopeAllOf } from './sharedScopeAllOf';
 import { SharedScopeBase } from './sharedScopeBase';
 import { SharedScopesPatchRequest } from './sharedScopesPatchRequest';
 import { SubmissionError } from './submissionError';
+import { UpdateDatavolumesSettingByKeyRequest } from './updateDatavolumesSettingByKeyRequest';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
@@ -96,6 +120,8 @@ let primitives = [
 let enumsMap: {[index: string]: any} = {
         "DatavolumePhase": DatavolumePhase,
         "DatavolumeRequestType": DatavolumeRequestType,
+        "DatavolumeSortFilterFields": DatavolumeSortFilterFields,
+        "DatavolumesSettingsKeyEnum": DatavolumesSettingsKeyEnum,
         "ScopeType": ScopeType,
 }
 
@@ -105,6 +131,7 @@ let typeMap: {[index: string]: any} = {
     "ComplianceIssues": ComplianceIssues,
     "ComplianceIssuesComplianceIssuesInner": ComplianceIssuesComplianceIssuesInner,
     "Condition": Condition,
+    "CountDatavolumes200Response": CountDatavolumes200Response,
     "Datavolume": Datavolume,
     "DatavolumeAllOf": DatavolumeAllOf,
     "DatavolumeCreationFields": DatavolumeCreationFields,
@@ -119,17 +146,26 @@ let typeMap: {[index: string]: any} = {
     "DatavolumeStatusForSyncAllOf": DatavolumeStatusForSyncAllOf,
     "DatavolumeStatusInternal": DatavolumeStatusInternal,
     "DatavolumeStatusInternalAllOf": DatavolumeStatusInternalAllOf,
+    "DatavolumesSettingsGetResponse": DatavolumesSettingsGetResponse,
     "DatavolumesSyncRequest": DatavolumesSyncRequest,
+    "EnableDataVolumesSetting": EnableDataVolumesSetting,
     "EnrichmentDataFields": EnrichmentDataFields,
     "GetDatavolumes200Response": GetDatavolumes200Response,
     "GetDatavolumesInternal200Response": GetDatavolumesInternal200Response,
+    "GetEnableDataVolumes": GetEnableDataVolumes,
+    "GetEnableDataVolumesValue": GetEnableDataVolumesValue,
+    "GetUsedPvcsFromDatavolumes200Response": GetUsedPvcsFromDatavolumes200Response,
     "HttpResponse": HttpResponse,
+    "InternalDatavolume": InternalDatavolume,
+    "InternalDatavolumeCreationFields": InternalDatavolumeCreationFields,
+    "InternalEnrichmentDataFields": InternalEnrichmentDataFields,
     "ModelError": ModelError,
     "SharedScope": SharedScope,
     "SharedScopeAllOf": SharedScopeAllOf,
     "SharedScopeBase": SharedScopeBase,
     "SharedScopesPatchRequest": SharedScopesPatchRequest,
     "SubmissionError": SubmissionError,
+    "UpdateDatavolumesSettingByKeyRequest": UpdateDatavolumesSettingByKeyRequest,
 }
 
 export class ObjectSerializer {

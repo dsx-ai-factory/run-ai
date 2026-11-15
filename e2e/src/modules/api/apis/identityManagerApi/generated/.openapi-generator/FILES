@@ -3,7 +3,6 @@
 api.ts
 api/accessKeysApi.ts
 api/apis.ts
-api/applicationsApi.ts
 api/clientsApi.ts
 api/configApi.ts
 api/healthApi.ts
@@ -15,7 +14,6 @@ api/realmApi.ts
 api/serviceAccountsApi.ts
 api/settingsApi.ts
 api/tokensApi.ts
-api/userApplicationsApi.ts
 api/usersApi.ts
 git_push.sh
 model/accessKey.ts
@@ -26,10 +24,6 @@ model/accessKeys.ts
 model/accessKeysAdministration.ts
 model/appTokenRequest.ts
 model/appTokenResponse.ts
-model/application.ts
-model/applicationCreationRequest.ts
-model/applicationPatchRequest.ts
-model/applicationPostResponse.ts
 model/authConfiguration.ts
 model/bulkUserCreationRequest.ts
 model/bulkUserCreationResponse.ts
@@ -59,7 +53,7 @@ model/idpCreationRequest.ts
 model/idpCreationRequestTypeEnum.ts
 model/idpPostResponse.ts
 model/idpResources.ts
-model/internalApplicationCreationRequest.ts
+model/installerBootstrapResponse.ts
 model/internalServiceAccountCreationRequest.ts
 model/internalUserCreationRequest.ts
 model/mandatoryClaim.ts
@@ -68,6 +62,7 @@ model/modelError.ts
 model/models.ts
 model/oAuth2Error.ts
 model/oAuth2TokenResponse.ts
+model/oAuthAuthorizationServer.ts
 model/ocpCreationData.ts
 model/ocpData.ts
 model/oidcCreationData.ts
@@ -78,7 +73,6 @@ model/realmCreationResponse.ts
 model/realmReconcileRequest.ts
 model/reconcilerType.ts
 model/regenerateAccessKeySecret200Response.ts
-model/regenerateApplicationSecret200Response.ts
 model/regenerateServiceAccountSecretResponse.ts
 model/resetUserPassword200Response.ts
 model/samlCreationData.ts
@@ -99,10 +93,6 @@ model/updateBrowserSessionTimeoutSettingValue.ts
 model/updateLogoutRedirectUriSettingValue.ts
 model/updateSecuritySettingByKeyRequest.ts
 model/user.ts
-model/userApp.ts
-model/userAppAdministration.ts
-model/userAppCreationRequest.ts
-model/userAppPostResponse.ts
 model/userChangePasswordRequest.ts
 model/userCreationRequest.ts
 model/userCreationRequestBulk.ts

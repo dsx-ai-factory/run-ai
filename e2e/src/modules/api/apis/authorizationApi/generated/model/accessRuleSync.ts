@@ -13,14 +13,13 @@
 import { RequestFile } from './models';
 import { AccessRuleSyncAllOfPredefinedRole } from './accessRuleSyncAllOfPredefinedRole';
 import { ScopeType } from './scopeType';
-import { SubjectType } from './subjectType';
+import { SubjectTypeExtended } from './subjectTypeExtended';
 
 export class AccessRuleSync {
     /**
     * The unique identifier of the subject (e.g., user, group, or app).
     */
     'subjectId': string;
-    'subjectType': SubjectType;
     /**
     * The numeric ID of the assigned role.
     */
@@ -34,6 +33,7 @@ export class AccessRuleSync {
     * The id of the cluster.
     */
     'clusterId'?: string;
+    'subjectType': SubjectTypeExtended;
     /**
     * The name of the assigned role (e.g., admin, viewer).
     */
@@ -81,11 +81,6 @@ export class AccessRuleSync {
             "type": "string"
         },
         {
-            "name": "subjectType",
-            "baseName": "subjectType",
-            "type": "SubjectType"
-        },
-        {
             "name": "roleId",
             "baseName": "roleId",
             "type": "number"
@@ -104,6 +99,11 @@ export class AccessRuleSync {
             "name": "clusterId",
             "baseName": "clusterId",
             "type": "string"
+        },
+        {
+            "name": "subjectType",
+            "baseName": "subjectType",
+            "type": "SubjectTypeExtended"
         },
         {
             "name": "roleName",

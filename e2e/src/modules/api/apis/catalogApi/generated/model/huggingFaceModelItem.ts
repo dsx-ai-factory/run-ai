@@ -19,6 +19,10 @@ export class HuggingFaceModelItem {
     'id'?: string;
     'gated'?: boolean;
     'downloads'?: number;
+    /**
+    * indicates if the model is trending
+    */
+    'trending'?: boolean;
 
     static discriminator: string | undefined = undefined;
 
@@ -37,6 +41,11 @@ export class HuggingFaceModelItem {
             "name": "downloads",
             "baseName": "downloads",
             "type": "number"
+        },
+        {
+            "name": "trending",
+            "baseName": "trending",
+            "type": "boolean"
         }    ];
 
     static getAttributeTypeMap() {

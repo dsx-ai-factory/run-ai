@@ -20,7 +20,7 @@ import {
     supportedFrom,
     SupportedVersions
 } from '../../../../../../modules/helpers/utils/SupporetedEnvsUtils';
-import { Project } from '../../../../../../modules/api/apis/projectsDepartmentsApi/generated/model/project';
+import { Project } from '../../../../../../modules/api/apis/projectsDepartmentsApi';
 import { WorkloadType } from '../../../../../../modules/helpers/utils/WorkloadsCrudUtils';
 
 test.describe(`worload preempt tags: ${tags.tool.ui} ${tags.resource.workloads} ${tags.teams.loong} ${tags.runOn.dgxc}`, () => {

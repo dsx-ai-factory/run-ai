@@ -11,9 +11,11 @@
  */
 
 import { RequestFile } from './models';
+import { SamlData } from './samlData';
 
 export class IdpPostResponse {
     'alias': string;
+    'samlData'?: SamlData | null;
 
     static discriminator: string | undefined = undefined;
 
@@ -22,6 +24,11 @@ export class IdpPostResponse {
             "name": "alias",
             "baseName": "alias",
             "type": "string"
+        },
+        {
+            "name": "samlData",
+            "baseName": "samlData",
+            "type": "SamlData"
         }    ];
 
     static getAttributeTypeMap() {

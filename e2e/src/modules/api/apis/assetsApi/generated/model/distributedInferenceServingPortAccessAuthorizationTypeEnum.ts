@@ -13,7 +13,7 @@
 import { RequestFile } from './models';
 
 /**
-* Specifies who can send inference requests to the serving endpoint:  Possible values: - `public`: No authorization required. - `authenticatedUsers`: Any NVIDIA Run:ai authenticated user can send requests. - `authorizedUsers`: Only users listed in the authorizedUsers field can send requests. - `authorizedGroups`: Only members of user groups listed in the authorizedGroups field can send requests. 
+* Specifies who can send inference requests to the serving endpoint:  Possible values: - `public`: No authorization is required. (Default) - `authenticatedUsers`: Any NVIDIA Run:ai authenticated user and service account can send requests. - `authorizedUsers`: Only users listed in the authorizedUsers field can send requests. - `authorizedGroups`: Only members of user groups listed in the authorizedGroups field can send requests. 
 */
 export enum DistributedInferenceServingPortAccessAuthorizationTypeEnum {
     Public = <any> 'public',

@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AccessKeysApi, ConfigApi, LoginsApi, SettingsApi, UserApplicationsApi } from './generated/api';
-import { ApplicationsApi } from './generated/api/applicationsApi';
+import { AccessKeysApi, ConfigApi, LoginsApi, SettingsApi } from './generated/api';
 import { ClientsApi } from './generated/api/clientsApi';
 import { IdpsApi } from './generated/api/idpsApi';
 import { RealmApi } from './generated/api/realmApi';
@@ -14,8 +13,6 @@ import { ServiceAccountsApi } from './generated/api/serviceAccountsApi';
 import { API_DEFAULT_HEADERS } from '../apiDefaults';
 
 export class IdentityManagerApi {
-    applicationsApi: ApplicationsApi;
-
     clientsApi: ClientsApi;
 
     idpsApi: IdpsApi;
@@ -30,8 +27,6 @@ export class IdentityManagerApi {
 
     loginApi: LoginsApi;
 
-    userApplicationsApi: UserApplicationsApi;
-
     settingsApi: SettingsApi;
 
     accessKeysApi: AccessKeysApi;
@@ -39,9 +34,6 @@ export class IdentityManagerApi {
     serviceAccountsApi: ServiceAccountsApi;
 
     constructor(url: string) {
-        this.applicationsApi = new ApplicationsApi(url);
-        this.applicationsApi.defaultHeaders = API_DEFAULT_HEADERS;
-
         this.clientsApi = new ClientsApi(url);
         this.clientsApi.defaultHeaders = API_DEFAULT_HEADERS;
 
@@ -62,9 +54,6 @@ export class IdentityManagerApi {
 
         this.loginApi = new LoginsApi(url);
         this.loginApi.defaultHeaders = API_DEFAULT_HEADERS;
-
-        this.userApplicationsApi = new UserApplicationsApi(url);
-        this.userApplicationsApi.defaultHeaders = API_DEFAULT_HEADERS;
 
         this.settingsApi = new SettingsApi(url);
         this.settingsApi.defaultHeaders = API_DEFAULT_HEADERS;

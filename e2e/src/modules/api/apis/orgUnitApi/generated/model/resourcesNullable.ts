@@ -25,10 +25,6 @@ export class ResourcesNullable {
     * The scheduling rank of this org-unit within the node pool. Determines the scheduling order of workloads between org-units. Workloads in higher-ranked org-units are scheduled before workloads in lower-ranked org-units. For example, all workloads in rank \"High\" will be scheduled before all workloads in rank \"Medium\".
     */
     'rank'?: string | null = 'MediumLow';
-    /**
-    * Deprecated. Use rank instead. The scheduling priority for workloads in this node pool.
-    */
-    'priority'?: string | null;
 
     static discriminator: string | undefined = undefined;
 
@@ -56,11 +52,6 @@ export class ResourcesNullable {
         {
             "name": "rank",
             "baseName": "rank",
-            "type": "string"
-        },
-        {
-            "name": "priority",
-            "baseName": "priority",
             "type": "string"
         }    ];
 

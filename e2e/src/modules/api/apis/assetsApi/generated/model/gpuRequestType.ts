@@ -13,10 +13,9 @@
 import { RequestFile } from './models';
 
 /**
-* Sets the unit type for GPU resources requests. Stated in terms of portion, memory or  mig profile [deprecated]. Sets the unit type for other GPU request fields. If `gpuDevicesRequest > 1`, only `portion` is supported. If `gpuDeviceRequest = 1`, the request type can be stated as `portion`, `memory` or `migProfile` [deprecated].
+* Sets the unit type for GPU resources requests. Stated in terms of portion or memory. Sets the unit type for other GPU request fields. If `gpuDevicesRequest > 1`, only `portion` is supported. If `gpuDeviceRequest = 1`, the request type can be stated as `portion` or `memory`.
 */
 export enum GpuRequestType {
     Portion = <any> 'portion',
-    Memory = <any> 'memory',
-    MigProfile = <any> 'migProfile'
+    Memory = <any> 'memory'
 }

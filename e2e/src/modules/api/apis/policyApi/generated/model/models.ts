@@ -1,6 +1,7 @@
 import localVarRequest from 'request';
 
 export * from './activationReplicasField';
+export * from './allowOverride';
 export * from './annotation';
 export * from './annotationsDefaults';
 export * from './arbitraryRules';
@@ -19,6 +20,14 @@ export * from './autoScalingMetricRules';
 export * from './autoScalingRules';
 export * from './autoScalingRulesInitializationTimeoutSeconds';
 export * from './booleanRules';
+export * from './breakdown';
+export * from './breakdownBreakdown';
+export * from './breakdownFieldRef';
+export * from './breakdownFieldVariation';
+export * from './breakdownFormatter';
+export * from './breakdownFormatterArrayKey';
+export * from './breakdownItemSelector';
+export * from './breakdownSpecSelector';
 export * from './capability';
 export * from './claimInfo';
 export * from './claimInfoRules';
@@ -35,6 +44,7 @@ export * from './configMapInstance';
 export * from './configMapRules';
 export * from './configMapsDefaults';
 export * from './configMapsRules';
+export * from './createGvkPolicyReq';
 export * from './dataVolume';
 export * from './dataVolumeInstance';
 export * from './dataVolumeRules';
@@ -42,6 +52,7 @@ export * from './dataVolumesDefaults';
 export * from './dataVolumesRules';
 export * from './defaultFromOrder';
 export * from './defaultFromRule';
+export * from './deleteGvkPolicyRulesReq';
 export * from './distributedFramework';
 export * from './distributedFrameworkOptions';
 export * from './distributedFrameworkOptionsOptionsInner';
@@ -88,7 +99,7 @@ export * from './distributedInferenceServingPortAuthorizationTypeRules';
 export * from './distributedInferenceServingPortContainerAndProtocol';
 export * from './distributedInferenceServingPortProtocol';
 export * from './distributedInferenceServingPortRules';
-export * from './distributedInferenceServingPortRules2';
+export * from './distributedInferenceServingPortRulesProperties';
 export * from './distributedInferenceStartupPolicy';
 export * from './distributedInferenceStartupPolicyField';
 export * from './distributedInferenceStartupPolicyFieldRules';
@@ -112,6 +123,8 @@ export * from './distributedPolicyRulesV2';
 export * from './distributedPolicyRulesV2Worker';
 export * from './distributedPolicyRulesV2WorkerAllOf';
 export * from './distributedPolicyV2';
+export * from './effectiveRules';
+export * from './effectiveRulesEffectiveRulesInner';
 export * from './emptyDir';
 export * from './emptyDirInstance';
 export * from './emptyDirRules';
@@ -138,6 +151,29 @@ export * from './fallbackPolicyDefaultsAndRules';
 export * from './fallbackPolicyDefaultsAndRulesDefaults';
 export * from './fallbackPolicyDefaultsAndRulesRules';
 export * from './fallbackPolicyOverwriteRequest';
+export * from './fieldGroup';
+export * from './fieldGroupCreationRequest';
+export * from './fieldGroupDeleteFieldsRequest';
+export * from './fieldGroupDeleteItemSelectorsRequest';
+export * from './fieldGroupField';
+export * from './fieldGroupFieldsWithScopeValue';
+export * from './fieldGroupListResponse';
+export * from './fieldGroupUpdateRequest';
+export * from './formatter';
+export * from './formatterArrayKey';
+export * from './formatterCreationRequest';
+export * from './formatterDeleteFieldsRequest';
+export * from './formatterField';
+export * from './formatterFieldArrayKey';
+export * from './formatterListResponse';
+export * from './formatterUpdateRequest';
+export * from './gVK';
+export * from './getGvkPolicyResp';
+export * from './getMappingFieldInfoReq';
+export * from './getMappingFieldInfoReqWorkloadType';
+export * from './getMappingMinimalInfoReq';
+export * from './getMappingMinimalInfoReqWorkloadType';
+export * from './getMappingMinimalResp';
 export * from './gitAuthenticationMethod';
 export * from './gitCommon';
 export * from './gitInstance';
@@ -192,8 +228,23 @@ export * from './instancesRules';
 export * from './integerRules';
 export * from './integerRulesOptional';
 export * from './itemRules';
+export * from './itemSelector';
+export * from './itemSelectorsWithScopeValue';
 export * from './label';
 export * from './labelsDefaults';
+export * from './listGvkPoliciesResp';
+export * from './mapping';
+export * from './mappingCreUpdRequest';
+export * from './mappingDeleteSpecSelectorsReq';
+export * from './mappingDeleteSpecSelectorsReqWorkloadType';
+export * from './mappingDeletionRequest';
+export * from './mappingDeletionRequestWorkloadType';
+export * from './mappingFieldType';
+export * from './mappingListResponse';
+export * from './mappingPossibleEnforcement';
+export * from './mappingScope';
+export * from './mappingScopeOfElement';
+export * from './mappingWorkloadType';
 export * from './matchExpression';
 export * from './matchExpressionOperator';
 export * from './metricThresholdField';
@@ -232,6 +283,10 @@ export * from './nimServiceRulesAllOfCompute';
 export * from './nimServiceRulesAllOfModelStore';
 export * from './nimServiceRulesAllOfSecurity';
 export * from './nimServiceServingPort';
+export * from './nimServiceServingPortAuthorizationType';
+export * from './nimServiceServingPortAuthorizationTypeOptions';
+export * from './nimServiceServingPortAuthorizationTypeOptionsOptionsInner';
+export * from './nimServiceServingPortAuthorizationTypeRules';
 export * from './nimServiceServingPortRules';
 export * from './nodeAffinityRequired';
 export * from './nodeSelectorTerm';
@@ -242,13 +297,43 @@ export * from './podAffinityType';
 export * from './podAffinityTypeOptions';
 export * from './podAffinityTypeOptionsOptionsInner';
 export * from './podAffinityTypeRules';
+export * from './policy';
 export * from './policyCreationFields';
 export * from './policyCrossType';
+export * from './policyDescriptionField';
+export * from './policyEnforcementBlocked';
+export * from './policyEnforcementDefault';
+export * from './policyEnforcementElements';
+export * from './policyEnforcementElementsElements';
+export * from './policyEnforcementItems';
+export * from './policyEnforcementItemsItems';
+export * from './policyEnforcementLength';
+export * from './policyEnforcementLengthLength';
+export * from './policyEnforcementMatch';
+export * from './policyEnforcementOptions';
+export * from './policyEnforcementQuantityRange';
+export * from './policyEnforcementQuantityRangeQuantityRange';
+export * from './policyEnforcementRange';
+export * from './policyEnforcementRangeRange';
+export * from './policyEnforcementRequired';
+export * from './policyEnforcementSet';
+export * from './policyIdAndOwnership';
 export * from './policyListEntry';
+export * from './policyListEntryAvailability';
 export * from './policyListEntryStatus';
 export * from './policyListResponse';
 export * from './policyMeta';
+export * from './policyPhase';
 export * from './policyReadOnlyFields';
+export * from './policyRule';
+export * from './policyRuleEnforcement';
+export * from './policyRuleEnforcements';
+export * from './policyRuleEnforcementsEnforcementsInner';
+export * from './policyRuleRef';
+export * from './policyRuleSource';
+export * from './policyRules';
+export * from './policyRulesRef';
+export * from './policyStatus';
 export * from './policySyncResponse';
 export * from './policySyncResponsePoliciesInner';
 export * from './policySyncResponseRequestInfo';
@@ -297,10 +382,8 @@ export * from './relatedUrlRules';
 export * from './relatedUrlsDefaults';
 export * from './relatedUrlsRules';
 export * from './replicaDefaultsV2';
-export * from './replicaDefaultsV2Security';
 export * from './replicaDefaultsV2Storage';
 export * from './replicaRulesV2';
-export * from './replicaRulesV2Security';
 export * from './replicaRulesV2Storage';
 export * from './restartPolicy';
 export * from './restartPolicyOptions';
@@ -350,6 +433,9 @@ export * from './servingPortServiceTypeOptions';
 export * from './servingPortServiceTypeOptionsOptionsInner';
 export * from './servingPortServiceTypeRules';
 export * from './sourceOfRule';
+export * from './specSelector';
+export * from './specSelectorDependency';
+export * from './specSelectorsWithScopeValue';
 export * from './storageInstanceName';
 export * from './stringOption';
 export * from './stringRules';
@@ -396,6 +482,8 @@ export * from './uidGidSource';
 export * from './uidGidSourceOptions';
 export * from './uidGidSourceOptionsOptionsInner';
 export * from './uidGidSourceRules';
+export * from './updateGvkPolicyReq';
+export * from './workloadTypeAndScope';
 export * from './workspacePolicyChangeRequestV2';
 export * from './workspacePolicyDefaultsAndRulesV2';
 export * from './workspacePolicyDefaultsAndRulesV2Defaults';
@@ -421,6 +509,7 @@ export type RequestFile = string | Buffer | fs.ReadStream | RequestDetailedFile;
 
 
 import { ActivationReplicasField } from './activationReplicasField';
+import { AllowOverride } from './allowOverride';
 import { Annotation } from './annotation';
 import { AnnotationsDefaults } from './annotationsDefaults';
 import { ArbitraryRules } from './arbitraryRules';
@@ -439,6 +528,14 @@ import { AutoScalingMetricRules } from './autoScalingMetricRules';
 import { AutoScalingRules } from './autoScalingRules';
 import { AutoScalingRulesInitializationTimeoutSeconds } from './autoScalingRulesInitializationTimeoutSeconds';
 import { BooleanRules } from './booleanRules';
+import { Breakdown } from './breakdown';
+import { BreakdownBreakdown } from './breakdownBreakdown';
+import { BreakdownFieldRef } from './breakdownFieldRef';
+import { BreakdownFieldVariation } from './breakdownFieldVariation';
+import { BreakdownFormatter } from './breakdownFormatter';
+import { BreakdownFormatterArrayKey } from './breakdownFormatterArrayKey';
+import { BreakdownItemSelector } from './breakdownItemSelector';
+import { BreakdownSpecSelector } from './breakdownSpecSelector';
 import { Capability } from './capability';
 import { ClaimInfo } from './claimInfo';
 import { ClaimInfoRules } from './claimInfoRules';
@@ -455,6 +552,7 @@ import { ConfigMapInstance } from './configMapInstance';
 import { ConfigMapRules } from './configMapRules';
 import { ConfigMapsDefaults } from './configMapsDefaults';
 import { ConfigMapsRules } from './configMapsRules';
+import { CreateGvkPolicyReq } from './createGvkPolicyReq';
 import { DataVolume } from './dataVolume';
 import { DataVolumeInstance } from './dataVolumeInstance';
 import { DataVolumeRules } from './dataVolumeRules';
@@ -462,6 +560,7 @@ import { DataVolumesDefaults } from './dataVolumesDefaults';
 import { DataVolumesRules } from './dataVolumesRules';
 import { DefaultFromOrder } from './defaultFromOrder';
 import { DefaultFromRule } from './defaultFromRule';
+import { DeleteGvkPolicyRulesReq } from './deleteGvkPolicyRulesReq';
 import { DistributedFramework } from './distributedFramework';
 import { DistributedFrameworkOptions } from './distributedFrameworkOptions';
 import { DistributedFrameworkOptionsOptionsInner } from './distributedFrameworkOptionsOptionsInner';
@@ -508,7 +607,7 @@ import { DistributedInferenceServingPortAuthorizationTypeRules } from './distrib
 import { DistributedInferenceServingPortContainerAndProtocol } from './distributedInferenceServingPortContainerAndProtocol';
 import { DistributedInferenceServingPortProtocol } from './distributedInferenceServingPortProtocol';
 import { DistributedInferenceServingPortRules } from './distributedInferenceServingPortRules';
-import { DistributedInferenceServingPortRules2 } from './distributedInferenceServingPortRules2';
+import { DistributedInferenceServingPortRulesProperties } from './distributedInferenceServingPortRulesProperties';
 import { DistributedInferenceStartupPolicy } from './distributedInferenceStartupPolicy';
 import { DistributedInferenceStartupPolicyField } from './distributedInferenceStartupPolicyField';
 import { DistributedInferenceStartupPolicyFieldRules } from './distributedInferenceStartupPolicyFieldRules';
@@ -532,6 +631,8 @@ import { DistributedPolicyRulesV2 } from './distributedPolicyRulesV2';
 import { DistributedPolicyRulesV2Worker } from './distributedPolicyRulesV2Worker';
 import { DistributedPolicyRulesV2WorkerAllOf } from './distributedPolicyRulesV2WorkerAllOf';
 import { DistributedPolicyV2 } from './distributedPolicyV2';
+import { EffectiveRules } from './effectiveRules';
+import { EffectiveRulesEffectiveRulesInner } from './effectiveRulesEffectiveRulesInner';
 import { EmptyDir } from './emptyDir';
 import { EmptyDirInstance } from './emptyDirInstance';
 import { EmptyDirRules } from './emptyDirRules';
@@ -558,6 +659,29 @@ import { FallbackPolicyDefaultsAndRules } from './fallbackPolicyDefaultsAndRules
 import { FallbackPolicyDefaultsAndRulesDefaults } from './fallbackPolicyDefaultsAndRulesDefaults';
 import { FallbackPolicyDefaultsAndRulesRules } from './fallbackPolicyDefaultsAndRulesRules';
 import { FallbackPolicyOverwriteRequest } from './fallbackPolicyOverwriteRequest';
+import { FieldGroup } from './fieldGroup';
+import { FieldGroupCreationRequest } from './fieldGroupCreationRequest';
+import { FieldGroupDeleteFieldsRequest } from './fieldGroupDeleteFieldsRequest';
+import { FieldGroupDeleteItemSelectorsRequest } from './fieldGroupDeleteItemSelectorsRequest';
+import { FieldGroupField } from './fieldGroupField';
+import { FieldGroupFieldsWithScopeValue } from './fieldGroupFieldsWithScopeValue';
+import { FieldGroupListResponse } from './fieldGroupListResponse';
+import { FieldGroupUpdateRequest } from './fieldGroupUpdateRequest';
+import { Formatter } from './formatter';
+import { FormatterArrayKey } from './formatterArrayKey';
+import { FormatterCreationRequest } from './formatterCreationRequest';
+import { FormatterDeleteFieldsRequest } from './formatterDeleteFieldsRequest';
+import { FormatterField } from './formatterField';
+import { FormatterFieldArrayKey } from './formatterFieldArrayKey';
+import { FormatterListResponse } from './formatterListResponse';
+import { FormatterUpdateRequest } from './formatterUpdateRequest';
+import { GVK } from './gVK';
+import { GetGvkPolicyResp } from './getGvkPolicyResp';
+import { GetMappingFieldInfoReq } from './getMappingFieldInfoReq';
+import { GetMappingFieldInfoReqWorkloadType } from './getMappingFieldInfoReqWorkloadType';
+import { GetMappingMinimalInfoReq } from './getMappingMinimalInfoReq';
+import { GetMappingMinimalInfoReqWorkloadType } from './getMappingMinimalInfoReqWorkloadType';
+import { GetMappingMinimalResp } from './getMappingMinimalResp';
 import { GitAuthenticationMethod } from './gitAuthenticationMethod';
 import { GitCommon } from './gitCommon';
 import { GitInstance } from './gitInstance';
@@ -612,8 +736,23 @@ import { InstancesRules } from './instancesRules';
 import { IntegerRules } from './integerRules';
 import { IntegerRulesOptional } from './integerRulesOptional';
 import { ItemRules } from './itemRules';
+import { ItemSelector } from './itemSelector';
+import { ItemSelectorsWithScopeValue } from './itemSelectorsWithScopeValue';
 import { Label } from './label';
 import { LabelsDefaults } from './labelsDefaults';
+import { ListGvkPoliciesResp } from './listGvkPoliciesResp';
+import { Mapping } from './mapping';
+import { MappingCreUpdRequest } from './mappingCreUpdRequest';
+import { MappingDeleteSpecSelectorsReq } from './mappingDeleteSpecSelectorsReq';
+import { MappingDeleteSpecSelectorsReqWorkloadType } from './mappingDeleteSpecSelectorsReqWorkloadType';
+import { MappingDeletionRequest } from './mappingDeletionRequest';
+import { MappingDeletionRequestWorkloadType } from './mappingDeletionRequestWorkloadType';
+import { MappingFieldType } from './mappingFieldType';
+import { MappingListResponse } from './mappingListResponse';
+import { MappingPossibleEnforcement } from './mappingPossibleEnforcement';
+import { MappingScope } from './mappingScope';
+import { MappingScopeOfElement } from './mappingScopeOfElement';
+import { MappingWorkloadType } from './mappingWorkloadType';
 import { MatchExpression } from './matchExpression';
 import { MatchExpressionOperator } from './matchExpressionOperator';
 import { MetricThresholdField } from './metricThresholdField';
@@ -652,6 +791,10 @@ import { NimServiceRulesAllOfCompute } from './nimServiceRulesAllOfCompute';
 import { NimServiceRulesAllOfModelStore } from './nimServiceRulesAllOfModelStore';
 import { NimServiceRulesAllOfSecurity } from './nimServiceRulesAllOfSecurity';
 import { NimServiceServingPort } from './nimServiceServingPort';
+import { NimServiceServingPortAuthorizationType } from './nimServiceServingPortAuthorizationType';
+import { NimServiceServingPortAuthorizationTypeOptions } from './nimServiceServingPortAuthorizationTypeOptions';
+import { NimServiceServingPortAuthorizationTypeOptionsOptionsInner } from './nimServiceServingPortAuthorizationTypeOptionsOptionsInner';
+import { NimServiceServingPortAuthorizationTypeRules } from './nimServiceServingPortAuthorizationTypeRules';
 import { NimServiceServingPortRules } from './nimServiceServingPortRules';
 import { NodeAffinityRequired } from './nodeAffinityRequired';
 import { NodeSelectorTerm } from './nodeSelectorTerm';
@@ -662,13 +805,43 @@ import { PodAffinityType } from './podAffinityType';
 import { PodAffinityTypeOptions } from './podAffinityTypeOptions';
 import { PodAffinityTypeOptionsOptionsInner } from './podAffinityTypeOptionsOptionsInner';
 import { PodAffinityTypeRules } from './podAffinityTypeRules';
+import { Policy } from './policy';
 import { PolicyCreationFields } from './policyCreationFields';
 import { PolicyCrossType } from './policyCrossType';
+import { PolicyDescriptionField } from './policyDescriptionField';
+import { PolicyEnforcementBlocked } from './policyEnforcementBlocked';
+import { PolicyEnforcementDefault } from './policyEnforcementDefault';
+import { PolicyEnforcementElements } from './policyEnforcementElements';
+import { PolicyEnforcementElementsElements } from './policyEnforcementElementsElements';
+import { PolicyEnforcementItems } from './policyEnforcementItems';
+import { PolicyEnforcementItemsItems } from './policyEnforcementItemsItems';
+import { PolicyEnforcementLength } from './policyEnforcementLength';
+import { PolicyEnforcementLengthLength } from './policyEnforcementLengthLength';
+import { PolicyEnforcementMatch } from './policyEnforcementMatch';
+import { PolicyEnforcementOptions } from './policyEnforcementOptions';
+import { PolicyEnforcementQuantityRange } from './policyEnforcementQuantityRange';
+import { PolicyEnforcementQuantityRangeQuantityRange } from './policyEnforcementQuantityRangeQuantityRange';
+import { PolicyEnforcementRange } from './policyEnforcementRange';
+import { PolicyEnforcementRangeRange } from './policyEnforcementRangeRange';
+import { PolicyEnforcementRequired } from './policyEnforcementRequired';
+import { PolicyEnforcementSet } from './policyEnforcementSet';
+import { PolicyIdAndOwnership } from './policyIdAndOwnership';
 import { PolicyListEntry } from './policyListEntry';
+import { PolicyListEntryAvailability } from './policyListEntryAvailability';
 import { PolicyListEntryStatus } from './policyListEntryStatus';
 import { PolicyListResponse } from './policyListResponse';
 import { PolicyMeta } from './policyMeta';
+import { PolicyPhase } from './policyPhase';
 import { PolicyReadOnlyFields } from './policyReadOnlyFields';
+import { PolicyRule } from './policyRule';
+import { PolicyRuleEnforcement } from './policyRuleEnforcement';
+import { PolicyRuleEnforcements } from './policyRuleEnforcements';
+import { PolicyRuleEnforcementsEnforcementsInner } from './policyRuleEnforcementsEnforcementsInner';
+import { PolicyRuleRef } from './policyRuleRef';
+import { PolicyRuleSource } from './policyRuleSource';
+import { PolicyRules } from './policyRules';
+import { PolicyRulesRef } from './policyRulesRef';
+import { PolicyStatus } from './policyStatus';
 import { PolicySyncResponse } from './policySyncResponse';
 import { PolicySyncResponsePoliciesInner } from './policySyncResponsePoliciesInner';
 import { PolicySyncResponseRequestInfo } from './policySyncResponseRequestInfo';
@@ -717,10 +890,8 @@ import { RelatedUrlRules } from './relatedUrlRules';
 import { RelatedUrlsDefaults } from './relatedUrlsDefaults';
 import { RelatedUrlsRules } from './relatedUrlsRules';
 import { ReplicaDefaultsV2 } from './replicaDefaultsV2';
-import { ReplicaDefaultsV2Security } from './replicaDefaultsV2Security';
 import { ReplicaDefaultsV2Storage } from './replicaDefaultsV2Storage';
 import { ReplicaRulesV2 } from './replicaRulesV2';
-import { ReplicaRulesV2Security } from './replicaRulesV2Security';
 import { ReplicaRulesV2Storage } from './replicaRulesV2Storage';
 import { RestartPolicy } from './restartPolicy';
 import { RestartPolicyOptions } from './restartPolicyOptions';
@@ -770,6 +941,9 @@ import { ServingPortServiceTypeOptions } from './servingPortServiceTypeOptions';
 import { ServingPortServiceTypeOptionsOptionsInner } from './servingPortServiceTypeOptionsOptionsInner';
 import { ServingPortServiceTypeRules } from './servingPortServiceTypeRules';
 import { SourceOfRule } from './sourceOfRule';
+import { SpecSelector } from './specSelector';
+import { SpecSelectorDependency } from './specSelectorDependency';
+import { SpecSelectorsWithScopeValue } from './specSelectorsWithScopeValue';
 import { StorageInstanceName } from './storageInstanceName';
 import { StringOption } from './stringOption';
 import { StringRules } from './stringRules';
@@ -816,6 +990,8 @@ import { UidGidSource } from './uidGidSource';
 import { UidGidSourceOptions } from './uidGidSourceOptions';
 import { UidGidSourceOptionsOptionsInner } from './uidGidSourceOptionsOptionsInner';
 import { UidGidSourceRules } from './uidGidSourceRules';
+import { UpdateGvkPolicyReq } from './updateGvkPolicyReq';
+import { WorkloadTypeAndScope } from './workloadTypeAndScope';
 import { WorkspacePolicyChangeRequestV2 } from './workspacePolicyChangeRequestV2';
 import { WorkspacePolicyDefaultsAndRulesV2 } from './workspacePolicyDefaultsAndRulesV2';
 import { WorkspacePolicyDefaultsAndRulesV2Defaults } from './workspacePolicyDefaultsAndRulesV2Defaults';
@@ -853,9 +1029,14 @@ let enumsMap: {[index: string]: any} = {
         "GpuRequestType": GpuRequestType,
         "HostPathMountPropagation": HostPathMountPropagation,
         "ImagePullPolicy": ImagePullPolicy,
+        "MappingFieldType": MappingFieldType,
+        "MappingPossibleEnforcement": MappingPossibleEnforcement,
+        "MappingScope": MappingScope,
         "MatchExpressionOperator": MatchExpressionOperator,
         "MpiLauncherCreationPolicy": MpiLauncherCreationPolicy,
+        "NimServiceServingPortAuthorizationType": NimServiceServingPortAuthorizationType,
         "PodAffinityType": PodAffinityType,
+        "PolicyPhase": PolicyPhase,
         "PolicySyncStatusOfCluster.StatusEnum": PolicySyncStatusOfCluster.StatusEnum,
         "PolicyType": PolicyType,
         "PortServiceType": PortServiceType,
@@ -877,6 +1058,7 @@ let enumsMap: {[index: string]: any} = {
 
 let typeMap: {[index: string]: any} = {
     "ActivationReplicasField": ActivationReplicasField,
+    "AllowOverride": AllowOverride,
     "Annotation": Annotation,
     "AnnotationsDefaults": AnnotationsDefaults,
     "ArbitraryRules": ArbitraryRules,
@@ -893,6 +1075,14 @@ let typeMap: {[index: string]: any} = {
     "AutoScalingRules": AutoScalingRules,
     "AutoScalingRulesInitializationTimeoutSeconds": AutoScalingRulesInitializationTimeoutSeconds,
     "BooleanRules": BooleanRules,
+    "Breakdown": Breakdown,
+    "BreakdownBreakdown": BreakdownBreakdown,
+    "BreakdownFieldRef": BreakdownFieldRef,
+    "BreakdownFieldVariation": BreakdownFieldVariation,
+    "BreakdownFormatter": BreakdownFormatter,
+    "BreakdownFormatterArrayKey": BreakdownFormatterArrayKey,
+    "BreakdownItemSelector": BreakdownItemSelector,
+    "BreakdownSpecSelector": BreakdownSpecSelector,
     "ClaimInfo": ClaimInfo,
     "ClaimInfoRules": ClaimInfoRules,
     "ClaimInfoUpdatable": ClaimInfoUpdatable,
@@ -907,6 +1097,7 @@ let typeMap: {[index: string]: any} = {
     "ConfigMapRules": ConfigMapRules,
     "ConfigMapsDefaults": ConfigMapsDefaults,
     "ConfigMapsRules": ConfigMapsRules,
+    "CreateGvkPolicyReq": CreateGvkPolicyReq,
     "DataVolume": DataVolume,
     "DataVolumeInstance": DataVolumeInstance,
     "DataVolumeRules": DataVolumeRules,
@@ -914,6 +1105,7 @@ let typeMap: {[index: string]: any} = {
     "DataVolumesRules": DataVolumesRules,
     "DefaultFromOrder": DefaultFromOrder,
     "DefaultFromRule": DefaultFromRule,
+    "DeleteGvkPolicyRulesReq": DeleteGvkPolicyRulesReq,
     "DistributedFrameworkOptions": DistributedFrameworkOptions,
     "DistributedFrameworkOptionsOptionsInner": DistributedFrameworkOptionsOptionsInner,
     "DistributedFrameworkRules": DistributedFrameworkRules,
@@ -956,7 +1148,7 @@ let typeMap: {[index: string]: any} = {
     "DistributedInferenceServingPortAuthorizationTypeRules": DistributedInferenceServingPortAuthorizationTypeRules,
     "DistributedInferenceServingPortContainerAndProtocol": DistributedInferenceServingPortContainerAndProtocol,
     "DistributedInferenceServingPortRules": DistributedInferenceServingPortRules,
-    "DistributedInferenceServingPortRules2": DistributedInferenceServingPortRules2,
+    "DistributedInferenceServingPortRulesProperties": DistributedInferenceServingPortRulesProperties,
     "DistributedInferenceStartupPolicyField": DistributedInferenceStartupPolicyField,
     "DistributedInferenceStartupPolicyFieldRules": DistributedInferenceStartupPolicyFieldRules,
     "DistributedInferenceStartupPolicyFieldRulesStartupPolicy": DistributedInferenceStartupPolicyFieldRulesStartupPolicy,
@@ -979,6 +1171,8 @@ let typeMap: {[index: string]: any} = {
     "DistributedPolicyRulesV2Worker": DistributedPolicyRulesV2Worker,
     "DistributedPolicyRulesV2WorkerAllOf": DistributedPolicyRulesV2WorkerAllOf,
     "DistributedPolicyV2": DistributedPolicyV2,
+    "EffectiveRules": EffectiveRules,
+    "EffectiveRulesEffectiveRulesInner": EffectiveRulesEffectiveRulesInner,
     "EmptyDir": EmptyDir,
     "EmptyDirInstance": EmptyDirInstance,
     "EmptyDirRules": EmptyDirRules,
@@ -1005,6 +1199,29 @@ let typeMap: {[index: string]: any} = {
     "FallbackPolicyDefaultsAndRulesDefaults": FallbackPolicyDefaultsAndRulesDefaults,
     "FallbackPolicyDefaultsAndRulesRules": FallbackPolicyDefaultsAndRulesRules,
     "FallbackPolicyOverwriteRequest": FallbackPolicyOverwriteRequest,
+    "FieldGroup": FieldGroup,
+    "FieldGroupCreationRequest": FieldGroupCreationRequest,
+    "FieldGroupDeleteFieldsRequest": FieldGroupDeleteFieldsRequest,
+    "FieldGroupDeleteItemSelectorsRequest": FieldGroupDeleteItemSelectorsRequest,
+    "FieldGroupField": FieldGroupField,
+    "FieldGroupFieldsWithScopeValue": FieldGroupFieldsWithScopeValue,
+    "FieldGroupListResponse": FieldGroupListResponse,
+    "FieldGroupUpdateRequest": FieldGroupUpdateRequest,
+    "Formatter": Formatter,
+    "FormatterArrayKey": FormatterArrayKey,
+    "FormatterCreationRequest": FormatterCreationRequest,
+    "FormatterDeleteFieldsRequest": FormatterDeleteFieldsRequest,
+    "FormatterField": FormatterField,
+    "FormatterFieldArrayKey": FormatterFieldArrayKey,
+    "FormatterListResponse": FormatterListResponse,
+    "FormatterUpdateRequest": FormatterUpdateRequest,
+    "GVK": GVK,
+    "GetGvkPolicyResp": GetGvkPolicyResp,
+    "GetMappingFieldInfoReq": GetMappingFieldInfoReq,
+    "GetMappingFieldInfoReqWorkloadType": GetMappingFieldInfoReqWorkloadType,
+    "GetMappingMinimalInfoReq": GetMappingMinimalInfoReq,
+    "GetMappingMinimalInfoReqWorkloadType": GetMappingMinimalInfoReqWorkloadType,
+    "GetMappingMinimalResp": GetMappingMinimalResp,
     "GitCommon": GitCommon,
     "GitInstance": GitInstance,
     "GitInstanceAllOf": GitInstanceAllOf,
@@ -1055,8 +1272,20 @@ let typeMap: {[index: string]: any} = {
     "IntegerRules": IntegerRules,
     "IntegerRulesOptional": IntegerRulesOptional,
     "ItemRules": ItemRules,
+    "ItemSelector": ItemSelector,
+    "ItemSelectorsWithScopeValue": ItemSelectorsWithScopeValue,
     "Label": Label,
     "LabelsDefaults": LabelsDefaults,
+    "ListGvkPoliciesResp": ListGvkPoliciesResp,
+    "Mapping": Mapping,
+    "MappingCreUpdRequest": MappingCreUpdRequest,
+    "MappingDeleteSpecSelectorsReq": MappingDeleteSpecSelectorsReq,
+    "MappingDeleteSpecSelectorsReqWorkloadType": MappingDeleteSpecSelectorsReqWorkloadType,
+    "MappingDeletionRequest": MappingDeletionRequest,
+    "MappingDeletionRequestWorkloadType": MappingDeletionRequestWorkloadType,
+    "MappingListResponse": MappingListResponse,
+    "MappingScopeOfElement": MappingScopeOfElement,
+    "MappingWorkloadType": MappingWorkloadType,
     "MatchExpression": MatchExpression,
     "MetricThresholdField": MetricThresholdField,
     "MetricThresholdPercentageField": MetricThresholdPercentageField,
@@ -1093,6 +1322,9 @@ let typeMap: {[index: string]: any} = {
     "NimServiceRulesAllOfModelStore": NimServiceRulesAllOfModelStore,
     "NimServiceRulesAllOfSecurity": NimServiceRulesAllOfSecurity,
     "NimServiceServingPort": NimServiceServingPort,
+    "NimServiceServingPortAuthorizationTypeOptions": NimServiceServingPortAuthorizationTypeOptions,
+    "NimServiceServingPortAuthorizationTypeOptionsOptionsInner": NimServiceServingPortAuthorizationTypeOptionsOptionsInner,
+    "NimServiceServingPortAuthorizationTypeRules": NimServiceServingPortAuthorizationTypeRules,
     "NimServiceServingPortRules": NimServiceServingPortRules,
     "NodeAffinityRequired": NodeAffinityRequired,
     "NodeSelectorTerm": NodeSelectorTerm,
@@ -1102,13 +1334,42 @@ let typeMap: {[index: string]: any} = {
     "PodAffinityTypeOptions": PodAffinityTypeOptions,
     "PodAffinityTypeOptionsOptionsInner": PodAffinityTypeOptionsOptionsInner,
     "PodAffinityTypeRules": PodAffinityTypeRules,
+    "Policy": Policy,
     "PolicyCreationFields": PolicyCreationFields,
     "PolicyCrossType": PolicyCrossType,
+    "PolicyDescriptionField": PolicyDescriptionField,
+    "PolicyEnforcementBlocked": PolicyEnforcementBlocked,
+    "PolicyEnforcementDefault": PolicyEnforcementDefault,
+    "PolicyEnforcementElements": PolicyEnforcementElements,
+    "PolicyEnforcementElementsElements": PolicyEnforcementElementsElements,
+    "PolicyEnforcementItems": PolicyEnforcementItems,
+    "PolicyEnforcementItemsItems": PolicyEnforcementItemsItems,
+    "PolicyEnforcementLength": PolicyEnforcementLength,
+    "PolicyEnforcementLengthLength": PolicyEnforcementLengthLength,
+    "PolicyEnforcementMatch": PolicyEnforcementMatch,
+    "PolicyEnforcementOptions": PolicyEnforcementOptions,
+    "PolicyEnforcementQuantityRange": PolicyEnforcementQuantityRange,
+    "PolicyEnforcementQuantityRangeQuantityRange": PolicyEnforcementQuantityRangeQuantityRange,
+    "PolicyEnforcementRange": PolicyEnforcementRange,
+    "PolicyEnforcementRangeRange": PolicyEnforcementRangeRange,
+    "PolicyEnforcementRequired": PolicyEnforcementRequired,
+    "PolicyEnforcementSet": PolicyEnforcementSet,
+    "PolicyIdAndOwnership": PolicyIdAndOwnership,
     "PolicyListEntry": PolicyListEntry,
+    "PolicyListEntryAvailability": PolicyListEntryAvailability,
     "PolicyListEntryStatus": PolicyListEntryStatus,
     "PolicyListResponse": PolicyListResponse,
     "PolicyMeta": PolicyMeta,
     "PolicyReadOnlyFields": PolicyReadOnlyFields,
+    "PolicyRule": PolicyRule,
+    "PolicyRuleEnforcement": PolicyRuleEnforcement,
+    "PolicyRuleEnforcements": PolicyRuleEnforcements,
+    "PolicyRuleEnforcementsEnforcementsInner": PolicyRuleEnforcementsEnforcementsInner,
+    "PolicyRuleRef": PolicyRuleRef,
+    "PolicyRuleSource": PolicyRuleSource,
+    "PolicyRules": PolicyRules,
+    "PolicyRulesRef": PolicyRulesRef,
+    "PolicyStatus": PolicyStatus,
     "PolicySyncResponse": PolicySyncResponse,
     "PolicySyncResponsePoliciesInner": PolicySyncResponsePoliciesInner,
     "PolicySyncResponseRequestInfo": PolicySyncResponseRequestInfo,
@@ -1152,10 +1413,8 @@ let typeMap: {[index: string]: any} = {
     "RelatedUrlsDefaults": RelatedUrlsDefaults,
     "RelatedUrlsRules": RelatedUrlsRules,
     "ReplicaDefaultsV2": ReplicaDefaultsV2,
-    "ReplicaDefaultsV2Security": ReplicaDefaultsV2Security,
     "ReplicaDefaultsV2Storage": ReplicaDefaultsV2Storage,
     "ReplicaRulesV2": ReplicaRulesV2,
-    "ReplicaRulesV2Security": ReplicaRulesV2Security,
     "ReplicaRulesV2Storage": ReplicaRulesV2Storage,
     "RestartPolicyOptions": RestartPolicyOptions,
     "RestartPolicyOptionsOptionsInner": RestartPolicyOptionsOptionsInner,
@@ -1198,6 +1457,9 @@ let typeMap: {[index: string]: any} = {
     "ServingPortServiceTypeOptionsOptionsInner": ServingPortServiceTypeOptionsOptionsInner,
     "ServingPortServiceTypeRules": ServingPortServiceTypeRules,
     "SourceOfRule": SourceOfRule,
+    "SpecSelector": SpecSelector,
+    "SpecSelectorDependency": SpecSelectorDependency,
+    "SpecSelectorsWithScopeValue": SpecSelectorsWithScopeValue,
     "StorageInstanceName": StorageInstanceName,
     "StringOption": StringOption,
     "StringRules": StringRules,
@@ -1241,6 +1503,8 @@ let typeMap: {[index: string]: any} = {
     "UidGidSourceOptions": UidGidSourceOptions,
     "UidGidSourceOptionsOptionsInner": UidGidSourceOptionsOptionsInner,
     "UidGidSourceRules": UidGidSourceRules,
+    "UpdateGvkPolicyReq": UpdateGvkPolicyReq,
+    "WorkloadTypeAndScope": WorkloadTypeAndScope,
     "WorkspacePolicyChangeRequestV2": WorkspacePolicyChangeRequestV2,
     "WorkspacePolicyDefaultsAndRulesV2": WorkspacePolicyDefaultsAndRulesV2,
     "WorkspacePolicyDefaultsAndRulesV2Defaults": WorkspacePolicyDefaultsAndRulesV2Defaults,

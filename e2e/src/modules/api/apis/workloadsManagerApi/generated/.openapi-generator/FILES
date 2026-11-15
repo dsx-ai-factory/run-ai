@@ -42,6 +42,7 @@ model/models.ts
 model/nIMServiceMetadataCreateParams.ts
 model/networkingEndpoint.ts
 model/networkingService.ts
+model/networkingSubmissionProfile.ts
 model/nimCache.ts
 model/nimServiceCreateRequest.ts
 model/nimServiceMultiNode.ts
@@ -93,6 +94,7 @@ model/workloadV2MetadataAutoFill.ts
 model/workloadV2MetadataCreateParams.ts
 model/workloadV2MetadataResponse.ts
 model/workloadV2MetadataUpdateParams.ts
+model/workloadV2MetadataUpdateParamsConfiguration.ts
 model/workloadV2SyncInfo.ts
 model/workloadV2SyncStatus.ts
 model/workloadV2Update.ts
@@ -105,6 +107,7 @@ model/workloadV2UpdateConfigurationPvcResources.ts
 model/workloadV2UpdateConfigurationPvcResourcesRequests.ts
 model/workloadV2UpdateConfigurationPvcSpec.ts
 model/workloadV2UpdateConfigurationPvcVolumeMode.ts
+model/workloadV2UpdateConfigurationPvcsConfig.ts
 model/workloadV2UpdateConfigurationUserCredentialSource.ts
 model/workloadV2UpdateConfigurationUserCredentials.ts
 model/workloadV2UpdateRequest.ts

@@ -1,3 +1,4 @@
+
 /**
  * RUN:AI API
  * RUN:AI API for managing clusters, departments, projects and users.
@@ -14,14 +15,14 @@
 import localVarRequest from 'request';
 import http from 'http';
 
-
 /* tslint:disable:no-unused-locals */
 import { ChecksumResponse } from '../model/checksumResponse';
 
 import { ObjectSerializer, Authentication, VoidAuth, Interceptor } from '../model/models';
 import { HttpBasicAuth, HttpBearerAuth, ApiKeyAuth, OAuth } from '../model/models';
 
-import { HttpError, RequestFile } from './apis';
+import { RequestFile } from './apis';
+import { HttpError } from './httpError';
 
 let defaultBasePath = 'http://localhost';
 
@@ -127,6 +128,9 @@ export class AdminCLIApi {
             headers: localVarHeaderParams,
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
+            /////Start: Modified by @Run.AI /////
+            qsStringifyOptions: { arrayFormat: 'comma' },
+            /////End: Modified by @Run.AI /////
             encoding: null,
         };
 
@@ -158,7 +162,9 @@ export class AdminCLIApi {
                             body = ObjectSerializer.deserialize(body, "Buffer");
                             resolve({ response: response, body: body });
                         } else {
-                            reject(new HttpError(response, body, response.statusCode));
+                            /////Start: Modified by @Run.AI /////
+                            reject(new HttpError(response, body, response.statusCode, localVarRequestOptions));
+                            /////End: Modified by @Run.AI /////
                         }
                     }
                 });
@@ -206,6 +212,9 @@ export class AdminCLIApi {
             headers: localVarHeaderParams,
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
+            /////Start: Modified by @Run.AI /////
+            qsStringifyOptions: { arrayFormat: 'comma' },
+            /////End: Modified by @Run.AI /////
             encoding: null,
         };
 
@@ -237,7 +246,9 @@ export class AdminCLIApi {
                             body = ObjectSerializer.deserialize(body, "Buffer");
                             resolve({ response: response, body: body });
                         } else {
-                            reject(new HttpError(response, body, response.statusCode));
+                            /////Start: Modified by @Run.AI /////
+                            reject(new HttpError(response, body, response.statusCode, localVarRequestOptions));
+                            /////End: Modified by @Run.AI /////
                         }
                     }
                 });
@@ -285,6 +296,9 @@ export class AdminCLIApi {
             headers: localVarHeaderParams,
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
+            /////Start: Modified by @Run.AI /////
+            qsStringifyOptions: { arrayFormat: 'comma' },
+            /////End: Modified by @Run.AI /////
             json: true,
         };
 
@@ -316,7 +330,9 @@ export class AdminCLIApi {
                             body = ObjectSerializer.deserialize(body, "ChecksumResponse");
                             resolve({ response: response, body: body });
                         } else {
-                            reject(new HttpError(response, body, response.statusCode));
+                            /////Start: Modified by @Run.AI /////
+                            reject(new HttpError(response, body, response.statusCode, localVarRequestOptions));
+                            /////End: Modified by @Run.AI /////
                         }
                     }
                 });
@@ -357,6 +373,9 @@ export class AdminCLIApi {
             headers: localVarHeaderParams,
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
+            /////Start: Modified by @Run.AI /////
+            qsStringifyOptions: { arrayFormat: 'comma' },
+            /////End: Modified by @Run.AI /////
             json: true,
         };
 
@@ -388,7 +407,9 @@ export class AdminCLIApi {
                             body = ObjectSerializer.deserialize(body, "ChecksumResponse");
                             resolve({ response: response, body: body });
                         } else {
-                            reject(new HttpError(response, body, response.statusCode));
+                            /////Start: Modified by @Run.AI /////
+                            reject(new HttpError(response, body, response.statusCode, localVarRequestOptions));
+                            /////End: Modified by @Run.AI /////
                         }
                     }
                 });

@@ -30,7 +30,7 @@ export class WorkloadSupportedTypes {
     */
     'distributed'?: boolean | null;
     /**
-    * The distributed training framework used in the workload.
+    * The distributed training framework used in the workload. Note: The TF, XGBoost and JAX frameworks are deprecated and will be removed in a future release. 
     */
     'distFramework'?: WorkloadSupportedTypes.DistFrameworkEnum;
 
@@ -73,6 +73,7 @@ export namespace WorkloadSupportedTypes {
         Mpi = <any> 'MPI',
         PyTorch = <any> 'PyTorch',
         Tf = <any> 'TF',
-        XgBoost = <any> 'XGBoost'
+        XgBoost = <any> 'XGBoost',
+        Jax = <any> 'JAX'
     }
 }

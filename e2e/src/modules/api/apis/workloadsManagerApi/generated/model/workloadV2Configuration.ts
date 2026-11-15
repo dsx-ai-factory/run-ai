@@ -14,6 +14,7 @@ import { RequestFile } from './models';
 import { MnnvlMode } from './mnnvlMode';
 import { NetworkingEndpoint } from './networkingEndpoint';
 import { WorkloadV2UpdateConfigurationPvc } from './workloadV2UpdateConfigurationPvc';
+import { WorkloadV2UpdateConfigurationPvcsConfig } from './workloadV2UpdateConfigurationPvcsConfig';
 import { WorkloadV2UpdateConfigurationUserCredentials } from './workloadV2UpdateConfigurationUserCredentials';
 
 /**
@@ -30,6 +31,7 @@ export class WorkloadV2Configuration {
     * PVCs to create and reconcile alongside the workload.
     */
     'pvcs'?: Array<WorkloadV2UpdateConfigurationPvc> | null;
+    'pvcsConfig'?: WorkloadV2UpdateConfigurationPvcsConfig | null;
 
     static discriminator: string | undefined = undefined;
 
@@ -53,6 +55,11 @@ export class WorkloadV2Configuration {
             "name": "pvcs",
             "baseName": "pvcs",
             "type": "Array<WorkloadV2UpdateConfigurationPvc>"
+        },
+        {
+            "name": "pvcsConfig",
+            "baseName": "pvcsConfig",
+            "type": "WorkloadV2UpdateConfigurationPvcsConfig"
         }    ];
 
     static getAttributeTypeMap() {

@@ -8,10 +8,6 @@ export * from './accessKeys';
 export * from './accessKeysAdministration';
 export * from './appTokenRequest';
 export * from './appTokenResponse';
-export * from './application';
-export * from './applicationCreationRequest';
-export * from './applicationPatchRequest';
-export * from './applicationPostResponse';
 export * from './authConfiguration';
 export * from './bulkUserCreationRequest';
 export * from './bulkUserCreationResponse';
@@ -41,7 +37,7 @@ export * from './idpCreationRequest';
 export * from './idpCreationRequestTypeEnum';
 export * from './idpPostResponse';
 export * from './idpResources';
-export * from './internalApplicationCreationRequest';
+export * from './installerBootstrapResponse';
 export * from './internalServiceAccountCreationRequest';
 export * from './internalUserCreationRequest';
 export * from './mandatoryClaim';
@@ -49,6 +45,7 @@ export * from './mappers';
 export * from './modelError';
 export * from './oAuth2Error';
 export * from './oAuth2TokenResponse';
+export * from './oAuthAuthorizationServer';
 export * from './ocpCreationData';
 export * from './ocpData';
 export * from './oidcCreationData';
@@ -59,7 +56,6 @@ export * from './realmCreationResponse';
 export * from './realmReconcileRequest';
 export * from './reconcilerType';
 export * from './regenerateAccessKeySecret200Response';
-export * from './regenerateApplicationSecret200Response';
 export * from './regenerateServiceAccountSecretResponse';
 export * from './resetUserPassword200Response';
 export * from './samlCreationData';
@@ -80,10 +76,6 @@ export * from './updateBrowserSessionTimeoutSettingValue';
 export * from './updateLogoutRedirectUriSettingValue';
 export * from './updateSecuritySettingByKeyRequest';
 export * from './user';
-export * from './userApp';
-export * from './userAppAdministration';
-export * from './userAppCreationRequest';
-export * from './userAppPostResponse';
 export * from './userChangePasswordRequest';
 export * from './userCreationRequest';
 export * from './userCreationRequestBulk';
@@ -113,10 +105,6 @@ import { AccessKeys } from './accessKeys';
 import { AccessKeysAdministration } from './accessKeysAdministration';
 import { AppTokenRequest } from './appTokenRequest';
 import { AppTokenResponse } from './appTokenResponse';
-import { Application } from './application';
-import { ApplicationCreationRequest } from './applicationCreationRequest';
-import { ApplicationPatchRequest } from './applicationPatchRequest';
-import { ApplicationPostResponse } from './applicationPostResponse';
 import { AuthConfiguration } from './authConfiguration';
 import { BulkUserCreationRequest } from './bulkUserCreationRequest';
 import { BulkUserCreationResponse } from './bulkUserCreationResponse';
@@ -146,7 +134,7 @@ import { IdpCreationRequest } from './idpCreationRequest';
 import { IdpCreationRequestTypeEnum } from './idpCreationRequestTypeEnum';
 import { IdpPostResponse } from './idpPostResponse';
 import { IdpResources } from './idpResources';
-import { InternalApplicationCreationRequest } from './internalApplicationCreationRequest';
+import { InstallerBootstrapResponse } from './installerBootstrapResponse';
 import { InternalServiceAccountCreationRequest } from './internalServiceAccountCreationRequest';
 import { InternalUserCreationRequest } from './internalUserCreationRequest';
 import { MandatoryClaim } from './mandatoryClaim';
@@ -154,6 +142,7 @@ import { Mappers } from './mappers';
 import { ModelError } from './modelError';
 import { OAuth2Error } from './oAuth2Error';
 import { OAuth2TokenResponse } from './oAuth2TokenResponse';
+import { OAuthAuthorizationServer } from './oAuthAuthorizationServer';
 import { OcpCreationData } from './ocpCreationData';
 import { OcpData } from './ocpData';
 import { OidcCreationData } from './oidcCreationData';
@@ -164,7 +153,6 @@ import { RealmCreationResponse } from './realmCreationResponse';
 import { RealmReconcileRequest } from './realmReconcileRequest';
 import { ReconcilerType } from './reconcilerType';
 import { RegenerateAccessKeySecret200Response } from './regenerateAccessKeySecret200Response';
-import { RegenerateApplicationSecret200Response } from './regenerateApplicationSecret200Response';
 import { RegenerateServiceAccountSecretResponse } from './regenerateServiceAccountSecretResponse';
 import { ResetUserPassword200Response } from './resetUserPassword200Response';
 import { SamlCreationData } from './samlCreationData';
@@ -185,10 +173,6 @@ import { UpdateBrowserSessionTimeoutSettingValue } from './updateBrowserSessionT
 import { UpdateLogoutRedirectUriSettingValue } from './updateLogoutRedirectUriSettingValue';
 import { UpdateSecuritySettingByKeyRequest } from './updateSecuritySettingByKeyRequest';
 import { User } from './user';
-import { UserApp } from './userApp';
-import { UserAppAdministration } from './userAppAdministration';
-import { UserAppCreationRequest } from './userAppCreationRequest';
-import { UserAppPostResponse } from './userAppPostResponse';
 import { UserChangePasswordRequest } from './userChangePasswordRequest';
 import { UserCreationRequest } from './userCreationRequest';
 import { UserCreationRequestBulk } from './userCreationRequestBulk';
@@ -232,10 +216,6 @@ let typeMap: {[index: string]: any} = {
     "AccessKeysAdministration": AccessKeysAdministration,
     "AppTokenRequest": AppTokenRequest,
     "AppTokenResponse": AppTokenResponse,
-    "Application": Application,
-    "ApplicationCreationRequest": ApplicationCreationRequest,
-    "ApplicationPatchRequest": ApplicationPatchRequest,
-    "ApplicationPostResponse": ApplicationPostResponse,
     "AuthConfiguration": AuthConfiguration,
     "BulkUserCreationRequest": BulkUserCreationRequest,
     "BulkUserCreationResponse": BulkUserCreationResponse,
@@ -262,7 +242,7 @@ let typeMap: {[index: string]: any} = {
     "IdpCreationRequest": IdpCreationRequest,
     "IdpPostResponse": IdpPostResponse,
     "IdpResources": IdpResources,
-    "InternalApplicationCreationRequest": InternalApplicationCreationRequest,
+    "InstallerBootstrapResponse": InstallerBootstrapResponse,
     "InternalServiceAccountCreationRequest": InternalServiceAccountCreationRequest,
     "InternalUserCreationRequest": InternalUserCreationRequest,
     "MandatoryClaim": MandatoryClaim,
@@ -270,6 +250,7 @@ let typeMap: {[index: string]: any} = {
     "ModelError": ModelError,
     "OAuth2Error": OAuth2Error,
     "OAuth2TokenResponse": OAuth2TokenResponse,
+    "OAuthAuthorizationServer": OAuthAuthorizationServer,
     "OcpCreationData": OcpCreationData,
     "OcpData": OcpData,
     "OidcCreationData": OidcCreationData,
@@ -279,7 +260,6 @@ let typeMap: {[index: string]: any} = {
     "RealmCreationResponse": RealmCreationResponse,
     "RealmReconcileRequest": RealmReconcileRequest,
     "RegenerateAccessKeySecret200Response": RegenerateAccessKeySecret200Response,
-    "RegenerateApplicationSecret200Response": RegenerateApplicationSecret200Response,
     "RegenerateServiceAccountSecretResponse": RegenerateServiceAccountSecretResponse,
     "ResetUserPassword200Response": ResetUserPassword200Response,
     "SamlCreationData": SamlCreationData,
@@ -297,10 +277,6 @@ let typeMap: {[index: string]: any} = {
     "UpdateLogoutRedirectUriSettingValue": UpdateLogoutRedirectUriSettingValue,
     "UpdateSecuritySettingByKeyRequest": UpdateSecuritySettingByKeyRequest,
     "User": User,
-    "UserApp": UserApp,
-    "UserAppAdministration": UserAppAdministration,
-    "UserAppCreationRequest": UserAppCreationRequest,
-    "UserAppPostResponse": UserAppPostResponse,
     "UserChangePasswordRequest": UserChangePasswordRequest,
     "UserCreationRequest": UserCreationRequest,
     "UserCreationRequestBulk": UserCreationRequestBulk,

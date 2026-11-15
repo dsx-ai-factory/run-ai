@@ -16,6 +16,11 @@ export * from './department';
 export * from './departmentAllOf';
 export * from './departmentUserDefinedProperties';
 export * from './displayedJob';
+export * from './grafanaData';
+export * from './grafanaMetric';
+export * from './grafanaResponse';
+export * from './grafanaResult';
+export * from './grafanaResultValueInner';
 export * from './jobsNodeAffinity';
 export * from './modelError';
 export * from './nodeAffinity';
@@ -27,11 +32,8 @@ export * from './projectCreateRequest';
 export * from './resource';
 export * from './resourcePermissions';
 export * from './role';
-export * from './tenantSetting';
-export * from './updateClusterLivenessRequest';
 export * from './user';
 export * from './userAllOf';
-export * from './v1K8sClustersUuidDelete200Response';
 
 import * as fs from 'fs';
 
@@ -62,6 +64,11 @@ import { Department } from './department';
 import { DepartmentAllOf } from './departmentAllOf';
 import { DepartmentUserDefinedProperties } from './departmentUserDefinedProperties';
 import { DisplayedJob } from './displayedJob';
+import { GrafanaData } from './grafanaData';
+import { GrafanaMetric } from './grafanaMetric';
+import { GrafanaResponse } from './grafanaResponse';
+import { GrafanaResult } from './grafanaResult';
+import { GrafanaResultValueInner } from './grafanaResultValueInner';
 import { JobsNodeAffinity } from './jobsNodeAffinity';
 import { ModelError } from './modelError';
 import { NodeAffinity } from './nodeAffinity';
@@ -73,11 +80,8 @@ import { ProjectCreateRequest } from './projectCreateRequest';
 import { Resource } from './resource';
 import { ResourcePermissions } from './resourcePermissions';
 import { Role } from './role';
-import { TenantSetting } from './tenantSetting';
-import { UpdateClusterLivenessRequest } from './updateClusterLivenessRequest';
 import { User } from './user';
 import { UserAllOf } from './userAllOf';
-import { V1K8sClustersUuidDelete200Response } from './v1K8sClustersUuidDelete200Response';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
@@ -114,6 +118,11 @@ let typeMap: {[index: string]: any} = {
     "DepartmentAllOf": DepartmentAllOf,
     "DepartmentUserDefinedProperties": DepartmentUserDefinedProperties,
     "DisplayedJob": DisplayedJob,
+    "GrafanaData": GrafanaData,
+    "GrafanaMetric": GrafanaMetric,
+    "GrafanaResponse": GrafanaResponse,
+    "GrafanaResult": GrafanaResult,
+    "GrafanaResultValueInner": GrafanaResultValueInner,
     "JobsNodeAffinity": JobsNodeAffinity,
     "ModelError": ModelError,
     "NodeAffinity": NodeAffinity,
@@ -124,11 +133,8 @@ let typeMap: {[index: string]: any} = {
     "ProjectCreateRequest": ProjectCreateRequest,
     "Resource": Resource,
     "ResourcePermissions": ResourcePermissions,
-    "TenantSetting": TenantSetting,
-    "UpdateClusterLivenessRequest": UpdateClusterLivenessRequest,
     "User": User,
     "UserAllOf": UserAllOf,
-    "V1K8sClustersUuidDelete200Response": V1K8sClustersUuidDelete200Response,
 }
 
 export class ObjectSerializer {

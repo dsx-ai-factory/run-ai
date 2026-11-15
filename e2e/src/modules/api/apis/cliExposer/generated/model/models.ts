@@ -1,7 +1,10 @@
 import localVarRequest from 'request';
 
 export * from './command';
+export * from './complianceIssues';
+export * from './complianceIssuesComplianceIssuesInner';
 export * from './modelError';
+export * from './submissionError';
 export * from './version';
 
 import * as fs from 'fs';
@@ -18,7 +21,10 @@ export type RequestFile = string | Buffer | fs.ReadStream | RequestDetailedFile;
 
 
 import { Command } from './command';
+import { ComplianceIssues } from './complianceIssues';
+import { ComplianceIssuesComplianceIssuesInner } from './complianceIssuesComplianceIssuesInner';
 import { ModelError } from './modelError';
+import { SubmissionError } from './submissionError';
 import { Version } from './version';
 
 /* tslint:disable:no-unused-variable */
@@ -38,7 +44,10 @@ let enumsMap: {[index: string]: any} = {
 
 let typeMap: {[index: string]: any} = {
     "Command": Command,
+    "ComplianceIssues": ComplianceIssues,
+    "ComplianceIssuesComplianceIssuesInner": ComplianceIssuesComplianceIssuesInner,
     "ModelError": ModelError,
+    "SubmissionError": SubmissionError,
     "Version": Version,
 }
 

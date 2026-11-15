@@ -21,6 +21,8 @@ import { UidGidSourceRules } from './uidGidSourceRules';
 
 export class DistributedInferenceLeaderWorkerRulesV2Security {
     'capabilities'?: ArrayRules | null;
+    'hostIpc'?: BooleanRules | null;
+    'hostNetwork'?: BooleanRules | null;
     'privileged'?: DistributedInferenceLeaderWorkerRulesV2SecurityPrivileged;
     'readOnlyRootFilesystem'?: BooleanRules | null;
     'runAsGid'?: IntegerRulesOptional | null;
@@ -37,6 +39,16 @@ export class DistributedInferenceLeaderWorkerRulesV2Security {
             "name": "capabilities",
             "baseName": "capabilities",
             "type": "ArrayRules"
+        },
+        {
+            "name": "hostIpc",
+            "baseName": "hostIpc",
+            "type": "BooleanRules"
+        },
+        {
+            "name": "hostNetwork",
+            "baseName": "hostNetwork",
+            "type": "BooleanRules"
         },
         {
             "name": "privileged",

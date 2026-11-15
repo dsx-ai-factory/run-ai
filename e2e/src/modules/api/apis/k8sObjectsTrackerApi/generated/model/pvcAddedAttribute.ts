@@ -18,48 +18,48 @@ import { PvcAddedAttributeFormat } from './pvcAddedAttributeFormat';
 */
 export class PvcAddedAttribute {
     /**
-    * the PVC annotation to receive the value of this attribute. must be aligned with the rules of a name part of an annotation key, i.e. required, 63 characters or less, beginning and ending with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics between.
+    * The annotation key for the PVC. Must comply with Kubernetes naming rules: ≤63 characters, beginning and ending with an alphanumeric character ([A-Za-z0-9]), and may include dashes (-), underscores (_), or dots (.).
     */
     'key': string;
     'format'?: PvcAddedAttributeFormat | null;
     /**
-    * a user friendly name describing the attribute
+    * User-friendly display name for the attribute, shown in the UI.
     */
     'display'?: string | null;
     /**
-    * textual explanation of the attribute
+    * A description of the attribute\'s purpose or expected values.
     */
     'description'?: string | null;
     /**
-    * hint for the value that the attribute can hold. can be used as watermark in frontend fields or in help messages
+    * Example or hint text for the attribute\'s value, displayed as a watermark or help message in the UI.
     */
     'placeholder'?: string | null;
     /**
-    * whether the attribute is mandatory
+    * Indicates whether this attribute is mandatory.
     */
     'required'?: boolean | null;
     /**
-    * the default value for the attribute
+    * Default value assigned to the attribute when not explicitly provided.
     */
     'defaultValue'?: string | null;
     /**
-    * for text format, optional regex to validate the provided text
+    * Regular expression used to validate user input for text attributes.
     */
     'validationRegexp'?: string | null;
     /**
-    * for number format, optional minimum value that can be provided
+    * Minimum allowed value for attributes of type number.
     */
     'minValue'?: number | null;
     /**
-    * for number format, optional maximum value that can be provided
+    * Maximum allowed value for attributes of type number.
     */
     'maxValue'?: number | null;
     /**
-    * for number format, required gap between permitted value
+    * Defines the incremental step between allowed numeric values (for example, 1, 0.1).
     */
     'step'?: number | null;
     /**
-    * optional text for validation error. if not provided, default error text will be composed.
+    * Custom validation error message shown if input fails validation. If omitted, a default error message is generated automatically.
     */
     'validationError'?: string | null;
 

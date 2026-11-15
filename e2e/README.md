@@ -128,15 +128,21 @@ The committed TypeScript clients are used by the tests. Regeneration is only nee
 Use the service specifications in the public monorepo, with Docker running:
 
 ```bash
-# From e2e/ inside the monorepo:
-export RUNAI_REPO_PATH=..
-npm run api-codegen-assetsApi
+# Check every client mapping without changing files:
+npm run api-codegen-check
 
-# From a separate checkout, use its local path instead:
-# export RUNAI_REPO_PATH=/path/to/run-ai
+# Generate a client into a clean preview directory:
+npm run api-codegen-assetsApi -- --output-dir /tmp/e2e-clients
+
+# Use a separate matching monorepo checkout if needed:
+RUNAI_REPO_PATH=/path/to/run-ai npm run api-codegen-assetsApi -- --output-dir /tmp/e2e-clients-new
 ```
 
-The existing generator version and templates are retained. Documentation links must be corrected in the service API source definitions before regeneration. Review generated API/type changes and run type-checks before submitting changes.
+Generator version 6.2.1 and the existing templates are retained. Specs are read directly from the monorepo and are not copied into `e2e/`. The default runner uses Docker; local tooling can instead set `OPENAPI_GENERATOR_JAR` to the same generator version, with `JAVA_HOME` pointing to its Java runtime.
+
+Generation requires an empty output directory to avoid retaining stale generated files. Review the preview, removed files and compatibility changes before replacing committed clients. `api-codegen-all` checks every mapping before generating; unresolved legacy mappings stop the command rather than silently skipping clients.
+
+Documentation links must be corrected in the service API source definitions before regeneration. Review generated API/type changes and run type-checks before submitting changes.
 
 Copied service Swagger files are not published. The cleaned, hand-maintained `backendUndocumentedApi/swagger.yaml` is an exception: it defines APIs still used by the test framework and has no corresponding monorepo source.
 

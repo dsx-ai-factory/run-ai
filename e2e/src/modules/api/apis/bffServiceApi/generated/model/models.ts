@@ -2,6 +2,14 @@ import localVarRequest from 'request';
 
 export * from './appearanceSettingsGetAllResponse';
 export * from './appearanceSettingsKeyEnum';
+export * from './bootConfig';
+export * from './bootConfigCapabilities';
+export * from './bootConfigDistributionAssets';
+export * from './bootConfigDocs';
+export * from './bootConfigSupport';
+export * from './bootConfigUnleashConfig';
+export * from './bootConfigVersion';
+export * from './bootConfigWhatsNew';
 export * from './brandingSettingsGetAllResponse';
 export * from './brandingSettingsKeyEnum';
 export * from './complianceIssues';
@@ -56,6 +64,14 @@ export type RequestFile = string | Buffer | fs.ReadStream | RequestDetailedFile;
 
 import { AppearanceSettingsGetAllResponse } from './appearanceSettingsGetAllResponse';
 import { AppearanceSettingsKeyEnum } from './appearanceSettingsKeyEnum';
+import { BootConfig } from './bootConfig';
+import { BootConfigCapabilities } from './bootConfigCapabilities';
+import { BootConfigDistributionAssets } from './bootConfigDistributionAssets';
+import { BootConfigDocs } from './bootConfigDocs';
+import { BootConfigSupport } from './bootConfigSupport';
+import { BootConfigUnleashConfig } from './bootConfigUnleashConfig';
+import { BootConfigVersion } from './bootConfigVersion';
+import { BootConfigWhatsNew } from './bootConfigWhatsNew';
 import { BrandingSettingsGetAllResponse } from './brandingSettingsGetAllResponse';
 import { BrandingSettingsKeyEnum } from './brandingSettingsKeyEnum';
 import { ComplianceIssues } from './complianceIssues';
@@ -109,6 +125,8 @@ let primitives = [
 
 let enumsMap: {[index: string]: any} = {
         "AppearanceSettingsKeyEnum": AppearanceSettingsKeyEnum,
+        "BootConfigDistributionAssets.ProfileEnum": BootConfigDistributionAssets.ProfileEnum,
+        "BootConfigDocs.CatalogVersionEnum": BootConfigDocs.CatalogVersionEnum,
         "BrandingSettingsKeyEnum": BrandingSettingsKeyEnum,
         "NotificationsSettingsKeyEnum": NotificationsSettingsKeyEnum,
         "WorkloadsSettingsKeyEnum": WorkloadsSettingsKeyEnum,
@@ -116,6 +134,14 @@ let enumsMap: {[index: string]: any} = {
 
 let typeMap: {[index: string]: any} = {
     "AppearanceSettingsGetAllResponse": AppearanceSettingsGetAllResponse,
+    "BootConfig": BootConfig,
+    "BootConfigCapabilities": BootConfigCapabilities,
+    "BootConfigDistributionAssets": BootConfigDistributionAssets,
+    "BootConfigDocs": BootConfigDocs,
+    "BootConfigSupport": BootConfigSupport,
+    "BootConfigUnleashConfig": BootConfigUnleashConfig,
+    "BootConfigVersion": BootConfigVersion,
+    "BootConfigWhatsNew": BootConfigWhatsNew,
     "BrandingSettingsGetAllResponse": BrandingSettingsGetAllResponse,
     "ComplianceIssues": ComplianceIssues,
     "ComplianceIssuesComplianceIssuesInner": ComplianceIssuesComplianceIssuesInner,

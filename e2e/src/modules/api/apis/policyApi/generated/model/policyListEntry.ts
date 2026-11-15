@@ -11,6 +11,7 @@
  */
 
 import { RequestFile } from './models';
+import { PolicyListEntryAvailability } from './policyListEntryAvailability';
 import { PolicyListEntryStatus } from './policyListEntryStatus';
 import { PolicyMeta } from './policyMeta';
 import { PolicyType } from './policyType';
@@ -19,6 +20,7 @@ export class PolicyListEntry {
     'type'?: PolicyType;
     'meta'?: PolicyMeta;
     'status'?: PolicyListEntryStatus;
+    'availability'?: PolicyListEntryAvailability | null;
 
     static discriminator: string | undefined = undefined;
 
@@ -37,6 +39,11 @@ export class PolicyListEntry {
             "name": "status",
             "baseName": "status",
             "type": "PolicyListEntryStatus"
+        },
+        {
+            "name": "availability",
+            "baseName": "availability",
+            "type": "PolicyListEntryAvailability"
         }    ];
 
     static getAttributeTypeMap() {

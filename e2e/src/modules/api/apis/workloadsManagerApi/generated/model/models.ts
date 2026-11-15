@@ -34,6 +34,7 @@ export * from './modelError';
 export * from './nIMServiceMetadataCreateParams';
 export * from './networkingEndpoint';
 export * from './networkingService';
+export * from './networkingSubmissionProfile';
 export * from './nimCache';
 export * from './nimServiceCreateRequest';
 export * from './nimServiceMultiNode';
@@ -85,6 +86,7 @@ export * from './workloadV2MetadataAutoFill';
 export * from './workloadV2MetadataCreateParams';
 export * from './workloadV2MetadataResponse';
 export * from './workloadV2MetadataUpdateParams';
+export * from './workloadV2MetadataUpdateParamsConfiguration';
 export * from './workloadV2SyncInfo';
 export * from './workloadV2SyncStatus';
 export * from './workloadV2Update';
@@ -97,6 +99,7 @@ export * from './workloadV2UpdateConfigurationPvcResources';
 export * from './workloadV2UpdateConfigurationPvcResourcesRequests';
 export * from './workloadV2UpdateConfigurationPvcSpec';
 export * from './workloadV2UpdateConfigurationPvcVolumeMode';
+export * from './workloadV2UpdateConfigurationPvcsConfig';
 export * from './workloadV2UpdateConfigurationUserCredentialSource';
 export * from './workloadV2UpdateConfigurationUserCredentials';
 export * from './workloadV2UpdateRequest';
@@ -156,6 +159,7 @@ import { ModelError } from './modelError';
 import { NIMServiceMetadataCreateParams } from './nIMServiceMetadataCreateParams';
 import { NetworkingEndpoint } from './networkingEndpoint';
 import { NetworkingService } from './networkingService';
+import { NetworkingSubmissionProfile } from './networkingSubmissionProfile';
 import { NimCache } from './nimCache';
 import { NimServiceCreateRequest } from './nimServiceCreateRequest';
 import { NimServiceMultiNode } from './nimServiceMultiNode';
@@ -207,6 +211,7 @@ import { WorkloadV2MetadataAutoFill } from './workloadV2MetadataAutoFill';
 import { WorkloadV2MetadataCreateParams } from './workloadV2MetadataCreateParams';
 import { WorkloadV2MetadataResponse } from './workloadV2MetadataResponse';
 import { WorkloadV2MetadataUpdateParams } from './workloadV2MetadataUpdateParams';
+import { WorkloadV2MetadataUpdateParamsConfiguration } from './workloadV2MetadataUpdateParamsConfiguration';
 import { WorkloadV2SyncInfo } from './workloadV2SyncInfo';
 import { WorkloadV2SyncStatus } from './workloadV2SyncStatus';
 import { WorkloadV2Update } from './workloadV2Update';
@@ -219,6 +224,7 @@ import { WorkloadV2UpdateConfigurationPvcResources } from './workloadV2UpdateCon
 import { WorkloadV2UpdateConfigurationPvcResourcesRequests } from './workloadV2UpdateConfigurationPvcResourcesRequests';
 import { WorkloadV2UpdateConfigurationPvcSpec } from './workloadV2UpdateConfigurationPvcSpec';
 import { WorkloadV2UpdateConfigurationPvcVolumeMode } from './workloadV2UpdateConfigurationPvcVolumeMode';
+import { WorkloadV2UpdateConfigurationPvcsConfig } from './workloadV2UpdateConfigurationPvcsConfig';
 import { WorkloadV2UpdateConfigurationUserCredentialSource } from './workloadV2UpdateConfigurationUserCredentialSource';
 import { WorkloadV2UpdateConfigurationUserCredentials } from './workloadV2UpdateConfigurationUserCredentials';
 import { WorkloadV2UpdateRequest } from './workloadV2UpdateRequest';
@@ -249,6 +255,7 @@ let enumsMap: {[index: string]: any} = {
         "GpuRequestType": GpuRequestType,
         "ImagePullPolicy": ImagePullPolicy,
         "MnnvlMode": MnnvlMode,
+        "NetworkingSubmissionProfile": NetworkingSubmissionProfile,
         "NimServiceRemovableFields": NimServiceRemovableFields,
         "NimServiceServingPortAuthorizationType": NimServiceServingPortAuthorizationType,
         "PolicyRuleEnum": PolicyRuleEnum,
@@ -337,6 +344,7 @@ let typeMap: {[index: string]: any} = {
     "WorkloadV2MetadataCreateParams": WorkloadV2MetadataCreateParams,
     "WorkloadV2MetadataResponse": WorkloadV2MetadataResponse,
     "WorkloadV2MetadataUpdateParams": WorkloadV2MetadataUpdateParams,
+    "WorkloadV2MetadataUpdateParamsConfiguration": WorkloadV2MetadataUpdateParamsConfiguration,
     "WorkloadV2SyncInfo": WorkloadV2SyncInfo,
     "WorkloadV2Update": WorkloadV2Update,
     "WorkloadV2UpdateConfiguration": WorkloadV2UpdateConfiguration,
@@ -346,6 +354,7 @@ let typeMap: {[index: string]: any} = {
     "WorkloadV2UpdateConfigurationPvcResources": WorkloadV2UpdateConfigurationPvcResources,
     "WorkloadV2UpdateConfigurationPvcResourcesRequests": WorkloadV2UpdateConfigurationPvcResourcesRequests,
     "WorkloadV2UpdateConfigurationPvcSpec": WorkloadV2UpdateConfigurationPvcSpec,
+    "WorkloadV2UpdateConfigurationPvcsConfig": WorkloadV2UpdateConfigurationPvcsConfig,
     "WorkloadV2UpdateConfigurationUserCredentialSource": WorkloadV2UpdateConfigurationUserCredentialSource,
     "WorkloadV2UpdateConfigurationUserCredentials": WorkloadV2UpdateConfigurationUserCredentials,
     "WorkloadV2UpdateRequest": WorkloadV2UpdateRequest,

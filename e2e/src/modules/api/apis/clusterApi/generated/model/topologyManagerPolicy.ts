@@ -13,7 +13,7 @@
 import { RequestFile } from './models';
 
 /**
-* The node\'s Kubelet Topology Manager policy; null when NUMA-aware scheduling is disabled.
+* The Kubernetes topology manager policy configured on the node, controlling how NUMA-aligned resource allocation is enforced. For more details, see [Kubernetes topology manager policies](https://kubernetes.io/docs/tasks/administer-cluster/topology-manager/#topology-manager-policies).
 */
 export enum TopologyManagerPolicy {
     None = <any> 'none',

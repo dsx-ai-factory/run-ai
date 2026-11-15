@@ -14,9 +14,12 @@ import { RequestFile } from './models';
 import { PvcAccessModes } from './pvcAccessModes';
 import { PvcSupportedAccessModes } from './pvcSupportedAccessModes';
 
+/**
+* Controls whether PVC access modes are required and what defaults to apply.
+*/
 export class AccessModeCustomization {
     /**
-    * whether accessModes field is mandatory
+    * If true, the accessMode field is mandatory when creating a PVC that uses this storage class.
     */
     'required'?: boolean | null;
     '_default'?: PvcAccessModes | null;

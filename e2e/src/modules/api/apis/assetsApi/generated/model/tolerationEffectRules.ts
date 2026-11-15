@@ -25,6 +25,10 @@ export class TolerationEffectRules {
     */
     'canEdit'?: boolean | null;
     /**
+    * Blocks the field to prevent workloads from specifying any value for it.
+    */
+    'blocked'?: boolean | null;
+    /**
     * Limit the permitted values for imagePullPolicy to a given set of values.
     */
     'options'?: Array<TolerationEffectOptionsOptionsInner> | null;
@@ -45,6 +49,11 @@ export class TolerationEffectRules {
         {
             "name": "canEdit",
             "baseName": "canEdit",
+            "type": "boolean"
+        },
+        {
+            "name": "blocked",
+            "baseName": "blocked",
             "type": "boolean"
         },
         {

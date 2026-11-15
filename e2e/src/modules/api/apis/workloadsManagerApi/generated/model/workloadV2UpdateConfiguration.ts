@@ -13,8 +13,10 @@
 import { RequestFile } from './models';
 import { AgentNetworkingConfiguration } from './agentNetworkingConfiguration';
 import { NetworkingEndpoint } from './networkingEndpoint';
+import { NetworkingSubmissionProfile } from './networkingSubmissionProfile';
 import { WorkloadV2UpdateConfigurationMnnvl } from './workloadV2UpdateConfigurationMnnvl';
 import { WorkloadV2UpdateConfigurationPvc } from './workloadV2UpdateConfigurationPvc';
+import { WorkloadV2UpdateConfigurationPvcsConfig } from './workloadV2UpdateConfigurationPvcsConfig';
 import { WorkloadV2UpdateConfigurationUserCredentials } from './workloadV2UpdateConfigurationUserCredentials';
 
 export class WorkloadV2UpdateConfiguration {
@@ -24,11 +26,13 @@ export class WorkloadV2UpdateConfiguration {
     * Endpoint-array networking configuration sent to agents that support the new networking shape. Supported for cluster version 2.26.0 and above. 
     */
     'networkingEndpoints'?: Array<NetworkingEndpoint> | null;
+    'networkingSubmissionProfile'?: NetworkingSubmissionProfile;
     'userCredentials'?: WorkloadV2UpdateConfigurationUserCredentials | null;
     /**
     * PVCs to create and reconcile alongside the workload.
     */
     'pvcs'?: Array<WorkloadV2UpdateConfigurationPvc> | null;
+    'pvcsConfig'?: WorkloadV2UpdateConfigurationPvcsConfig | null;
 
     static discriminator: string | undefined = undefined;
 
@@ -49,6 +53,11 @@ export class WorkloadV2UpdateConfiguration {
             "type": "Array<NetworkingEndpoint>"
         },
         {
+            "name": "networkingSubmissionProfile",
+            "baseName": "networkingSubmissionProfile",
+            "type": "NetworkingSubmissionProfile"
+        },
+        {
             "name": "userCredentials",
             "baseName": "userCredentials",
             "type": "WorkloadV2UpdateConfigurationUserCredentials"
@@ -57,6 +66,11 @@ export class WorkloadV2UpdateConfiguration {
             "name": "pvcs",
             "baseName": "pvcs",
             "type": "Array<WorkloadV2UpdateConfigurationPvc>"
+        },
+        {
+            "name": "pvcsConfig",
+            "baseName": "pvcsConfig",
+            "type": "WorkloadV2UpdateConfigurationPvcsConfig"
         }    ];
 
     static getAttributeTypeMap() {

@@ -13,6 +13,7 @@
 import { RequestFile } from './models';
 import { ArrayRules } from './arrayRules';
 import { BooleanRules } from './booleanRules';
+import { DistributedInferenceLeaderWorkerRulesV2SecurityPrivileged } from './distributedInferenceLeaderWorkerRulesV2SecurityPrivileged';
 import { IntegerRulesOptional } from './integerRulesOptional';
 import { SeccompProfileTypeRules } from './seccompProfileTypeRules';
 import { StringRules } from './stringRules';
@@ -23,7 +24,7 @@ export class SupersetRulesAllOfSecurity {
     'capabilities'?: ArrayRules | null;
     'hostIpc'?: BooleanRules | null;
     'hostNetwork'?: BooleanRules | null;
-    'privileged'?: BooleanRules;
+    'privileged'?: DistributedInferenceLeaderWorkerRulesV2SecurityPrivileged;
     'readOnlyRootFilesystem'?: BooleanRules | null;
     'runAsGid'?: IntegerRulesOptional | null;
     'runAsNonRoot'?: BooleanRules | null;
@@ -58,7 +59,7 @@ export class SupersetRulesAllOfSecurity {
         {
             "name": "privileged",
             "baseName": "privileged",
-            "type": "BooleanRules"
+            "type": "DistributedInferenceLeaderWorkerRulesV2SecurityPrivileged"
         },
         {
             "name": "readOnlyRootFilesystem",

@@ -15,18 +15,24 @@ import { StorageClassCustomization } from './storageClassCustomization';
 import { StorageClassPermissions } from './storageClassPermissions';
 
 export class StorageClassConfiguration {
+    /**
+    * The unique identifier of the storage class configuration.
+    */
     'id': string;
     /**
     * The id of the tenant.
     */
     'tenantId': number;
+    /**
+    * Currently supported value: \'cluster\', which is also the default.
+    */
     'scopeType': StorageClassConfiguration.ScopeTypeEnum = StorageClassConfiguration.ScopeTypeEnum.Cluster;
     /**
-    * The id of the tenant, cluster, department or project, depending on the scope type.
+    * The ID of the cluster.
     */
     'scopeId': string;
     /**
-    * The name of the storage class to apply the configuration to.
+    * The name of the storage class to which the configuration applies.
     */
     'name': string;
     'permissions'?: StorageClassPermissions | null;

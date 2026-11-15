@@ -1,3 +1,5 @@
+export * from './bootConfigApi';
+import { BootConfigApi } from './bootConfigApi';
 export * from './healthApi';
 import { HealthApi } from './healthApi';
 export * from './settingsApi';
@@ -11,6 +13,6 @@ export { HttpError };
 
 export type { RequestFile } from '../model/models';
 
-export const APIS = [HealthApi, SettingsApi, SystemNotificationApi, VersionApi];
+export const APIS = [BootConfigApi, HealthApi, SettingsApi, SystemNotificationApi, VersionApi];
 
 

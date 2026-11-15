@@ -13,19 +13,19 @@
 import { RequestFile } from './models';
 
 /**
-* Requested access mode(s) for the newly created PVC.
+* Default access mode(s) applied to newly created PVCs unless explicitly overridden.
 */
 export class PvcAccessModes {
     /**
-    * Requesting claim that can be mounted in read/write mode to exactly one host. This is the default access mode.
+    * Mount the volume as read/write by a single node.
     */
     'readWriteOnce'?: boolean | null = true;
     /**
-    * Requesting claim that can be mounted in read-only mode to many hosts.
+    * Mount the volume as read-only by many nodes.
     */
     'readOnlyMany'?: boolean | null = false;
     /**
-    * Requesting claim that can be mounted in read/write mode to many hosts.
+    * Mount the volume as read/write by many nodes.
     */
     'readWriteMany'?: boolean | null = false;
 

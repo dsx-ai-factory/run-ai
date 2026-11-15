@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AssignedResources } from '../../api/apis/projectsDepartmentsApi/generated/model/assignedResources';
-import { NodePoolAssignedResources } from '../../api/apis/projectsDepartmentsApi/generated/model/nodePoolAssignedResources';
+import { AssignedResources } from '../../api/apis/projectsDepartmentsApi';
+import { NodePoolAssignedResources } from '../../api/apis/projectsDepartmentsApi';
 import { nodePoolUtils } from '../index';
 import { Resources, Units } from '../../api/apis/orgUnitApi';
 

@@ -12,8 +12,6 @@
 
 import { RequestFile } from './models';
 import { AssignedResources } from './assignedResources';
-import { DepartmentAllOf } from './departmentAllOf';
-import { DepartmentUserDefinedProperties } from './departmentUserDefinedProperties';
 
 export class Department {
     /**
@@ -104,7 +102,7 @@ export class Department {
         {
             "name": "projects",
             "baseName": "projects",
-            "type": "Array"
+            "type": "Array<any>"
         },
         {
             "name": "projectsDeservedGpus",

@@ -1,3 +1,4 @@
+
 /**
  * RUN:AI API
  * RUN:AI API for managing clusters, departments, projects and users.
@@ -20,7 +21,8 @@ import { AuditLogRecord } from '../model/auditLogRecord';
 import { ObjectSerializer, Authentication, VoidAuth, Interceptor } from '../model/models';
 import { HttpBasicAuth, HttpBearerAuth, ApiKeyAuth, OAuth } from '../model/models';
 
-import { HttpError, RequestFile } from './apis';
+import { RequestFile } from './apis';
+import { HttpError } from './httpError';
 
 let defaultBasePath = 'http://localhost';
 
@@ -179,6 +181,9 @@ export class AuditApi {
             headers: localVarHeaderParams,
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
+            /////Start: Modified by @Run.AI /////
+            qsStringifyOptions: { arrayFormat: 'comma' },
+            /////End: Modified by @Run.AI /////
             json: true,
         };
 
@@ -210,7 +215,9 @@ export class AuditApi {
                             body = ObjectSerializer.deserialize(body, "Array<AuditLogRecord>");
                             resolve({ response: response, body: body });
                         } else {
-                            reject(new HttpError(response, body, response.statusCode));
+                            /////Start: Modified by @Run.AI /////
+                            reject(new HttpError(response, body, response.statusCode, localVarRequestOptions));
+                            /////End: Modified by @Run.AI /////
                         }
                     }
                 });

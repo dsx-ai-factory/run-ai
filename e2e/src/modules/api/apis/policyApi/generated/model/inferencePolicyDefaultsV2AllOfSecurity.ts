@@ -21,6 +21,14 @@ export class InferencePolicyDefaultsV2AllOfSecurity {
     */
     'capabilities'?: Array<Capability> | null;
     /**
+    * Whether to enable host IPC. Defaults to false.
+    */
+    'hostIpc'?: boolean | null;
+    /**
+    * Whether to enable host networking. Default to false.
+    */
+    'hostNetwork'?: boolean | null;
+    /**
     * If true, mounts the container\'s root filesystem as read-only.
     */
     'readOnlyRootFilesystem'?: boolean | null;
@@ -50,6 +58,16 @@ export class InferencePolicyDefaultsV2AllOfSecurity {
             "name": "capabilities",
             "baseName": "capabilities",
             "type": "Array<Capability>"
+        },
+        {
+            "name": "hostIpc",
+            "baseName": "hostIpc",
+            "type": "boolean"
+        },
+        {
+            "name": "hostNetwork",
+            "baseName": "hostNetwork",
+            "type": "boolean"
         },
         {
             "name": "readOnlyRootFilesystem",

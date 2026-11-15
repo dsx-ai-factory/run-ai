@@ -12,25 +12,28 @@
 
 import { RequestFile } from './models';
 
+/**
+* Defines the access permissions and behavioral rules for this storage class.
+*/
 export class StorageClassPermissions {
     /**
-    * Permission to create PVC assets on this storage class.
+    * Determines whether PVC assets can be created using this storage class.
     */
     'allowedForAssets'?: boolean | null;
     /**
-    * Permission to include PVCs that use this storage class in workloads. With this permission flag set to off, user will not be able to (a) include non-existing PVC asset, created on this storage class, in asset based submission. (b) include PVC instance with existing=false, that uses this storage class.
+    * Allows workloads to include PVCs that use this storage class. When disabled, users cannot (a) include non-existing PVC assets created with this class in asset-based submissions, or (b) attach PVCs with existing=false to workloads using this class.
     */
     'allowedForWorkloads'?: boolean | null;
     /**
-    * Permission to allow workload to create ephemeral volumes on this storage class With this permission flag set to off, user will not be able to (a) create PVC asset with autoDelete=true and ephemeral=true (b) include PVC instance with isEphemeral=false, that uses this storage class.
+    * Allows workloads to create ephemeral volumes using this storage class. When disabled, users cannot (a) create PVC assets with autoDelete=true and ephemeral=true, or (b) include PVC instances with isEphemeral=false that use this storage class.
     */
     'allowedForEphemeralVolumes'?: boolean | null;
     /**
-    * Permission to allow workload to create persistent volumes on this storage class With this permission flag set to off, user will not be able to (a) create PVC asset with autoDelete=true and ephemeral=true (b) include PVC instance with isEphemeral=false, that uses this storage class.
+    * Allows workloads to create persistent volumes using this storage class. When disabled, users cannot (a) create PVC assets with autoDelete=true and ephemeral=true, or (b) include PVC instances with isEphemeral=false that use this storage class.
     */
     'allowedForPersistentVolumes'?: boolean | null;
     /**
-    * Permission to create a PVC using a shared volume
+    * Allows creation of PVCs using a shared volume.
     */
     'allowDataSharing'?: boolean | null;
 

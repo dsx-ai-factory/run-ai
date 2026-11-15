@@ -28,6 +28,10 @@ export class ServiceSpec {
     */
     'selector': { [key: string]: string; } | null;
     /**
+    * Labels to apply to the Kubernetes Service.
+    */
+    'labels'?: { [key: string]: string; };
+    /**
     * Ports exposed by the service.
     */
     'ports': Array<ServicePort>;
@@ -48,6 +52,11 @@ export class ServiceSpec {
         {
             "name": "selector",
             "baseName": "selector",
+            "type": "{ [key: string]: string; }"
+        },
+        {
+            "name": "labels",
+            "baseName": "labels",
             "type": "{ [key: string]: string; }"
         },
         {

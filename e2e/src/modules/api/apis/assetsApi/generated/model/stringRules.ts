@@ -25,6 +25,10 @@ export class StringRules {
     */
     'canEdit'?: boolean | null;
     /**
+    * Blocks the field to prevent workloads from specifying any value for it.
+    */
+    'blocked'?: boolean | null;
+    /**
     * Set of options that the value of the field must be chosen from.
     */
     'options'?: Array<StringOption> | null;
@@ -45,6 +49,11 @@ export class StringRules {
         {
             "name": "canEdit",
             "baseName": "canEdit",
+            "type": "boolean"
+        },
+        {
+            "name": "blocked",
+            "baseName": "blocked",
             "type": "boolean"
         },
         {

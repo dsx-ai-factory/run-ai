@@ -14,6 +14,9 @@ import { RequestFile } from './models';
 import { StorageClassConfiguration } from './storageClassConfiguration';
 
 export class StorageClassConfigurationListResponse {
+    /**
+    * A list of storage class configuration objects. Each object defines the configuration details for a specific storage class.
+    */
     'storageClassConfigurations': Array<StorageClassConfiguration>;
     'next'?: number;
 

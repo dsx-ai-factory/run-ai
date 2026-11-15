@@ -5,7 +5,7 @@
 
 import { StatusCodes } from 'http-status-codes';
 import { UserPostResponse } from '../../../../../../../modules/api/apis/identityManagerApi/generated/api';
-import { Project } from '../../../../../../../modules/api/apis/projectsDepartmentsApi/generated/api';
+import { Project } from '../../../../../../../modules/api/apis/projectsDepartmentsApi';
 import {
     accessRulesClusterUtils,
     authorizationUtils,

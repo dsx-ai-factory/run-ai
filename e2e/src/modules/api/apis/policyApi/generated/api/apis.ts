@@ -2,21 +2,15 @@ export * from './healthApi';
 import { HealthApi } from './healthApi';
 export * from './policyApi';
 import { PolicyApi } from './policyApi';
+export * from './specMappingApi';
+import { SpecMappingApi } from './specMappingApi';
 export * from './synchronizationApi';
 import { SynchronizationApi } from './synchronizationApi';
-import * as http from 'http';
-
-export class HttpError extends Error {
-    constructor (public response: http.IncomingMessage, public body: any, public statusCode?: number, requestOptions?: any) {
-        /////Start: Modified by @Run.AI /////
-        super(`HTTP request failed with the following statusCode ${statusCode},\n Request: ${JSON.stringify(requestOptions)},\n Response: ${JSON.stringify(body)}`);
-        /////End: Modified by @Run.AI /////
-        this.name = 'HttpError';
-    }
-}
+import { HttpError } from './httpError';
+export { HttpError };
 
 export type { RequestFile } from '../model/models';
 
-export const APIS = [HealthApi, PolicyApi, SynchronizationApi];
+export const APIS = [HealthApi, PolicyApi, SpecMappingApi, SynchronizationApi];
 
 

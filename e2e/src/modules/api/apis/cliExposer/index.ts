@@ -3,10 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CLIApi, HealthApi } from './generated/api';
+import { ResearcherCommandLineInterfaceDeprecatedApi, HealthApi } from './generated/api';
 import { API_DEFAULT_HEADERS } from '../apiDefaults';
+import { flowRootState } from '../../../helpers';
 
 export * from './generated/model/models';
+
+// Authentication previously added inside generated code must survive regeneration.
+class CLIApi extends ResearcherCommandLineInterfaceDeprecatedApi {
+    getInstallerUnixCommands(
+        options: Parameters<ResearcherCommandLineInterfaceDeprecatedApi['getInstallerUnixCommandsDeprecated']>[0] = { headers: {} },
+        accessToken = flowRootState.users.system_administrator.accessToken
+    ): ReturnType<ResearcherCommandLineInterfaceDeprecatedApi['getInstallerUnixCommandsDeprecated']> {
+        this.accessToken = accessToken;
+        return super.getInstallerUnixCommandsDeprecated(options);
+    }
+
+    getManualDocument(
+        documentName: string,
+        options: Parameters<ResearcherCommandLineInterfaceDeprecatedApi['getManualDocumentDeprecated']>[1] = { headers: {} },
+        accessToken = flowRootState.users.system_administrator.accessToken
+    ): ReturnType<ResearcherCommandLineInterfaceDeprecatedApi['getManualDocumentDeprecated']> {
+        this.accessToken = accessToken;
+        return super.getManualDocumentDeprecated(documentName, options);
+    }
+}
 
 export class CliExposer {
     cliApi: CLIApi;

@@ -14,10 +14,13 @@ import { RequestFile } from './models';
 import { NumaNodeDetails } from './numaNodeDetails';
 import { TopologyManagerPolicy } from './topologyManagerPolicy';
 
+/**
+* NUMA configuration and per-NUMA-node resource data for the node.
+*/
 export class NumaInfoExtended {
     'topologyManagerPolicy'?: TopologyManagerPolicy | null;
     /**
-    * NUMA nodes reported in the node\'s NodeResourceTopology object.
+    * The list of NUMA nodes on the physical machine and their resource availability.
     */
     'nodes': Array<NumaNodeDetails>;
 

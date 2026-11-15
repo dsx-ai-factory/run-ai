@@ -13,7 +13,7 @@
 import { RequestFile } from './models';
 
 /**
-* the values that the attribute can hold
+* Defines the data type the attribute can accept. Enum: \"text\" \"number\" \"boolean\"
 */
 export enum PvcAddedAttributeFormat {
     Text = <any> 'text',

@@ -13,7 +13,7 @@
 import { RequestFile } from './models';
 
 /**
-* Details of the user credential and key used to populate the environment variable. User credentials are created by the user and are only accessible to the user who created them.
+* Defines a reference to a user-created credential and a specific key within that credential whose value will populate the environment variable. User credentials can only be accessed by the user who created them.
 */
 export class EnvironmentVariableUserCredential {
     /**

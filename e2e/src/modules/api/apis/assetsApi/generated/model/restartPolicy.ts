@@ -13,7 +13,7 @@
 import { RequestFile } from './models';
 
 /**
-* Specify the restart policy of the workload pods. Default is empty, which is determine by the framework default
+* Specify the restart policy of the workload pods. Default is empty, which is determine by the framework default. The `Always` value is deprecated; use `OnFailure` or `Never` instead. 
 */
 export enum RestartPolicy {
     Always = <any> 'Always',

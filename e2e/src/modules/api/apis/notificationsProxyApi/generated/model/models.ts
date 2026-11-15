@@ -1,12 +1,11 @@
 import localVarRequest from 'request';
 
-export * from './addSlackApp200Response';
+export * from './connectSlackWorkspace200Response';
 export * from './createSlackAppRequestBody';
 export * from './createSlackAppResponse';
 export * from './detailedNotificationState';
 export * from './detailedNotificationStateSlack';
-export * from './detailedSlackNotificationState';
-export * from './detailedSlackNotificationStateSettings';
+export * from './detailedSlackNotificationsState';
 export * from './emailAuthType';
 export * from './emailChannel';
 export * from './emailChannelConfig';
@@ -26,11 +25,17 @@ export * from './notificationChannelType';
 export * from './notificationState';
 export * from './notificationStateStatus';
 export * from './notificationType';
+export * from './slackDetails';
+export * from './slackDetailsSettings';
+export * from './slackNotificationChannel';
 export * from './slackNotificationChannelConfig';
+export * from './slackNotificationChannelPatchRequest';
+export * from './slackNotificationChannelPatchRequestConfig';
 export * from './subscription';
 export * from './subscriptionAllOf';
 export * from './subscriptionEvent';
 export * from './subscriptionForPut';
+export * from './validateSinkResponse';
 
 import * as fs from 'fs';
 
@@ -45,13 +50,12 @@ export interface RequestDetailedFile {
 export type RequestFile = string | Buffer | fs.ReadStream | RequestDetailedFile;
 
 
-import { AddSlackApp200Response } from './addSlackApp200Response';
+import { ConnectSlackWorkspace200Response } from './connectSlackWorkspace200Response';
 import { CreateSlackAppRequestBody } from './createSlackAppRequestBody';
 import { CreateSlackAppResponse } from './createSlackAppResponse';
 import { DetailedNotificationState } from './detailedNotificationState';
 import { DetailedNotificationStateSlack } from './detailedNotificationStateSlack';
-import { DetailedSlackNotificationState } from './detailedSlackNotificationState';
-import { DetailedSlackNotificationStateSettings } from './detailedSlackNotificationStateSettings';
+import { DetailedSlackNotificationsState } from './detailedSlackNotificationsState';
 import { EmailAuthType } from './emailAuthType';
 import { EmailChannel } from './emailChannel';
 import { EmailChannelConfig } from './emailChannelConfig';
@@ -71,11 +75,17 @@ import { NotificationChannelType } from './notificationChannelType';
 import { NotificationState } from './notificationState';
 import { NotificationStateStatus } from './notificationStateStatus';
 import { NotificationType } from './notificationType';
+import { SlackDetails } from './slackDetails';
+import { SlackDetailsSettings } from './slackDetailsSettings';
+import { SlackNotificationChannel } from './slackNotificationChannel';
 import { SlackNotificationChannelConfig } from './slackNotificationChannelConfig';
+import { SlackNotificationChannelPatchRequest } from './slackNotificationChannelPatchRequest';
+import { SlackNotificationChannelPatchRequestConfig } from './slackNotificationChannelPatchRequestConfig';
 import { Subscription } from './subscription';
 import { SubscriptionAllOf } from './subscriptionAllOf';
 import { SubscriptionEvent } from './subscriptionEvent';
 import { SubscriptionForPut } from './subscriptionForPut';
+import { ValidateSinkResponse } from './validateSinkResponse';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
@@ -96,13 +106,12 @@ let enumsMap: {[index: string]: any} = {
 }
 
 let typeMap: {[index: string]: any} = {
-    "AddSlackApp200Response": AddSlackApp200Response,
+    "ConnectSlackWorkspace200Response": ConnectSlackWorkspace200Response,
     "CreateSlackAppRequestBody": CreateSlackAppRequestBody,
     "CreateSlackAppResponse": CreateSlackAppResponse,
     "DetailedNotificationState": DetailedNotificationState,
     "DetailedNotificationStateSlack": DetailedNotificationStateSlack,
-    "DetailedSlackNotificationState": DetailedSlackNotificationState,
-    "DetailedSlackNotificationStateSettings": DetailedSlackNotificationStateSettings,
+    "DetailedSlackNotificationsState": DetailedSlackNotificationsState,
     "EmailChannel": EmailChannel,
     "EmailChannelConfig": EmailChannelConfig,
     "EmailChannelConfigForPatch": EmailChannelConfigForPatch,
@@ -120,11 +129,17 @@ let typeMap: {[index: string]: any} = {
     "NotificationState": NotificationState,
     "NotificationStateStatus": NotificationStateStatus,
     "NotificationType": NotificationType,
+    "SlackDetails": SlackDetails,
+    "SlackDetailsSettings": SlackDetailsSettings,
+    "SlackNotificationChannel": SlackNotificationChannel,
     "SlackNotificationChannelConfig": SlackNotificationChannelConfig,
+    "SlackNotificationChannelPatchRequest": SlackNotificationChannelPatchRequest,
+    "SlackNotificationChannelPatchRequestConfig": SlackNotificationChannelPatchRequestConfig,
     "Subscription": Subscription,
     "SubscriptionAllOf": SubscriptionAllOf,
     "SubscriptionEvent": SubscriptionEvent,
     "SubscriptionForPut": SubscriptionForPut,
+    "ValidateSinkResponse": ValidateSinkResponse,
 }
 
 export class ObjectSerializer {

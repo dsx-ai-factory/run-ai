@@ -13,6 +13,9 @@
 import { RequestFile } from './models';
 import { TopologyManagerPolicy } from './topologyManagerPolicy';
 
+/**
+* NUMA configuration and per-NUMA-node resource data for the node.
+*/
 export class NumaInfo {
     'topologyManagerPolicy'?: TopologyManagerPolicy | null;
 

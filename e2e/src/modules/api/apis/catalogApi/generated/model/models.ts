@@ -1,7 +1,20 @@
 import localVarRequest from 'request';
 
+export * from './catalogSettingsGetResponse';
+export * from './catalogSettingsKeyEnum';
 export * from './complianceIssues';
 export * from './complianceIssuesComplianceIssuesInner';
+export * from './enableNgcIntegrationSetting';
+export * from './getEnableNgcIntegration';
+export * from './getEnableNgcIntegrationValue';
+export * from './helmChart';
+export * from './helmChartListResponse';
+export * from './helmChartVersion';
+export * from './helmRepo';
+export * from './helmRepoCreationRequest';
+export * from './helmRepoListResponse';
+export * from './helmRepoUpdateRequest';
+export * from './httpResponse';
 export * from './huggingFaceModelItem';
 export * from './huggingFaceModelSearchResults';
 export * from './imageTags';
@@ -13,6 +26,7 @@ export * from './registryIntegrationListResponse';
 export * from './registryIntegrationUpdateRequest';
 export * from './scopeType';
 export * from './submissionError';
+export * from './updateCatalogSettingByKeyRequest';
 
 import * as fs from 'fs';
 
@@ -27,8 +41,21 @@ export interface RequestDetailedFile {
 export type RequestFile = string | Buffer | fs.ReadStream | RequestDetailedFile;
 
 
+import { CatalogSettingsGetResponse } from './catalogSettingsGetResponse';
+import { CatalogSettingsKeyEnum } from './catalogSettingsKeyEnum';
 import { ComplianceIssues } from './complianceIssues';
 import { ComplianceIssuesComplianceIssuesInner } from './complianceIssuesComplianceIssuesInner';
+import { EnableNgcIntegrationSetting } from './enableNgcIntegrationSetting';
+import { GetEnableNgcIntegration } from './getEnableNgcIntegration';
+import { GetEnableNgcIntegrationValue } from './getEnableNgcIntegrationValue';
+import { HelmChart } from './helmChart';
+import { HelmChartListResponse } from './helmChartListResponse';
+import { HelmChartVersion } from './helmChartVersion';
+import { HelmRepo } from './helmRepo';
+import { HelmRepoCreationRequest } from './helmRepoCreationRequest';
+import { HelmRepoListResponse } from './helmRepoListResponse';
+import { HelmRepoUpdateRequest } from './helmRepoUpdateRequest';
+import { HttpResponse } from './httpResponse';
 import { HuggingFaceModelItem } from './huggingFaceModelItem';
 import { HuggingFaceModelSearchResults } from './huggingFaceModelSearchResults';
 import { ImageTags } from './imageTags';
@@ -40,6 +67,7 @@ import { RegistryIntegrationListResponse } from './registryIntegrationListRespon
 import { RegistryIntegrationUpdateRequest } from './registryIntegrationUpdateRequest';
 import { ScopeType } from './scopeType';
 import { SubmissionError } from './submissionError';
+import { UpdateCatalogSettingByKeyRequest } from './updateCatalogSettingByKeyRequest';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
@@ -54,12 +82,25 @@ let primitives = [
                  ];
 
 let enumsMap: {[index: string]: any} = {
+        "CatalogSettingsKeyEnum": CatalogSettingsKeyEnum,
         "ScopeType": ScopeType,
 }
 
 let typeMap: {[index: string]: any} = {
+    "CatalogSettingsGetResponse": CatalogSettingsGetResponse,
     "ComplianceIssues": ComplianceIssues,
     "ComplianceIssuesComplianceIssuesInner": ComplianceIssuesComplianceIssuesInner,
+    "EnableNgcIntegrationSetting": EnableNgcIntegrationSetting,
+    "GetEnableNgcIntegration": GetEnableNgcIntegration,
+    "GetEnableNgcIntegrationValue": GetEnableNgcIntegrationValue,
+    "HelmChart": HelmChart,
+    "HelmChartListResponse": HelmChartListResponse,
+    "HelmChartVersion": HelmChartVersion,
+    "HelmRepo": HelmRepo,
+    "HelmRepoCreationRequest": HelmRepoCreationRequest,
+    "HelmRepoListResponse": HelmRepoListResponse,
+    "HelmRepoUpdateRequest": HelmRepoUpdateRequest,
+    "HttpResponse": HttpResponse,
     "HuggingFaceModelItem": HuggingFaceModelItem,
     "HuggingFaceModelSearchResults": HuggingFaceModelSearchResults,
     "ImageTags": ImageTags,
@@ -70,6 +111,7 @@ let typeMap: {[index: string]: any} = {
     "RegistryIntegrationListResponse": RegistryIntegrationListResponse,
     "RegistryIntegrationUpdateRequest": RegistryIntegrationUpdateRequest,
     "SubmissionError": SubmissionError,
+    "UpdateCatalogSettingByKeyRequest": UpdateCatalogSettingByKeyRequest,
 }
 
 export class ObjectSerializer {
