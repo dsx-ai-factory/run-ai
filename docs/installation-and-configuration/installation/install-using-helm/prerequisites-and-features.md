@@ -292,7 +292,7 @@ With external access, inference services are reachable from outside the cluster.
 
 On Kubernetes, external access exposes inference services through a wildcard FQDN (for example, `*.runai-inference.mycorp.local`). This requires the wildcard DNS record (see [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns)), the standard inference wildcard certificate (see [Cluster TLS Certificates](preparations.md#cluster-tls-certificates)), and an HAProxy ingress to handle TLS termination.
 
-Follow the [Installing Knative](https://knative.dev/docs/install/operator/knative-with-operators/) instructions or run the following, updating `{VERSION}` with a `knative-operator` release that supports the Knative Serving version you are using:
+Follow the [Installing Knative](https://knative.dev/docs/install/operator/knative-with-operators/) instructions or run the following, updating `{VERSION}` with a `knative-operator` release in the [supported Knative Serving range](../../support-matrix.md) (operator and Serving versions match):
 
 ```bash
 helm repo add knative-operator https://knative.github.io/operator
@@ -456,7 +456,7 @@ On OpenShift Serverless, external access is the platform default; cluster-local 
 
 On Kubernetes, cluster-local access does not require an external DNS record, a wildcard certificate, or an HAProxy ingress because traffic does not leave the cluster.
 
-Follow the [Installing Knative](https://knative.dev/docs/install/operator/knative-with-operators/) instructions or run the following, updating `{VERSION}` with a `knative-operator` release that supports the Knative Serving version you are using:
+Follow the [Installing Knative](https://knative.dev/docs/install/operator/knative-with-operators/) instructions or run the following, updating `{VERSION}` with a `knative-operator` release in the [supported Knative Serving range](../../support-matrix.md) (operator and Serving versions match):
 
 ```bash
 helm repo add knative-operator https://knative.github.io/operator

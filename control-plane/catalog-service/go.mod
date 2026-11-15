@@ -5,6 +5,7 @@ go 1.27.4
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.15
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.1.1
+	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/client v1.0.9
 	github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.9
@@ -96,7 +97,7 @@ require (
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
 	github.com/lithammer/shortuuid/v4 v4.3.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20261101121723-be84dd9509a0 // indirect
-	github.com/magiconair/properties v1.18.12 // indirect
+	github.com/magiconair/properties v1.18.13 // indirect
 	github.com/mattn/go-colorable v0.1.16 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/maypok86/otter/v2 v2.4.0 // indirect
@@ -163,13 +164,13 @@ require (
 	go.yaml.in/yaml/v2 v2.4.5 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/crypto v0.59.0 // indirect
-	golang.org/x/exp v0.0.0-20261109185158-a52e3aef5920 // indirect
+	golang.org/x/exp v0.0.0-20261112173441-d10d3b464990 // indirect
 	golang.org/x/mod v0.43.0 // indirect
 	golang.org/x/net v0.62.0 // indirect
 	golang.org/x/sync v0.25.0 // indirect
 	golang.org/x/sys v0.50.0 // indirect
 	golang.org/x/text v0.44.0 // indirect
-	golang.org/x/tools v0.52.1-0.20261111171530-d4453b555d58 // indirect
+	golang.org/x/tools v0.52.1-0.20261112212842-4dd740f845db // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20261110000943-09e21b237f2c // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20261110000943-09e21b237f2c // indirect
@@ -194,3 +195,5 @@ replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabiliti
 replace github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies => ./../workloads-and-policies
 
 replace github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client => ../../control-plane/org-unit-service/pkg/client
+
+replace github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client => ../cluster-service/pkg/client

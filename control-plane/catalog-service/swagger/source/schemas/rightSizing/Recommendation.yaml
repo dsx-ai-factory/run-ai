@@ -1,0 +1,21 @@
+type: object
+nullable: true
+required: [allocationType, gpuCount]
+properties:
+  allocationType:
+    allOf:
+      - $ref: './RecommendationAllocationType.yaml'
+    description: >-
+      Whether the allocation requests GPU memory (`gpu_memory`) or whole GPUs (`gpu_count`).
+  gpuCount:
+    type: integer
+    format: int64
+    minimum: 1
+    description: >-
+      Number of GPUs used by the allocation. Always 1 for `gpu_memory`; for `gpu_count`, equals the selected profile’s tensor parallel size multiplied by its pipeline parallel size.
+  gpuMemoryPerDeviceBytes:
+    type: integer
+    format: int64
+    minimum: 1
+    description: >-
+      Recommended memory per GPU, in bytes. For `gpu_memory`, this is the published minimum rounded up to whole bytes. For `gpu_count`, this is the reported capacity of each GPU.
