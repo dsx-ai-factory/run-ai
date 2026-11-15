@@ -268,8 +268,7 @@ validate-mockery: git-config-command
 	${SUCCESS_MESSAGE_HANDLER}
 .PHONY: validate-mockery
 
-# The golangci-lint version above, for CI that lints without make
-# (pr-checks.yaml go-lint), so both run the same Renovate-managed version.
+# Used by pr-checks.yaml go-lint.
 print-golangci-lint-version:
 	@echo $(GOLANGCI_LINT_VERSION)
 .PHONY: print-golangci-lint-version
