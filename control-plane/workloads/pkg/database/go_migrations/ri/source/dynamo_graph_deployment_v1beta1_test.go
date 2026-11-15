@@ -113,6 +113,7 @@ var _ = Describe("Dynamo v1beta1 Karta", func() {
 		Entry("omitted replicas", `{"name":"worker"}`, int32(1)),
 		Entry("zero replicas", `{"name":"worker","replicas":0}`, int32(0)),
 		Entry("multiple replicas", `{"name":"worker","replicas":3}`, int32(3)),
+		Entry("default node count when multinode is enabled", `{"name":"worker","replicas":2,"multinode":{}}`, int32(4)),
 		Entry("multiple nodes", `{"name":"worker","replicas":2,"multinode":{"nodeCount":4}}`, int32(8)),
 		Entry("zero replicas across multiple nodes", `{"name":"worker","replicas":0,"multinode":{"nodeCount":4}}`, int32(0)),
 	)

@@ -37,7 +37,7 @@ func dynamoKarta(beta bool) *kartav1alpha1.Karta {
 			ChildComponents: []kartav1alpha1.ComponentDefinition{{
 				Name: "component", OwnerRef: ptr.To("dynamographdeployment"),
 				InstanceIdPath:  ptr.To(".spec.components[] | .name"),
-				ScaleDefinition: &kartav1alpha1.ScaleDefinition{ReplicasPath: ptr.To(`.spec.components[] | (.replicas // 1) * (.multinode.nodeCount // 1)`)},
+				ScaleDefinition: &kartav1alpha1.ScaleDefinition{ReplicasPath: ptr.To(`.spec.components[] | (.replicas // 1) * (if .multinode == null then 1 else (.multinode.nodeCount // 2) end)`)},
 				SpecDefinition:  &kartav1alpha1.SpecDefinition{PodTemplateSpecPath: ptr.To(".spec.components[] | .podTemplate")},
 			}},
 		}}}

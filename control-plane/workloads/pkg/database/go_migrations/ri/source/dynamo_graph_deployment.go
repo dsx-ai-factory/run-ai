@@ -175,7 +175,9 @@ func buildDynamoGraphDeploymentV1beta1ChildComponents() []karta.ComponentDefinit
 				PodTemplateSpecPath: ptr.To(".spec.components[] | .podTemplate"),
 			},
 			ScaleDefinition: &karta.ScaleDefinition{
-				ReplicasPath: ptr.To(".spec.components[] | (.replicas // 1) * (.multinode.nodeCount // 1)"),
+				// multinode: {} means two nodes per replica in Dynamo. Without multinode,
+				// each replica is one pod.
+				ReplicasPath: ptr.To(".spec.components[] | (.replicas // 1) * (if .multinode == null then 1 else (.multinode.nodeCount // 2) end)"),
 			},
 			PodSelector: &karta.PodSelector{
 				ComponentInstanceSelector: &karta.ComponentInstanceSelector{
