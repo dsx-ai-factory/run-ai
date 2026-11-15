@@ -24,7 +24,6 @@ var _ MappedNullable = &WorkloadsSettingsGetResponse{}
 type WorkloadsSettingsGetResponse struct {
 	EnablePolicies              *GetEnablePolicies              `json:"enablePolicies,omitempty"`
 	WorkloadSubmissionV2Enabled *GetWorkloadSubmissionV2Enabled `json:"workloadSubmissionV2Enabled,omitempty"`
-	EnableTemplatesV2           *GetEnableTemplatesV2           `json:"enableTemplatesV2,omitempty"`
 	EnableHybridSubmission      *GetEnableHybridSubmission      `json:"enableHybridSubmission,omitempty"`
 	GpuOverProvisioning         *GetGpuOverProvisioning         `json:"gpuOverProvisioning,omitempty"`
 	ApplicationSubmission       *GetApplicationSubmission       `json:"applicationSubmission,omitempty"`
@@ -109,38 +108,6 @@ func (o *WorkloadsSettingsGetResponse) HasWorkloadSubmissionV2Enabled() bool {
 // SetWorkloadSubmissionV2Enabled gets a reference to the given GetWorkloadSubmissionV2Enabled and assigns it to the WorkloadSubmissionV2Enabled field.
 func (o *WorkloadsSettingsGetResponse) SetWorkloadSubmissionV2Enabled(v GetWorkloadSubmissionV2Enabled) {
 	o.WorkloadSubmissionV2Enabled = &v
-}
-
-// GetEnableTemplatesV2 returns the EnableTemplatesV2 field value if set, zero value otherwise.
-func (o *WorkloadsSettingsGetResponse) GetEnableTemplatesV2() GetEnableTemplatesV2 {
-	if o == nil || IsNil(o.EnableTemplatesV2) {
-		var ret GetEnableTemplatesV2
-		return ret
-	}
-	return *o.EnableTemplatesV2
-}
-
-// GetEnableTemplatesV2Ok returns a tuple with the EnableTemplatesV2 field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *WorkloadsSettingsGetResponse) GetEnableTemplatesV2Ok() (*GetEnableTemplatesV2, bool) {
-	if o == nil || IsNil(o.EnableTemplatesV2) {
-		return nil, false
-	}
-	return o.EnableTemplatesV2, true
-}
-
-// HasEnableTemplatesV2 returns a boolean if a field has been set.
-func (o *WorkloadsSettingsGetResponse) HasEnableTemplatesV2() bool {
-	if o != nil && !IsNil(o.EnableTemplatesV2) {
-		return true
-	}
-
-	return false
-}
-
-// SetEnableTemplatesV2 gets a reference to the given GetEnableTemplatesV2 and assigns it to the EnableTemplatesV2 field.
-func (o *WorkloadsSettingsGetResponse) SetEnableTemplatesV2(v GetEnableTemplatesV2) {
-	o.EnableTemplatesV2 = &v
 }
 
 // GetEnableHybridSubmission returns the EnableHybridSubmission field value if set, zero value otherwise.
@@ -254,9 +221,6 @@ func (o WorkloadsSettingsGetResponse) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.WorkloadSubmissionV2Enabled) {
 		toSerialize["workloadSubmissionV2Enabled"] = o.WorkloadSubmissionV2Enabled
-	}
-	if !IsNil(o.EnableTemplatesV2) {
-		toSerialize["enableTemplatesV2"] = o.EnableTemplatesV2
 	}
 	if !IsNil(o.EnableHybridSubmission) {
 		toSerialize["enableHybridSubmission"] = o.EnableHybridSubmission

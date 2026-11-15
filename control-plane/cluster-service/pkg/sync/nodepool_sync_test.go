@@ -63,7 +63,7 @@ var _ = Describe("Nodepool sync tests", Ordered, func() {
 	orgClient.On("NodePoolCreated", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	orgClient.On("NodePoolDeleted", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	orgClient.On("DefaultNodePoolCreated", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-	nodepoolService := services.NewNodePoolsApiService(tenantSettingsClient, orgClient)
+	nodepoolService := services.NewNodePoolsApiService(tenantSettingsClient, orgClient, nil)
 	nodepoolSyncService := NewNodePoolsSync(nodepoolService)
 
 	tenantIds := []string{}

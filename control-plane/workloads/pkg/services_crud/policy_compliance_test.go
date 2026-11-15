@@ -16,7 +16,6 @@ import (
 	clientsclusterservice "github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/clusterservice"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/clusterservice"
 	"github.com/go-chi/chi/v5"
-	"github.com/stretchr/testify/mock"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/org_unit"
 
@@ -196,7 +195,6 @@ var _ = Describe("policy compliance validations", func() {
 
 		authorization.SetMock(authMock)
 		orgunit.SetMock(authMock.OrgUnitMock())
-		mockTenantSettingsClient.On("GetHybridSubmissionEnabled", mock.Anything).Return(false, nil)
 
 		clusterClientMock = clusterClient.NewSimpleMockClient().WithCluster(randoms.ClusterId, clusterApi.DisplayedCluster{
 			Uuid:    randoms.ClusterId,

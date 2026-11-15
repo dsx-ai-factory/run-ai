@@ -5,6 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Alias** | **string** |  | 
+**SamlData** | Pointer to [**NullableSamlData**](SamlData.md) |  | [optional] 
 
 ## Methods
 
@@ -45,6 +46,41 @@ and a boolean to check if the value has been set.
 SetAlias sets Alias field to given value.
 
 
+### GetSamlData
+
+`func (o *IdpPostResponse) GetSamlData() SamlData`
+
+GetSamlData returns the SamlData field if non-nil, zero value otherwise.
+
+### GetSamlDataOk
+
+`func (o *IdpPostResponse) GetSamlDataOk() (*SamlData, bool)`
+
+GetSamlDataOk returns a tuple with the SamlData field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetSamlData
+
+`func (o *IdpPostResponse) SetSamlData(v SamlData)`
+
+SetSamlData sets SamlData field to given value.
+
+### HasSamlData
+
+`func (o *IdpPostResponse) HasSamlData() bool`
+
+HasSamlData returns a boolean if a field has been set.
+
+### SetSamlDataNil
+
+`func (o *IdpPostResponse) SetSamlDataNil(b bool)`
+
+ SetSamlDataNil sets the value for SamlData to be an explicit nil
+
+### UnsetSamlData
+`func (o *IdpPostResponse) UnsetSamlData()`
+
+UnsetSamlData ensures that no value is present for SamlData, not even an explicit nil
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

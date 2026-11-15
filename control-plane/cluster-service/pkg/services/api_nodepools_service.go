@@ -57,18 +57,26 @@ const (
 // NodePoolsApiService is a service that implements the logic for the NodePoolsApiServicer
 // This service should implement the business logic for every endpoint for the NodePoolsApi API.
 // Include any external packages or services that will be required by this service.
+type permittedScopesGetter interface {
+	GetPermittedScopes(ctx context.Context, resourceType authorization_api.ResourceType, action *authorization_api.Action) (*authorization_api.PermittedScopesActions, int, error)
+}
+
 type NodePoolsApiService struct {
 	tenantSettingsClient            clients.TenantSettingsClient
 	orgUnitClient                   org_unit_service_client.IOrgUnitClient
+	authorizationClient             permittedScopesGetter
 	metricsService                  QueryMetricsService
 	clusterCapabilityCheckerFactory clients_local.ClusterCapabilityCheckerFactory
 }
 
 // NewNodePoolsApiService creates a default api service
-func NewNodePoolsApiService(client clients.TenantSettingsClient, orgUnitClient org_unit_service_client.IOrgUnitClient) api.NodePoolsAPIServicer {
+func NewNodePoolsApiService(client clients.TenantSettingsClient, orgUnitClient org_unit_service_client.IOrgUnitClient,
+	authorizationClient permittedScopesGetter,
+) api.NodePoolsAPIServicer {
 	return &NodePoolsApiService{
 		tenantSettingsClient:            client,
 		orgUnitClient:                   orgUnitClient,
+		authorizationClient:             authorizationClient,
 		metricsService:                  NewDefaultMetricsService(),
 		clusterCapabilityCheckerFactory: clients_local.LocalClusterCapabilityCheckerFactory,
 	}
@@ -172,7 +180,7 @@ func (s *NodePoolsApiService) CreateNodepool(ctx context.Context, fields api.Nod
 	if err := setSchedulingConfigurationFieldsOnCreate(ctx, &nodepoolModel, fields, capChecker); err != nil {
 		return NewErrorResponse(api.NewError(http.StatusInternalServerError, "Failed to apply scheduling configuration on create", err)), nil
 	}
-	setSchedulingCapabilitiesOnCreateUpdate(ctx, &nodepoolModel, fields.SchedulingCapabilities, true)
+	setSchedulingCapabilitiesOnCreateUpdate(ctx, &nodepoolModel, fields.SchedulingCapabilities)
 
 	nodepoolSetDefaults(&nodepoolModel)
 
@@ -697,7 +705,8 @@ func (s *NodePoolsApiService) createDefaultNodepool(ctx context.Context, cluster
 		CpuPlacementStrategy:       "",
 		MinGuaranteedRuntime:       nil,
 	}
-	setSchedulingCapabilitiesOnCreateUpdate(ctx, &nodepoolModel, clusterNotification.SchedulingCapabilities, true)
+	// the default nodepool keeps the defaults: org-unit-service gives its default department unlimited quota
+	setSchedulingCapabilitiesOnCreateUpdate(ctx, &nodepoolModel, api.SchedulingCapabilitiesNullable{})
 	nodepoolSetDefaults(&nodepoolModel)
 
 	nodepoolModel.ClusterId = uuid.MustParse(clusterNotification.Id)
@@ -751,7 +760,7 @@ func mapUpdateFieldsToModel(ctx context.Context, nodepoolModel models.Nodepool, 
 	if err := setSchedulingConfigurationFieldsOnUpdate(ctx, result, updateFields, capChecker); err != nil {
 		return nil, api.NewError(http.StatusInternalServerError, "Failed to apply scheduling configuration on update", err)
 	}
-	setSchedulingCapabilitiesOnCreateUpdate(ctx, result, updateFields.SchedulingCapabilities, false)
+	setSchedulingCapabilitiesOnCreateUpdate(ctx, result, updateFields.SchedulingCapabilities)
 
 	ntErr := setNetworkTopology(ctx, nodepoolModel.TenantId, result, updateFields.NetworkTopologyId)
 	if ntErr != nil {
@@ -1046,6 +1055,9 @@ func validateLabels(key *string, value *string, isDefault bool) error {
 func validateSchedulingMode(nodepool models.Nodepool) error {
 	if nodepool.AllowCpuQuota && !nodepool.AllowQuota {
 		return fmt.Errorf("SchedulingCapabilities.CpuQuota can only be enabled when SchedulingCapabilities.Quota is enabled")
+	}
+	if nodepool.AllowLimits && !nodepool.AllowQuota {
+		return fmt.Errorf("SchedulingCapabilities.Limits can only be enabled when SchedulingCapabilities.Quota is enabled")
 	}
 	return nil
 }

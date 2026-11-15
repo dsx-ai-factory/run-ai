@@ -75,7 +75,7 @@ func getAppModelForRequest(name, id, createdBy string) *iamModels.Client {
 			TokenLifespan: ptr.To(realm_client.DefaultServiceAccountTokenLifespan),
 		},
 	}
-	realm_client.ApplyClientProfile(client, realm_client.ClientTypeTenantApp)
+	realm_client.ApplyClientProfile(client, realm_client.ClientTypeServiceAccount)
 	return client
 }
 

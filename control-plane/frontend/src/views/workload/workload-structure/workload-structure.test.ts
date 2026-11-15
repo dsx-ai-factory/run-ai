@@ -126,6 +126,26 @@ describe("workload-structure.vue", () => {
     document.body.innerHTML = "";
   });
 
+  describe("Activity tab", () => {
+    it("maps an existing Activity link to Event history without a separate tab", async () => {
+      routeQuery.value = { tab: "activity" };
+      const wrapper = mountPage();
+      await flushPromises();
+      const tabs = wrapper.findComponent({ name: "RunaiTab" });
+      expect(tabs.props("modelValue")).toBe("event history");
+      expect(tabs.props("tabs").some((tab: { name: string }) => tab.name === "activity")).toBe(false);
+    });
+
+    it("uses Metrics for an activity link scoped to a child element", async () => {
+      routeQuery.value = { tab: "activity", elementId: "el-1" };
+      const wrapper = mountPage();
+      await flushPromises();
+      const tabs = wrapper.findComponent({ name: "RunaiTab" });
+      expect(tabs.props("modelValue")).toBe("metrics");
+      expect(tabs.props("tabs")).toContainEqual(expect.objectContaining({ name: "event history", hidden: true }));
+    });
+  });
+
   describe("initial load", () => {
     it("calls getWorkloadById, getWorkloadElements and getWorkloadPods on mount", async () => {
       mountPage();

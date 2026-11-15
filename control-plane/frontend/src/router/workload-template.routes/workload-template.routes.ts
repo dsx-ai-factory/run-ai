@@ -7,17 +7,14 @@ import { ResourceType, Action } from "@/swagger-models/authorization-client";
 
 import { WORKLOAD_TEMPLATE_ROUTE_NAMES } from "./workload-template.routes.names";
 
-import WorkloadTemplateNewApp from "@/views/workload-template/workload-template-new-app.vue";
-import WorkloadTemplateNew from "@/views/workload-template/workload-template-new.vue";
 import WorkloadTemplateHybridNew from "@/views/workload-template/workload-template-hybrid/template-hybrid-new.vue";
-import WorkloadTemplateAssetsApp from "@/views/workload-template/workload-template-assets-app.vue";
 import WorkloadTemplateTrainingHybrid from "@/views/workload-template/workload-template-hybrid/template-training-hybrid.vue";
 import WorkloadTemplateWorkspaceHybrid from "@/views/workload-template/workload-template-hybrid/template-workspace-hybrid.vue";
 import WorkloadTemplateDistributedHybrid from "@/views/workload-template/workload-template-hybrid/template-distributed-hybrid.vue";
 import { START_LOCATION, type RunaiRouteRecord } from "vue-router";
 import { EMenuSubjectNames } from "@/components/infra/runai-layout/routes-model/routes-model";
 import { USER_SETTINGS_ROUTE_NAMES } from "../user-settings.routes/user-settings.routes.names";
-import TemplateIndexWrapper from "@/views/workload-template/template-index-wrapper.vue";
+import TemplateIndex from "@/views/workload-template/workload-template-hybrid/template-index.vue";
 import { inferenceTemplateRoutes } from "./inference-routes/workload-template.routes";
 
 export const workloadTemplateRoutes: RunaiRouteRecord = {
@@ -30,7 +27,7 @@ export const workloadTemplateRoutes: RunaiRouteRecord = {
     {
       path: "",
       name: WORKLOAD_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_INDEX,
-      component: TemplateIndexWrapper,
+      component: TemplateIndex,
       meta: {
         pageTitle: "Templates",
         resourceType: ResourceType.Templates,
@@ -38,33 +35,6 @@ export const workloadTemplateRoutes: RunaiRouteRecord = {
         requiresAuth: true,
         parentSubject: EMenuSubjectNames.WORKLOADS_MANAGER,
       },
-    },
-    {
-      path: "new",
-      name: WORKLOAD_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_NEW_APP,
-      component: WorkloadTemplateNewApp,
-      children: [
-        {
-          path: "",
-          name: WORKLOAD_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_NEW,
-          component: WorkloadTemplateNew,
-          meta: {
-            pageTitle: "New template",
-            fullWidth: true,
-            requestToLeave: true,
-            backPageName: WORKLOAD_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_INDEX,
-            resourceType: ResourceType.Templates,
-            minPermittedActions: [Action.Create, Action.Update],
-            requiresAuth: true,
-            parentSubject: EMenuSubjectNames.WORKLOADS_MANAGER,
-          },
-        },
-        {
-          path: "assets",
-          name: WORKLOAD_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_ASSETS_APP,
-          component: WorkloadTemplateAssetsApp,
-        },
-      ],
     },
     {
       path: "workspace",

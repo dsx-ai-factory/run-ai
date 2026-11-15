@@ -478,7 +478,7 @@ type UnifiedAPIServicer interface {
 // while the service implementation can be ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
 type WorkloadActionsAPIServicer interface {
-	GetWorkloadActionsHistory(context.Context, string, int32, int32) (ImplResponse, error)
+	GetWorkloadActionsHistory(context.Context, string, int32, int32, string, string, []string, string) (ImplResponse, error)
 	InternalCreateWorkloadActions(context.Context, CreateWorkloadActionsRequest) (ImplResponse, error)
 }
 

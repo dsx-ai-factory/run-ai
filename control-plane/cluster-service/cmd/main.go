@@ -160,7 +160,7 @@ func initServices(ctx context.Context) *services.ClusterServiceServices {
 	healthApiService := services.NewHealthApiService()
 	workloadsClient := workloads_clients.NewWorkloadsClient(appConfig.WorkloadsServiceUrl)
 	nodesApiService := services.NewNodeService(tenantSettingsClient, workloadsClient)
-	nodepoolsApiService := services.NewNodePoolsApiService(tenantSettingsClient, orgUnitClient)
+	nodepoolsApiService := services.NewNodePoolsApiService(tenantSettingsClient, orgUnitClient, authorizationClient)
 	nodepoolSync := clustersync.NewNodePoolsSync(nodepoolsApiService)
 	go nodepoolSync.Start()
 

@@ -32,12 +32,12 @@ describe("node label autocomplete", () => {
     await state.searchValues("H");
     await state.moreValues();
     expect(nodeLabelsService.values).toHaveBeenNthCalledWith(1, "cluster-a", "nvidia.com/gpu.product", {
-      contains: "H",
+      search: "H",
       offset: 0,
       limit: 50,
     });
     expect(nodeLabelsService.values).toHaveBeenNthCalledWith(2, "cluster-a", "nvidia.com/gpu.product", {
-      contains: "H",
+      search: "H",
       offset: 50,
       limit: 50,
     });

@@ -5568,6 +5568,7 @@ components:
         serviceProviderMetadataUrl: serviceProviderMetadataUrl
         singleSignOnServiceUrl: singleSignOnServiceUrl
         entityId: entityId
+        certificateExpirationDate: 2000-01-23T04:56:07.000+00:00
       nullable: true
       properties:
         signingCertificate:
@@ -5583,6 +5584,10 @@ components:
           description: Whether the signature of SAML responses from the identity provider
             is validated
           type: boolean
+        certificateExpirationDate:
+          description: The expiration date of the signing certificate
+          format: date-time
+          type: string
       required:
       - validateSignature
       type: object
@@ -5712,6 +5717,7 @@ components:
           serviceProviderMetadataUrl: serviceProviderMetadataUrl
           singleSignOnServiceUrl: singleSignOnServiceUrl
           entityId: entityId
+          certificateExpirationDate: 2000-01-23T04:56:07.000+00:00
         ocpData:
           clientId: clientId
           idpBaseUrl: idpBaseUrl
@@ -5976,6 +5982,8 @@ components:
       properties:
         alias:
           type: string
+        samlData:
+          $ref: '#/components/schemas/SamlData'
       required:
       - alias
       type: object
@@ -6617,11 +6625,14 @@ components:
       minItems: 0
       type: array
     ClientType:
+      description: The kind of client to create. Application is a deprecated alias
+        of ServiceAccount and is kept so existing callers keep working; use ServiceAccount.
       enum:
       - Agent
       - WorkloadsAuth
-      - Application
       - Installer
+      - ServiceAccount
+      - Application
       type: string
     ClientAttributeCreationRequest:
       properties:

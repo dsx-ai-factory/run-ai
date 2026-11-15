@@ -53,7 +53,7 @@ runai inference nim submit <workload-name> -p <project-name> -i nvcr.io/nim/meta
       --gpu-memory-portion-request positiveFloat   GPU memory fraction to allocate per device (between 0 and 1, e.g. 0.5).
       --gpu-memory-request string                  Amount of GPU memory to allocate (e.g. 1G, 500M).
       --gpu-request-type string                    Type of GPU request: portion, memory
-  -h, --help                                       help for submit
+  -h, --help[=true|false]                          help for submit
   -i, --image string                               The container image to use for the workload.
       --image-pull-policy string                   Image pull policy for the container. Valid values: Always, IfNotPresent, Never.
       --image-pull-secret stringArray              Image pull secrets
@@ -77,18 +77,18 @@ runai inference nim submit <workload-name> -p <project-name> -i nvcr.io/nim/meta
       --scale-window-seconds int32                 The duration (in seconds) for which the autoscaler considers past metrics when making scaling decisions.
       --serving-port string                        Serving port options. Simplified: --serving-port=PORT. Full: --serving-port=port=PORT,[grpc-port=GRPC_PORT],[metrics-port=METRICS_PORT],[expose-externally],[exposed-url=URL],[exposed-protocol=http|grpc],[service-type=ClusterIP|NodePort|LoadBalancer|ExternalName]
       --toleration stringArray                     Add Kubernetes tolerations. Format: operator=Equal|Exists,key=KEY,[value=VALUE],[effect=NoSchedule|NoExecute|PreferNoSchedule],[seconds=SECONDS].
-      --use-name-as-prefix                         Use the provided workload name as a prefix and generate a unique suffix
+      --use-name-as-prefix[=true|false]            Use the provided workload name as a prefix and generate a unique suffix
       --workers int32                              Number of worker nodes for multi-node NIM. Cannot be used with autoscaling (--min-replicas/--max-replicas)
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --config-file string   config file name; can be set by environment variable RUNAI_CLI_CONFIG_FILE (default "config.json")
-      --config-path string   config path; can be set by environment variable RUNAI_CLI_CONFIG_PATH
-  -d, --debug                enable debug mode
-  -q, --quiet                enable quiet mode, suppress all output except error messages
-      --verbose              enable verbose mode
+      --config-file string     config file name; can be set by environment variable RUNAI_CLI_CONFIG_FILE (default "config.json")
+      --config-path string     config path; can be set by environment variable RUNAI_CLI_CONFIG_PATH
+  -d, --debug[=true|false]     enable debug mode
+  -q, --quiet[=true|false]     enable quiet mode, suppress all output except error messages
+      --verbose[=true|false]   enable verbose mode
 ```
 
 ### SEE ALSO

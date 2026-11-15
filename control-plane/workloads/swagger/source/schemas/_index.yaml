@@ -218,8 +218,6 @@ EnablePoliciesSetting:
   $ref: './Settings/EnablePoliciesSetting.yaml'
 WorkloadSubmissionV2EnabledSetting:
   $ref: './Settings/WorkloadSubmissionV2EnabledSetting.yaml'
-EnableTemplatesV2Setting:
-  $ref: './Settings/EnableTemplatesV2Setting.yaml'
 EnableHybridSubmissionSetting:
   $ref: './Settings/EnableHybridSubmissionSetting.yaml'
 GpuOverProvisioningSetting:

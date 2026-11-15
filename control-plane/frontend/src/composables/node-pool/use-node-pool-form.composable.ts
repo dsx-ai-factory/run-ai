@@ -10,10 +10,10 @@ import { errorMessages } from "@/common/error-message.constant";
 import { deepCopy } from "@/utils/common.util";
 import { filterUtil } from "@/utils/filter.util/filter.util";
 import { NodepoolSortFilterFields, type Nodepool } from "@/swagger-models/cluster-service-client";
-import { createNodePoolDraft } from "@/utils/node-pool.util/node-pool.util";
+import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
 
 export function useNodePoolForm(clusterId: string) {
-  const draft = reactive(createNodePoolDraft(clusterId));
+  const draft = reactive(nodePoolUtil.createNodePoolDraft(clusterId));
   const pools = ref<Nodepool[]>([]);
   const loading = ref(false);
   const loadError = ref("");

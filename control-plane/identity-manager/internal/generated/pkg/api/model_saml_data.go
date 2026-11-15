@@ -13,6 +13,10 @@
 
 package api
 
+import (
+	"time"
+)
+
 ////////////////////////// RUNAI START (18.1) ////////////////////////////
 import runaihttp "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp"
 
@@ -48,6 +52,12 @@ type SamlData struct {
 	//ValidateSignature bool `json:"validateSignature"`
 	ValidateSignature bool `json:"validateSignature" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// The expiration date of the signing certificate
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//CertificateExpirationDate time.Time `json:"certificateExpirationDate,omitempty"`
+	CertificateExpirationDate time.Time `json:"certificateExpirationDate,omitempty" gorm:"not null;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertSamlDataRequired checks if the required fields are not zero-ed
@@ -66,6 +76,11 @@ func AssertSamlDataRequired(obj SamlData) error {
 
 // AssertSamlDataConstraints checks if the values respects the defined constraints
 func AssertSamlDataConstraints(obj SamlData) error {
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////

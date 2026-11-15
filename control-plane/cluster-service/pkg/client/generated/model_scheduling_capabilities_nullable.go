@@ -29,6 +29,8 @@ type SchedulingCapabilitiesNullable struct {
 	Quota NullableBool `json:"quota,omitempty"`
 	// Whether to allow CPU quota for the nodepool's resources. Only allowed when allowQuota=true.
 	CpuQuota NullableBool `json:"cpuQuota,omitempty"`
+	// Whether to allow GPU, CPU and memory limits for the nodepool's resources. Only allowed when quota=true.
+	Limits NullableBool `json:"limits,omitempty"`
 }
 
 // NewSchedulingCapabilitiesNullable instantiates a new SchedulingCapabilitiesNullable object
@@ -45,6 +47,8 @@ func NewSchedulingCapabilitiesNullable() *SchedulingCapabilitiesNullable {
 	this.Quota = *NewNullableBool(&quota)
 	var cpuQuota bool = false
 	this.CpuQuota = *NewNullableBool(&cpuQuota)
+	var limits bool = true
+	this.Limits = *NewNullableBool(&limits)
 	return &this
 }
 
@@ -61,6 +65,8 @@ func NewSchedulingCapabilitiesNullableWithDefaults() *SchedulingCapabilitiesNull
 	this.Quota = *NewNullableBool(&quota)
 	var cpuQuota bool = false
 	this.CpuQuota = *NewNullableBool(&cpuQuota)
+	var limits bool = true
+	this.Limits = *NewNullableBool(&limits)
 	return &this
 }
 
@@ -236,6 +242,49 @@ func (o *SchedulingCapabilitiesNullable) UnsetCpuQuota() {
 	o.CpuQuota.Unset()
 }
 
+// GetLimits returns the Limits field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *SchedulingCapabilitiesNullable) GetLimits() bool {
+	if o == nil || IsNil(o.Limits.Get()) {
+		var ret bool
+		return ret
+	}
+	return *o.Limits.Get()
+}
+
+// GetLimitsOk returns a tuple with the Limits field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *SchedulingCapabilitiesNullable) GetLimitsOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Limits.Get(), o.Limits.IsSet()
+}
+
+// HasLimits returns a boolean if a field has been set.
+func (o *SchedulingCapabilitiesNullable) HasLimits() bool {
+	if o != nil && o.Limits.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetLimits gets a reference to the given NullableBool and assigns it to the Limits field.
+func (o *SchedulingCapabilitiesNullable) SetLimits(v bool) {
+	o.Limits.Set(&v)
+}
+
+// SetLimitsNil sets the value for Limits to be an explicit nil
+func (o *SchedulingCapabilitiesNullable) SetLimitsNil() {
+	o.Limits.Set(nil)
+}
+
+// UnsetLimits ensures that no value is present for Limits, not even an explicit nil
+func (o *SchedulingCapabilitiesNullable) UnsetLimits() {
+	o.Limits.Unset()
+}
+
 func (o SchedulingCapabilitiesNullable) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -257,6 +306,9 @@ func (o SchedulingCapabilitiesNullable) ToMap() (map[string]interface{}, error) 
 	}
 	if o.CpuQuota.IsSet() {
 		toSerialize["cpuQuota"] = o.CpuQuota.Get()
+	}
+	if o.Limits.IsSet() {
+		toSerialize["limits"] = o.Limits.Get()
 	}
 	return toSerialize, nil
 }

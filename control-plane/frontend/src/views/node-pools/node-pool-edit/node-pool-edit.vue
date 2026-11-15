@@ -31,7 +31,7 @@ import { useQuasar } from "quasar";
 import { NodePoolEditFormV2, ENodePoolFormDestination } from "@/components/node-pools/node-pool-edit-form-v2";
 import { ENABLE_NODE_POOL_CREATE_FLOW } from "@/constants/node-pool.constants";
 import { errorMessages } from "@/common/error-message.constant";
-import type { INodePoolFormDraft } from "@/components/node-pools/node-pool-edit-form-v2";
+import type { INodePoolFormDraft } from "@/models/node-pool.model";
 import NodePoolEditForm from "@/components/node-pools/node-pool-edit-form/node-pool-edit-form.vue";
 import { useAppStore } from "@/stores/app.store";
 import { useNodePoolStore } from "@/stores/node-pool.store";

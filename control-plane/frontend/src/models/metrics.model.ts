@@ -110,6 +110,7 @@ export interface IChartItemConfigBase {
 
 export interface IChartMapItemConfig extends IChartItemConfigBase {
   data: Record<string, ChartDataMapItem>;
+  nodepoolName?: string;
 }
 
 export interface IChartArrayItemConfig extends IChartItemConfigBase {

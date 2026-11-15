@@ -50,7 +50,7 @@ func TestAccessKey_CreateAccessKey_HappyFlow(t *testing.T) {
 	require.NotNil(t, newClient.Attributes.CreatedAt)
 	require.Nil(t, newClient.Attributes.LastLogin)
 	require.Equal(t, 30*time.Minute, *newClient.Attributes.TokenLifespan)
-	require.Equal(t, realm_client.ClientTypeUserApp, *newClient.Attributes.ClientType)
+	require.Equal(t, realm_client.ClientTypeAccessKey, *newClient.Attributes.ClientType)
 	require.Equal(t, createdByUser, *newClient.Attributes.CreatedBy)
 }
 
@@ -446,7 +446,7 @@ func TestAccessKey_GetAccessKeysAdministration_ClientIdFilter_HappyFlow(t *testi
 		TenantId: ptr.To(BaseTenantId),
 		Attributes: &models.ClientAttributes{
 			CreatedBy:  ptr.To(createdBy),
-			ClientType: ptr.To(realm_client.ClientTypeUserApp),
+			ClientType: ptr.To(realm_client.ClientTypeAccessKey),
 		},
 	})
 	require.NoError(t, err)

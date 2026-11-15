@@ -314,7 +314,7 @@ const WorkspaceAssetsEdit = defineComponent({
         this.updateCreatedPvc(createdDataSourceId);
       }
 
-      this.computeSectionOptions.applyPolicyDefaults = !!fromCopyId || !!this.workspaceStore.templateId;
+      this.computeSectionOptions.applyPolicyDefaults = !!fromCopyId;
 
       this.cleanupNoneComplianceAssets();
     } catch (error: unknown) {

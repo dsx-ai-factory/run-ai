@@ -1,0 +1,6 @@
+name: sortBy
+in: query
+description: Field to sort by. Defaults to acceptedAt.
+schema:
+  type: string
+  enum: [acceptedAt, action, subject]

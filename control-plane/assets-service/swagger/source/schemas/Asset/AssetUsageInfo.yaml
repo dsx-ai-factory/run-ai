@@ -20,11 +20,6 @@ properties:
     type: array
     items:
       $ref: "../Workload/WorkloadRefAndStatus.yaml"
-  templates:
-    description: templates that rely on this asset.
-    type: array
-    items:
-      $ref: "./AssetRef.yaml"
   assets:
     description: list of other assets that use this asset. 
       specifically, accessKeys used by s3, and passwords used by git.

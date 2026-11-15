@@ -92,12 +92,6 @@ func Pre(cmd *cobra.Command, args []string) error {
 		return cmdtxn.CmdErrorValidationMessage(cmd, "Error: %v", errors.New(errEmptyTemplateFlag))
 	}
 
-	// Process the --environment flag values to separate env vars from asset names
-	err = Spec.ProcessRawEnvironment(cmd.ErrOrStderr())
-	if err != nil {
-		return cmdtxn.CmdErrorPrintAndSet(cmd, consts.FailedToSubmit, err)
-	}
-
 	err = Spec.Validate()
 	if err != nil {
 		return cmdtxn.CmdErrorVersionMessage(cmd, err)

@@ -1106,10 +1106,13 @@ var _ = Describe("Parsers", Ordered, func() {
 			Expect(parsedNodeInfo.Numa.Get()).To(BeNil())
 		})
 
-		It("Parse nodes to Sync Request", func() {
+		It("includes each node's labels and status in the sync request", func() {
+			By("Preparing two nodes with different labels and marking the second node unschedulable")
 			node.Status.Conditions = []corev1.NodeCondition{readyCondition}
 			node.Spec.Taints = []corev1.Taint{}
 			node2 := node.DeepCopy()
+			node.Labels["gpu-type"] = "a100"
+			node2.Labels["gpu-type"] = "h100"
 
 			node2Name := "node2"
 			node2.Name = node2Name
@@ -1126,16 +1129,20 @@ var _ = Describe("Parsers", Ordered, func() {
 			fakeCachedClient = fakecachedclient.NewFakeCachedClient(fakeClientBuilder)
 			nodeParser = parsers.NewNodeParser(fakeCachedClient)
 
+			By("Converting both nodes into entries for one sync request")
 			nodeNamesMap, parsedNodesInfo := nodeParser.ParseNodesToServerScheme([]corev1.Node{*node2, *node})
 
+			By("Checking that both node names are included")
 			Expect(nodeNamesMap).To(HaveLen(2))
 			Expect(nodeNamesMap).To(HaveKey(node2Name))
 			Expect(nodeNamesMap).To(HaveKey(nodeName))
 
 			Expect(parsedNodesInfo).To(HaveLen(2))
+			By("Checking that the unschedulable node keeps its labels and NotReady status")
 			Expect(parsedNodesInfo[0]).To(Equal(clustersvcswagger.NodeForSync{
 				Name: node2Name,
 				NodeInfo: clustersvcswagger.NodeInfo{
+					Labels: utils.Ref(node2.Labels),
 					Status: parsers.NotReadyPhase,
 					Conditions: []clustersvcswagger.NodeStatusConditionDetails{
 						{
@@ -1151,9 +1158,12 @@ var _ = Describe("Parsers", Ordered, func() {
 					NvLinkCliqueId:  *clustersvcswagger.NewNullableString(nil),
 				},
 			}))
+
+			By("Checking that the other node keeps its own labels and Ready status")
 			Expect(parsedNodesInfo[1]).To(Equal(clustersvcswagger.NodeForSync{
 				Name: nodeName,
 				NodeInfo: clustersvcswagger.NodeInfo{
+					Labels:          utils.Ref(node.Labels),
 					Status:          parsers.ReadyPhase,
 					Conditions:      []clustersvcswagger.NodeStatusConditionDetails{},
 					Taints:          []clustersvcswagger.NodeTaint{},

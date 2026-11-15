@@ -70,14 +70,14 @@ func (_e *Logger_Expecter) Debugf(format any, args ...any) *Logger_Debugf_Call {
 }
 
 func (_c *Logger_Debugf_Call) Run(run func(format string, args ...any)) *Logger_Debugf_Call {
-	_c.Call.Run(func(args mock.Arguments) {
+	_c.Call.Run(func(args1 mock.Arguments) {
 		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
+		if args1[0] != nil {
+			arg0 = args1[0].(string)
 		}
 		var arg1 []any
-		variadicArgs := make([]any, len(args)-1)
-		for i, a := range args[1:] {
+		variadicArgs := make([]any, len(args1)-1)
+		for i, a := range args1[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(any)
 			}
@@ -124,14 +124,14 @@ func (_e *Logger_Expecter) Errorf(format any, args ...any) *Logger_Errorf_Call {
 }
 
 func (_c *Logger_Errorf_Call) Run(run func(format string, args ...any)) *Logger_Errorf_Call {
-	_c.Call.Run(func(args mock.Arguments) {
+	_c.Call.Run(func(args1 mock.Arguments) {
 		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
+		if args1[0] != nil {
+			arg0 = args1[0].(string)
 		}
 		var arg1 []any
-		variadicArgs := make([]any, len(args)-1)
-		for i, a := range args[1:] {
+		variadicArgs := make([]any, len(args1)-1)
+		for i, a := range args1[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(any)
 			}
@@ -178,14 +178,14 @@ func (_e *Logger_Expecter) Infof(format any, args ...any) *Logger_Infof_Call {
 }
 
 func (_c *Logger_Infof_Call) Run(run func(format string, args ...any)) *Logger_Infof_Call {
-	_c.Call.Run(func(args mock.Arguments) {
+	_c.Call.Run(func(args1 mock.Arguments) {
 		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
+		if args1[0] != nil {
+			arg0 = args1[0].(string)
 		}
 		var arg1 []any
-		variadicArgs := make([]any, len(args)-1)
-		for i, a := range args[1:] {
+		variadicArgs := make([]any, len(args1)-1)
+		for i, a := range args1[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(any)
 			}
@@ -232,14 +232,14 @@ func (_e *Logger_Expecter) Warnf(format any, args ...any) *Logger_Warnf_Call {
 }
 
 func (_c *Logger_Warnf_Call) Run(run func(format string, args ...any)) *Logger_Warnf_Call {
-	_c.Call.Run(func(args mock.Arguments) {
+	_c.Call.Run(func(args1 mock.Arguments) {
 		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
+		if args1[0] != nil {
+			arg0 = args1[0].(string)
 		}
 		var arg1 []any
-		variadicArgs := make([]any, len(args)-1)
-		for i, a := range args[1:] {
+		variadicArgs := make([]any, len(args1)-1)
+		for i, a := range args1[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(any)
 			}

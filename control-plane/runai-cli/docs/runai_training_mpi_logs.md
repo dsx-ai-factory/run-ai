@@ -46,29 +46,29 @@ runai training mpi logs <workload-name> --wait-timeout=30s
 ### Options
 
 ```
-  -c, --container string        The name of the container within the pod.
-  -f, --follow                  Stream logs in real time.
-  -h, --help                    help for logs
-      --limit-bytes int         Maximum bytes of logs to return. Defaults to no limit (e.g, 20, 2000).
-      --name string             The name of the workload. Must match the name used at submission.
-      --pod string              The pod ID. If not specified, the first pod will be used.
-      --previous                Show logs from the previous instance of the pod, if it was restarted.
-  -p, --project string          Specify the project for the command to use. Defaults to the project set in the context, if any. Use 'runai project set <project>' to set the default.
-      --since duration          Show logs newer than a relative duration (e.g., 5s, 2m, 3h).
-      --since-time string       Show logs generated after a specific RFC3339 timestamp (e.g. 2025-05-25T14:30:00Z).
-  -t, --tail int                The number of log lines to display from the end of the logs. Use -1 to show all lines. (default -1)
-      --timestamps              Include timestamps in log output.
-      --wait-timeout duration   Timeout while waiting for the workload to become ready for log streaming (e.g., 5s, 2m, 3h).
+  -c, --container string          The name of the container within the pod.
+  -f, --follow[=true|false]       Stream logs in real time.
+  -h, --help[=true|false]         help for logs
+      --limit-bytes int           Maximum bytes of logs to return. Defaults to no limit (e.g, 20, 2000).
+      --name string               The name of the workload. Must match the name used at submission.
+      --pod string                The pod ID. If not specified, the first pod will be used.
+      --previous[=true|false]     Show logs from the previous instance of the pod, if it was restarted.
+  -p, --project string            Specify the project for the command to use. Defaults to the project set in the context, if any. Use 'runai project set <project>' to set the default.
+      --since duration            Show logs newer than a relative duration (e.g., 5s, 2m, 3h).
+      --since-time string         Show logs generated after a specific RFC3339 timestamp (e.g. 2025-05-25T14:30:00Z).
+  -t, --tail int                  The number of log lines to display from the end of the logs. Use -1 to show all lines. (default -1)
+      --timestamps[=true|false]   Include timestamps in log output.
+      --wait-timeout duration     Timeout while waiting for the workload to become ready for log streaming (e.g., 5s, 2m, 3h).
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --config-file string   config file name; can be set by environment variable RUNAI_CLI_CONFIG_FILE (default "config.json")
-      --config-path string   config path; can be set by environment variable RUNAI_CLI_CONFIG_PATH
-  -d, --debug                enable debug mode
-  -q, --quiet                enable quiet mode, suppress all output except error messages
-      --verbose              enable verbose mode
+      --config-file string     config file name; can be set by environment variable RUNAI_CLI_CONFIG_FILE (default "config.json")
+      --config-path string     config path; can be set by environment variable RUNAI_CLI_CONFIG_PATH
+  -d, --debug[=true|false]     enable debug mode
+  -q, --quiet[=true|false]     enable quiet mode, suppress all output except error messages
+      --verbose[=true|false]   enable verbose mode
 ```
 
 ### SEE ALSO

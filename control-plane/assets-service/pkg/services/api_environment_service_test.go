@@ -638,22 +638,6 @@ var _ = Describe("environment specific tests", func() {
 		})
 	})
 
-	Context("delete env asset used by template(s)", func() {
-		It("should fail on precondition ", func() {
-			env, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-			template, _, _ := createTemplateAsset(buildRandomProjectTemplate(randoms, env.Meta.Id), router, headerForAdmin(randoms))
-
-			deleteHttpReq, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", urlEnvironment, env.Meta.Id), nil)
-			Expect(err).To(BeNil())
-			deleteHttpReq.Header = *headerForAdmin(randoms)
-
-			deleteHttpResp := httptest.NewRecorder()
-			router.ServeHTTP(deleteHttpResp, deleteHttpReq)
-			Expect(deleteHttpResp.Code).To(Equal(http.StatusPreconditionFailed))
-			Expect(deleteHttpResp.Body.String()).To(ContainSubstring("the requested environment asset is being used by template '%s'", template.Meta.Name))
-		})
-	})
-
 	Context("container port out of range", func() {
 		It("should fail on validation ", func() {
 			creationReq := buildRandomTenantEnvironmentAsset(randoms)
@@ -1437,4 +1421,21 @@ func expectConnectionValidationError(creationReq api.EnvironmentCreationRequest,
 	Expect(respJsonErr).To(BeNil())
 	Expect(createHttpResp.Code).To(Equal(http.StatusBadRequest))
 	Expect(createHttpResp.Body.String()).To(ContainSubstring(errText))
+}
+
+func randomSpecificEnv() *api.SpecificRunParams {
+	return &api.SpecificRunParams{
+		Command: convutils.Ref(testutils.RandString(12)),
+		Args:    convutils.Ref(testutils.RandString(12)),
+		EnvironmentVariables: &[]api.EnvironmentVariableOfAsset{
+			{
+				Name:  convutils.Ref(testutils.RandString(5)),
+				Value: convutils.Ref(testutils.RandString(8)),
+			},
+			{
+				Name:  convutils.Ref(testutils.RandString(5)),
+				Value: convutils.Ref(testutils.RandString(8)),
+			},
+		},
+	}
 }

@@ -4,10 +4,19 @@
  */
 
 import type { IStatusColOptions } from "@/models/table.model";
-import { NodepoolGPUNetworkAccelerationDetection, NodepoolPhase } from "@/swagger-models/cluster-service-client";
+import {
+  type NodepoolCreateFields,
+  type SchedulingCapabilitiesNullable,
+  NodepoolGPUNetworkAccelerationDetection,
+  NodepoolPhase,
+} from "@/swagger-models/cluster-service-client";
 import type { ISelectOption } from "@/models/global.model";
 import { docsUtil } from "@/utils/docs.util/docs.util";
 import DOCS from "@/constants/docs";
+
+export interface INodePoolFormDraft extends NodepoolCreateFields {
+  description: string;
+}
 
 export enum PlacementStrategy {
   Binpack = "binpack",
@@ -188,9 +197,8 @@ export const NODE_POOL_NETWORK_DISCOVERY_OPTIONS: ISelectOption[] = [
 
 export const EMPTY_PRIORITY_LABEL = "empty";
 
-import type { NodepoolCreateFields, SchedulingCapabilitiesNullable } from "@/swagger-models/cluster-service-client";
-// TODO: include limits: false after #4369 merges, including isProportional.
 export const PROPORTIONAL_CAPABILITIES = Object.freeze({
+  limits: false,
   adjustableWeights: true,
   quota: false,
   ranks: false,
@@ -212,7 +220,8 @@ export function isProportional(capabilities?: SchedulingCapabilitiesNullable): b
     capabilities?.adjustableWeights === true &&
     capabilities.quota === false &&
     capabilities.ranks === false &&
-    capabilities.cpuQuota === false
+    capabilities.cpuQuota === false &&
+    capabilities.limits !== true
   );
 }
 export interface INodePoolSummaryConfiguration extends NodepoolCreateFields {
@@ -234,6 +243,8 @@ export const NETWORK_ACCELERATION_LABELS: Record<NodepoolGPUNetworkAccelerationD
   [NodepoolGPUNetworkAccelerationDetection.DontUse]: "Is not present",
 };
 
+export type NodePoolSchedulingMode = "proportional" | "ranked" | "guaranteed";
+
 export enum ENodePoolSchedulingMode {
   Unknown = "Unknown",
   Guaranteed = "Guaranteed quota",
@@ -244,24 +255,16 @@ export enum ENodePoolSchedulingMode {
 
 export function getSchedulingMode(capabilities?: SchedulingCapabilitiesNullable): ENodePoolSchedulingMode {
   if (!capabilities) return ENodePoolSchedulingMode.Unknown;
-  if (capabilities.quota && capabilities.ranks) return ENodePoolSchedulingMode.Guaranteed;
-  if (
-    capabilities.quota === false &&
-    capabilities.ranks &&
-    capabilities.adjustableWeights &&
-    capabilities.cpuQuota === false
-  )
-    return ENodePoolSchedulingMode.Ranked;
+  if (capabilities.quota) return ENodePoolSchedulingMode.Guaranteed;
+  if (capabilities.quota === false && capabilities.ranks) return ENodePoolSchedulingMode.Ranked;
   if (isProportional(capabilities)) return ENodePoolSchedulingMode.Proportional;
   return ENodePoolSchedulingMode.Custom;
 }
 
 export const SCHEDULING_MODE_DESCRIPTIONS: Partial<Record<ENodePoolSchedulingMode, string>> = {
+  Ranked: "Higher-ranked departments and projects receive GPU resources first. Remaining capacity goes to lower-ranked ones, in rank order.",
+  "Guaranteed quota": "Each department has a guaranteed GPU quota. Any unused quota is redistributed by rank and weight.",
   Proportional: "GPU resources are distributed proportionally according to each department's and project's weight.",
-  Ranked:
-    "Higher-ranked departments and projects receive GPU resources first. Remaining capacity goes to lower-ranked ones, in rank order.",
-  "Guaranteed quota":
-    "Each department has a guaranteed GPU quota. Any unused quota is redistributed by rank and weight.",
 };
 
 export const NODE_POOL_LABEL_REGEX = {

@@ -88,18 +88,6 @@ func TestWorkloadsAdapter_UpdateSetting_WorkloadSubmissionV2Enabled(t *testing.T
 	assert.Equal(t, true, ts.lastBody["enabled"])
 }
 
-func TestWorkloadsAdapter_UpdateSetting_EnableTemplatesV2(t *testing.T) {
-	ts := newWorkloadsAdapterTestServer(http.StatusOK)
-	defer ts.server.Close()
-	adapter := newWorkloadsAdapterWithServer(ts)
-
-	err := adapter.UpdateSetting(context.Background(), testWorkloadsTenantID, settings.SettingKeyEnableTemplatesV2, true)
-
-	assert.NoError(t, err)
-	assert.Equal(t, "/api/v1/workloads/settings/enableTemplatesV2", ts.lastPath)
-	assert.Equal(t, true, ts.lastBody["enabled"])
-}
-
 func TestWorkloadsAdapter_UpdateSetting_EnableHybridSubmission(t *testing.T) {
 	ts := newWorkloadsAdapterTestServer(http.StatusOK)
 	defer ts.server.Close()

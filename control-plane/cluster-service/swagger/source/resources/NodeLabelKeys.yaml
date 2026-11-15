@@ -1,0 +1,35 @@
+get:
+  summary: Get node label keys.
+  description: Return unique, sorted label keys up to 253 characters long from nodes in the selected cluster.
+  operationId: get_node_label_keys
+  x-service: cluster-service
+  x-test-coverage:
+    - control-plane/cluster-service/pkg/services/api_nodes_labels_test.go
+  x-authorize:
+    resource-type: nodes
+    action: read
+  tags:
+    - Nodes
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Search.yaml'
+  responses:
+    200:
+      description: Matching label keys. Returns an empty array when no keys match.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Nodes/NodeLabelOptions.yaml'
+          example: [gpu-type, nvidia.com/gpu.product]
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

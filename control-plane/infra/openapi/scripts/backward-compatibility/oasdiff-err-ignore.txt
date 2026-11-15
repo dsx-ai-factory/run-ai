@@ -6,3 +6,8 @@
 # along with the feature. No caller sorts or filters by them.
 in API GET /api/v1/node-pools removed the enum value 'swapEnabled' from the 'query' request parameter 'sortBy'
 in API GET /api/v1/node-pools removed the enum value 'nodeLevelSchedulerEnabled' from the 'query' request parameter 'sortBy'
+
+# Legacy asset-based templates are retired, including the setting that selected
+# between legacy and flexible workload templates.
+in API GET /api/v1/workloads/settings/{key} removed the enum value 'enableTemplatesV2' from the 'path' request parameter 'key'
+in API PUT /api/v1/workloads/settings/{key} removed the enum value 'enableTemplatesV2' from the 'path' request parameter 'key'

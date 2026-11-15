@@ -8,6 +8,7 @@ package parsers
 import (
 	"context"
 	"fmt"
+	"maps"
 	"strconv"
 	"strings"
 	"sync"
@@ -188,6 +189,8 @@ func getTopologyManagerPolicy(node *corev1.Node) *swagger.TopologyManagerPolicy 
 }
 
 func (nodeParser *NodeParser) ParseNodeToServerScheme(node *corev1.Node) swagger.NodeInfo {
+	labels := map[string]string{}
+	maps.Copy(labels, node.Labels)
 	conditions := nodeParser.calculateNodeConditions(node)
 
 	nodePhase := getReadinessPhase(conditions)
@@ -195,6 +198,7 @@ func (nodeParser *NodeParser) ParseNodeToServerScheme(node *corev1.Node) swagger
 	domainUid, cliqueId := tryGetNVLinkValues(node)
 	// Parse Node label <gpuNetworkAccelerationLabelKey> value and set relevant fields
 	nodeInfo := swagger.NodeInfo{
+		Labels:     ptr.To(labels),
 		Status:     nodePhase,
 		Conditions: conditions,
 		Taints:     parseTaints(node.Spec.Taints),

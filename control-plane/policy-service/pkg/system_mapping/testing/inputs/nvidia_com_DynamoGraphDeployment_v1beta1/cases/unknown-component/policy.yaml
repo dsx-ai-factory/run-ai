@@ -1,0 +1,17 @@
+description: A missing component name must not modify another component or create one.
+effectiveRules:
+  - field: serviceAccountName
+    specSelector: componentPodSpec
+    selectorParams:
+      componentName: missing
+    enforcements:
+      - set:
+          value: inference-sa
+  - field: image
+    specSelector: componentAppContainerByName
+    selectorParams:
+      componentName: component-b
+      containerName: missing
+    enforcements:
+      - set:
+          value: example/missing:test

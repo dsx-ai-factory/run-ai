@@ -26,6 +26,11 @@ type IdpPostResponse struct {
 	//Alias string `json:"alias"`
 	Alias string `json:"alias" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//SamlData *SamlData `json:"samlData,omitempty"`
+	SamlData *SamlData `json:"samlData,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertIdpPostResponseRequired checks if the required fields are not zero-ed
@@ -39,6 +44,11 @@ func AssertIdpPostResponseRequired(obj IdpPostResponse) error {
 		}
 	}
 
+	if obj.SamlData != nil {
+		if err := AssertSamlDataRequired(*obj.SamlData); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -49,5 +59,15 @@ func AssertIdpPostResponseConstraints(obj IdpPostResponse) error {
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.SamlData != nil {
+		if err := AssertSamlDataConstraints(*obj.SamlData); err != nil {
+			return err
+		}
+	}
 	return nil
 }

@@ -189,11 +189,6 @@ Class | Method | HTTP request | Description
 *SynchronizationAPI* | [**ListAssetsById**](docs/SynchronizationAPI.md#listassetsbyid) | **Get** /api/v1/asset | List assets by their ids
 *SynchronizationAPI* | [**SyncAssetsResourcesIds**](docs/SynchronizationAPI.md#syncassetsresourcesids) | **Post** /api/v1/asset/sync/asset-resources-ids | Sync asset resources ids.
 *SynchronizationAPI* | [**SyncValidate**](docs/SynchronizationAPI.md#syncvalidate) | **Post** /api/v1/asset/sync/validate | Validate assets sync.
-*TemplateAPI* | [**CreateTemplate**](docs/TemplateAPI.md#createtemplate) | **Post** /api/v1/asset/workload-template | Create a template.
-*TemplateAPI* | [**DeleteTemplateById**](docs/TemplateAPI.md#deletetemplatebyid) | **Delete** /api/v1/asset/workload-template/{AssetId} | Delete a template.
-*TemplateAPI* | [**GetTemplateById**](docs/TemplateAPI.md#gettemplatebyid) | **Get** /api/v1/asset/workload-template/{AssetId} | Get a template.
-*TemplateAPI* | [**ListTemplates**](docs/TemplateAPI.md#listtemplates) | **Get** /api/v1/asset/workload-template | List templates.
-*TemplateAPI* | [**UpdateTemplate**](docs/TemplateAPI.md#updatetemplate) | **Put** /api/v1/asset/workload-template/{AssetId} | Update a template.
 *TrainingsAPI* | [**CreateTraining**](docs/TrainingsAPI.md#createtraining) | **Post** /api/v1/training | Create training workload.
 *TrainingsAPI* | [**CreateTrainingV2**](docs/TrainingsAPI.md#createtrainingv2) | **Post** /api/v2/training | Create a training - assets based [Experimental]
 *TrainingsAPI* | [**DeleteDistributedById**](docs/TrainingsAPI.md#deletedistributedbyid) | **Delete** /v1/k8s/clusters/{clusterUuid}/distributed/{workloadId} | Delete a distributed, per cluster sync update [Obsolete]
@@ -604,7 +599,6 @@ Class | Method | HTTP request | Description
  - [SpecificRunAutoScalingAutoScaling](docs/SpecificRunAutoScalingAutoScaling.md)
  - [SpecificRunConnectionInfo](docs/SpecificRunConnectionInfo.md)
  - [SpecificRunConnections](docs/SpecificRunConnections.md)
- - [SpecificRunCreationFields](docs/SpecificRunCreationFields.md)
  - [SpecificRunInfoFields](docs/SpecificRunInfoFields.md)
  - [SpecificRunMetricFields](docs/SpecificRunMetricFields.md)
  - [SpecificRunParamAttrDefaults](docs/SpecificRunParamAttrDefaults.md)
@@ -652,10 +646,6 @@ Class | Method | HTTP request | Description
  - [WorkloadState](docs/WorkloadState.md)
  - [WorkloadStatusUpdate](docs/WorkloadStatusUpdate.md)
  - [WorkloadSupportedTypes](docs/WorkloadSupportedTypes.md)
- - [WorkloadTemplate](docs/WorkloadTemplate.md)
- - [WorkloadTemplateCreationRequest](docs/WorkloadTemplateCreationRequest.md)
- - [WorkloadTemplateListResponse](docs/WorkloadTemplateListResponse.md)
- - [WorkloadTemplateUpdateRequest](docs/WorkloadTemplateUpdateRequest.md)
  - [WorkloadType](docs/WorkloadType.md)
  - [Workspace](docs/Workspace.md)
  - [WorkspaceCreationRequestV2](docs/WorkspaceCreationRequestV2.md)

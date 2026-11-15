@@ -15,7 +15,7 @@ dependencies:
     condition: postgresql.enabled
   - name: keycloakx
     repository: https://codecentric.github.io/helm-charts
-    version: 7.2.0
+    version: 7.4.0
     condition: keycloakx.enabled
   - name: thanos
     repository: https://charts.bitnami.com/bitnami
@@ -24,7 +24,7 @@ dependencies:
   - name: runai-telemetry
     alias: telemetryService
     repository: https://helm.ngc.nvidia.com/nvidia/runai
-    version: 1.2.29
+    version: 1.2.35
     condition: telemetryService.enabled,supportEntitled
   - name: nats
     repository: https://charts.bitnami.com/bitnami
