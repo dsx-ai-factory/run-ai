@@ -17,6 +17,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 )
 
 var _ = Describe("GetAllComponents", func() {
@@ -335,3 +336,18 @@ func newExtractedInstanceWithFragmentedSpec(containers ...corev1.Container) kart
 		},
 	}
 }
+
+var _ = Describe("CalcInstanceReplicas", func() {
+	DescribeTable("uses explicit replicas before minimums and defaults",
+		func(scale *kartaresource.Scale, expected int32) {
+			Expect(CalcInstanceReplicas(kartaresource.ExtractedInstance{Scale: scale})).To(Equal(expected))
+		},
+		Entry("no scale", nil, int32(1)),
+		Entry("no replica counts", &kartaresource.Scale{}, int32(1)),
+		Entry("explicit replicas", &kartaresource.Scale{Replicas: ptr.To(int32(4)), MinReplicas: ptr.To(int32(2))}, int32(4)),
+		Entry("zero replicas", &kartaresource.Scale{Replicas: ptr.To(int32(0))}, int32(0)),
+		Entry("zero replicas override minimum", &kartaresource.Scale{Replicas: ptr.To(int32(0)), MinReplicas: ptr.To(int32(2))}, int32(0)),
+		Entry("minimum without replicas", &kartaresource.Scale{MinReplicas: ptr.To(int32(3))}, int32(3)),
+		Entry("zero minimum without replicas", &kartaresource.Scale{MinReplicas: ptr.To(int32(0))}, int32(0)),
+	)
+})

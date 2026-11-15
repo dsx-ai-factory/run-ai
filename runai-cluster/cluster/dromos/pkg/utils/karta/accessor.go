@@ -114,18 +114,11 @@ func containerHasNvidiaGPUResources(resources corev1.ResourceRequirements) bool 
 	return false
 }
 
+// CalcInstanceReplicas preserves replicas when set, including zero. Otherwise it
+// uses minReplicas, or 1 when neither count is set. Missing scale is treated as unset.
 func CalcInstanceReplicas(instance kartaresource.ExtractedInstance) int32 {
-	var replicas int32
-	if instance.Scale != nil {
-		replicas = ptr.Deref(instance.Scale.Replicas, 0)
-		if replicas == 0 {
-			replicas = ptr.Deref(instance.Scale.MinReplicas, 0)
-		}
-	}
-	if replicas == 0 {
-		replicas = 1
-	}
-	return replicas
+	scale := ptr.Deref(instance.Scale, kartaresource.Scale{})
+	return ptr.Deref(scale.Replicas, ptr.Deref(scale.MinReplicas, 1))
 }
 
 func getFirstInstance(instances map[string]kartaresource.ExtractedInstance) kartaresource.ExtractedInstance {

@@ -508,3 +508,25 @@ func TestDynamoWithoutGPUsAndMNNVLDisabled(t *testing.T) {
 		})
 	}
 }
+
+func TestDynamoV1beta1ZeroReplicas(t *testing.T) {
+	g := NewWithT(t)
+	ctx := context.Background()
+	obj := dynamoResource(t, true, `{"replicas":0,"type":"worker","podTemplate":{"spec":{"containers":[{"name":"main","image":"worker","resources":{"limits":{"nvidia.com/gpu":"1"}}}]}}}`)
+	runner := newTestRunner(testWorkloadName, testNamespace, newMnnvlConfig(dromosv1alpha1.MnnvlModeRequired, testGPULabel))
+	cl := testutil.WithSSASupport(fake.NewClientBuilder().WithScheme(scheme.Scheme).Build())
+	plugin := newTestPlugin(false)
+	state := reconcile.New()
+	g.Expect(plugin.HandleAdditionalResources(ctx, runner, obj, dynamoKarta(true), cl, state)).To(Succeed())
+	g.Expect(state.Issues()).To(BeEmpty())
+	domains := &nvapi.ComputeDomainList{}
+	g.Expect(cl.List(ctx, domains)).To(Succeed())
+	g.Expect(domains.Items).To(BeEmpty())
+
+	g.Expect(plugin.MutateResource(ctx, runner, obj, dynamoKarta(true), state)).To(Succeed())
+	g.Expect(state.Issues()).To(BeEmpty())
+	worker := dynamoComponent(t, obj, true, "w")
+	claims, _, err := unstructured.NestedSlice(worker, "podTemplate", "spec", "resourceClaims")
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(claims).To(BeEmpty())
+}
