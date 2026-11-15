@@ -125,8 +125,7 @@ GO_ACC_COMMAND=go install github.com/ory/go-acc@v0.2.8 && \
 
 GO_LDFLAGS=''
 
-# Build tags golangci-lint type-checks with (--build-tags), for services whose
-# code is split by tags. Empty by default.
+# Build tags for lint-go.
 GO_BUILD_TAGS?=
 
 # Restrict golangci-lint to changes since the PR's base branch
