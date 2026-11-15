@@ -44,7 +44,7 @@ Then run whichever language-level checks apply, matching the jobs in
 
 ```bash
 # Go
-golangci-lint run            # version: GOLANGCI_LINT_VERSION in build/makefile/golang.mk; or `make lint` in a service
+make lint                    # in the service dir; matches the targets job
 govulncheck ./...            # matches the govulncheck job
 gofmt -l .                   # formatting is not optional in this repo
 
