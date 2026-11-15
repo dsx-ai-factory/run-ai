@@ -13250,7 +13250,7 @@ Copyright Micah Parks - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   github.com/MicahParks/keyfunc v1.9.0
-  github.com/MicahParks/keyfunc/v3 v3.9.1
+  github.com/MicahParks/keyfunc/v3 v3.9.2
 
                                  Apache License
                            Version 2.0, January 2004
@@ -20788,6 +20788,7 @@ Components:
   golang.org/x/exp/slices v0.0.0-20260410095643-746e56fc9e2f
   golang.org/x/exp/slices v0.0.0-20261014143641-f0251eb4aa3e
   golang.org/x/exp/slices v0.0.0-20261112173441-d10d3b464990
+  golang.org/x/exp/slices v0.0.0-20261113113407-e3970619a1a4
   golang.org/x/mod/semver v0.42.0
   golang.org/x/mod/semver v0.43.0
   golang.org/x/net v0.59.0
@@ -20819,7 +20820,7 @@ Components:
   golang.org/x/time/rate v0.15.0
   golang.org/x/time/rate v0.16.0
   golang.org/x/tools v0.52.0
-  golang.org/x/tools v0.52.1-0.20261112212842-4dd740f845db
+  golang.org/x/tools v0.52.1-0.20261113204035-cba9b8046c90
 
 Copyright 2009 The Go Authors.
 
