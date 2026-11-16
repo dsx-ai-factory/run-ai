@@ -36,6 +36,9 @@ navigation:
         path: ../../docs/getting-started/whats-new/whats-new-3-0.md
       - page: Deprecation Notifications
         path: ../../docs/getting-started/whats-new/deprecation-notifications.md
+      - page: Hotfixes for Version 3.0
+        slug: hotfixes-for-version-3-0
+        path: ../../docs/getting-started/whats-new/hotfixes-for-version-3-0.md
     - page: Support, Lifecycle, and Deprecation Policy
       path: ../../docs/getting-started/product-support-policy.md
     - page: Quick Start Guide
