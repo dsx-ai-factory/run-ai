@@ -20,6 +20,7 @@ import (
 	kartav1alpha1 "github.com/run-ai/karta/pkg/api/runai/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -393,6 +394,32 @@ var _ = Describe("RunPostPhase", func() {
 	})
 })
 
+var _ = Describe("RunRunnerDeleted", func() {
+	gone := types.NamespacedName{Namespace: "default", Name: "gone"}
+
+	It("tells the plugins which runner is gone", func() {
+		plugin := &mockRunnerDeletedPlugin{name: "cleanup1"}
+		f := NewFramework(NewRegistry(plugin, newEmptyPlugin()), nil)
+
+		Expect(f.RunRunnerDeleted(context.Background(), gone, nil)).To(Succeed())
+
+		Expect(plugin.deleted).To(ConsistOf(gone))
+	})
+
+	It("runs every plugin, and returns a failure with its plugin's name", func() {
+		expectedErr := errors.New("cleanup boom")
+		failing := &mockRunnerDeletedPlugin{name: "cleanup1", err: expectedErr}
+		after := &mockRunnerDeletedPlugin{name: "cleanup2"}
+		f := NewFramework(NewRegistry(failing, after), nil)
+
+		err := f.RunRunnerDeleted(context.Background(), gone, nil)
+
+		Expect(err).To(MatchError(expectedErr))
+		Expect(err.Error()).To(ContainSubstring("HandleRunnerDeleted failed in plugin cleanup1"))
+		Expect(after.deleted).To(ConsistOf(gone), "a failure must not stop the plugins after it")
+	})
+})
+
 func createRunnerWorkload() *dromosv1alpha1.WorkloadRunner {
 	return &dromosv1alpha1.WorkloadRunner{
 		ObjectMeta: metav1.ObjectMeta{
@@ -592,5 +619,20 @@ func (m *mockPostPhasePlugin) Name() string {
 
 func (m *mockPostPhasePlugin) HandlePostPhase(_ context.Context, _ *dromosv1alpha1.WorkloadRunner, _ *unstructured.Unstructured, _ *kartav1alpha1.Karta, _ client.Client) error {
 	m.called = true
+	return m.err
+}
+
+type mockRunnerDeletedPlugin struct {
+	name    string
+	err     error
+	deleted []types.NamespacedName
+}
+
+func (m *mockRunnerDeletedPlugin) Name() string {
+	return m.name
+}
+
+func (m *mockRunnerDeletedPlugin) HandleRunnerDeleted(_ context.Context, runner types.NamespacedName, _ client.Client) error {
+	m.deleted = append(m.deleted, runner)
 	return m.err
 }

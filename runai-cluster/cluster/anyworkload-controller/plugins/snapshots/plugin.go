@@ -39,8 +39,8 @@ type kartaGetter interface {
 //     Disabled, with a warning when its opt-in can't be honoured.
 //
 // A replica turning Ready, or a capture changing, reconciles the runner again
-// (watches.go). Once the runner is gone, NewCleanupSetup deletes its captures
-// (cleanup.go).
+// (watches.go). Once the runner is gone, dromos calls HandleRunnerDeleted, which
+// deletes its captures (cleanup.go).
 type Plugin struct {
 	kartas            kartaGetter
 	parser            *templateutils.Parser
@@ -78,4 +78,5 @@ var (
 	_ framework.ResourceMutatePlugin     = &Plugin{}
 	_ framework.AdditionalResourcePlugin = &Plugin{}
 	_ framework.WatcherPlugin            = &Plugin{}
+	_ framework.RunnerDeletedPlugin      = &Plugin{}
 )

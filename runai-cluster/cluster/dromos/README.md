@@ -107,7 +107,7 @@ return `(nil, framework.ErrPluginDisabled)` to opt out at start time.
 > controller can reach, including the admission webhook path. **Only register
 > plugins you trust.**
 
-## The 6 hook interfaces
+## The 7 hook interfaces
 
 | Interface | When invoked | Use for |
 |---|---|---|
@@ -117,6 +117,7 @@ return `(nil, framework.ErrPluginDisabled)` to opt out at start time.
 | `ResourceMutatePlugin` | reconcile, multi-round | mutate the rendered child manifest until convergence |
 | `AdditionalResourcePlugin` | reconcile | create supporting K8s resources (Services, ConfigMaps, etc.) |
 | `StatusPlugin` | reconcile | report plugin-specific conditions and phase onto status |
+| `RunnerDeletedPlugin` | reconcile of a `WorkloadRunner` that is gone | delete resources the plugin created and the runner did not own |
 
 ## API stability
 

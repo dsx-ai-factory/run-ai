@@ -7,6 +7,7 @@ package snapshots
 
 import (
 	"context"
+	"errors"
 
 	snapshotv1alpha1 "github.com/ai-dynamo/snapshot/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/internal/snapshotkey"
@@ -15,89 +16,38 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 )
 
-var _ = Describe("cleanup", func() {
+var _ = Describe("HandleRunnerDeleted", func() {
 	var ctx context.Context
 
 	BeforeEach(func() {
 		ctx = context.Background()
 	})
 
-	// cleanUp reconciles testRunner's name.
-	cleanUp := func(c client.Client) {
-		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: "runai-proj", Name: "llama"}}
-		_, err := (&cleaner{client: c, apiReader: c}).Reconcile(ctx, request)
-		Expect(err).NotTo(HaveOccurred())
-	}
+	name := types.NamespacedName{Namespace: "runai-proj", Name: "llama"}
 	named := func(key string) gomegatypes.GomegaMatcher {
 		return HaveField("ObjectMeta.Name", snapshotkey.SnapshotName(key, "llama"))
 	}
 
-	It("deletes a deleted runner's SnapshotJobs and PodSnapshots", func() {
-		c := captureClient(capturedJob("k1", true), capturedPodSnapshot("k1", "runner-uid"))
+	It("deletes the runner's SnapshotJobs and PodSnapshots, and an earlier runner's of the same name", func() {
+		earlier := capturedJob("old-key", true)
+		earlier.Labels[commonconstants.WorkloadRunnerUidLabel] = "earlier-runner-uid"
+		c := captureClient(
+			earlier, capturedPodSnapshot("old-key", "earlier-runner-uid"),
+			capturedJob("k1", true), capturedPodSnapshot("k1", "runner-uid"))
 
-		cleanUp(c)
+		Expect(capturePlugin().HandleRunnerDeleted(ctx, name, c)).To(Succeed())
 
 		Expect(snapshotJobs(ctx, c)).To(BeEmpty())
 		Expect(podSnapshots(ctx, c)).To(BeEmpty())
 	})
-
-	It("keeps the current runner's", func() {
-		c := captureClient(testRunner(), capturedJob("k1", true), capturedPodSnapshot("k1", "runner-uid"))
-
-		cleanUp(c)
-
-		Expect(snapshotJobs(ctx, c)).To(ConsistOf(named("k1")))
-		Expect(podSnapshots(ctx, c)).To(ConsistOf(named("k1")))
-	})
-
-	// A workload deleted and resubmitted under the same name gets a new runner.
-	It("deletes an earlier runner's of the same name", func() {
-		earlier := capturedJob("old-key", true)
-		earlier.Labels[commonconstants.WorkloadRunnerUidLabel] = "earlier-runner-uid"
-		c := captureClient(testRunner(),
-			earlier, capturedPodSnapshot("old-key", "earlier-runner-uid"),
-			capturedJob("k1", true), capturedPodSnapshot("k1", "runner-uid"))
-
-		cleanUp(c)
-
-		Expect(snapshotJobs(ctx, c)).To(ConsistOf(named("k1")))
-		Expect(podSnapshots(ctx, c)).To(ConsistOf(named("k1")))
-	})
-
-	// The workload is resubmitted, and its new runner captures, while the old
-	// runner's captures are being cleaned up.
-	DescribeTable("leaves a capture made by a new runner during the cleanup",
-		func(beforeLookup bool) {
-			earlier := capturedJob("old-key", true)
-			earlier.Labels[commonconstants.WorkloadRunnerUidLabel] = "earlier-runner-uid"
-			c := captureClient(earlier)
-			resubmit := func() {
-				Expect(c.Create(ctx, testRunner())).To(Succeed())
-				Expect(c.Create(ctx, capturedJob("k1", true))).To(Succeed())
-			}
-			lookup := lookupHook{Reader: c, before: func() {}, after: func() {}}
-			if beforeLookup {
-				lookup.before = resubmit
-			} else {
-				lookup.after = resubmit
-			}
-
-			request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: "runai-proj", Name: "llama"}}
-			_, err := (&cleaner{client: c, apiReader: lookup}).Reconcile(ctx, request)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(snapshotJobs(ctx, c)).To(ConsistOf(named("k1")))
-		},
-		Entry("between the listing and the runner lookup", true),
-		Entry("right after the runner lookup", false),
-	)
 
 	It("leaves what the plugin didn't make, and other runners'", func() {
 		unlabelled := capturedJob("k1", true)
@@ -108,44 +58,46 @@ var _ = Describe("cleanup", func() {
 		otherNamespace := capturedJob("k3", true)
 		otherNamespace.Namespace = "runai-other"
 		otherNamespace.Labels[commonconstants.WorkloadRunnerUidLabel] = "other-llama-uid"
-		c := captureClient(testRunner(), unlabelled, otherName, otherNamespace)
+		c := captureClient(unlabelled, otherName, otherNamespace)
 
-		cleanUp(c)
+		Expect(capturePlugin().HandleRunnerDeleted(ctx, name, c)).To(Succeed())
 
 		Expect(snapshotJobs(ctx, c)).To(ConsistOf(named("k1"), named("k2"), named("k3")))
 	})
 
-	It("checks a runner when it is deleted", func() {
-		runner := testRunner()
-		deletes := onlyDeletes()
+	// dromos retries a reconcile that fails.
+	It("fails when a delete fails, to be tried again", func() {
+		c := failingDeletes(captureClient(capturedJob("k1", true)), errors.New("the API server is unreachable"))
 
-		Expect(deletes.Delete(event.DeleteEvent{Object: runner})).To(BeTrue())
-		Expect(deletes.Create(event.CreateEvent{Object: runner})).To(BeFalse())
-		Expect(deletes.Update(event.UpdateEvent{ObjectOld: runner, ObjectNew: runner})).To(BeFalse())
+		Expect(capturePlugin().HandleRunnerDeleted(ctx, name, c)).To(MatchError(ContainSubstring("unreachable")))
 	})
 
-	// The startup list arrives as creates, so a runner deleted while the
-	// controller was down is still cleaned up.
-	It("checks the runner of a SnapshotJob or PodSnapshot when it is created", func() {
-		job := capturedJob("k1", true)
-		creates := onlyCreates()
+	It("takes one already deleted for done", func() {
+		gone := apierrors.NewNotFound(schema.GroupResource{Group: "nvidia.com", Resource: "snapshotjobs"}, "k1")
+		c := failingDeletes(captureClient(capturedJob("k1", true)), gone)
 
-		Expect(creates.Create(event.CreateEvent{Object: job})).To(BeTrue())
-		Expect(creates.Update(event.UpdateEvent{ObjectOld: job, ObjectNew: job})).To(BeFalse())
-		Expect(creates.Delete(event.DeleteEvent{Object: job})).To(BeFalse())
+		Expect(capturePlugin().HandleRunnerDeleted(ctx, name, c)).To(Succeed())
+	})
+
+	// Listing a kind whose CRD is missing fails, so it would fail for every runner.
+	It("does nothing without Snapshot", func() {
+		c := captureClient(capturedJob("k1", true))
+		plugin := capturePlugin()
+		plugin.snapshotInstalled = false
+
+		Expect(plugin.HandleRunnerDeleted(ctx, name, c)).To(Succeed())
+
+		Expect(snapshotJobs(ctx, c)).To(HaveLen(1))
 	})
 })
 
-// lookupHook runs before and after each read it passes on.
-type lookupHook struct {
-	client.Reader
-	before, after func()
-}
-
-func (h lookupHook) Get(ctx context.Context, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
-	h.before()
-	defer h.after()
-	return h.Reader.Get(ctx, key, obj, opts...)
+// failingDeletes is c with every delete failing with err.
+func failingDeletes(c client.Client, err error) client.Client {
+	return interceptor.NewClient(c.(client.WithWatch), interceptor.Funcs{
+		Delete: func(context.Context, client.WithWatch, client.Object, ...client.DeleteOption) error {
+			return err
+		},
+	})
 }
 
 // capturedPodSnapshot is the PodSnapshot Snapshot creates for a capture of key,

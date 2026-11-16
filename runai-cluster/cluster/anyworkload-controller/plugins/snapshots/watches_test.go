@@ -82,3 +82,16 @@ var _ = Describe("replicaReadinessChanged", func() {
 		}, false),
 	)
 })
+
+var _ = Describe("onlyCreates", func() {
+	// The startup list arrives as creates, so a runner deleted while the
+	// controller was down is still cleaned up.
+	It("checks the runner of a PodSnapshot when it is created", func() {
+		snapshot := &snapshotv1alpha1.PodSnapshot{}
+		creates := onlyCreates()
+
+		Expect(creates.Create(event.CreateEvent{Object: snapshot})).To(BeTrue())
+		Expect(creates.Update(event.UpdateEvent{ObjectOld: snapshot, ObjectNew: snapshot})).To(BeFalse())
+		Expect(creates.Delete(event.DeleteEvent{Object: snapshot})).To(BeFalse())
+	})
+})

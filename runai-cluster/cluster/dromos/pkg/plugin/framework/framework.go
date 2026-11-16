@@ -20,6 +20,7 @@ import (
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	kartav1alpha1 "github.com/run-ai/karta/pkg/api/runai/v1alpha1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -42,6 +43,7 @@ type Framework struct {
 	additionalResourcesPlugins []AdditionalResourcePlugin
 	statusPlugins              []StatusPlugin
 	postPhasePlugins           []PostPhasePlugin
+	runnerDeletedPlugins       []RunnerDeletedPlugin
 	config                     Config
 }
 
@@ -61,6 +63,7 @@ func NewFramework(registry Registry, config *Config) *Framework {
 		additionalResourcesPlugins: []AdditionalResourcePlugin{},
 		statusPlugins:              []StatusPlugin{},
 		postPhasePlugins:           []PostPhasePlugin{},
+		runnerDeletedPlugins:       []RunnerDeletedPlugin{},
 		config:                     *config,
 	}
 
@@ -93,6 +96,10 @@ func NewFramework(registry Registry, config *Config) *Framework {
 
 		if postPhasePlugin, ok := plugin.(PostPhasePlugin); ok {
 			f.postPhasePlugins = append(f.postPhasePlugins, postPhasePlugin)
+		}
+
+		if runnerDeletedPlugin, ok := plugin.(RunnerDeletedPlugin); ok {
+			f.runnerDeletedPlugins = append(f.runnerDeletedPlugins, runnerDeletedPlugin)
 		}
 	}
 
@@ -298,4 +305,17 @@ func (f *Framework) RunPostPhase(
 		}
 	}
 	return nil
+}
+
+// RunRunnerDeleted runs all the runner-deleted plugins once a WorkloadRunner is gone.
+// One plugin failing doesn't stop the others cleaning up.
+func (f *Framework) RunRunnerDeleted(ctx context.Context, runner types.NamespacedName, k8sClient client.Client) error {
+	var pluginsError error
+	for _, plugin := range f.runnerDeletedPlugins {
+		if err := plugin.HandleRunnerDeleted(ctx, runner, k8sClient); err != nil {
+			pluginsError = errors.Join(pluginsError,
+				fmt.Errorf("HandleRunnerDeleted failed in plugin %s: %w", plugin.Name(), err))
+		}
+	}
+	return pluginsError
 }

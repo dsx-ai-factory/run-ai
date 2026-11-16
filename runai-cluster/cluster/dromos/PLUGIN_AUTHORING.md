@@ -14,7 +14,7 @@ plugin to start your own.
 
 ## Mental model
 
-dromos exposes 6 hook points where a plugin can participate. A plugin
+dromos exposes 7 hook points where a plugin can participate. A plugin
 implements as many or as few of these as it needs:
 
 | Interface | When invoked | Typical use |
@@ -25,6 +25,7 @@ implements as many or as few of these as it needs:
 | `ResourceMutatePlugin` | reconcile, multi-round | mutate the rendered child manifest until convergence |
 | `AdditionalResourcePlugin` | reconcile | create supporting K8s resources (Services, auth proxies, ComputeDomains, etc.) |
 | `StatusPlugin` | reconcile | report plugin-specific conditions and phase onto `WorkloadRunner.status` |
+| `RunnerDeletedPlugin` | reconcile of a `WorkloadRunner` that is gone | delete resources the plugin created and the runner did not own, which garbage collection leaves behind |
 
 The interface definitions are in
 [`pkg/plugin/framework/interface.go`](pkg/plugin/framework/interface.go).

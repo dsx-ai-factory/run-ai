@@ -71,7 +71,9 @@ type captureInput struct {
 }
 
 // HandleAdditionalResources captures each key from its first Ready replica, one
-// capture at a time per workload, newest key first.
+// capture at a time per workload, newest key first. Before that it deletes what
+// an earlier runner of the same name left behind: a runner replaced at once is
+// never seen to be gone, so HandleRunnerDeleted doesn't run for it.
 //
 // A problem is reported as a warning and never returned: an error here would
 // stop the workload being applied.
@@ -83,7 +85,14 @@ func (p *Plugin) HandleAdditionalResources(
 	k8sClient client.Client,
 	state *reconcile.State,
 ) error {
-	if !p.captureEnabled || !p.snapshotInstalled || !optedIn(resource) {
+	if !p.snapshotInstalled {
+		return nil
+	}
+	// Opted in or not: the earlier runner may have been.
+	if err := deleteOthers(ctx, k8sClient, client.ObjectKeyFromObject(runner), runner.UID); err != nil {
+		_ = state.AddPluginIssue(ctx, p, resource, err, false, "", issue.Compute)
+	}
+	if !p.captureEnabled || !optedIn(resource) {
 		return nil
 	}
 	if err := checkEligibility(ctx, resource, karta); err != nil {
@@ -254,7 +263,7 @@ func serviceSelectors(ctx context.Context, c client.Reader, namespace string) ([
 
 // buildSnapshotJob copies a Ready replica into the SnapshotJob that captures its
 // key. The runner doesn't own it: its labels tie it to the runner, and
-// NewCleanupSetup deletes it once the runner is gone.
+// HandleRunnerDeleted deletes it once the runner is gone.
 func buildSnapshotJob(runner *dromosv1alpha1.WorkloadRunner, replica *corev1.Pod,
 	in captureInput) (*snapshotv1alpha1.SnapshotJob, error) {
 	target, err := snapshotkey.TargetContainer(replica)

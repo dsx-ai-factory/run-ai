@@ -26,6 +26,10 @@ import (
 // workload's own status changing after the pod cache saw the replica Ready; the
 // framework never requeues on a timer.
 //
+// The SnapshotJob and PodSnapshot watches also catch a runner deleted while the
+// controller was down: the startup list arrives as creates, the framework finds
+// no runner of that name, and calls HandleRunnerDeleted.
+//
 // Only with Snapshot installed: a watch on a kind whose CRD is missing stops the
 // controller starting.
 func (p *Plugin) Watchers(bldr *builder.Builder) (*builder.Builder, error) {
@@ -35,6 +39,7 @@ func (p *Plugin) Watchers(bldr *builder.Builder) (*builder.Builder, error) {
 	toRunner := handler.EnqueueRequestsFromMapFunc(mapToRunner)
 	return bldr.
 		Watches(&snapshotv1alpha1.SnapshotJob{}, toRunner).
+		Watches(&snapshotv1alpha1.PodSnapshot{}, toRunner, builder.WithPredicates(onlyCreates())).
 		Watches(&corev1.Pod{}, toRunner, builder.WithPredicates(replicaReadinessChanged())), nil
 }
 
@@ -73,4 +78,13 @@ func asReplica(object client.Object) (*corev1.Pod, bool) {
 		return nil, false
 	}
 	return pod, true
+}
+
+func onlyCreates() predicate.Predicate {
+	return predicate.Funcs{
+		CreateFunc:  func(event.CreateEvent) bool { return true },
+		UpdateFunc:  func(event.UpdateEvent) bool { return false },
+		DeleteFunc:  func(event.DeleteEvent) bool { return false },
+		GenericFunc: func(event.GenericEvent) bool { return false },
+	}
 }

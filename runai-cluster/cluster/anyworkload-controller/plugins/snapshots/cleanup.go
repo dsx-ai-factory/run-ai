@@ -10,70 +10,47 @@ import (
 	"fmt"
 
 	snapshotv1alpha1 "github.com/ai-dynamo/snapshot/api/v1alpha1"
-	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
-// NewCleanupSetup returns the manager setup that deletes a workload's
-// SnapshotJobs and PodSnapshots once its runner is gone. The plugin can't: dromos
-// runs no plugin for a deleted runner.
+// HandleRunnerDeleted deletes a workload's SnapshotJobs and PodSnapshots once its
+// runner is gone. Garbage collection can't: the runner doesn't own them, since a
+// SnapshotJob it owned would show as a second workload of the same runner.
+func (p *Plugin) HandleRunnerDeleted(ctx context.Context, runner types.NamespacedName, k8sClient client.Client) error {
+	// Listing a kind whose CRD is missing fails.
+	if !p.snapshotInstalled {
+		return nil
+	}
+	return deleteOthers(ctx, k8sClient, runner, "")
+}
+
+// deleteOthers deletes what was made for a runner of this name other than
+// current, the UID of the runner being reconciled, or empty when it is gone.
 //
-// Only with Snapshot installed, as for the plugin's watches.
-func NewCleanupSetup() func(context.Context, ctrl.Manager) error {
-	return func(_ context.Context, mgr ctrl.Manager) error {
-		toRunner := handler.EnqueueRequestsFromMapFunc(mapToRunner)
-		return ctrl.NewControllerManagedBy(mgr).
-			Named("snapshot-cleanup").
-			Watches(&dromosv1alpha1.WorkloadRunner{}, &handler.EnqueueRequestForObject{},
-				builder.WithPredicates(onlyDeletes())).
-			// Catches a runner deleted while the controller was down.
-			Watches(&snapshotv1alpha1.SnapshotJob{}, toRunner, builder.WithPredicates(onlyCreates())).
-			Watches(&snapshotv1alpha1.PodSnapshot{}, toRunner, builder.WithPredicates(onlyCreates())).
-			Complete(&cleaner{client: mgr.GetClient(), apiReader: mgr.GetAPIReader()})
-	}
-}
-
-type cleaner struct {
-	client    client.Client
-	apiReader client.Reader
-}
-
-// Reconcile deletes what was made for a runner of this name other than the
-// current one.
-func (r *cleaner) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
-	made, err := madeFor(ctx, r.client, request.NamespacedName)
+// current is the caller's, from the cache. Nothing else captures for this name
+// during its reconcile, so only a cache still stale after a restart could take a
+// live runner's captures for another's, and those are captured again.
+func deleteOthers(ctx context.Context, c client.Client, name types.NamespacedName, current types.UID) error {
+	runnersSnapshots, err := getRunnersSnapshots(ctx, c, name)
 	if err != nil {
-		return ctrl.Result{}, err
+		return err
 	}
-
-	// After the listing, and uncached, so the runner is never older than what
-	// was listed: a stale "not found" or UID would delete a live runner's captures.
-	current := &dromosv1alpha1.WorkloadRunner{}
-	if err := r.apiReader.Get(ctx, request.NamespacedName, current); client.IgnoreNotFound(err) != nil {
-		return ctrl.Result{}, fmt.Errorf("get runner: %w", err)
-	}
-	for _, object := range made {
-		// current.UID is empty when no runner has this name, so all of it goes.
-		if object.GetLabels()[commonconstants.WorkloadRunnerUidLabel] == string(current.UID) {
+	for _, object := range runnersSnapshots {
+		if object.GetLabels()[commonconstants.WorkloadRunnerUidLabel] == string(current) {
 			continue
 		}
-		if err := r.client.Delete(ctx, object); err != nil && !apierrors.IsNotFound(err) {
-			return ctrl.Result{}, fmt.Errorf("delete %T %s: %w", object, object.GetName(), err)
+		if err := c.Delete(ctx, object); err != nil && !apierrors.IsNotFound(err) {
+			return fmt.Errorf("delete %T %s: %w", object, object.GetName(), err)
 		}
 	}
-	return ctrl.Result{}, nil
+	return nil
 }
 
-// madeFor lists the SnapshotJobs and PodSnapshots made for runners of this name.
-func madeFor(ctx context.Context, c client.Reader, name types.NamespacedName) ([]client.Object, error) {
+// getRunnersSnapshots lists the SnapshotJobs and PodSnapshots made for runners of this name.
+func getRunnersSnapshots(ctx context.Context, c client.Reader, name types.NamespacedName) ([]client.Object, error) {
 	jobs := &snapshotv1alpha1.SnapshotJobList{}
 	snapshots := &snapshotv1alpha1.PodSnapshotList{}
 	for _, list := range []client.ObjectList{jobs, snapshots} {
@@ -85,30 +62,12 @@ func madeFor(ctx context.Context, c client.Reader, name types.NamespacedName) ([
 		}
 	}
 
-	var made []client.Object
+	var runnersSnapshots []client.Object
 	for i := range jobs.Items {
-		made = append(made, &jobs.Items[i])
+		runnersSnapshots = append(runnersSnapshots, &jobs.Items[i])
 	}
 	for i := range snapshots.Items {
-		made = append(made, &snapshots.Items[i])
+		runnersSnapshots = append(runnersSnapshots, &snapshots.Items[i])
 	}
-	return made, nil
-}
-
-func onlyDeletes() predicate.Predicate {
-	return predicate.Funcs{
-		CreateFunc:  func(event.CreateEvent) bool { return false },
-		UpdateFunc:  func(event.UpdateEvent) bool { return false },
-		DeleteFunc:  func(event.DeleteEvent) bool { return true },
-		GenericFunc: func(event.GenericEvent) bool { return false },
-	}
-}
-
-func onlyCreates() predicate.Predicate {
-	return predicate.Funcs{
-		CreateFunc:  func(event.CreateEvent) bool { return true },
-		UpdateFunc:  func(event.UpdateEvent) bool { return false },
-		DeleteFunc:  func(event.DeleteEvent) bool { return false },
-		GenericFunc: func(event.GenericEvent) bool { return false },
-	}
+	return runnersSnapshots, nil
 }

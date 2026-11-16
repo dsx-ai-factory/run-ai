@@ -91,7 +91,6 @@ func run() error {
 			// Before the plugin builds its watches on Snapshot's kinds; manager setups run later.
 			app.WithSchemeBuilders(snapshotv1alpha1.AddToScheme),
 			app.WithManagerSetup(snapshotrestore.NewSetup(cfg.AgentNodeSelector())),
-			app.WithManagerSetup(snapshots.NewCleanupSetup()),
 		)
 	} else {
 		log.Debug().Msg("snapshot integration inactive")

@@ -7,6 +7,7 @@ package snapshots
 
 import (
 	"context"
+	"errors"
 
 	snapshotv1alpha1 "github.com/ai-dynamo/snapshot/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/internal/snapshotkey"
@@ -97,6 +98,37 @@ var _ = Describe("HandleAdditionalResources", func() {
 		handle(ctx, capturePlugin(), c, optedIn())
 
 		Expect(snapshotJobs(ctx, c)).To(BeEmpty())
+	})
+
+	// A workload deleted and resubmitted at once is never seen to be gone, so
+	// its new runner's reconcile deletes what the earlier one left.
+	DescribeTable("deletes what an earlier runner of the same name left behind",
+		func(workload func() *unstructured.Unstructured) {
+			earlier := capturedJob("old-key", true)
+			earlier.Labels[commonconstants.WorkloadRunnerUidLabel] = "earlier-runner-uid"
+			c := captureClient(
+				earlier, capturedPodSnapshot("old-key", "earlier-runner-uid"),
+				capturedJob("k1", true), capturedPodSnapshot("k1", "runner-uid"))
+
+			Expect(handle(ctx, capturePlugin(), c, workload())).To(BeEmpty())
+
+			Expect(snapshotJobs(ctx, c)).To(ConsistOf(HaveField("Name", snapshotkey.SnapshotName("k1", "llama"))))
+			Expect(podSnapshots(ctx, c)).To(ConsistOf(HaveField("Name", snapshotkey.SnapshotName("k1", "llama"))))
+		},
+		Entry("opted in", optedIn),
+		// The earlier runner may have been.
+		Entry("not opted in", func() *unstructured.Unstructured { return deployment(nil, gpu) }),
+	)
+
+	It("warns when it can't delete an earlier runner's, and still captures", func() {
+		ready := replica("llama-a", "rs-1", 100, true)
+		earlier := capturedJob("old-key", true)
+		earlier.Labels[commonconstants.WorkloadRunnerUidLabel] = "earlier-runner-uid"
+		c := failingDeletes(captureClient(ready, earlier), errors.New("the API server is unreachable"))
+
+		Expect(handle(ctx, capturePlugin(), c, optedIn())).To(ConsistOf(ContainSubstring("unreachable")))
+
+		Expect(hasSnapshotJob(ctx, c, keyOf(ready))).To(BeTrue(), "the replica was not captured")
 	})
 
 	It("needs a Ready replica", func() {
