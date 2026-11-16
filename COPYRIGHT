@@ -11550,6 +11550,7 @@ Copyright Jack Christensen - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/jackc/puddle/v2 v2.2.3
+  github.com/jackc/puddle/v2 v2.2.4
 
 Copyright (c) 2018 Jack Christensen
 
@@ -20821,7 +20822,7 @@ Components:
   golang.org/x/time/rate v0.15.0
   golang.org/x/time/rate v0.16.0
   golang.org/x/tools v0.52.0
-  golang.org/x/tools v0.52.1-0.20261113204035-cba9b8046c90
+  golang.org/x/tools v0.52.1-0.20261116193541-3fa2809636fb
 
 Copyright 2009 The Go Authors.
 
