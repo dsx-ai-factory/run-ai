@@ -4,8 +4,8 @@ go 1.27.4
 
 require (
 	github.com/aws/smithy-go v1.28.9
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.4
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.22
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.5
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.23
 	github.com/stretchr/testify v1.12.1
 	github.com/testcontainers/testcontainers-go v0.45.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.45.0
@@ -44,8 +44,8 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/go-archive v0.3.3 // indirect
-	github.com/moby/moby/api v1.56.1 // indirect
-	github.com/moby/moby/client v0.6.2 // indirect
+	github.com/moby/moby/api v1.57.0 // indirect
+	github.com/moby/moby/client v0.6.3 // indirect
 	github.com/moby/patternmatcher v0.6.1 // indirect
 	github.com/moby/sys/sequential v0.7.0 // indirect
 	github.com/moby/sys/user v0.4.1 // indirect
