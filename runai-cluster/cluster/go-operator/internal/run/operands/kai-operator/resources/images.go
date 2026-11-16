@@ -24,6 +24,11 @@ func convertImage(image *runaicommon.Image) *kaicommon.Image {
 		Name:       image.Name,
 		Tag:        image.Tag,
 	}
+	// KAI's Image has no digest field, so a pin travels on the tag. A digest with
+	// no tag renders an invalid reference rather than being silently dropped.
+	if ptr.Deref(image.Digest, "") != "" {
+		converted.Tag = ptr.To(image.TagWithDigest())
+	}
 	if image.PullPolicy != "" {
 		converted.PullPolicy = ptr.To(corev1.PullPolicy(image.PullPolicy))
 	}

@@ -822,7 +822,7 @@ func formatImageRef(image *common.Image) *string {
 	if image == nil || image.Registry == nil || image.Name == nil || image.Tag == nil {
 		return nil
 	}
-	ref := fmt.Sprintf("%s/%s:%s", *image.Registry, *image.Name, *image.Tag)
+	ref := image.Reference()
 	return &ref
 }
 

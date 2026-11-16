@@ -28,8 +28,9 @@ func convertPodGroupAssigner(runaiConfig *runaiv1.RunaiConfig) *kaiv1alpha1.PodG
 			Resources:       (*kaicommon.Resources)(config.Resources),
 			K8sClientConfig: (*kaicommon.K8sClientConfig)(config.K8sClientConfig),
 			Affinity:        config.Affinity,
-			// Image is KRM's own, resolved from its chart. PodDisruptionBudget is
-			// left to KRM's default of disabled, matching runai, which creates none.
+			Image:           krmServiceImage(config.Image),
+			// PodDisruptionBudget is left to KRM's default of disabled, matching
+			// runai, which creates none.
 		},
 		ControllerService: &kaiv1alpha1.PodGroupAssignerService{
 			Webhook: podGroupAssignerWebhookPorts(config),

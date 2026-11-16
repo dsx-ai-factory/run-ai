@@ -84,7 +84,7 @@ func (d *DeploymentResource) Object(ctx context.Context) (client.Object, error) 
 					RunAsUser:                runAsUser,
 					ReadOnlyRootFilesystem:   ptr.To(true),
 				},
-				Image:           fmt.Sprintf("%s/%s:%s", *image.Registry, *image.Name, *image.Tag),
+				Image:           image.Reference(),
 				ImagePullPolicy: image.PullPolicy,
 				Resources:       v1.ResourceRequirements(*config.Resources),
 				Command:         []string{"valkey-server"},

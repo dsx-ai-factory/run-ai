@@ -7,6 +7,7 @@
 package common
 
 import (
+	"fmt"
 	"os"
 
 	"k8s.io/utils/pointer"
@@ -47,6 +48,11 @@ type Image struct {
 	// Tag is the tag of the image
 	// +kubebuilder:validation:Optional
 	Tag *string `json:"tag,omitempty"`
+
+	// Digest pins the image by content digest, in the form sha256:<64 hex characters>.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern=`^sha256:[a-f0-9]{64}$`
+	Digest *string `json:"digest,omitempty"`
 
 	// PullPolicy is the pull policy of the image
 	// +kubebuilder:validation:Optional
@@ -91,6 +97,19 @@ func (i *Image) SetDefaultsWhereNeeded(defaultImageValues *Image) {
 			i.PullPolicy = v1.PullAlways
 		}
 	}
+}
+
+// Reference returns the pullable image reference: registry/name:tag, plus @digest when one is set
+func (i *Image) Reference() string {
+	return fmt.Sprintf("%s/%s:%s", *i.Registry, *i.Name, i.tag())
+}
+
+func (i *Image) tag() string {
+	tag := ptr.Deref(i.Tag, "")
+	if digest := ptr.Deref(i.Digest, ""); digest != "" {
+		return tag + "@" + digest
+	}
+	return tag
 }
 
 type Service struct {
@@ -157,7 +176,7 @@ func (r *Route) SetDefaultsWhereNeeded() {
 
 // GatewayRef specifies a reference to a Gateway resource for per-operand override.
 // When provided, both Name and Namespace must be non-empty.
-// +kubebuilder:validation:XValidation:rule="!has(self.name) && !has(self.__namespace__) || (has(self.name) && self.name != '' && has(self.__namespace__) && self.__namespace__ != '')",message="both name and namespace are required when gatewayAPI override is specified"
+// +kubebuilder:validation:XValidation:rule="!has(self.name) && !has(self.__namespace__) || (has(self.name) && self.name != ” && has(self.__namespace__) && self.__namespace__ != ”)",message="both name and namespace are required when gatewayAPI override is specified"
 type GatewayRef struct {
 	// Name is the name of the Gateway resource.
 	// +kubebuilder:validation:MinLength=1
