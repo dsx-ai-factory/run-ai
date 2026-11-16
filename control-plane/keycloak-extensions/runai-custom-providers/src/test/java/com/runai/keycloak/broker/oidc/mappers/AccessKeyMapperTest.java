@@ -5,20 +5,34 @@
 
 package com.runai.keycloak.broker.oidc.mappers;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-import org.keycloak.models.*;
-import org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper;
-import org.keycloak.representations.IDToken;
-import org.mockito.MockedStatic;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-import static org.mockito.ArgumentMatchers.*;
-
-import com.runai.keycloak.broker.oidc.mappers.MapperUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.keycloak.models.AuthenticatedClientSessionModel;
+import org.keycloak.models.ClientModel;
+import org.keycloak.models.ClientSessionContext;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.ProtocolMapperModel;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
+import org.keycloak.models.UserProvider;
+import org.keycloak.models.UserSessionModel;
+import org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper;
+import org.keycloak.representations.IDToken;
+import static org.mockito.ArgumentMatchers.any;
+import org.mockito.MockedStatic;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class AccessKeyMapperTest {
 
@@ -61,7 +75,7 @@ class AccessKeyMapperTest {
         when(serviceAccountUser.getUsername()).thenReturn("service-account-test");
 
         config = new HashMap<>();
-        config.put(OIDCAttributeMapperHelper.TOKEN_CLAIM_NAME, "user_app_groups");
+        config.put(OIDCAttributeMapperHelper.TOKEN_CLAIM_NAME, "access_key_groups");
         config.put(MapperUtils.GROUPS_USER_ATTRIBUTE, "GROUPS");
         config.put(MapperUtils.MULTIVALUED_ATTRIBUTE, "true");
         config.put(MapperUtils.GROUPS_INTERSECTION_ENABLED_ATTRIBUTE, "false");
@@ -132,7 +146,7 @@ class AccessKeyMapperTest {
 
             mapper.setClaim(token, mappingModel, userSession, keycloakSession, clientSessionCtx);
 
-            assertThat(token.getOtherClaims().get("user_app_groups")).isEqualTo(userGroups);
+            assertThat(token.getOtherClaims().get("access_key_groups")).isEqualTo(userGroups);
             verify(userProvider).getUserByUsername(realm, userIdentifier);
             verify(userProvider, never()).getUserByEmail(realm, userIdentifier);
         }
@@ -152,7 +166,7 @@ class AccessKeyMapperTest {
 
             mapper.setClaim(token, mappingModel, userSession, keycloakSession, clientSessionCtx);
 
-            assertThat(token.getOtherClaims().get("user_app_groups")).isEqualTo(userGroups);
+            assertThat(token.getOtherClaims().get("access_key_groups")).isEqualTo(userGroups);
             verify(userProvider).getUserByUsername(realm, userIdentifier);
             verify(userProvider).getUserByEmail(realm, userIdentifier);
         }
@@ -168,7 +182,7 @@ class AccessKeyMapperTest {
 
             mapper.setClaim(token, mappingModel, userSession, keycloakSession, clientSessionCtx);
 
-            assertThat((List<String>) token.getOtherClaims().get("user_app_groups")).isNotNull().isEmpty();
+            assertThat((List<String>) token.getOtherClaims().get("access_key_groups")).isNotNull().isEmpty();
             verify(userProvider).getUserByUsername(realm, userIdentifier);
             verify(userProvider).getUserByEmail(realm, userIdentifier);
         }
@@ -188,7 +202,7 @@ class AccessKeyMapperTest {
 
             mapper.setClaim(token, mappingModel, userSession, keycloakSession, clientSessionCtx);
 
-            assertThat(token.getOtherClaims().get("user_app_groups")).isEqualTo(userGroups);
+            assertThat(token.getOtherClaims().get("access_key_groups")).isEqualTo(userGroups);
             verify(userProvider).getUserByUsername(realm, emailIdentifier);
             verify(userProvider).getUserByEmail(realm, emailIdentifier);
         }
@@ -207,7 +221,7 @@ class AccessKeyMapperTest {
 
             mapper.setClaim(token, mappingModel, userSession, keycloakSession, clientSessionCtx);
 
-            assertThat(token.getOtherClaims().get("user_app_groups")).isEqualTo(userGroups);
+            assertThat(token.getOtherClaims().get("access_key_groups")).isEqualTo(userGroups);
             verify(userProvider).getUserByUsername(realm, usernameIdentifier);
             verify(userProvider, never()).getUserByEmail(realm, usernameIdentifier);
         }
@@ -219,7 +233,7 @@ class AccessKeyMapperTest {
 
         mapper.setClaim(token, mappingModel, userSession, keycloakSession, clientSessionCtx);
 
-        assertThat((List<String>) token.getOtherClaims().get("user_app_groups")).isNotNull().isEmpty();
+        assertThat((List<String>) token.getOtherClaims().get("access_key_groups")).isNotNull().isEmpty();
         verify(userProvider, never()).getUserByUsername(any(), any());
         verify(userProvider, never()).getUserByEmail(any(), any());
     }
@@ -230,7 +244,7 @@ class AccessKeyMapperTest {
 
         mapper.setClaim(token, mappingModel, userSession, keycloakSession, clientSessionCtx);
 
-        assertThat((List<String>) token.getOtherClaims().get("user_app_groups")).isNotNull().isEmpty();
+        assertThat((List<String>) token.getOtherClaims().get("access_key_groups")).isNotNull().isEmpty();
         verify(userProvider, never()).getUserByUsername(any(), any());
         verify(userProvider, never()).getUserByEmail(any(), any());
     }
@@ -242,7 +256,7 @@ class AccessKeyMapperTest {
 
         mapper.setClaim(token, mappingModel, userSession, keycloakSession, clientSessionCtx);
 
-        assertThat(token.getOtherClaims()).doesNotContainKey("user_app_groups");
+        assertThat(token.getOtherClaims()).doesNotContainKey("access_key_groups");
         verify(userProvider, never()).getUserByUsername(any(), any());
         verify(userProvider, never()).getUserByEmail(any(), any());
     }
@@ -259,7 +273,7 @@ class AccessKeyMapperTest {
 
             mapper.setClaim(token, mappingModel, userSession, keycloakSession, clientSessionCtx);
 
-            assertThat((List<String>) token.getOtherClaims().get("user_app_groups")).isNotNull().isEmpty();
+            assertThat((List<String>) token.getOtherClaims().get("access_key_groups")).isNotNull().isEmpty();
             verify(userProvider).getUserByUsername(realm, userIdentifier);
             verify(userProvider, never()).getUserByEmail(realm, userIdentifier);
         }
@@ -320,7 +334,7 @@ class AccessKeyMapperTest {
 
             mapper.setClaim(token, mappingModel, userSession, keycloakSession, clientSessionCtx);
 
-            assertThat(token.getOtherClaims().get("user_app_groups")).isEqualTo(supGroups);
+            assertThat(token.getOtherClaims().get("access_key_groups")).isEqualTo(supGroups);
         }
     }
 

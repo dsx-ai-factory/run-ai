@@ -7,11 +7,11 @@
 
 * `CLIENTS` (value: `"clients"`)
 
-* `APPS` (value: `"apps"`)
+* `SERVICE_ACCOUNTS` (value: `"serviceAccounts"`)
 
-* `INTERNAL_APPS` (value: `"internalApps"`)
+* `INTERNAL_SERVICE_ACCOUNTS` (value: `"internalServiceAccounts"`)
 
-* `USER_APPS` (value: `"userApps"`)
+* `ACCESS_KEYS` (value: `"accessKeys"`)
 
 * `WORKLOAD_AUTH` (value: `"workloadAuth"`)
 

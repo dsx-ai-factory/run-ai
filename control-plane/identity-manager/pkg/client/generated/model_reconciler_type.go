@@ -23,21 +23,21 @@ type ReconcilerType string
 
 // List of reconcilerType
 const (
-	RECONCILERTYPE_REALMS        ReconcilerType = "realms"
-	RECONCILERTYPE_CLIENTS       ReconcilerType = "clients"
-	RECONCILERTYPE_APPS          ReconcilerType = "apps"
-	RECONCILERTYPE_INTERNAL_APPS ReconcilerType = "internalApps"
-	RECONCILERTYPE_USER_APPS     ReconcilerType = "userApps"
-	RECONCILERTYPE_WORKLOAD_AUTH ReconcilerType = "workloadAuth"
+	RECONCILERTYPE_REALMS                    ReconcilerType = "realms"
+	RECONCILERTYPE_CLIENTS                   ReconcilerType = "clients"
+	RECONCILERTYPE_SERVICE_ACCOUNTS          ReconcilerType = "serviceAccounts"
+	RECONCILERTYPE_INTERNAL_SERVICE_ACCOUNTS ReconcilerType = "internalServiceAccounts"
+	RECONCILERTYPE_ACCESS_KEYS               ReconcilerType = "accessKeys"
+	RECONCILERTYPE_WORKLOAD_AUTH             ReconcilerType = "workloadAuth"
 )
 
 // All allowed values of ReconcilerType enum
 var AllowedReconcilerTypeEnumValues = []ReconcilerType{
 	"realms",
 	"clients",
-	"apps",
-	"internalApps",
-	"userApps",
+	"serviceAccounts",
+	"internalServiceAccounts",
+	"accessKeys",
 	"workloadAuth",
 }
 
