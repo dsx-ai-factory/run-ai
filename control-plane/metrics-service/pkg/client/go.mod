@@ -3,8 +3,8 @@ module github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client
 go 1.27.4
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.12
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.33
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.13
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.34
 	github.com/google/uuid v1.6.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/spf13/viper v1.21.0
@@ -33,6 +33,6 @@ require (
 	go.opentelemetry.io/otel/metric v1.47.0 // indirect
 	go.opentelemetry.io/otel/trace v1.47.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
-	golang.org/x/sys v0.49.0 // indirect
-	golang.org/x/text v0.43.0 // indirect
+	golang.org/x/sys v0.50.0 // indirect
+	golang.org/x/text v0.44.0 // indirect
 )

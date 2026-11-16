@@ -33,6 +33,8 @@ func CreateRouter() chi.Router {
 	inferencesApiService := services.NewInferencesAPIService()
 	inferencesApiController := api.NewInferencesAPIController(inferencesApiService)
 
+	rightSizingApiController := api.NewRightSizingAPIController(services.NewRightSizingAPIService())
+
 	helmReposApiService := services.NewHelmReposAPIService(assetsClientInstance)
 	helmReposApiController := api.NewHelmReposAPIController(helmReposApiService)
 
@@ -51,6 +53,7 @@ func CreateRouter() chi.Router {
 		api.AddRoutes(router, healthApiController)
 		api.AddRoutes(router, imagesApiController)
 		api.AddRoutes(router, inferencesApiController)
+		api.AddRoutes(router, rightSizingApiController)
 		api.AddRoutes(router, registriesApiController)
 		api.AddRoutes(router, helmReposApiController)
 		api.AddRoutes(router, settingsApiController)

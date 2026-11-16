@@ -1,0 +1,24 @@
+description: Create component metadata without creating a pod spec when the template is omitted.
+effectiveRules:
+  - field: serviceAccountName
+    specSelector: componentPodSpec
+    selectorParams:
+      componentName: component-c
+    enforcements:
+      - set:
+          value: inference-sa
+  - field: priorityClassName
+    specSelector: componentPodSpec
+    selectorParams:
+      componentName: component-c
+    enforcements:
+      - set:
+          value: high-priority
+  - field: labels
+    specSelector: componentPodMetadata
+    selectorParams:
+      componentName: component-c
+    enforcements:
+      - set:
+          key: app
+          value: inference

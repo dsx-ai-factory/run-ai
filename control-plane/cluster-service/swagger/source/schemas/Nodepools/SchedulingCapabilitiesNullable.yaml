@@ -25,3 +25,9 @@ properties:
     example: false
     default: false
     nullable: true
+  limits:
+    type: boolean
+    description: Whether to allow GPU, CPU and memory limits for the nodepool's resources. Only allowed when quota=true.
+    example: false
+    default: true
+    nullable: true

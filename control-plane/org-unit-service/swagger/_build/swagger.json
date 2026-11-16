@@ -5486,7 +5486,8 @@
         "type": "string",
         "enum": [
           "HAS_QUOTA",
-          "NON_DEFAULT_RANK"
+          "NON_DEFAULT_RANK",
+          "HAS_LIMIT"
         ]
       },
       "OrgUnitsNodepoolSummary": {
@@ -5517,7 +5518,8 @@
         "description": "The action to apply",
         "x-internal": true,
         "enum": [
-          "CPU_QUOTAS_TO_DEFAULT"
+          "CPU_QUOTAS_TO_DEFAULT",
+          "LIMITS_TO_DEFAULT"
         ]
       },
       "OrgUnitsNodepoolResourcesResetRequest": {
@@ -7693,7 +7695,8 @@
           "QUOTAS_TO_DEFAULT",
           "RANKS_TO_DEFAULT",
           "WEIGHTS_TO_DEFAULT",
-          "WEIGHTS_TO_DESERVED"
+          "WEIGHTS_TO_DESERVED",
+          "LIMITS_TO_DEFAULT"
         ]
       },
       "DepartmentsResourcesResetRequest": {

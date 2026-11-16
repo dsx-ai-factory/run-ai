@@ -24,21 +24,28 @@ async function getIdps(): Promise<Idp[]> {
   }
 }
 
-async function addIdp(idp: IdpCreationRequest): Promise<IdpPostResponse> {
+// A dry run rethrows the raw error: the 400 body carries the parsed config.
+async function addIdp(idp: IdpCreationRequest, dryRun = false): Promise<IdpPostResponse> {
   try {
-    const response = await identityManagerApi.idpsApi.createIdp(idp);
+    const response = await identityManagerApi.idpsApi.createIdp(dryRun ? { ...idp, dryRun } : idp);
     return response.data;
   } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
+    throw dryRun ? err : httpService.handleHttpError(err);
   }
 }
 
-async function updateIdp(idpAlias: string, idpCreationRequest: IdpCreationRequest): Promise<void> {
+async function updateIdp(
+  idpAlias: string,
+  idpCreationRequest: IdpCreationRequest,
+  dryRun = false,
+): Promise<IdpPostResponse | undefined> {
   try {
-    const response = await identityManagerApi.idpsApi.updateIdp(idpAlias, idpCreationRequest);
-    return response.data;
+    const request = dryRun ? { ...idpCreationRequest, dryRun } : idpCreationRequest;
+    const response = await identityManagerApi.idpsApi.updateIdp(idpAlias, request);
+    // The generated client types the update response as void, but a dry run returns the parsed config.
+    return response.data as unknown as IdpPostResponse | undefined;
   } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
+    throw dryRun ? err : httpService.handleHttpError(err);
   }
 }
 
