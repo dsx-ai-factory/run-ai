@@ -64,11 +64,8 @@ func (r *ClusterRedis) SetDefaultsWhereNeeded(internalSpec *internal.Internal, g
 	}
 	r.Image.SetDefaultsWhereNeeded(common.ThirdPartyImage("VALKEY"))
 	if r.Replicas == nil {
-		if global.ReplicaCount != nil {
-			r.Replicas = ptr.To[int32](*global.ReplicaCount)
-		} else {
-			r.Replicas = ptr.To[int32](1)
-		}
+		// Cluster Redis runs without replication, so additional pods do not share sessions.
+		r.Replicas = ptr.To[int32](1)
 	}
 	if r.Resources == nil {
 		r.Resources = &Resources{}
