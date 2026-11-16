@@ -10,6 +10,7 @@ import { requestToLeave } from "@/services/infra/router.service/router.service";
 import Settings from "./node-pool-scheduling-settings.vue";
 import Table from "./node-pool-department-table.vue";
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
+import { RunaiSegmentedButton } from "@/components/common/runai-segmented-button";
 import NodePoolSchedulingStep from "./node-pool-scheduling-step.vue";
 import RunaiWizardLayout from "@/components/common/runai-wizard-layout/runai-wizard-layout.vue";
 import NodePoolWizardSummary from "../node-pool-wizard-summary/node-pool-wizard-summary.vue";
@@ -43,6 +44,149 @@ function render(input = pool) {
 }
 
 describe("scheduling step foundation", () => {
+  it.each([
+    { quota: false, ranks: false },
+    { quota: false, ranks: true },
+    { quota: true, ranks: true },
+  ])("explains permission-disabled mode cards for the actual saved mode: %j", async (saved) => {
+    const wrapper = render({
+      ...pool,
+      schedulingCapabilities: { adjustableWeights: true, cpuQuota: false, limits: false, ...saved },
+    });
+    try {
+      await wrapper.setProps({ canEditDepartments: false });
+      const options = wrapper.findComponent(RunaiSegmentedButton).props("options");
+      expect(options.map((option) => option.disabledTooltip)).toEqual([
+        "You do not have permission to edit departments.",
+        "You do not have permission to edit departments.",
+        "You do not have permission to edit departments.",
+      ]);
+      await wrapper.setProps({ canEditDepartments: true });
+      const enabledOptions = wrapper.findComponent(RunaiSegmentedButton).props("options");
+      expect(enabledOptions[0].disabledTooltip).toBe(
+        saved.quota ? "An existing Guaranteed quota pool cannot switch to a lower scheduling mode." : undefined,
+      );
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it("identifies unsaved pool settings when a changed retry fails after partial success", async () => {
+    const wrapper = render();
+    await wrapper.setProps({ canSavePool: true });
+    saveMocks.patchPool.mockReset().mockImplementation(async (_id, payload) => ({ ...pool, ...payload }));
+    saveMocks.patchDepartments
+      .mockReset()
+      .mockResolvedValue({ succeeded: [], totalFailed: 1, failed: [{ message: "department conflict" }] });
+    wrapper.findComponent(Table).vm.$emit("edit", { id: "a", weight: 5 });
+    await wrapper.get('[aid="scheduling-save-close"]').trigger("click");
+    await flushPromises();
+    expect(wrapper.get('[role="alert"]').text()).toContain("Pool settings were saved");
+    await wrapper.get('[aid="mode-ranked"]').trigger("click");
+    saveMocks.patchPool.mockRejectedValueOnce(new Error("latest pool update failed"));
+    await wrapper.get('[aid="scheduling-save-close"]').trigger("click");
+    await flushPromises();
+    expect(wrapper.get('[role="alert"]').text()).toContain("Current pool settings were not saved");
+    expect(wrapper.get('[aid="mode-ranked"]').attributes("aria-checked")).toBe("true");
+    expect(wrapper.findComponent(Table).props("draft").departments.a.weight).toBe(5);
+    wrapper.unmount();
+  });
+  it("expands the whole mode group on hover and dismisses descriptions with Escape without selecting", async () => {
+    const wrapper = render();
+    const cards = wrapper.get('[aid="scheduling-mode-options"]');
+    await wrapper.get('[aid="scheduling-mode-hover-target"]').trigger("mouseenter");
+    expect(wrapper.findAll(".mode-explanation")).toHaveLength(3);
+    expect(wrapper.get('[aid="mode-proportional"]').attributes("aria-checked")).toBe("true");
+    await cards.trigger("keydown", { key: "Escape" });
+    expect(wrapper.findAll(".mode-explanation")).toHaveLength(0);
+    await wrapper.get('[aid="mode-proportional"] .runai-segment__label').trigger("mouseover");
+    expect(wrapper.findAll(".mode-explanation")).toHaveLength(0);
+    expect(wrapper.get('[aid="mode-proportional"]').attributes("aria-checked")).toBe("true");
+    wrapper.unmount();
+  });
+  it("warns before committing Guaranteed quota when hovered or selected", async () => {
+    const wrapper = render();
+    const cards = wrapper.get('[aid="scheduling-mode-options"]');
+    await wrapper.get('[aid="mode-guaranteed"]').trigger("mouseover");
+    expect(wrapper.find(".mode-guarantee-warning").text()).toBe("Mode can't be changed after saving");
+    await wrapper.get('[aid="mode-guaranteed"]').trigger("click");
+    await cards.trigger("mouseleave");
+    expect(wrapper.find(".mode-guarantee-warning").text()).toBe("Mode can't be changed after saving");
+    wrapper.unmount();
+  });
+  it("closes descriptions when the pointer leaves the full-width card hover target", async () => {
+    const wrapper = render();
+    const target = wrapper.get('[aid="scheduling-mode-hover-target"]');
+    await target.trigger("mouseenter");
+    expect(wrapper.findAll(".mode-explanation")).toHaveLength(3);
+    await target.trigger("mouseleave");
+    expect(wrapper.findAll(".mode-explanation")).toHaveLength(0);
+    expect(wrapper.get('[aid="mode-proportional"]').attributes("aria-checked")).toBe("true");
+    wrapper.unmount();
+  });
+  it("defaults a first Guaranteed selection to Automatic and retains an explicit Custom choice", async () => {
+    const wrapper = render();
+    try {
+      await wrapper.get('[aid="mode-guaranteed"]').trigger("click");
+      expect(wrapper.findComponent(Table).props("draft").automaticWeights).toBe(true);
+
+      await wrapper.get('[aid="advanced-settings"]').trigger("click");
+      wrapper.findComponent(Settings).vm.$emit("patch", { automaticWeights: false });
+      await wrapper.get('[aid="mode-ranked"]').trigger("click");
+      await wrapper.get('[aid="mode-guaranteed"]').trigger("click");
+      expect(wrapper.findComponent(Table).props("draft").automaticWeights).toBe(false);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it("uses the API fairshare defaults when enabling previously unconfigured history", async () => {
+    saveMocks.patchPool.mockReset().mockImplementation(async (_id, payload) => ({ ...pool, ...payload }));
+    saveMocks.patchDepartments.mockReset().mockResolvedValue({ succeeded: [], failed: [], totalFailed: 0 });
+    const wrapper = render({ ...pool, schedulingConfiguration: { timeBasedFairShare: { enabled: false } } });
+    try {
+      await wrapper.setProps({ canSavePool: true });
+      await wrapper.get('[aid="advanced-settings"]').trigger("click");
+      const settings = wrapper.findComponent(Settings);
+      expect(settings.props("draft").historicalWeight).toBe(1);
+      expect(settings.props("draft").historicalWindow).toEqual({ Days: 7, Hours: 0, Minutes: 0, Seconds: 0 });
+      settings.vm.$emit("patch", { timeFairshare: true });
+      await wrapper.get('[aid="scheduling-save-close"]').trigger("click");
+      await flushPromises();
+      expect(saveMocks.patchPool.mock.calls.at(-1)?.[1].schedulingConfiguration.timeBasedFairShare).toMatchObject({
+        enabled: true,
+        historicalUsageWeight: 1,
+        windowDuration: "7d",
+      });
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it("preserves explicitly saved zero historical weight and zero window", () => {
+    const wrapper = render({
+      ...pool,
+      schedulingConfiguration: { timeBasedFairShare: { enabled: true, historicalUsageWeight: 0, windowDuration: "0" } },
+    });
+    const draft = wrapper.findComponent(Table).props("draft");
+    expect(draft.historicalWeight).toBe(0);
+    expect(draft.historicalWindow).toEqual({ Days: 0, Hours: 0, Minutes: 0, Seconds: 0 });
+    wrapper.unmount();
+  });
+
+  it("loads fractional windows and weekly runtimes into the visible duration fields", () => {
+    const wrapper = render({
+      ...pool,
+      schedulingConfiguration: {
+        minGuaranteedRuntime: "1w",
+        timeBasedFairShare: { enabled: true, windowDuration: "0.5m" },
+      },
+    });
+    const draft = wrapper.findComponent(Table).props("draft");
+    expect(draft.minimumRuntime).toEqual({ Days: 7, Hours: 0, Minutes: 0, Seconds: 0 });
+    expect(draft.historicalWindow).toEqual({ Days: 0, Hours: 0, Minutes: 0.5, Seconds: 0 });
+    wrapper.unmount();
+  });
   it.each([
     { maxAllocation: true },
     { timeFairshare: true },
@@ -88,7 +232,7 @@ describe("scheduling step foundation", () => {
     await wrapper.get('[aid="mode-guaranteed"]').trigger("click");
     expect(summary.text()).toContain("Guaranteed quota");
     expect(summary.props("pool").schedulingCapabilities).toEqual({
-      adjustableWeights: true,
+      adjustableWeights: false,
       quota: true,
       ranks: true,
       cpuQuota: false,

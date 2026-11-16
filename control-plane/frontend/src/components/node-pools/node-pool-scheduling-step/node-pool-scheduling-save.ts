@@ -8,23 +8,9 @@ import type {
   BatchPatchDepartmentResourcesResponse,
   NodePoolResourcesPatchRequest,
 } from "@/swagger-models/org-unit-service-client";
-import { dateUtil } from "@/utils/date.util/date.util";
 import { ENTITY_PRIORITY_SELECT_OPTIONS } from "@/models/org-unit.model";
 import { toSchedulingCapabilities, type SchedulingDraft } from "./node-pool-scheduling.model";
-
-function duration(fields: Record<string, number | null> | undefined): string | undefined {
-  if (!fields) return undefined;
-  const seconds = Object.entries({ Days: 86400, Hours: 3600, Minutes: 60, Seconds: 1 }).reduce(
-    (total, [unit, multiplier]) => {
-      const value = fields[unit] ?? 0;
-      if (!Number.isFinite(value) || value < 0) throw new Error("Enter a valid nonnegative duration.");
-      return total + value * multiplier;
-    },
-    0,
-  );
-  if (!Number.isFinite(seconds) || seconds > Number.MAX_SAFE_INTEGER) throw new Error("The duration is too large.");
-  return `${seconds}s`;
-}
+import { schedulingDurationSeconds, serializeSchedulingDuration } from "./scheduling-duration.util";
 
 export function buildSchedulingSave(pool: Nodepool, draft: SchedulingDraft) {
   if (!draft.mode) throw new Error("Select a supported scheduling mode.");
@@ -33,8 +19,9 @@ export function buildSchedulingSave(pool: Nodepool, draft: SchedulingDraft) {
   if (draft.maxAllocation && draft.mode !== "guaranteed")
     throw new Error("Max GPU allocation in this mode is preview-only. Turn it off before saving.");
   const capabilities = toSchedulingCapabilities(draft);
-  const minimum = duration(draft.minimumRuntime);
-  const window = draft.timeFairshare ? duration(draft.historicalWindow) : undefined;
+  const minimum = serializeSchedulingDuration(draft.minimumRuntime);
+  const window = draft.timeFairshare ? serializeSchedulingDuration(draft.historicalWindow, false) : undefined;
+  const savedWindow = pool.schedulingConfiguration?.timeBasedFairShare?.windowDuration;
   if (
     draft.timeFairshare &&
     draft.historicalWeight != null &&
@@ -45,8 +32,8 @@ export function buildSchedulingSave(pool: Nodepool, draft: SchedulingDraft) {
     schedulingCapabilities: capabilities,
     schedulingConfiguration: {
       ...(minimum !== undefined &&
-      dateUtil.parseDurationStringToSeconds(minimum) !==
-        dateUtil.parseDurationStringToSeconds(pool.schedulingConfiguration?.minGuaranteedRuntime ?? "")
+      schedulingDurationSeconds(minimum) !==
+        schedulingDurationSeconds(pool.schedulingConfiguration?.minGuaranteedRuntime)
         ? { minGuaranteedRuntime: minimum }
         : {}),
       ...(draft.timeFairshare !== undefined
@@ -54,7 +41,10 @@ export function buildSchedulingSave(pool: Nodepool, draft: SchedulingDraft) {
             timeBasedFairShare: {
               ...(draft.timeFairshare ? pool.schedulingConfiguration?.timeBasedFairShare : {}),
               enabled: draft.timeFairshare,
-              ...(window !== undefined ? { windowDuration: window } : {}),
+              ...(window !== undefined &&
+              (savedWindow == null || schedulingDurationSeconds(window) !== schedulingDurationSeconds(savedWindow))
+                ? { windowDuration: window }
+                : {}),
               ...(draft.timeFairshare && draft.historicalWeight != null
                 ? { historicalUsageWeight: draft.historicalWeight }
                 : {}),
@@ -104,14 +94,19 @@ export function createSchedulingSaver(transport: SchedulingSaveTransport) {
   let busy = false;
   let poolKey = "";
   let savedPool: Nodepool | undefined;
+  let poolSettingsSaved = false;
   const completed = new Map<string, string>();
   return {
     get savedPool() {
       return savedPool;
     },
+    get poolSettingsSaved() {
+      return poolSettingsSaved;
+    },
     async save(pool: Nodepool, draft: SchedulingDraft): Promise<Nodepool> {
       if (busy) throw new Error("A save is already in progress.");
       busy = true;
+      poolSettingsSaved = false;
       try {
         const latest = savedPool?.id === pool.id ? savedPool : pool;
         const plan = buildSchedulingSave(latest, draft);
@@ -133,6 +128,7 @@ export function createSchedulingSaver(transport: SchedulingSaveTransport) {
           poolKey = key;
           completed.clear();
         }
+        poolSettingsSaved = true;
         const pending = plan.departments.filter((row) => completed.get(row.orgUnitId) !== JSON.stringify(row));
         for (let start = 0; start < pending.length; start += 100) {
           const batch = pending.slice(start, start + 100);

@@ -310,6 +310,81 @@ describe("RunaiWizardStepsPanel", () => {
   });
 
   describe("Step Icons", () => {
+    it.each([
+      { state: "active", activeStep: "custom-step", done: false, expected: "img:/active-step.svg" },
+      { state: "completed", activeStep: "other-step", done: true, expected: "img:/completed-step.svg" },
+    ])("binds the optional $state icon to the rendered QIcon", ({ activeStep, done, expected }) => {
+      wrapper = createWrapper({
+        steps: [
+          {
+            name: "custom-step",
+            title: "Custom step",
+            done,
+            activeIcon: "img:/active-step.svg",
+            completedIcon: "img:/completed-step.svg",
+          },
+        ],
+        activeStep,
+      });
+
+      const icon = wrapper.getComponent(QIcon);
+      expect(icon.props("name")).toBe(expected);
+      expect(icon.get("img").attributes("src")).toBe(expected.slice(4));
+    });
+
+    it("keeps active icon precedence over error and completed states", () => {
+      wrapper = createWrapper({
+        steps: [
+          {
+            name: "custom-step",
+            title: "Custom step",
+            done: true,
+            hasError: true,
+            activeIcon: "img:/active-step.svg",
+            completedIcon: "img:/completed-step.svg",
+          },
+        ],
+        activeStep: "custom-step",
+      });
+
+      expect(wrapper.getComponent(QIcon).props("name")).toBe("img:/active-step.svg");
+    });
+
+    it("keeps the error icon ahead of a completed icon override", () => {
+      wrapper = createWrapper({
+        steps: [
+          {
+            name: "custom-step",
+            title: "Custom step",
+            done: true,
+            hasError: true,
+            completedIcon: "img:/completed-step.svg",
+          },
+        ],
+        activeStep: "other-step",
+      });
+
+      expect(wrapper.getComponent(QIcon).props("name")).toBe("ph-bold ph-warning-circle");
+    });
+
+    it("keeps an idle step numbered when only state-specific icons are provided", () => {
+      wrapper = createWrapper({
+        steps: [
+          {
+            name: "custom-step",
+            title: "Custom step",
+            done: false,
+            activeIcon: "img:/active-step.svg",
+            completedIcon: "img:/completed-step.svg",
+          },
+        ],
+        activeStep: "other-step",
+      });
+
+      expect(wrapper.findComponent(QIcon).exists()).toBe(false);
+      expect(wrapper.get(".wizard-step-number").text()).toBe("1");
+    });
+
     it("determines icon visibility correctly", () => {
       const stepsWithMixedStates = [
         { name: "step-1", title: "Step 1", done: true },

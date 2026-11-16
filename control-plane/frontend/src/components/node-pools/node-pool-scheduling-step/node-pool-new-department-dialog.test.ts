@@ -20,7 +20,7 @@ vi.mock("@/composables/access-rule/use-access-rule-roles.composable", async () =
   const { ref } = await import("vue");
   return {
     useAccessRuleRoles: () => ({
-      roleOptions: [{ label: "Department administrator", value: 7 }],
+      roleOptions: ref([{ label: "Department administrator", value: 7 }]),
       canAssignRoles: ref(true),
       loadRoles: vi.fn(),
       validateRole: (role: unknown) => !!role,
@@ -61,6 +61,13 @@ async function render() {
   return wrapper.findComponent(DepartmentNameSection).get("input");
 }
 describe("new department creation", () => {
+  it("defaults the administrator row to the eligible API-backed department administrator role", async () => {
+    await render();
+    (document.querySelector('[aid="add-department-administrator"]') as HTMLButtonElement).click();
+    await flushPromises();
+    const role = wrapper.findAllComponents(RunaiSelect).find((select) => select.props("label") === "Role");
+    expect(role?.props("modelValue")).toEqual({ label: "Department administrator", value: 7 });
+  });
   it("creates a real department and emits it for table refresh", async () => {
     const name = await render();
     await name.setValue("department-preview");

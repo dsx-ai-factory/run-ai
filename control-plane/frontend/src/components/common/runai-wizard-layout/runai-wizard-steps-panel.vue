@@ -101,9 +101,9 @@ const shouldShowIcon = (step: IRunaiWizardLayoutStep): boolean => {
 };
 
 const getStepIcon = (step: IRunaiWizardLayoutStep): string => {
-  if (step.name === props.activeStep) return "ph-fill ph-pencil-simple";
+  if (step.name === props.activeStep) return step.activeIcon || "ph-fill ph-pencil-simple";
   if (step.hasError) return "ph-bold ph-warning-circle";
-  if (step.done) return "ph-bold ph-check";
+  if (step.done) return step.completedIcon || "ph-bold ph-check";
   if (step.icon) return step.icon; // Custom icon when not active/done/error
   return "";
 };

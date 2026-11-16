@@ -13,6 +13,74 @@ import { RunaiPageActions } from "@/components/common/runai-page-actions";
 import { simulationPreviewKey } from "./node-pool-simulation.service";
 import Table from "./node-pool-department-table.vue";
 import DepartmentResourceEditor from "./department-resource-editor.vue";
+
+describe("rank group identity after filtering", () => {
+  it("does not retain duplicate group rows when an edited destination survives a multi-rank filter", async () => {
+    const peers: DepartmentNodePoolResources[] = Array.from({ length: 12 }, (_, index) => ({
+      id: "resource-" + index,
+      clusterId: "c",
+      nodePoolId: "p",
+      nodePoolName: "Pool",
+      orgUnitId: "department-" + index,
+      orgUnitName: "Department " + index,
+      rank: index < 4 ? "High" : index < 8 ? "MediumLow" : "Low",
+      resources: { gpu: { overQuotaWeight: 2, deserved: 0 } },
+    }));
+    const wrapper = mount(Table, {
+      props: {
+        rows: peers,
+        baselineRows: peers,
+        aggregates: {},
+        draft: {
+          mode: "ranked",
+          automaticWeights: false,
+          cpuQuota: false,
+          departments: {},
+        },
+        rankCounts: { High: 4, MediumLow: 4, Low: 4 },
+        ranks: ["High", "MediumLow", "Low", "Lowest"],
+        readonly: false,
+        loading: false,
+      },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+      },
+    });
+    try {
+      for (const rank of ["High", "Low"]) {
+        await wrapper.get('[aid="rank-' + rank + '"]').trigger("click");
+      }
+      expect(wrapper.findAll(".rank-header")).toHaveLength(3);
+      await wrapper.setProps({
+        draft: {
+          mode: "ranked",
+          automaticWeights: false,
+          cpuQuota: false,
+          departments: {
+            "department-0": { id: "department-0", rank: "Lowest" },
+            "department-4": { id: "department-4", rank: "Lowest" },
+          },
+        },
+      });
+      await wrapper.get('[aid="rank-Lowest"]').trigger("click");
+      expect(wrapper.findAll(".rank-header")).toHaveLength(4);
+      wrapper.findComponent(RunaiPageActions).vm.$emit("filters-changed", {
+        advancedFilters: [
+          { name: "rank", type: "EnumBased", selectedValues: ["High", "Lowest"], selectOptions: [], label: "Rank" },
+        ],
+      });
+      await wrapper.vm.$nextTick();
+      expect(wrapper.findAll(".rank-header").map((group) => group.text())).toEqual([
+        "High (3 departments)",
+        "Lowest (2 departments)",
+      ]);
+      expect(wrapper.findAll(".department-name")).toHaveLength(5);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+});
 const rows: DepartmentNodePoolResources[] = [
   {
     id: "resource-a",

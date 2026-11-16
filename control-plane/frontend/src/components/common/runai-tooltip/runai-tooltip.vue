@@ -24,7 +24,7 @@
       v-model="visible"
       :no-parent-event="interactive"
       class="q-pa-sm runai-tooltip"
-      :class="{ 'dark-mode': darkMode, 'all-pointer-events': interactive }"
+      :class="[tooltipClass, { 'dark-mode': darkMode, 'all-pointer-events': interactive }]"
       :max-width="width"
       :anchor="anchorPosition"
       :self="selfPosition"
@@ -49,6 +49,10 @@ export default defineComponent({
   props: {
     interactive: { type: Boolean, default: false },
     tooltipOffset: { type: Array as PropType<number[]>, default: undefined },
+    tooltipClass: {
+      type: String,
+      default: undefined,
+    },
     tooltipText: {
       type: String as PropType<string>,
       required: true,

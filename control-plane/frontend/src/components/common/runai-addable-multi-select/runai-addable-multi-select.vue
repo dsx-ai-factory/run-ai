@@ -210,7 +210,8 @@ export default defineComponent({
       this.$emit("options-select", updatedOptions);
     },
     createNewValue(val: string) {
-      if (!this.supportAddingNewValue) return;
+      if (!this.supportAddingNewValue || (this.maxValues != null && this.selectedOptions.length >= this.maxValues))
+        return;
       if (val.length > 0) {
         this.$emit("add-option", val, () => {
           this.resetInput();

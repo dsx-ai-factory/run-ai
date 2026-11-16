@@ -2,12 +2,52 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { mount } from "@vue/test-utils";
-import { QBtn, Quasar } from "quasar";
+import { flushPromises, mount } from "@vue/test-utils";
+import { QBtn, QIcon, QMenu, Quasar } from "quasar";
 import { describe, expect, it } from "vitest";
 import EditableCellPopup from "./editable-cell-popup.vue";
 
 describe("editable cell popup", () => {
+  it.each([
+    ["custom", "img:/scoped-close.svg"],
+    ["default", undefined],
+  ])("renders the %s close icon without changing the other consumer", async (_name, closeIcon) => {
+    const wrapper = mount(EditableCellPopup, {
+      props: { title: "Weight", closeIcon },
+      global: { plugins: [Quasar] },
+      attachTo: document.body,
+    });
+    try {
+      await wrapper.get(".cell-trigger").trigger("click");
+      await flushPromises();
+      const icon = wrapper.findComponent(QIcon);
+      if (closeIcon) expect(icon.get("img").attributes("src")).toBe("/scoped-close.svg");
+      else expect(icon.classes()).toEqual(expect.arrayContaining(["ph-bold", "ph-x"]));
+    } finally {
+      wrapper.unmount();
+    }
+  });
+  it("preserves the existing opened-after-show lifecycle by default", async () => {
+    const wrapper = mount(EditableCellPopup, { props: { title: "Weight" }, global: { plugins: [Quasar] } });
+    const menu = wrapper.findComponent(QMenu);
+    await wrapper.get(".cell-trigger").trigger("click");
+    expect(wrapper.emitted("opened")).toBeUndefined();
+    menu.vm.$emit("show");
+    expect(wrapper.emitted("opened")).toHaveLength(1);
+    wrapper.unmount();
+  });
+  it("prepares an opted-in editor before showing and does not open it again after the transition", async () => {
+    const wrapper = mount(EditableCellPopup, {
+      props: { title: "Weight", prepareBeforeShow: true },
+      global: { plugins: [Quasar] },
+    });
+    const menu = wrapper.findComponent(QMenu);
+    await wrapper.get(".cell-trigger").trigger("click");
+    expect(wrapper.emitted("opened")).toHaveLength(1);
+    menu.vm.$emit("show");
+    expect(wrapper.emitted("opened")).toHaveLength(1);
+    wrapper.unmount();
+  });
   it("disables Apply during invalid or loading input and enables it when submission becomes valid", async () => {
     const wrapper = mount(EditableCellPopup, {
       props: { title: "Weight", isSubmitDisabled: true },

@@ -21,7 +21,8 @@
       advanced-filters
       search-tooltip-text="Search departments"
       filter-menu-width="208px"
-      filter-menu-max-height="280px"
+      filter-menu-max-height="512px"
+      filter-menu-class="node-pool-scheduling-filter-popup"
       hide-cluster-filter
       hide-columns-btn
       hide-export-csv
@@ -117,7 +118,7 @@
                     <q-toggle
                       v-model="simulation"
                       dense
-                      size="30px"
+                      size="35px"
                       :disable="!canView"
                       aid="simulate-demand"
                       aria-label="Simulate workload demand"
@@ -127,7 +128,7 @@
               </q-th> </q-tr
           ></template>
           <template #body="{ row }">
-            <q-tr v-if="row.group" class="rank-header">
+            <q-tr v-if="row.group" :key="row.key" class="rank-header">
               <q-td :colspan="columns.length"
                 ><div class="rank-row">
                   <q-btn
@@ -174,7 +175,7 @@
                 :load-context="() => quotaContext(row)"
                 @apply="emit('edit', { id: row.id, quota: $event })"
               />
-              <q-td class="department-name">{{ row.name }}</q-td>
+              <q-td class="department-name"><runai-ellipsis-text-with-tooltip :text="row.name" /></q-td>
               <department-resource-editor
                 :id="row.id"
                 kind="weight"
@@ -201,7 +202,7 @@
               />
               <q-td class="result-cell">
                 <div class="result-bar" :class="{ 'simulation-bar': simulation }">
-                  <template v-if="simulation && simulationResults?.[row.id]">
+                  <div v-if="simulation && simulationResults?.[row.id]" class="simulation-segments">
                     <span
                       class="allocated"
                       :style="{
@@ -215,14 +216,25 @@
                       :style="{ width: `${Math.min(100, (simulationResults[row.id].unmet / (capacity || 1)) * 100)}%` }"
                       >{{ Number(simulationResults[row.id].unmet.toFixed(2)) }}</span
                     >
-                  </template>
-                  <span
-                    v-else-if="percentage(row) !== 'Unknown'"
-                    class="quota-marker"
-                    :style="{
-                      left: `${Math.min(100, Math.max(0, parseFloat(percentage(row))))}%`,
-                    }"
-                  />
+                    <img
+                      class="allocation-marker"
+                      :src="weightLegend"
+                      alt=""
+                      :style="{
+                        left: `${Math.min(100, (simulationResults[row.id].allocated / (capacity || 1)) * 100)}%`,
+                      }"
+                    />
+                  </div>
+                  <div v-else-if="percentage(row) !== 'Unknown'" class="simulation-segments">
+                    <img
+                      class="quota-marker"
+                      :src="weightLegend"
+                      alt=""
+                      :style="{
+                        left: `${Math.min(100, Math.max(0, parseFloat(percentage(row))))}%`,
+                      }"
+                    />
+                  </div>
                   <q-tooltip class="tooltip-dark scheduling-result-tooltip" max-width="380px">
                     <div class="result-tooltip-title">{{ row.name }}</div>
                     <div class="result-tooltip-legend">
@@ -231,8 +243,9 @@
                           <img :src="entry.image" alt="" width="4" height="38" />
                         </span>
                         <span v-else class="result-tooltip-swatch" :class="`swatch-${entry.kind}`" aria-hidden="true" />
-                        <span
-                          >{{ entry.label }} <strong>{{ entry.value }}</strong></span
+                        <span class="result-tooltip-description"
+                          ><span>{{ entry.label }}</span
+                          >{{ " " }}<strong>{{ entry.value }}</strong></span
                         >
                       </div>
                     </div>
@@ -325,6 +338,7 @@ import maximumLegend from "@/assets/icons/scheduling/maximum-legend.png";
 import { computed, inject, ref, watch } from "vue";
 import type { QTableColumn } from "quasar";
 import { RunaiPageActions } from "@/components/common/runai-page-actions";
+import { RunaiEllipsisTextWithTooltip } from "@/components/common/runai-ellipsis-text-with-tooltip";
 import { RunaiActionButton } from "@/components/common/runai-page-actions/runai-action-button";
 import { EColumnFilterType, EFilterOperator, type IFilterBy } from "@/models/filter.model";
 import type { ITableColumn } from "@/models/table.model";
@@ -816,9 +830,33 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   font-size: 20px;
   line-height: 20px;
 }
+.scheduling-actions :deep(.runai-general-search .ph-magnifying-glass),
+.scheduling-actions :deep([aid="refresh-data-button"] .q-icon),
+.scheduling-actions :deep([aid="advanced-settings"] .q-icon) {
+  width: 20px;
+  height: 20px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 20px 20px;
+}
+.scheduling-actions :deep(.runai-general-search .ph-magnifying-glass::before),
+.scheduling-actions :deep([aid="refresh-data-button"] .q-icon::before),
+.scheduling-actions :deep([aid="advanced-settings"] .q-icon::before) {
+  content: none;
+}
+.scheduling-actions :deep(.runai-general-search .ph-magnifying-glass) {
+  background-image: url("@/assets/icons/node-pool-table-search.svg");
+}
+.scheduling-actions :deep([aid="refresh-data-button"] .q-icon) {
+  background-image: url("@/assets/icons/node-pool-table-refresh.svg");
+}
+.scheduling-actions :deep([aid="advanced-settings"] .q-icon) {
+  background-image: url("@/assets/icons/node-pool-table-settings.svg");
+}
 .scheduling-actions :deep(.runai-general-search .icon-container span) {
   font-size: 10px;
   line-height: 14px;
+  color: rgba(0, 0, 0, 0.54);
 }
 .scheduling-actions :deep(.runai-general-search:not(.focus):not(.filled)) {
   width: 59px;
@@ -831,7 +869,9 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   margin-left: 0;
   height: 38px;
   min-height: 38px;
+  width: 78px;
   padding: 0 10px;
+  line-height: 20px;
 }
 .scheduling-actions :deep(.main-actions) {
   height: 40px;
@@ -840,6 +880,8 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   height: 40px;
   min-height: 40px;
   padding: 0 10px;
+  line-height: 14px;
+  color: rgba(0, 0, 0, 0.54);
 }
 .scheduling-actions :deep(.right-actions-container > .q-btn .q-btn__content) {
   gap: 3px;
@@ -855,9 +897,10 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
 }
 .scheduling-actions :deep([aid="refresh-data-button"]) {
   margin-inline: 16px;
+  width: 63px;
 }
 .scheduling-actions :deep([aid="advanced-settings"]) {
-  width: 128px;
+  width: 121px;
 }
 .scheduling-actions :deep(.right-actions-container) {
   flex-shrink: 0;
@@ -885,20 +928,25 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
 .scheduling-table :deep(th) {
   height: 60px;
   padding: 10px;
-  vertical-align: bottom;
+  vertical-align: top;
   line-height: 16.8px;
   text-align: left;
   font-size: 12px;
   background: white;
   white-space: normal;
   font-weight: 500;
+  color: rgba(0, 0, 0, 0.87);
+  border-bottom: 0;
+  box-shadow: inset 0 -1px var(--border-subtle);
 }
 .scheduling-table :deep(td) {
   height: 60px;
   font-size: 14px;
-  line-height: 19.5px;
-  padding: 4px 10px;
-  border-bottom: 1px solid var(--border-subtle);
+  line-height: 21px;
+  padding: 5px 10px;
+  border-bottom: 0;
+  box-shadow: inset 0 -1px var(--border-subtle);
+  color: rgba(0, 0, 0, 0.87);
 }
 .scheduling-table :deep(.q-table__middle) {
   overflow-x: auto;
@@ -913,7 +961,7 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
 .scheduling-table :deep(.column-selection) {
   width: 56px;
   padding: 0 10px;
-  color: var(--icon-default);
+  color: rgba(0, 0, 0, 0.54);
 }
 .scheduling-table :deep(.column-department) {
   width: 220px;
@@ -927,34 +975,57 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   min-width: 220px;
 }
 .column-order {
-  font-weight: 500;
+  font-weight: 700;
+  line-height: 18px;
   margin-bottom: 3px;
+  color: #212121;
 }
 .order-quota {
-  color: #2196f3;
+  color: #42a5f5;
 }
 .order-department {
-  color: #673ab7;
+  color: #4a148c;
 }
 .order-limit {
-  color: #ff6d00;
+  color: #e65100;
 }
 .column-label {
-  min-height: 21px;
+  min-height: 17px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
+}
+.scheduling-table :deep(th.column-department:not(:has(.column-order))) {
+  vertical-align: bottom;
+}
+.scheduling-table :deep(th.column-department:not(:has(.column-order))) .column-label {
+  min-height: 21px;
 }
 .column-label .q-icon {
-  color: var(--icon-default);
+  color: rgba(0, 0, 0, 0.54);
 }
 .simulation-control {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-weight: 400;
-  margin-top: 3px;
+  line-height: 18px;
+  margin-top: 5px;
   white-space: nowrap;
+}
+.simulation-control :deep(.q-toggle__inner) {
+  padding-top: 3px;
+  padding-bottom: 0;
+}
+.simulation-control :deep(.q-toggle__inner--truthy .q-toggle__track) {
+  background: #7bb43b;
+  opacity: 0.5;
+}
+.simulation-control :deep(.q-toggle__inner--truthy .q-toggle__thumb) {
+  left: 13px;
+}
+.simulation-control :deep(.q-toggle__inner--truthy .q-toggle__thumb::after) {
+  box-shadow: 0 3.24324px 3.24324px rgba(0, 0, 0, 0.25);
 }
 .rank-header td {
   height: 60px !important;
@@ -980,11 +1051,17 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   height: 50px;
   width: 100px;
   justify-content: flex-start;
-  padding: 0 14px;
+  padding: 0 15px;
   font-size: 14px;
+  border-radius: 3px;
 }
 .scheduling-table :deep(.cell--disabled .cell-trigger) {
-  color: var(--text-disabled);
+  color: rgba(0, 0, 0, 0.4);
+  border-color: #bdbdbd;
+}
+.scheduling-table :deep(.unlimited-allocation .cell-trigger) {
+  color: rgba(0, 0, 0, 0.4);
+  border-color: #bdbdbd;
 }
 .selected-department {
   background: #eee;
@@ -1002,27 +1079,39 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   border-radius: 3px;
   overflow: visible;
   font-size: 12px;
-  line-height: 16px;
+  line-height: 16.8px;
   font-weight: 500;
 }
 .result-bar:not(.simulation-bar) {
   height: 18px;
 }
-.quota-marker {
+.quota-marker,
+.allocation-marker {
   position: absolute;
-  height: 100%;
-  border-left: 1px dashed #212121;
+  top: 50%;
+  width: 4px;
+  height: 38px;
+  transform: translate(-3px, -50%);
 }
 .allocated {
   background: #90caf9;
   height: 100%;
   text-align: center;
   overflow: hidden;
-  border-right: 1px dashed #212121;
+  flex: 0 0 auto;
+}
+.simulation-segments {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 2px;
 }
 .unmet {
   background: #ffe082;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  min-width: 0;
   text-align: center;
   height: 100%;
 }
@@ -1044,7 +1133,7 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   border: 1px solid white;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.87);
-  box-shadow: 0 2px 2px #0004;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.25);
 }
 .demand-slider::-moz-range-thumb {
   width: 18px;
@@ -1060,6 +1149,12 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   align-items: center;
   justify-content: center;
   color: var(--b-text-main);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+.scheduling-table :deep(.q-table__bottom:has(.scheduling-empty)) {
+  padding: 0;
 }
 .simulation-notice,
 .data-notice {
@@ -1075,11 +1170,8 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
 }
 .allocated,
 .unmet {
-  text-shadow:
-    -1px 0 white,
-    1px 0 white,
-    0 -1px white,
-    0 1px white;
+  -webkit-text-stroke: 1.4px white;
+  paint-order: stroke fill;
 }
 :global(.q-tooltip.scheduling-result-tooltip) {
   background: rgba(0, 0, 0, 0.87);
@@ -1093,6 +1185,7 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
 .result-tooltip-title {
   margin-bottom: 7px;
   font-weight: 400;
+  min-height: 17px;
 }
 .result-tooltip-legend {
   display: flex;
@@ -1104,10 +1197,21 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   align-items: center;
   gap: 7px;
   white-space: nowrap;
+  min-height: 17px;
 }
 .result-tooltip-entry strong {
   font-weight: 800;
-  margin-left: 5px;
+}
+.result-tooltip-description {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.result-tooltip-entry:first-child:has(> .swatch-guaranteed) {
+  min-height: 20px;
+}
+.result-tooltip-entry:first-child > .swatch-guaranteed {
+  margin-right: 8px;
 }
 .result-tooltip-line {
   width: 20px;
@@ -1143,5 +1247,82 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
 }
 .result-tooltip-unavailable {
   margin-top: 7px;
+}
+</style>
+
+<style lang="scss">
+.node-pool-scheduling-filter-popup:has(.checkbox-container[aria-label="Rank"]) {
+  padding: 16px 10px;
+  border-radius: 3px;
+  box-shadow: -1px 0 7px rgba(0, 0, 0, 0.15);
+
+  > .q-card__section {
+    padding: 0;
+  }
+  > .q-card__section:first-child {
+    height: 32px;
+    margin-bottom: 16px;
+
+    > .text-weight-medium {
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 20px;
+    }
+    > .q-btn {
+      width: 32px;
+      height: 32px;
+      min-height: 32px;
+      padding: 0;
+
+      .q-icon {
+        font-size: 20px;
+      }
+    }
+  }
+  .checkbox-container > span {
+    margin-bottom: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 18px;
+  }
+  .checkbox-container > .q-item {
+    height: 32px;
+    min-height: 32px;
+    padding-right: 10px;
+
+    &:not(:last-child) {
+      margin-bottom: 7px;
+    }
+  }
+  .q-checkbox {
+    width: 100%;
+    height: 32px;
+    min-height: 32px;
+  }
+  .q-checkbox__inner {
+    font-size: 32px;
+  }
+  .q-checkbox__label {
+    flex: 1;
+    min-width: 0;
+    padding-left: 8px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 19.5px;
+  }
+  > .q-card__section:last-child {
+    height: 38px;
+    margin-top: 16px;
+
+    > .q-btn {
+      width: 62px;
+      height: 38px;
+      min-height: 38px;
+      padding: 0 10px;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 20px;
+    }
+  }
 }
 </style>

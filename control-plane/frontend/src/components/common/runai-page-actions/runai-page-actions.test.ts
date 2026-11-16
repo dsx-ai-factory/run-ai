@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { mount, type VueWrapper } from "@vue/test-utils";
+import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { RunaiPageActions } from ".";
 import { Quasar } from "quasar";
 import { createTestingPinia } from "@pinia/testing";
@@ -14,6 +14,56 @@ import type { IFilterBy } from "@/models/filter.model";
 import type { ITableColumn } from "@/models/table.model";
 import type { ActionMenuItem } from "@/components/common/runai-page-actions/model";
 import { beforeEach, describe, expect, vi, it } from "vitest";
+import { EColumnFilterType } from "@/models/filter.model";
+
+describe("advanced filter popup class opt-in", () => {
+  it.each([
+    ["custom", "node-pool-scheduling-filter-popup"],
+    ["default", undefined],
+  ])("styles only the visible popup for the %s consumer", async (_name, popupClass) => {
+    const wrapper = mount(RunaiPageActions, {
+      attachTo: document.body,
+      props: {
+        advancedFilters: true,
+        filterMenuClass: popupClass,
+        hideClusterFilter: true,
+        hideExportCsv: true,
+        showSearch: false,
+        filters: { advancedFilters: [] },
+        columns: [
+          {
+            name: "rank",
+            label: "Rank",
+            field: "rank",
+            filter: {
+              type: EColumnFilterType.EnumBased,
+              selectOptions: [{ label: "High", value: "High" }],
+            },
+          },
+        ],
+      },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+        mocks: { $route: { query: {}, meta: { resourceType: "nodePools" } } },
+      },
+    });
+    try {
+      await wrapper.get(".add-filter-btn").trigger("click");
+      await flushPromises();
+      const item = document.body.querySelector('[role="menuitem"]') as HTMLElement;
+      expect(item?.textContent).toBe("Rank");
+      item.click();
+      await flushPromises();
+      const popup = document.body.querySelector(".page-filter-popup");
+      expect(popup?.textContent).toContain("Matches any:");
+      expect(popup?.classList.contains("node-pool-scheduling-filter-popup")).toBe(!!popupClass);
+      expect(wrapper.element.classList.contains("node-pool-scheduling-filter-popup")).toBe(false);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+});
 
 interface IRunaiPageActionsProps {
   advancedFilters?: boolean;

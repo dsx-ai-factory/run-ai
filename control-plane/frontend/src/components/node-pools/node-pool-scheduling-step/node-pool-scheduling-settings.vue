@@ -10,8 +10,15 @@
   >
     <header>
       <span>Advanced settings</span
-      ><q-btn flat round dense icon="ph-bold ph-x" aria-label="Hide Advanced settings" @click="emit('close')">
-        <q-tooltip>Hide Advanced settings</q-tooltip>
+      ><q-btn
+        flat
+        round
+        dense
+        :icon="`img:${settingsCloseIcon}`"
+        aria-label="Hide Advanced settings"
+        @click="emit('close')"
+      >
+        <q-tooltip class="node-pool-settings-hide-help">Hide Advanced settings</q-tooltip>
       </q-btn>
     </header>
     <div class="settings-body">
@@ -23,10 +30,12 @@
           tooltip-text="For more information, see The NVIDIA Run:ai Scheduler: Concepts and Principles guide"
         >
           <template #tooltip-content>
-            For more information, see
-            <a :href="DOCS.PLATFORM_MANAGEMENT.SCHEDULING_CONCEPTS" target="_blank" rel="noopener noreferrer"
-              >The NVIDIA Run:ai Scheduler: Concepts and Principles guide</a
-            >
+            <span class="node-pool-settings-help node-pool-settings-help--standard">
+              For more information, see
+              <a :href="DOCS.PLATFORM_MANAGEMENT.SCHEDULING_CONCEPTS" target="_blank" rel="noopener noreferrer"
+                >The NVIDIA Run:ai Scheduler: Concepts and Principles guide</a
+              >
+            </span>
           </template>
         </runai-section-title>
         <runai-radio-options
@@ -37,7 +46,11 @@
         />
       </section>
       <section class="toggle-section">
-        <runai-section-title title="Max GPU allocation" tooltip-icon="ph-bold ph-info" :tooltip-text="maxHelp" />
+        <runai-section-title title="Max GPU allocation" tooltip-icon="ph-bold ph-info" :tooltip-text="maxHelp">
+          <template #tooltip-content>
+            <span class="node-pool-settings-help node-pool-settings-help--standard">{{ maxHelp }}</span>
+          </template>
+        </runai-section-title>
         <runai-toggle
           :model-value="!!draft.maxAllocation"
           :disable="readonly || (!canResetResources && (savedMaxAllocation ?? draft.maxAllocation))"
@@ -54,20 +67,22 @@
             title="Time-based fairshare"
             interactive-tooltip
             tooltip-icon="ph-bold ph-info"
-            width="425px"
+            width="427px"
             tooltip-text="When enabled, the Scheduler adjusts fairshare scores based on each project's weight and historical usage records. To use this feature, persistent data must be enabled. When disabled, the Scheduler uses the default fairshare, with scheduling fairness based on the current project's weight and resource usage. For more information, see the Time-based fairshare guide."
           >
             <template #tooltip-content>
-              When enabled, the Scheduler adjusts fairshare scores based on each project's weight and historical usage
-              records.<br />
-              To use this feature,
-              <a :href="DOCS.NODE_POOLS.PERSISTENT_DATA" target="_blank" rel="noopener noreferrer">persistent data</a>
-              must be enabled.<br />
-              When disabled, the Scheduler uses the default fairshare, with scheduling fairness based on the current
-              project's weight and resource usage. For more information, see the
-              <a :href="DOCS.NODE_POOLS.TIME_BASED_FAIR_SHARE" target="_blank" rel="noopener noreferrer"
-                >Time-based fairshare guide</a
-              >.
+              <span class="node-pool-settings-help node-pool-settings-help--fairshare">
+                When enabled, the Scheduler adjusts fairshare scores based on each project's weight and historical usage
+                records.<br />
+                To use this feature,
+                <a :href="DOCS.NODE_POOLS.PERSISTENT_DATA" target="_blank" rel="noopener noreferrer">persistent data</a>
+                must be enabled.<br />
+                When disabled, the Scheduler uses the default fairshare, with scheduling fairness based on the current
+                project's weight and resource usage. For more information, see the
+                <a :href="DOCS.NODE_POOLS.TIME_BASED_FAIR_SHARE" target="_blank" rel="noopener noreferrer"
+                  >Time-based fairshare guide</a
+                >.
+              </span>
             </template>
           </runai-section-title>
           <runai-toggle
@@ -83,16 +98,18 @@
               flat
               class="historical-weight-title"
               title="Set the weight value that determines how a project's historical resource usage affects its fairshare"
-              width="473px"
+              width="475px"
               tooltip-text="This determines how strongly historical resource usage influences fairshare scores: 0 — History is ignored; fairshare is based on current weight only. 0–1 — History has partial influence; lower values reduce its effect. 1 — History and current weight are balanced equally. >1 — History dominates; higher values amplify its effect."
-              ><template #tooltip-content
-                >This determines how strongly historical resource usage influences fairshare scores:
-                <ul class="historical-weight-help">
-                  <li>0 — History is ignored; fairshare is based on current weight only.</li>
-                  <li>0–1 — History has partial influence; lower values reduce its effect.</li>
-                  <li>1 — History and current weight are balanced equally.</li>
-                  <li>&gt;1 — History dominates; higher values amplify its effect.</li>
-                </ul>
+              ><template #tooltip-content>
+                <div class="node-pool-settings-help node-pool-settings-help--historical">
+                  This determines how strongly historical resource usage influences fairshare scores:
+                  <ul class="historical-weight-help">
+                    <li>0 — History is ignored; fairshare is based on current weight only.</li>
+                    <li>0–1 — History has partial influence; lower values reduce its effect.</li>
+                    <li>1 — History and current weight are balanced equally.</li>
+                    <li>&gt;1 — History dominates; higher values amplify its effect.</li>
+                  </ul>
+                </div>
               </template></runai-section-title
             >
             <div class="historical-weight-field">
@@ -115,9 +132,13 @@
             <runai-section-title
               flat
               title="Set the duration of the historical usage window"
-              width="372px"
-              tooltip-text="This defines the duration of the sliding window used to calculate historical resource usage. At any given moment, the system looks only at usage within this duration from the current time. As time passes, the window slides forward continuously, including new usage and dropping old usage that falls outside the window."
-            />
+              width="374px"
+              :tooltip-text="windowHelp"
+            >
+              <template #tooltip-content>
+                <span class="node-pool-settings-help node-pool-settings-help--standard">{{ windowHelp }}</span>
+              </template>
+            </runai-section-title>
             <div class="duration-grid historical-window">
               <q-input
                 v-for="unit in windowUnits"
@@ -141,8 +162,12 @@
         <runai-section-title
           title="Set the minimum guaranteed runtime"
           tooltip-icon="ph-bold ph-info"
-          tooltip-text="This defines the minimum time a preemptible workload is guaranteed to run once it is scheduled in this node pool, before it can be preempted and its resources reallocated to other workloads."
-        />
+          :tooltip-text="runtimeHelp"
+        >
+          <template #tooltip-content>
+            <span class="node-pool-settings-help node-pool-settings-help--standard">{{ runtimeHelp }}</span>
+          </template>
+        </runai-section-title>
         <div class="duration-grid">
           <q-input
             v-for="unit in runtimeUnits"
@@ -169,12 +194,15 @@
             tooltip-text="When enabled, CPU resources can be set per department or project. For more information, see the Departments guide and Projects guide."
           >
             <template #tooltip-content>
-              When enabled, CPU resources can be set per department or project. For more information, see the
-              <a :href="DOCS.PLATFORM_MANAGEMENT.DEPARTMENTS" target="_blank" rel="noopener noreferrer"
-                >Departments guide</a
-              >
-              and
-              <a :href="DOCS.PLATFORM_MANAGEMENT.PROJECTS" target="_blank" rel="noopener noreferrer">Projects guide</a>.
+              <span class="node-pool-settings-help node-pool-settings-help--cpu">
+                When enabled, CPU resources can be set per department or project. For more information, see the
+                <a :href="DOCS.PLATFORM_MANAGEMENT.DEPARTMENTS" target="_blank" rel="noopener noreferrer"
+                  >Departments guide</a
+                >
+                and
+                <a :href="DOCS.PLATFORM_MANAGEMENT.PROJECTS" target="_blank" rel="noopener noreferrer">Projects guide</a
+                >.
+              </span>
             </template>
           </runai-section-title>
           <runai-toggle
@@ -218,6 +246,7 @@
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
+import settingsCloseIcon from "@/assets/icons/node-pool-settings-close.svg?url";
 import { DOCS } from "@/constants/docs";
 import { RunaiSectionTitle } from "@/components/common/runai-section-title";
 import { RunaiRadioOptions } from "@/components/common/runai-radio-options";
@@ -237,17 +266,25 @@ const weightOptions = [
   {
     label: "Automatic",
     value: "automatic",
+    toolTipClass: "node-pool-settings-option-help",
+    toolTipWidth: "374px",
     toolTip:
       "A project or department gets a proportion of unused resources relative to its quota, and it can't be modified.",
   },
   {
     label: "Custom",
     value: "custom",
+    toolTipClass: "node-pool-settings-option-help",
+    toolTipWidth: "374px",
     toolTip: "Set the proportion of unused resources a project or department can get on top of its quota.",
   },
 ];
 const maxHelp =
   'When enabled, the maximum GPU device allocation each department and project can get from this node pool, representing the maximum sum of assigned quota and over-quota GPUs, can be set. When disabled, the maximum is "unlimited."';
+const runtimeHelp =
+  "This defines the minimum time a preemptible workload is guaranteed to run once it is scheduled in this node pool, before it can be preempted and its resources reallocated to other workloads.";
+const windowHelp =
+  "This defines the duration of the sliding window used to calculate historical resource usage. At any given moment, the system looks only at usage within this duration from the current time. As time passes, the window slides forward continuously, including new usage and dropping old usage that falls outside the window.";
 const runtimeUnits = ["Days", "Hours", "Minutes", "Seconds"];
 const windowUnits = ["Days", "Hours", "Minutes"];
 const confirmation = ref<"maxAllocation" | "cpuQuota">();
@@ -291,7 +328,7 @@ function confirmDisable() {
 }
 .scheduling-settings--compact {
   align-self: flex-start;
-  border-bottom: 1px solid var(--border-subtle);
+  box-shadow: inset 0 -1px var(--border-subtle);
 }
 header {
   height: 55px;
@@ -299,18 +336,19 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--border-subtle);
+  box-shadow: inset 0 -1px var(--border-subtle);
   font-weight: 500;
+  line-height: 20px;
 }
 header .q-btn {
-  color: var(--icon-default);
+  color: rgba(0, 0, 0, 0.54);
   width: 32px;
   min-width: 32px;
   height: 32px;
   min-height: 32px;
 }
 header :deep(.q-icon) {
-  font-size: 20px;
+  font-size: 32px;
 }
 .settings-body {
   padding: 20px;
@@ -361,7 +399,7 @@ header :deep(.q-icon) {
   padding: 0;
 }
 .settings-body > .runtime-section:last-child {
-  padding-bottom: 12px !important;
+  padding-bottom: 0 !important;
 }
 .settings-body :deep(.runai-radio-options) {
   margin-top: 7px;
@@ -529,5 +567,41 @@ header :deep(.q-icon) {
 .scheduling-confirm .runai-base-dialog-footer {
   min-height: 70px;
   padding: 16px;
+}
+</style>
+
+<style lang="scss">
+.runai-tooltip:has(> .node-pool-settings-help),
+.runai-tooltip.node-pool-settings-option-help,
+.q-tooltip.node-pool-settings-hide-help {
+  padding: 10px;
+  border-radius: 3px;
+  background: white;
+  color: rgba(0, 0, 0, 0.87);
+  box-shadow: -1px 0 7px rgba(0, 0, 0, 0.15);
+  font-family: Roboto, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16.8px;
+}
+.runai-tooltip:has(> .node-pool-settings-help--standard),
+.runai-tooltip.node-pool-settings-option-help {
+  width: 374px;
+  max-width: min(374px, calc(100vw - 20px)) !important;
+}
+.runai-tooltip:has(> .node-pool-settings-help--fairshare) {
+  width: 427px;
+  max-width: min(427px, calc(100vw - 20px)) !important;
+}
+.runai-tooltip:has(> .node-pool-settings-help--cpu) {
+  width: 429px;
+  max-width: min(429px, calc(100vw - 20px)) !important;
+}
+.runai-tooltip:has(> .node-pool-settings-help--historical) {
+  width: 475px;
+  max-width: min(475px, calc(100vw - 20px)) !important;
+}
+.q-tooltip.node-pool-settings-hide-help {
+  width: 147px;
 }
 </style>

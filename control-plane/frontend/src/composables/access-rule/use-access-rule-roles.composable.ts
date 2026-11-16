@@ -21,7 +21,10 @@ export function useAccessRuleRoles() {
   const roleOptions = computed<ISelectOption[]>(() =>
     canReadRoles.value
       ? roleStore.roleList
-          .filter((role) => rolesService.isPermittedRole(role, permissionStore.permissionsList))
+          .filter(
+            (role) =>
+              role.effectiveEnabled !== false && rolesService.isPermittedRole(role, permissionStore.permissionsList),
+          )
           .map((role) => ({ label: role.name, value: role.id, roleStageBadge: role.name }))
       : [],
   );

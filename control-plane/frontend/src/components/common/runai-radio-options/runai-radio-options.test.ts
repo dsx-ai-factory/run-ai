@@ -66,3 +66,55 @@ describe("runai-radio-options.vue", () => {
     expect(runaiRadioOptionsCmp.emitted("update:model-value")).toEqual([[options[1].value]]);
   });
 });
+
+describe("option tooltip class opt-in", () => {
+  test("applies an option's tooltip class to its visible help popup without styling the trigger", async () => {
+    const wrapper = mount(RunaiRadioOptions, {
+      attachTo: document.body,
+      global: { plugins: [Quasar] },
+      props: {
+        modelValue: "automatic",
+        options: [
+          {
+            label: "Automatic",
+            value: "automatic",
+            toolTip: "Automatic allocation help",
+            toolTipClass: "option-specific-help",
+          },
+        ],
+      },
+    });
+    try {
+      const tooltip = wrapper.findComponent({ name: "QTooltip" });
+      await tooltip.vm.show();
+      await wrapper.vm.$nextTick();
+      const popup = document.body.querySelector('[role="tooltip"]');
+      expect(popup?.textContent).toContain("Automatic allocation help");
+      expect(popup?.classList.contains("option-specific-help")).toBe(true);
+      expect(wrapper.find("button.option-specific-help").exists()).toBe(false);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  test("leaves a default option's visible help popup without an option-specific class", async () => {
+    const wrapper = mount(RunaiRadioOptions, {
+      attachTo: document.body,
+      global: { plugins: [Quasar] },
+      props: {
+        modelValue: "automatic",
+        options: [{ label: "Automatic", value: "automatic", toolTip: "Default allocation help" }],
+      },
+    });
+    try {
+      const tooltip = wrapper.findComponent({ name: "QTooltip" });
+      await tooltip.vm.show();
+      await wrapper.vm.$nextTick();
+      const popup = document.body.querySelector('[role="tooltip"]');
+      expect(popup?.textContent).toContain("Default allocation help");
+      expect(popup?.classList.contains("option-specific-help")).toBe(false);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+});

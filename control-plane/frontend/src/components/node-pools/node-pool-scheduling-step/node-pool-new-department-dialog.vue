@@ -9,6 +9,7 @@
     size="width-lg"
     :is-modal-persistent="saving"
     :hide-x="saving"
+    :close-icon="`img:${settingsCloseIcon}`"
     @close="!saving && emit('close')"
   >
     <template #header>New Department</template>
@@ -34,6 +35,7 @@
           <runai-section-title
             flat
             class="administrator-title"
+            :tooltip-icon="`img:${departmentHelpIcon}`"
             title="Set the department administrator(s)"
             tooltip-text="Department administrators can manage the department and its projects. Adding them here enables an access rule scoped to the department. It can be edited later in the department."
           />
@@ -41,7 +43,7 @@
             <runai-btn
               icon-button
               aid="remove-department-administrator"
-              icon="ph ph-x"
+              :icon="`img:${settingsCloseIcon}`"
               size="sm"
               tooltip="Remove administrator"
               class="remove-administrator"
@@ -81,7 +83,7 @@
             v-else
             flat
             color="primary"
-            icon="ph-bold ph-plus"
+            :icon="`img:${departmentPlusIcon}`"
             label="Administrator"
             class="add-administrator"
             aid="add-department-administrator"
@@ -112,7 +114,10 @@
   </runai-base-dialog>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
+import settingsCloseIcon from "@/assets/icons/node-pool-settings-close.svg?url";
+import departmentHelpIcon from "@/assets/icons/node-pool-department-help.svg?url";
+import departmentPlusIcon from "@/assets/icons/node-pool-department-plus.svg?url";
 import { useAccessRuleRoles } from "@/composables/access-rule/use-access-rule-roles.composable";
 import { useAuthStore } from "@/stores/auth.store";
 import { errorMessages } from "@/common/error-message.constant";
@@ -152,6 +157,13 @@ const subject = ref<ISelectOption | null>(null);
 const subjects = ref<ISelectOption[]>([]);
 const { roleOptions, canAssignRoles, loadRoles, validateRole, loading: rolesLoading } = useAccessRuleRoles();
 const role = ref<ISelectOption | null>(null);
+watch(
+  roleOptions,
+  (options) => {
+    if (!role.value) role.value = options.find((option) => option.label === "Department administrator") ?? null;
+  },
+  { immediate: true },
+);
 const rolesError = ref("");
 const requiredSubject = (value: ISelectOption | null) => !!value || errorMessages.SUBJECT_NOT_EMPTY;
 async function loadRoleOptions() {
@@ -229,11 +241,17 @@ async function createDepartment() {
 }
 </script>
 <style lang="scss">
-.scheduling-new-department {
+.q-card.scheduling-new-department {
+  display: flex;
+  flex-direction: column;
   width: 800px !important;
   max-width: calc(100vw - 40px) !important;
 }
-.scheduling-new-department .runai-base-dialog-header {
+.scheduling-new-department > .q-separator {
+  display: none;
+}
+.q-card.scheduling-new-department > .runai-base-dialog-header {
+  box-shadow: inset 0 -1px var(--border-subtle);
   height: 64px;
   min-height: 64px;
   padding: 16px;
@@ -245,20 +263,76 @@ async function createDepartment() {
 .scheduling-new-department .runai-base-dialog-close-btn {
   height: 32px;
   width: 32px;
+  min-width: 32px;
   min-height: 32px;
+  padding: 0;
+}
+.scheduling-new-department .runai-base-dialog-close-btn .q-icon {
+  width: 32px;
+  height: 32px;
+  font-size: 32px;
 }
 .scheduling-new-department .runai-base-dialog-body {
+  min-height: 0;
   padding: 26px 16px;
 }
-.scheduling-new-department .runai-base-dialog-footer {
+.q-card.scheduling-new-department > .runai-base-dialog-footer {
+  box-shadow: inset 0 1px var(--border-subtle);
   min-height: 70px;
   padding: 16px;
 }
+.scheduling-new-department .department-fields > p {
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+  margin: 0;
+}
 .new-department-form .department-cluster {
-  width: 85%;
-  margin-top: 31px;
+  width: 655px;
+  max-width: 100%;
+  margin-top: 26px;
   margin-bottom: 26px;
   padding-bottom: 24px;
+}
+.scheduling-new-department .department-cluster .q-field__control {
+  height: auto;
+}
+.scheduling-new-department .department-cluster .q-field__control-container {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+.scheduling-new-department .department-cluster .q-field__label {
+  position: static;
+  order: 0;
+  height: auto;
+  min-height: 17px;
+  transform: none;
+  font-size: 12px;
+  line-height: 16.8px;
+}
+.scheduling-new-department .department-cluster .q-field__native {
+  order: 1;
+  min-height: 31px;
+  margin-top: 3px;
+  padding: 0 0 10px;
+  line-height: 21px;
+}
+.scheduling-new-department .department-name-section--compact .q-field__native {
+  line-height: 21px;
+}
+.scheduling-new-department .department-name-section--compact .q-textarea .q-field__control-container {
+  padding: 0;
+}
+.scheduling-new-department .department-name-section--compact textarea.q-field__native {
+  overflow-y: auto !important;
+}
+.scheduling-new-department .q-field__messages,
+.scheduling-new-department .q-field__counter {
+  min-height: 17px;
+  font-size: 12px;
+  line-height: 16.8px;
+  letter-spacing: 0;
 }
 .new-department-form .department-cluster .q-field__control:before {
   border-bottom-style: solid;
@@ -295,7 +369,7 @@ async function createDepartment() {
 }
 .administrator-rule {
   position: relative;
-  border: 1px solid var(--border-subtle);
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
   padding: 16px;
   margin-top: 26px;
 }
@@ -310,8 +384,13 @@ async function createDepartment() {
 }
 .administrator-rule .remove-administrator {
   position: absolute;
-  top: 20px;
-  right: 10px;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
 }
 .add-administrator {
   margin-top: 26px;
@@ -340,10 +419,106 @@ async function createDepartment() {
   font-size: 12px;
   margin: 0;
 }
-</style>
+.scheduling-new-department .remove-administrator .q-icon {
+  width: 32px;
+  height: 32px;
+  font-size: 32px;
+}
 
-<style scoped>
-.remove-administrator :deep(.q-icon) {
+.q-card.scheduling-new-department {
+  --q-negative: #f44336;
+  overflow: hidden;
+  border-radius: 5px;
+  box-shadow: -1px 0 7px 0 rgba(0, 0, 0, 0.15);
+  letter-spacing: 0;
+}
+.scheduling-new-department .runai-base-dialog-header h6 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
   font-size: 20px;
+  font-weight: 500;
+  line-height: 28px;
+  letter-spacing: 0;
+}
+.scheduling-new-department .q-field__native {
+  font-size: 14px;
+  line-height: 21px;
+  letter-spacing: 0;
+}
+.scheduling-new-department .q-field__label {
+  letter-spacing: 0;
+}
+.q-card.scheduling-new-department .new-department-form .department-cluster .q-field__label,
+.q-card.scheduling-new-department .new-department-form .department-cluster .q-field__native {
+  color: rgba(0, 0, 0, 0.4);
+}
+.scheduling-new-department .q-field:not(.q-field--error) .q-field__native::placeholder {
+  color: rgba(0, 0, 0, 0.6);
+}
+.scheduling-new-department .q-field:not(.q-field--error) .q-field__control:before {
+  border-color: #bdbdbd;
+}
+.scheduling-new-department .department-name-section--compact .runai-expansion-header {
+  line-height: 21px;
+}
+.scheduling-new-department .administrator-title > .row > span {
+  min-width: 224px;
+  margin-right: 10px;
+  line-height: 21px;
+}
+.scheduling-new-department .administrator-rule .subject-select,
+.scheduling-new-department .administrator-rule .role-select {
+  width: 250px;
+}
+.scheduling-new-department .administrator-rule .subject-addable-multi-select {
+  width: 100%;
+}
+.scheduling-new-department .runai-base-dialog-footer .footer {
+  gap: 16px;
+}
+.scheduling-new-department .runai-base-dialog-footer .footer .q-btn,
+.scheduling-new-department .add-administrator {
+  height: 38px;
+  min-height: 38px;
+  padding: 10px;
+  border-radius: 3px;
+  box-shadow: -1px 0 7px 0 rgba(0, 0, 0, 0.15);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0;
+}
+.scheduling-new-department .runai-base-dialog-footer .footer .q-btn:before,
+.scheduling-new-department .add-administrator:before {
+  box-shadow: none;
+}
+.scheduling-new-department .runai-base-dialog-footer .footer .q-btn + .q-btn {
+  margin-left: 0;
+  padding: 10px;
+}
+.q-card.scheduling-new-department .runai-base-dialog-footer .footer [aid="cancel-new-department"] {
+  min-width: 74px;
+}
+.q-card.scheduling-new-department .runai-base-dialog-footer .footer [aid="create-department"] {
+  min-width: 164px;
+}
+.scheduling-new-department .add-administrator {
+  min-width: 160px;
+}
+
+.scheduling-new-department .administrator-rule .q-field:not(.q-field--float) .q-field__label {
+  height: auto;
+  min-height: 21px;
+  font-size: 14px;
+  line-height: 21px;
+}
+.scheduling-new-department .administrator-rule .q-field--float .q-field__label {
+  top: 0;
+  height: auto;
+  min-height: 17px;
+  transform: none;
+  font-size: 12px;
+  line-height: 16.8px;
 }
 </style>

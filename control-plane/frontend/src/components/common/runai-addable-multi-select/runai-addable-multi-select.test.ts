@@ -73,6 +73,23 @@ describe("RunaiAddableMultiSelect", () => {
     wrapper.vm.createNewValue("option3");
     expect(wrapper.emitted("add-option")).toBeTruthy();
   });
+  it("rejects manually entered values at the selection limit and allows one after removal", async () => {
+    const selectedOptions = Array.from({ length: 10 }, (_, index) => ({
+      label: `user-${index}@example.invalid`,
+      value: `user-${index}@example.invalid`,
+    }));
+    factory({ ...DEFAULT_PROPS, selectedOptions });
+    await wrapper.setProps({ maxValues: 10 });
+    const select = wrapper.findComponent({ name: "QSelect" });
+
+    select.vm.$emit("new-value", "eleventh@example.invalid");
+    expect(wrapper.emitted("add-option")).toBeUndefined();
+
+    await wrapper.setProps({ selectedOptions: selectedOptions.slice(0, 9) });
+    select.vm.$emit("new-value", "replacement@example.invalid");
+    expect(wrapper.emitted("add-option")?.[0][0]).toBe("replacement@example.invalid");
+  });
+
   it("clears selected options when clear button is clicked", async () => {
     const options: ISelectOption[] = [
       { label: "option1", value: "option1" },

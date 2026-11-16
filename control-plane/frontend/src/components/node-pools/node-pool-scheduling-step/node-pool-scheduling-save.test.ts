@@ -118,4 +118,69 @@ describe("scheduling persistence", () => {
     await expect(pending).rejects.toThrow(/capabilities/);
     expect(batch).not.toHaveBeenCalled();
   });
+
+  it.each([
+    [{ Days: 7, Hours: 0, Minutes: 0 }, "7d"],
+    [{ Days: 0, Hours: 2, Minutes: 30 }, "2h30m"],
+    [{ Days: 0, Hours: 0, Minutes: 0 }, "0"],
+  ])("saves historical windows using the API-supported minute/hour/day units: %j", (historicalWindow, expected) => {
+    const actual = buildSchedulingSave(pool, {
+      ...draft(),
+      timeFairshare: true,
+      historicalWeight: 1,
+      historicalWindow,
+    }).pool.schedulingConfiguration?.timeBasedFairShare?.windowDuration;
+    expect(actual).toBe(expected);
+  });
+  it("does not silently discard nonzero seconds in a historical window", () => {
+    expect(() =>
+      buildSchedulingSave(pool, {
+        ...draft(),
+        timeFairshare: true,
+        historicalWindow: { Minutes: 1, Seconds: 30 },
+      }),
+    ).toThrow(/historical usage window/i);
+  });
+  it("persists a fractional runtime change from saved whole seconds", () => {
+    const saved = { ...pool, schedulingConfiguration: { minGuaranteedRuntime: "5s" } };
+    const actual = buildSchedulingSave(saved, { ...draft(), minimumRuntime: { Seconds: 0.5 } });
+    expect(actual.pool.schedulingConfiguration?.minGuaranteedRuntime).toBe("0.5s");
+  });
+  it.each([
+    ["0.5h", { Minutes: 30 }],
+    ["2w", { Days: 14 }],
+    ["500ms", { Seconds: 0.5 }],
+  ])("keeps a semantically unchanged saved runtime %s untouched", (minGuaranteedRuntime, minimumRuntime) => {
+    const saved = { ...pool, schedulingConfiguration: { minGuaranteedRuntime } };
+    expect(buildSchedulingSave(saved, { ...draft(), minimumRuntime }).pool.schedulingConfiguration).not.toHaveProperty(
+      "minGuaranteedRuntime",
+    );
+  });
+  it("persists changing a saved runtime to zero", () => {
+    const saved = { ...pool, schedulingConfiguration: { minGuaranteedRuntime: "1h" } };
+    expect(
+      buildSchedulingSave(saved, { ...draft(), minimumRuntime: { Hours: 0 } }).pool.schedulingConfiguration,
+    ).toHaveProperty("minGuaranteedRuntime", "0");
+  });
+
+  it("preserves an equivalent saved historical window without rewriting its units", () => {
+    const saved = {
+      ...pool,
+      schedulingConfiguration: { timeBasedFairShare: { enabled: true, windowDuration: "0.5h" } },
+    };
+    const actual = buildSchedulingSave(saved, {
+      ...draft(),
+      timeFairshare: true,
+      historicalWindow: { Minutes: 30 },
+    });
+    expect(actual.pool.schedulingConfiguration?.timeBasedFairShare?.windowDuration).toBe("0.5h");
+  });
+  it("retains fractional minutes in the historical window instead of truncating them", () => {
+    const actual = buildSchedulingSave(pool, {
+      ...draft(),
+      timeFairshare: true,
+      historicalWindow: { Minutes: 0.5 },
+    });
+    expect(actual.pool.schedulingConfiguration?.timeBasedFairShare?.windowDuration).toBe("0.5m");
+  });
 });

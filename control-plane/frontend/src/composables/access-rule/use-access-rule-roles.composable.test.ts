@@ -71,6 +71,31 @@ describe("shared department access-rule role selection", () => {
     ]);
     expect(nodePoolModal.validateRole({ label: "Custom reader", value: 2 })).not.toBe(true);
   });
+  it("excludes disabled built-in and custom roles from both forms and rejects stale selections", () => {
+    usePermissionStore().setPermissions([
+      { displayName: "Test", groupId: "iam", resourceType: ResourceType.Roles, actions: [Action.Read] },
+      { displayName: "Test", groupId: "iam", resourceType: ResourceType.AccessRules, actions: [Action.Create] },
+      { displayName: "Test", groupId: "iam", resourceType: ResourceType.Department, actions: [Action.Read] },
+    ]);
+    const disabledBuiltIn = { ...roles[0], id: 4, name: "Disabled administrator", effectiveEnabled: false };
+    const disabledCustom = { ...roles[1], id: 5, name: "Disabled custom reader", effectiveEnabled: false };
+    const legacyRole = { ...roles[1], id: 6, name: "Legacy reader" };
+    delete (legacyRole as Partial<Role>).effectiveEnabled;
+    useRoleStore().roles = [...roles.map((role) => ({ ...role })), disabledBuiltIn, disabledCustom, legacyRole];
+    const departmentForm = useAccessRuleRoles();
+    const nodePoolModal = useAccessRuleRoles();
+    expect(departmentForm.roleOptions.value.map((role) => role.value)).toEqual([2, 1, 6]);
+    expect(nodePoolModal.roleOptions.value.map((role) => role.value)).toEqual([2, 1, 6]);
+    expect(nodePoolModal.validateRole({ label: "Disabled administrator", value: 4 })).not.toBe(true);
+    expect(departmentForm.validateRole({ label: "Disabled custom reader", value: 5 })).not.toBe(true);
+    expect(nodePoolModal.validateRole({ label: "Custom reader", value: 2 })).toBe(true);
+    expect(departmentForm.validateRole({ label: "Legacy reader", value: 6 })).toBe(true);
+    const customReader = useRoleStore().roles.find((role) => role.id === 2);
+    if (!customReader) throw new Error("The custom reader fixture must exist");
+    customReader.effectiveEnabled = false;
+    expect(nodePoolModal.validateRole({ label: "Custom reader", value: 2 })).not.toBe(true);
+    expect(departmentForm.roleOptions.value.map((role) => role.value)).toEqual([1, 6]);
+  });
   it("does not load or offer roles without read permission", async () => {
     useRoleStore().roles = roles;
     const load = vi.spyOn(useRoleStore(), "loadRoles");

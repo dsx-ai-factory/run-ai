@@ -7,6 +7,8 @@
     :class="{ 'unlimited-allocation': kind === 'limit' && (value == null || value === -1) }"
     :title="editorTitle"
     popup-class="scheduling-resource-popup"
+    prepare-before-show
+    :close-icon="'img:' + resourceCloseIcon"
     :popup-width="kind === 'weight' ? '274px' : '200px'"
     :state="
       active && !loading
@@ -36,17 +38,19 @@
           v-if="kind === 'weight'"
           class="weight-editor-help q-ml-xs"
           icon="ph-bold ph-question"
-          width="320px"
+          width="300px"
           :tooltip-text="weightHelp"
           tooltip-position="right"
           :tooltip-offset="rankedWeight ? [120, 0] : [180, 0]"
           ><template #content
-            ><strong>Weight</strong> determines a department’s share relative to the other departments{{
-              rankedWeight ? " in the same rank" : ""
-            }}. A higher weight means a larger portion of the resources.
-            <strong>The weight is expressed as a percentage</strong>, calculated as the weight divided by the total
-            weight of all departments{{ rankedWeight ? " in the rank" : "" }}.<br />For example, a department with a
-            weight of 2{{ rankedWeight ? " in a rank" : "" }} where the weights total 20 receives 10%.</template
+            ><span class="node-pool-weight-help"
+              ><strong>Weight</strong> determines a department’s share relative to the other departments{{
+                rankedWeight ? " in the same rank" : ""
+              }}. A higher weight means a larger portion of the resources.
+              <strong>The weight is expressed as a percentage</strong>, calculated as the weight divided by the total
+              weight of all departments{{ rankedWeight ? " in the rank" : "" }}.<br />For example, a department with a
+              weight of 2{{ rankedWeight ? " in a rank" : "" }} where the weights total 20 receives 10%.</span
+            ></template
           ></runai-tooltip
         >
       </span>
@@ -57,14 +61,19 @@
           v-model="input"
           :type="kind === 'limit' ? 'text' : 'number'"
           min="0"
-          dense
+          :dense="kind !== 'limit'"
+          :label="kind === 'limit' ? editorTitle : undefined"
+          :stack-label="kind === 'limit'"
           :aria-label="editorTitle"
           :max="kind === 'weight' ? 20 : undefined"
           :step="kind === 'weight' ? 1 : undefined"
           :placeholder="kind === 'limit' ? 'Unlimited' : undefined"
           :error="validation.errors.length > 0"
           :color="!validation.errors.length && validation.warnings.length ? 'warning' : 'primary'"
-          :class="{ 'resource-input-warning': !validation.errors.length && validation.warnings.length }"
+          :class="{
+            'resource-input-warning': !validation.errors.length && validation.warnings.length,
+            'resource-limit-input': kind === 'limit',
+          }"
           :error-message="errorMessage"
           no-error-icon
         />
@@ -94,6 +103,7 @@
 </template>
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import resourceCloseIcon from "@/assets/icons/node-pool-resource-close.svg?url";
 import { RunaiTooltip } from "@/components/common/runai-tooltip";
 import { EditableCellPopup } from "@/components/common/runai-table/runai-custom-table-columns/editable-cell-popup";
 import {
@@ -274,9 +284,33 @@ p {
 </style>
 
 <style lang="scss">
+.scheduling-resource-popup {
+  border-radius: 5px;
+  box-shadow: -1px 0 7px rgba(0, 0, 0, 0.15);
+}
+.scheduling-resource-popup .popup-card {
+  border-radius: 5px;
+  box-shadow: none;
+}
+.runai-tooltip:has(> .node-pool-weight-help) {
+  padding: 10px;
+  border-radius: 3px;
+  box-shadow: -1px 0 7px rgba(0, 0, 0, 0.15);
+  line-height: 16.8px;
+}
 .scheduling-resource-popup .popup-card .q-card__section:first-child {
-  min-height: 44px;
-  padding: 8px 16px;
+  min-height: 52px;
+  padding: 10px 16px;
+}
+.scheduling-resource-popup .popup-card .q-card__section:first-child > .q-btn {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+}
+.scheduling-resource-popup .popup-card .q-card__section:first-child > .q-btn .q-icon {
+  font-size: 32px;
 }
 .scheduling-resource-popup .popup-card .q-card__section:nth-child(2) {
   padding-top: 0;
@@ -284,11 +318,27 @@ p {
 .scheduling-resource-popup .popup-card .q-card__section:last-child {
   padding: 8px 16px;
 }
+.scheduling-resource-popup .popup-card .q-card__section:last-child > .q-btn {
+  width: 62px;
+  height: 38px;
+  min-height: 38px;
+  padding: 0 10px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
 .scheduling-resource-popup .q-input .q-field__native {
   padding-top: 0;
 }
 .scheduling-resource-popup .q-field__control {
   height: 38px;
+}
+.scheduling-resource-popup .resource-limit-input .q-field__control {
+  height: 53px;
+}
+.scheduling-resource-popup .resource-limit-input .q-field__native {
+  padding-top: 19.5px;
+  line-height: 19.5px;
 }
 .resource-input-warning .q-field__control:before {
   border-color: var(--q-warning);
@@ -312,5 +362,33 @@ p {
 .scheduling-resource-popup .q-field__bottom {
   padding-left: 0;
   padding-right: 0;
+}
+.scheduling-resource-popup:has(.resource-limit-input) .resource-editor-title {
+  line-height: 17px;
+}
+.scheduling-resource-popup:has(.resource-limit-input) .popup-card > .q-card__section:nth-child(2) {
+  padding-top: 6px;
+}
+.scheduling-resource-popup:has(.resource-limit-input) .popup-card > .q-card__section:last-child {
+  padding-bottom: 10px;
+}
+.scheduling-resource-popup .resource-limit-input .q-field__label {
+  top: 0;
+  left: 0;
+  width: 100%;
+  max-width: none;
+  height: 17px;
+  font-size: 12px;
+  line-height: 16.8px;
+  transform: none;
+}
+.scheduling-resource-popup .resource-limit-input .q-field__bottom {
+  padding-top: 7px;
+}
+.scheduling-resource-popup .resource-limit-input.q-field--error .q-field__label {
+  color: #f44336;
+}
+.scheduling-resource-popup .resource-limit-input.q-field--error .q-field__control::after {
+  height: 1px;
 }
 </style>
