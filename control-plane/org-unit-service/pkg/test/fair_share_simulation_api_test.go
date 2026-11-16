@@ -101,7 +101,7 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 			parent: &api.FairShareSimulationParent{Id: parentId}, orgUnits: orgUnits}
 	}
 	row := func(id string) api.FairShareSimulationOrgUnit { return api.FairShareSimulationOrgUnit{Id: id} }
-	dragged := func(id string, demand float64) api.FairShareSimulationOrgUnit {
+	withDemand := func(id string, demand float64) api.FairShareSimulationOrgUnit {
 		return api.FairShareSimulationOrgUnit{Id: id, Demand: &api.FairShareSimulationResources{Gpu: demand}}
 	}
 
@@ -157,7 +157,7 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 		}
 	})
 
-	Context("node pool form: departments", func() {
+	Context("departments", func() {
 		It("gives each department its quota, then what's left by rank, at half the capacity", func() {
 			body := simulate(fullAccess, departmentsScenario(row(a), row(b)))
 			expectResult(body.OrgUnits[0], a, expected{demand: 10, fairShare: 10, guaranteed: 4, unmet: 0, weightShare: 1})
@@ -165,28 +165,28 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 		})
 
 		It("gives the higher rank everything above quota when demand is the whole pool", func() {
-			body := simulate(fullAccess, departmentsScenario(dragged(b, 20), dragged(a, 20)))
+			body := simulate(fullAccess, departmentsScenario(withDemand(b, 20), withDemand(a, 20)))
 			expectResult(body.OrgUnits[0], b, expected{demand: 20, fairShare: 2, guaranteed: 2, unmet: 18, weightShare: 1})
 			expectResult(body.OrgUnits[1], a, expected{demand: 20, fairShare: 18, guaranteed: 4, unmet: 2, weightShare: 1})
 		})
 
-		It("uses a dragged demand and unsaved rank and weight", func() {
-			high := dragged(b, 20)
+		It("uses a sent demand and unsaved rank and weight", func() {
+			high := withDemand(b, 20)
 			high.Rank = ptr.To(api.FairShareSimulationRank("High"))
 			high.Gpu = &api.FairShareSimulationGpuSettings{OverQuotaWeight: ptr.To(3.0)}
-			body := simulate(fullAccess, departmentsScenario(dragged(a, 20), high))
+			body := simulate(fullAccess, departmentsScenario(withDemand(a, 20), high))
 			Expect(body.OrgUnits[0].FairShare.Gpu + body.OrgUnits[1].FairShare.Gpu).To(Equal(20.0))
 			Expect(body.OrgUnits[0].WeightShareInRank).To(Equal(0.25))
 			Expect(body.OrgUnits[1].WeightShareInRank).To(Equal(0.75))
 			Expect(body.OrgUnits[1].FairShare.Gpu).To(BeNumerically(">", body.OrgUnits[0].FairShare.Gpu))
 
-			body = simulate(fullAccess, departmentsScenario(dragged(a, 5), dragged(b, 20)))
+			body = simulate(fullAccess, departmentsScenario(withDemand(a, 5), withDemand(b, 20)))
 			expectResult(body.OrgUnits[0], a, expected{demand: 5, fairShare: 5, guaranteed: 4, unmet: 0, weightShare: 1})
 			expectResult(body.OrgUnits[1], b, expected{demand: 20, fairShare: 15, guaranteed: 2, unmet: 5, weightShare: 1})
 		})
 
 		It("still grants quotas when the node pool has no GPUs", func() {
-			sc := departmentsScenario(dragged(a, 20), dragged(b, 20))
+			sc := departmentsScenario(withDemand(a, 20), withDemand(b, 20))
 			sc.capacity = 0
 			body := simulate(fullAccess, sc)
 			Expect(body.OrgUnits[0].FairShare.Gpu).To(Equal(4.0))
@@ -194,7 +194,7 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 		})
 
 		It("resets every department's quota and rank when the scheduling mode turns them off", func() {
-			sc := departmentsScenario(dragged(a, 20), dragged(b, 20))
+			sc := departmentsScenario(withDemand(a, 20), withDemand(b, 20))
 			sc.capabilities = api.FairShareSimulationSchedulingCapabilities{AdjustableWeights: true}
 			body := simulate(fullAccess, sc)
 			expectResult(body.OrgUnits[0], a, expected{demand: 20, fairShare: 10, guaranteed: 0, unmet: 10, weightShare: 0.5})
@@ -202,7 +202,7 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 		})
 
 		It("returns only the requested departments, and counts the others at half the capacity", func() {
-			body := simulate(fullAccess, departmentsScenario(dragged(b, 20)))
+			body := simulate(fullAccess, departmentsScenario(withDemand(b, 20)))
 			Expect(body.OrgUnits).To(HaveLen(1))
 			expectResult(body.OrgUnits[0], b, expected{demand: 20, fairShare: 10, guaranteed: 2, unmet: 10, weightShare: 1})
 		})
@@ -219,7 +219,7 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 		})
 	})
 
-	Context("project form: the parent's projects", func() {
+	Context("projects of a parent", func() {
 		It("lets the parent take the node pool while the other departments are idle", func() {
 			body := simulate(fullAccess, projectsScenario(a, row(a1), row(a2)))
 			expectResult(body.OrgUnits[0], a1, expected{demand: 10, fairShare: 10, guaranteed: 2, unmet: 0, weightShare: 0.5})
@@ -227,7 +227,7 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 		})
 
 		It("counts the projects that weren't sent at half the capacity", func() {
-			body := simulate(fullAccess, projectsScenario(a, dragged(a1, 15)))
+			body := simulate(fullAccess, projectsScenario(a, withDemand(a1, 15)))
 			Expect(body.OrgUnits).To(HaveLen(1))
 			expectResult(body.OrgUnits[0], a1, expected{demand: 15, fairShare: 11, guaranteed: 2, unmet: 4, weightShare: 0.5})
 		})
@@ -301,7 +301,7 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 			expectBadRequest(fullAccess, limitWithLimitsOff)
 
 			expectBadRequest(fullAccess, departmentsScenario(api.FairShareSimulationOrgUnit{Id: a, Rank: ptr.To(api.FairShareSimulationRank("Sometimes"))}))
-			expectBadRequest(fullAccess, departmentsScenario(dragged(a, -1)))
+			expectBadRequest(fullAccess, departmentsScenario(withDemand(a, -1)))
 			expectBadRequest(fullAccess, departmentsScenario(api.FairShareSimulationOrgUnit{Id: a,
 				Gpu: &api.FairShareSimulationGpuSettings{Deserved: ptr.To(6.0), Limit: ptr.To(5.0)}}))
 		})

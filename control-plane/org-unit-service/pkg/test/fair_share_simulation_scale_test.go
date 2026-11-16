@@ -149,14 +149,14 @@ var _ = Describe("Fair share simulation at scale", Ordered, func() {
 		return r
 	}
 
-	It("times every form and its parts", func() {
-		nodePoolForm := request("department", rowsOf(departmentIds))
-		departmentForm500 := request("project", rowsOf(projectIds[:500]))
-		departmentForm20 := request("project", rowsOf(projectIds[:20]))
+	It("times every level and its parts", func() {
+		departmentLevel := request("department", rowsOf(departmentIds))
+		projectLevel500 := request("project", rowsOf(projectIds[:500]))
+		projectLevel20 := request("project", rowsOf(projectIds[:20]))
 
-		body := simulate(nodePoolForm)
+		body := simulate(departmentLevel)
 		Expect(body.OrgUnits).To(HaveLen(departmentCount))
-		body = simulate(departmentForm500)
+		body = simulate(projectLevel500)
 		Expect(body.OrgUnits).To(HaveLen(500))
 
 		departmentFilters, err := queryapi.NewParser(models.DepartmentNodePoolResources{}.FilterByFieldsToColumn()).Filters([]string{"nodePoolId==" + pool.Id})
@@ -180,10 +180,10 @@ var _ = Describe("Fair share simulation at scale", Ordered, func() {
 			Expect(*rows).To(HaveLen(projectCount))
 		})
 
-		measure("department form, 1,500 projects, 20 sent (first)", func() { simulate(departmentForm20) })
-		measure("department form, 1,500 projects, 500 sent", func() { simulate(departmentForm500) })
-		measure("department form, 1,500 projects, 20 sent (again)", func() { simulate(departmentForm20) })
-		measure("node pool form, 300 departments sent", func() { simulate(nodePoolForm) })
+		measure("projects, 1,500 in the parent, 20 sent (first)", func() { simulate(projectLevel20) })
+		measure("projects, 1,500 in the parent, 500 sent", func() { simulate(projectLevel500) })
+		measure("projects, 1,500 in the parent, 20 sent (again)", func() { simulate(projectLevel20) })
+		measure("departments, 300 sent", func() { simulate(departmentLevel) })
 
 		measure("  part again: projects query (1,500 rows)", func() {
 			rows, err := dao.GetProjectNodePoolResources(ctx, TestTenant, projectFilters, "", "", 0, 0, nil, "", models.SlimVerbosity)
@@ -198,7 +198,7 @@ var _ = Describe("Fair share simulation at scale", Ordered, func() {
 		}
 		measure("  part: KAI division, 1,500 units", func() { simulation.Divide(capacity, units) })
 
-		response500 := simulate(departmentForm500)
+		response500 := simulate(projectLevel500)
 		measure("  part: JSON of a 500-row response", func() {
 			_, err := json.Marshal(response500)
 			Expect(err).To(BeNil())

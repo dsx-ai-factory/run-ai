@@ -28,7 +28,7 @@ const (
 
 	maxSimulatedOrgUnits = 500
 
-	// Product decision: an org unit the user didn't drag asks for half the node pool.
+	// Product decision: an org unit sent without a demand, or not sent, asks for half the node pool.
 	defaultDemandShareOfCapacity = 0.5
 
 	// The cluster agent sends a nil over-quota weight to the scheduler as 1.
@@ -199,8 +199,8 @@ func newSimulationScenario(request api.FairShareSimulationRequest) simulationSce
 	}
 }
 
-// simulateDepartments uses each department's own demand (the slider, else the default), not its projects', so the
-// node pool form needs no project data.
+// simulateDepartments uses each department's own demand (sent, else the default), not its projects', so it needs no
+// project data.
 func (s simulationScenario) simulateDepartments(departments map[string]*simulatedOrgUnit, visible map[string]bool,
 ) ([]api.FairShareSimulationResult, error) {
 	if err := s.applyChanges(orgUnitTypeDepartment, departments, visible); err != nil {
@@ -217,9 +217,9 @@ func (s simulationScenario) simulateDepartments(departments map[string]*simulate
 	return s.requestedResults(simulation.Divide(s.capacity, units)), nil
 }
 
-// simulateProjects shows the parent's projects with the other departments idle, as the project form states. The
-// parent asks for the sum of its projects' demand, as the scheduler does for a parent queue. The parent needn't be
-// readable: a project's reader opens the project form without read on its department.
+// simulateProjects divides the parent's share among its projects, with the other departments idle. The parent asks for
+// the sum of its projects' demand, as the scheduler does for a parent queue. The parent needn't be readable, so a
+// caller with read on a project but not on its department can still simulate it.
 func (s simulationScenario) simulateProjects(departments map[string]*simulatedOrgUnit,
 	projects map[string]*simulatedOrgUnit, visibleProjects map[string]*simulatedOrgUnit,
 ) ([]api.FairShareSimulationResult, error) {
