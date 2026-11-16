@@ -180,7 +180,7 @@ keycloakx:
 
 ### PostgreSQL
 
-PostgreSQL is the centralized database for the NVIDIA Run:ai control plane. Gov-ready installations always use an externally managed PostgreSQL instance that is FIPS-ready. You provide and manage the instance. Only PostgreSQL version 16 is supported.
+PostgreSQL is the centralized database for the NVIDIA Run:ai control plane. Gov-ready installations always use an externally managed PostgreSQL instance that is FIPS-ready. You provide and manage the instance. PostgreSQL versions 16, 17, and 18 are supported.
 
 #### Using an External PostgreSQL Instance
 

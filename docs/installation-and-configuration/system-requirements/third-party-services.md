@@ -31,11 +31,13 @@ Keycloak provides authentication and identity management for the NVIDIA Run:ai c
 
 ### PostgreSQL
 
-PostgreSQL is the centralized database for the NVIDIA Run:ai control plane. It is deployed as part of the control plane Helm chart using [Bitnami PostgreSQL](https://artifacthub.io/packages/helm/bitnami/postgresql) (`postgresql`). Only PostgreSQL version 16 is supported. For built-in PostgreSQL tuning and changing passwords, see [Advanced Control Plane Configurations](../configuration/control-plane-config.md#postgresql).
+PostgreSQL is the centralized database for the NVIDIA Run:ai control plane. It is deployed as part of the control plane Helm chart using [Bitnami PostgreSQL](https://artifacthub.io/packages/helm/bitnami/postgresql) (`postgresql`). The built-in PostgreSQL is version 16. For built-in PostgreSQL tuning and changing passwords, see [Advanced Control Plane Configurations](../configuration/control-plane-config.md#postgresql).
 
 #### Using an External PostgreSQL Instance
 
 To replace the deployed PostgreSQL with an external managed database, set `postgresql.enabled: false` and configure `global.postgresql.auth.*` with the external server connection details.
+
+PostgreSQL versions 16, 17, and 18 are supported for an external instance.
 
 Before installing, provision the database and role on your external PostgreSQL server:
 
