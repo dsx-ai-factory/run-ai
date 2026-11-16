@@ -73,8 +73,9 @@ type captureInput struct {
 	timeoutSeconds    *int64
 }
 
-// HandleAdditionalResources captures each key from its first Ready replica, one
-// capture at a time per workload, newest key first.
+// HandleAdditionalResources deletes the workload's snapshots that are no longer
+// needed, then captures each key from its first Ready replica, one capture at a
+// time per workload, newest key first.
 //
 // A problem is reported as a warning and never returned: an error here would
 // stop the workload being applied.
@@ -86,7 +87,14 @@ func (p *Plugin) HandleAdditionalResources(
 	k8sClient client.Client,
 	state *reconcile.State,
 ) error {
-	if !p.captureEnabled || !p.snapshotInstalled || !optedIn(resource) {
+	if !p.snapshotInstalled {
+		return nil
+	}
+	// Opted in or not, so removing the opt-in deletes them too.
+	if err := deleteUnused(ctx, k8sClient, runner, optedIn(resource)); err != nil {
+		_ = state.AddPluginIssue(ctx, p, resource, err, false, "", issue.Compute)
+	}
+	if !p.captureEnabled || !optedIn(resource) {
 		return nil
 	}
 	if err := checkEligibility(ctx, resource, karta); err != nil {
@@ -144,6 +152,76 @@ func (p *Plugin) capture(ctx context.Context, c client.Client, runner *dromosv1a
 	return nil
 }
 
+// deleteUnused deletes the runner's snapshots outside the keep-set. A failed
+// PodSnapshot goes even when kept, but its SnapshotJob stays, so the key doesn't
+// capture again until the spec changes.
+func deleteUnused(ctx context.Context, c client.Client, runner *dromosv1alpha1.WorkloadRunner, optedIn bool) error {
+	snapshots, err := runnerPodSnapshots(ctx, c, runner)
+	if err != nil {
+		return err
+	}
+	jobs, err := runnerSnapshotJobs(ctx, c, runner)
+	if err != nil {
+		return err
+	}
+	// Most workloads have none, and then their replicas needn't be listed.
+	if len(snapshots) == 0 && len(jobs) == 0 {
+		return nil
+	}
+	keep, err := keepSet(ctx, c, runner, optedIn)
+	if err != nil {
+		return err
+	}
+
+	for i := range snapshots {
+		snapshot := &snapshots[i]
+		if keep.Has(snapshot.Labels[constants.SnapshotKeyLabel]) && !snapshotv1alpha1.IsPodSnapshotFailed(snapshot) {
+			continue
+		}
+		// Snapshot's finalizer removes the checkpoint from the volume.
+		if err := c.Delete(ctx, snapshot); client.IgnoreNotFound(err) != nil {
+			return fmt.Errorf("delete PodSnapshot %s: %w", snapshot.Name, err)
+		}
+	}
+	for i := range jobs {
+		if keep.Has(jobs[i].Labels[constants.SnapshotKeyLabel]) {
+			continue
+		}
+		// With its PodSnapshot, not after it as the design has it: Snapshot keeps a
+		// failed SnapshotJob's capture Job, so only this stops a capture still running.
+		if err := c.Delete(ctx, &jobs[i]); client.IgnoreNotFound(err) != nil {
+			return fmt.Errorf("delete SnapshotJob %s: %w", jobs[i].Name, err)
+		}
+	}
+	return nil
+}
+
+// keepSet is the keys whose snapshots stay: the replicas' and, while the workload
+// opts in, its newest, so the first replica after a scale to zero restores.
+func keepSet(ctx context.Context, c client.Reader, runner *dromosv1alpha1.WorkloadRunner,
+	optedIn bool) (datastructs.Set[string], error) {
+	replicas, err := keyedReplicas(ctx, c, runner)
+	if err != nil {
+		return nil, err
+	}
+	keep := datastructs.NewSet[string]()
+	for i := range replicas {
+		key, _ := snapshotkey.SnapshotKeyOf(&replicas[i])
+		keep.Add(key)
+	}
+	if !optedIn {
+		return keep, nil
+	}
+	newest, err := recordedNewestKey(runner)
+	if err != nil {
+		return nil, err
+	}
+	if newest != "" {
+		keep.Add(newest)
+	}
+	return keep, nil
+}
+
 // runnerSnapshotJobs lists the runner's captures. The UID tells them from those
 // of an earlier runner of the same name.
 func runnerSnapshotJobs(ctx context.Context, c client.Reader,
@@ -158,9 +236,23 @@ func runnerSnapshotJobs(ctx context.Context, c client.Reader,
 	return list.Items, nil
 }
 
-// readyReplicas lists the runner's Ready replicas that carry a key. One without
-// a key was admitted while the restore webhook was down.
-func readyReplicas(ctx context.Context, c client.Reader, runner *dromosv1alpha1.WorkloadRunner) ([]corev1.Pod, error) {
+// runnerPodSnapshots lists the runner's PodSnapshots, which Snapshot labels from
+// the SnapshotJob's template. The UID leaves an earlier runner's to the cleanup.
+func runnerPodSnapshots(ctx context.Context, c client.Reader,
+	runner *dromosv1alpha1.WorkloadRunner) ([]snapshotv1alpha1.PodSnapshot, error) {
+	list := &snapshotv1alpha1.PodSnapshotList{}
+	if err := c.List(ctx, list, client.InNamespace(runner.Namespace), client.MatchingLabels{
+		commonconstants.WorkloadRunnerNameLabel: runner.Name,
+		commonconstants.WorkloadRunnerUidLabel:  string(runner.UID),
+	}); err != nil {
+		return nil, fmt.Errorf("list PodSnapshots: %w", err)
+	}
+	return list.Items, nil
+}
+
+// keyedReplicas lists the runner's replicas that carry a key. One without a key
+// was admitted while the restore webhook was down.
+func keyedReplicas(ctx context.Context, c client.Reader, runner *dromosv1alpha1.WorkloadRunner) ([]corev1.Pod, error) {
 	pods := &corev1.PodList{}
 	if err := c.List(ctx, pods, client.InNamespace(runner.Namespace),
 		client.MatchingLabels{
@@ -171,10 +263,19 @@ func readyReplicas(ctx context.Context, c client.Reader, runner *dromosv1alpha1.
 		client.HasLabels{constants.SnapshotKeyLabel}); err != nil {
 		return nil, fmt.Errorf("list replicas: %w", err)
 	}
+	return pods.Items, nil
+}
+
+// readyReplicas lists the runner's keyed replicas that are Ready.
+func readyReplicas(ctx context.Context, c client.Reader, runner *dromosv1alpha1.WorkloadRunner) ([]corev1.Pod, error) {
+	replicas, err := keyedReplicas(ctx, c, runner)
+	if err != nil {
+		return nil, err
+	}
 	var ready []corev1.Pod
-	for i := range pods.Items {
-		if pods.Items[i].DeletionTimestamp == nil && podReady(&pods.Items[i]) {
-			ready = append(ready, pods.Items[i])
+	for i := range replicas {
+		if replicas[i].DeletionTimestamp == nil && podReady(&replicas[i]) {
+			ready = append(ready, replicas[i])
 		}
 	}
 	return ready, nil

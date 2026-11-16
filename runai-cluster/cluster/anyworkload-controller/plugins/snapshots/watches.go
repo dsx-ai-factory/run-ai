@@ -21,10 +21,10 @@ import (
 	ctrlreconcile "sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-// Watchers reconciles the runner when one of its replicas turns Ready, and when
-// a capture changes. Without the pod watch the capture would depend on the
-// workload's own status changing after the pod cache saw the replica Ready; the
-// framework never requeues on a timer.
+// Watchers reconciles the runner when one of its replicas turns Ready or is
+// gone, and when a capture or its PodSnapshot changes. The framework never
+// requeues on a timer, so without these the capture and the deletion would wait
+// for the workload's own status to change.
 //
 // Only with Snapshot installed: a watch on a kind whose CRD is missing stops the
 // controller starting.
@@ -35,7 +35,8 @@ func (p *Plugin) Watchers(bldr *builder.Builder) (*builder.Builder, error) {
 	toRunner := handler.EnqueueRequestsFromMapFunc(mapToRunner)
 	return bldr.
 		Watches(&snapshotv1alpha1.SnapshotJob{}, toRunner).
-		Watches(&corev1.Pod{}, toRunner, builder.WithPredicates(replicaReadinessChanged())), nil
+		Watches(&snapshotv1alpha1.PodSnapshot{}, toRunner).
+		Watches(&corev1.Pod{}, toRunner, builder.WithPredicates(replicaReadyOrGone())), nil
 }
 
 // mapToRunner reads the runner's name from its label: MutateResource stamps it
@@ -48,9 +49,9 @@ func mapToRunner(_ context.Context, object client.Object) []ctrlreconcile.Reques
 	return []ctrlreconcile.Request{{NamespacedName: types.NamespacedName{Namespace: object.GetNamespace(), Name: name}}}
 }
 
-// replicaReadinessChanged passes opted-in replicas whose Ready condition changed,
-// and on a restart those that are already Ready.
-func replicaReadinessChanged() predicate.Predicate {
+// replicaReadyOrGone passes opted-in replicas whose Ready condition changed, on
+// a restart those that are already Ready, and those deleted.
+func replicaReadyOrGone() predicate.Predicate {
 	return predicate.Funcs{
 		CreateFunc: func(e event.CreateEvent) bool {
 			pod, ok := asReplica(e.Object)
@@ -61,7 +62,10 @@ func replicaReadinessChanged() predicate.Predicate {
 			after, isReplica := asReplica(e.ObjectNew)
 			return wasReplica && isReplica && podReady(before) != podReady(after)
 		},
-		DeleteFunc:  func(event.DeleteEvent) bool { return false },
+		DeleteFunc: func(e event.DeleteEvent) bool { //tod edith: why?
+			_, ok := asReplica(e.Object)
+			return ok
+		},
 		GenericFunc: func(event.GenericEvent) bool { return false },
 	}
 }
