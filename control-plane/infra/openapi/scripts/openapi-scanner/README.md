@@ -474,10 +474,10 @@ The comparison JSON report contains comprehensive diff information:
 ## Dependencies
 
 - **Python**: ^3.10
-- **PyYAML**: ^6.0.2
+- **PyYAML**: ^6.0.3
 - **Click**: ^8.2.1
 - **Rich**: ^14.0.0
-- **Pydantic**: ^2.11.7
+- **Pydantic**: ^2.12.0
 
 ## Development
 
