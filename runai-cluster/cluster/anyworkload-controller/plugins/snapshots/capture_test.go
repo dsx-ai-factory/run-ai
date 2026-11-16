@@ -455,7 +455,11 @@ func captureClient(objects ...client.Object) client.Client {
 	Expect(corev1.AddToScheme(scheme)).To(Succeed())
 	Expect(dromosv1alpha1.AddToScheme(scheme)).To(Succeed())
 	Expect(snapshotv1alpha1.AddToScheme(scheme)).To(Succeed())
-	return fakeclient.NewClientBuilder().WithScheme(scheme).WithObjects(objects...).Build()
+	// testRunner's namespace, a project's.
+	project := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{
+		Name: "runai-proj", Labels: map[string]string{constants.RunaiQueueLabel: "proj"},
+	}}
+	return fakeclient.NewClientBuilder().WithScheme(scheme).WithObjects(project).WithObjects(objects...).Build()
 }
 
 // handle runs the capture hook for testRunner and returns its warnings.
