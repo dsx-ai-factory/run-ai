@@ -896,6 +896,133 @@ func (_c *OrgUnitAPI_OrgsNodePoolSummaryExecute_Call) RunAndReturn(run func(r op
 	return _c
 }
 
+// SimulateNodePoolFairShare provides a mock function for the type OrgUnitAPI
+func (_mock *OrgUnitAPI) SimulateNodePoolFairShare(ctx context.Context, nodepoolId string) openapi.ApiSimulateNodePoolFairShareRequest {
+	ret := _mock.Called(ctx, nodepoolId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SimulateNodePoolFairShare")
+	}
+
+	var r0 openapi.ApiSimulateNodePoolFairShareRequest
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) openapi.ApiSimulateNodePoolFairShareRequest); ok {
+		r0 = returnFunc(ctx, nodepoolId)
+	} else {
+		r0 = ret.Get(0).(openapi.ApiSimulateNodePoolFairShareRequest)
+	}
+	return r0
+}
+
+// OrgUnitAPI_SimulateNodePoolFairShare_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SimulateNodePoolFairShare'
+type OrgUnitAPI_SimulateNodePoolFairShare_Call struct {
+	*mock.Call
+}
+
+// SimulateNodePoolFairShare is a helper method to define mock.On call
+//   - ctx context.Context
+//   - nodepoolId string
+func (_e *OrgUnitAPI_Expecter) SimulateNodePoolFairShare(ctx any, nodepoolId any) *OrgUnitAPI_SimulateNodePoolFairShare_Call {
+	return &OrgUnitAPI_SimulateNodePoolFairShare_Call{Call: _e.mock.On("SimulateNodePoolFairShare", ctx, nodepoolId)}
+}
+
+func (_c *OrgUnitAPI_SimulateNodePoolFairShare_Call) Run(run func(ctx context.Context, nodepoolId string)) *OrgUnitAPI_SimulateNodePoolFairShare_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *OrgUnitAPI_SimulateNodePoolFairShare_Call) Return(apiSimulateNodePoolFairShareRequest openapi.ApiSimulateNodePoolFairShareRequest) *OrgUnitAPI_SimulateNodePoolFairShare_Call {
+	_c.Call.Return(apiSimulateNodePoolFairShareRequest)
+	return _c
+}
+
+func (_c *OrgUnitAPI_SimulateNodePoolFairShare_Call) RunAndReturn(run func(ctx context.Context, nodepoolId string) openapi.ApiSimulateNodePoolFairShareRequest) *OrgUnitAPI_SimulateNodePoolFairShare_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// SimulateNodePoolFairShareExecute provides a mock function for the type OrgUnitAPI
+func (_mock *OrgUnitAPI) SimulateNodePoolFairShareExecute(r openapi.ApiSimulateNodePoolFairShareRequest) (*openapi.FairShareSimulationResponse, *http.Response, error) {
+	ret := _mock.Called(r)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SimulateNodePoolFairShareExecute")
+	}
+
+	var r0 *openapi.FairShareSimulationResponse
+	var r1 *http.Response
+	var r2 error
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiSimulateNodePoolFairShareRequest) (*openapi.FairShareSimulationResponse, *http.Response, error)); ok {
+		return returnFunc(r)
+	}
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiSimulateNodePoolFairShareRequest) *openapi.FairShareSimulationResponse); ok {
+		r0 = returnFunc(r)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.FairShareSimulationResponse)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(openapi.ApiSimulateNodePoolFairShareRequest) *http.Response); ok {
+		r1 = returnFunc(r)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*http.Response)
+		}
+	}
+	if returnFunc, ok := ret.Get(2).(func(openapi.ApiSimulateNodePoolFairShareRequest) error); ok {
+		r2 = returnFunc(r)
+	} else {
+		r2 = ret.Error(2)
+	}
+	return r0, r1, r2
+}
+
+// OrgUnitAPI_SimulateNodePoolFairShareExecute_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SimulateNodePoolFairShareExecute'
+type OrgUnitAPI_SimulateNodePoolFairShareExecute_Call struct {
+	*mock.Call
+}
+
+// SimulateNodePoolFairShareExecute is a helper method to define mock.On call
+//   - r openapi.ApiSimulateNodePoolFairShareRequest
+func (_e *OrgUnitAPI_Expecter) SimulateNodePoolFairShareExecute(r any) *OrgUnitAPI_SimulateNodePoolFairShareExecute_Call {
+	return &OrgUnitAPI_SimulateNodePoolFairShareExecute_Call{Call: _e.mock.On("SimulateNodePoolFairShareExecute", r)}
+}
+
+func (_c *OrgUnitAPI_SimulateNodePoolFairShareExecute_Call) Run(run func(r openapi.ApiSimulateNodePoolFairShareRequest)) *OrgUnitAPI_SimulateNodePoolFairShareExecute_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 openapi.ApiSimulateNodePoolFairShareRequest
+		if args[0] != nil {
+			arg0 = args[0].(openapi.ApiSimulateNodePoolFairShareRequest)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *OrgUnitAPI_SimulateNodePoolFairShareExecute_Call) Return(fairShareSimulationResponse *openapi.FairShareSimulationResponse, response *http.Response, err error) *OrgUnitAPI_SimulateNodePoolFairShareExecute_Call {
+	_c.Call.Return(fairShareSimulationResponse, response, err)
+	return _c
+}
+
+func (_c *OrgUnitAPI_SimulateNodePoolFairShareExecute_Call) RunAndReturn(run func(r openapi.ApiSimulateNodePoolFairShareRequest) (*openapi.FairShareSimulationResponse, *http.Response, error)) *OrgUnitAPI_SimulateNodePoolFairShareExecute_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // UpdateOrgUnitSettings provides a mock function for the type OrgUnitAPI
 func (_mock *OrgUnitAPI) UpdateOrgUnitSettings(ctx context.Context) openapi.ApiUpdateOrgUnitSettingsRequest {
 	ret := _mock.Called(ctx)
