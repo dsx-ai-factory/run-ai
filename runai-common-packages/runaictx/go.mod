@@ -3,13 +3,13 @@ module github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx
 go 1.27.4
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.20
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.21
 	github.com/rs/zerolog v1.35.1
 	github.com/stretchr/testify v1.12.1
 )
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.4 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.5 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
 	github.com/go-playground/locales v0.14.2 // indirect

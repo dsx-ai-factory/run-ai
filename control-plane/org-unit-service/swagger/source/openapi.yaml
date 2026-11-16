@@ -140,6 +140,9 @@ paths:
   /api/v1/org-unit/departments/node-pool-resources/sum:
     x-internal: true
     $ref: "./requests/nodePoolResources/DepartmentNodePoolResourcesSum.yaml"
+  /api/v1/org-unit/node-pools/{nodepoolId}/fair-share-simulation:
+    x-internal: true
+    $ref: "./requests/org/NodePoolFairShareSimulation.yaml"
   /api/v1/org-unit/projects/node-pool-resources:
     $ref: "./requests/nodePoolResources/ProjectNodePoolResources.yaml"
   /api/v1/org-unit/projects/node-pool-resources/count:
