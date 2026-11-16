@@ -72,7 +72,7 @@
                     <template #option-end="{ selected, option }">
                       <div class="mode-details">
                         <q-slide-transition :duration="511">
-                          <div v-if="modeHelpExpanded" class="mode-explanation-transition">
+                          <div v-show="modeHelpExpanded" class="mode-explanation-transition">
                             <div class="mode-explanation-content">
                               <span class="mode-explanation">{{ modeExplanations[String(option.value)] }}</span>
                             </div>
@@ -80,7 +80,7 @@
                         </q-slide-transition>
                         <q-slide-transition :duration="511">
                           <div
-                            v-if="option.value === 'guaranteed' && showGuaranteedNotice"
+                            v-show="option.value === 'guaranteed' && showGuaranteedNotice"
                             class="mode-warning-transition"
                           >
                             <div class="mode-warning-container">
@@ -201,7 +201,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { createSchedulingSaver, buildSchedulingSave } from "./node-pool-scheduling-save";
 import { patchSchedulingPool, patchSchedulingDepartments } from "./node-pool-scheduling.service";
 import { extractErrorMessages } from "@/utils/error-alert.util";
@@ -378,17 +378,24 @@ const showGuaranteedNotice = computed(
     !props.pool.schedulingCapabilities?.quota &&
     (hoveredMode.value === "guaranteed" || draft.value.mode === "guaranteed"),
 );
+let modeHelpCloseTimer: ReturnType<typeof setTimeout> | undefined;
+onBeforeUnmount(() => clearTimeout(modeHelpCloseTimer));
 function openModeHelp() {
+  clearTimeout(modeHelpCloseTimer);
   modeCardsHovered.value = true;
   modeHelpDismissed.value = false;
 }
 function hoverModeHelp(event: MouseEvent) {
+  clearTimeout(modeHelpCloseTimer);
   modeCardsHovered.value = true;
   hoveredMode.value = (event.target as Element).closest("[role=radio]")?.getAttribute("aid")?.replace("mode-", "");
 }
 function leaveModeHelp() {
-  modeCardsHovered.value = false;
-  hoveredMode.value = undefined;
+  clearTimeout(modeHelpCloseTimer);
+  modeHelpCloseTimer = setTimeout(() => {
+    modeCardsHovered.value = false;
+    hoveredMode.value = undefined;
+  }, 150);
 }
 function focusModeHelp(event: FocusEvent) {
   modeCardsFocused.value = (event.target as Element).matches(":focus-visible");

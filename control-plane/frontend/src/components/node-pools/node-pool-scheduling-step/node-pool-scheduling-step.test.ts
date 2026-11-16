@@ -98,9 +98,9 @@ describe("scheduling step foundation", () => {
     expect(wrapper.findAll(".mode-explanation")).toHaveLength(3);
     expect(wrapper.get('[aid="mode-proportional"]').attributes("aria-checked")).toBe("true");
     await cards.trigger("keydown", { key: "Escape" });
-    expect(wrapper.findAll(".mode-explanation")).toHaveLength(0);
+    expect(wrapper.findAll(".mode-explanation").filter((item) => item.isVisible())).toHaveLength(0);
     await wrapper.get('[aid="mode-proportional"] .runai-segment__label').trigger("mouseover");
-    expect(wrapper.findAll(".mode-explanation")).toHaveLength(0);
+    expect(wrapper.findAll(".mode-explanation").filter((item) => item.isVisible())).toHaveLength(0);
     expect(wrapper.get('[aid="mode-proportional"]').attributes("aria-checked")).toBe("true");
     wrapper.unmount();
   });
@@ -114,15 +114,46 @@ describe("scheduling step foundation", () => {
     expect(wrapper.find(".mode-guarantee-warning").text()).toBe("Mode can't be changed after saving");
     wrapper.unmount();
   });
-  it("closes descriptions when the pointer leaves the full-width card hover target", async () => {
+  it("keeps descriptions open through a brief pointer exit, then closes after a sustained exit", async () => {
+    vi.useFakeTimers();
     const wrapper = render();
-    const target = wrapper.get('[aid="scheduling-mode-hover-target"]');
-    await target.trigger("mouseenter");
-    expect(wrapper.findAll(".mode-explanation")).toHaveLength(3);
-    await target.trigger("mouseleave");
-    expect(wrapper.findAll(".mode-explanation")).toHaveLength(0);
-    expect(wrapper.get('[aid="mode-proportional"]').attributes("aria-checked")).toBe("true");
-    wrapper.unmount();
+    try {
+      const target = wrapper.get('[aid="scheduling-mode-hover-target"]');
+      const expanded = () => wrapper.get('[aid="scheduling-mode-options"]').classes("mode-cards--expanded");
+      await target.trigger("mouseenter");
+      expect(expanded()).toBe(true);
+      await target.trigger("mouseleave");
+      await vi.advanceTimersByTimeAsync(80);
+      expect(expanded()).toBe(true);
+      await target.trigger("mouseenter");
+      await vi.advanceTimersByTimeAsync(700);
+      expect(expanded()).toBe(true);
+      await target.trigger("mouseleave");
+      await vi.advanceTimersByTimeAsync(300);
+      expect(expanded()).toBe(false);
+      expect(wrapper.get('[aid="mode-proportional"]').attributes("aria-checked")).toBe("true");
+    } finally {
+      wrapper.unmount();
+      vi.useRealTimers();
+    }
+  });
+  it("dismisses immediately with Escape during the pointer-exit grace period and allows a fresh hover", async () => {
+    vi.useFakeTimers();
+    const wrapper = render();
+    try {
+      const target = wrapper.get('[aid="scheduling-mode-hover-target"]');
+      const expanded = () => wrapper.get('[aid="scheduling-mode-options"]').classes("mode-cards--expanded");
+      await target.trigger("mouseenter");
+      await target.trigger("mouseleave");
+      await wrapper.get('[aid="scheduling-mode-options"]').trigger("keydown", { key: "Escape" });
+      expect(expanded()).toBe(false);
+      await target.trigger("mouseenter");
+      await vi.advanceTimersByTimeAsync(700);
+      expect(expanded()).toBe(true);
+    } finally {
+      wrapper.unmount();
+      vi.useRealTimers();
+    }
   });
   it("defaults a first Guaranteed selection to Automatic and retains an explicit Custom choice", async () => {
     const wrapper = render();
