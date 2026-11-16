@@ -353,6 +353,13 @@ async function save() {
   gap: 20px;
   margin-top: 26px;
 }
+.placement-group :deep(.runai-radio-options > span) {
+  width: 100%;
+}
+.placement-group :deep(.horizontal-options),
+.placement-group :deep(.horizontal-options > div) {
+  margin-left: 0;
+}
 .placement-group h3 {
   font-size: 14px;
   line-height: 20px;
