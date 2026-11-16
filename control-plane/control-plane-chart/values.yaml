@@ -1527,8 +1527,8 @@ postgresql:
     enabled: true
   image:
     registry: docker.io
-    repository: bitnamilegacy/postgresql
-    tag: "16"
+    repository: bitnami/postgresql # POC-TEMP: was bitnamilegacy/postgresql
+    tag: "latest" # POC-TEMP: was "16"
     debug: false
   tls:
     enabled: false
