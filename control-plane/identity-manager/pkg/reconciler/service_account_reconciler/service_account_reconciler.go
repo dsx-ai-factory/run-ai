@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package app_reconciler
+package service_account_reconciler
 
 import (
 	"context"
@@ -22,45 +22,45 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
 
-type AppsReconcilerConfig struct {
+type ServiceAccountsReconcilerConfig struct {
 	hostTemplate string
 	appHost      string
 }
 
-type AppsReconciler struct {
+type ServiceAccountsReconciler struct {
 	iamServices           iam.IamServiceContainer
-	config                AppsReconcilerConfig
+	config                ServiceAccountsReconcilerConfig
 	tenantResolver        reconciler.TenantResolver
 	isExternal            *bool
 	version               string
 	reconcilerVersionsDal business.ReconcilerVersionsDal
 }
 
-func NewAppsReconciler(ctx context.Context, iamServices *iam.IamServiceContainer, tenantRealm *config.TenantRealm,
+func NewServiceAccountsReconciler(ctx context.Context, iamServices *iam.IamServiceContainer, tenantRealm *config.TenantRealm,
 	realmDal business.RealmDal, reconcilerVersionsDal business.ReconcilerVersionsDal, version string,
 ) reconciler.Reconciler {
-	return newAppsReconciler(ctx, iamServices, tenantRealm, realmDal, reconcilerVersionsDal, ptr.To(true), version)
+	return newServiceAccountsReconciler(ctx, iamServices, tenantRealm, realmDal, reconcilerVersionsDal, ptr.To(true), version)
 }
 
-func NewInternalAppsReconciler(ctx context.Context, iamServices *iam.IamServiceContainer, tenantRealm *config.TenantRealm,
+func NewInternalServiceAccountsReconciler(ctx context.Context, iamServices *iam.IamServiceContainer, tenantRealm *config.TenantRealm,
 	realmDal business.RealmDal, reconcilerVersionsDal business.ReconcilerVersionsDal, version string,
 ) reconciler.Reconciler {
-	return newAppsReconciler(ctx, iamServices, tenantRealm, realmDal, reconcilerVersionsDal, ptr.To(false), version)
+	return newServiceAccountsReconciler(ctx, iamServices, tenantRealm, realmDal, reconcilerVersionsDal, ptr.To(false), version)
 }
 
-func newAppsReconciler(ctx context.Context, iamServices *iam.IamServiceContainer, tenantRealm *config.TenantRealm,
+func newServiceAccountsReconciler(ctx context.Context, iamServices *iam.IamServiceContainer, tenantRealm *config.TenantRealm,
 	realmDal business.RealmDal, reconcilerVersionsDal business.ReconcilerVersionsDal, isExternal *bool, version string,
 ) reconciler.Reconciler {
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Debugf("Init Service Accounts Reconciler")
 	tenantResolver := reconciler.NewRealmTenantResolver(ctx, realmDal)
 
-	cr := AppsReconciler{
+	cr := ServiceAccountsReconciler{
 		iamServices:           *iamServices,
 		tenantResolver:        tenantResolver,
 		reconcilerVersionsDal: reconcilerVersionsDal,
 		isExternal:            isExternal,
 		version:               version,
-		config: AppsReconcilerConfig{
+		config: ServiceAccountsReconcilerConfig{
 			hostTemplate: tenantRealm.TenantDomainTemplate,
 			appHost:      tenantRealm.AppHost,
 		},
@@ -68,7 +68,7 @@ func newAppsReconciler(ctx context.Context, iamServices *iam.IamServiceContainer
 	return &cr
 }
 
-func (cr *AppsReconciler) Reconcile(ctx context.Context, realm string, force bool) error {
+func (cr *ServiceAccountsReconciler) Reconcile(ctx context.Context, realm string, force bool) error {
 	start := time.Now()
 	isExternal := cr.getIsExternalVal()
 	defer reconciler.LogReconcileDuration(ctx, start, realm, fmt.Sprintf("ServiceAccountsReconciler with external: %s. in version %s. force: %t", isExternal, cr.version, force))
@@ -100,7 +100,7 @@ func (cr *AppsReconciler) Reconcile(ctx context.Context, realm string, force boo
 	return nil
 }
 
-func (cr *AppsReconciler) updateInternalServiceAccountsVersionAndLogError(ctx context.Context, tenantId string) {
+func (cr *ServiceAccountsReconciler) updateInternalServiceAccountsVersionAndLogError(ctx context.Context, tenantId string) {
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Updating internal service accounts for tenant id %s to version %s", tenantId, cr.version)
 	err := cr.reconcilerVersionsDal.UpdateInternalServiceAccountsReconcilerVersions(ctx, tenantId, cr.version)
 	if err != nil {
@@ -108,7 +108,7 @@ func (cr *AppsReconciler) updateInternalServiceAccountsVersionAndLogError(ctx co
 	}
 }
 
-func (cr *AppsReconciler) updateServiceAccountsVersionAndLogError(ctx context.Context, tenantId string) {
+func (cr *ServiceAccountsReconciler) updateServiceAccountsVersionAndLogError(ctx context.Context, tenantId string) {
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Updating service accounts for tenant id %s to version %s", tenantId, cr.version)
 	err := cr.reconcilerVersionsDal.UpdateServiceAccountsReconcilerVersions(ctx, tenantId, cr.version)
 	if err != nil {
@@ -116,17 +116,17 @@ func (cr *AppsReconciler) updateServiceAccountsVersionAndLogError(ctx context.Co
 	}
 }
 
-func (cr *AppsReconciler) reconcileInternalServiceAccounts(ctx context.Context, realm string, tenantId string) error {
+func (cr *ServiceAccountsReconciler) reconcileInternalServiceAccounts(ctx context.Context, realm string, tenantId string) error {
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Reconciling internal service accounts for realm %s", realm)
 	return cr.reconcileServiceAccountsByType(ctx, realm, tenantId, false)
 }
 
-func (cr *AppsReconciler) reconcileServiceAccounts(ctx context.Context, realm string, tenantId string) error {
+func (cr *ServiceAccountsReconciler) reconcileServiceAccounts(ctx context.Context, realm string, tenantId string) error {
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Reconciling service accounts for realm %s", realm)
 	return cr.reconcileServiceAccountsByType(ctx, realm, tenantId, true)
 }
 
-func (cr *AppsReconciler) reconcileServiceAccountsByType(ctx context.Context, realm string, tenantId string, isExternal bool) error {
+func (cr *ServiceAccountsReconciler) reconcileServiceAccountsByType(ctx context.Context, realm string, tenantId string, isExternal bool) error {
 	filters := &iamModels.ClientFilter{
 		IsExternal: &isExternal,
 	}
@@ -163,7 +163,7 @@ func (cr *AppsReconciler) reconcileServiceAccountsByType(ctx context.Context, re
 	return nil
 }
 
-func (cr *AppsReconciler) reconcileServiceAccount(ctx context.Context, realm string, client realm_client.Client) error {
+func (cr *ServiceAccountsReconciler) reconcileServiceAccount(ctx context.Context, realm string, client realm_client.Client) error {
 	clientID := client.GetClientID()
 	existsClient, err := cr.iamServices.ClientService.GetClientByClientId(ctx, realm, clientID)
 	if err != nil {
@@ -182,7 +182,7 @@ func (cr *AppsReconciler) reconcileServiceAccount(ctx context.Context, realm str
 	return err
 }
 
-func (r *AppsReconciler) shouldReconcileInternalServiceAccounts(ctx context.Context, tenantId string, force bool) bool {
+func (r *ServiceAccountsReconciler) shouldReconcileInternalServiceAccounts(ctx context.Context, tenantId string, force bool) bool {
 	if r.isExternal != nil && *r.isExternal {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Debugf("reconciler set to run on service accounts skipping internal service accounts for tenant %s", tenantId)
 		return false
@@ -199,7 +199,7 @@ func (r *AppsReconciler) shouldReconcileInternalServiceAccounts(ctx context.Cont
 	return versions.InternalServiceAccounts != r.version
 }
 
-func (r *AppsReconciler) shouldReconcileServiceAccounts(ctx context.Context, tenantId string, force bool) bool {
+func (r *ServiceAccountsReconciler) shouldReconcileServiceAccounts(ctx context.Context, tenantId string, force bool) bool {
 	if r.isExternal != nil && !*r.isExternal {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Debugf("reconciler set to run on internal service accounts skipping service accounts for tenant %s", tenantId)
 		return false
@@ -216,7 +216,7 @@ func (r *AppsReconciler) shouldReconcileServiceAccounts(ctx context.Context, ten
 	return versions.ServiceAccounts != r.version
 }
 
-func (cr *AppsReconciler) getIsExternalVal() interface{} {
+func (cr *ServiceAccountsReconciler) getIsExternalVal() interface{} {
 	if cr.isExternal == nil {
 		return "nil"
 	}
