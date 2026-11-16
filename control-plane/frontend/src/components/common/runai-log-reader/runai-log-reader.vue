@@ -254,10 +254,9 @@ export default defineComponent({
         const listContainer: HTMLElement = this.$refs["list-container"] as HTMLElement;
         if (!listContainer) return;
         const before = listContainer.scrollTop;
-        this.isProgrammaticScroll = true;
         listContainer.scrollTop = listContainer.scrollHeight;
-        // Already at the bottom: no scroll event follows, so don't leave the flag set to swallow the next user scroll.
-        if (listContainer.scrollTop === before) this.isProgrammaticScroll = false;
+        // Only a real move queues a scroll event; a no-op must neither set the flag nor clear one a pending event still needs.
+        if (listContainer.scrollTop !== before) this.isProgrammaticScroll = true;
       });
     },
     handleScroll(): void {

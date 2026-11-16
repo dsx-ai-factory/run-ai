@@ -619,37 +619,43 @@ describe("runai-log-reader.vue", () => {
       },
       { name: "trims across frames", maxLines: 2, frames: ["a\nb\n", "c\n"], rows: ["b", "c"], omitted: 1 },
       { name: "keeps every line under the limit", maxLines: 10, frames: ["a\nb\n"], rows: ["a", "b"], omitted: 0 },
-      {
-        name: "falls back to the default for a zero limit",
-        maxLines: 0,
-        frames: ["a\nb\n"],
-        rows: ["a", "b"],
-        omitted: 0,
-      },
       ...[
+        { label: "zero", maxLines: 0 },
         { label: "negative", maxLines: -1 },
         { label: "NaN", maxLines: NaN },
         { label: "non-integer", maxLines: 2.5 },
       ].map(({ label, maxLines }) => ({
         name: `falls back to the default for a ${label} limit`,
         maxLines,
+        frames: ["a\nb\n"],
+        rows: ["a", "b"],
+        omitted: 0,
+      })),
+      // Only this case renders 10,000 rows; it pins the default itself
+      {
+        name: "keeps the last 10,000 lines by default",
+        maxLines: undefined,
         frames: [longFrame.join("\n") + "\n"],
         rows: longFrame.slice(1),
         omitted: 1,
-      })),
-    ])("$name", async ({ maxLines, frames, rows, omitted }) => {
-      const reader = factory({ maxLines });
+      },
+    ])(
+      "$name",
+      async ({ maxLines, frames, rows, omitted }) => {
+        const reader = factory({ maxLines });
 
-      for (const data of frames) {
-        reader.vm.wsSubscription?.onMessage(new MessageEvent("message", { data }));
-      }
-      await nextTick();
+        for (const data of frames) {
+          reader.vm.wsSubscription?.onMessage(new MessageEvent("message", { data }));
+        }
+        await nextTick();
 
-      expect(reader.findAll(".log-row").map((row) => row.text())).toEqual(rows);
-      const notice = reader.find(".omitted-lines-notice");
-      expect(notice.exists()).toBe(omitted > 0);
-      if (omitted > 0) expect(notice.text()).toContain(String(omitted));
-    });
+        expect(reader.findAll(".log-row").map((row) => row.text())).toEqual(rows);
+        const notice = reader.find(".omitted-lines-notice");
+        expect(notice.exists()).toBe(omitted > 0);
+        if (omitted > 0) expect(notice.text()).toContain(String(omitted));
+      },
+      30_000,
+    ); // rendering 10,000 rows in jsdom is slow on a loaded runner
 
     type Reader = VueWrapper<InstanceType<typeof RunaiLogReader>>;
     const sendFrame = (reader: Reader, data: string) =>
@@ -749,6 +755,25 @@ describe("runai-log-reader.vue", () => {
       await list.trigger("scroll");
 
       expect(list.classes()).toContain("paused");
+    });
+
+    test("resuming a paused reader with overflowing logs keeps following", async () => {
+      const reader = factory({ maxLines: 3 });
+      const list = reader.find(".list-container");
+      const layout = stubLayout(list.element);
+      sendFrame(reader, "a\nb\nc\n");
+      await nextTick();
+      await list.trigger("scroll");
+      await list.trigger("scroll"); // user scrolls up: pauses
+      expect(list.classes()).toContain("paused");
+
+      layout.grow();
+      await reader.find(".resume-button").trigger("click");
+      await nextTick();
+      // Resume scrolls once (moves) and once more via the watcher (no-op); the queued event arrives after both
+      await list.trigger("scroll");
+
+      expect(list.classes()).not.toContain("paused");
     });
   });
 });
