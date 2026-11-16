@@ -13,9 +13,11 @@ import { allWorkloadsIconsMap } from "../icons.constant";
 import { EWorkloadType } from "@/models/workload.model";
 import type { Label } from "@/swagger-models/assets-service-client";
 
+const NVIDIA_IMAGE_REGISTRY_PATHS = ["nvcr.io/nvidia", "ghcr.io/nvidia/"];
+
 export function isNvidiaImage(image: string | null | undefined): boolean {
   if (!image) return false;
-  return image.includes("nvcr.io/nvidia");
+  return NVIDIA_IMAGE_REGISTRY_PATHS.some((registryPath) => image.includes(registryPath));
 }
 
 export function isNvidiaPytorch(image: string | null | undefined): boolean {
