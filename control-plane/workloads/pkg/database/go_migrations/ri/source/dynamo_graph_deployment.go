@@ -165,6 +165,8 @@ func buildDynamoGraphDeploymentV1alpha1ChildComponents() []karta.ComponentDefini
 	}
 }
 
+const dynamoV1beta1Roles = `.spec.components[] as $component | $component.roles[]? | select(.podTemplate != null)`
+
 func buildDynamoGraphDeploymentV1beta1ChildComponents() []karta.ComponentDefinition {
 	return []karta.ComponentDefinition{
 		{
@@ -187,6 +189,9 @@ func buildDynamoGraphDeploymentV1beta1ChildComponents() []karta.ComponentDefinit
 				ReplicasPath: ptr.To(".spec.components[] | (.replicas // 1) * (.multinode.nodeCount // 1)"),
 			},
 			PodSelector: &karta.PodSelector{
+				// With multiple pod definitions, Karta no longer picks one automatically.
+				// Match every pod here to preserve the existing component grouping.
+				ComponentTypeSelector: &karta.ComponentTypeSelector{KeyPath: `"component"`, Value: ptr.To("component")},
 				ComponentInstanceSelector: &karta.ComponentInstanceSelector{
 					IdPath: ".metadata.labels[\"nvidia.com/dynamo-component\"]",
 				},
@@ -195,6 +200,26 @@ func buildDynamoGraphDeploymentV1beta1ChildComponents() []karta.ComponentDefinit
 				},
 			},
 			InstanceIdPath: ptr.To(".spec.components[] | .name"),
+		},
+		{
+			Name:           "role",
+			OwnerRef:       ptr.To("dynamographdeployment"),
+			InstanceIdPath: ptr.To(dynamoV1beta1Roles + ` | $component.name + "/" + .name`),
+			SpecDefinition: &karta.SpecDefinition{
+				PodTemplateSpecPath: ptr.To(`.spec.components[] | .roles[]? | select(.podTemplate != null) | .podTemplate`),
+			},
+			ScaleDefinition: &karta.ScaleDefinition{
+				// nodeCount includes the leader, which does not count toward worker replicas.
+				ReplicasPath: ptr.To(dynamoV1beta1Roles + `
+                    | ($component.replicas // 1) * (.replicas // (
+                        if .name == "worker" and $component.multinode != null then ($component.multinode.nodeCount // 2) - 1 else 1 end))`),
+			},
+			PodSelector: &karta.PodSelector{
+				// Pods keep matching the component definition above.
+				ComponentTypeSelector: &karta.ComponentTypeSelector{KeyPath: "empty"},
+				// Required by Karta when InstanceIdPath is set.
+				ComponentInstanceSelector: &karta.ComponentInstanceSelector{IdPath: "empty"},
+			},
 		},
 	}
 }

@@ -9,6 +9,7 @@ import (
 	dynamov1beta1 "github.com/ai-dynamo/dynamo/deploy/operator/api/v1beta1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/pkg/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
+	kartav1alpha1 "github.com/run-ai/karta/pkg/api/runai/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -116,3 +117,30 @@ var (
 		},
 	}
 )
+
+func DynamoGraphDeploymentV1beta1Karta() *kartav1alpha1.Karta {
+	roles := `.spec.components[] as $component | $component.roles[]? | select(.podTemplate != null)`
+	return &kartav1alpha1.Karta{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   "dynamo-v1beta1",
+			Labels: v1alpha1.GetKartaLabels("", "nvidia.com", "v1beta1", "DynamoGraphDeployment", ""),
+		},
+		Spec: kartav1alpha1.KartaSpec{StructureDefinition: kartav1alpha1.StructureDefinition{
+			RootComponent: kartav1alpha1.ComponentDefinition{
+				Name: "dynamographdeployment",
+				Kind: &kartav1alpha1.GroupVersionKind{Group: "nvidia.com", Version: "v1beta1", Kind: "DynamoGraphDeployment"},
+			},
+			ChildComponents: []kartav1alpha1.ComponentDefinition{{
+				Name: "role", OwnerRef: ptr.To("dynamographdeployment"),
+				InstanceIdPath: ptr.To(roles + ` | $component.name + "/" + .name`),
+				SpecDefinition: &kartav1alpha1.SpecDefinition{
+					PodTemplateSpecPath: ptr.To(`.spec.components[] | .roles[]? | select(.podTemplate != null) | .podTemplate`),
+				},
+				ScaleDefinition: &kartav1alpha1.ScaleDefinition{
+					ReplicasPath: ptr.To(roles + ` | ($component.replicas // 1) * (.replicas // (
+                        if .name == "worker" and $component.multinode != null then ($component.multinode.nodeCount // 2) - 1 else 1 end))`),
+				},
+			}},
+		}},
+	}
+}
