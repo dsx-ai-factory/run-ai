@@ -8634,6 +8634,7 @@ components:
     NodepoolGpuTypeDetails:
       example:
         totalDevices: 16
+        maxDevicesPerNode: 8
         gpuMemoryBytes: 85899345920
         type: NVIDIA-H100-80GB-HBM3
       properties:
@@ -8654,6 +8655,14 @@ components:
             nodes.
           example: 16
           minimum: 0
+          type: integer
+        maxDevicesPerNode:
+          description: Largest installed GPU count on a single node for this exact
+            GPU type and per-device memory capacity. Not a sum across nodes or a free-device
+            count. Omitted when per-node count evidence is unavailable.
+          example: 8
+          format: int64
+          minimum: 1
           type: integer
       required:
       - totalDevices
@@ -8850,9 +8859,11 @@ components:
             status: "True"
         gpuTypes:
         - totalDevices: 16
+          maxDevicesPerNode: 8
           gpuMemoryBytes: 85899345920
           type: NVIDIA-H100-80GB-HBM3
         - totalDevices: 16
+          maxDevicesPerNode: 8
           gpuMemoryBytes: 85899345920
           type: NVIDIA-H100-80GB-HBM3
     NodepoolId:
@@ -8880,9 +8891,11 @@ components:
         gpuNetworkAccelerationDetected: true
         gpuTypes:
         - totalDevices: 16
+          maxDevicesPerNode: 8
           gpuMemoryBytes: 85899345920
           type: NVIDIA-H100-80GB-HBM3
         - totalDevices: 16
+          maxDevicesPerNode: 8
           gpuMemoryBytes: 85899345920
           type: NVIDIA-H100-80GB-HBM3
       properties:
@@ -10947,9 +10960,11 @@ components:
               status: "True"
           gpuTypes:
           - totalDevices: 16
+            maxDevicesPerNode: 8
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
           - totalDevices: 16
+            maxDevicesPerNode: 8
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
         - schedulingConfiguration:
@@ -11053,9 +11068,11 @@ components:
               status: "True"
           gpuTypes:
           - totalDevices: 16
+            maxDevicesPerNode: 8
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
           - totalDevices: 16
+            maxDevicesPerNode: 8
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
       properties:
@@ -11080,9 +11097,11 @@ components:
           gpuNetworkAccelerationDetected: true
           gpuTypes:
           - totalDevices: 16
+            maxDevicesPerNode: 8
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
           - totalDevices: 16
+            maxDevicesPerNode: 8
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
         - phase: Creating
@@ -11098,9 +11117,11 @@ components:
           gpuNetworkAccelerationDetected: true
           gpuTypes:
           - totalDevices: 16
+            maxDevicesPerNode: 8
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
           - totalDevices: 16
+            maxDevicesPerNode: 8
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
       properties:
@@ -11213,9 +11234,11 @@ components:
               status: "True"
           gpuTypes:
           - totalDevices: 16
+            maxDevicesPerNode: 8
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
           - totalDevices: 16
+            maxDevicesPerNode: 8
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
         - schedulingConfiguration:
@@ -11319,9 +11342,11 @@ components:
               status: "True"
           gpuTypes:
           - totalDevices: 16
+            maxDevicesPerNode: 8
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
           - totalDevices: 16
+            maxDevicesPerNode: 8
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
       properties:
@@ -11347,9 +11372,11 @@ components:
           gpuNetworkAccelerationDetected: true
           gpuTypes:
           - totalDevices: 16
+            maxDevicesPerNode: 8
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
           - totalDevices: 16
+            maxDevicesPerNode: 8
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
         - phase: Creating
@@ -11365,9 +11392,11 @@ components:
           gpuNetworkAccelerationDetected: true
           gpuTypes:
           - totalDevices: 16
+            maxDevicesPerNode: 8
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
           - totalDevices: 16
+            maxDevicesPerNode: 8
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
       properties:

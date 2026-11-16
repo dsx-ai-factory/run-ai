@@ -101,9 +101,9 @@ require (
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/JohannesKaufmann/html-to-markdown/v2 v2.5.2
-	github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client v1.0.6
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.10
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.12
+	github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client v1.0.7
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.11
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.13
 	github.com/emersion/go-sasl v0.0.0-20241020182733-b788ff22d5a6
 	github.com/emersion/go-smtp v0.25.1
 	github.com/go-chi/chi/v5 v5.5.0
@@ -125,7 +125,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
 	github.com/xyproto/jpath v0.7.0
-	golang.org/x/exp v0.0.0-20261112173441-d10d3b464990
+	golang.org/x/exp v0.0.0-20261113113407-e3970619a1a4
 	gorm.io/datatypes v1.2.7
 	gorm.io/driver/postgres v1.6.3
 	gorm.io/gorm v1.31.2
