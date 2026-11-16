@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# The resource that makes the pre Application go OutOfSync. Change runId (and
+# version, on an upgrade) to run the pre hooks again; nothing else starts them.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: runai-cluster-pre-hooks-run
+  namespace: runai
+data:
+  version: "<CLUSTER_VERSION>"
+  runId: "<RUN_ID>"

@@ -1,3 +1,5 @@
+{{- /* Only the post hooks mount this ConfigMap. */ -}}
+{{- if eq (include "runai.renderHook" (list . (list "post"))) "true" }}
 {{- if .Values.helmHooksHandler.enabled }}
 {{- $runai_operator := index .Values "runai-operator" -}}
 apiVersion: v1
@@ -13,4 +15,5 @@ data:
       "clusterConfig" : {{- .Values.clusterConfig | toJson }},
       "mgmtPrometheusIngress" : {{- include "mgmtPrometheusIngressJson" . }}
     }
+{{- end }}
 {{- end }}

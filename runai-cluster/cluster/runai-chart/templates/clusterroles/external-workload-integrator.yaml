@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderRelease" .) "true" }}
 {{- if .Values.operands.rbac.base.create }}
 # Run:AI ExternalWorkloadIntegrator
 apiVersion: rbac.authorization.k8s.io/v1
@@ -437,4 +438,5 @@ subjects:
   - kind: ServiceAccount
     name: runai-agent
     namespace: runai
+{{- end }}
 {{- end }}

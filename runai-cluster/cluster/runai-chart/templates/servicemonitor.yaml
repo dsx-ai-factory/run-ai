@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderRelease" .) "true" }}
 {{- if and (index .Values "runai-operator" "enabled") (index .Values "runai-operator" "metrics" "serviceMonitor" "enabled") }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -20,4 +21,5 @@ spec:
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace }}
+{{- end }}
 {{- end }}

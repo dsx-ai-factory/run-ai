@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
         {{- print true -}}
     {{- else if (and
             .Values.controlPlane.url
-            .Values.cluster.uid)
+            (or .Values.cluster.uid (and .Values.controlPlane.existingSecret .Values.controlPlane.secretKeys.clusterUid)))
     -}}
         {{- print false -}}
     {{- else -}}
@@ -25,6 +25,46 @@ SPDX-License-Identifier: Apache-2.0
         {{- else -}}
           {{- printf "%s" .registry -}}
         {{- end -}}
+    {{- end -}}
+{{- end -}}
+
+{{- /*
+hooks.render and hooks.phase split the chart into the release and its lifecycle
+hooks so they can be deployed separately. See values.yaml.
+*/ -}}
+{{- define "runai.hooksRender" -}}
+    {{- $render := .Values.hooks.render | default "all" -}}
+    {{- if not (has $render (list "all" "none" "only")) -}}
+        {{- fail (printf "hooks.render must be one of all, none or only, got %q" $render) -}}
+    {{- end -}}
+    {{- $render -}}
+{{- end -}}
+
+{{- define "runai.hooksPhase" -}}
+    {{- $phase := .Values.hooks.phase | default "all" -}}
+    {{- if not (has $phase (list "all" "pre" "post" "delete")) -}}
+        {{- fail (printf "hooks.phase must be one of all, pre, post or delete, got %q" $phase) -}}
+    {{- end -}}
+    {{- $phase -}}
+{{- end -}}
+
+{{- /* "true" when the resources that are not hooks should be rendered. */ -}}
+{{- define "runai.renderRelease" -}}
+    {{- ternary "false" "true" (eq (include "runai.hooksRender" .) "only") -}}
+{{- end -}}
+
+{{- /*
+"true" when a hook template that belongs to the given phases should be rendered.
+Call with (list . (list "pre" "post")).
+*/ -}}
+{{- define "runai.renderHook" -}}
+    {{- $ctx := index . 0 -}}
+    {{- $phases := index . 1 -}}
+    {{- $phase := include "runai.hooksPhase" $ctx -}}
+    {{- if and (ne (include "runai.hooksRender" $ctx) "none") (or (eq $phase "all") (has $phase $phases)) -}}
+        {{- print true -}}
+    {{- else -}}
+        {{- print false -}}
     {{- end -}}
 {{- end -}}
 

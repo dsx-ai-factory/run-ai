@@ -46,7 +46,7 @@ type Options struct {
 	ControlPlaneClientID         string
 	ControlPlaneClientSecret     FileContentFlag
 	ControlPlaneBootstrapToken   FileContentFlag
-	ClusterUID                   string
+	ClusterUID                   FileContentFlag
 	ClusterURL                   string
 	CustomCaEnabled              bool
 	CustomCaSecretOptional       bool
@@ -146,8 +146,8 @@ func (opts *Options) parseCommandLineArgs(flagSet *flag.FlagSet) {
 	flagSet.Var(&opts.ControlPlaneBootstrapToken, "control-plane-bootstrap-token",
 		"Bootstrap token to authenticate to the control-plane with. Accepts file path when starts with @ (e.g. @/path/to/token)")
 
-	flagSet.StringVar(&opts.ClusterUID, "cluster-uid", "",
-		"UID of the cluster to install or upgrade")
+	flagSet.Var(&opts.ClusterUID, "cluster-uid",
+		"UID of the cluster to install or upgrade. Accepts file path when starts with @ (e.g. @/path/to/uid)")
 
 	flagSet.StringVar(&opts.ClusterURL, "cluster-url", "",
 		"URL of the cluster")

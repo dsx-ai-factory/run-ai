@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderRelease" .) "true" }}
 {{- if (index .Values "kai-resource-management" "enabled") }}
 apiVersion: v1
 kind: Namespace
@@ -12,4 +13,5 @@ metadata:
 spec:
   podSelector: {}
   ingress: []
+{{- end }}
 {{- end }}

@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderRelease" .) "true" }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -34,3 +35,4 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: runai-legacy-workload-cleanup
+{{- end }}

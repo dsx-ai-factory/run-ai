@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderRelease" .) "true" }}
 {{- $runai_operator := index .Values "runai-operator" -}}
 {{- $createRunaiConfig := eq (include "createRunaiConfig" .) "true" -}}
 {{- if and $runai_operator.config $createRunaiConfig }}
@@ -27,4 +28,5 @@ metadata:
   name: runai
 spec:
 {{- $config | toYaml | nindent 2 -}}
+{{- end }}
 {{- end }}

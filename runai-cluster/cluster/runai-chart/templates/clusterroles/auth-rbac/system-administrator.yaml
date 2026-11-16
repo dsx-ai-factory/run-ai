@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderRelease" .) "true" }}
 {{- if .Values.userAuth.rbac.create }}
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
@@ -240,5 +241,6 @@ roleRef:
   name: runai-system-administrator-logs
   apiGroup: rbac.authorization.k8s.io
 ---
+{{- end }}
 {{- end }}
 {{- end }}

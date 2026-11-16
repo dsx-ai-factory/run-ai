@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderRelease" .) "true" }}
 {{- if and (not .Values.global.serviceAccountName) (index .Values "runai-operator" "enabled") }}
 apiVersion: v1
 kind: ServiceAccount
@@ -143,4 +144,5 @@ roleRef:
   kind: Role
   name: runai-operator
   apiGroup: rbac.authorization.k8s.io
+{{- end }}
 {{- end }}

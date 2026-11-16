@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderHook" (list . (list "pre"))) "true" }}
 {{- if .Values.crdUpgrader.enabled }}
 apiVersion: batch/v1
 kind: Job
@@ -47,4 +48,5 @@ spec:
       imagePullSecrets: {{ include "imagePullSecretList" .| nindent 8 }}
       affinity: {{- include "deploymentAffinity" .| nindent 8 }}
       tolerations: {{- include "deploymentTolerations" .| nindent 8 }}
+{{- end }}
 {{- end }}
