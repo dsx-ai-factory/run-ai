@@ -78,7 +78,8 @@ func run() error {
 
 	// Registered with or without Snapshot: the pod labels it stamps depend only on
 	// the workload's opt-in, so installing or removing Snapshot never rolls a workload.
-	options = append(options, app.WithPlugins(snapshots.NewBuilder(cfg.SnapshotEnabled, cfg.AgentNodeSelector())))
+	snapshotIntegration := snapshots.NewIntegration(cfg.SnapshotEnabled, cfg.AgentNodeSelector())
+	options = append(options, app.WithPlugins(snapshotIntegration.Build))
 
 	// Set by the operator from Snapshot's CRDs being present — the same fact that
 	// gates the webhook configuration, so the configuration and the path it
@@ -91,7 +92,7 @@ func run() error {
 			// Before the plugin builds its watches on Snapshot's kinds; manager setups run later.
 			app.WithSchemeBuilders(snapshotv1alpha1.AddToScheme),
 			app.WithManagerSetup(snapshotrestore.NewSetup(cfg.AgentNodeSelector())),
-			app.WithManagerSetup(snapshots.NewCleanupSetup()),
+			app.WithManagerSetup(snapshots.NewCleanupSetup(), snapshotIntegration.NewSetup()),
 		)
 	} else {
 		log.Debug().Msg("snapshot integration inactive")
