@@ -138,8 +138,11 @@ export default defineComponent({
       }
     },
     handleInitLogReader(): void {
-      // The old socket shuts down asynchronously; its late close must not finalize the new stream.
-      if (this.wsSubscription) this.wsSubscription.onClose = () => {};
+      // The old socket shuts down asynchronously; its late messages and close must not reach the new stream.
+      if (this.wsSubscription) {
+        this.wsSubscription.onMessage = () => {};
+        this.wsSubscription.onClose = () => {};
+      }
       this.wsSubscription?.unsubscribe();
       this.isLoading = true;
       this.$emit("connecting", true);

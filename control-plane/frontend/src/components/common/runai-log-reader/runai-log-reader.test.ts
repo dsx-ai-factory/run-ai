@@ -678,7 +678,7 @@ describe("runai-log-reader.vue", () => {
     test.each([
       { name: "text", data: "new\npartial" },
       { name: "binary", data: new Blob(["new\npartial"]) },
-    ])("ignores a late close from the previous stream after switching pods ($name message)", async ({ data }) => {
+    ])("ignores late events from the previous stream after switching pods ($name message)", async ({ data }) => {
       vi.mocked(webSocketsService.subscribe).mockImplementation(() => ({ ...mockWsSubscription }));
       const reader = factory();
       const oldSubscription = reader.vm.wsSubscription as IWebSocketSubscription;
@@ -687,6 +687,7 @@ describe("runai-log-reader.vue", () => {
       await reader.setProps({ logParams: { ...mockLogParams, podName: "other-pod" } });
       const newSubscription = reader.vm.wsSubscription as IWebSocketSubscription;
       expect(newSubscription).not.toBe(oldSubscription);
+      oldSubscription.onMessage(new MessageEvent("message", { data: "stale\n" }));
       newSubscription.onMessage(new MessageEvent("message", { data }));
       oldSubscription.onClose(new CloseEvent("close", { code: 1000 }));
 
