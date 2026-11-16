@@ -9,7 +9,6 @@
     size="width-lg"
     :is-modal-persistent="saving"
     :hide-x="saving"
-    :close-icon="`img:${settingsCloseIcon}`"
     @close="!saving && emit('close')"
   >
     <template #header>New Department</template>
@@ -35,7 +34,6 @@
           <runai-section-title
             flat
             class="administrator-title"
-            :tooltip-icon="`img:${departmentHelpIcon}`"
             title="Set the department administrator(s)"
             tooltip-text="Department administrators can manage the department and its projects. Adding them here enables an access rule scoped to the department. It can be edited later in the department."
           />
@@ -43,7 +41,7 @@
             <runai-btn
               icon-button
               aid="remove-department-administrator"
-              :icon="`img:${settingsCloseIcon}`"
+              icon="ph-bold ph-x"
               size="sm"
               tooltip="Remove administrator"
               class="remove-administrator"
@@ -83,7 +81,7 @@
             v-else
             flat
             color="primary"
-            :icon="`img:${departmentPlusIcon}`"
+            icon="ph-bold ph-plus"
             label="Administrator"
             class="add-administrator"
             aid="add-department-administrator"
@@ -115,9 +113,6 @@
 </template>
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
-import settingsCloseIcon from "@/assets/icons/node-pool-settings-close.svg?url";
-import departmentHelpIcon from "@/assets/icons/node-pool-department-help.svg?url";
-import departmentPlusIcon from "@/assets/icons/node-pool-department-plus.svg?url";
 import { useAccessRuleRoles } from "@/composables/access-rule/use-access-rule-roles.composable";
 import { useAuthStore } from "@/stores/auth.store";
 import { errorMessages } from "@/common/error-message.constant";
@@ -268,9 +263,9 @@ async function createDepartment() {
   padding: 0;
 }
 .scheduling-new-department .runai-base-dialog-close-btn .q-icon {
-  width: 32px;
-  height: 32px;
-  font-size: 32px;
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
 }
 .scheduling-new-department .runai-base-dialog-body {
   min-height: 0;
@@ -420,9 +415,9 @@ async function createDepartment() {
   margin: 0;
 }
 .scheduling-new-department .remove-administrator .q-icon {
-  width: 32px;
-  height: 32px;
-  font-size: 32px;
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
 }
 
 .q-card.scheduling-new-department {

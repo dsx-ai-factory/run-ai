@@ -4,7 +4,7 @@
  */
 import { flushPromises, mount } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
-import { QIcon, QInput, QMenu, Quasar } from "quasar";
+import { QInput, QMenu, Quasar } from "quasar";
 import Editor from "./department-resource-editor.vue";
 const popup = {
   template: '<td><slot name="input" /></td>',
@@ -12,22 +12,6 @@ const popup = {
   emits: ["apply", "reset", "opened"],
 };
 describe("resource editor opening transition", () => {
-  it("loads the source close glyph through an image URL", async () => {
-    const wrapper = mount(Editor, {
-      props: { id: "a", kind: "weight", value: 2 },
-      global: { plugins: [Quasar] },
-      attachTo: document.body,
-    });
-    try {
-      await wrapper.get(".cell-trigger").trigger("click");
-      await flushPromises();
-      const icon = wrapper.findAllComponents(QIcon).find((item) => item.find("img").exists());
-      const source = icon?.get("img").attributes("src");
-      expect(source?.startsWith("data:image/svg+xml,") || source?.split("?")[0].endsWith(".svg")).toBe(true);
-    } finally {
-      wrapper.unmount();
-    }
-  });
   it("does not overwrite input entered while the popup is opening", async () => {
     const wrapper = mount(Editor, {
       props: { id: "a", kind: "weight", value: 2 },

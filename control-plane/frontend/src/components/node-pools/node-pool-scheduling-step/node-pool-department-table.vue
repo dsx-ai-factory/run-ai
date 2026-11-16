@@ -830,29 +830,6 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   font-size: 20px;
   line-height: 20px;
 }
-.scheduling-actions :deep(.runai-general-search .ph-magnifying-glass),
-.scheduling-actions :deep([aid="refresh-data-button"] .q-icon),
-.scheduling-actions :deep([aid="advanced-settings"] .q-icon) {
-  width: 20px;
-  height: 20px;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 20px 20px;
-}
-.scheduling-actions :deep(.runai-general-search .ph-magnifying-glass::before),
-.scheduling-actions :deep([aid="refresh-data-button"] .q-icon::before),
-.scheduling-actions :deep([aid="advanced-settings"] .q-icon::before) {
-  content: none;
-}
-.scheduling-actions :deep(.runai-general-search .ph-magnifying-glass) {
-  background-image: url("@/assets/icons/node-pool-table-search.svg");
-}
-.scheduling-actions :deep([aid="refresh-data-button"] .q-icon) {
-  background-image: url("@/assets/icons/node-pool-table-refresh.svg");
-}
-.scheduling-actions :deep([aid="advanced-settings"] .q-icon) {
-  background-image: url("@/assets/icons/node-pool-table-settings.svg");
-}
 .scheduling-actions :deep(.runai-general-search .icon-container span) {
   font-size: 10px;
   line-height: 14px;

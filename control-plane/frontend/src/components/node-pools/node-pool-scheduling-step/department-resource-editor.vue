@@ -8,7 +8,6 @@
     :title="editorTitle"
     popup-class="scheduling-resource-popup"
     prepare-before-show
-    :close-icon="'img:' + resourceCloseIcon"
     :popup-width="kind === 'weight' ? '274px' : '200px'"
     :state="
       active && !loading
@@ -103,7 +102,6 @@
 </template>
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import resourceCloseIcon from "@/assets/icons/node-pool-resource-close.svg?url";
 import { RunaiTooltip } from "@/components/common/runai-tooltip";
 import { EditableCellPopup } from "@/components/common/runai-table/runai-custom-table-columns/editable-cell-popup";
 import {
@@ -310,7 +308,7 @@ p {
   padding: 0;
 }
 .scheduling-resource-popup .popup-card .q-card__section:first-child > .q-btn .q-icon {
-  font-size: 32px;
+  font-size: 20px;
 }
 .scheduling-resource-popup .popup-card .q-card__section:nth-child(2) {
   padding-top: 0;

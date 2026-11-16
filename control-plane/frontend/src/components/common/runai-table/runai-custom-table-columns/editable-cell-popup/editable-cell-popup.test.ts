@@ -2,31 +2,12 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { flushPromises, mount } from "@vue/test-utils";
-import { QBtn, QIcon, QMenu, Quasar } from "quasar";
+import { mount } from "@vue/test-utils";
+import { QBtn, QMenu, Quasar } from "quasar";
 import { describe, expect, it } from "vitest";
 import EditableCellPopup from "./editable-cell-popup.vue";
 
 describe("editable cell popup", () => {
-  it.each([
-    ["custom", "img:/scoped-close.svg"],
-    ["default", undefined],
-  ])("renders the %s close icon without changing the other consumer", async (_name, closeIcon) => {
-    const wrapper = mount(EditableCellPopup, {
-      props: { title: "Weight", closeIcon },
-      global: { plugins: [Quasar] },
-      attachTo: document.body,
-    });
-    try {
-      await wrapper.get(".cell-trigger").trigger("click");
-      await flushPromises();
-      const icon = wrapper.findComponent(QIcon);
-      if (closeIcon) expect(icon.get("img").attributes("src")).toBe("/scoped-close.svg");
-      else expect(icon.classes()).toEqual(expect.arrayContaining(["ph-bold", "ph-x"]));
-    } finally {
-      wrapper.unmount();
-    }
-  });
   it("preserves the existing opened-after-show lifecycle by default", async () => {
     const wrapper = mount(EditableCellPopup, { props: { title: "Weight" }, global: { plugins: [Quasar] } });
     const menu = wrapper.findComponent(QMenu);

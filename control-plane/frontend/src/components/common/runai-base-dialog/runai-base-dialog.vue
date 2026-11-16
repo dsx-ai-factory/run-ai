@@ -22,7 +22,7 @@
         <q-btn
           v-if="!hideX"
           class="runai-base-dialog-close-btn runai-icon-btn--large text-icon-default"
-          :icon="closeIcon"
+          icon="ph-bold ph-x"
           flat
           round
           @click="$emit('close')"
@@ -113,10 +113,6 @@ export default defineComponent({
     hideX: {
       type: Boolean,
       default: false,
-    },
-    closeIcon: {
-      type: String,
-      default: "ph-bold ph-x",
     },
     hideSubheaderSeparator: {
       type: Boolean,

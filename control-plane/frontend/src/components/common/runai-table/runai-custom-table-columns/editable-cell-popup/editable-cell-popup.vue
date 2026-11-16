@@ -32,7 +32,7 @@
           <div class="text-weight-medium">
             <slot name="title">{{ title }}</slot>
           </div>
-          <q-btn flat :icon="closeIcon" class="q-pa-xs runai-icon-btn--default" round v-close-popup />
+          <q-btn flat icon="ph-bold ph-x" class="q-pa-xs runai-icon-btn--default" round v-close-popup />
         </q-card-section>
 
         <q-card-section class="q-py-sm q-px-md">
@@ -72,7 +72,6 @@ const props = withDefaults(
     disabled?: boolean; // Disables the entire cell (prevents opening the popup)
     disabledTooltip?: string;
     prepareBeforeShow?: boolean;
-    closeIcon?: string;
   }>(),
   {
     displayValue: "-",
@@ -81,7 +80,6 @@ const props = withDefaults(
     disabled: false,
     disabledTooltip: "",
     prepareBeforeShow: false,
-    closeIcon: "ph-bold ph-x",
   },
 );
 

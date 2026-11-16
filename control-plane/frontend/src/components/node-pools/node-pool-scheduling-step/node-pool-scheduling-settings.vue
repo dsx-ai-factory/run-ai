@@ -10,14 +10,7 @@
   >
     <header>
       <span>Advanced settings</span
-      ><q-btn
-        flat
-        round
-        dense
-        :icon="`img:${settingsCloseIcon}`"
-        aria-label="Hide Advanced settings"
-        @click="emit('close')"
-      >
+      ><q-btn flat round dense icon="ph-bold ph-x" aria-label="Hide Advanced settings" @click="emit('close')">
         <q-tooltip class="node-pool-settings-hide-help">Hide Advanced settings</q-tooltip>
       </q-btn>
     </header>
@@ -246,7 +239,6 @@
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
-import settingsCloseIcon from "@/assets/icons/node-pool-settings-close.svg?url";
 import { DOCS } from "@/constants/docs";
 import { RunaiSectionTitle } from "@/components/common/runai-section-title";
 import { RunaiRadioOptions } from "@/components/common/runai-radio-options";
@@ -348,7 +340,7 @@ header .q-btn {
   min-height: 32px;
 }
 header :deep(.q-icon) {
-  font-size: 32px;
+  font-size: 20px;
 }
 .settings-body {
   padding: 20px;

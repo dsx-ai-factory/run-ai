@@ -82,7 +82,7 @@
                       >
                       <q-icon
                         v-if="selected || option.disable || saving || !canEditDepartments || !canViewDepartments"
-                        :name="'img:' + nodePoolStepCompletedIcon"
+                        name="ph-bold ph-check"
                         size="16px"
                         class="mode-check"
                         :class="{ 'mode-check--hover-only': !selected }"
@@ -188,8 +188,6 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import nodePoolStepCompletedIcon from "@/assets/icons/node-pool-step-completed.svg?url";
-import nodePoolStepEditIcon from "@/assets/icons/node-pool-step-edit.svg?url";
 import { createSchedulingSaver, buildSchedulingSave } from "./node-pool-scheduling-save";
 import { patchSchedulingPool, patchSchedulingDepartments } from "./node-pool-scheduling.service";
 import { extractErrorMessages } from "@/utils/error-alert.util";
@@ -277,9 +275,8 @@ const steps = [
     title: "Cluster & name",
     done: true,
     disabled: true,
-    completedIcon: `img:${nodePoolStepCompletedIcon}`,
   },
-  { name: "scheduling", title: "Scheduling mode", done: false, activeIcon: `img:${nodePoolStepEditIcon}` },
+  { name: "scheduling", title: "Scheduling mode", done: false },
   { name: "topology", title: "Topology & placement", done: false, disabled: true },
 ];
 const modePermissionTooltip = computed(() =>
@@ -632,10 +629,6 @@ async function save() {
   border-radius: 3px;
   background: var(--border-pressed);
   color: #fafafa;
-}
-.mode-check :deep(img) {
-  width: 16px;
-  height: 16px;
 }
 .scheduling-footer {
   display: flex;

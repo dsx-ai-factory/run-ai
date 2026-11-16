@@ -14,6 +14,4 @@ export interface IRunaiWizardLayoutStep {
   hasError?: boolean;
   tooltip?: string;
   icon?: string; // Custom icon to display instead of step number (e.g., "ph-fill ph-users-three")
-  activeIcon?: string;
-  completedIcon?: string;
 }
