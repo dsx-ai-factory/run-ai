@@ -213,16 +213,28 @@ func parallel(n int, do func(i int)) {
 	for w := 0; w < workers; w++ {
 		wg.Add(1)
 		go func() {
-			defer GinkgoRecover()
+			// GinkgoRecover must run before wg.Done, so a failure is recorded before the producer is released.
 			defer wg.Done()
+			defer GinkgoRecover()
 			for i := range next {
 				do(i)
 			}
 		}()
 	}
+	// A failed assertion ends its worker; once none is left, nothing receives, so stop sending instead of blocking.
+	workersDone := make(chan struct{})
+	go func() {
+		wg.Wait()
+		close(workersDone)
+	}()
+dispatch:
 	for i := 0; i < n; i++ {
-		next <- i
+		select {
+		case next <- i:
+		case <-workersDone:
+			break dispatch
+		}
 	}
 	close(next)
-	wg.Wait()
+	<-workersDone
 }

@@ -146,10 +146,14 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 
 	AfterAll(func() {
 		for _, id := range []string{a1, a2, b1} {
-			_, _ = projectApiService.DeleteProject(ctx, id, "", false)
+			response, err := projectApiService.DeleteProject(ctx, id, "", false)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(response.Code).To(Equal(http.StatusNoContent), "%+v", response.Body)
 		}
 		for _, id := range []string{a, b} {
-			_, _ = departmentApiService.DeleteDepartment(ctx, id)
+			response, err := departmentApiService.DeleteDepartment(ctx, id)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(response.Code).To(Equal(http.StatusNoContent), "%+v", response.Body)
 		}
 	})
 

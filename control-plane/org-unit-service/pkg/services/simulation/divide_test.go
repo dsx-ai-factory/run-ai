@@ -51,6 +51,24 @@ func TestDivide(t *testing.T) {
 			},
 		},
 		{
+			name:     "a fractional limit is never exceeded by the whole GPU the remainder round hands out",
+			capacity: 1,
+			units:    []Unit{unit("a", 1, 0, 0.6, 1, 10), unit("bb", 1, 0, 0.6, 1, 10)},
+			expected: map[string]Result{
+				"a":  {Demand: 0.6, FairShare: 0.6, Guaranteed: 0, OverQuota: 0.6, Unmet: 0, WeightShareInRank: 0.5},
+				"bb": {Demand: 0.6, FairShare: 0, Guaranteed: 0, OverQuota: 0, Unmet: 0.6, WeightShareInRank: 0.5},
+			},
+		},
+		{
+			name:     "a fractional demand is never exceeded by the whole GPU the remainder round hands out",
+			capacity: 1,
+			units:    []Unit{unit("a", 1, 0, Unlimited, 1, 0.6), unit("bb", 1, 0, Unlimited, 1, 0.6)},
+			expected: map[string]Result{
+				"a":  {Demand: 0.6, FairShare: 0.6, Guaranteed: 0, OverQuota: 0.6, Unmet: 0, WeightShareInRank: 0.5},
+				"bb": {Demand: 0.6, FairShare: 0, Guaranteed: 0, OverQuota: 0, Unmet: 0.6, WeightShareInRank: 0.5},
+			},
+		},
+		{
 			name:     "quotas are granted even when they exceed the capacity",
 			capacity: 0,
 			units:    []Unit{unit("a", 1, 4, Unlimited, 1, 10), unit("bb", 1, 2, Unlimited, 1, 1)},

@@ -68,8 +68,10 @@ func Divide(capacity float64, units []Unit) map[string]Result {
 
 	results := make(map[string]Result, len(units))
 	for i, u := range units {
-		fairShare := queues[i].FairShare
 		demand := u.RequestableDemand()
+		// KAI's remainder round hands out whole GPUs without checking the remaining request, so a fractional demand or
+		// limit can get more than it asks for. The scheduler never allocates past that, so neither does the simulation.
+		fairShare := math.Min(queues[i].FairShare, demand)
 		deserved := u.Deserved
 		if deserved == Unlimited {
 			deserved = capacity
