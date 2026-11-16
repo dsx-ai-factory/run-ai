@@ -173,7 +173,7 @@ curl -L 'https://console.<DOMAIN>/api/v1/clusters' \
 
 Once the cluster is registered, retrieve a bootstrap token to install it with the `runai-installer` CLI:
 
-* Send a `GET` request to the `/v1/clusters/{clusterUuid}/cluster-install-info?version=<version>` endpoint using the `uuid` returned when the cluster was registered.
+* Send a `GET` request to the `/api/v1/clusters/{clusterUuid}/cluster-install-info?version=<version>` endpoint using the `uuid` returned when the cluster was registered.
 * The response includes a `bootstrapToken`. The `bootstrapToken` is a short-lived token that expires 2 hours after it is issued. If installation takes longer, send the `GET` request again to retrieve a new `bootstrapToken` before running the installer.
 
 **Example response:**
