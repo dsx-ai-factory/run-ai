@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import type { EWorkloadActionSortField } from "@/models/workload-action.model";
 import { workloadServiceApi } from "@/services/infra/client-apis/workloads-service-api/workloads-service-api";
 import { workloadsManagerApi } from "@/services/infra/client-apis/workloads-manager-api/workloads-manager-api";
 import {
@@ -62,10 +63,11 @@ import {
 } from "@/models/workload.model";
 import { EWorkloadType } from "@/models/workload.model";
 
-import type { IFilterBy, IPaginationFilter } from "@/models/filter.model";
+import type { ESortOrder, IFilterBy, IPaginationFilter } from "@/models/filter.model";
 import { controlPlaneService } from "@/services/control-plane/control-plane.service/control-plane.service";
 import type {
   GetWorkloadHistory200Response,
+  GetWorkloadActionsResponse,
   TelemetryResponse,
   Workload,
   WorkloadPatchFields,
@@ -82,6 +84,7 @@ export const workloadService = {
   list,
   getWorkloadPods,
   getWorkloadHistory,
+  getWorkloadActions,
   getWorkloadById,
   getWorkloadV2ById,
   getWorkloadCrudById,
@@ -487,6 +490,35 @@ async function getWorkloadHistory(workloadId: string, clusterUuid: string): Prom
   return controlPlaneService.get(`${WORKLOADS_SERVICE_ENDPOINT}/${workloadId}/history?clusterId=${clusterUuid}`);
 }
 
+export interface WorkloadActionsQuery {
+  sortBy?: EWorkloadActionSortField;
+  sortOrder?: ESortOrder;
+  filterBy?: string[];
+  search?: string;
+}
+
+async function getWorkloadActions(
+  workloadId: string,
+  offset = 0,
+  limit = 50,
+  query?: WorkloadActionsQuery,
+): Promise<GetWorkloadActionsResponse> {
+  const api = workloadServiceApi.workloadActionsApi;
+  return (
+    await (query
+      ? api.getWorkloadActionsHistory(
+          workloadId,
+          offset,
+          limit,
+          query.sortOrder,
+          query.sortBy || undefined,
+          query.filterBy,
+          query.search,
+        )
+      : api.getWorkloadActionsHistory(workloadId, offset, limit))
+  ).data;
+}
+
 async function countWorkloadsByName(name: string, clusterId: string, projectId?: number | null): Promise<number> {
   try {
     let filterBy = `name==${name},clusterId==${clusterId}`;
@@ -612,6 +644,8 @@ async function getWorkloadsTelemetryCsv(
   nodepoolName?: string,
   departmentId?: string,
   groupBy?: Array<EWorkloadTelemetryGroupBy>,
+  phases?: Array<Phase>,
+  filename?: string,
 ): Promise<void> {
   try {
     const query: Record<string, string | number | Array<string>> = {
@@ -629,7 +663,10 @@ async function getWorkloadsTelemetryCsv(
     if (groupBy && groupBy.length > 0) {
       query["groupBy"] = groupBy;
     }
-    await fileService.downloadFile(WORKLOADS_TELEMETRY_ENDPOINT, FileType.csv, undefined, query, {});
+    if (phases && phases.length > 0) {
+      query["filterByPhases"] = phases.join(",");
+    }
+    await fileService.downloadFile(WORKLOADS_TELEMETRY_ENDPOINT, FileType.csv, filename, query, {});
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
   }

@@ -45,7 +45,7 @@ func getClientModelForResponse() *models.Client {
 		Secret:   ptr.To("secret"),
 		Attributes: &models.ClientAttributes{
 			CreatedBy:  ptr.To(CreatedBy),
-			ClientType: ptr.To(realm_client.ClientTypeUserApp),
+			ClientType: ptr.To(realm_client.ClientTypeAccessKey),
 		},
 	}
 }
@@ -53,12 +53,12 @@ func getClientModelForResponse() *models.Client {
 func TestCreateAccessKey_HappyFlow(t *testing.T) {
 	iamMock, testSubject := initAccessKeysTest(t)
 	ctx := enrichContext()
-	iamMock.MockClientService.On("GetClientsCount", ctx, RealmName, &models.ClientFilter{ClientType: ptr.To(realm_client.ClientTypeUserApp), IsTenantAdmin: false, CreatedBy: ptr.To(createdBy)}).Return(2, nil)
+	iamMock.MockClientService.On("GetClientsCount", ctx, RealmName, &models.ClientFilter{ClientType: ptr.To(realm_client.ClientTypeAccessKey), IsTenantAdmin: false, CreatedBy: ptr.To(createdBy)}).Return(2, nil)
 	iamMock.MockClientService.On("CreateClient", ctx, RealmName, mock.MatchedBy(func(c *models.Client) bool {
 		return c != nil &&
 			c.Name != nil && *c.Name == AccessKeyName &&
 			c.ClientConfig != nil && c.ClientConfig.ServiceAccountsEnabled != nil && *c.ClientConfig.ServiceAccountsEnabled &&
-			c.Attributes != nil && c.Attributes.ClientType != nil && *c.Attributes.ClientType == realm_client.ClientTypeUserApp &&
+			c.Attributes != nil && c.Attributes.ClientType != nil && *c.Attributes.ClientType == realm_client.ClientTypeAccessKey &&
 			c.Attributes.CreatedBy != nil && *c.Attributes.CreatedBy == createdBy &&
 			c.Attributes.TokenLifespan != nil && *c.Attributes.TokenLifespan == DefaultServiceAccountTokenLifespan
 	})).Return(AccessKeyId, nil)
@@ -79,7 +79,7 @@ func TestCreateAccessKey_HappyFlow(t *testing.T) {
 func TestCreateAccessKey_GetClientsCount_Error(t *testing.T) {
 	iamMock, testSubject := initAccessKeysTest(t)
 	ctx := enrichContext()
-	iamMock.MockClientService.On("GetClientsCount", ctx, RealmName, &models.ClientFilter{ClientType: ptr.To(realm_client.ClientTypeUserApp), IsTenantAdmin: false, CreatedBy: ptr.To(createdBy)}).Return(0, fmt.Errorf("error"))
+	iamMock.MockClientService.On("GetClientsCount", ctx, RealmName, &models.ClientFilter{ClientType: ptr.To(realm_client.ClientTypeAccessKey), IsTenantAdmin: false, CreatedBy: ptr.To(createdBy)}).Return(0, fmt.Errorf("error"))
 	response, err := testSubject.CreateAccessKey(ctx, api.AccessKeyCreationRequest{
 		Name: AccessKeyName,
 	})
@@ -91,12 +91,12 @@ func TestCreateAccessKey_GetClientsCount_Error(t *testing.T) {
 func TestCreateAccessKey_CreateClient_Error(t *testing.T) {
 	iamMock, testSubject := initAccessKeysTest(t)
 	ctx := enrichContext()
-	iamMock.MockClientService.On("GetClientsCount", ctx, RealmName, &models.ClientFilter{ClientType: ptr.To(realm_client.ClientTypeUserApp), IsTenantAdmin: false, CreatedBy: ptr.To(createdBy)}).Return(2, nil)
+	iamMock.MockClientService.On("GetClientsCount", ctx, RealmName, &models.ClientFilter{ClientType: ptr.To(realm_client.ClientTypeAccessKey), IsTenantAdmin: false, CreatedBy: ptr.To(createdBy)}).Return(2, nil)
 	iamMock.MockClientService.On("CreateClient", ctx, RealmName, mock.MatchedBy(func(c *models.Client) bool {
 		return c != nil &&
 			c.Name != nil && *c.Name == AccessKeyName &&
 			c.ClientConfig != nil && c.ClientConfig.ServiceAccountsEnabled != nil && *c.ClientConfig.ServiceAccountsEnabled &&
-			c.Attributes != nil && c.Attributes.ClientType != nil && *c.Attributes.ClientType == realm_client.ClientTypeUserApp &&
+			c.Attributes != nil && c.Attributes.ClientType != nil && *c.Attributes.ClientType == realm_client.ClientTypeAccessKey &&
 			c.Attributes.CreatedBy != nil && *c.Attributes.CreatedBy == createdBy
 	})).Return("", fmt.Errorf("error"))
 	response, err := testSubject.CreateAccessKey(ctx, api.AccessKeyCreationRequest{
@@ -110,7 +110,7 @@ func TestCreateAccessKey_CreateClient_Error(t *testing.T) {
 func TestCreateAccessKey_ExceedsLimit(t *testing.T) {
 	iamMock, testSubject := initAccessKeysTest(t)
 	ctx := enrichContext()
-	iamMock.MockClientService.On("GetClientsCount", ctx, RealmName, &models.ClientFilter{ClientType: ptr.To(realm_client.ClientTypeUserApp), IsTenantAdmin: false, CreatedBy: ptr.To(createdBy)}).Return(21, nil)
+	iamMock.MockClientService.On("GetClientsCount", ctx, RealmName, &models.ClientFilter{ClientType: ptr.To(realm_client.ClientTypeAccessKey), IsTenantAdmin: false, CreatedBy: ptr.To(createdBy)}).Return(21, nil)
 	response, err := testSubject.CreateAccessKey(ctx, api.AccessKeyCreationRequest{
 		Name: AccessKeyName,
 	})
@@ -335,20 +335,20 @@ func TestDeleteAccessKeyByIdAdministration_HappyFlow(t *testing.T) {
 	assert.Equal(t, http.StatusNoContent, response.Code)
 }
 
-func TestDeleteAccessKeyByIdAdministration_InvalidUserApp(t *testing.T) {
+func TestDeleteAccessKeyByIdAdministration_NotAnAccessKey(t *testing.T) {
 	iamMock, testSubject := initAccessKeysTest(t)
 	ctx := enrichContext()
-	tenantAppClient := &models.Client{
+	serviceAccountClient := &models.Client{
 		ID:       ptr.To(AccessKeyId),
 		ClientID: ptr.To("clientId"),
 		Name:     ptr.To(AccessKeyName),
 		Secret:   ptr.To("secret"),
 		Attributes: &models.ClientAttributes{
 			CreatedBy:  ptr.To(CreatedBy),
-			ClientType: ptr.To(realm_client.ClientTypeTenantApp),
+			ClientType: ptr.To(realm_client.ClientTypeServiceAccount),
 		},
 	}
-	iamMock.MockClientService.On("GetClient", ctx, RealmName, AccessKeyId).Return(tenantAppClient, nil)
+	iamMock.MockClientService.On("GetClient", ctx, RealmName, AccessKeyId).Return(serviceAccountClient, nil)
 	response, err := testSubject.DeleteAccessKeyByIdAdministration(ctx, AccessKeyId)
 	assert.NotNil(t, err)
 	assert.Nil(t, response.Body)
@@ -379,7 +379,7 @@ func TestDeleteAccessKeyByIdAdministration_DeleteAppError(t *testing.T) {
 func TestCreateAccessKey_GetClient_Error(t *testing.T) {
 	iamMock, testSubject := initAccessKeysTest(t)
 	ctx := enrichContext()
-	iamMock.MockClientService.On("GetClientsCount", ctx, RealmName, &models.ClientFilter{ClientType: ptr.To(realm_client.ClientTypeUserApp), IsTenantAdmin: false, CreatedBy: ptr.To(createdBy)}).Return(2, nil)
+	iamMock.MockClientService.On("GetClientsCount", ctx, RealmName, &models.ClientFilter{ClientType: ptr.To(realm_client.ClientTypeAccessKey), IsTenantAdmin: false, CreatedBy: ptr.To(createdBy)}).Return(2, nil)
 	iamMock.MockClientService.On("CreateClient", ctx, RealmName, mock.MatchedBy(func(c *models.Client) bool {
 		return c != nil && c.Name != nil && *c.Name == AccessKeyName
 	})).Return(AccessKeyId, nil)
@@ -402,7 +402,7 @@ func TestGetAccessKeysAdministration_HappyFlow_NoFilter(t *testing.T) {
 		*getClientModelForResponse(),
 	}
 	emptyCreatedBy := ""
-	iamMock.MockClientService.On("GetClients", ctx, RealmName, &models.ClientFilter{ClientType: ptr.To(realm_client.ClientTypeUserApp), IsTenantAdmin: true, CreatedBy: &emptyCreatedBy}).Return(clientsArray, nil)
+	iamMock.MockClientService.On("GetClients", ctx, RealmName, &models.ClientFilter{ClientType: ptr.To(realm_client.ClientTypeAccessKey), IsTenantAdmin: true, CreatedBy: &emptyCreatedBy}).Return(clientsArray, nil)
 
 	response, err := testSubject.GetAccessKeysAdministration(ctx, "", "")
 	assert.Nil(t, err)
@@ -430,15 +430,15 @@ func TestGetAccessKeysAdministration_ClientId_NonAccessKey(t *testing.T) {
 	iamMock, testSubject := initAccessKeysTest(t)
 	ctx := enrichContext()
 
-	tenantAppClient := &models.Client{
+	serviceAccountClient := &models.Client{
 		ID:       ptr.To(AccessKeyId),
 		ClientID: ptr.To(clientId),
 		Name:     ptr.To(AccessKeyName),
 		Attributes: &models.ClientAttributes{
-			ClientType: ptr.To(realm_client.ClientTypeTenantApp),
+			ClientType: ptr.To(realm_client.ClientTypeServiceAccount),
 		},
 	}
-	iamMock.MockClientService.On("GetClientByClientId", ctx, RealmName, clientId).Return(tenantAppClient, nil)
+	iamMock.MockClientService.On("GetClientByClientId", ctx, RealmName, clientId).Return(serviceAccountClient, nil)
 
 	response, err := testSubject.GetAccessKeysAdministration(ctx, clientId, "")
 	assert.NotNil(t, err)

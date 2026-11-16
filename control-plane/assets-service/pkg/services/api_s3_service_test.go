@@ -273,32 +273,6 @@ var _ = Describe("s3 specific tests", func() {
 		})
 	})
 
-	Context("delete S3 asset used by template(s)", func() {
-		It("should fail on precondition ", func() {
-			env, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-			accessKey, _, _ := createAccessKey(&randoms.ClusterId, buildRandomProjectAccessKey(randoms), router, headerForAdmin(randoms))
-			s3, _, _ := createS3Asset(buildRandomProjectS3(randoms, &accessKey.Meta.Id), router, headerForAdmin(randoms))
-
-			templatePayload := buildRandomProjectTemplate(randoms, env.Meta.Id)
-			templatePayload.Spec.Assets.Datasources = []api.AssetIdAndKind{
-				{
-					Kind: api.ASSETKIND_S3,
-					Id:   s3.Meta.Id,
-				},
-			}
-			template, _, _ := createTemplateAsset(templatePayload, router, headerForAdmin(randoms))
-
-			deleteHttpReq, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", urlS3, s3.Meta.Id), nil)
-			Expect(err).To(BeNil())
-			deleteHttpReq.Header = *headerForAdmin(randoms)
-
-			deleteHttpResp := httptest.NewRecorder()
-			router.ServeHTTP(deleteHttpResp, deleteHttpReq)
-			Expect(deleteHttpResp.Code).To(Equal(http.StatusPreconditionFailed))
-			Expect(deleteHttpResp.Body.String()).To(ContainSubstring(fmt.Sprintf("the requested s3 asset is being used by template '%s'", template.Meta.Name)))
-		})
-	})
-
 	Context("update S3 asset's spec", func() {
 		It("should allow changing all fields", func() {
 			url := urlS3

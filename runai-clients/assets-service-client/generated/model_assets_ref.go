@@ -22,7 +22,7 @@ import (
 // checks if the AssetsRef type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &AssetsRef{}
 
-// AssetsRef Reference information about a set of assets. used to describe - assets comprising a workspace - assets comprising a workspace template - assets that use other assets (e.g. s3 asset which uses access key).
+// AssetsRef Reference information about a set of assets. used to describe - assets comprising a workspace - assets that use other assets (e.g. s3 asset which uses access key).
 type AssetsRef struct {
 	// environment asset.
 	Environment     EnvironmentAssetRef      `json:"environment"`

@@ -174,7 +174,7 @@ func GetServiceAccountsArray() []iamModels.Client {
 	}
 }
 
-func GetInternalApplicationsArray() []iamModels.Client {
+func GetInternalClientsArray() []iamModels.Client {
 	isExternal := false
 	clusterId := "cluster1"
 	return []iamModels.Client{

@@ -132,16 +132,32 @@ func (client *IdmClient) DeleteClient(ctx context.Context, clientId string) (*ht
 }
 
 func (client *IdmClient) CreateClient(ctx context.Context, name string, clientType string, tenantId *string) (*string, error) {
+	return client.createClient(ctx, name, openapi.ClientType(clientType), tenantId)
+}
+
+// CreateServiceAccountClient creates a service-account client through the internal clients API.
+// It needs an identity-manager that knows the ServiceAccount client type; older servers only accept
+// the deprecated Application value.
+func (client *IdmClient) CreateServiceAccountClient(ctx context.Context, name string, tenantId *string) (*string, error) {
+	return client.createClient(ctx, name, openapi.CLIENTTYPE_SERVICE_ACCOUNT, tenantId)
+}
+
+func (client *IdmClient) createClient(ctx context.Context, name string, clientType openapi.ClientType, tenantId *string) (*string, error) {
 	newClient := openapi.ClientCreationRequest{
-		Type:     openapi.ClientType(clientType),
+		Type:     clientType,
 		ClientId: name,
 		TenantId: tenantId,
 	}
 	req := client.ApiClient.ClientsAPI.CreateInternalClient(ctx)
 	req = req.ClientCreationRequest(newClient)
 	res, httpResponse, err := client.ApiClient.ClientsAPI.CreateInternalClientExecute(req)
-	if err != nil || httpResponse == nil || httpResponse.StatusCode != http.StatusOK {
-		return nil, errors.Wrap(err, fmt.Sprintf("failed to create client %s with type: %s for tenant %s. StatusCode: %v, err: %v", name, clientType, *tenantId, httpResponse, err))
+	// the server answers 201 Created; 200 is kept for compatibility with the previous check
+	if err != nil || httpResponse == nil || (httpResponse.StatusCode != http.StatusCreated && httpResponse.StatusCode != http.StatusOK) {
+		tenant := ""
+		if tenantId != nil {
+			tenant = *tenantId
+		}
+		return nil, errors.Wrap(err, fmt.Sprintf("failed to create client %s with type: %s for tenant %s. StatusCode: %v, err: %v", name, clientType, tenant, httpResponse, err))
 	}
 	return res.Id, err
 }

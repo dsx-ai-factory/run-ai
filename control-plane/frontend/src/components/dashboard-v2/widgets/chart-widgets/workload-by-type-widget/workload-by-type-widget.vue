@@ -702,6 +702,12 @@ export default defineComponent({
           this.nodePoolName,
           undefined,
           [this.groupBy, this.secondaryGroupBy],
+          undefined,
+          dashboardUtil.getCsvFileName(
+            this.wrapperOptions.title ?? "",
+            this.clusterStore.clusterNameByUuid(this.clusterId),
+            this.nodePoolName,
+          ),
         );
       } catch (error: unknown) {
         this.$q.notify(dashboardUtil.getCsvErrorMessage());

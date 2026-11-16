@@ -19,7 +19,6 @@ import (
 var settingKeyToWorkloadsAPIKey = map[string]wc_openapi.WorkloadsSettingsKeyEnum{
 	settings.SettingKeyEnablePolicies:              wc_openapi.WORKLOADSSETTINGSKEYENUM_ENABLE_POLICIES,
 	settings.SettingKeyWorkloadSubmissionV2Enabled: wc_openapi.WORKLOADSSETTINGSKEYENUM_WORKLOAD_SUBMISSION_V2_ENABLED,
-	settings.SettingKeyEnableTemplatesV2:           wc_openapi.WORKLOADSSETTINGSKEYENUM_ENABLE_TEMPLATES_V2,
 	settings.SettingKeyEnableHybridSubmission:      wc_openapi.WORKLOADSSETTINGSKEYENUM_ENABLE_HYBRID_SUBMISSION,
 	settings.SettingKeyGpuOverProvisioning:         wc_openapi.WORKLOADSSETTINGSKEYENUM_GPU_OVER_PROVISIONING,
 }

@@ -22,18 +22,23 @@ import (
 	nimv1alpha1 "github.com/NVIDIA/k8s-nim-operator/api/apps/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils"
 	"github.com/ghodss/yaml"
+	kairesources "github.com/kai-scheduler/KAI-scheduler/pkg/common/resources"
 	"github.com/stretchr/testify/assert"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type NimServiceComposerTest struct {
-	specFname        string // input spec filename
-	expectedFname    string // expected output filename
-	expectedError    string // expected error message (if any)
-	subdomainEnabled bool   // whether the cluster has subdomain support enabled (default: false)
-	ingressClass     string // ingress class name (default: "")
-	isOpenshift      bool   // whether the cluster is an OpenShift cluster (default: false)
-	gpuVendor        string // gpu vendor (default: "nvidia", supported: "nvidia", "amd")
-	clusterVersion   string // cluster version for capability gating (default: "2.25.0")
+	specFname                string // input spec filename
+	expectedFname            string // expected output filename
+	expectedError            string // expected error message (if any)
+	subdomainEnabled         bool   // whether the cluster has subdomain support enabled (default: false)
+	ingressClass             string // ingress class name (default: "")
+	isOpenshift              bool   // whether the cluster is an OpenShift cluster (default: false)
+	gpuVendor                string // gpu vendor (default: "nvidia", supported: "nvidia", "amd")
+	clusterVersion           string // cluster version for capability gating (default: "2.25.0")
+	validateGpuMemoryWithKai bool
 }
 
 type NimReplicaCompositionTest struct {
@@ -44,6 +49,67 @@ type NimReplicaCompositionTest struct {
 }
 
 var NimServiceComposerTests = []TableEntry{
+	Entry("gpu memory - equal decimal quantities", NimServiceComposerTest{
+		specFname:                "gpu_mem_decimal_equal",
+		expectedFname:            "gpu_mem_decimal_equal",
+		clusterVersion:           "3.1.0",
+		validateGpuMemoryWithKai: true,
+	}),
+
+	Entry("gpu memory - equal binary quantities", NimServiceComposerTest{
+		specFname:                "gpu_mem_binary_equal",
+		expectedFname:            "gpu_mem_binary_equal",
+		clusterVersion:           "3.1.0",
+		validateGpuMemoryWithKai: true,
+	}),
+
+	Entry("gpu memory - a larger decimal limit", NimServiceComposerTest{
+		specFname:                "gpu_mem_larger_limit",
+		expectedFname:            "gpu_mem_larger_limit",
+		clusterVersion:           "3.1.0",
+		validateGpuMemoryWithKai: true,
+	}),
+
+	Entry("gpu memory - equivalent quantities with different units", NimServiceComposerTest{
+		specFname:                "gpu_mem_mixed_units",
+		expectedFname:            "gpu_mem_mixed_units",
+		clusterVersion:           "3.1.0",
+		validateGpuMemoryWithKai: true,
+	}),
+
+	Entry("gpu memory - a decimal request without a limit", NimServiceComposerTest{
+		specFname:                "gpu_mem_decimal_request",
+		expectedFname:            "gpu_mem_decimal_request",
+		clusterVersion:           "3.1.0",
+		validateGpuMemoryWithKai: true,
+	}),
+
+	Entry("gpu memory - a binary request without a limit", NimServiceComposerTest{
+		specFname:                "gpu_mem_binary_request",
+		expectedFname:            "gpu_mem_binary_request",
+		clusterVersion:           "3.1.0",
+		validateGpuMemoryWithKai: true,
+	}),
+
+	Entry("gpu memory - retains legacy memory fields before reader support", NimServiceComposerTest{
+		specFname:      "compute_gpu_memory_with_limit",
+		expectedFname:  "compute_gpu_memory_with_limit",
+		clusterVersion: "3.0.22",
+	}),
+
+	Entry("gpu memory - retains legacy memory fields through 3.0", NimServiceComposerTest{
+		specFname:      "compute_gpu_memory_with_limit",
+		expectedFname:  "compute_gpu_memory_with_limit",
+		clusterVersion: "3.0.99",
+	}),
+
+	Entry("gpu memory - development cluster", NimServiceComposerTest{
+		specFname:                "gpu_mem_decimal_equal",
+		expectedFname:            "gpu_mem_decimal_equal",
+		clusterVersion:           "0.0.0-dev",
+		validateGpuMemoryWithKai: true,
+	}),
+
 	Entry("valid image", NimServiceComposerTest{
 		specFname:     "image_with_tag",
 		expectedFname: "image_with_tag",
@@ -732,6 +798,26 @@ func RunNimServiceComposerTest(testDetails NimServiceComposerTest, basePath stri
 
 	// Compare with expected results
 	CompareNimServiceFiles(testBrief, &nimServiceSpec, testDetails.expectedFname, basePath)
+
+	if testDetails.validateGpuMemoryWithKai {
+		nimService := nimv1alpha1.NIMService{ObjectMeta: metav1.ObjectMeta{Name: workloadName}}
+		container := corev1.Container{Name: nimService.GetContainerName(), Env: nimServiceSpec.Env}
+		if nimServiceSpec.Resources != nil {
+			container.Resources = *nimServiceSpec.Resources
+		}
+		pod := &corev1.Pod{
+			ObjectMeta: metav1.ObjectMeta{Annotations: nimServiceSpec.Annotations},
+			Spec:       corev1.PodSpec{Containers: []corev1.Container{container}},
+		}
+		Expect(kairesources.ValidateGPUFractionRequest(pod)).To(Succeed())
+		parsed, parseErr := kairesources.ParsePodGPUFractionRequest(pod)
+		Expect(parseErr).NotTo(HaveOccurred())
+		Expect(parsed.Memory.Cmp(resource.MustParse(*inputSpec.Compute.Get().GpuMemoryRequest.Get()))).To(BeZero())
+		if limit := inputSpec.Compute.Get().GpuMemoryLimit.Get(); limit != nil {
+			Expect(parsed.Limit).NotTo(BeNil())
+			Expect(parsed.Limit.Cmp(resource.MustParse(*limit))).To(BeZero())
+		}
+	}
 }
 
 func CompareNimServiceFiles(testBrief string, actualResults *nimv1alpha1.NIMServiceSpec, expectedFname string, basePath string) {

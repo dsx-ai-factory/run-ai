@@ -136,11 +136,6 @@ func (cms *configMapApiService) DeleteConfigMapAssetById(ctx context.Context, as
 		return NewErrorResponse(api.NewError(int(rbacErr.Code), rbacErr.Message, errors.New(rbacErr.Details))), nil
 	}
 
-	validationError := validateNotBeingUsedByTemplate(ctx, assetId, assetKind)
-	if validationError != nil {
-		return NewErrorResponse(validationError), nil
-	}
-
 	actionError := cms.dbAccessor.DeleteConfigMapAsset(ctx, assetMeta, dao.HardDelete)
 	if actionError != nil {
 		return NewErrorResponse(actionError), nil

@@ -20,9 +20,11 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/internal/mnnvlconv"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/internal/ownership"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/internal/restart"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/internal/snapshotrestore"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/plugins/networking"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/plugins/personalcreds"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/plugins/restartrules"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/plugins/snapshots"
 	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/app"
 	dromosconfig "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/config"
@@ -72,5 +74,22 @@ func run() error {
 			app.WithPlugins(restartrules.NewBuilder(cfg.RestartAllowedServiceAccounts)),
 		)
 	}
+
+	// Registered with or without Snapshot: the pod labels it stamps depend only on
+	// the workload's opt-in, so installing or removing Snapshot never rolls a workload.
+	options = append(options, app.WithPlugins(snapshots.NewBuilder(cfg.SnapshotEnabled)))
+
+	// Set by the operator from Snapshot's CRDs being present — the same fact that
+	// gates the webhook configuration, so the configuration and the path it
+	// routes to appear and disappear together.
+	if cfg.SnapshotEnabled {
+		log.Info().
+			Str("agentNodeSelector", cfg.SnapshotAgentNodeSelector).
+			Msg("snapshot integration enabled")
+		options = append(options, app.WithManagerSetup(snapshotrestore.NewSetup(cfg.AgentNodeSelector())))
+	} else {
+		log.Debug().Msg("snapshot integration inactive")
+	}
+
 	return app.RunController(ctrl.SetupSignalHandler(), options...)
 }

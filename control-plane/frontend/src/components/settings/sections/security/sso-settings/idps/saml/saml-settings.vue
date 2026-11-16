@@ -22,6 +22,7 @@
         <saml-fields
           :idp-resources="idpResources"
           :is-new-idp="isNewIdp"
+          :idp-alias="idp?.alias"
           :saml-settings="samlConfigSettings"
           @updated="updateSamlFields"
           @certificate-details="onCertificateDetails"
@@ -194,7 +195,6 @@ export default defineComponent({
       authStore: useAuthStore(),
       isIdpFieldsChanged: false,
       certificateExpirationDate: null as Date | null,
-      certificateRequestToken: 0,
       idpStore: useIdpsStore(),
       idpResources: {} as IdpResources,
       editCertificateDetails: {
@@ -208,12 +208,12 @@ export default defineComponent({
   },
   async created(): Promise<void> {
     this.isEditMode = this.isNewIdp;
-    await this.refreshCertificateExpiration();
+    this.refreshCertificateExpiration();
   },
   computed: {
     isExpiredCertificate(): boolean {
       if (!this.idp?.samlData?.signingCertificate) return false;
-      return !this.certificateExpirationDate || !idpCommon.iValidCertificateDate(this.certificateExpirationDate);
+      return !!this.certificateExpirationDate && !idpCommon.iValidCertificateDate(this.certificateExpirationDate);
     },
     isCertificateExpiringSoon(): boolean {
       return !!this.certificateExpirationDate && idpCommon.isCertificateExpiringSoon(this.certificateExpirationDate);
@@ -254,6 +254,7 @@ export default defineComponent({
           idpEntityId: this.idp?.samlData?.entityId || "",
           singleSignOnServiceUrl: this.idp?.samlData?.singleSignOnServiceUrl || "",
           signingCertificate: this.idp?.samlData?.signingCertificate || "",
+          certificateExpirationDate: this.idp?.samlData?.certificateExpirationDate,
         };
       } else {
         return {} as SamlConfigSettings;
@@ -321,14 +322,8 @@ export default defineComponent({
         window.open(spMetadataUrl, "_blank");
       }
     },
-    async refreshCertificateExpiration(): Promise<void> {
-      const signingCertificate = this.idp?.samlData?.signingCertificate;
-      const requestToken = ++this.certificateRequestToken;
-      const expirationDate = signingCertificate
-        ? await idpCommon.getCertificateExpirationDate(signingCertificate)
-        : null;
-      if (requestToken !== this.certificateRequestToken) return;
-      this.certificateExpirationDate = expirationDate;
+    refreshCertificateExpiration(): void {
+      this.certificateExpirationDate = idpCommon.parseExpirationDate(this.idp?.samlData?.certificateExpirationDate);
       this.$emit("certificate-status", {
         expired: this.isExpiredCertificate,
         expiringSoon: this.isCertificateExpiringSoon,
@@ -339,7 +334,7 @@ export default defineComponent({
     isEditMode(newValue: boolean): void {
       this.$emit("edit-mode-changed", newValue);
     },
-    "idp.samlData.signingCertificate"(): void {
+    "idp.samlData.certificateExpirationDate"(): void {
       this.refreshCertificateExpiration();
     },
   },

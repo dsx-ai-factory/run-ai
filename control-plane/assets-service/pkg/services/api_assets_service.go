@@ -123,7 +123,6 @@ func (s *AssetsAPIService) AssetFlatFormatImpl(ctx context.Context, assetFlatReq
 	}
 
 	allIds := datastructs.NewSet[string]()
-	templateFound := false
 
 	for _, assetId := range assetIds {
 		assetMeta, ok := assetsMeta[assetId]
@@ -133,17 +132,6 @@ func (s *AssetsAPIService) AssetFlatFormatImpl(ctx context.Context, assetFlatReq
 
 		response.AssetsMeta = append(response.AssetsMeta, assetMeta.AssetMeta)
 
-		//
-		//  if template is provided, it has to be the only asset specified in the API payload
-		//  we allow multiple assets OR template, not both in the same API
-		//
-		if assetMeta.Kind == api.ASSETKIND_WORKLOAD_TEMPLATE {
-			if len(assetsMeta) != 1 {
-				return nil, api.NewError(http.StatusBadRequest, "multiple assetIds cannot be provided when assetId of a workload template is specified", nil)
-			}
-			templateFound = true
-		}
-
 		if allIds.Has(assetMeta.Id) {
 			return nil, api.NewError(http.StatusBadRequest, fmt.Sprintf("assetId %s provided more than once", assetMeta.Id), nil)
 		}
@@ -151,23 +139,8 @@ func (s *AssetsAPIService) AssetFlatFormatImpl(ctx context.Context, assetFlatReq
 		allIds.Add(assetMeta.Id)
 	}
 
-	worker := CreateFlatWorkloadReplicaInfo{}
+	worker := CreateFlatWorkloadReplicaInfo{containedAssetIds: assetIds}
 	var master *CreateFlatWorkloadReplicaInfo
-
-	//
-	//   for template, we need the list of assets comprising the template. for single asset
-	//   we just need to convert the single asset to flat format
-	//
-	if templateFound {
-		template, containedAssetIds, err := dao.GetTemplateAssetById(ctx, assetIds[0])
-		if err != nil {
-			return nil, err
-		}
-		worker.containedAssetIds = containedAssetIds
-		worker.specificRunParams = template.Spec.SpecificEnv
-	} else {
-		worker.containedAssetIds = assetIds
-	}
 
 	switch assetFlatRequest.WorkloadType {
 	case api.WORKLOADTYPE_DISTRIBUTED:

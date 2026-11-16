@@ -66,20 +66,20 @@ func TestNonSSOMappersWithExistsClients(t *testing.T) {
 	realmName := "test-realm"
 
 	tenantResolverMock.On("GetRealmTenantId", context.Background(), mock.Anything).Return(TenantId, nil)
-	internalApps := test_utils.GetInternalApplicationsArray()
+	internalClients := test_utils.GetInternalClientsArray()
 
-	defaultIamMockSetup(iamMock, internalApps, realmName, true)
+	defaultIamMockSetup(iamMock, internalClients, realmName, true)
 	defaultReconcilerVersionMockSetup(reconcilerVersionsDalMock)
 
-	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(false)}).Return(internalApps, nil)
-	externalApps := test_utils.GetServiceAccountsArray()
-	defaultIamMockSetup(iamMock, externalApps, realmName, true)
-	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(true)}).Return(externalApps, nil)
+	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(false)}).Return(internalClients, nil)
+	serviceAccounts := test_utils.GetServiceAccountsArray()
+	defaultIamMockSetup(iamMock, serviceAccounts, realmName, true)
+	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(true)}).Return(serviceAccounts, nil)
 
 	err := testSubject.Reconcile(context.Background(), realmName, true)
 	assert.Nil(t, err)
 	tenantResolverMock.AssertNumberOfCalls(t, "CreateApp", 0)
-	iamMock.MockClientService.AssertNumberOfCalls(t, "UpdateClient", len(internalApps)+len(externalApps))
+	iamMock.MockClientService.AssertNumberOfCalls(t, "UpdateClient", len(internalClients)+len(serviceAccounts))
 	tenantResolverMock.AssertNumberOfCalls(t, "GetRealmTenantId", 1)
 	iamMock.MockClientService.AssertNumberOfCalls(t, "GetClients", 2)
 }
@@ -106,16 +106,16 @@ func TestNonSSOMappersWithoutApps(t *testing.T) {
 	defaultReconcilerVersionMockSetup(reconcilerVersionsDalMock)
 
 	tenantResolverMock.On("GetRealmTenantId", context.Background(), mock.Anything).Return(TenantId, nil)
-	internalApps := test_utils.GetInternalApplicationsArray()
-	defaultIamMockSetup(iamMock, internalApps, realmName, false)
-	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(false)}).Return(internalApps, nil)
-	externalApps := test_utils.GetServiceAccountsArray()
-	defaultIamMockSetup(iamMock, externalApps, realmName, false)
-	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(true)}).Return(externalApps, nil)
+	internalClients := test_utils.GetInternalClientsArray()
+	defaultIamMockSetup(iamMock, internalClients, realmName, false)
+	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(false)}).Return(internalClients, nil)
+	serviceAccounts := test_utils.GetServiceAccountsArray()
+	defaultIamMockSetup(iamMock, serviceAccounts, realmName, false)
+	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(true)}).Return(serviceAccounts, nil)
 
 	err := testSubject.Reconcile(context.Background(), realmName, true)
 	assert.Nil(t, err)
-	iamMock.MockClientService.AssertNumberOfCalls(t, "CreateClient", len(internalApps)+len(externalApps))
+	iamMock.MockClientService.AssertNumberOfCalls(t, "CreateClient", len(internalClients)+len(serviceAccounts))
 	tenantResolverMock.AssertNumberOfCalls(t, "GetRealmTenantId", 1)
 	iamMock.MockClientService.AssertNumberOfCalls(t, "GetClients", 2)
 }
@@ -128,18 +128,18 @@ func TestSSOMappersWithExistsClients(t *testing.T) {
 
 	tenantResolverMock.On("GetRealmTenantId", context.Background(), mock.Anything).Return(TenantId, nil)
 
-	internalApps := test_utils.GetInternalApplicationsArray()
-	defaultIamMockSetup(iamMock, internalApps, realmName, true)
-	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(false)}).Return(internalApps, nil)
-	externalApps := test_utils.GetServiceAccountsArray()
-	defaultIamMockSetup(iamMock, externalApps, realmName, true)
-	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(true)}).Return(externalApps, nil)
+	internalClients := test_utils.GetInternalClientsArray()
+	defaultIamMockSetup(iamMock, internalClients, realmName, true)
+	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(false)}).Return(internalClients, nil)
+	serviceAccounts := test_utils.GetServiceAccountsArray()
+	defaultIamMockSetup(iamMock, serviceAccounts, realmName, true)
+	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(true)}).Return(serviceAccounts, nil)
 
 	err := testSubject.Reconcile(context.Background(), realmName, true)
 	assert.Nil(t, err)
 
 	tenantResolverMock.AssertNumberOfCalls(t, "CreateApp", 0)
-	iamMock.MockClientService.AssertNumberOfCalls(t, "UpdateClient", len(internalApps)+len(externalApps))
+	iamMock.MockClientService.AssertNumberOfCalls(t, "UpdateClient", len(internalClients)+len(serviceAccounts))
 	tenantResolverMock.AssertNumberOfCalls(t, "GetRealmTenantId", 1)
 	iamMock.MockClientService.AssertNumberOfCalls(t, "GetClients", 2)
 }

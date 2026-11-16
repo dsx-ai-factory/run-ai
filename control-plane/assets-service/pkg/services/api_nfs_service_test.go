@@ -7,10 +7,8 @@ package services
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"sort"
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/clients/org_unit"
@@ -222,40 +220,6 @@ var _ = Describe("host path specific tests", func() {
 			SimpleMockClient: policies.SimpleMockClient{
 				EffectiveUpdatedAt: time.Now(),
 			},
-		})
-	})
-
-	Context("delete nfs asset used by template(s)", func() {
-		It("should fail on precondition ", func() {
-			env, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-			nfs1, _, _ := createNFSAsset(buildRandomTenantNFSAsset(), router, headerForAdmin(randoms))
-			nfs2, _, _ := createNFSAsset(buildRandomTenantNFSAsset(), router, headerForAdmin(randoms))
-
-			templatePayload := buildRandomProjectTemplate(randoms, env.Meta.Id)
-			templatePayload.Spec.Assets.Datasources = []api.AssetIdAndKind{
-				{
-					Kind: api.ASSETKIND_NFS,
-					Id:   nfs1.Meta.Id,
-				},
-				{
-					Kind: api.ASSETKIND_NFS,
-					Id:   nfs2.Meta.Id,
-				},
-			}
-			sort.Slice(templatePayload.Spec.Assets.Datasources, func(i, j int) bool {
-				return templatePayload.Spec.Assets.Datasources[i].Id < templatePayload.Spec.Assets.Datasources[j].Id
-			})
-
-			template, _, _ := createTemplateAsset(templatePayload, router, headerForAdmin(randoms))
-
-			deleteHttpReq, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", urlNFS, nfs2.Meta.Id), nil)
-			Expect(err).To(BeNil())
-			deleteHttpReq.Header = *headerForAdmin(randoms)
-
-			deleteHttpResp := httptest.NewRecorder()
-			router.ServeHTTP(deleteHttpResp, deleteHttpReq)
-			Expect(deleteHttpResp.Code).To(Equal(http.StatusPreconditionFailed))
-			Expect(deleteHttpResp.Body.String()).To(ContainSubstring(fmt.Sprintf("the requested nfs asset is being used by template '%s'", template.Meta.Name)))
 		})
 	})
 

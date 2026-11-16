@@ -103,7 +103,12 @@ func DistributedInferenceContainerFlagSet(flagsContainer *pflag.FlagSet, contain
 	flagsContainer.StringVar(&container.WorkerCommand, consts.AttributeNameWorkerCommand, "", consts.AttributeUsageWorkerCommand)
 	flagsContainer.StringVar(&container.WorkerArgs, consts.AttributeNameWorkerArgs, "", consts.AttributeUsageWorkerArgs)
 	flagsContainer.StringVar(&container.WorkerWorkingDir, consts.AttributeNameWorkerWorkingDir, "", consts.AttributeUsageWorkerWorkingDir)
-	flagsContainer.StringArrayVar(&container.WorkerEnvironmentVariables, consts.AttributeNameWorkerEnvironment, []string{}, consts.AttributeUsageWorkerEnvironment)
+	flagsContainer.StringArrayVar(&container.WorkerEnvironmentVariables, consts.AttributeNameWorkerEnvVariable, []string{}, consts.AttributeUsageWorkerEnvironment)
+	// Share the value so mixing the alias and canonical flag preserves every variable.
+	//nolint:staticcheck // Register the deprecated alias for backward compatibility.
+	flagsContainer.Var(flagsContainer.Lookup(consts.AttributeNameWorkerEnvVariable).Value, consts.AttributeNameWorkerEnvDeprecated, consts.AttributeUsageWorkerEnvironment)
+	//nolint:staticcheck // Mark the backward-compatible alias as deprecated.
+	_ = flagsContainer.MarkDeprecated(consts.AttributeNameWorkerEnvDeprecated, "use --worker-environment-variable instead")
 	flagsContainer.StringArrayVar(&container.WorkerFieldRef, consts.AttributeNameWorkerEnvPodFieldRef, []string{}, consts.AttributeUsageWorkerEnvPodFieldRef)
 	flagsContainer.StringArrayVar(&container.WorkerEnvSecret, consts.AttributeNameWorkerEnvSecret, []string{}, consts.AttributeUsageWorkerEnvSecret)
 	flagsContainer.BoolVar(&container.WorkerCreateHomeDir, consts.AttributeNameWorkerCreateHomeDir, false, consts.AttributeUsageWorkerCreateHomeDir)

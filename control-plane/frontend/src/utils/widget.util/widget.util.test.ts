@@ -428,4 +428,18 @@ describe("widgetUtil", () => {
       expect(result["GPU-0"]).toHaveLength(2);
     });
   });
+
+  describe("getIdleWorkloadsAdvancedFilters", () => {
+    test("filters by idle GPU devices only when no node pool is given", () => {
+      expect(JSON.parse(widgetUtil.getIdleWorkloadsAdvancedFilters())).toEqual([
+        expect.objectContaining({ name: "idleAllocatedGpus", operator: ">=", minValue: "0.01", type: "Numeric" }),
+      ]);
+    });
+
+    test("adds the node pool filter when given", () => {
+      const filters = JSON.parse(widgetUtil.getIdleWorkloadsAdvancedFilters("pool-a"));
+      expect(filters).toHaveLength(2);
+      expect(filters[1]).toEqual(expect.objectContaining({ name: "nodepool", term: "pool-a", value: "==" }));
+    });
+  });
 });

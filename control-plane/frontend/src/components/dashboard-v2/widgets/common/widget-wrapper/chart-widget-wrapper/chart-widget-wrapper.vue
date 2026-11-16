@@ -237,6 +237,10 @@ export default defineComponent({
 .chart-widget-header {
   min-height: 50px;
 }
+.grid-widget-container:not(.size-auto) .chart-semantic-region {
+  min-height: 0;
+  overflow-y: auto;
+}
 .title-tooltip-container {
   display: flex;
   align-items: center;

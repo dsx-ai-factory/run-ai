@@ -17,12 +17,10 @@ import type {
   CredentialsListResponseEntry,
   DatasourceListResponseEntry,
   EnvironmentAsset,
-  WorkloadTemplate,
 } from "@/swagger-models/assets-service-client";
 import type { IFilterBy } from "@/models/filter.model";
 import type { ITableColumn } from "@/models/table.model";
 import { credentialIndexColumns } from "@/table-models/credential.table-model";
-import { workloadTemplateIndexColumns } from "@/table-models/workload-template.table-model";
 import { DATA_SOURCE_TYPE, type TDataSourceKinds } from "@/models/data-source.model";
 // Utils
 import { dateUtil } from "@/utils/date.util";
@@ -385,78 +383,6 @@ describe("runai-table.vue", () => {
           const expectedCellsContent: Array<string> = tableModels.credentialModel.rows.map(
             (credential: CredentialsListResponseEntry) =>
               dateUtil.dateAndTimeFormat(new Date(credential.meta.createdAt)),
-          );
-          const actualCellsContent: Array<string> = cells.map((cell: DOMWrapper<HTMLTableCellElement>) => cell.text());
-          expect(actualCellsContent).toEqual(expectedCellsContent);
-        });
-      });
-    });
-
-    describe("template model", () => {
-      beforeEach(async () => {
-        runaiTableCmp.setProps({
-          columns: workloadTemplateIndexColumns,
-          rows: tableModels.templateModel.rows,
-          filterBy: tableModels.templateModel.filterBy,
-        });
-      });
-
-      test("should show the correct order of columns", () => {
-        const expectedColumns = getExpectedColumns(workloadTemplateIndexColumns);
-        const actualColumns = runaiTableCmp.findAll("th").map((th) => th.text());
-        expect(actualColumns).toEqual(expectedColumns);
-      });
-
-      describe("cells content", () => {
-        test("should show the correct content in the 'template' column", () => {
-          const cells: DOMWrapper<HTMLTableCellElement>[] = getCellsByColumnName("template");
-          const expectedCellsContent: Array<string> = tableModels.templateModel.rows.map(
-            (template: WorkloadTemplate) => template.meta.name,
-          );
-          const actualCellsContent: Array<string> = cells.map((cell: DOMWrapper<HTMLTableCellElement>) => cell.text());
-          expect(actualCellsContent).toEqual(expectedCellsContent);
-        });
-
-        test("should show the correct content in the 'environment' column", () => {
-          const cells: DOMWrapper<HTMLTableCellElement>[] = getCellsByColumnName("environment");
-          const expectedCellsContent: Array<string> = tableModels.templateModel.rows.map(
-            (template: WorkloadTemplate) => template.spec.assets.environment.name,
-          );
-          const actualCellsContent: Array<string> = cells.map((cell: DOMWrapper<HTMLTableCellElement>) => cell.text());
-          expect(actualCellsContent).toEqual(expectedCellsContent);
-        });
-
-        test("should show the correct content in the 'compute-resource' column", () => {
-          const cells: DOMWrapper<HTMLTableCellElement>[] = getCellsByColumnName("compute-resource");
-          const expectedCellsContent: Array<string> = tableModels.templateModel.rows.map(
-            (template: WorkloadTemplate) => template.spec.assets.compute?.name || "-",
-          );
-          const actualCellsContent: Array<string> = cells.map((cell: DOMWrapper<HTMLTableCellElement>) => cell.text());
-          expect(actualCellsContent).toEqual(expectedCellsContent);
-        });
-
-        test("should show the correct content in the 'datasources' column", () => {
-          const cells: DOMWrapper<HTMLTableCellElement>[] = getCellsByColumnName("datasources");
-          const expectedCellsContent: Array<string> = tableModels.templateModel.rows.map((template: WorkloadTemplate) =>
-            previewStrings(template.spec.assets.datasources?.map((ds) => ds.name) || []),
-          );
-          const actualCellsContent: Array<string> = cells.map((cell: DOMWrapper<HTMLTableCellElement>) => cell.text());
-          expect(actualCellsContent).toEqual(expectedCellsContent);
-        });
-
-        test("should show the correct content in the 'created-by' column", () => {
-          const cells: DOMWrapper<HTMLTableCellElement>[] = getCellsByColumnName("created-by");
-          const expectedCellsContent: Array<string> = tableModels.templateModel.rows.map(
-            (template: WorkloadTemplate) => template.meta.createdBy,
-          );
-          const actualCellsContent: Array<string> = cells.map((cell: DOMWrapper<HTMLTableCellElement>) => cell.text());
-          expect(actualCellsContent).toEqual(expectedCellsContent);
-        });
-
-        test("should show the correct content in the 'created-at' column", () => {
-          const cells: DOMWrapper<HTMLTableCellElement>[] = getCellsByColumnName("created-at");
-          const expectedCellsContent: Array<string> = tableModels.templateModel.rows.map((template: WorkloadTemplate) =>
-            dateUtil.dateAndTimeFormat(new Date(template.meta.createdAt)),
           );
           const actualCellsContent: Array<string> = cells.map((cell: DOMWrapper<HTMLTableCellElement>) => cell.text());
           expect(actualCellsContent).toEqual(expectedCellsContent);

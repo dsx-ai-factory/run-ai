@@ -40,7 +40,7 @@ func AddNodeHandlerToCache(backendClient *backendclient.BackendClient, cachedCli
 			newNode := newObj.(*corev1.Node)
 			if newNode.Labels != nil && newNode.Labels[v1alpha1.NodePoolNameLabel] == constants2.ExcludedNodepoolName {
 				oldNode := oldObj.(*corev1.Node)
-				if oldNode.Labels != nil && oldNode.Labels[v1alpha1.NodePoolNameLabel] != constants2.ExcludedNodepoolName {
+				if oldNode.Labels[v1alpha1.NodePoolNameLabel] != constants2.ExcludedNodepoolName {
 					rateLimitedController.MarkItemDeleted(objectKeyFromObject(oldNode))
 					genericControllerErrorHandler(nodeHandler.HandleDelete(newNode), constants.DeleteOperation, constants.NodeResourceName, newNode)
 				}

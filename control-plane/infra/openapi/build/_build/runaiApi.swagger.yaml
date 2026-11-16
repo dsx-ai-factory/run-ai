@@ -4420,139 +4420,6 @@ paths:
           $ref: '#/components/responses/404NotFound'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v1/asset/workload-template:
-    get:
-      summary: List templates.
-      description: Retrieve a list of templates.
-      operationId: list_templates
-      deprecated: true
-      tags:
-        - Template
-      parameters:
-        - $ref: '#/components/parameters/AssetNameFilter'
-        - $ref: '#/components/parameters/AssetScopeFilter'
-        - $ref: '#/components/parameters/AssetProjectFilter'
-        - $ref: '#/components/parameters/AssetDepartmentFilter'
-        - $ref: '#/components/parameters/AssetClusterFilter'
-        - $ref: '#/components/parameters/DistributedFrameworkQuery'
-        - $ref: '#/components/parameters/IsDistributedQuery'
-        - $ref: '#/components/parameters/IsTrainingQuery'
-        - $ref: '#/components/parameters/IsWorkspaceQuery'
-        - $ref: '#/components/parameters/IsDistributedInferenceQuery'
-      responses:
-        '200':
-          description: Request completed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WorkloadTemplateListResponse'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-    post:
-      summary: Create a template.
-      description: Use to create a template.
-      operationId: create_template
-      deprecated: true
-      tags:
-        - Template
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/WorkloadTemplateCreationRequest'
-      responses:
-        '202':
-          description: Request accepted successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WorkloadTemplate'
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '409':
-          $ref: '#/components/responses/409Conflict'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v1/asset/workload-template/{AssetId}:
-    parameters:
-      - $ref: '#/components/parameters/AssetId'
-    get:
-      summary: Get a template.
-      description: Retrieve the details of a template by id.
-      operationId: get_template_by_id
-      deprecated: true
-      tags:
-        - Template
-      responses:
-        '200':
-          description: Request completed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WorkloadTemplate'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '404':
-          $ref: '#/components/responses/404NotFound'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-    put:
-      summary: Update a template.
-      description: Use to update the details of a template by id.
-      operationId: update_template
-      deprecated: true
-      tags:
-        - Template
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/WorkloadTemplateUpdateRequest'
-      responses:
-        '202':
-          description: Request accepted successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WorkloadTemplate'
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '409':
-          $ref: '#/components/responses/409Conflict'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-    delete:
-      summary: Delete a template.
-      description: Use to delete a template by id.
-      operationId: delete_template_by_id
-      deprecated: true
-      tags:
-        - Template
-      responses:
-        '202':
-          $ref: '#/components/responses/202Accepted'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '404':
-          $ref: '#/components/responses/404NotFound'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
   /v1/k8s/clusters/{clusterUuid}/workspaces:
     parameters:
       - $ref: '#/components/parameters/ClusterUuid'
@@ -8163,7 +8030,7 @@ paths:
   /api/v1/workloads/{workloadId}/actions:
     get:
       summary: Get workload action history.
-      description: Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+      description: Returns accepted workload actions. Free-text search matches raw action values and subjects case-insensitively. Use the action filter for exact action selection. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
       operationId: get_workload_actions_history
       tags:
         - WorkloadActions
@@ -8171,6 +8038,10 @@ paths:
         - $ref: '#/components/parameters/WorkloadId'
         - $ref: '#/components/parameters/Offset'
         - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/WorkloadActionsSortOrder'
+        - $ref: '#/components/parameters/WorkloadActionsSort'
+        - $ref: '#/components/parameters/WorkloadActionsFilter'
+        - $ref: '#/components/parameters/Search'
       responses:
         '200':
           description: Executed successfully.
@@ -8298,8 +8169,6 @@ paths:
         - WORKLOADS_COUNT: Count of workloads
         - GPU_ALLOCATION: GPU allocation metrics
         - PENDING_TIME_DISTRIBUTION: Distribution of workloads by current pending time (time since entering Pending phase).
-
-
 
 
 
@@ -9483,7 +9352,7 @@ paths:
     get:
       summary: List templates. [Experimental]
       description: Retrieve all available templates.
-      operationId: list_templates1
+      operationId: list_templates
       tags:
         - Workload templates
       parameters:
@@ -9536,7 +9405,7 @@ paths:
   /api/v1/workload-templates/{templateId}:
     get:
       summary: Get a template, any type. [Experimental]
-      operationId: get_template_by_id1
+      operationId: get_template_by_id
       description: Retrieve the details of a template using its id.
       tags:
         - Workload templates
@@ -13416,6 +13285,10 @@ components:
           example: gcr.io/runai/goofys:v0.24.0
         s3FileSystemResources:
           $ref: '#/components/schemas/ClusterReportedResourceRequirements'
+        s3FileSystemMountCheckImage:
+          type: string
+          nullable: true
+          description: The exact S3 image reference that supports goofys --ready-file and --check-ready. Omitted when support is unknown or disabled.
         fipsMode:
           $ref: '#/components/schemas/FipsModeEnum'
         runaiOauth2ProxyImage:
@@ -13761,6 +13634,12 @@ components:
         - nodePool
         - createdAt
       properties:
+        labels:
+          writeOnly: true
+          type: object
+          additionalProperties:
+            type: string
+          description: Labels assigned to the node.
         status:
           type: string
           enum:
@@ -14119,8 +13998,6 @@ components:
 
 
 
-
-
              - binpack - Place as many GPU pods as possible on each GPU device to use fewer devices and maximize available capacity, minimizing GPU fraction fragmentation.
              - spread - Distribute GPU pods across as many GPU devices as possible to balance load across devices.
           allOf:
@@ -14175,8 +14052,6 @@ components:
 
 
 
-
-
              - 0.0: Ignore historical usage data (100% current usage).
              - 1.0: Historical usage data has higher impact, it may cause fairshare to be 0.
              - Values between 0.0 and 1.0 combine historical and current usage to maintain a balanced fairshare
@@ -14189,8 +14064,6 @@ components:
           pattern: ^(0|[+]?((\d+(\.\d+)?)(m|h|d))+$)
           description: |
             Set the half-life time to define the decay rate of a project’s historical resource usage. The half-life defines how long it takes for past usage to diminish to half of its original influence on a project's fairshare.
-
-
 
 
 
@@ -14260,6 +14133,9 @@ components:
           type: string
           example: v100
           minLength: 1
+        description:
+          type: string
+          description: The description of the node pool.
         labelKey:
           type: string
           description: Label key for associated nodes to the Node Pool (with value as in labelValue)
@@ -14543,6 +14419,11 @@ components:
           example: v100
           minLength: 1
           maxLength: 63
+        description:
+          type: string
+          nullable: true
+          maxLength: 250
+          description: The description of the node pool.
         labelKey:
           description: Label key for associated nodes to the Node Pool (with value as in labelValue)
           example: node-type
@@ -14575,6 +14456,11 @@ components:
     NodepoolUpdateFields:
       type: object
       properties:
+        description:
+          type: string
+          nullable: true
+          maxLength: 250
+          description: The description of the node pool.
         labelKey:
           type: string
           nullable: true
@@ -16280,6 +16166,7 @@ components:
         - RANKS_TO_DEFAULT
         - WEIGHTS_TO_DEFAULT
         - WEIGHTS_TO_DESERVED
+        - LIMITS_TO_DEFAULT
     DepartmentsResourcesResetRequest:
       type: object
       required:
@@ -17459,7 +17346,6 @@ components:
         - nfs
         - pvc
         - hostPath
-        - workload-template
         - model
         - config-map
         - secret-volume
@@ -17610,16 +17496,6 @@ components:
           description: The status of the workspace or training.
           type: string
           minLength: 1
-    AssetRef:
-      description: Reference information about an asset.
-      required:
-        - id
-        - name
-      properties:
-        id:
-          $ref: '#/components/schemas/AssetId'
-        name:
-          $ref: '#/components/schemas/AssetName'
     ToolType:
       description: Super set of Internal and External tool types.
       type: string
@@ -17652,6 +17528,16 @@ components:
           nullable: true
           items:
             $ref: '#/components/schemas/ToolType'
+    AssetRef:
+      description: Reference information about an asset.
+      required:
+        - id
+        - name
+      properties:
+        id:
+          $ref: '#/components/schemas/AssetId'
+        name:
+          $ref: '#/components/schemas/AssetName'
     AssetsUsageRefCompute:
       allOf:
         - $ref: '#/components/schemas/AssetRef'
@@ -17721,11 +17607,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/WorkloadRefAndStatus'
-        templates:
-          description: templates that rely on this asset.
-          type: array
-          items:
-            $ref: '#/components/schemas/AssetRef'
         assets:
           description: list of other assets that use this asset. specifically, accessKeys used by s3, and passwords used by git.
           $ref: '#/components/schemas/AssetsUsageRef'
@@ -19931,7 +19812,7 @@ components:
         overrides:
           $ref: '#/components/schemas/DataSourceOverrides'
     AssetsRef:
-      description: Reference information about a set of assets. used to describe - assets comprising a workspace - assets comprising a workspace template - assets that use other assets (e.g. s3 asset which uses access key).
+      description: Reference information about a set of assets. used to describe - assets comprising a workspace - assets that use other assets (e.g. s3 asset which uses access key).
       required:
         - environment
       properties:
@@ -20206,7 +20087,7 @@ components:
           maxLength: 63
       nullable: true
     Preemptibility:
-      description: Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
+      description: Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. Semi-preemptible is intended for multi-pod workloads. Replicas up to the configured minimum are non-preemptible, while replicas above that minimum are preemptible. On single-pod workloads with a fixed replica count of one, semi-preemptible behaves as non-preemptible. The API continues to accept semi-preemptible for these workloads. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
       type: string
       minLength: 1
       enum:
@@ -20592,62 +20473,6 @@ components:
               $ref: '#/components/schemas/InfoDistMaster'
       nullable: true
       type: object
-    SpecificRunInfoFields:
-      description: Information about the set of assets which comprises a workspace, training or template, and an optional set of specific run parameters.
-      required:
-        - assets
-      properties:
-        assets:
-          $ref: '#/components/schemas/AssetsRef'
-        specificEnv:
-          $ref: '#/components/schemas/SpecificRunParams'
-        distributed:
-          $ref: '#/components/schemas/InfoDistributed'
-    WorkloadTemplate:
-      required:
-        - meta
-        - spec
-      properties:
-        meta:
-          $ref: '#/components/schemas/AssetMeta'
-        spec:
-          $ref: '#/components/schemas/SpecificRunInfoFields'
-    WorkloadTemplateListResponse:
-      type: object
-      required:
-        - entries
-      properties:
-        entries:
-          type: array
-          items:
-            $ref: '#/components/schemas/WorkloadTemplate'
-    SpecificRunCreationFields:
-      description: The information needed for creating az template - a set of assets and an optional set of specific environment parameters.
-      required:
-        - assets
-      properties:
-        assets:
-          $ref: '#/components/schemas/AssetsIds'
-        specificEnv:
-          $ref: '#/components/schemas/SpecificRunParams'
-    WorkloadTemplateCreationRequest:
-      required:
-        - meta
-        - spec
-      properties:
-        meta:
-          $ref: '#/components/schemas/AssetCreationRequest'
-        spec:
-          $ref: '#/components/schemas/SpecificRunCreationFields'
-    WorkloadTemplateUpdateRequest:
-      required:
-        - meta
-        - spec
-      properties:
-        meta:
-          $ref: '#/components/schemas/AssetUpdateRequest'
-        spec:
-          $ref: '#/components/schemas/SpecificRunCreationFields'
     DistMaster:
       description: |
         Parameters which apply to the master in a distributed training.
@@ -28322,25 +28147,29 @@ components:
           items:
             $ref: '#/components/schemas/BatchResponseFailureItem'
     AccessRulesFilterFields:
-      required:
-        - validateSignature
       $ref: '#/components/schemas/AccessRulesSortFilterFields'
     SamlData:
       type: object
       nullable: true
+      required:
+        - validateSignature
       properties:
         signingCertificate:
           type: string
         singleSignOnServiceUrl:
           type: string
         entityId:
-        validateSignature:
-          type: boolean
-          description: Whether the signature of SAML responses from the identity provider is validated
           type: string
         serviceProviderMetadataUrl:
           type: string
           description: Service Provider (SP) metadata url
+        validateSignature:
+          type: boolean
+          description: Whether the signature of SAML responses from the identity provider is validated
+        certificateExpirationDate:
+          type: string
+          format: date-time
+          description: The expiration date of the signing certificate
     MandatoryClaim:
       type: object
       nullable: true
@@ -28563,6 +28392,9 @@ components:
           $ref: '#/components/schemas/OcpCreationData'
         mappers:
           $ref: '#/components/schemas/Mappers'
+        dryRun:
+          type: boolean
+          default: false
     IdpPostResponse:
       type: object
       required:
@@ -28570,6 +28402,9 @@ components:
       properties:
         alias:
           type: string
+        samlData:
+          $ref: '#/components/schemas/SamlData'
+          description: Parsed SAML identity provider configuration. Returned when dryRun is true. Nothing is stored.
       example:
         alias: oidc
     IdpResources:
@@ -33746,20 +33581,6 @@ components:
         stage:
           type: string
           readOnly: true
-    GetEnableTemplatesV2:
-      type: object
-      properties:
-        value:
-          $ref: '#/components/schemas/GetEnableSettingsValue'
-        displayName:
-          type: string
-          readOnly: true
-        description:
-          type: string
-          readOnly: true
-        stage:
-          type: string
-          readOnly: true
     GetEnableHybridSubmission:
       type: object
       properties:
@@ -33809,8 +33630,6 @@ components:
           $ref: '#/components/schemas/GetEnablePolicies'
         workloadSubmissionV2Enabled:
           $ref: '#/components/schemas/GetWorkloadSubmissionV2Enabled'
-        enableTemplatesV2:
-          $ref: '#/components/schemas/GetEnableTemplatesV2'
         enableHybridSubmission:
           $ref: '#/components/schemas/GetEnableHybridSubmission'
         gpuOverProvisioning:
@@ -33822,7 +33641,6 @@ components:
       enum:
         - enablePolicies
         - workloadSubmissionV2Enabled
-        - enableTemplatesV2
         - enableHybridSubmission
         - gpuOverProvisioning
         - applicationSubmission
@@ -36059,6 +35877,34 @@ components:
         format: uuid
         minLength: 1
         example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+    Offset:
+      name: offset
+      in: query
+      required: false
+      description: The offset of the first item returned in the collection.
+      schema:
+        type: integer
+        format: int32
+        example: 100
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: The maximum number of entries to return.
+      schema:
+        type: integer
+        format: int32
+        default: 50
+        minimum: 1
+        maximum: 500
+    Search:
+      name: search
+      in: query
+      required: false
+      description: Filter results by a free text search.
+      schema:
+        type: string
+        example: test project
     NodesFilter:
       name: filterBy
       in: query
@@ -36073,14 +35919,6 @@ components:
         example:
           - name!=some-name
       explode: false
-    Search:
-      name: search
-      in: query
-      required: false
-      description: Filter results by a free text search.
-      schema:
-        type: string
-        example: test project
     NodeName:
       name: nodeName
       in: path
@@ -36123,26 +35961,6 @@ components:
         example:
           - name==my-cluster
       explode: false
-    Offset:
-      name: offset
-      in: query
-      required: false
-      description: The offset of the first item returned in the collection.
-      schema:
-        type: integer
-        format: int32
-        example: 100
-    Limit:
-      name: limit
-      in: query
-      required: false
-      description: The maximum number of entries to return.
-      schema:
-        type: integer
-        format: int32
-        default: 50
-        minimum: 1
-        maximum: 500
     QueryForceDelete:
       name: force
       in: query
@@ -37331,6 +37149,37 @@ components:
       $ref: '#/components/parameters/appType'
     is_hard_delete:
       $ref: '#/components/parameters/isHardDelete'
+    WorkloadActionsSortOrder:
+      name: sortOrder
+      in: query
+      description: Sort direction. Defaults to newest first.
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+        default: desc
+    WorkloadActionsSort:
+      name: sortBy
+      in: query
+      description: Field to sort by. Defaults to acceptedAt.
+      schema:
+        type: string
+        enum:
+          - acceptedAt
+          - action
+          - subject
+    WorkloadActionsFilter:
+      name: filterBy
+      in: query
+      description: Filter event, subject or accepted time using the standard field/operator/value syntax. Dates use ISO 8601 timestamps and only support ==, !=, <= and >= operators.
+      schema:
+        type: array
+        maxItems: 10
+        items:
+          type: string
+          pattern: ^((action|subject)(==|!=|<=|>=|=@|!@|=\^|=\$)|acceptedAt(==|!=|<=|>=)).+$
+      explode: false
     WorkloadsFilter:
       name: filterBy
       in: query

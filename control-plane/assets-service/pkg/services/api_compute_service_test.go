@@ -670,31 +670,6 @@ var _ = Describe("compute asset specific tests", func() {
 		})
 	})
 
-	Context("delete compute asset used by template(s)", func() {
-		It("should fail on precondition ", func() {
-			env, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-
-			compute, _, _ := createComputeAsset(buildRandomTenantCompute(), router, headerForAdmin(randoms))
-			templatePayload1 := buildRandomProjectTemplate(randoms, env.Meta.Id)
-			templatePayload2 := buildRandomProjectTemplate(randoms, env.Meta.Id)
-			templatePayload1.Spec.Assets.Compute = convutils.Ref(compute.Meta.Id)
-			templatePayload2.Spec.Assets.Compute = convutils.Ref(compute.Meta.Id)
-			template1, _, _ := createTemplateAsset(templatePayload1, router, headerForAdmin(randoms))
-			template2, _, _ := createTemplateAsset(templatePayload2, router, headerForAdmin(randoms))
-
-			deleteHttpReq, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", urlCompute, compute.Meta.Id), nil)
-			Expect(err).To(BeNil())
-			deleteHttpReq.Header = *headerForAdmin(randoms)
-
-			deleteHttpResp := httptest.NewRecorder()
-			router.ServeHTTP(deleteHttpResp, deleteHttpReq)
-			Expect(deleteHttpResp.Code).To(Equal(http.StatusPreconditionFailed))
-			Expect(deleteHttpResp.Body.String()).To(ContainSubstring("the requested compute asset is being used by 2 templates"))
-			Expect(deleteHttpResp.Body.String()).To(ContainSubstring(template1.Meta.Name))
-			Expect(deleteHttpResp.Body.String()).To(ContainSubstring(template2.Meta.Name))
-		})
-	})
-
 	Context("update compute asset's spec", func() {
 		It("should allow changing all fields", func() {
 			url := urlCompute

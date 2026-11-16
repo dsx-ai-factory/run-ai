@@ -28,6 +28,7 @@ type IIdm interface {
 	CreateInternalClient(ctx context.Context, req openapi.ClientCreationRequest) (*openapi.CreateInternalClient201Response, *http.Response, error)
 	DeleteClient(ctx context.Context, clientId string) (*http.Response, error)
 	CreateClient(ctx context.Context, name string, clientType string, tenantId *string) (*string, error)
+	CreateServiceAccountClient(ctx context.Context, name string, tenantId *string) (*string, error)
 	CreateServiceAccountInternally(ctx context.Context, name string, realmName string) (*openapi.ServiceAccountPostResponse, error)
 	IIdmExternalClient
 }

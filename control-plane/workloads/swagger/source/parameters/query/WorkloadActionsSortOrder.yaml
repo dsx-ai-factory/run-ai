@@ -1,0 +1,7 @@
+name: sortOrder
+in: query
+description: Sort direction. Defaults to newest first.
+schema:
+  type: string
+  enum: [asc, desc]
+  default: desc

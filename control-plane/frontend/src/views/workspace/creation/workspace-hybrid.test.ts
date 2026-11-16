@@ -31,7 +31,6 @@ import { EPolicyGroup } from "@/utils/policy.util/policy-view.util";
 import type { IUISuperWorkloadCreationRequest } from "@/models/workload.model";
 import type { Project } from "@/swagger-models/org-unit-service-client";
 import { UidGidSource } from "@/swagger-models/workloads-client";
-import { SettingKeys } from "@/models/setting.model";
 import { WorkloadCreationDrawerEntities } from "@/models/workload-creation-drawer-model";
 
 vi.mock("@/services/control-plane/credential.service/credential.service");
@@ -201,9 +200,6 @@ describe("workspace-hybrid.vue", () => {
   it("expands a workload template and omits its IdP identity before submission", async () => {
     await flushPromises();
     wrapper.vm.onBack();
-    vi.mocked(wrapper.vm.settingStore.isFeatureEnabled).mockImplementation(
-      (key) => key === SettingKeys.EnableTemplatesV2,
-    );
     const security = {
       uidGidSource: UidGidSource.FromIdpToken,
       runAsUid: 1001,

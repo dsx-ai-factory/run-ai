@@ -47,8 +47,6 @@ func (s *SettingsManager) GetSettingByKey(key api.WorkloadsSettingsKeyEnum, tena
 		return setting_pkg.Get[*EnablePolicies](tenantID)
 	case api.WORKLOADSSETTINGSKEYENUM_WORKLOAD_SUBMISSION_V2_ENABLED:
 		return setting_pkg.Get[*WorkloadSubmissionV2Enabled](tenantID)
-	case api.WORKLOADSSETTINGSKEYENUM_ENABLE_TEMPLATES_V2:
-		return setting_pkg.Get[*EnableTemplatesV2](tenantID)
 	case api.WORKLOADSSETTINGSKEYENUM_ENABLE_HYBRID_SUBMISSION:
 		return setting_pkg.Get[*EnableHybridSubmission](tenantID)
 	case api.WORKLOADSSETTINGSKEYENUM_GPU_OVER_PROVISIONING:
@@ -71,27 +69,8 @@ func (s *SettingsManager) UpdateSettingByKey(ctx context.Context, key api.Worklo
 		return setting_pkg.Update[*EnablePolicies](tenantID, EnablePolicies{Enabled: enabled}).UpdatedByUser().Execute()
 	case api.WORKLOADSSETTINGSKEYENUM_WORKLOAD_SUBMISSION_V2_ENABLED:
 		return setting_pkg.Update[*WorkloadSubmissionV2Enabled](tenantID, WorkloadSubmissionV2Enabled{Enabled: enabled}).UpdatedByUser().Execute()
-	case api.WORKLOADSSETTINGSKEYENUM_ENABLE_TEMPLATES_V2:
-		if enabled {
-			hybridSubmission, err := setting_pkg.Get[*EnableHybridSubmission](tenantID)
-			if err != nil {
-				return fmt.Errorf("failed to check enableHybridSubmission state: %w", err)
-			}
-			if !hybridSubmission.Enabled {
-				return fmt.Errorf("%s: cannot enable enableTemplatesV2 while enableHybridSubmission is disabled", ErrValidationFailed)
-			}
-		}
-		return setting_pkg.Update[*EnableTemplatesV2](tenantID, EnableTemplatesV2{Enabled: enabled}).UpdatedByUser().Execute()
 	case api.WORKLOADSSETTINGSKEYENUM_ENABLE_HYBRID_SUBMISSION:
-		if err := setting_pkg.Update[*EnableHybridSubmission](tenantID, EnableHybridSubmission{Enabled: enabled}).UpdatedByUser().Execute(); err != nil {
-			return err
-		}
-		if !enabled {
-			if err := setting_pkg.Update[*EnableTemplatesV2](tenantID, EnableTemplatesV2{Enabled: false}).UpdatedByUser().Execute(); err != nil {
-				return fmt.Errorf("failed to disable enableTemplatesV2 after disabling enableHybridSubmission: %w", err)
-			}
-		}
-		return nil
+		return setting_pkg.Update[*EnableHybridSubmission](tenantID, EnableHybridSubmission{Enabled: enabled}).UpdatedByUser().Execute()
 	case api.WORKLOADSSETTINGSKEYENUM_GPU_OVER_PROVISIONING:
 		return setting_pkg.Update[*GpuOverProvisioning](tenantID, GpuOverProvisioning{Enabled: enabled}).UpdatedByUser().Execute()
 	case api.WORKLOADSSETTINGSKEYENUM_APPLICATION_SUBMISSION:
@@ -115,13 +94,6 @@ func (s *SettingsManager) TransformSettingsToResponse(settingsList []manager.Set
 			}
 		case *WorkloadSubmissionV2Enabled:
 			response.WorkloadSubmissionV2Enabled = api.GetWorkloadSubmissionV2Enabled{
-				Value:       api.GetEnableSettingsValue{Enabled: &v.Enabled},
-				DisplayName: v.DisplayName(),
-				Description: v.Description(),
-				Stage:       string(v.Stage()),
-			}
-		case *EnableTemplatesV2:
-			response.EnableTemplatesV2 = api.GetEnableTemplatesV2{
 				Value:       api.GetEnableSettingsValue{Enabled: &v.Enabled},
 				DisplayName: v.DisplayName(),
 				Description: v.Description(),
@@ -165,13 +137,6 @@ func (s *SettingsManager) TransformSettingByKeyToResponse(setting manager.Settin
 		}, nil
 	case *WorkloadSubmissionV2Enabled:
 		return api.GetWorkloadSubmissionV2Enabled{
-			Value:       api.GetEnableSettingsValue{Enabled: &v.Enabled},
-			DisplayName: v.DisplayName(),
-			Description: v.Description(),
-			Stage:       string(v.Stage()),
-		}, nil
-	case *EnableTemplatesV2:
-		return api.GetEnableTemplatesV2{
 			Value:       api.GetEnableSettingsValue{Enabled: &v.Enabled},
 			DisplayName: v.DisplayName(),
 			Description: v.Description(),

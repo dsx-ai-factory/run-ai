@@ -13,6 +13,13 @@ import { RunaiTableNoData } from "@/components/common/runai-table/runai-table-no
 import type { ProjectGetRanking } from "@/swagger-models/org-unit-service-client";
 import type { ITableColumn } from "@/models/table.model";
 import { EOrgUnitProjectsRankingColumnName } from "@/table-models/org-unit.table-model";
+import {
+  EOrgUnitEntityRankingValue,
+  ORG_UNIT_RANKING_ENTITY_SELECT_OPTIONS,
+  ORG_UNIT_RANKING_METRIC_SELECT_OPTIONS,
+} from "@/models/org-unit.model";
+import { PROJECT_ROUTE_NAMES } from "@/router/project.routes/project.routes.names";
+import { DEPARTMENT_ROUTE_NAMES } from "@/router/department.routes/department.routes.names";
 const pinia: TestingPinia = createTestingPinia({ createSpy: vi.fn });
 vi.mock("@/services/control-plane/org-unit.service/org-unit.service");
 vi.mock("@/services/cluster/workload.service/workload.service");
@@ -38,10 +45,11 @@ const MOCK_PROJECTS_RANKING_RECORDS: ProjectGetRanking[] = [
 const mockRouter = {
   push: vi.fn(),
 };
+const { routerPushMock } = vi.hoisted(() => ({ routerPushMock: vi.fn() }));
 vi.mock("vue-router", () => ({
   useRoute: vi.fn(),
   useRouter: vi.fn(() => ({
-    push: vi.fn(),
+    push: routerPushMock,
   })),
 }));
 let wrapper: VueWrapper<InstanceType<typeof OrgUnitRankingWidget>>;
@@ -151,5 +159,53 @@ describe("org-unit-ranking-widget", () => {
     mountComponent();
     await flushPromises();
     expect(departmentCountSpy).toHaveBeenCalled();
+  });
+
+  it("links to projects filtered by allocated GPUs for the allocation metric", async () => {
+    vi.mocked(orgUnitService.getProjectsRanking).mockResolvedValue(MOCK_PROJECTS_RANKING_RECORDS);
+    mountComponent();
+    await flushPromises();
+    wrapper.vm.redirectToEntityIndex();
+    const [advancedFilter] = JSON.parse(routerPushMock.mock.lastCall?.[0].query.advancedFilters);
+    expect(advancedFilter).toEqual(
+      expect.objectContaining({ name: "gpuAllocated", label: "Allocated GPUs", operator: ">=", minValue: "1" }),
+    );
+  });
+
+  it.each([
+    {
+      entity: ORG_UNIT_RANKING_ENTITY_SELECT_OPTIONS[1],
+      metric: ORG_UNIT_RANKING_METRIC_SELECT_OPTIONS[0],
+      expected: { name: "gpuAllocated", label: "Allocated GPUs", minValue: "1" },
+    },
+    {
+      entity: ORG_UNIT_RANKING_ENTITY_SELECT_OPTIONS[0],
+      metric: ORG_UNIT_RANKING_METRIC_SELECT_OPTIONS[1],
+      expected: { name: "gpuAllocated", label: "Allocated GPUs", minValue: "0" },
+    },
+    {
+      entity: ORG_UNIT_RANKING_ENTITY_SELECT_OPTIONS[0],
+      metric: ORG_UNIT_RANKING_METRIC_SELECT_OPTIONS[2],
+      expected: { name: "averageGpuUtilization", label: "Avg. GPU utilization", minValue: "1" },
+    },
+  ])("links $entity.label for $metric.label with the matching filter", async ({ entity, metric, expected }) => {
+    vi.mocked(orgUnitService.countDepartments).mockResolvedValue(2);
+    vi.mocked(orgUnitService.getProjectsRanking).mockResolvedValue(MOCK_PROJECTS_RANKING_RECORDS);
+    vi.mocked(orgUnitService.getDepartmentsRanking).mockResolvedValue([]);
+    mountComponent();
+    await flushPromises();
+    wrapper.vm.selectedEntityOption = entity;
+    wrapper.vm.selectedMetricOption = metric;
+    await flushPromises();
+
+    wrapper.vm.redirectToEntityIndex();
+
+    const [{ name, query }] = routerPushMock.mock.calls[routerPushMock.mock.calls.length - 1];
+    expect(name).toEqual(
+      entity.value === EOrgUnitEntityRankingValue.Project
+        ? PROJECT_ROUTE_NAMES.PROJECT_INDEX
+        : DEPARTMENT_ROUTE_NAMES.DEPARTMENT_INDEX,
+    );
+    expect(JSON.parse(query.advancedFilters)).toEqual([expect.objectContaining({ ...expected, operator: ">=" })]);
   });
 });

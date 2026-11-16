@@ -30,7 +30,7 @@
             <transition-group name="fade">
               <template v-if="selectedProjectId && selectedProjectId !== -1">
                 <template-section-v2
-                  v-if="showTemplatesV2"
+                  v-if="isHybridSupported"
                   aid="template-section-v2"
                   :templates="flatTemplates"
                   :total-templates-count="flatTotalCount"
@@ -40,14 +40,6 @@
                   @template-changed="onSelectedTemplate"
                   @query-changed="onTemplatesListQueryChanged"
                   @get-next-batch="onGetNextTemplatesBatch"
-                />
-                <template-section
-                  v-else
-                  aid="template-section"
-                  :templates="templates"
-                  :loading="loadingTemplate"
-                  @template-changed="onSelectedTemplate"
-                  :template-id="selectedTemplateId || null"
                 />
                 <workload-name-section
                   entity-type="workspace"
@@ -101,7 +93,6 @@ import { defineComponent, type DefineComponent } from "vue";
 // store
 import { useWorkspaceStore } from "@/stores/workspace.store";
 import { useClusterStore } from "@/stores/cluster.store";
-import { useWorkloadTemplateStore } from "@/stores/workload-template.store";
 import { useAppStore } from "@/stores/app.store";
 import { useAuthStore } from "@/stores/auth.store";
 import { useEnvironmentStore } from "@/stores/environment.store";
@@ -111,7 +102,6 @@ import { useGuidedTourStore } from "@/stores/guided-tour.store";
 // services
 import { alertUtil } from "@/utils/alert.util";
 import { requestToLeave } from "@/services/infra/router.service/router.service";
-import { dataSourceService } from "@/services/control-plane/data-source.service/data-source.service";
 import { urlService } from "@/services/url.service/url.service";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 import { workloadService } from "@/services/cluster/workload.service/workload.service";
@@ -121,13 +111,12 @@ import { RunaiFormWrapper } from "@/components/common/runai-form-wrapper";
 import { RunaiExpansionWrapper } from "@/components/common/runai-expansion-wrapper";
 import { WorkloadNameSection } from "@/components/section/workload-name-section";
 import { ProjectSection } from "@/components/section/project-section";
-import { TemplateSection } from "@/components/section/template-section";
 import { RunaiBtn } from "@/components/common/runai-btn";
 import { TemplateSectionV2 } from "@/components/section/template-section-v2";
 import { RunaiClusterSection } from "@/components/common/runai-cluster-selection/runai-cluster-section";
 import { QuickSubmissionDropdown } from "@/components/workload-creation/quick-submission-dropdown";
 // models
-import { type WorkloadTemplate, type PVCAsset, UidGidSource } from "@/swagger-models/assets-service-client";
+import { UidGidSource } from "@/swagger-models/assets-service-client";
 import type { IUIWorkloadCreation } from "@/models/workload.model";
 import type { Project, ProjectMetadata } from "@/swagger-models/org-unit-service-client";
 import { MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION } from "@/common/version.constant";
@@ -140,9 +129,7 @@ import { WORKLOAD_ROUTE_NAMES } from "@/router/workloads.routes/workloads.routes
 
 // utils
 import { workloadUtil } from "@/utils/workload.util/workload.util";
-import { dataSourceUtil } from "@/utils/data-source.util";
 import { deepCopy } from "@/utils/common.util";
-import { SettingKeys } from "@/models/setting.model";
 import { useFlatTemplatesGallery } from "@/composables/use-flat-templates-gallery.composable";
 import { useQuickSubmission } from "@/composables/use-quick-submission.composable";
 
@@ -154,7 +141,6 @@ const WorkspaceNew = defineComponent({
     RunaiFormWrapper,
     ProjectSection,
     WorkloadNameSection,
-    TemplateSection,
     RunaiBtn,
     TemplateSectionV2,
     QuickSubmissionDropdown,
@@ -162,7 +148,6 @@ const WorkspaceNew = defineComponent({
   data() {
     return {
       workspaceStore: useWorkspaceStore(),
-      workloadTemplateStore: useWorkloadTemplateStore(),
       appStore: useAppStore(),
       clusterStore: useClusterStore(),
       environmentStore: useEnvironmentStore(),
@@ -231,9 +216,6 @@ const WorkspaceNew = defineComponent({
     }
   },
   computed: {
-    templates(): Array<WorkloadTemplate> {
-      return this.workloadTemplateStore.workloadTemplateList;
-    },
     isHybridSupported(): boolean {
       return (
         this.clusterStore.isClusterVersionSufficient(
@@ -242,11 +224,8 @@ const WorkspaceNew = defineComponent({
         ) && this.settingStore.isHybridSubmissionEnabled
       );
     },
-    showTemplatesV2(): boolean {
-      return this.isHybridSupported && this.settingStore.isFeatureEnabled(SettingKeys.EnableTemplatesV2);
-    },
     showQuickSubmissionDropdown(): boolean {
-      if (!this.showTemplatesV2 || !this.isHybridSupported) return false;
+      if (!this.isHybridSupported) return false;
 
       // show the dropdown only if an actual template is selected
       return this.selectedTemplateId !== "-1" && !!this.selectedTemplateId;
@@ -317,13 +296,8 @@ const WorkspaceNew = defineComponent({
         console.error(error);
       }
     },
-    async loadWorkspaceModel(projectId: string, templateId?: string | null): Promise<void> {
-      const tempId = templateId === "-1" ? undefined : templateId;
-      const workspaceModel = await workspaceService.getWorkspaceMergedWithPolicy(
-        projectId,
-        undefined,
-        tempId || undefined,
-      );
+    async loadWorkspaceModel(projectId: string): Promise<void> {
+      const workspaceModel = await workspaceService.getWorkspaceMergedWithPolicy(projectId);
 
       this.workspaceStore.setLoadedWorkspaceModelWithDefaults(deepCopy(workspaceModel));
       this.workspace = workloadUtil.convertWorkloadToWorkloadUI({
@@ -339,36 +313,21 @@ const WorkspaceNew = defineComponent({
       this.workspaceStore.setWorkspace(this.workspace);
     },
     async loadTemplates(applyOffset = false, amountRequired?: number): Promise<void> {
+      if (!this.isHybridSupported) {
+        this.selectedTemplateId = "-1";
+        this.setTemplates([]);
+        return;
+      }
       try {
         this.loadingTemplate = true;
+        if (!this.selectedProjectId) return;
 
-        if (this.showTemplatesV2) {
-          if (!this.selectedProjectId) return;
-
-          await this.list(WorkloadType.Workspace, this.selectedProjectId.toString(), applyOffset, amountRequired);
-
-          if (!applyOffset) this.selectedTemplateId = null;
-        } else {
-          await this.workloadTemplateStore.loadWorkloadTemplates({
-            projectId: this.selectedProjectId,
-            isWorkspace: true,
-          });
-        }
-
-        const templates = this.showTemplatesV2 ? this.flatTemplates : this.templates;
-
-        if (templates.length === 0 && !this.selectedTemplateId) {
+        await this.list(WorkloadType.Workspace, this.selectedProjectId.toString(), applyOffset, amountRequired);
+        if (!applyOffset) this.selectedTemplateId = null;
+        if (this.flatTemplates.length === 0 && !this.selectedTemplateId) {
           this.selectedTemplateId = "-1";
-        } else if (
-          !this.showTemplatesV2 &&
-          this.workspaceStore.templateId &&
-          (this.workspaceStore.templateId === "-1" ||
-            templates.find((template) => template.meta.id === this.workspaceStore.templateId))
-        ) {
-          this.selectedTemplateId = this.workspaceStore.templateId;
         }
       } catch (error: unknown) {
-        // could happen if the user try to search for templates with non-english characters
         this.setTemplates([]);
         console.error(error);
       } finally {
@@ -377,7 +336,6 @@ const WorkspaceNew = defineComponent({
     },
     onSelectedTemplate(templateId: string | null): void {
       this.selectedTemplateId = templateId;
-      this.workspaceStore.setTemplate(templateId);
     },
     redirectToPrevRoute(): void {
       this.workspaceStore.clearFlatFormState();
@@ -409,15 +367,7 @@ const WorkspaceNew = defineComponent({
         return;
       }
 
-      await this.loadWorkspaceModel(this.selectedProjectId.toString(), this.selectedTemplateId);
-
-      const template: WorkloadTemplate | undefined = this.templates.find(
-        (template) => template.meta.id === this.selectedTemplateId,
-      );
-      if (template?.spec.assets.workloadVolumes?.length) {
-        const pvcs: Array<PVCAsset> = await dataSourceService.loadPVCAssets(template.spec.assets.workloadVolumes);
-        this.workspace.assets.uiVolumes = dataSourceUtil.mapPvcsToUiVolumes(pvcs);
-      }
+      await this.loadWorkspaceModel(this.selectedProjectId.toString());
 
       await this.setSpecificUserGidUidIfNeeded();
 

@@ -69,7 +69,7 @@ func (a *AppsReconciler) Reconcile(ctx context.Context, realm string, force bool
 	if a.shouldReconcileAccessKeys(ctx, tenantId, force) {
 		err := a.reconcileAccessKeys(ctx, realm, tenantId)
 		if err != nil {
-			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to reconcile external apps for realm %s: %+v", realm, err)
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to reconcile access keys for realm %s: %+v", realm, err)
 			return err
 		}
 		a.updateAccessKeysVersionAndLogError(ctx, tenantId)
@@ -102,34 +102,34 @@ func (cr *AppsReconciler) updateAccessKeysVersionAndLogError(ctx context.Context
 func (cr *AppsReconciler) reconcileAccessKeys(ctx context.Context, realm string, tenantId string) error {
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Reconciling access keys for realm %s", realm)
 
-	clientType := realm_client.ClientTypeUserApp
+	clientType := realm_client.ClientTypeAccessKey
 	filters := &iamModels.ClientFilter{
 		ClientType: &clientType,
 	}
-	apps, err := cr.iamServices.ClientService.GetClients(ctx, realm, filters)
+	accessKeys, err := cr.iamServices.ClientService.GetClients(ctx, realm, filters)
 	if err != nil {
-		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get apps for realm %s: %+v", realm, err)
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get access keys for realm %s: %+v", realm, err)
 		return err
 	}
-	for _, app := range apps {
-		if app.Attributes == nil || app.Attributes.CreatedBy == nil {
-			return fmt.Errorf("failed to reconcile access key %s in realm %s. missing 'createdBy' attribute", *app.ClientID, realm)
+	for _, accessKey := range accessKeys {
+		if accessKey.Attributes == nil || accessKey.Attributes.CreatedBy == nil {
+			return fmt.Errorf("failed to reconcile access key %s in realm %s. missing 'createdBy' attribute", *accessKey.ClientID, realm)
 		}
-		runaiClient := realm_client.NewRunaiServiceAccountClient(*app.ClientID, tenantId, nil, realm_client.ClientTypeUserApp)
-		err := cr.reconcileApplication(ctx, realm, runaiClient)
+		runaiClient := realm_client.NewRunaiServiceAccountClient(*accessKey.ClientID, tenantId, nil, realm_client.ClientTypeAccessKey)
+		err := cr.reconcileAccessKey(ctx, realm, runaiClient)
 		if err != nil {
-			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to reconcile access key %s in realm %s: %+v", *app.ClientID, realm, err)
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to reconcile access key %s in realm %s: %+v", *accessKey.ClientID, realm, err)
 			return err
 		}
 	}
 	return nil
 }
 
-func (cr *AppsReconciler) reconcileApplication(ctx context.Context, realm string, client realm_client.Client) error {
+func (cr *AppsReconciler) reconcileAccessKey(ctx context.Context, realm string, client realm_client.Client) error {
 	clientID := client.GetClientID()
 	existsClient, err := cr.iamServices.ClientService.GetClientByClientId(ctx, realm, clientID)
 	if err != nil {
-		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get App %s in realm %s: %+v", clientID, realm, err)
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get access key %s in realm %s: %+v", clientID, realm, err)
 		return err
 	}
 

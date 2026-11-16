@@ -72,13 +72,17 @@ func createWorkloadsClientWithTenant(t *testing.T, ctx context.Context, clientNa
 	return *resp.Id
 }
 
-func createApplicationClient(t *testing.T, ctx context.Context, clientName string) string {
-	return createApplicationClientWithTenant(t, ctx, clientName, BaseTenantId)
+func createServiceAccountClient(t *testing.T, ctx context.Context, clientName string) string {
+	return createServiceAccountClientWithTenant(t, ctx, clientName, BaseTenantId)
 }
 
-func createApplicationClientWithTenant(t *testing.T, ctx context.Context, clientName string, tenantId string) string {
+func createServiceAccountClientWithTenant(t *testing.T, ctx context.Context, clientName string, tenantId string) string {
+	return createClientOfType(t, ctx, clientName, tenantId, openapi.CLIENTTYPE_SERVICE_ACCOUNT)
+}
+
+func createClientOfType(t *testing.T, ctx context.Context, clientName string, tenantId string, clientType openapi.ClientType) string {
 	clientRequest := openapi.ClientCreationRequest{
-		Type:     openapi.CLIENTTYPE_APPLICATION,
+		Type:     clientType,
 		ClientId: clientName,
 		TenantId: ptr.To(tenantId),
 	}
@@ -217,9 +221,16 @@ func TestClient_CreateInternalClient_DifferentClientTypes(t *testing.T) {
 			expectExternal: false,
 		},
 		{
-			name:           "Application/External client type",
+			name:           "Service account client type",
+			clientType:     openapi.CLIENTTYPE_SERVICE_ACCOUNT,
+			expectType:     "service-account",
+			expectExternal: true,
+		},
+		{
+			// deprecated alias of ServiceAccount, kept so existing callers keep working
+			name:           "Deprecated Application client type",
 			clientType:     openapi.CLIENTTYPE_APPLICATION,
-			expectType:     "tenant-application",
+			expectType:     "service-account",
 			expectExternal: true,
 		},
 	}
@@ -233,8 +244,10 @@ func TestClient_CreateInternalClient_DifferentClientTypes(t *testing.T) {
 				createAgentClient(t, ctx, clientId, nil)
 			case openapi.CLIENTTYPE_WORKLOADS_AUTH:
 				createWorkloadsClient(t, ctx, clientId, "test-cluster-456")
+			case openapi.CLIENTTYPE_SERVICE_ACCOUNT:
+				createServiceAccountClient(t, ctx, clientId)
 			case openapi.CLIENTTYPE_APPLICATION:
-				createApplicationClient(t, ctx, clientId)
+				createClientOfType(t, ctx, clientId, BaseTenantId, openapi.CLIENTTYPE_APPLICATION)
 			}
 
 			clients := getAllClients(t, ctx)
@@ -305,11 +318,11 @@ func TestClient_GetAllClients_WithFilter(t *testing.T) {
 
 	agentClientName := GenerateRandomString("agent-client")
 	workloadsClientName := GenerateRandomString("workloads-client")
-	appClientName := GenerateRandomString("app-client")
+	serviceAccountClientName := GenerateRandomString("service-account-client")
 
 	createAgentClientWithTenant(t, ctx, agentClientName, nil, tenantId)
 	createWorkloadsClientWithTenant(t, ctx, workloadsClientName, "test-cluster-123", tenantId)
-	createApplicationClientWithTenant(t, ctx, appClientName, tenantId)
+	createServiceAccountClientWithTenant(t, ctx, serviceAccountClientName, tenantId)
 
 	tests := []struct {
 		name            string
@@ -516,7 +529,7 @@ func TestClient_UpdateRedirectUris_InvalidClientID(t *testing.T) {
 		RedirectUris: []string{"https://example.com/callback"},
 	}
 
-	httpResp, err := OpenapiClient.ClientsAPI.UpdateRedirectUris(ctx, "invalid-application-client-id").ClientRedirectUrisUpdateRequest(updateRequest).Execute()
+	httpResp, err := OpenapiClient.ClientsAPI.UpdateRedirectUris(ctx, "invalid-client-id").ClientRedirectUrisUpdateRequest(updateRequest).Execute()
 	require.Error(t, err)
 	if httpResp != nil {
 		require.True(t, httpResp.StatusCode >= 400, "Should return an error status code")

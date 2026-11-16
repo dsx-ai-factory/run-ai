@@ -14,17 +14,17 @@ import (
 )
 
 const (
-	ClientTypeWorkloadsAuth = "WorkloadsAuth"
-	ClientTypeRunaiAdminUI  = "RunaiAdminUI"
-	ClientTypeCLI           = "CLI"
-	ClientTypeRunaiCLI      = "RunaiCLI"
-	ClientTypeRunai         = "Runai"
-	ClientTypeTokenExchange = "TokenExchange"
-	ClientTypeAgent         = "agent"
-	ClientTypeInstaller     = "runai-installer"
-	ClientTypeUserApp       = "user-application"
-	ClientTypeTenantApp     = "tenant-application"
-	ClientTypeMCP           = "MCP"
+	ClientTypeWorkloadsAuth  = "WorkloadsAuth"
+	ClientTypeRunaiAdminUI   = "RunaiAdminUI"
+	ClientTypeCLI            = "CLI"
+	ClientTypeRunaiCLI       = "RunaiCLI"
+	ClientTypeRunai          = "Runai"
+	ClientTypeTokenExchange  = "TokenExchange"
+	ClientTypeAgent          = "agent"
+	ClientTypeInstaller      = "runai-installer"
+	ClientTypeAccessKey      = "access-key"
+	ClientTypeServiceAccount = "service-account"
+	ClientTypeMCP            = "MCP"
 )
 
 const DefaultServiceAccountTokenLifespan = 30 * time.Minute
@@ -150,12 +150,12 @@ var clientProfiles = map[string]clientProfile{
 		isExternal:     ptr.To(false),
 		tokenLifespan:  ptr.To(2 * time.Hour),
 	},
-	ClientTypeUserApp: {
+	ClientTypeAccessKey: {
 		standardFlow:   true,
 		serviceAccount: true,
 		tokenLifespan:  ptr.To(DefaultServiceAccountTokenLifespan),
 	},
-	ClientTypeTenantApp: {
+	ClientTypeServiceAccount: {
 		standardFlow:   true,
 		serviceAccount: true,
 		isExternal:     ptr.To(true),

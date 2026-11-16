@@ -84,11 +84,6 @@ func PatchUsageInfo(ctx context.Context, assetKind api.AssetKind, patchingInfo m
 				return dbError
 			}
 		}
-
-		dbError := findTemplatesUsingGivenAssets(ctx, assetKind, patchingInfo, singleId)
-		if dbError != nil {
-			return dbError
-		}
 	}
 
 	return nil
@@ -138,33 +133,6 @@ func findWorkloadsWhichUseGivenAssets(ctx context.Context, workloadType string, 
 			}
 		}
 	}
-	return nil
-}
-
-func findTemplatesUsingGivenAssets(ctx context.Context,
-	_ api.AssetKind, patchingInfo map[string]response_patching.ResponsePatchingPtrs, singleId *string,
-) *api.Error {
-	templates, actionError := dao.ListTemplatesUsingAssets(ctx, singleId)
-	if actionError != nil {
-		return actionError
-	}
-
-	for _, template := range templates {
-		curPatch, ok := patchingInfo[template.ContainedAssetId]
-		if ok {
-			curTemplateInfo := api.AssetRef{
-				Id:   template.AssetMeta.Id,
-				Name: template.AssetMeta.Name,
-			}
-
-			if *curPatch.UsedBy == nil {
-				*curPatch.UsedBy = NewAssetUsageInfo()
-			}
-
-			(*curPatch.UsedBy).Templates = append((*curPatch.UsedBy).Templates, curTemplateInfo)
-		}
-	}
-
 	return nil
 }
 
@@ -385,6 +353,5 @@ func NewAssetUsageInfo() *api.AssetUsageInfo {
 		Workspaces: make([]api.WorkloadRefAndStatus, 0),
 		Trainings:  make([]api.WorkloadRefAndStatus, 0),
 		Inferences: make([]api.WorkloadRefAndStatus, 0),
-		Templates:  make([]api.AssetRef, 0),
 	}
 }

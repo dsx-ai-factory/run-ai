@@ -464,6 +464,12 @@ export default defineComponent({
           this.nodePoolName,
           this.departmentId,
           this.groupBy ? [this.groupBy, EWorkloadTelemetryGroupBy.Phase] : [EWorkloadTelemetryGroupBy.Phase],
+          DISPLAYED_PHASES as Phase[],
+          dashboardUtil.getCsvFileName(
+            this.wrapperOptions.title ?? "",
+            this.clusterStore.clusterNameByUuid(this.clusterId),
+            this.nodePoolName,
+          ),
         );
       } catch (e: unknown) {
         this.$q.notify(dashboardUtil.getCsvErrorMessage());

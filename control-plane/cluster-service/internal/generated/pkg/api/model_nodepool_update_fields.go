@@ -21,6 +21,12 @@ var dummyNodepoolUpdateFields = runaihttp.AssertPattern
 
 type NodepoolUpdateFields struct {
 
+	// The description of the node pool.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Description *string `json:"description,omitempty"`
+	Description *string `json:"description,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	// Label key for associated nodes to the Node Pool (with value as in labelValue)
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//LabelKey *string `json:"labelKey,omitempty"`
@@ -76,6 +82,14 @@ func AssertNodepoolUpdateFieldsRequired(obj NodepoolUpdateFields) error {
 
 // AssertNodepoolUpdateFieldsConstraints checks if the values respects the defined constraints
 func AssertNodepoolUpdateFieldsConstraints(obj NodepoolUpdateFields) error {
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.Description, "Description", 250); maxLengthErr != nil {
+		return &ParsingError{Param: "Description", Err: maxLengthErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	if minLengthErr := runaihttp.AssertMinLength(obj.LabelKey, "LabelKey", 1); minLengthErr != nil {
 		return &ParsingError{Param: "LabelKey", Err: minLengthErr}

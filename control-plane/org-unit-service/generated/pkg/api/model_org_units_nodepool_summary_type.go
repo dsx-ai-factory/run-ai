@@ -30,18 +30,21 @@ type OrgUnitsNodepoolSummaryType string
 const (
 	ORGUNITSNODEPOOLSUMMARYTYPE_HAS_QUOTA        OrgUnitsNodepoolSummaryType = "HAS_QUOTA"
 	ORGUNITSNODEPOOLSUMMARYTYPE_NON_DEFAULT_RANK OrgUnitsNodepoolSummaryType = "NON_DEFAULT_RANK"
+	ORGUNITSNODEPOOLSUMMARYTYPE_HAS_LIMIT        OrgUnitsNodepoolSummaryType = "HAS_LIMIT"
 )
 
 // AllowedOrgUnitsNodepoolSummaryTypeEnumValues is all the allowed values of OrgUnitsNodepoolSummaryType enum
 var AllowedOrgUnitsNodepoolSummaryTypeEnumValues = []OrgUnitsNodepoolSummaryType{
 	"HAS_QUOTA",
 	"NON_DEFAULT_RANK",
+	"HAS_LIMIT",
 }
 
 // validOrgUnitsNodepoolSummaryTypeEnumValue provides a map of OrgUnitsNodepoolSummaryTypes for fast verification of use input
 var validOrgUnitsNodepoolSummaryTypeEnumValues = map[OrgUnitsNodepoolSummaryType]struct{}{
 	"HAS_QUOTA":        {},
 	"NON_DEFAULT_RANK": {},
+	"HAS_LIMIT":        {},
 }
 
 // IsValid return true if the value is valid for the enum, false otherwise

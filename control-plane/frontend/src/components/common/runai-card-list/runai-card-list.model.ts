@@ -8,9 +8,10 @@ import type {
   ComputeAsset,
   DatasourceListResponseEntry,
   EnvironmentAsset,
-  WorkloadTemplate,
 } from "@/swagger-models/assets-service-client";
 import type { ProjectMetadata } from "@/swagger-models/org-unit-service-client";
+import type { SupersetTemplate } from "@/swagger-models/workloads-client";
+
 export interface ICreateNewCard {
   meta: {
     id: string;
@@ -27,7 +28,6 @@ export type TCardSortValues = "name" | "creation" | "recentUsage";
 
 export enum TCardCmpName {
   CREATE_NEW = "create-new-card",
-  TEMPLATE = "template-card",
   TEMPLATE_V2 = "template-card-v2",
   PROJECT = "project-card",
   ENVIRONMENT = "environment-card",
@@ -41,7 +41,7 @@ export type TCardListCmpType =
   | ProjectMetadata
   | EnvironmentAsset
   | ICreateNewCard
-  | WorkloadTemplate
+  | SupersetTemplate
   | ComputeAsset
   | DatasourceListResponseEntry
   | IK8sDistributionCardData;

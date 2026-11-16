@@ -205,6 +205,14 @@ export function useGenericMetricWidgetOptions() {
         },
       } as unknown as EChartsOption["tooltip"];
     }
+
+    const gridBottom = config.value.chartOptions.grid?.bottom;
+    if (config.value.chartOptions.tooltipAboveXAxis && typeof gridBottom === "number") {
+      chartOptions.value.tooltip = {
+        ...(chartOptions.value.tooltip as Record<string, unknown>),
+        position: chartUtil.getTooltipPositionAboveXAxis(gridBottom),
+      } as unknown as EChartsOption["tooltip"];
+    }
   };
 
   const addXAxisOptions = (): void => {

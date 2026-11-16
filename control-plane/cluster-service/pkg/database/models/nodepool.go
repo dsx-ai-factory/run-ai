@@ -43,12 +43,14 @@ const (
 	CpuQuotaColumn                             = "allow_cpu_quota"
 	QuotaColumn                                = "allow_quota"
 	RanksColumn                                = "allow_ranks"
+	LimitsColumn                               = "allow_limits"
 	NumaAwareSchedulingColumn                  = "numa_aware_scheduling"
 
 	DefaultAllowAdjustableWeights = false
 	DefaultAllowQuota             = true
 	DefaultAllowRanks             = true
 	DefaultAllowCpuQuota          = false
+	DefaultAllowLimits            = true
 )
 
 type Nodepool struct {
@@ -58,6 +60,7 @@ type Nodepool struct {
 	TenantId                        int32  `gorm:"not null"`
 	LabelKey                        *string
 	LabelValue                      *string
+	Description                     *string
 	Phase                           api.NodepoolPhase
 	PhaseMessage                    *string
 	ClusterId                       uuid.UUID `gorm:"not null"`
@@ -85,6 +88,7 @@ type Nodepool struct {
 	AllowRanks             bool
 	AllowQuota             bool
 	AllowCpuQuota          bool
+	AllowLimits            bool
 
 	NumaAwareScheduling *bool
 
@@ -166,6 +170,7 @@ func (np *Nodepool) DeepCopyInto(out *Nodepool) {
 	out.UpdatedAt = np.UpdatedAt
 	out.ID = np.ID
 	out.Name = np.Name
+	out.Description = np.Description
 	out.TenantId = np.TenantId
 	out.LabelKey = np.LabelKey
 	out.LabelValue = np.LabelValue
@@ -196,6 +201,7 @@ func (np *Nodepool) DeepCopyInto(out *Nodepool) {
 	out.AllowRanks = np.AllowRanks
 	out.AllowQuota = np.AllowQuota
 	out.AllowCpuQuota = np.AllowCpuQuota
+	out.AllowLimits = np.AllowLimits
 
 	out.NumaAwareScheduling = np.NumaAwareScheduling
 }
@@ -227,6 +233,7 @@ func (np *Nodepool) GetSchedulingCapabilities() api.SchedulingCapabilities {
 		Ranks:             np.AllowRanks,
 		AdjustableWeights: np.AllowAdjustableWeights,
 		CpuQuota:          np.AllowCpuQuota,
+		Limits:            np.AllowLimits,
 	}
 }
 

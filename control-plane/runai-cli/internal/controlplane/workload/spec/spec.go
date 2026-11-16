@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -1222,12 +1221,6 @@ func (gs *GeneralSpec) GetMasterAssetSubmissionIds() *openapi.AssetSubmissionIds
 	assets := openapi.NewAssetSubmissionIds()
 	assets.SetDatasources(datasourceIds)
 	return assets
-}
-
-// ProcessRawEnvironment processes the --environment flag values
-// This should be called after flag parsing but before spec generation
-func (gs *GeneralSpec) ProcessRawEnvironment(w io.Writer) error {
-	return gs.flags.Container.ProcessRawEnvironment(w)
 }
 
 func generalFlagSet(generalFlags *pflag.FlagSet, project *string, generalSpec *submit.General, getType spectype.Workload) {

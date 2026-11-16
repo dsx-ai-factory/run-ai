@@ -68,7 +68,12 @@ func HasGPU(instance kartaresource.ExtractedInstance) bool {
 	case instance.PodSpec != nil:
 		containers = instance.PodSpec.Containers
 	case instance.FragmentedPodSpec != nil:
-		containers = instance.FragmentedPodSpec.Containers
+		frag := instance.FragmentedPodSpec
+		if HasGPUInFragmentedResources(frag.Resources) ||
+			(frag.Container != nil && containerHasNvidiaGPUResources(frag.Container.Resources)) {
+			return true
+		}
+		containers = frag.Containers
 	}
 
 	for _, container := range containers {
@@ -78,6 +83,21 @@ func HasGPU(instance kartaresource.ExtractedInstance) bool {
 	}
 
 	return false
+}
+
+// HasGPUInFragmentedResources also recognizes the GPU shorthand used by Dynamo
+// service resources. The shorthand is not a Kubernetes container resource name.
+func HasGPUInFragmentedResources(resources *corev1.ResourceRequirements) bool {
+	if resources == nil {
+		return false
+	}
+	if quantity, ok := resources.Requests["gpu"]; ok && quantity.Sign() > 0 {
+		return true
+	}
+	if quantity, ok := resources.Limits["gpu"]; ok && quantity.Sign() > 0 {
+		return true
+	}
+	return containerHasNvidiaGPUResources(*resources)
 }
 
 func containerHasNvidiaGPUResources(resources corev1.ResourceRequirements) bool {

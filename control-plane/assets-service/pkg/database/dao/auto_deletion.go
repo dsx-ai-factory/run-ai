@@ -53,8 +53,7 @@ func AutoDeletePvcAssets(ctx context.Context, deletionType DeletionType) *api.Er
 	//
 	records := make([]dbmodel.AssetMetaRec, 0)
 
-	_, scanErr := result.Where(fmt.Sprintf("%s NOT in (select contained_asset_id from %s)", dbtables.AssetMetaColumnId, dbtables.TableNameAssetsTemplateContent)).
-		Where(fmt.Sprintf("%s NOT in (select asset_id from %s)", dbtables.AssetMetaColumnId, dbtables.TableNameWorkloadsAssets)).
+	_, scanErr := result.Where(fmt.Sprintf("%s NOT in (select asset_id from %s)", dbtables.AssetMetaColumnId, dbtables.TableNameWorkloadsAssets)).
 		Where(fmt.Sprintf("%s.%s < ?", dbtables.TableNameAssetsMeta, dbtables.AssetMetaColumnCreationTime), graceTime).
 		Scan(&records)
 	if scanErr != nil {
