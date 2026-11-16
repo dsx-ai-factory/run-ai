@@ -10,8 +10,10 @@ import (
 	"fmt"
 
 	snapshotv1alpha1 "github.com/ai-dynamo/snapshot/api/v1alpha1"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -49,6 +51,16 @@ type cleaner struct {
 // Reconcile deletes what was made for a runner of this name other than the
 // current one.
 func (r *cleaner) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
+	// Runners live only in project namespaces. Anywhere else there is never one,
+	// so whatever carries a runner's labels there would always be deleted.
+	namespace := &corev1.Namespace{}
+	if err := r.client.Get(ctx, types.NamespacedName{Name: request.Namespace}, namespace); err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+	if _, project := namespace.Labels[constants.RunaiQueueLabel]; !project {
+		return ctrl.Result{}, nil
+	}
+
 	made, err := madeFor(ctx, r.client, request.NamespacedName)
 	if err != nil {
 		return ctrl.Result{}, err

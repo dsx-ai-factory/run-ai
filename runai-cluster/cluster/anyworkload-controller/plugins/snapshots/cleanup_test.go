@@ -14,6 +14,7 @@ import (
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -110,6 +111,29 @@ var _ = Describe("cleanup", func() {
 
 		Expect(snapshotJobs(ctx, c)).To(ConsistOf(named("k1"), named("k2"), named("k3")))
 	})
+
+	// Only project namespaces have runners, so elsewhere a runner's labels say
+	// nothing about who made the object.
+	DescribeTable("deletes nothing outside a project namespace",
+		func(namespace *corev1.Namespace) {
+			job, snapshot := capturedJob("k1", true), capturedPodSnapshot("k1", "runner-uid")
+			job.Namespace, snapshot.Namespace = "default", "default"
+			objects := []client.Object{job, snapshot}
+			if namespace != nil {
+				objects = append(objects, namespace)
+			}
+			c := captureClient(objects...)
+
+			request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: "default", Name: "llama"}}
+			_, err := (&cleaner{client: c, apiReader: c}).Reconcile(ctx, request)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(snapshotJobs(ctx, c)).To(HaveLen(1))
+			Expect(podSnapshots(ctx, c)).To(HaveLen(1))
+		},
+		Entry("a namespace that isn't a project's", &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "default"}}),
+		Entry("a namespace that is gone", nil),
+	)
 
 	It("checks a runner when it is deleted", func() {
 		runner := testRunner()
