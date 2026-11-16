@@ -124,7 +124,6 @@ func resolveInferenceRoutingDefaultsWith(
 // rejects a submitted inference block. defaults is nil when the workload did not opt in.
 func applyInferenceRouting(
 	adapter inferenceRoutingAdapter,
-	routing *api.WorkloadV2ConfigurationInferenceRouting,
 	defaults *inferenceendpoint.Defaults,
 	manifest map[string]interface{},
 	configuration *models.WorkloadConfiguration,
@@ -186,7 +185,7 @@ func resolveNIMServiceInferenceRouting(
 	if err != nil {
 		return nil, err
 	}
-	if err := applyInferenceRouting(inferenceRoutingNIMService, routing, defaults, nil, configuration, workloadName); err != nil {
+	if err := applyInferenceRouting(inferenceRoutingNIMService, defaults, nil, configuration, workloadName); err != nil {
 		return nil, err
 	}
 	return configuration.Networking, nil

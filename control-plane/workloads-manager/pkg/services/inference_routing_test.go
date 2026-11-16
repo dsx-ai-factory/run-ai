@@ -210,7 +210,7 @@ var _ = Describe("inference routing", func() {
 			before, err := json.Marshal(configuration)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(applyInferenceRouting(inferenceRoutingDistributedInference, nil, nil, manifest, configuration, "model")).To(BeNil())
+			Expect(applyInferenceRouting(inferenceRoutingDistributedInference, nil, manifest, configuration, "model")).To(BeNil())
 
 			after, err := json.Marshal(configuration)
 			Expect(err).NotTo(HaveOccurred())
@@ -218,36 +218,30 @@ var _ = Describe("inference routing", func() {
 			Expect((*configuration.Networking)[0].ExternalAccess.Inference).To(BeNil())
 		})
 
-		DescribeTable("sets the inference block on the serving endpoint",
-			func(routing *api.WorkloadV2ConfigurationInferenceRouting, expected string) {
-				manifest, configuration := composeDistributedInferenceForTest(nil)
-				Expect(applyInferenceRouting(inferenceRoutingDistributedInference, routing, defaults, manifest, configuration, "model")).To(BeNil())
+		It("sets the inference block on the serving endpoint", func() {
+			manifest, configuration := composeDistributedInferenceForTest(nil)
+			Expect(applyInferenceRouting(inferenceRoutingDistributedInference, defaults, manifest, configuration, "model")).To(BeNil())
 
-				access := (*configuration.Networking)[0].ExternalAccess
-				Expect(access.HttpRoute).NotTo(BeNil())
-				raw, err := json.Marshal(access.Inference)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(raw).To(MatchJSON(expected))
-			},
-			Entry("loadAwareRouting", &api.WorkloadV2ConfigurationInferenceRouting{LoadAwareRouting: ptr.To(true)},
-				`{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/v1"}`),
-		)
+			access := (*configuration.Networking)[0].ExternalAccess
+			Expect(access.HttpRoute).NotTo(BeNil())
+			raw, err := json.Marshal(access.Inference)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/v1"}`))
+		})
 
 		It("rejects the composed protected serving port", func() {
 			authenticated := workloadsapi.DISTRIBUTEDINFERENCESERVINGPORTACCESSAUTHORIZATIONTYPEENUM_AUTHENTICATED_USERS
 			manifest, configuration := composeDistributedInferenceForTest(&authenticated)
 			Expect(*(*(*configuration.Networking)[0].Services)[0].Spec.Ports[0].TargetPort).To(Equal(composer.Oauth2ContainerDefaultPort))
 
-			routing := &api.WorkloadV2ConfigurationInferenceRouting{LoadAwareRouting: ptr.To(true)}
-			err := applyInferenceRouting(inferenceRoutingDistributedInference, routing, defaults, manifest, configuration, "model")
+			err := applyInferenceRouting(inferenceRoutingDistributedInference, defaults, manifest, configuration, "model")
 			Expect(err).NotTo(BeNil())
 			Expect(err.Message).To(ContainSubstring(inferenceendpoint.AuthNotSupportedMessage))
 		})
 
 		It("rejects a workload without one serving endpoint", func() {
 			manifest, _ := composeDistributedInferenceForTest(nil)
-			routing := &api.WorkloadV2ConfigurationInferenceRouting{LoadAwareRouting: ptr.To(true)}
-			err := applyInferenceRouting(inferenceRoutingDistributedInference, routing, defaults, manifest, &models.WorkloadConfiguration{}, "model")
+			err := applyInferenceRouting(inferenceRoutingDistributedInference, defaults, manifest, &models.WorkloadConfiguration{}, "model")
 			Expect(err).NotTo(BeNil())
 			Expect(err.Code).To(BeEquivalentTo(http.StatusBadRequest))
 			Expect(err.Message).To(ContainSubstring("requires one serving port endpoint"))
@@ -272,8 +266,7 @@ var _ = Describe("inference routing", func() {
 
 		It("sets the inference block on the composed NIM serving endpoint", func() {
 			configuration := &models.WorkloadConfiguration{Networking: cloneNetworkingConfig(nimGatewayNetworking(publicServingPort("https://my-nim.example.com"), true))}
-			routing := &api.WorkloadV2ConfigurationInferenceRouting{LoadAwareRouting: ptr.To(true)}
-			Expect(applyInferenceRouting(inferenceRoutingNIMService, routing, defaults, nil, configuration, "my-nim")).To(BeNil())
+			Expect(applyInferenceRouting(inferenceRoutingNIMService, defaults, nil, configuration, "my-nim")).To(BeNil())
 
 			raw, err := json.Marshal((*configuration.Networking)[0].ExternalAccess.Inference)
 			Expect(err).NotTo(HaveOccurred())
@@ -282,8 +275,7 @@ var _ = Describe("inference routing", func() {
 
 		It("rejects the composed path-based NIM endpoint", func() {
 			configuration := &models.WorkloadConfiguration{Networking: cloneNetworkingConfig(nimGatewayNetworking(publicServingPort("https://example.com/project/my-nim"), true))}
-			routing := &api.WorkloadV2ConfigurationInferenceRouting{LoadAwareRouting: ptr.To(true)}
-			err := applyInferenceRouting(inferenceRoutingNIMService, routing, defaults, nil, configuration, "my-nim")
+			err := applyInferenceRouting(inferenceRoutingNIMService, defaults, nil, configuration, "my-nim")
 			Expect(err).NotTo(BeNil())
 			Expect(err.Code).To(BeEquivalentTo(http.StatusBadRequest))
 			Expect(err.Message).To(Equal("load-aware routing: NIM service requires a host-based URL; path-based URLs are not supported"))
@@ -291,8 +283,7 @@ var _ = Describe("inference routing", func() {
 
 		It("rejects NIM networking composed without the Service reference", func() {
 			configuration := &models.WorkloadConfiguration{Networking: cloneNetworkingConfig(nimGatewayNetworking(publicServingPort("https://my-nim.example.com"), false))}
-			routing := &api.WorkloadV2ConfigurationInferenceRouting{LoadAwareRouting: ptr.To(true)}
-			err := applyInferenceRouting(inferenceRoutingNIMService, routing, defaults, nil, configuration, "my-nim")
+			err := applyInferenceRouting(inferenceRoutingNIMService, defaults, nil, configuration, "my-nim")
 			Expect(err).NotTo(BeNil())
 			Expect(err.Message).To(ContainSubstring("requires exactly one referenced serving Service"))
 		})

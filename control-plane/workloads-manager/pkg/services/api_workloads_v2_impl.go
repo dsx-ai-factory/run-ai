@@ -257,7 +257,7 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 		enableNetworkingOwnershipContract(&dryRunRecord.Configuration)
 		// Run the same serving topology checks as submission, before the ownership
 		// binding adds the workload ID to the serving Service selector.
-		if routingErr := applyInferenceRouting(routingAdapter, inferenceRouting, inferenceDefaults, dryRunRecord.EffectiveManifest, dryRunRecord.Configuration, name); routingErr != nil {
+		if routingErr := applyInferenceRouting(routingAdapter, inferenceDefaults, dryRunRecord.EffectiveManifest, dryRunRecord.Configuration, name); routingErr != nil {
 			validationErrors.Add(routingErr)
 		}
 		if bindingErr := applyNetworkingOwnershipBinding(ctx, dryRunRecord, workloadType); bindingErr != nil {
@@ -304,7 +304,7 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 
 	// Build the intent from the effective manifest, before the ownership binding
 	// adds the workload ID to the serving Service selector.
-	if routingErr := applyInferenceRouting(routingAdapter, inferenceRouting, inferenceDefaults, effectiveManifest, configuration, name); routingErr != nil {
+	if routingErr := applyInferenceRouting(routingAdapter, inferenceDefaults, effectiveManifest, configuration, name); routingErr != nil {
 		return nil, SingleError(routingErr)
 	}
 
@@ -887,7 +887,7 @@ func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId strin
 		if routingErr != nil {
 			return nil, SubmissionErrorToApiError(routingErr)
 		}
-		if routingErr := applyInferenceRouting(routingAdapter, inferenceRouting, inferenceDefaults, effectiveManifest, configuration, qRecord.Name); routingErr != nil {
+		if routingErr := applyInferenceRouting(routingAdapter, inferenceDefaults, effectiveManifest, configuration, qRecord.Name); routingErr != nil {
 			return nil, SubmissionErrorToApiError(routingErr)
 		}
 		qRecord.Configuration = configuration
