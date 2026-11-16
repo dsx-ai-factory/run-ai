@@ -37,8 +37,12 @@ func BuildMasterReconciler(
 	reconcilers := reconciler.NewMasterReconciler(ctx)
 	reconcilers.AddReconciler(api.RECONCILERTYPE_REALMS, realm_reconciler.NewRealmReconciler(ctx, tenantRealm, iamServices, realmDal))
 	reconcilers.AddReconciler(api.RECONCILERTYPE_CLIENTS, client_reconciler.NewClientsReconciler(ctx, &iamServices, tenantRealm, realmDal))
-	reconcilers.AddReconciler(api.RECONCILERTYPE_SERVICE_ACCOUNTS, service_account_reconciler.NewServiceAccountsReconciler(ctx, &iamServices, tenantRealm, realmDal, reconcilerVersionsDal, reconcilerConfig.ServiceAccountsVersion))
-	reconcilers.AddReconciler(api.RECONCILERTYPE_INTERNAL_SERVICE_ACCOUNTS, service_account_reconciler.NewInternalServiceAccountsReconciler(ctx, &iamServices, tenantRealm, realmDal, reconcilerVersionsDal, reconcilerConfig.InternalServiceAccountsVersion))
+	reconcilers.AddReconciler(api.RECONCILERTYPE_SERVICE_ACCOUNTS, service_account_reconciler.NewServiceAccountsReconciler(
+		ctx, &iamServices, tenantRealm, realmDal, reconcilerVersionsDal, reconcilerConfig.ServiceAccountsVersion,
+	))
+	reconcilers.AddReconciler(api.RECONCILERTYPE_INTERNAL_SERVICE_ACCOUNTS, service_account_reconciler.NewInternalServiceAccountsReconciler(
+		ctx, &iamServices, tenantRealm, realmDal, reconcilerVersionsDal, reconcilerConfig.InternalServiceAccountsVersion,
+	))
 	reconcilers.AddReconciler(api.RECONCILERTYPE_ACCESS_KEYS, access_key_reconciler.NewAccessKeysReconciler(ctx, &iamServices, tenantRealm, realmDal, reconcilerVersionsDal, reconcilerConfig.AccessKeysVersion))
 	reconcilers.AddReconciler(api.RECONCILERTYPE_WORKLOAD_AUTH, client_reconciler.NewWorkloadAuthReconciler(ctx, &iamServices, tenantRealm, realmDal))
 
