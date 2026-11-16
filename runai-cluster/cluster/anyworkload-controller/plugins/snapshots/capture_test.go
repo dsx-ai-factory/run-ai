@@ -270,7 +270,7 @@ var _ = Describe("buildSnapshotJob", func() {
 	})
 
 	It("keeps only the pod labels that don't send traffic or count it as the serving workload's", func() {
-		Expect(job.Spec.PodTemplate.Labels).To(Equal(map[string]string{"team": "a", "project": "proj", captureLabel: "true"}))
+		Expect(job.Spec.PodTemplate.Labels).To(Equal(map[string]string{"team": "a", "project": "proj"}))
 	})
 
 	It("leaves the replica unchanged", func() {

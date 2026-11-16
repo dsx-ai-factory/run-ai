@@ -45,9 +45,6 @@ var (
 	errNoAgentNodes = errors.New("no nodes are known to run Snapshot's agent")
 )
 
-// captureLabel marks a capture pod.
-const captureLabel = "run.ai/snapshot-capture"
-
 // knativeLabelPrefix marks the labels Knative and Run:ai find a revision's pods by.
 const knativeLabelPrefix = "serving.knative.dev/"
 
@@ -330,9 +327,6 @@ func captureSpec(replica *corev1.Pod, target string, agentNodeSelector map[strin
 // capture pod traffic or count it as the serving workload's.
 func captureLabels(replica map[string]string, serviceSelectors []map[string]string) map[string]string {
 	captured := maps.Clone(replica)
-	if captured == nil {
-		captured = map[string]string{}
-	}
 	for _, key := range droppedLabels {
 		delete(captured, key)
 	}
@@ -351,7 +345,6 @@ func captureLabels(replica map[string]string, serviceSelectors []map[string]stri
 			}
 		}
 	}
-	captured[captureLabel] = "true"
 	return captured
 }
 

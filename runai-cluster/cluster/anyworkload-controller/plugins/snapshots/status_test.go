@@ -77,6 +77,13 @@ var _ = Describe("Status", func() {
 		Entry("eligible", deploymentKarta(),
 			func() *unstructured.Unstructured { return deployment(optIn, gpu) },
 			dromosv1alpha1.PluginPhaseReady, ReasonEnabled, ""),
+		// Only the target is restored, so a sidecar keeps its own.
+		Entry("a sidecar's own seccomp profile and startup probe", deploymentKarta(),
+			func() *unstructured.Unstructured {
+				sidecar := corev1.Container{Name: "sidecar", Image: "busybox"}
+				return deployment(optIn, gpu, withStartupProbe(withSeccomp(sidecar, ownProfile)))
+			},
+			dromosv1alpha1.PluginPhaseReady, ReasonEnabled, ""),
 		Entry("two pod templates", pairKarta(),
 			func() *unstructured.Unstructured { return pair(optIn, gpu) },
 			dromosv1alpha1.PluginPhaseDisabled, ReasonIneligible, "2 pod templates"),
