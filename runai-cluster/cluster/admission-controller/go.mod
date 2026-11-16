@@ -5,14 +5,14 @@ go 1.27.4
 require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20261111161025-458db923a809
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20261111161025-458db923a809
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.6
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20261115233308-3256ccd5269c
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20261115233308-3256ccd5269c
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.7
 	github.com/dyson/certman v0.2.1
 	github.com/golang/mock v1.6.0
-	github.com/magiconair/properties v1.18.12
+	github.com/magiconair/properties v1.18.13
 	github.com/stretchr/testify v1.12.1
-	golang.org/x/exp v0.0.0-20261109185158-a52e3aef5920
+	golang.org/x/exp v0.0.0-20261113113407-e3970619a1a4
 	gomodules.xyz/jsonpatch/v2 v2.5.0
 	k8s.io/api v0.37.2
 	k8s.io/apimachinery v0.37.2
@@ -34,8 +34,8 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.4 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.20 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.5 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.21 // indirect
 	github.com/emicklei/go-restful/v3 v3.14.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
