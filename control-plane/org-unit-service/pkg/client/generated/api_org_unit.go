@@ -132,6 +132,10 @@ type OrgUnitAPI interface {
 	return the same message as an unknown id, so hidden org units aren't revealed: an unreadable org unit is a 400,
 	not a 403.
 
+	Authorization: simulating departments requires read on departments, and simulating projects requires read on
+	projects, in some scope; otherwise 403. The handler checks it, since the required permission depends on
+	`orgUnitType`.
+
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param nodepoolId The unique id identifying the Node Pool.
@@ -1205,6 +1209,10 @@ the capabilities turn off; a quota or limit between -1 and 0; a limit below the 
 unit that isn't on the node pool, isn't readable by the caller, or (for projects) isn't the parent's. These all
 return the same message as an unknown id, so hidden org units aren't revealed: an unreadable org unit is a 400,
 not a 403.
+
+Authorization: simulating departments requires read on departments, and simulating projects requires read on
+projects, in some scope; otherwise 403. The handler checks it, since the required permission depends on
+`orgUnitType`.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param nodepoolId The unique id identifying the Node Pool.

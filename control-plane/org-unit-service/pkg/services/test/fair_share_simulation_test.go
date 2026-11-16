@@ -14,17 +14,57 @@ import (
 	"github.com/go-chi/chi/v5"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/mock"
+	"k8s.io/utils/ptr"
+
+	authorization_api "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
+	auth_mocks "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/mocks"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/services"
 )
 
 var _ = Describe("SimulateNodePoolFairShare", func() {
+	serviceWith := func(read map[authorization_api.ResourceType]authorization_api.PermittedScopes) services.OrgUnitApiService {
+		authMock := &auth_mocks.IAuthorizationClient{}
+		for resourceType, scopes := range read {
+			authMock.On("GetPermittedScopes", mock.Anything, resourceType, mock.Anything).
+				Return(&authorization_api.PermittedScopesActions{Read: scopes}, 0, nil)
+		}
+		return services.OrgUnitApiService{AuthorizationClient: authMock}
+	}
+	readEverything := serviceWith(map[authorization_api.ResourceType]authorization_api.PermittedScopes{
+		authorization_api.RESOURCETYPE_DEPARTMENT: {System: ptr.To(true)},
+		authorization_api.RESOURCETYPE_PROJECT:    {System: ptr.To(true)},
+	})
+
 	It("returns 501 until the simulation is implemented", func() {
-		response, err := services.OrgUnitApiService{}.SimulateNodePoolFairShare(context.Background(), "1", api.FairShareSimulationRequest{})
+		response, err := readEverything.SimulateNodePoolFairShare(context.Background(), "1",
+			api.FairShareSimulationRequest{OrgUnitType: "department"})
 		Expect(err).ToNot(HaveOccurred())
 		Expect(response.Code).To(Equal(http.StatusNotImplemented))
 	})
+
+	DescribeTable("requires read on the simulated org unit type",
+		func(orgUnitType string, read map[authorization_api.ResourceType]authorization_api.PermittedScopes, expectedCode int) {
+			response, err := serviceWith(read).SimulateNodePoolFairShare(context.Background(), "1",
+				api.FairShareSimulationRequest{OrgUnitType: orgUnitType})
+			Expect(err).ToNot(HaveOccurred())
+			Expect(response.Code).To(Equal(expectedCode))
+		},
+		Entry("departments with department read", "department",
+			map[authorization_api.ResourceType]authorization_api.PermittedScopes{
+				authorization_api.RESOURCETYPE_DEPARTMENT: {Departments: []string{"1"}}}, http.StatusNotImplemented),
+		Entry("departments with project read only", "department",
+			map[authorization_api.ResourceType]authorization_api.PermittedScopes{
+				authorization_api.RESOURCETYPE_DEPARTMENT: {}}, http.StatusForbidden),
+		Entry("projects with project read", "project",
+			map[authorization_api.ResourceType]authorization_api.PermittedScopes{
+				authorization_api.RESOURCETYPE_PROJECT: {Projects: []string{"1"}}}, http.StatusNotImplemented),
+		Entry("projects with department read only", "project",
+			map[authorization_api.ResourceType]authorization_api.PermittedScopes{
+				authorization_api.RESOURCETYPE_PROJECT: {}}, http.StatusForbidden),
+	)
 
 	// The generated controller rejects all-zero required objects unless they're pointers, so these requests must reach
 	// the service.
@@ -35,7 +75,7 @@ var _ = Describe("SimulateNodePoolFairShare", func() {
 			request := httptest.NewRequest(http.MethodPost, "/api/v1/org-unit/node-pools/1/fair-share-simulation",
 				strings.NewReader(body)).WithContext(context.WithValue(context.Background(), chi.RouteCtxKey, routeContext))
 			recorder := httptest.NewRecorder()
-			api.NewOrgUnitAPIController(services.OrgUnitApiService{}).SimulateNodePoolFairShare(recorder, request)
+			api.NewOrgUnitAPIController(readEverything).SimulateNodePoolFairShare(recorder, request)
 			if reachesService {
 				Expect(recorder.Code).To(Equal(http.StatusNotImplemented), recorder.Body.String())
 			} else {

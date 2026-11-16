@@ -5355,6 +5355,10 @@ paths:
         unit that isn't on the node pool, isn't readable by the caller, or (for projects) isn't the parent's. These all
         return the same message as an unknown id, so hidden org units aren't revealed: an unreadable org unit is a 400,
         not a 403.
+
+        Authorization: simulating departments requires read on departments, and simulating projects requires read on
+        projects, in some scope; otherwise 403. The handler checks it, since the required permission depends on
+        `orgUnitType`.
       operationId: simulate_node_pool_fair_share
       parameters:
       - description: The unique id identifying the Node Pool.
@@ -5429,9 +5433,7 @@ paths:
       tags:
       - Org unit
       x-service: org-unit-service
-      x-authorize:
-        resource-type: project
-        action: read
+      x-no-authorization: true
       x-test-coverage:
       - control-plane/org-unit-service/pkg/services/test/fair_share_simulation_test.go
     x-internal: true

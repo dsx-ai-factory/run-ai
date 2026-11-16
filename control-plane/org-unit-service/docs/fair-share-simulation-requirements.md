@@ -103,6 +103,7 @@ The code is KAI's `pkg/fairshare` (v0.19.0). The simulation must use it, not a p
 - 400 for: `limits` on with `quota` off; a `limit` on a row while `limits` is off; a `rank` while `ranks` is off; a duplicate id; an id not in the pool or not readable (same message); a row outside the parent; `parent` missing for projects or set for departments; `capacity < 0`; `demand < 0`. A demand above the limit is capped, not rejected. `capacity = 0` is valid (a pool with no nodes yet): the quota phase still runs, so each org unit gets its quota (capped by demand and limit) and nothing above it.
 - Response: only `orgUnits`. Per row: `fairShare`, `guaranteed`, `overQuota`, `unmet`, `demand` (effective), `weightShareInRank`. Values may be fractional; the client rounds. The parent's own result isn't returned: with the other departments idle it repeats its capped demand, and no form shows it.
 - The parent needn't be readable, so a project's reader can open the project form; an unknown parent gets the same 400 as an unknown project.
+- Authorization: department rows require read on departments and project rows read on projects, in some scope; otherwise 403. It's checked in the handler, since the permission depends on `orgUnitType` (a custom role may have department read without project read, or the reverse).
 - Cost per call: the pool's departments (hundreds) plus, for the project form, one department's projects (up to ~1.2k), two permitted-scopes calls, and KAI's division.
 
 ## 12. Decisions taken on the open questions
