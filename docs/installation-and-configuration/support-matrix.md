@@ -37,7 +37,8 @@ Each NVIDIA Run:ai release is tested and validated against a single minor versio
 | Component    | Deployed On                | Supported Version |
 | ------------ | --------------------------- | ----------------- |
 | Keycloak     | NVIDIA Run:ai control plane | 26.6              |
-| PostgreSQL   | NVIDIA Run:ai control plane | 16                |
+| PostgreSQL (built-in)  | NVIDIA Run:ai control plane | 16                |
+| PostgreSQL (external)  | Customer-managed            | 16, 17, 18        |
 | Traefik      | NVIDIA Run:ai control plane | 3.7               |
 | NATS         | NVIDIA Run:ai control plane | 2.11.8            |
 | Thanos       | NVIDIA Run:ai control plane | 0.38.0            |
