@@ -7,6 +7,7 @@ package services_test
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -178,23 +179,29 @@ var _ = Describe("Nodepool gpu types", Ordered, func() {
 	})
 
 	Context("metadata (minimal) endpoint", func() {
+		It("reports the largest matching GPU count on one node instead of the pool total", func() {
+			body, err := json.Marshal(gpuTypesOf(listMinimal(cluster.ID.String()), homogeneousPool))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(body).To(MatchJSON(`[{"type":"NVIDIA-H100-80GB-HBM3","gpuMemoryBytes":85899345920,"totalDevices":12,"maxDevicesPerNode":8}]`))
+		})
+
 		It("sums devices of a single gpu type across the pool's nodes", func() {
 			Expect(gpuTypesOf(listMinimal(cluster.ID.String()), homogeneousPool)).To(ConsistOf(
-				api.NodepoolGpuTypeDetails{Type: h100, GpuMemoryBytes: h100Memory, TotalDevices: 12},
+				api.NodepoolGpuTypeDetails{Type: h100, GpuMemoryBytes: h100Memory, TotalDevices: 12, MaxDevicesPerNode: 8},
 			))
 		})
 
 		It("reports an entry per gpu type in a heterogeneous pool", func() {
 			Expect(gpuTypesOf(listMinimal(cluster.ID.String()), heterogeneousPool)).To(ConsistOf(
-				api.NodepoolGpuTypeDetails{Type: h100, GpuMemoryBytes: h100Memory, TotalDevices: 8},
-				api.NodepoolGpuTypeDetails{Type: v100, GpuMemoryBytes: v100Memory, TotalDevices: 2},
+				api.NodepoolGpuTypeDetails{Type: h100, GpuMemoryBytes: h100Memory, TotalDevices: 8, MaxDevicesPerNode: 8},
+				api.NodepoolGpuTypeDetails{Type: v100, GpuMemoryBytes: v100Memory, TotalDevices: 2, MaxDevicesPerNode: 2},
 			))
 		})
 
 		It("splits one gpu type into an entry per memory size", func() {
 			Expect(gpuTypesOf(listMinimal(cluster.ID.String()), mixedMemoryPool)).To(ConsistOf(
-				api.NodepoolGpuTypeDetails{Type: h100, GpuMemoryBytes: h100Memory, TotalDevices: 8},
-				api.NodepoolGpuTypeDetails{Type: h100, GpuMemoryBytes: halfH100Mem, TotalDevices: 1},
+				api.NodepoolGpuTypeDetails{Type: h100, GpuMemoryBytes: h100Memory, TotalDevices: 8, MaxDevicesPerNode: 8},
+				api.NodepoolGpuTypeDetails{Type: h100, GpuMemoryBytes: halfH100Mem, TotalDevices: 1, MaxDevicesPerNode: 1},
 			))
 		})
 
@@ -202,8 +209,8 @@ var _ = Describe("Nodepool gpu types", Ordered, func() {
 		// known-memory one would hand the submission form GB figures for devices nobody measured.
 		It("keeps devices with unknown memory in a separate entry from the same model", func() {
 			Expect(gpuTypesOf(listMinimal(cluster.ID.String()), unknownMemoryPool)).To(ConsistOf(
-				api.NodepoolGpuTypeDetails{Type: h100, GpuMemoryBytes: h100Memory, TotalDevices: 8},
-				api.NodepoolGpuTypeDetails{Type: h100, TotalDevices: 4},
+				api.NodepoolGpuTypeDetails{Type: h100, GpuMemoryBytes: h100Memory, TotalDevices: 8, MaxDevicesPerNode: 8},
+				api.NodepoolGpuTypeDetails{Type: h100, TotalDevices: 4, MaxDevicesPerNode: 4},
 			))
 		})
 
@@ -211,7 +218,7 @@ var _ = Describe("Nodepool gpu types", Ordered, func() {
 		// and device count still have to come through.
 		It("reports the model and device count for a cluster that reports no memory", func() {
 			Expect(gpuTypesOf(listMinimal(cluster.ID.String()), noMemoryPool)).To(ConsistOf(
-				api.NodepoolGpuTypeDetails{Type: v100, TotalDevices: 6},
+				api.NodepoolGpuTypeDetails{Type: v100, TotalDevices: 6, MaxDevicesPerNode: 4},
 			))
 		})
 
@@ -222,7 +229,7 @@ var _ = Describe("Nodepool gpu types", Ordered, func() {
 		It("does not leak gpu types between same-named pools in different clusters", func() {
 			Expect(gpuTypesOf(listMinimal(cluster.ID.String()), sharedNamePool)).To(BeEmpty())
 			Expect(gpuTypesOf(listMinimal(otherCluster.ID.String()), sharedNamePool)).To(ConsistOf(
-				api.NodepoolGpuTypeDetails{Type: v100, GpuMemoryBytes: v100Memory, TotalDevices: 3},
+				api.NodepoolGpuTypeDetails{Type: v100, GpuMemoryBytes: v100Memory, TotalDevices: 3, MaxDevicesPerNode: 3},
 			))
 		})
 
@@ -239,7 +246,7 @@ var _ = Describe("Nodepool gpu types", Ordered, func() {
 			Expect(err).To(BeNil())
 			Expect(response.Code).To(Equal(http.StatusOK))
 			Expect(response.Body.(api.NodepoolMinimal).GpuTypes).To(ConsistOf(
-				api.NodepoolGpuTypeDetails{Type: h100, GpuMemoryBytes: h100Memory, TotalDevices: 12},
+				api.NodepoolGpuTypeDetails{Type: h100, GpuMemoryBytes: h100Memory, TotalDevices: 12, MaxDevicesPerNode: 8},
 			))
 		})
 	})
@@ -257,11 +264,11 @@ var _ = Describe("Nodepool gpu types", Ordered, func() {
 			}
 
 			Expect(byName[homogeneousPool]).To(ConsistOf(
-				api.NodepoolGpuTypeDetails{Type: h100, GpuMemoryBytes: h100Memory, TotalDevices: 12},
+				api.NodepoolGpuTypeDetails{Type: h100, GpuMemoryBytes: h100Memory, TotalDevices: 12, MaxDevicesPerNode: 8},
 			))
 			Expect(byName[heterogeneousPool]).To(ConsistOf(
-				api.NodepoolGpuTypeDetails{Type: h100, GpuMemoryBytes: h100Memory, TotalDevices: 8},
-				api.NodepoolGpuTypeDetails{Type: v100, GpuMemoryBytes: v100Memory, TotalDevices: 2},
+				api.NodepoolGpuTypeDetails{Type: h100, GpuMemoryBytes: h100Memory, TotalDevices: 8, MaxDevicesPerNode: 8},
+				api.NodepoolGpuTypeDetails{Type: v100, GpuMemoryBytes: v100Memory, TotalDevices: 2, MaxDevicesPerNode: 2},
 			))
 			Expect(byName[cpuOnlyPool]).To(BeEmpty())
 		})
