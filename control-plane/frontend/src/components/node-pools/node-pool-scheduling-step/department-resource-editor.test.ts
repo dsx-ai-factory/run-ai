@@ -147,13 +147,15 @@ describe("department resource editor", () => {
     });
     expect(wrapper.get(".weight-percentage").text()).toBe("(10%)");
     expect(wrapper.find(".q-field__suffix").exists()).toBe(false);
-    for (const value of ["-2", "0.5", "21"]) {
+    for (const value of ["", "-2", "0.5", "21", "2223"]) {
       await wrapper.get("input").setValue(value);
       expect(wrapper.text()).toContain("Enter a whole number from 0 to 20");
+      expect(wrapper.find(".weight-percentage").exists()).toBe(false);
       wrapper.findComponent(popup).vm.$emit("apply");
     }
     expect(wrapper.emitted("apply")).toBeUndefined();
     await wrapper.get("input").setValue("20");
+    expect(wrapper.get(".weight-percentage").text()).toBe("(100%)");
     wrapper.findComponent(popup).vm.$emit("apply");
     expect(wrapper.emitted("apply")).toEqual([[20]]);
     wrapper.unmount();

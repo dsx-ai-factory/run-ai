@@ -70,16 +70,30 @@
                     @update:model-value="selectMode"
                   >
                     <template #option-end="{ selected, option }">
-                      <span v-if="modeHelpExpanded" class="mode-explanation">{{
-                        modeExplanations[String(option.value)]
-                      }}</span>
-                      <notification-alert-bar
-                        v-if="option.value === 'guaranteed' && showGuaranteedNotice"
-                        class="mode-guarantee-warning"
-                        :variant="ENotificationBarVariant.Default"
-                        icon-override="ph ph-lock"
-                        >Mode can't be changed after saving</notification-alert-bar
-                      >
+                      <div class="mode-details">
+                        <q-slide-transition :duration="511">
+                          <div v-if="modeHelpExpanded" class="mode-explanation-transition">
+                            <div class="mode-explanation-content">
+                              <span class="mode-explanation">{{ modeExplanations[String(option.value)] }}</span>
+                            </div>
+                          </div>
+                        </q-slide-transition>
+                        <q-slide-transition :duration="511">
+                          <div
+                            v-if="option.value === 'guaranteed' && showGuaranteedNotice"
+                            class="mode-warning-transition"
+                          >
+                            <div class="mode-warning-container">
+                              <notification-alert-bar
+                                class="mode-guarantee-warning"
+                                :variant="ENotificationBarVariant.Default"
+                                icon-override="ph ph-lock"
+                                >Mode can't be changed after saving</notification-alert-bar
+                              >
+                            </div>
+                          </div>
+                        </q-slide-transition>
+                      </div>
                       <q-icon
                         v-if="selected || option.disable || saving || !canEditDepartments || !canViewDepartments"
                         name="ph-bold ph-check"
@@ -578,7 +592,8 @@ async function save() {
     border: 1px solid var(--border-subtle);
     border-radius: 5px;
     padding: 9px 15px;
-    gap: 10px;
+    column-gap: 10px;
+    row-gap: 0;
     text-align: left;
     background: #fff;
     transition: none;
@@ -658,17 +673,29 @@ async function save() {
   font-weight: 400;
   line-height: 16.8px;
 }
-.mode-cards--expanded :deep(.runai-segment:not([aid="mode-guaranteed"])) {
-  min-height: 122px;
+.mode-details {
+  grid-column: 1 / -1;
 }
-.mode-cards--notice {
+.mode-explanation-content,
+.mode-warning-container {
+  padding-top: 10px;
+}
+.mode-cards :deep(.runai-segment:not([aid="mode-guaranteed"])) .mode-explanation-content {
+  min-height: 61px;
+}
+.mode-explanation {
+  display: block;
+}
+.mode-cards {
   align-items: stretch;
 }
-.mode-cards--notice :deep(.runai-segment) {
-  min-height: 155px;
+@media (prefers-reduced-motion: reduce) {
+  .mode-explanation-transition,
+  .mode-warning-transition {
+    transition-duration: 0.001ms !important;
+  }
 }
 .mode-guarantee-warning {
-  grid-column: 1 / -1;
   min-height: 40px;
   padding: 10px 16px;
   border-radius: 0;

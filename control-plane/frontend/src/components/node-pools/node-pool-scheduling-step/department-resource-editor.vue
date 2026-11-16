@@ -76,7 +76,9 @@
           :error-message="errorMessage"
           no-error-icon
         />
-        <span v-if="kind === 'weight'" class="weight-percentage">({{ proposedWeightPercentage }})</span>
+        <span v-if="kind === 'weight' && !validation.errors.length" class="weight-percentage"
+          >({{ proposedWeightPercentage }})</span
+        >
       </div>
       <p
         v-if="kind === 'quota' && !loading && !validation.errors.length && !validation.warnings.length"

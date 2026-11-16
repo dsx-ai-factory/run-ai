@@ -207,7 +207,7 @@ describe("scheduling department table", () => {
     expect(editor.get(".weight-percentage").text()).toBe("(100%)");
     for (const invalid of ["", "-1", "0.5"]) {
       await editor.get("input").setValue(invalid);
-      expect(editor.get(".weight-percentage").text()).toBe("(Unknown)");
+      expect(editor.find(".weight-percentage").exists()).toBe(false);
       editor.findComponent(weightPopup).vm.$emit("apply");
     }
     expect(wrapper.emitted("edit")).toBeUndefined();
