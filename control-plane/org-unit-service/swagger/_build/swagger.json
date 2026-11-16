@@ -3655,7 +3655,7 @@
         "summary": "Simulate the fair share of a node pool's org units",
         "operationId": "simulate_node_pool_fair_share",
         "x-service": "org-unit-service",
-        "description": "Computes the GPUs the scheduler would give org units of a node pool for a scenario: the node pool's capacity and\nscheduling capabilities as set in the form, and the org units to return with their unsaved changes. The calculation\ncovers every department of the node pool, and for projects every project of the parent, including ones the caller\ncan't read; the response holds only the requested org units. Org units not in the request keep their stored\nsettings and ask for half the capacity. Nothing is saved. The same scenario gives the same result for every caller.\n\nOnly saved org units can be simulated; the department and project create forms are out of scope.\n\n400 covers, besides the schema: `parent` missing for projects or set for departments; a rank or limit the\ncapabilities turn off (a weight is ignored while adjustableWeights is off); a quota or limit between -1 and 0; a\nlimit below the quota; a duplicate id; and an org unit that isn't on the node pool, isn't readable by the caller,\nor (for projects) isn't the parent's. These all return the same message as an unknown id, so hidden org units\naren't revealed: an unreadable org unit is a 400, not a 403.\n\nAuthorization: simulating departments requires read on departments, and simulating projects requires read on\nprojects, in some scope; otherwise 403. The handler checks it, since the required permission depends on\n`orgUnitType`.\n",
+        "description": "Computes the GPUs the scheduler would give org units of a node pool for a scenario: a node pool capacity and\nscheduling capabilities, saved or not, and the org units to return with their unsaved changes. The calculation\ncovers every department of the node pool, and for projects every project of the parent, including ones the caller\ncan't read; the response holds only the requested org units. Org units not in the request keep their stored\nsettings and ask for half the capacity. Nothing is saved. The same scenario gives the same result for every caller.\n\nOnly saved org units can be simulated; an org unit that doesn't exist yet can't be part of the scenario.\n\n400 covers, besides the schema: `parent` missing for projects or set for departments; a rank or limit the\ncapabilities turn off (a weight is ignored while adjustableWeights is off); a quota or limit between -1 and 0; a\nlimit below the quota; a duplicate id; and an org unit that isn't on the node pool, isn't readable by the caller,\nor (for projects) isn't the parent's. These all return the same message as an unknown id, so hidden org units\naren't revealed: an unreadable org unit is a 400, not a 403.\n\nAuthorization: simulating departments requires read on departments, and simulating projects requires read on\nprojects, in some scope; otherwise 403. The handler checks it, since the required permission depends on\n`orgUnitType`.\n",
         "x-no-authorization": true,
         "x-test-coverage": [
           "control-plane/org-unit-service/pkg/test/fair_share_simulation_api_test.go"
@@ -8154,7 +8154,7 @@
       },
       "FairShareSimulationSchedulingCapabilities": {
         "type": "object",
-        "description": "The node pool's scheduling capabilities as set in the form, saved or not.",
+        "description": "The node pool's scheduling capabilities to simulate, saved or not.",
         "required": [
           "quota",
           "ranks",
@@ -8179,7 +8179,7 @@
       },
       "FairShareSimulationNodePool": {
         "type": "object",
-        "description": "The node pool as it is in the form.",
+        "description": "The node pool to simulate, saved or not.",
         "required": [
           "capacity",
           "schedulingCapabilities"
@@ -8266,7 +8266,7 @@
       },
       "FairShareSimulationOrgUnit": {
         "type": "object",
-        "description": "A requested org unit with its unsaved changes. Each field replaces the stored value on its own; omitted fields keep\nit. `demand` is the GPUs the org unit asks for (the dragged slider), capped by its limit; without it, half the node\npool's capacity.\n",
+        "description": "A requested org unit with its unsaved changes. Each field replaces the stored value on its own; omitted fields keep\nit. `demand` is the GPUs the org unit asks for, capped by its limit; without it, half the node pool's capacity.\n",
         "required": [
           "id"
         ],
@@ -8293,7 +8293,7 @@
             ]
           },
           "demand": {
-            "description": "The dragged slider, capped by the limit. Omitted or null asks for half the capacity.",
+            "description": "The GPUs the org unit asks for, capped by its limit. Omitted or null asks for half the capacity.",
             "nullable": true,
             "allOf": [
               {
@@ -8305,7 +8305,7 @@
       },
       "FairShareSimulationRequest": {
         "type": "object",
-        "description": "A scenario to simulate: the node pool as it is in the form and the org units the form shows, with their unsaved\nchanges. Every org unit without a demand asks for half the node pool's capacity, capped by its limit. For\ndepartments, every department competes; the node pool and department forms both send departments. For projects, the\nother departments ask for nothing, and the parent asks for the sum of its projects' demand, capped by its limit.\n",
+        "description": "A scenario to simulate: the node pool and the org units to return, with their unsaved changes. Every org unit\nwithout a demand asks for half the node pool's capacity, capped by its limit. For departments, every department\ncompetes. For projects, the other departments ask for nothing, and the parent asks for the sum of its projects'\ndemand, capped by its limit.\n",
         "required": [
           "nodePool",
           "orgUnitType",
@@ -8342,7 +8342,7 @@
             "type": "array",
             "minItems": 1,
             "maxItems": 500,
-            "description": "The org units to return, with their unsaved changes. Send the rows the screen shows and every edited row: an edit\nthat isn't sent is lost.\n",
+            "description": "The org units to return, with their unsaved changes. Every org unit with an unsaved change must be sent: a change\nthat isn't sent isn't simulated.\n",
             "items": {
               "$ref": "#/components/schemas/FairShareSimulationOrgUnit"
             }
