@@ -7,14 +7,18 @@ package snapshots
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/internal/snapshotkey"
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/plugin/framework"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/reconcile"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/reconcile/issue"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -38,10 +42,13 @@ const (
 // Status reports Ready for an opted-in workload that can use snapshots, and
 // Disabled otherwise, with a warning issue when an opt-in can't be honoured.
 // Neither moves the workload's phase: an ineligible workload just starts cold.
+//
+// For an opted-in workload it also records the newest key, which the deletion
+// keeps while no replica runs.
 func (p *Plugin) Status(
 	ctx context.Context,
 	runner *dromosv1alpha1.WorkloadRunner,
-	_ client.Client,
+	c client.Client,
 	status framework.PluginStatusSetter,
 	state *reconcile.State,
 ) error {
@@ -63,6 +70,9 @@ func (p *Plugin) Status(
 	if !p.snapshotInstalled {
 		setEnabled(status, metav1.ConditionFalse, ReasonNotInstalled, msgNotInstalled)
 		return nil
+	}
+	if err := recordNewestKey(ctx, c, runner, status); err != nil {
+		_ = state.AddPluginIssue(ctx, p, template, err, false, "", issue.Compute)
 	}
 	gvk := template.GroupVersionKind()
 	karta, err := p.kartas.GetKartaForGVK(ctx, gvk)
@@ -100,4 +110,50 @@ func setEnabled(status framework.PluginStatusSetter, enabled metav1.ConditionSta
 func checkFailed(status framework.PluginStatusSetter, err error) error {
 	setEnabled(status, metav1.ConditionUnknown, ReasonCheckFailed, err.Error())
 	return err
+}
+
+// statusInfo is the plugin's structured status.
+type statusInfo struct {
+	// NewestKey is the most recently created replica's key, kept while no replica runs.
+	NewestKey string `json:"newestKey,omitempty"`
+}
+
+// recordNewestKey records the key of the runner's most recently created replica,
+// and leaves the record alone while it has none.
+func recordNewestKey(ctx context.Context, c client.Reader, runner *dromosv1alpha1.WorkloadRunner,
+	status framework.PluginStatusSetter) error {
+	replicas, err := keyedReplicas(ctx, c, runner)
+	if err != nil {
+		return err
+	}
+	var newest *corev1.Pod
+	for i := range replicas {
+		if newest == nil || replicas[i].CreationTimestamp.After(newest.CreationTimestamp.Time) {
+			newest = &replicas[i]
+		}
+	}
+	if newest == nil {
+		return nil
+	}
+	key, _ := snapshotkey.SnapshotKeyOf(newest)
+	raw, err := json.Marshal(statusInfo{NewestKey: key})
+	if err != nil {
+		return fmt.Errorf("record the newest key: %w", err)
+	}
+	status.SetAdditionalInfo(&runtime.RawExtension{Raw: raw})
+	return nil
+}
+
+// recordedNewestKey reads the key Status recorded on an earlier reconcile; the
+// framework hands the plugin its own status back on every one.
+func recordedNewestKey(runner *dromosv1alpha1.WorkloadRunner) (string, error) {
+	plugin := runner.Status.Plugins[PluginName]
+	if plugin == nil || plugin.AdditionalInfo == nil {
+		return "", nil
+	}
+	var info statusInfo
+	if err := json.Unmarshal(plugin.AdditionalInfo.Raw, &info); err != nil {
+		return "", fmt.Errorf("read the recorded newest key: %w", err)
+	}
+	return info.NewestKey, nil
 }

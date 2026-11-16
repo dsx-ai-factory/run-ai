@@ -42,9 +42,9 @@ var _ = Describe("mapToRunner", func() {
 	})
 })
 
-var _ = Describe("replicaReadinessChanged", func() {
+var _ = Describe("replicaReadyOrGone", func() {
 	var cold, ready, notOptedIn, notOptedInCold *corev1.Pod
-	changed := replicaReadinessChanged()
+	changed := replicaReadyOrGone()
 
 	BeforeEach(func() {
 		cold = replica("llama-a", "rs-1", 100, false)
@@ -55,7 +55,7 @@ var _ = Describe("replicaReadinessChanged", func() {
 		delete(notOptedInCold.Labels, constants.SnapshotOptInLabel)
 	})
 
-	DescribeTable("passes only a change in a replica's readiness",
+	DescribeTable("passes a change in a replica's readiness, and its deletion",
 		func(passes func() bool, want bool) {
 			Expect(passes()).To(Equal(want))
 		},
@@ -79,6 +79,9 @@ var _ = Describe("replicaReadinessChanged", func() {
 		}, false),
 		Entry("deleted", func() bool {
 			return changed.Delete(event.DeleteEvent{Object: ready})
+		}, true),
+		Entry("deleted, not opted in", func() bool {
+			return changed.Delete(event.DeleteEvent{Object: notOptedIn})
 		}, false),
 	)
 })

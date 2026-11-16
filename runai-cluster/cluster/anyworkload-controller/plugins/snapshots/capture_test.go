@@ -16,6 +16,7 @@ import (
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	gomegatypes "github.com/onsi/gomega/types"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -176,6 +177,110 @@ var _ = Describe("HandleAdditionalResources", func() {
 		jobs := snapshotJobs(ctx, c)
 		Expect(jobs).To(HaveLen(1))
 		Expect(jobs[0].Spec.ActiveDeadlineSeconds).To(HaveValue(Equal(int64(7200))))
+	})
+})
+
+var _ = Describe("Deleting unused snapshots", func() {
+	var ctx context.Context
+
+	BeforeEach(func() {
+		ctx = context.Background()
+	})
+
+	gpu := gpuContainer("main")
+	optedIn := func() *unstructured.Unstructured { return deployment(optIn, gpu) }
+	optedOut := func() *unstructured.Unstructured { return deployment(nil, gpu) }
+
+	It("deletes the snapshots, and a capture still running, of a key no replica has", func() {
+		current := replica("llama-new", "rs-new", 200, true)
+		c := captureClient(current,
+			capturedJob(keyOf(current), true), capturedPodSnapshot(keyOf(current), "runner-uid"),
+			capturedJob("old-key", false), capturedPodSnapshot("old-key", "runner-uid"))
+
+		Expect(handle(ctx, capturePlugin(), c, optedIn())).To(BeEmpty())
+
+		Expect(snapshotJobs(ctx, c)).To(ConsistOf(named(keyOf(current))))
+		Expect(podSnapshots(ctx, c)).To(ConsistOf(named(keyOf(current))))
+	})
+
+	It("keeps the newest key while no replica runs, so the first one after a scale to zero restores", func() {
+		c := captureClient(
+			capturedJob("k1", true), capturedPodSnapshot("k1", "runner-uid"),
+			capturedJob("k2", true), capturedPodSnapshot("k2", "runner-uid"))
+
+		handleRunner(ctx, capturePlugin(), withNewestKey(testRunner(), "k2"), c, optedIn())
+
+		Expect(snapshotJobs(ctx, c)).To(ConsistOf(named("k2")))
+		Expect(podSnapshots(ctx, c)).To(ConsistOf(named("k2")))
+	})
+
+	DescribeTable("keeps a key while a replica has it",
+		func(workload func() *unstructured.Unstructured) {
+			running := replica("llama-a", "rs-1", 100, true)
+			c := captureClient(running,
+				capturedJob(keyOf(running), true), capturedPodSnapshot(keyOf(running), "runner-uid"))
+
+			handle(ctx, capturePlugin(), c, workload())
+
+			Expect(snapshotJobs(ctx, c)).To(ConsistOf(named(keyOf(running))))
+			Expect(podSnapshots(ctx, c)).To(ConsistOf(named(keyOf(running))))
+		},
+		Entry("opted in", optedIn),
+		Entry("opt-in removed", optedOut),
+	)
+
+	It("deletes the newest key's snapshots too once the opt-in is removed", func() {
+		c := captureClient(capturedJob("k2", true), capturedPodSnapshot("k2", "runner-uid"))
+
+		handleRunner(ctx, capturePlugin(), withNewestKey(testRunner(), "k2"), c, optedOut())
+
+		Expect(snapshotJobs(ctx, c)).To(BeEmpty())
+		Expect(podSnapshots(ctx, c)).To(BeEmpty())
+	})
+
+	It("removes a failed PodSnapshot but keeps its SnapshotJob, so the key doesn't capture again", func() {
+		running := replica("llama-a", "rs-1", 100, true)
+		c := captureClient(running,
+			capturedJob(keyOf(running), true), failed(capturedPodSnapshot(keyOf(running), "runner-uid")))
+
+		handle(ctx, capturePlugin(), c, optedIn())
+
+		Expect(podSnapshots(ctx, c)).To(BeEmpty())
+		jobs := snapshotJobs(ctx, c)
+		Expect(jobs).To(ConsistOf(named(keyOf(running))))
+		Expect(snapshotv1alpha1.IsSnapshotJobTerminal(&jobs[0])).To(BeTrue(), "want the finished capture, not a new one")
+	})
+
+	// The cleanup deletes them once that runner is gone.
+	It("leaves an earlier runner's snapshots", func() {
+		c := captureClient(capturedPodSnapshot("old-key", "earlier-runner-uid"))
+
+		handle(ctx, capturePlugin(), c, optedIn())
+
+		Expect(podSnapshots(ctx, c)).To(HaveLen(1))
+	})
+
+	It("deletes with the capture turned off", func() {
+		plugin := capturePlugin()
+		plugin.captureEnabled = false
+		c := captureClient(capturedJob("old-key", true), capturedPodSnapshot("old-key", "runner-uid"))
+
+		handle(ctx, plugin, c, optedIn())
+
+		Expect(snapshotJobs(ctx, c)).To(BeEmpty())
+		Expect(podSnapshots(ctx, c)).To(BeEmpty())
+	})
+
+	// Listing a kind whose CRD is missing fails, so it would warn on every reconcile.
+	It("does nothing without Snapshot", func() {
+		plugin := capturePlugin()
+		plugin.snapshotInstalled = false
+		c := captureClient(capturedJob("old-key", true), capturedPodSnapshot("old-key", "runner-uid"))
+
+		Expect(handle(ctx, plugin, c, optedIn())).To(BeEmpty())
+
+		Expect(snapshotJobs(ctx, c)).To(HaveLen(1))
+		Expect(podSnapshots(ctx, c)).To(HaveLen(1))
 	})
 })
 
@@ -353,11 +458,17 @@ func captureClient(objects ...client.Object) client.Client {
 	return fakeclient.NewClientBuilder().WithScheme(scheme).WithObjects(objects...).Build()
 }
 
-// handle runs the capture hook and returns its warnings, failing on any critical
-// one: a capture problem must never change the workload's phase.
+// handle runs the capture hook for testRunner and returns its warnings.
 func handle(ctx context.Context, plugin *Plugin, c client.Client, workload *unstructured.Unstructured) []string {
+	return handleRunner(ctx, plugin, testRunner(), c, workload)
+}
+
+// handleRunner runs the capture hook and returns its warnings, failing on any
+// critical one: a capture problem must never change the workload's phase.
+func handleRunner(ctx context.Context, plugin *Plugin, runner *dromosv1alpha1.WorkloadRunner, c client.Client,
+	workload *unstructured.Unstructured) []string {
 	state := reconcile.New()
-	Expect(plugin.HandleAdditionalResources(ctx, testRunner(), workload, deploymentKarta(), c, state)).To(Succeed())
+	Expect(plugin.HandleAdditionalResources(ctx, runner, workload, deploymentKarta(), c, state)).To(Succeed())
 	var warnings []string
 	for _, reported := range state.PluginIssues(plugin) {
 		Expect(reported.IsCritical).To(BeFalse(), "issue %q is critical", reported.Error())
@@ -381,7 +492,28 @@ func hasSnapshotJob(ctx context.Context, c client.Client, key string) bool {
 	return false
 }
 
+// named matches testRunner's capture, or its PodSnapshot, of key.
+func named(key string) gomegatypes.GomegaMatcher {
+	return HaveField("ObjectMeta.Name", snapshotkey.SnapshotName(key, "llama"))
+}
+
 func keyOf(pod *corev1.Pod) string {
 	key, _ := snapshotkey.SnapshotKeyOf(pod)
 	return key
+}
+
+// withNewestKey gives runner the status an earlier reconcile recorded for key.
+func withNewestKey(runner *dromosv1alpha1.WorkloadRunner, key string) *dromosv1alpha1.WorkloadRunner {
+	runner.Status.Plugins = map[string]*dromosv1alpha1.PluginStatus{
+		PluginName: {AdditionalInfo: &runtime.RawExtension{Raw: []byte(`{"newestKey":"` + key + `"}`)}},
+	}
+	return runner
+}
+
+func failed(snapshot *snapshotv1alpha1.PodSnapshot) *snapshotv1alpha1.PodSnapshot {
+	snapshot.Status.Conditions = []metav1.Condition{{
+		Type: snapshotv1alpha1.PodSnapshotConditionFailed, Status: metav1.ConditionTrue,
+		Reason: "CaptureFailed", LastTransitionTime: metav1.Unix(300, 0),
+	}}
+	return snapshot
 }

@@ -14,7 +14,6 @@ import (
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	gomegatypes "github.com/onsi/gomega/types"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -34,9 +33,6 @@ var _ = Describe("cleanup", func() {
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: "runai-proj", Name: "llama"}}
 		_, err := (&cleaner{client: c, apiReader: c}).Reconcile(ctx, request)
 		Expect(err).NotTo(HaveOccurred())
-	}
-	named := func(key string) gomegatypes.GomegaMatcher {
-		return HaveField("ObjectMeta.Name", snapshotkey.SnapshotName(key, "llama"))
 	}
 
 	It("deletes a deleted runner's SnapshotJobs and PodSnapshots", func() {
