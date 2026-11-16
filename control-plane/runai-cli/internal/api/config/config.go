@@ -11,6 +11,8 @@ import (
 	"net/url"
 	"runtime"
 
+	catalog "github.com/dsx-ai-factory/run-ai/runai-clients/catalog-service-client/generated"
+
 	k8sobjtrack "github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client/generated"
 
 	cliVersion "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/version"
@@ -185,4 +187,17 @@ func GetUserAgent() string {
 	currentVersion := cliVersion.GetVersion()
 	return fmt.Sprintf(UserAgentStr, currentVersion.ControlPlaneVersion, currentVersion.Version,
 		currentVersion.GoVersion, runtime.GOOS, runtime.GOARCH)
+}
+
+func CreateCatalogConfig(urlStr, token string) (*catalog.Configuration, error) {
+	serviceURL, err := url.Parse(urlStr)
+	if err != nil {
+		return nil, err
+	}
+	configuration := catalog.NewConfiguration()
+	configuration.Scheme = serviceURL.Scheme
+	configuration.Host = serviceURL.Host
+	configuration.UserAgent = GetUserAgent()
+	configuration.AddDefaultHeader(AuthorizationHeader, fmt.Sprintf(BearerTokenStr, token))
+	return configuration, nil
 }

@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2440" height="2080" viewBox="0 0 2440 2080">
+  <rect x="0" y="0" width="2440" height="2080" rx="0" fill="#F5F7FB" />
+  <text x="70" y="74" font-family="Arial, sans-serif" font-size="58" font-weight="700" fill="#132C42" text-anchor="start" dominant-baseline="central">NIM recommendation: request → response</text>
+  <text x="70" y="131" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#52677D" text-anchor="start" dominant-baseline="central">POST /api/v1/catalog/right-sizing/recommendation · Current implementation</text>
+  <rect x="70" y="210" width="1430" height="150" rx="20" fill="#EDF5FC" stroke="#176BA7" stroke-width="2" />
+  <text x="94" y="246" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#176BA7" text-anchor="start" dominant-baseline="central">1. Validate request</text>
+  <text x="94" y="291" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Cluster ID, exact NIM image/tag, optional GPU type.</text>
+  <rect x="1700" y="210" width="630" height="150" rx="20" fill="#FFF0F2" stroke="#B32D42" stroke-width="2" />
+  <text x="1724" y="246" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#B32D42" text-anchor="start" dominant-baseline="central">400 · Invalid request</text>
+  <text x="1724" y="291" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Reject before dependency calls.</text>
+  <rect x="70" y="430" width="1430" height="190" rx="20" fill="#EDF5FC" stroke="#176BA7" stroke-width="2" />
+  <text x="94" y="466" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#176BA7" text-anchor="start" dominant-baseline="central">2. Read requested cluster GPUs</text>
+  <text x="94" y="511" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Check cluster access/existence, then read fresh node-pool inventory.</text>
+  <text x="94" y="547" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Keep each GPU type/capacity variant and its maximum count on one node.</text>
+  <text x="94" y="583" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">If provided, filter by the exact requested GPU type.</text>
+  <rect x="1700" y="430" width="630" height="190" rx="20" fill="#FFF0F2" stroke="#B32D42" stroke-width="2" />
+  <text x="1724" y="466" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#B32D42" text-anchor="start" dominant-baseline="central">Request fails</text>
+  <text x="1724" y="511" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Absent requested type: 400</text>
+  <text x="1724" y="547" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Cluster access/existence: 401/403/404</text>
+  <text x="1724" y="583" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Other dependency failure: 503</text>
+  <rect x="1700" y="680" width="630" height="150" rx="20" fill="#FFF5E0" stroke="#986313" stroke-width="2" />
+  <text x="1724" y="716" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#986313" text-anchor="start" dominant-baseline="central">200 · Empty results</text>
+  <text x="1724" y="761" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Existing cluster without GPUs,</text>
+  <text x="1724" y="797" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">when no GPU type was requested.</text>
+  <rect x="70" y="870" width="1430" height="150" rx="20" fill="#EDF5FC" stroke="#176BA7" stroke-width="2" />
+  <text x="94" y="906" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#176BA7" text-anchor="start" dominant-baseline="central">3. Load exact-tag NGC profiles</text>
+  <text x="94" y="951" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Fetch published requirements; nonempty metadata may be cached for 15 minutes.</text>
+  <text x="94" y="987" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">404 / missing profiles means no sizing evidence, not a dependency failure.</text>
+  <rect x="1700" y="870" width="630" height="150" rx="20" fill="#FFF0F2" stroke="#B32D42" stroke-width="2" />
+  <text x="1724" y="906" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#B32D42" text-anchor="start" dominant-baseline="central">503 · Metadata failure</text>
+  <text x="1724" y="951" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Transport, non-404 HTTP failure,</text>
+  <text x="1724" y="987" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">or malformed response.</text>
+  <rect x="70" y="1110" width="1430" height="190" rx="20" fill="#EDF5FC" stroke="#176BA7" stroke-width="2" />
+  <text x="94" y="1146" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#176BA7" text-anchor="start" dominant-baseline="central">4. Select a fitting profile for each hardware variant</text>
+  <text x="94" y="1191" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Only GPU-agnostic profiles with explicit TP/PP and a valid per-device minimum.</text>
+  <text x="94" y="1227" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Check memory per GPU and TP × PP against the single-node count and profile limit.</text>
+  <text x="94" y="1263" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Prefer fewer GPUs, then lower published minimum, then profile ID.</text>
+  <rect x="1700" y="1110" width="630" height="190" rx="20" fill="#FFF5E0" stroke="#986313" stroke-width="2" />
+  <text x="1724" y="1146" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#986313" text-anchor="start" dominant-baseline="central">Result: no_recommendation</text>
+  <text x="1724" y="1191" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Missing hardware capacity/count</text>
+  <text x="1724" y="1227" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">or no eligible profile fits.</text>
+  <text x="1724" y="1263" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Return a reason.</text>
+  <rect x="70" y="1390" width="1430" height="190" rx="20" fill="#EDF5FC" stroke="#176BA7" stroke-width="2" />
+  <text x="94" y="1426" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#176BA7" text-anchor="start" dominant-baseline="central">5. Record profile evidence, then choose allocation</text>
+  <text x="94" y="1471" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Parallel profile: exactly TP × PP whole GPUs.</text>
+  <text x="94" y="1507" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Single GPU: below cutoff → minimum memory; at/above cutoff → whole GPU.</text>
+  <text x="94" y="1543" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Default cutoff: 90%. No extra memory headroom is added.</text>
+  <rect x="1700" y="1390" width="630" height="190" rx="20" fill="#FFF5E0" stroke="#986313" stroke-width="2" />
+  <text x="1724" y="1426" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#986313" text-anchor="start" dominant-baseline="central">Result: no_recommendation</text>
+  <text x="1724" y="1471" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Invalid single-GPU sharing policy.</text>
+  <text x="1724" y="1507" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Keep selected profile evidence;</text>
+  <text x="1724" y="1543" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">return a reason without allocation.</text>
+  <rect x="70" y="1780" width="1430" height="150" rx="20" fill="#EAF6EF" stroke="#23784E" stroke-width="2" />
+  <text x="94" y="1816" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#23784E" text-anchor="start" dominant-baseline="central">6. Return recommendation response</text>
+  <text x="94" y="1861" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Echo image/tag; include one result per hardware variant.</text>
+  <text x="94" y="1897" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Recommended entries include profile evidence and memory/GPU-count allocation.</text>
+  <polyline points="785,360 785,430" fill="none" stroke="#52677D" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="785,430 793.0,413.0 777.0,413.0" fill="#52677D" />
+  <polyline points="785,620 785,870" fill="none" stroke="#52677D" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="785,870 793.0,853.0 777.0,853.0" fill="#52677D" />
+  <polyline points="785,1020 785,1110" fill="none" stroke="#52677D" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="785,1110 793.0,1093.0 777.0,1093.0" fill="#52677D" />
+  <polyline points="785,1300 785,1390" fill="none" stroke="#52677D" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="785,1390 793.0,1373.0 777.0,1373.0" fill="#52677D" />
+  <polyline points="785,1580 785,1780" fill="none" stroke="#52677D" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="785,1780 793.0,1763.0 777.0,1763.0" fill="#52677D" />
+  <polyline points="1500,285 1700,285" fill="none" stroke="#B32D42" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="1700,285 1683.0,277.0 1683.0,293.0" fill="#B32D42" />
+  <polyline points="1500,510 1700,510" fill="none" stroke="#B32D42" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="1700,510 1683.0,502.0 1683.0,518.0" fill="#B32D42" />
+  <polyline points="1500,945 1700,945" fill="none" stroke="#B32D42" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="1700,945 1683.0,937.0 1683.0,953.0" fill="#B32D42" />
+  <polyline points="1450,620 1450,755 1700,755" fill="none" stroke="#986313" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="1700,755 1683.0,747.0 1683.0,763.0" fill="#986313" />
+  <rect x="1481.0" y="737" width="148" height="36" rx="5" fill="#F5F7FB" />
+  <text x="1555" y="755" font-family="Arial, sans-serif" font-size="25" font-weight="400" fill="#986313" text-anchor="middle" dominant-baseline="central">No variants</text>
+  <polyline points="1500,1190 1700,1190" fill="none" stroke="#986313" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="1700,1190 1683.0,1182.0 1683.0,1198.0" fill="#986313" />
+  <polyline points="1500,1470 1700,1470" fill="none" stroke="#986313" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="1700,1470 1683.0,1462.0 1683.0,1478.0" fill="#986313" />
+  <polyline points="2330,1205 2380,1205 2380,1710 1400,1710 1400,1780" fill="none" stroke="#986313" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="1400,1780 1408.0,1763.0 1392.0,1763.0" fill="#986313" />
+  <polyline points="2330,1485 2380,1485" fill="none" stroke="#986313" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="2380,1485 2363.0,1477.0 2363.0,1493.0" fill="#986313" />
+  <text x="70" y="1990" font-family="Arial, sans-serif" font-size="25" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Solid cards = implemented behavior. Blue: processing · Green: response · Amber: valid negative result · Red: request failure</text>
+  <text x="70" y="2035" font-family="Arial, sans-serif" font-size="25" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Installed hardware fit only: no PCI/model compatibility check, free-GPU reservation, scheduling guarantee or model-startup validation.</text>
+</svg>
