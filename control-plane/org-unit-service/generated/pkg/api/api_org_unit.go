@@ -219,6 +219,15 @@ func (c *OrgUnitAPIController) Routes() Routes {
 			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
 			BuildHandlerChain(
 				func(next http.HandlerFunc) http.HandlerFunc {
+					return c.authorizationClient.AuthorizeMiddleware(
+						next,
+						"project",
+						"read",
+						false,
+						"",
+					)
+				},
+				func(next http.HandlerFunc) http.HandlerFunc {
 					////////////////////////////// RUNAI END (11.4) ///////////////////////////////
 					return c.SimulateNodePoolFairShare
 					////////////////////////////// RUNAI START (11.5) ///////////////////////////////

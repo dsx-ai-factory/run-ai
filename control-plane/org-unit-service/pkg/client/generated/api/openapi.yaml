@@ -5378,7 +5378,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FairShareSimulationResponse'
-          description: The simulated fair share of each requested org unit.
+          description: "The simulated fair share of every requested org unit, in one\
+            \ response with no paging."
         "400":
           content:
             application/json:
@@ -5428,7 +5429,9 @@ paths:
       tags:
       - Org unit
       x-service: org-unit-service
-      x-no-authorization: true
+      x-authorize:
+        resource-type: project
+        action: read
       x-test-coverage:
       - control-plane/org-unit-service/pkg/services/test/fair_share_simulation_test.go
     x-internal: true

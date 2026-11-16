@@ -5102,7 +5102,9 @@ paths:
         revealed: an unreadable org unit is a 400,
 
         not a 403.
-      x-no-authorization: true
+      x-authorize:
+        resource-type: project
+        action: read
       x-test-coverage:
         - >-
           control-plane/org-unit-service/pkg/services/test/fair_share_simulation_test.go
@@ -5118,7 +5120,9 @@ paths:
               $ref: '#/components/schemas/FairShareSimulationRequest'
       responses:
         '200':
-          description: The simulated fair share of each requested org unit.
+          description: >-
+            The simulated fair share of every requested org unit, in one
+            response with no paging.
           content:
             application/json:
               schema:
