@@ -184,17 +184,17 @@ var _ = Describe("Fair share simulation at scale", Ordered, func() {
 			Filters([]string{"nodePoolId==" + pool.Id, "parentId==" + focus})
 		Expect(err).To(BeNil())
 		measure("  part: departments query (300 rows)", func() {
-			rows, err := dao.GetDepartmentNodePoolResources(ctx, TestTenant, departmentFilters, "", "", 0, 0, nil, "", models.SlimVerbosity)
+			rows, err := dao.GetDepartmentNodePoolResources(ctx, TestTenant, departmentFilters, "", "", 0, 0, nil, "", dao.SchedulingNodePoolResourcesColumns)
 			Expect(err).To(BeNil())
 			Expect(*rows).To(HaveLen(departmentCount))
 		})
 		measure("  part: projects query, full row (1,500 rows)", func() {
-			rows, err := dao.GetProjectNodePoolResources(ctx, TestTenant, projectFilters, "", "", 0, 0, nil, "", models.VerboseVerbosity)
+			rows, err := dao.GetProjectNodePoolResources(ctx, TestTenant, projectFilters, "", "", 0, 0, nil, "", dao.AllNodePoolResourcesColumns)
 			Expect(err).To(BeNil())
 			Expect(*rows).To(HaveLen(projectCount))
 		})
 		measure("  part: projects query, slim (1,500 rows)", func() {
-			rows, err := dao.GetProjectNodePoolResources(ctx, TestTenant, projectFilters, "", "", 0, 0, nil, "", models.SlimVerbosity)
+			rows, err := dao.GetProjectNodePoolResources(ctx, TestTenant, projectFilters, "", "", 0, 0, nil, "", dao.SchedulingNodePoolResourcesColumns)
 			Expect(err).To(BeNil())
 			Expect(*rows).To(HaveLen(projectCount))
 		})
@@ -205,7 +205,7 @@ var _ = Describe("Fair share simulation at scale", Ordered, func() {
 		measure("departments, 300 sent", func() { simulate(departmentLevel) })
 
 		measure("  part again: projects query (1,500 rows)", func() {
-			rows, err := dao.GetProjectNodePoolResources(ctx, TestTenant, projectFilters, "", "", 0, 0, nil, "", models.SlimVerbosity)
+			rows, err := dao.GetProjectNodePoolResources(ctx, TestTenant, projectFilters, "", "", 0, 0, nil, "", dao.SchedulingNodePoolResourcesColumns)
 			Expect(err).To(BeNil())
 			Expect(*rows).To(HaveLen(projectCount))
 		})

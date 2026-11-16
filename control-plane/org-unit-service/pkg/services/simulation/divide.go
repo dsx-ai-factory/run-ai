@@ -19,8 +19,11 @@ const Unlimited = fairshare.Unlimited
 // Unit is one org unit on one level of the queue tree, already mapped the way the cluster sync sends it to the
 // scheduler.
 type Unit struct {
-	ID        string
-	Priority  int
+	ID       string
+	Priority int
+	// CreatedAt is when the org unit's resources on the node pool were created, the closest time the views expose. KAI
+	// breaks ties by the queue's own creation, so units whose rows were created together (a node pool added after its
+	// org units) can resolve a tie for a leftover GPU differently than the scheduler.
 	CreatedAt time.Time
 	Deserved  float64
 	Limit     float64
@@ -37,7 +40,7 @@ type Result struct {
 	WeightShareInRank float64
 }
 
-// RequestableDemand is the part of the demand the scheduler can give: the demand capped by the limit.
+// RequestableDemand mirrors KAI's RequestableShare.
 func (u Unit) RequestableDemand() float64 {
 	if u.Limit == Unlimited {
 		return u.Demand

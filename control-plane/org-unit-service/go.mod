@@ -215,3 +215,5 @@ replace github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-clien
 replace github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client => ../../control-plane/workloads/pkg/client
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities => ../../runai-cluster/common/cluster-capabilities
+
+replace k8s.io/apimachinery => k8s.io/apimachinery v0.35.4

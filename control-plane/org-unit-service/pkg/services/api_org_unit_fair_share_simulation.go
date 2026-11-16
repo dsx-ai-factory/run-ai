@@ -315,7 +315,7 @@ func applyChange(unit *simulatedOrgUnit, rank *api.FairShareSimulationRank, gpu 
 }
 
 func (s simulationScenario) checkLimitAboveQuota(orgUnitType string, orgUnit *simulatedOrgUnit) error {
-	unit := s.toSchedulerUnit(orgUnit)
+	unit := orgUnit.unit
 	if unit.Deserved >= 0 && unit.Limit != simulation.Unlimited && unit.Limit < unit.Deserved {
 		return fmt.Errorf("%s %s: the limit is below the quota", orgUnitType, orgUnit.id)
 	}
@@ -382,7 +382,7 @@ func departmentsOfNodePool(ctx context.Context, tenantId, nodepoolId string, sco
 	if err != nil {
 		return nil, fmt.Errorf("filter departments of node pool %s: %w", nodepoolId, err)
 	}
-	rows, err := dao.GetDepartmentNodePoolResources(ctx, tenantId, filters, "", "", 0, 0, scopes, "", models.SlimVerbosity)
+	rows, err := dao.GetDepartmentNodePoolResources(ctx, tenantId, filters, "", "", 0, 0, scopes, "", dao.SchedulingNodePoolResourcesColumns)
 	if err != nil {
 		return nil, fmt.Errorf("load departments of node pool %s: %w", nodepoolId, err)
 	}
@@ -402,7 +402,7 @@ func projectsOfDepartment(ctx context.Context, tenantId, nodepoolId, departmentI
 	if err != nil {
 		return nil, fmt.Errorf("filter projects of department %s on node pool %s: %w", departmentId, nodepoolId, err)
 	}
-	rows, err := dao.GetProjectNodePoolResources(ctx, tenantId, filters, "", "", 0, 0, scopes, "", models.SlimVerbosity)
+	rows, err := dao.GetProjectNodePoolResources(ctx, tenantId, filters, "", "", 0, 0, scopes, "", dao.SchedulingNodePoolResourcesColumns)
 	if err != nil {
 		return nil, fmt.Errorf("load projects of department %s on node pool %s: %w", departmentId, nodepoolId, err)
 	}

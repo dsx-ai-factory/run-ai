@@ -20,6 +20,7 @@ import (
 const (
 	sqlSelectDeptNodePoolResources = `SELECT * FROM department_node_pool_resources_view WHERE tenant_id = ? ORDER BY id DESC LIMIT ? OFFSET ?`
 	sqlSelectProjNodePoolResources = `SELECT * FROM project_node_pool_resources_view WHERE tenant_id = ? ORDER BY id DESC LIMIT ? OFFSET ?`
+	sqlSelectSlimDeptResources     = `SELECT org_unit_id,rank,gpu_deserved,gpu_limit,gpu_over_quota_weight,created_at FROM department_node_pool_resources_view WHERE tenant_id = ?`
 	sqlSelectSlimProjResources     = `SELECT org_unit_id,rank,gpu_deserved,gpu_limit,gpu_over_quota_weight,created_at,parent_id FROM project_node_pool_resources_view WHERE tenant_id = ?`
 	sqlCountDeptNodePoolResources  = `SELECT count(*) FROM department_node_pool_resources_view WHERE tenant_id = ?`
 	sqlCountProjNodePoolResources  = `SELECT count(*) FROM project_node_pool_resources_view WHERE tenant_id = ?`
@@ -41,7 +42,7 @@ var _ = Describe("Node pool resources DAO SQL", func() {
 			mocker.ExpectQuery(sqlSelectDeptNodePoolResources, testTenantID, 10, 5).
 				Returns([]models.DepartmentNodePoolResources{expected})
 
-			got, err := GetDepartmentNodePoolResources(context.Background(), testTenantID, nil, "", "", 5, 10, nil, "", models.VerboseVerbosity)
+			got, err := GetDepartmentNodePoolResources(context.Background(), testTenantID, nil, "", "", 5, 10, nil, "", AllNodePoolResourcesColumns)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(*got).To(HaveLen(1))
 			Expect((*got)[0].OrgUnitName).To(Equal(expected.OrgUnitName))
@@ -51,7 +52,7 @@ var _ = Describe("Node pool resources DAO SQL", func() {
 			mocker.ExpectQuery(sqlSelectDeptNodePoolResources, testTenantID, 10, 5).
 				ReturnsError(errors.New("db error"))
 
-			got, err := GetDepartmentNodePoolResources(context.Background(), testTenantID, nil, "", "", 5, 10, nil, "", models.VerboseVerbosity)
+			got, err := GetDepartmentNodePoolResources(context.Background(), testTenantID, nil, "", "", 5, 10, nil, "", AllNodePoolResourcesColumns)
 			Expect(err).To(MatchError("db error"))
 			Expect(got).To(BeNil())
 		})
@@ -63,20 +64,32 @@ var _ = Describe("Node pool resources DAO SQL", func() {
 			mocker.ExpectQuery(sqlSelectProjNodePoolResources, testTenantID, 10, 5).
 				Returns([]models.ProjectNodePoolResources{expected})
 
-			got, err := GetProjectNodePoolResources(context.Background(), testTenantID, nil, "", "", 5, 10, nil, "", models.VerboseVerbosity)
+			got, err := GetProjectNodePoolResources(context.Background(), testTenantID, nil, "", "", 5, 10, nil, "", AllNodePoolResourcesColumns)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(*got).To(HaveLen(1))
 			Expect((*got)[0].OrgUnitName).To(Equal(expected.OrgUnitName))
 		})
 	})
-	Describe("GetProjectNodePoolResources with slim verbosity", func() {
+	Describe("GetDepartmentNodePoolResources with the scheduling columns", func() {
+		It("reads only the scheduling inputs, unsorted", func() {
+			mocker := setupSQLMock()
+			expected := testDepartmentNodePoolResources()
+			mocker.ExpectQuery(sqlSelectSlimDeptResources, testTenantID).
+				Returns([]models.DepartmentNodePoolResources{expected})
+
+			got, err := GetDepartmentNodePoolResources(context.Background(), testTenantID, nil, "", "", 0, 0, nil, "", SchedulingNodePoolResourcesColumns)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(*got).To(HaveLen(1))
+		})
+	})
+	Describe("GetProjectNodePoolResources with the scheduling columns", func() {
 		It("reads only the scheduling inputs, unsorted", func() {
 			mocker := setupSQLMock()
 			expected := testProjectNodePoolResources()
 			mocker.ExpectQuery(sqlSelectSlimProjResources, testTenantID).
 				Returns([]models.ProjectNodePoolResources{expected})
 
-			got, err := GetProjectNodePoolResources(context.Background(), testTenantID, nil, "", "", 0, 0, nil, "", models.SlimVerbosity)
+			got, err := GetProjectNodePoolResources(context.Background(), testTenantID, nil, "", "", 0, 0, nil, "", SchedulingNodePoolResourcesColumns)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(*got).To(HaveLen(1))
 		})

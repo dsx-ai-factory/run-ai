@@ -148,11 +148,17 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 
 	AfterAll(func() {
 		for _, id := range []string{a1, a2, b1} {
+			if id == "" {
+				continue
+			}
 			response, err := projectApiService.DeleteProject(ctx, id, "", false)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(response.Code).To(Equal(http.StatusNoContent), "%+v", response.Body)
 		}
 		for _, id := range []string{a, b} {
+			if id == "" {
+				continue
+			}
 			response, err := departmentApiService.DeleteDepartment(ctx, id)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(response.Code).To(Equal(http.StatusNoContent), "%+v", response.Body)
@@ -209,14 +215,22 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 			expectResult(body.OrgUnits[0], b, expected{demand: 20, fairShare: 10, guaranteed: 2, unmet: 10, weightShare: 1})
 		})
 
-		It("uses each department's quota as its weight while adjustable weights is off", func() {
-			sc := departmentsScenario(withDemand(a, 20), withDemand(b, 20))
+		It("uses each department's quota as its weight while adjustable weights is off, ignoring a sent weight", func() {
+			weighted := withDemand(a, 20)
+			weighted.Gpu = &api.FairShareSimulationGpuSettings{OverQuotaWeight: ptr.To(9.0)}
+			sc := departmentsScenario(weighted, withDemand(b, 20))
 			sc.capabilities = api.FairShareSimulationSchedulingCapabilities{Quota: true, Limits: true}
 			body := simulate(fullAccess, sc)
 			Expect(body.OrgUnits[0].WeightShareInRank).To(BeNumerically("~", 4.0/6, 1e-9))
 			Expect(body.OrgUnits[1].WeightShareInRank).To(BeNumerically("~", 2.0/6, 1e-9))
 			Expect(body.OrgUnits[0].FairShare.Gpu + body.OrgUnits[1].FairShare.Gpu).To(Equal(20.0))
 			Expect(body.OrgUnits[0].FairShare.Gpu).To(BeNumerically(">", body.OrgUnits[1].FairShare.Gpu))
+		})
+
+		It("guarantees the whole demand under an unlimited quota", func() {
+			unlimited := api.FairShareSimulationOrgUnit{Id: a, Gpu: &api.FairShareSimulationGpuSettings{Deserved: ptr.To(-1.0)}}
+			body := simulate(fullAccess, departmentsScenario(unlimited, row(b)))
+			expectResult(body.OrgUnits[0], a, expected{demand: 10, fairShare: 10, guaranteed: 10, unmet: 0, weightShare: 1})
 		})
 
 		It("caps the demand and the fair share at an unsaved limit", func() {
@@ -329,6 +343,8 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 			expectBadRequest(fullAccess, departmentsScenario(api.FairShareSimulationOrgUnit{Id: a, Rank: ptr.To(api.FairShareSimulationRank("Sometimes"))}))
 			expectBadRequest(fullAccess, departmentsScenario(withDemand(a, -1)))
 			expectBadRequest(fullAccess, departmentsScenario(api.FairShareSimulationOrgUnit{Id: a,
+				Gpu: &api.FairShareSimulationGpuSettings{Deserved: ptr.To(-0.5)}}))
+			expectBadRequest(fullAccess, departmentsScenario(api.FairShareSimulationOrgUnit{Id: a,
 				Gpu: &api.FairShareSimulationGpuSettings{Deserved: ptr.To(6.0), Limit: ptr.To(5.0)}}))
 		})
 
@@ -394,6 +410,49 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 			parent := call(fullAccess, projectsScenario(a+"||"+b, row(a1)))
 			Expect(parent.Code).To(Equal(http.StatusBadRequest))
 			Expect(parent.Body.(api.Error).Message).To(Equal("project " + a1 + " not found in the node pool"))
+		})
+	})
+	Context("a department with a stored limit", Ordered, func() {
+		var c, c1, c2 string
+
+		BeforeAll(func() {
+			response, err := departmentApiService.CreateDepartment(ctx, getDepartmentResourcesCreateRequest(
+				"fss-dep-"+uuid.NewString()[:8], clusterId, []api.ResourcesNullable{{
+					NodePool: &api.ResourcesNodePool{Id: pool.Id, Name: pool.Name},
+					Gpu:      api.ResourcesNullableGpu{Deserved: ptr.To(0.0), Limit: ptr.To(6.0), OverQuotaWeight: ptr.To(1.0)},
+					Rank:     ptr.To("High"),
+				}}))
+			Expect(err).To(BeNil())
+			Expect(response.Code).To(Equal(http.StatusCreated), "%+v", response.Body)
+			c = response.Body.(api.Department).Id
+			c1 = createProject(c, 0)
+			c2 = createProject(c, 0)
+		})
+
+		AfterAll(func() {
+			for _, id := range []string{c1, c2} {
+				if id == "" {
+					continue
+				}
+				response, err := projectApiService.DeleteProject(ctx, id, "", false)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(response.Code).To(Equal(http.StatusNoContent), "%+v", response.Body)
+			}
+			if c != "" {
+				response, err := departmentApiService.DeleteDepartment(ctx, c)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(response.Code).To(Equal(http.StatusNoContent), "%+v", response.Body)
+			}
+		})
+
+		It("caps a department that wasn't sent at its stored limit", func() {
+			body := simulate(fullAccess, departmentsScenario(withDemand(a, 20)))
+			Expect(body.OrgUnits[0].FairShare.Gpu).To(Equal(12.0))
+		})
+
+		It("caps the parent's projects at the parent's stored limit", func() {
+			body := simulate(fullAccess, projectsScenario(c, row(c1), row(c2)))
+			Expect(body.OrgUnits[0].FairShare.Gpu + body.OrgUnits[1].FairShare.Gpu).To(Equal(6.0))
 		})
 	})
 })

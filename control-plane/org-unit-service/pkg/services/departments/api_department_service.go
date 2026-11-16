@@ -1123,7 +1123,7 @@ func (s *DepartmentApiService) GetDepartmentNodePoolResources(ctx context.Contex
 		permittedScopes = nil
 	}
 
-	nodePoolResources, err := dao.GetDepartmentNodePoolResources(ctx, *tenantId, filters, sortColumn, sortOrder, offset, limit, permittedScopes, search, models.VerboseVerbosity)
+	nodePoolResources, err := dao.GetDepartmentNodePoolResources(ctx, *tenantId, filters, sortColumn, sortOrder, offset, limit, permittedScopes, search, dao.AllNodePoolResourcesColumns)
 	if err != nil {
 		errResponse := services.HandleDbError(ctx, err, "Failed to get department nodePool resources")
 		return errResponse, nil

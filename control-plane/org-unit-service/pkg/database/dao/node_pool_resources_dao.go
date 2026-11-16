@@ -32,7 +32,7 @@ func GetDepartmentNodePoolResources(
 	limit int32,
 	permittedScopes *openapi.PermittedScopes,
 	search string,
-	verbosity models.Verbosity,
+	columns NodePoolResourcesColumns,
 ) (*[]models.DepartmentNodePoolResources, error) {
 	var permittedScopesQuery *string = nil
 	if permittedScopes != nil {
@@ -44,7 +44,7 @@ func GetDepartmentNodePoolResources(
 
 	nodePoolResources := &[]models.DepartmentNodePoolResources{}
 	query, err := getNodePoolResources(ctx, tenantId, filterBy, sortBy, sortOrder, offset, limit, permittedScopesQuery, search,
-		models.DepartmentNodePoolResourcesView, verbosity, slimNodePoolResourcesColumns)
+		models.DepartmentNodePoolResourcesView, columns, schedulingNodePoolResourcesColumns)
 	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get department node pool resources, err: %v", err)
 		return nil, err
@@ -67,7 +67,7 @@ func GetProjectNodePoolResources(
 	limit int32,
 	permittedScopes *openapi.PermittedScopes,
 	search string,
-	verbosity models.Verbosity,
+	columns NodePoolResourcesColumns,
 ) (*[]models.ProjectNodePoolResources, error) {
 	var permittedScopesQuery *string = nil
 	if permittedScopes != nil {
@@ -79,7 +79,7 @@ func GetProjectNodePoolResources(
 
 	nodePoolResources := &[]models.ProjectNodePoolResources{}
 	query, err := getNodePoolResources(ctx, tenantId, filterBy, sortBy, sortOrder, offset, limit, permittedScopesQuery, search,
-		models.ProjectNodePoolResourcesView, verbosity, slimProjectNodePoolResourcesColumns)
+		models.ProjectNodePoolResourcesView, columns, schedulingProjectNodePoolResourcesColumns)
 	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get project node pool resources, err: %v", err)
 		return nil, err
@@ -92,9 +92,18 @@ func GetProjectNodePoolResources(
 	return nodePoolResources, nil
 }
 
+type NodePoolResourcesColumns int
+
+const (
+	// AllNodePoolResourcesColumns is the zero value, so a caller that doesn't choose gets full, sorted rows.
+	AllNodePoolResourcesColumns NodePoolResourcesColumns = iota
+	// SchedulingNodePoolResourcesColumns reads only the scheduler's inputs, unsorted, so it must not be paged.
+	SchedulingNodePoolResourcesColumns
+)
+
 var (
-	slimNodePoolResourcesColumns        = []string{"org_unit_id", "rank", "gpu_deserved", "gpu_limit", "gpu_over_quota_weight", "created_at"}
-	slimProjectNodePoolResourcesColumns = append(slices.Clone(slimNodePoolResourcesColumns), "parent_id")
+	schedulingNodePoolResourcesColumns        = []string{"org_unit_id", "rank", "gpu_deserved", "gpu_limit", "gpu_over_quota_weight", "created_at"}
+	schedulingProjectNodePoolResourcesColumns = append(slices.Clone(schedulingNodePoolResourcesColumns), "parent_id")
 )
 
 func getNodePoolResources(
@@ -108,14 +117,14 @@ func getNodePoolResources(
 	permittedScopesQuery *string,
 	search string,
 	viewName string,
-	verbosity models.Verbosity,
-	slimColumns []string,
+	columns NodePoolResourcesColumns,
+	schedulingColumns []string,
 ) (orm.DB, error) {
 	query := runaidb.DB().WithContext(ctx).
 		Table(viewName).
 		Where("tenant_id = ?", tenantId)
-	if verbosity == models.SlimVerbosity {
-		query = query.Select(slimColumns)
+	if columns == SchedulingNodePoolResourcesColumns {
+		query = query.Select(schedulingColumns)
 	}
 
 	if permittedScopesQuery != nil {
@@ -129,7 +138,7 @@ func getNodePoolResources(
 	if search != "" {
 		query = query.Where("org_unit_name like ?", "%"+search+"%")
 	}
-	if verbosity != models.SlimVerbosity {
+	if columns != SchedulingNodePoolResourcesColumns {
 		query = query.Order("id DESC")
 	}
 
