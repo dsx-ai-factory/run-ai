@@ -7,10 +7,17 @@ package logreader
 
 import (
 	"bufio"
+	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
 )
+
+// maxLogLineBytes is the buffer a single line may need. bufio.Scanner defaults
+// to 64KiB, and a longer line ends the read early - silently before the scan
+// error was reported, and with an error once it is.
+const maxLogLineBytes = 1024 * 1024
 
 type LogFileInfo struct {
 	Name       string
@@ -24,33 +31,70 @@ type LogReader struct {
 	logListInfo []LogFileInfo
 }
 
+// GetLogList returns the newest lines of the log directory, at most tail of
+// them, spanning the rotated files newest first.
 func (lr *LogReader) GetLogList() ([]string, error) {
 	var lines []string
-	var lc = lr.tail
+	remaining := lr.tail
 	for _, log := range lr.logListInfo {
-		readFile, err := os.Open(filepath.Join(lr.path, log.Name))
+		if remaining <= 0 {
+			break
+		}
 
+		fileLines, err := readLastLines(filepath.Join(lr.path, log.Name), remaining)
 		if err != nil {
-			return lines, err
-		}
-		fileScanner := bufio.NewScanner(readFile)
-		fileScanner.Split(bufio.ScanLines)
-		var fileLines []string
-
-		for fileScanner.Scan() {
-			fileLines = append(fileLines, fileScanner.Text())
+			return lines, fmt.Errorf("read log file %q: %w", log.Name, err)
 		}
 
-		readFile.Close()
+		lines = append(lines, fileLines...)
+		remaining -= len(fileLines)
+	}
+	return lines, nil
+}
 
-		for _, line := range fileLines {
-			lines = append(lines, line)
-			lc--
+// readLastLines returns the last n lines of the file. A log file is appended
+// to, so the lines worth reporting are the ones at its end; reading from the
+// start returned the oldest lines of the newest file.
+func readLastLines(filePath string, n int) ([]string, error) {
+	if n <= 0 {
+		return nil, nil
+	}
 
-			if lc < 0 {
-				break
-			}
+	readFile, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	// Ring buffer: keep the last n lines without holding the whole file.
+	ring := make([]string, n)
+	start, count := 0, 0
+
+	fileScanner := bufio.NewScanner(readFile)
+	fileScanner.Split(bufio.ScanLines)
+	fileScanner.Buffer(make([]byte, 0, bufio.MaxScanTokenSize), maxLogLineBytes)
+	for fileScanner.Scan() {
+		ring[(start+count)%n] = fileScanner.Text()
+		if count < n {
+			count++
+		} else {
+			start = (start + 1) % n
 		}
+	}
+
+	// A failed read leaves the result short without saying so, which is exactly
+	// what this function is supposed to report accurately. A close failure is
+	// reported alongside the scan failure rather than dropped because the scan
+	// failed first.
+	if err := fileScanner.Err(); err != nil {
+		return nil, fmt.Errorf("scan: %w", errors.Join(err, readFile.Close()))
+	}
+	if err := readFile.Close(); err != nil {
+		return nil, fmt.Errorf("close: %w", err)
+	}
+
+	lines := make([]string, 0, count)
+	for i := 0; i < count; i++ {
+		lines = append(lines, ring[(start+i)%n])
 	}
 	return lines, nil
 }
@@ -68,44 +112,68 @@ func NewLogReader(path string, tail int) (*LogReader, error) {
 	}, nil
 }
 
+// ListLogFilesByCreateTime returns the files holding the newest lines, newest
+// first, stopping once they cover limit lines (limit <= 0 keeps every file).
+//
+// The files are ordered by modification time before the limit is applied.
+// os.ReadDir sorts by name, and a rotated name sorts before the active file
+// because '-' precedes '.', so cutting the list off in directory order dropped
+// the active metrics.log - the file that holds the newest lines.
 func ListLogFilesByCreateTime(filePath string, limit int) ([]LogFileInfo, error) {
-	var (
-		lineCount    = 0
-		lcTemp       int
-		logFilesInfo []LogFileInfo
-		fInfo        os.FileInfo
-	)
-
-	fileList, err := os.ReadDir(filePath)
+	entries, err := os.ReadDir(filePath)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, file := range fileList {
-		fInfo, err = file.Info()
+	type candidate struct {
+		name    string
+		modTime int64
+	}
+
+	candidates := make([]candidate, 0, len(entries))
+	for _, entry := range entries {
+		fInfo, err := entry.Info()
 		if err != nil {
 			continue
 		}
-		lcTemp, err = lineCounter(filepath.Join(filePath, file.Name()))
+
+		candidates = append(candidates, candidate{name: entry.Name(), modTime: fInfo.ModTime().UTC().Unix()})
+	}
+
+	sort.Slice(candidates, func(i, j int) bool {
+		if candidates[i].modTime != candidates[j].modTime {
+			return candidates[i].modTime > candidates[j].modTime
+		}
+
+		// Modification times only resolve to a second here, so files rotated
+		// within the same second need a stable tie-break; the active file wins
+		// it, since '.' sorts after '-'.
+		return candidates[i].name > candidates[j].name
+	})
+
+	var (
+		lineCount    int
+		logFilesInfo []LogFileInfo
+	)
+	for _, c := range candidates {
+		lcTemp, err := lineCounter(filepath.Join(filePath, c.name))
 		if err != nil {
+			// A directory or an unreadable entry is not a log file to report
+			// on; keeping it in the list made the read fail on it later.
 			continue
 		}
 
 		logFilesInfo = append(logFilesInfo, LogFileInfo{
-			Name:       file.Name(),
-			ModifyTime: fInfo.ModTime().UTC().Unix(),
+			Name:       c.name,
+			ModifyTime: c.modTime,
 			LineCount:  lcTemp,
 		})
 
 		lineCount += lcTemp
-		if limit > 0 && lineCount > limit {
+		if limit > 0 && lineCount >= limit {
 			break
 		}
 	}
-
-	sort.Slice(logFilesInfo, func(i, j int) bool {
-		return logFilesInfo[i].ModifyTime > logFilesInfo[j].ModifyTime
-	})
 
 	return logFilesInfo, nil
 }
@@ -119,9 +187,13 @@ func lineCounter(filePath string) (int, error) {
 
 	// Count lines
 	scanner := bufio.NewScanner(file)
+	scanner.Buffer(make([]byte, 0, bufio.MaxScanTokenSize), maxLogLineBytes)
 	lineCount := 0
 	for scanner.Scan() {
 		lineCount++
+	}
+	if err := scanner.Err(); err != nil {
+		return 0, fmt.Errorf("count lines: %w", err)
 	}
 	return lineCount, nil
 }
