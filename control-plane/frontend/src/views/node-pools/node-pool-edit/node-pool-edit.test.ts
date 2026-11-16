@@ -46,6 +46,7 @@ describe("shared node pool new/edit entry", () => {
             template: "<p>New node pool</p>",
           },
           NodePoolScheduling: { template: "<p>Scheduling saved-pool</p>" },
+          NodePoolTopology: { template: "<p>Topology saved-pool</p>" },
           NodePoolEditForm: { props: ["nodePool"], template: "<p>Edit {{nodePool.name}}</p>" },
         },
       },
@@ -57,6 +58,11 @@ describe("shared node pool new/edit entry", () => {
     await flushPromises();
     expect(router.currentRoute.value.query.stepName).toBe("scheduling");
     expect(wrapper.text()).toContain("Scheduling saved-pool");
+    vi.mocked(clusterService.getNodepool).mockClear();
+    await router.push("/node-pools/edit/saved?stepName=topology");
+    await flushPromises();
+    expect(wrapper.text()).toContain("Topology saved-pool");
+    expect(clusterService.getNodepool).not.toHaveBeenCalled();
     await router.push("/node-pools/edit/saved");
     await flushPromises();
     expect(clusterService.getNodepool).toHaveBeenCalledWith("saved");

@@ -5,7 +5,7 @@
 import { mount, flushPromises } from "@vue/test-utils";
 import { createMemoryHistory, createRouter, RouterView } from "vue-router";
 import { createTestingPinia } from "@pinia/testing";
-import { Quasar } from "quasar";
+import { Notify, Quasar } from "quasar";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import View from "./node-pool-scheduling.vue";
 import Step from "@/components/node-pools/node-pool-scheduling-step/node-pool-scheduling-step.vue";
@@ -15,6 +15,7 @@ const { createNodePoolDraft } = nodePoolUtil;
 import type { Nodepool } from "@/swagger-models/cluster-service-client";
 import { requestToLeave } from "@/services/infra/router.service/router.service";
 import { useAppStore } from "@/stores/app.store";
+import { NODE_POOL_ROUTE_NAMES } from "@/router/node-pool.routes/node-pool.routes.names";
 
 vi.mock("@/services/control-plane/cluster.service/cluster.service", () => ({
   clusterService: {
@@ -44,15 +45,20 @@ async function render(realStep = false) {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
-      { path: "/:id", component: View },
-      { path: "/", component: { template: "<div>Pool list</div>" } },
+      { path: "/:id", name: NODE_POOL_ROUTE_NAMES.NODE_POOL_SCHEDULING, component: View },
+      {
+        path: "/edit/:id",
+        name: NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT,
+        component: { template: "<div>Topology step</div>" },
+      },
+      { path: "/", name: NODE_POOL_ROUTE_NAMES.NODE_POOL_INDEX, component: { template: "<div>Pool list</div>" } },
     ],
   });
   await router.push("/one");
   await router.isReady();
   const wrapper = mount(RouterView, {
     global: {
-      plugins: [router, Quasar, createTestingPinia({ createSpy: vi.fn })],
+      plugins: [router, [Quasar, { plugins: { Notify } }], createTestingPinia({ createSpy: vi.fn })],
       directives: { "click-outside": {}, permission: {} },
       stubs: realStep ? {} : { NodePoolSchedulingStep: true },
     },
@@ -95,6 +101,41 @@ describe("scheduling route", () => {
     expect(wrapper.text()).toContain("Pool list");
     wrapper.unmount();
   });
+  it("opens topology with the successfully saved pool ID after Save & continue", async () => {
+    vi.mocked(clusterService.getNodepool).mockResolvedValue(pool);
+    const { wrapper, router } = await render();
+    await flushPromises();
+    wrapper.findComponent(Step).vm.$emit("saved", { ...pool, id: "saved-pool" }, "continue");
+    await flushPromises();
+    expect(router.currentRoute.value.name).toBe(NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT);
+    expect(router.currentRoute.value.params.id).toBe("saved-pool");
+    expect(router.currentRoute.value.query.stepName).toBe("topology");
+    expect(wrapper.text()).toContain("Topology step");
+    wrapper.unmount();
+  });
+
+  it("keeps Save & close returning to the node pool list", async () => {
+    vi.mocked(clusterService.getNodepool).mockResolvedValue(pool);
+    const { wrapper, router } = await render();
+    await flushPromises();
+    wrapper.findComponent(Step).vm.$emit("saved", pool, "close");
+    await flushPromises();
+    expect(router.currentRoute.value.name).toBe(NODE_POOL_ROUTE_NAMES.NODE_POOL_INDEX);
+    expect(wrapper.text()).toContain("Pool list");
+    wrapper.unmount();
+  });
+
+  it("does not navigate when partial persistence only updates the saved pool snapshot", async () => {
+    vi.mocked(clusterService.getNodepool).mockResolvedValue(pool);
+    const { wrapper, router } = await render();
+    await flushPromises();
+    wrapper.findComponent(Step).vm.$emit("pool-saved", { ...pool, name: "partially saved" });
+    await flushPromises();
+    expect(router.currentRoute.value.name).toBe(NODE_POOL_ROUTE_NAMES.NODE_POOL_SCHEDULING);
+    expect(wrapper.findComponent(Step).props("pool").name).toBe("partially saved");
+    wrapper.unmount();
+  });
+
   it("loads by route ID without creating or updating a pool", async () => {
     vi.mocked(clusterService.getNodepool).mockResolvedValue(pool);
     const { wrapper } = await render();

@@ -65,14 +65,19 @@ import { requestToLeave } from "@/services/infra/router.service/router.service";
 import { usePermissionStore } from "@/stores/permissions.store";
 import { Action, ResourceType } from "@/swagger-models/authorization-client";
 import { NODE_POOL_ROUTE_NAMES } from "@/router/node-pool.routes/node-pool.routes.names";
+import type { Nodepool } from "@/swagger-models/cluster-service-client";
 const route = useRoute();
 const router = useRouter();
 const permissionStore = usePermissionStore();
 const canSavePool = computed(() => permissionStore.hasPermission(ResourceType.Nodepools, Action.Update));
 const saving = ref(false);
-async function onSaved() {
+async function onSaved(savedPool: Nodepool, destination: "close" | "continue" = "close") {
   leaveApproved.value = true;
-  await router.push({ name: NODE_POOL_ROUTE_NAMES.NODE_POOL_INDEX });
+  await router.push(
+    destination === "continue"
+      ? { name: NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT, params: { id: savedPool.id }, query: { stepName: "topology" } }
+      : { name: NODE_POOL_ROUTE_NAMES.NODE_POOL_INDEX },
+  );
 }
 const appStore = useAppStore();
 const poolId = computed(() => (typeof route.params.id === "string" ? route.params.id : ""));

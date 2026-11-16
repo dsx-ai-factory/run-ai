@@ -27,6 +27,8 @@ export function buildSchedulingSave(pool: Nodepool, draft: SchedulingDraft) {
   )
     throw new Error("Historical usage weight must be 0 or greater.");
   const poolUpdate: NodepoolUpdateFields = {
+    // The backend clears topology when omitted, including on narrow PATCH requests.
+    networkTopologyId: pool.networkTopologyId ?? null,
     schedulingCapabilities: capabilities,
     schedulingConfiguration: {
       ...(minimum !== undefined &&

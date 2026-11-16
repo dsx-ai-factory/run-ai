@@ -25,6 +25,15 @@ const success = (ids: string[]) => ({
   totalFailed: 0,
 });
 describe("scheduling persistence", () => {
+  it.each(["saved-topology", null, undefined])(
+    "preserves the intended topology association during a Step 2 save: %s",
+    (networkTopologyId) => {
+      expect(buildSchedulingSave({ ...pool, networkTopologyId }, draft()).pool).toHaveProperty(
+        "networkTopologyId",
+        networkTopologyId ?? null,
+      );
+    },
+  );
   it("maps only active resource fields and preserves unrelated pool settings", () => {
     const result = buildSchedulingSave(pool, draft());
     expect(result.departments).toEqual([

@@ -54,12 +54,17 @@ import {
   type INodePoolSummaryResources,
 } from "@/models/node-pool.model";
 
-const props = defineProps<{
-  pool: INodePoolSummaryConfiguration;
-  scheduling?: boolean;
-  clusterName?: string;
-  resources?: INodePoolSummaryResources;
-}>();
+const props = withDefaults(
+  defineProps<{
+    pool: INodePoolSummaryConfiguration;
+    scheduling?: boolean;
+    clusterName?: string;
+    resources?: INodePoolSummaryResources;
+    showNuma?: boolean;
+    showGpuDevice?: boolean;
+  }>(),
+  { showNuma: true, showGpuDevice: true },
+);
 const schedulingMode = computed(() => getSchedulingMode(props.pool.schedulingCapabilities));
 const modeDescription = computed(() => SCHEDULING_MODE_DESCRIPTIONS[schedulingMode.value]);
 const resourceRows = computed(() => [
@@ -97,7 +102,11 @@ const configurationRows = computed(() => {
       label: "CPU node placement strategy",
       value: nodePoolUtil.placementStrategyText(config?.cpuPodsPlacementStrategy?.node ?? defaults.cpuNodePlacement),
     },
-  ];
+  ].filter(
+    (row) =>
+      (props.showNuma || row.label !== "NUMA-aware scheduling") &&
+      (props.showGpuDevice || row.label !== "GPU device placement strategy"),
+  );
 });
 </script>
 <style scoped lang="scss">

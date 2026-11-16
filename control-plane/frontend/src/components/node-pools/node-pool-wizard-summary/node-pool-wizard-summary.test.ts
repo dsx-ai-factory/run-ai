@@ -68,6 +68,14 @@ describe("node pool wizard summary", () => {
     expect(wrapper.text()).toContain("NUMA-aware scheduling: Disabled");
     wrapper.unmount();
   });
+  it("omits configuration unsupported by the selected cluster when opted in", async () => {
+    const wrapper = render();
+    await wrapper.setProps({ showNuma: false, showGpuDevice: false });
+    expect(wrapper.text()).not.toContain("NUMA-aware scheduling:");
+    expect(wrapper.text()).not.toContain("GPU device placement strategy:");
+    expect(wrapper.text()).toContain("GPU node placement strategy: Bin-pack");
+    wrapper.unmount();
+  });
   it("renders measured zero and supplied resource totals distinctly from unknown", async () => {
     const wrapper = render();
     await wrapper.setProps({ resources: { nodes: 0, gpus: 0, gpuMemoryBytes: 0, gpuTypes: [] } });
