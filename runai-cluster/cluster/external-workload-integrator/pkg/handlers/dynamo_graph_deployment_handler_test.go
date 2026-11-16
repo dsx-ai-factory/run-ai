@@ -19,7 +19,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	kartav1alpha1 "github.com/run-ai/karta/pkg/api/runai/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -48,7 +47,6 @@ var _ = Describe("TestDynamoGraphDeploymentHandler", Ordered, func() {
 		scheme := scheme_init.Scheme()
 		utilruntime.Must(dynamov1alpha1.AddToScheme(scheme))
 		utilruntime.Must(dynamov1beta1.AddToScheme(scheme))
-		utilruntime.Must(kartav1alpha1.AddToScheme(scheme))
 		ns := test.BuildNamespace(test.TestNamespace, map[string]string{})
 		workloadConfigMap := test.CreateWorkloadsConfigMapObject()
 		cachedClient = fake.NewClientBuilder().WithStatusSubresource(&corev1.Pod{}).WithScheme(scheme).WithObjects(ns, workloadConfigMap).Build()
@@ -530,7 +528,7 @@ var _ = Describe("TestDynamoGraphDeploymentHandler", Ordered, func() {
 				}
 			}
 			// The fake tracker decodes registered types on storage and would drop roles.
-			roleClient := fake.NewClientBuilder().WithScheme(scheme_init.Scheme()).WithObjects(test.DynamoGraphDeploymentV1beta1Karta()).WithInterceptorFuncs(interceptor.Funcs{
+			roleClient := fake.NewClientBuilder().WithScheme(scheme_init.Scheme()).WithInterceptorFuncs(interceptor.Funcs{
 				Get: func(ctx context.Context, c client.WithWatch, key client.ObjectKey, out client.Object, opts ...client.GetOption) error {
 					if key == client.ObjectKeyFromObject(object) {
 						return runtime.DefaultUnstructuredConverter.FromUnstructured(object.DeepCopy().Object, out)
@@ -554,121 +552,6 @@ var _ = Describe("TestDynamoGraphDeploymentHandler", Ordered, func() {
 		Entry("shared template with role overrides", ptr.To(int32(2)), int32(3), false, true, int32(6), "600m"),
 		Entry("zero component replicas", ptr.To(int32(0)), int32(3), false, false, int32(0), "0"),
 	)
-
-	DescribeTable("parses ordinary beta workloads without role-aware RI",
-		func(withOldKarta bool, roles []any) {
-			var objects []client.Object
-			if withOldKarta {
-				old := test.DynamoGraphDeploymentV1beta1Karta()
-				old.Spec.StructureDefinition.ChildComponents = []kartav1alpha1.ComponentDefinition{{Name: "component"}}
-				objects = append(objects, old)
-			}
-			configuredClient := fake.NewClientBuilder().WithScheme(scheme_init.Scheme()).WithObjects(objects...).Build()
-			handler := NewDynamoGraphDeploymentTopOwnerHandler(configuredClient, nil,
-				func() client.Object { return &dynamov1beta1.DynamoGraphDeployment{} })
-			worker := newV1beta1Component("worker", dynamov1beta1.ComponentTypeWorker, 2, 1, dgdImage,
-				corev1.ResourceList{corev1.ResourceCPU: resource.MustParse("1")}, nil)
-			raw, err := runtime.DefaultUnstructuredConverter.ToUnstructured(newV1beta1DGD("ordinary", "", worker))
-			Expect(err).NotTo(HaveOccurred())
-			if roles != nil {
-				component := raw["spec"].(map[string]any)["components"].([]any)[0].(map[string]any)
-				component["roles"] = roles
-			}
-			ew := &v1alpha1.ExternalWorkload{}
-			Expect(handler.Parse(ctx, &unstructured.Unstructured{Object: raw}, ew)).To(Succeed())
-			Expect(*ew.Spec.RequestedPods.Replicas).To(Equal(int32(2)))
-			Expect(ew.Spec.RequestedResources.Requests.Cpu().String()).To(Equal("2"))
-		},
-		Entry("missing Karta", false, nil),
-		Entry("older Karta", true, nil),
-		Entry("empty roles without Karta", false, []any{}),
-		Entry("roles using the shared template without Karta", false, []any{map[string]any{"name": "leader"}}),
-		Entry("null role template with older Karta", true, []any{map[string]any{"name": "leader", "podTemplate": nil}}),
-	)
-
-	It("uses the installed Karta role expressions", func() {
-		karta := test.DynamoGraphDeploymentV1beta1Karta()
-		role := &karta.Spec.StructureDefinition.ChildComponents[0]
-		role.InstanceIdPath = ptr.To(`.spec.components[] | .name + "/configured"`)
-		role.SpecDefinition.PodTemplateSpecPath = ptr.To(".spec.components[] | .podTemplate")
-		role.ScaleDefinition.ReplicasPath = ptr.To(".spec.components[] | 7")
-		configuredClient := fake.NewClientBuilder().WithScheme(scheme_init.Scheme()).WithObjects(karta).Build()
-		handler := NewDynamoGraphDeploymentTopOwnerHandler(configuredClient, nil,
-			func() client.Object { return &dynamov1beta1.DynamoGraphDeployment{} })
-		worker := newV1beta1Component("worker", dynamov1beta1.ComponentTypeWorker, 2, 1, dgdImage,
-			corev1.ResourceList{corev1.ResourceCPU: resource.MustParse("1")}, nil)
-		ew := &v1alpha1.ExternalWorkload{}
-		raw, err := runtime.DefaultUnstructuredConverter.ToUnstructured(newV1beta1DGD("configured", "", worker))
-		Expect(err).NotTo(HaveOccurred())
-		component := raw["spec"].(map[string]any)["components"].([]any)[0].(map[string]any)
-		component["roles"] = []any{map[string]any{"name": "leader", "podTemplate": component["podTemplate"]}}
-		Expect(handler.Parse(ctx, &unstructured.Unstructured{Object: raw}, ew)).To(Succeed())
-		Expect(*ew.Spec.RequestedPods.Replicas).To(Equal(int32(7)))
-		Expect(ew.Spec.RequestedResources.Requests.Cpu().String()).To(Equal("7"))
-	})
-
-	DescribeTable("reports missing role extraction configuration for explicit role templates",
-		func(withOldKarta bool, expectedError string) {
-			var objects []client.Object
-			if withOldKarta {
-				old := test.DynamoGraphDeploymentV1beta1Karta()
-				old.Spec.StructureDefinition.ChildComponents = nil
-				objects = append(objects, old)
-			}
-			configuredClient := fake.NewClientBuilder().WithScheme(scheme_init.Scheme()).WithObjects(objects...).Build()
-			handler := NewDynamoGraphDeploymentTopOwnerHandler(configuredClient, nil,
-				func() client.Object { return &dynamov1beta1.DynamoGraphDeployment{} })
-			object := &unstructured.Unstructured{}
-			Expect(json.Unmarshal([]byte(`{
-              "apiVersion":"nvidia.com/v1beta1","kind":"DynamoGraphDeployment",
-              "spec":{"components":[{"name":"worker","roles":[
-                {"name":"leader","podTemplate":{"spec":{"containers":[{"name":"main"}]}}}
-              ]}]}
-            }`), &object.Object)).To(Succeed())
-			Expect(handler.Parse(ctx, object, &v1alpha1.ExternalWorkload{})).
-				To(MatchError(ContainSubstring(expectedError)))
-		},
-		Entry("missing Karta", false, "get Dynamo v1beta1 Karta"),
-		Entry("older Karta", true, "get Dynamo v1beta1 roles"),
-	)
-
-	It("keeps component order and topology when parsing role instances", func() {
-		object := &unstructured.Unstructured{}
-		Expect(json.Unmarshal([]byte(`{
-          "apiVersion":"nvidia.com/v1beta1", "kind":"DynamoGraphDeployment",
-          "metadata":{"name":"mixed"},
-          "spec":{
-            "topologyConstraint":{"clusterTopologyName":"topology","packDomain":"rack"},
-            "components":[
-              {"name":"frontend","type":"frontend","podTemplate":{"spec":{"containers":[
-                {"name":"main","image":"frontend:test","resources":{"requests":{"cpu":"1"}}}
-              ]}}},
-              {"name":"worker","type":"worker","replicas":2,"roles":[
-                {"name":"leader","podTemplate":{"spec":{"containers":[
-                  {"name":"main","image":"worker:test","resources":{"requests":{"cpu":"200m"}}}
-                ]}}}
-              ]}
-            ]
-          }
-        }`), &object.Object)).To(Succeed())
-		configuredClient := fake.NewClientBuilder().WithScheme(scheme_init.Scheme()).
-			WithObjects(test.DynamoGraphDeploymentV1beta1Karta()).Build()
-		handler := NewDynamoGraphDeploymentTopOwnerHandler(configuredClient, nil,
-			func() client.Object { return &dynamov1beta1.DynamoGraphDeployment{} })
-		ew := &v1alpha1.ExternalWorkload{}
-		original := object.DeepCopy()
-		for range 2 {
-			Expect(handler.Parse(ctx, object, ew)).To(Succeed())
-			Expect(*ew.Spec.RequestedPods.Replicas).To(Equal(int32(3)))
-			Expect(ew.Spec.RequestedResources.Requests.Cpu().String()).To(Equal("1400m"))
-			Expect(ew.Spec.ImageName).To(Equal("frontend:test"))
-			Expect(ew.Spec.ComponentTopologies).To(Equal([]v1alpha1.ComponentTopologyEntry{
-				{SpecName: "frontend", Topology: v1alpha1.Topology{Name: "topology", RequiredPlacement: "rack"}},
-				{SpecName: "worker", Topology: v1alpha1.Topology{Name: "topology", RequiredPlacement: "rack"}},
-			}))
-			Expect(object).To(Equal(original))
-		}
-	})
 
 	It("DRA GPU resources from ExtraPodSpec ResourceClaims", func() {
 		draFakeClient := fake.NewClientBuilder().WithScheme(scheme_init.Scheme()).WithObjects(test.TestDRAGpuClaim.DeepCopy(), test.TestDRAGpuClaimTemplate.DeepCopy()).Build()

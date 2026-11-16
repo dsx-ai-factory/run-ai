@@ -9,7 +9,6 @@ import (
 	"context"
 	"fmt"
 	"sort"
-	"strings"
 
 	dynamov1alpha1 "github.com/ai-dynamo/dynamo/deploy/operator/api/v1alpha1"
 	dynamov1beta1 "github.com/ai-dynamo/dynamo/deploy/operator/api/v1beta1"
@@ -21,12 +20,10 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/pkg/utils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	"github.com/rs/zerolog/log"
-	riresource "github.com/run-ai/karta/pkg/resource"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -56,25 +53,18 @@ func NewDynamoGraphDeploymentTopOwnerHandler(cachedClient client.Client, draPars
 func (h *DynamoGraphDeploymentTopOwnerHandler) Parse(ctx context.Context, object client.Object,
 	externalWorkload *v1alpha1.ExternalWorkload,
 ) error {
-	typedObject := object
-	if raw, ok := object.(*unstructured.Unstructured); ok &&
-		raw.GetAPIVersion() == dynamov1beta1.GroupVersion.String() && raw.GetKind() == "DynamoGraphDeployment" {
-		deployment := &dynamov1beta1.DynamoGraphDeployment{}
-		if err := runtime.DefaultUnstructuredConverter.FromUnstructured(raw.Object, deployment); err != nil {
-			return fmt.Errorf("decode Dynamo v1beta1 deployment: %w", err)
-		}
-		typedObject = deployment
+	object, err := expandDynamoV1beta1RoleTemplates(object)
+	if err != nil {
+		return err
 	}
-	dynamoGraphDeploymentAlpha1, ok := typedObject.(*dynamov1alpha1.DynamoGraphDeployment)
+	dynamoGraphDeploymentAlpha1, ok := object.(*dynamov1alpha1.DynamoGraphDeployment)
 	if !ok {
-		dynamoGraphDeploymentBeta1, okBeta1 := typedObject.(*dynamov1beta1.DynamoGraphDeployment)
+		dynamoGraphDeploymentBeta1, okBeta1 := object.(*dynamov1beta1.DynamoGraphDeployment)
 		if !okBeta1 {
 			return fmt.Errorf("failed converting object to dynamov1alpha1/v1beta1.DynamoGraphDeployment")
 		}
 
-		if err := h.parseSpecV1beta1(ctx, object, dynamoGraphDeploymentBeta1, externalWorkload); err != nil {
-			return err
-		}
+		h.parseSpecV1beta1(ctx, dynamoGraphDeploymentBeta1, externalWorkload)
 		fillObservedStatus(string(dynamoGraphDeploymentBeta1.Status.State), dynamoGraphDeploymentBeta1.Status.Conditions, &externalWorkload.Status.ObservedStatus)
 		return nil
 	}
@@ -158,67 +148,54 @@ func (h *DynamoGraphDeploymentTopOwnerHandler) parseSpecV1alpha1(ctx context.Con
 // image, and node affinity are derived from each component's pod template, which
 // lets us reuse the shared pod-template parsers. v1beta1 components have no
 // ingress field, so no frontend URL is discovered here (tracked separately).
-func (h *DynamoGraphDeploymentTopOwnerHandler) parseSpecV1beta1(ctx context.Context, object client.Object,
-	dynamoGraphDeployment *dynamov1beta1.DynamoGraphDeployment,
+func (h *DynamoGraphDeploymentTopOwnerHandler) parseSpecV1beta1(ctx context.Context, dynamoGraphDeployment *dynamov1beta1.DynamoGraphDeployment,
 	externalWorkload *v1alpha1.ExternalWorkload,
-) error {
-	roleInstances, roleIDs, err := h.getDynamoV1beta1RoleInstances(ctx, object)
-	if err != nil {
-		return err
-	}
-
+) {
 	totalReplicas := int32(0)
 	// Accumulate into a local value and assign once, so re-parsing an existing
 	// ExternalWorkload (on reconcile) recomputes resources rather than summing
 	// onto the previous result.
 	totalResources := corev1.ResourceRequirements{}
 
-	parsePodTemplate := func(name string, podTemplate *corev1.PodTemplateSpec, replicas int32) {
+	for i := range dynamoGraphDeployment.Spec.Components {
+		component := &dynamoGraphDeployment.Spec.Components[i]
+
+		replicas := int32(1) // default
+		if component.Replicas != nil {
+			replicas = *component.Replicas
+		}
+		// Multiply by number of nodes if multinode
+		replicas = replicas * component.GetNumberOfNodes()
 		totalReplicas += replicas
-		if podTemplate == nil {
-			return
+
+		if component.PodTemplate == nil {
+			continue
 		}
 
 		// Aggregate requested resources from the pod template, scaled by replicas.
-		podResources := commonparsers.GetPodRequestedResources(podTemplate)
+		podResources := commonparsers.GetPodRequestedResources(component.PodTemplate)
 		totalResources = resources.SumResourceRequirements(
 			totalResources, commonparsers.MultiplyResources(replicas, podResources))
 
 		// DRA GPUs declared via the pod template's resource claims.
-		if h.draParser != nil && len(podTemplate.Spec.ResourceClaims) > 0 {
+		if h.draParser != nil && len(component.PodTemplate.Spec.ResourceClaims) > 0 {
 			gpuCount := h.draParser.ResolveDRAGpuCount(ctx, dynamoGraphDeployment.Namespace,
-				podTemplate.Spec.ResourceClaims)
+				component.PodTemplate.Spec.ResourceClaims)
 			if gpuCount > 0 {
 				dra.AddDRAGpuToResources(gpuCount*int64(replicas), &totalResources)
 			}
 		}
 
 		if externalWorkload.Spec.ImageName == "" {
-			commonparsers.CalculateImageInfo(podTemplate, externalWorkload)
+			commonparsers.CalculateImageInfo(component.PodTemplate, externalWorkload)
 		}
 
 		// Capture each component's nodeAffinity under its component name so each
 		// component is distinguishable in the EW spec and downstream API.
-		commonparsers.UpsertNodeAffinityFromPodTemplate(name, podTemplate, externalWorkload)
+		commonparsers.UpsertNodeAffinityFromPodTemplate(component.ComponentName, component.PodTemplate, externalWorkload)
 
-		commonparsers.FillRequestedNodePools(ctx, dynamoGraphDeployment.ObjectMeta, dynamoGraphDeployment.GroupVersionKind().GroupKind().Kind, podTemplate.Spec.Affinity,
+		commonparsers.FillRequestedNodePools(ctx, dynamoGraphDeployment.ObjectMeta, dynamoGraphDeployment.GroupVersionKind().GroupKind().Kind, component.PodTemplate.Spec.Affinity,
 			h.cachedClient, externalWorkload)
-	}
-	for _, component := range dynamoGraphDeployment.Spec.Components {
-		hasRoles := false
-		for _, id := range roleIDs {
-			if !strings.HasPrefix(id, component.ComponentName+"/") {
-				continue
-			}
-			hasRoles = true
-			instance := roleInstances[id]
-			scale := ptr.Deref(instance.Scale, riresource.Scale{})
-			parsePodTemplate(id, instance.PodTemplateSpec, ptr.Deref(scale.Replicas, ptr.Deref(scale.MinReplicas, 1)))
-		}
-		if !hasRoles {
-			parsePodTemplate(component.ComponentName, component.PodTemplate,
-				ptr.Deref(component.Replicas, 1)*component.GetNumberOfNodes())
-		}
 	}
 
 	noPodsRequested := totalReplicas == 0
@@ -247,7 +224,6 @@ func (h *DynamoGraphDeploymentTopOwnerHandler) parseSpecV1beta1(ctx context.Cont
 			externalWorkload.Spec.Preemptibility = preemptibility
 		}
 	}
-	return nil
 }
 
 func buildUrlFromIngress(ingress *dynamov1alpha1.IngressSpec) string {

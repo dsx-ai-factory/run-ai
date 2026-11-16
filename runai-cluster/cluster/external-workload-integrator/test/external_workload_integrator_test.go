@@ -94,7 +94,7 @@ var _ = Describe("TestExternalWorkloadIntegrator", Ordered, func() {
 
 		testCreatedObjects = []client.Object{}
 
-		kartasForTest         = []client.Object{KartaForKserveInferenceService, KartaForDeployment, DynamoGraphDeploymentV1beta1Karta()}
+		kartasForTest         = []client.Object{KartaForKserveInferenceService, KartaForDeployment}
 		additionalGvksForTest = []schema.GroupVersionKind{kservev1beta1.SchemeGroupVersion.WithKind("InferenceService")}
 	)
 
