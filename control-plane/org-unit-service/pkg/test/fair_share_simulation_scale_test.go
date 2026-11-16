@@ -110,6 +110,25 @@ var _ = Describe("Fair share simulation at scale", Ordered, func() {
 		Expect(err).To(BeNil())
 	})
 
+	AfterAll(func() {
+		parallel(len(projectIds), func(i int) {
+			if projectIds[i] == "" {
+				return
+			}
+			response, err := projectApiService.DeleteProject(ctx, projectIds[i], "", false)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(response.Code).To(Equal(http.StatusNoContent), "%+v", response.Body)
+		})
+		parallel(len(departmentIds), func(i int) {
+			if departmentIds[i] == "" {
+				return
+			}
+			response, err := departmentApiService.DeleteDepartment(ctx, departmentIds[i])
+			Expect(err).ToNot(HaveOccurred())
+			Expect(response.Code).To(Equal(http.StatusNoContent), "%+v", response.Body)
+		})
+	})
+
 	measure := func(name string, call func()) time.Duration {
 		durations := make([]time.Duration, calls)
 		for i := range durations {

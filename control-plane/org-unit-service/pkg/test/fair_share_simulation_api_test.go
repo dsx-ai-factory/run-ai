@@ -7,6 +7,7 @@ package testing
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -49,7 +50,8 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 	clusterServiceClient.On("GetNodePoolsMinimalByCluster", mock.Anything, clusterId).
 		Return(&clustersOpenapi.GetNodepoolsMinimal200Response{Nodepools: []clustersOpenapi.NodepoolMinimal{pool}}, nil)
 	clusterServiceClient.On("GetNodepoolMinimal", mock.Anything, pool.Id).Return(&pool, nil)
-	clusterServiceClient.On("GetNodepoolMinimal", mock.Anything, mock.Anything).Return(nil, http.ErrMissingFile)
+	clusterServiceClient.On("GetNodepoolMinimal", mock.Anything, "999997").Return(nil, errors.New("connection refused"))
+	clusterServiceClient.On("GetNodepoolMinimal", mock.Anything, mock.Anything).Return(nil, errors.New("404 Not Found"))
 	departmentApiService := departments.NewDepartmentApiService(&clusterServiceClient, nil)
 	projectApiService := projects.NewProjectApiService(services.NewProjectDeletionService(&clusterServiceClient, nil, nil), &clusterServiceClient, nil)
 
@@ -207,6 +209,22 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 			expectResult(body.OrgUnits[0], b, expected{demand: 20, fairShare: 10, guaranteed: 2, unmet: 10, weightShare: 1})
 		})
 
+		It("uses each department's quota as its weight while adjustable weights is off", func() {
+			sc := departmentsScenario(withDemand(a, 20), withDemand(b, 20))
+			sc.capabilities = api.FairShareSimulationSchedulingCapabilities{Quota: true, Limits: true}
+			body := simulate(fullAccess, sc)
+			Expect(body.OrgUnits[0].WeightShareInRank).To(BeNumerically("~", 4.0/6, 1e-9))
+			Expect(body.OrgUnits[1].WeightShareInRank).To(BeNumerically("~", 2.0/6, 1e-9))
+			Expect(body.OrgUnits[0].FairShare.Gpu + body.OrgUnits[1].FairShare.Gpu).To(Equal(20.0))
+			Expect(body.OrgUnits[0].FairShare.Gpu).To(BeNumerically(">", body.OrgUnits[1].FairShare.Gpu))
+		})
+
+		It("caps the demand and the fair share at an unsaved limit", func() {
+			limited := api.FairShareSimulationOrgUnit{Id: a, Gpu: &api.FairShareSimulationGpuSettings{Limit: ptr.To(5.0)}}
+			body := simulate(fullAccess, departmentsScenario(limited, row(b)))
+			expectResult(body.OrgUnits[0], a, expected{demand: 5, fairShare: 5, guaranteed: 4, unmet: 0, weightShare: 1})
+		})
+
 		It("refuses a department the caller can't read the same way as an unknown one", func() {
 			onlyB := serviceFor(authorization_api.PermittedScopes{Departments: []string{b}})
 			Expect(simulate(onlyB, departmentsScenario(row(b))).OrgUnits[0].FairShare.Gpu).To(Equal(10.0))
@@ -256,6 +274,14 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 				Return(&authorization_api.PermittedScopesActions{Read: projects}, 0, nil)
 			return services.NewOrgUnitApiService(&authMock, &clusterServiceClient, mockTenantsClient, &clusterServiceClient)
 		}
+
+		It("answers 503 when the caller's permissions can't be fetched", func() {
+			authMock := auth_mocks.IAuthorizationClient{}
+			authMock.On("GetPermittedScopes", mock.Anything, mock.Anything, mock.Anything).
+				Return(nil, 0, errors.New("authorization is down"))
+			unavailable := services.NewOrgUnitApiService(&authMock, &clusterServiceClient, mockTenantsClient, &clusterServiceClient)
+			Expect(call(unavailable, departmentsScenario(row(a))).Code).To(Equal(http.StatusServiceUnavailable))
+		})
 
 		It("requires read on departments to simulate departments", func() {
 			projectsOnly := readOn(authorization_api.PermittedScopes{}, authorization_api.PermittedScopes{Projects: []string{a1}})
@@ -328,9 +354,9 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 			Expect(response.Body.String()).To(ContainSubstring(`"demand":{"gpu":10}`))
 
 			Expect(post(`{"nodePool":null,"orgUnitType":"department","orgUnits":[{"id":"` + a + `"}]}`).Code).
-				To(BeNumerically(">=", http.StatusBadRequest))
+				To(Equal(http.StatusBadRequest))
 			Expect(post(`{"nodePool":` + allOff + `,"orgUnitType":"department","orgUnits":[{"id":"` + a + `","rank":"Sometimes"}]}`).Code).
-				To(BeNumerically(">=", http.StatusBadRequest))
+				To(Equal(http.StatusBadRequest))
 		})
 
 		It("answers 404 for a node pool that doesn't exist", func() {
@@ -342,6 +368,32 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 			})
 			Expect(err).To(BeNil())
 			Expect(response.Code).To(Equal(http.StatusNotFound))
+		})
+
+		It("answers 503 when cluster-service can't say whether the node pool exists", func() {
+			response, err := fullAccess.SimulateNodePoolFairShare(ctx, "999997", api.FairShareSimulationRequest{
+				NodePool: &api.FairShareSimulationNodePool{
+					Capacity: &api.FairShareSimulationResources{}, SchedulingCapabilities: &allOn,
+				},
+				OrgUnitType: "department", OrgUnits: []api.FairShareSimulationOrgUnit{row(a)},
+			})
+			Expect(err).To(BeNil())
+			Expect(response.Code).To(Equal(http.StatusServiceUnavailable))
+		})
+
+		It("refuses ids that would change the filter", func() {
+			response, err := fullAccess.SimulateNodePoolFairShare(ctx, pool.Id+"||7201", api.FairShareSimulationRequest{
+				NodePool: &api.FairShareSimulationNodePool{
+					Capacity: &api.FairShareSimulationResources{}, SchedulingCapabilities: &allOn,
+				},
+				OrgUnitType: "department", OrgUnits: []api.FairShareSimulationOrgUnit{row(a)},
+			})
+			Expect(err).To(BeNil())
+			Expect(response.Code).To(Equal(http.StatusNotFound))
+
+			parent := call(fullAccess, projectsScenario(a+"||"+b, row(a1)))
+			Expect(parent.Code).To(Equal(http.StatusBadRequest))
+			Expect(parent.Body.(api.Error).Message).To(Equal("project " + a1 + " not found in the node pool"))
 		})
 	})
 })

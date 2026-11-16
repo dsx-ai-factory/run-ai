@@ -92,7 +92,6 @@ func GetProjectNodePoolResources(
 	return nodePoolResources, nil
 }
 
-// slimNodePoolResourcesColumns are the scheduling inputs of an org unit on a node pool, all a fair share needs.
 var (
 	slimNodePoolResourcesColumns        = []string{"org_unit_id", "rank", "gpu_deserved", "gpu_limit", "gpu_over_quota_weight", "created_at"}
 	slimProjectNodePoolResourcesColumns = append(slices.Clone(slimNodePoolResourcesColumns), "parent_id")

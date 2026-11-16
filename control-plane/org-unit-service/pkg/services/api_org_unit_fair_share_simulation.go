@@ -11,6 +11,8 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"k8s.io/utils/ptr"
 
@@ -44,6 +46,10 @@ type simulatedOrgUnit struct {
 
 func (o OrgUnitApiService) SimulateNodePoolFairShare(ctx context.Context, nodepoolId string, request api.FairShareSimulationRequest,
 ) (api.ImplResponse, error) {
+	if request.OrgUnitType != orgUnitTypeDepartment && request.OrgUnitType != orgUnitTypeProject {
+		err := fmt.Errorf("orgUnitType must be %s or %s", orgUnitTypeDepartment, orgUnitTypeProject)
+		return HandleError(err, http.StatusBadRequest, err.Error()), nil
+	}
 	// The spec can't require department or project read depending on orgUnitType, so the handler checks it.
 	resourceType := authorization_api.RESOURCETYPE_DEPARTMENT
 	if request.OrgUnitType == orgUnitTypeProject {
@@ -65,6 +71,15 @@ func (o OrgUnitApiService) SimulateNodePoolFairShare(ctx context.Context, nodepo
 	if err != nil {
 		return HandleError(err, http.StatusBadRequest, "Failed to parse tenant id"), nil
 	}
+	// The ids end up in queryapi filter strings, where anything but a plain id could change the filter.
+	if !isPlainId(nodepoolId) {
+		return api.Response(http.StatusNotFound, api.NewError(http.StatusNotFound,
+			fmt.Sprintf("node pool %s not found", nodepoolId), nil)), nil
+	}
+	if request.Parent != nil && !isPlainId(request.Parent.Id) {
+		err := notFoundInNodePool(orgUnitTypeProject, request.OrgUnits[0].Id)
+		return HandleError(err, http.StatusBadRequest, err.Error()), nil
+	}
 
 	departments, err := departmentsOfNodePool(ctx, *tenantId, nodepoolId, nil)
 	if err != nil {
@@ -72,7 +87,11 @@ func (o OrgUnitApiService) SimulateNodePoolFairShare(ctx context.Context, nodepo
 	}
 	if len(departments) == 0 {
 		if _, err := GetNodePoolMetadata(ctx, o.clusterExternalClient, nodepoolId); err != nil {
-			return HandleError(err, http.StatusNotFound, fmt.Sprintf("Failed to get node pool %s", nodepoolId)), nil
+			if isNotFound(err) {
+				return HandleError(err, http.StatusNotFound, fmt.Sprintf("node pool %s not found", nodepoolId)), nil
+			}
+			return HandleError(fmt.Errorf("get node pool %s: %w", nodepoolId, err), http.StatusServiceUnavailable,
+				"Failed to get the node pool"), nil
 		}
 	}
 
@@ -114,8 +133,6 @@ func validateFairShareSimulationRequest(request api.FairShareSimulationRequest) 
 	}
 	capabilities := *request.NodePool.SchedulingCapabilities
 	switch {
-	case request.OrgUnitType != orgUnitTypeDepartment && request.OrgUnitType != orgUnitTypeProject:
-		return fmt.Errorf("orgUnitType must be %s or %s", orgUnitTypeDepartment, orgUnitTypeProject)
 	case request.OrgUnitType == orgUnitTypeDepartment && request.Parent != nil:
 		return errors.New("parent can only be set for projects")
 	case request.OrgUnitType == orgUnitTypeProject && (request.Parent == nil || request.Parent.Id == ""):
@@ -241,7 +258,6 @@ func (s simulationScenario) simulateProjects(departments map[string]*simulatedOr
 		if change, ok := s.changes[id]; ok && change.Demand != nil {
 			project.unit.Demand = change.Demand.Gpu
 		}
-		project.unit.Demand = project.unit.RequestableDemand()
 		parentDemand += project.unit.Demand
 		projectUnits = append(projectUnits, project.unit)
 	}
@@ -364,11 +380,11 @@ func departmentsOfNodePool(ctx context.Context, tenantId, nodepoolId string, sco
 ) (map[string]*simulatedOrgUnit, error) {
 	filters, err := queryapi.NewParser(models.DepartmentNodePoolResources{}.FilterByFieldsToColumn()).Filters([]string{"nodePoolId==" + nodepoolId})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("filter departments of node pool %s: %w", nodepoolId, err)
 	}
 	rows, err := dao.GetDepartmentNodePoolResources(ctx, tenantId, filters, "", "", 0, 0, scopes, "", models.SlimVerbosity)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("load departments of node pool %s: %w", nodepoolId, err)
 	}
 	units := make(map[string]*simulatedOrgUnit, len(*rows))
 	for _, row := range *rows {
@@ -384,11 +400,11 @@ func projectsOfDepartment(ctx context.Context, tenantId, nodepoolId, departmentI
 	filters, err := queryapi.NewParser(models.ProjectNodePoolResources{}.FilterByFieldsToColumn()).
 		Filters([]string{"nodePoolId==" + nodepoolId, "parentId==" + departmentId})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("filter projects of department %s on node pool %s: %w", departmentId, nodepoolId, err)
 	}
 	rows, err := dao.GetProjectNodePoolResources(ctx, tenantId, filters, "", "", 0, 0, scopes, "", models.SlimVerbosity)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("load projects of department %s on node pool %s: %w", departmentId, nodepoolId, err)
 	}
 	units := make(map[string]*simulatedOrgUnit, len(*rows))
 	for _, row := range *rows {
@@ -405,7 +421,7 @@ func visibleDepartmentsOfNodePool(ctx context.Context, tenantId, nodepoolId stri
 	var err error
 	if !scopesCoverTenant(tenantId, scopes) {
 		if departments, err = departmentsOfNodePool(ctx, tenantId, nodepoolId, scopes); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("load visible departments: %w", err)
 		}
 	}
 	visible := make(map[string]bool, len(departments))
@@ -413,6 +429,16 @@ func visibleDepartmentsOfNodePool(ctx context.Context, tenantId, nodepoolId stri
 		visible[id] = true
 	}
 	return visible, nil
+}
+
+func isPlainId(id string) bool {
+	_, err := strconv.ParseUint(id, 10, 64)
+	return err == nil
+}
+
+// isNotFound reads the status the cluster-service client puts at the start of its errors, as in "404 Not Found".
+func isNotFound(err error) bool {
+	return strings.HasPrefix(err.Error(), strconv.Itoa(http.StatusNotFound)+" ")
 }
 
 func hasAnyScope(scopes authorization_api.PermittedScopes) bool {
