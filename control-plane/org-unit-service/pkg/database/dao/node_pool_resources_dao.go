@@ -7,6 +7,7 @@ package dao
 
 import (
 	"context"
+	"slices"
 	"time"
 
 	"k8s.io/utils/ptr"
@@ -31,6 +32,7 @@ func GetDepartmentNodePoolResources(
 	limit int32,
 	permittedScopes *openapi.PermittedScopes,
 	search string,
+	verbosity models.Verbosity,
 ) (*[]models.DepartmentNodePoolResources, error) {
 	var permittedScopesQuery *string = nil
 	if permittedScopes != nil {
@@ -41,7 +43,8 @@ func GetDepartmentNodePoolResources(
 	}
 
 	nodePoolResources := &[]models.DepartmentNodePoolResources{}
-	query, err := getNodePoolResources(ctx, tenantId, filterBy, sortBy, sortOrder, offset, limit, permittedScopesQuery, search, models.DepartmentNodePoolResourcesView)
+	query, err := getNodePoolResources(ctx, tenantId, filterBy, sortBy, sortOrder, offset, limit, permittedScopesQuery, search,
+		models.DepartmentNodePoolResourcesView, verbosity, slimNodePoolResourcesColumns)
 	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get department node pool resources, err: %v", err)
 		return nil, err
@@ -64,6 +67,7 @@ func GetProjectNodePoolResources(
 	limit int32,
 	permittedScopes *openapi.PermittedScopes,
 	search string,
+	verbosity models.Verbosity,
 ) (*[]models.ProjectNodePoolResources, error) {
 	var permittedScopesQuery *string = nil
 	if permittedScopes != nil {
@@ -74,7 +78,8 @@ func GetProjectNodePoolResources(
 	}
 
 	nodePoolResources := &[]models.ProjectNodePoolResources{}
-	query, err := getNodePoolResources(ctx, tenantId, filterBy, sortBy, sortOrder, offset, limit, permittedScopesQuery, search, models.ProjectNodePoolResourcesView)
+	query, err := getNodePoolResources(ctx, tenantId, filterBy, sortBy, sortOrder, offset, limit, permittedScopesQuery, search,
+		models.ProjectNodePoolResourcesView, verbosity, slimProjectNodePoolResourcesColumns)
 	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get project node pool resources, err: %v", err)
 		return nil, err
@@ -87,6 +92,12 @@ func GetProjectNodePoolResources(
 	return nodePoolResources, nil
 }
 
+// slimNodePoolResourcesColumns are the scheduling inputs of an org unit on a node pool, all a fair share needs.
+var (
+	slimNodePoolResourcesColumns        = []string{"org_unit_id", "rank", "gpu_deserved", "gpu_limit", "gpu_over_quota_weight", "created_at"}
+	slimProjectNodePoolResourcesColumns = append(slices.Clone(slimNodePoolResourcesColumns), "parent_id")
+)
+
 func getNodePoolResources(
 	ctx context.Context,
 	tenantId string,
@@ -98,10 +109,15 @@ func getNodePoolResources(
 	permittedScopesQuery *string,
 	search string,
 	viewName string,
+	verbosity models.Verbosity,
+	slimColumns []string,
 ) (orm.DB, error) {
 	query := runaidb.DB().WithContext(ctx).
 		Table(viewName).
 		Where("tenant_id = ?", tenantId)
+	if verbosity == models.SlimVerbosity {
+		query = query.Select(slimColumns)
+	}
 
 	if permittedScopesQuery != nil {
 		query = query.Where(*permittedScopesQuery)
@@ -114,7 +130,9 @@ func getNodePoolResources(
 	if search != "" {
 		query = query.Where("org_unit_name like ?", "%"+search+"%")
 	}
-	query = query.Order("id DESC")
+	if verbosity != models.SlimVerbosity {
+		query = query.Order("id DESC")
+	}
 
 	if offset != 0 {
 		query = query.Offset(int(offset))

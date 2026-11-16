@@ -1116,7 +1116,7 @@ func (s *ProjectApiService) GetProjectNodePoolResources(ctx context.Context, fil
 		permittedScopes = nil
 	}
 
-	nodePoolResources, err := dao.GetProjectNodePoolResources(ctx, *tenantId, filters, sortColumn, sortOrder, offset, limit, permittedScopes, search)
+	nodePoolResources, err := dao.GetProjectNodePoolResources(ctx, *tenantId, filters, sortColumn, sortOrder, offset, limit, permittedScopes, search, models.VerboseVerbosity)
 	if err != nil {
 		errResponse := services.HandleDbError(ctx, err, "Failed to get project nodePool resources")
 		return errResponse, nil
