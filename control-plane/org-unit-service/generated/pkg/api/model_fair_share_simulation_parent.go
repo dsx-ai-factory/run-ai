@@ -20,23 +20,12 @@ var dummyFairShareSimulationParent = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// FairShareSimulationParent - The department whose projects are simulated, with its unsaved changes. Required when orgUnitType is project; not allowed for departments. It needn't be readable by the caller. Each field replaces the stored value on its own; omitted fields keep it.
+// FairShareSimulationParent - The department whose projects are simulated, with its stored settings. Required when orgUnitType is project; not allowed for departments. It needn't be readable by the caller.
 type FairShareSimulationParent struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Id string `json:"id"`
 	Id string `json:"id" gorm:"not null;"`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	// An unsaved rank. Only while ranks is on. Omitted or null keeps the stored rank.
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Rank *FairShareSimulationRank `json:"rank,omitempty"`
-	Rank *FairShareSimulationRank `json:"rank,omitempty" gorm:""`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Gpu *FairShareSimulationGpuSettings `json:"gpu,omitempty"`
-	Gpu *FairShareSimulationGpuSettings `json:"gpu,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
@@ -51,11 +40,6 @@ func AssertFairShareSimulationParentRequired(obj FairShareSimulationParent) erro
 		}
 	}
 
-	if obj.Gpu != nil {
-		if err := AssertFairShareSimulationGpuSettingsRequired(*obj.Gpu); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
@@ -66,26 +50,5 @@ func AssertFairShareSimulationParentConstraints(obj FairShareSimulationParent) e
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	if obj.Rank != nil {
-		if okValue := obj.Rank.IsValid(); !okValue {
-			return &UnsupportedValueError{Field: "Rank", Value: string(*obj.Rank)}
-		}
-	}
-
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
-	if obj.Gpu != nil {
-		if err := AssertFairShareSimulationGpuSettingsConstraints(*obj.Gpu); err != nil {
-			return err
-		}
-	}
 	return nil
 }

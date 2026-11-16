@@ -2458,10 +2458,10 @@ export interface FairShareSimulationOrgUnit {
     'rank'?: FairShareSimulationRank | null;
     /**
      * 
-     * @type {FairShareSimulationParentGpu}
+     * @type {FairShareSimulationOrgUnitGpu}
      * @memberof FairShareSimulationOrgUnit
      */
-    'gpu'?: FairShareSimulationParentGpu | null;
+    'gpu'?: FairShareSimulationOrgUnitGpu | null;
     /**
      * 
      * @type {FairShareSimulationOrgUnitDemand}
@@ -2483,7 +2483,32 @@ export interface FairShareSimulationOrgUnitDemand {
     'gpu': number;
 }
 /**
- * The department whose projects are simulated, with its unsaved changes. Required when orgUnitType is project; not allowed for departments. It needn\'t be readable by the caller. Each field replaces the stored value on its own; omitted fields keep it. 
+ * 
+ * @export
+ * @interface FairShareSimulationOrgUnitGpu
+ */
+export interface FairShareSimulationOrgUnitGpu {
+    /**
+     * The GPU quota; -1 means unlimited. Values between -1 and 0 are rejected.
+     * @type {number}
+     * @memberof FairShareSimulationOrgUnitGpu
+     */
+    'deserved'?: number | null;
+    /**
+     * The maximum GPU allocation; -1 means unlimited. Values between -1 and 0 are rejected. Only while limits is on, and not below the quota. 
+     * @type {number}
+     * @memberof FairShareSimulationOrgUnitGpu
+     */
+    'limit'?: number | null;
+    /**
+     * The over-quota weight within the rank. Ignored while adjustableWeights is off, where the weight is the quota.
+     * @type {number}
+     * @memberof FairShareSimulationOrgUnitGpu
+     */
+    'overQuotaWeight'?: number | null;
+}
+/**
+ * The department whose projects are simulated, with its stored settings. Required when orgUnitType is project; not allowed for departments. It needn\'t be readable by the caller. 
  * @export
  * @interface FairShareSimulationParent
  */
@@ -2494,43 +2519,6 @@ export interface FairShareSimulationParent {
      * @memberof FairShareSimulationParent
      */
     'id': string;
-    /**
-     * An unsaved rank. Only while ranks is on. Omitted or null keeps the stored rank.
-     * @type {FairShareSimulationRank}
-     * @memberof FairShareSimulationParent
-     */
-    'rank'?: FairShareSimulationRank | null;
-    /**
-     * 
-     * @type {FairShareSimulationParentGpu}
-     * @memberof FairShareSimulationParent
-     */
-    'gpu'?: FairShareSimulationParentGpu | null;
-}
-/**
- * 
- * @export
- * @interface FairShareSimulationParentGpu
- */
-export interface FairShareSimulationParentGpu {
-    /**
-     * The GPU quota; -1 means unlimited. Values between -1 and 0 are rejected.
-     * @type {number}
-     * @memberof FairShareSimulationParentGpu
-     */
-    'deserved'?: number | null;
-    /**
-     * The maximum GPU allocation; -1 means unlimited. Values between -1 and 0 are rejected. Only while limits is on, and not below the quota. 
-     * @type {number}
-     * @memberof FairShareSimulationParentGpu
-     */
-    'limit'?: number | null;
-    /**
-     * The over-quota weight within the rank. Ignored while adjustableWeights is off, where the weight is the quota.
-     * @type {number}
-     * @memberof FairShareSimulationParentGpu
-     */
-    'overQuotaWeight'?: number | null;
 }
 /**
  * An unsaved rank. Only while ranks is on.
@@ -2554,7 +2542,7 @@ export type FairShareSimulationRank = typeof FairShareSimulationRank[keyof typeo
 
 
 /**
- * A scenario to simulate: the node pool as it is in the form and the org units the form shows, with their unsaved changes. Every org unit without a demand asks for half the node pool\'s capacity, capped by its limit. For departments, every department competes. For projects, the other departments ask for nothing, and the parent asks for the sum of its projects\' demand. 
+ * A scenario to simulate: the node pool as it is in the form and the org units the form shows, with their unsaved changes. Every org unit without a demand asks for half the node pool\'s capacity, capped by its limit. For departments, every department competes; the node pool and department forms both send departments. For projects, the other departments ask for nothing, and the parent asks for the sum of its projects\' demand, capped by its limit. 
  * @export
  * @interface FairShareSimulationRequest
  */
@@ -2623,18 +2611,6 @@ export interface FairShareSimulationRequestParent {
      * @memberof FairShareSimulationRequestParent
      */
     'id': string;
-    /**
-     * An unsaved rank. Only while ranks is on. Omitted or null keeps the stored rank.
-     * @type {FairShareSimulationRank}
-     * @memberof FairShareSimulationRequestParent
-     */
-    'rank'?: FairShareSimulationRank | null;
-    /**
-     * 
-     * @type {FairShareSimulationParentGpu}
-     * @memberof FairShareSimulationRequestParent
-     */
-    'gpu'?: FairShareSimulationParentGpu | null;
 }
 /**
  * 

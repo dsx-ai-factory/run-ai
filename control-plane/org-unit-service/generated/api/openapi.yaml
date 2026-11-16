@@ -10851,6 +10851,17 @@ components:
       - capacity
       - schedulingCapabilities
       type: object
+    FairShareSimulationParent:
+      description: |
+        The department whose projects are simulated, with its stored settings. Required when orgUnitType is project; not
+        allowed for departments. It needn't be readable by the caller.
+      properties:
+        id:
+          example: "4500014"
+          type: string
+      required:
+      - id
+      type: object
     FairShareSimulationRank:
       description: An unsaved rank. Only while ranks is on.
       enum:
@@ -10896,28 +10907,6 @@ components:
           nullable: true
           type: number
       type: object
-    FairShareSimulationParent:
-      description: |
-        The department whose projects are simulated, with its unsaved changes. Required when orgUnitType is project; not
-        allowed for departments. It needn't be readable by the caller. Each field replaces the stored value on its own;
-        omitted fields keep it.
-      properties:
-        id:
-          example: "4500014"
-          type: string
-        rank:
-          allOf:
-          - $ref: '#/components/schemas/FairShareSimulationRank'
-          description: An unsaved rank. Only while ranks is on. Omitted or null keeps
-            the stored rank.
-          nullable: true
-        gpu:
-          allOf:
-          - $ref: '#/components/schemas/FairShareSimulationGpuSettings'
-          nullable: true
-      required:
-      - id
-      type: object
     FairShareSimulationOrgUnit:
       description: |
         A requested org unit with its unsaved changes. Each field replaces the stored value on its own; omitted fields keep
@@ -10955,8 +10944,8 @@ components:
       description: |
         A scenario to simulate: the node pool as it is in the form and the org units the form shows, with their unsaved
         changes. Every org unit without a demand asks for half the node pool's capacity, capped by its limit. For
-        departments, every department competes. For projects, the other departments ask for nothing, and the parent asks
-        for the sum of its projects' demand.
+        departments, every department competes; the node pool and department forms both send departments. For projects, the
+        other departments ask for nothing, and the parent asks for the sum of its projects' demand, capped by its limit.
       example:
         nodePool: ""
         parent: ""

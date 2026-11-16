@@ -1,6 +1,6 @@
 # Fair share simulation: requirements
 
-Draft, 2026-11-12; open questions 1–5 answered by Barak the same day; design review applied (focus department, one demand rule, parent visibility, effective demand); contract simplified with Edith on 2026-11-15 (assumptions fixed per form, `parent` in the request). Gathered from the Figma (V3 - Node Pools, Approved Version), the GitHub issues (#2949, #4107, #4112, #4114, #4250, #4350), Slack (Chen's 2026-10-29 meeting summary, Shiri's 2026-11-04 permission answer, Shiri's 2026-11-12 decisions and questions) and KAI's scheduler code.
+Draft, 2026-11-12; open questions 1–5 answered by Barak the same day; design review applied (focus department, one demand rule, parent visibility, effective demand); contract simplified with Edith on 2026-11-15 (assumptions fixed per form, `parent` in the request); 2026-11-16: the department form shows sibling departments, as today's form does, so `parent` is only an id. Gathered from the Figma (V3 - Node Pools, Approved Version), the GitHub issues (#2949, #4107, #4112, #4114, #4250, #4350), Slack (Chen's 2026-10-29 meeting summary, Shiri's 2026-11-04 permission answer, Shiri's 2026-11-12 decisions and questions) and KAI's scheduler code.
 
 Legend: **D** decided · **O** open, needs product · **T** technical fact we verified.
 
@@ -13,7 +13,7 @@ Before saving a node pool, show the admin how the scheduler would split the pool
 | Form | Level shown | Status |
 |---|---|---|
 | Node pool, step 2 "Scheduling mode" (create and edit) | Departments of the node pool | **D**, Figma approved |
-| Department form | Projects of the department | **D**: will show it; no Figma yet (epic #2950). The API must serve it. |
+| Department form | The department among its sibling departments, as in today's form | **D**: will show it; no Figma yet (epic #2950). Same call as the node pool form (`orgUnitType: department`). |
 | Project form | The project among its siblings | **D**: same |
 
 The node pool already exists in step 2 (created at step 1), so it always has an id.
@@ -61,10 +61,10 @@ The code is KAI's `pkg/fairshare` (merged, kai-scheduler/KAI-Scheduler#2572; not
 |---|---|---|
 | 6.1 | Every org unit the user didn't drag asks for a default demand. Dragged values are exact. | **D** |
 | 6.2 | Default demand for an untouched org unit: **50% of the node pool's capacity**, capped by its limit. Applies to departments and projects alike, including hidden ones. The backend applies it; the client doesn't send it (Edith, 2026-11-15). | **D** |
-| 6.3 | A department's demand is the sum of its projects' demands **only when its projects are the simulated level** (department and project forms). In the node pool form, a department's demand is its slider, else the default. So the node pool form needs no project data. | **D** (review) |
-| 6.4 | In the department and project forms, the other departments are **idle: demand 0**, with a footnote. The request names the `parent` (with its unsaved edits); it still competes under the pool's rules, so it gets at most its limit, else the capacity. | **D** |
+| 6.3 | A department's demand is the sum of its projects' demands **only when its projects are the simulated level** (the project form). In the node pool and department forms, a department's demand is its slider, else the default. So those forms need no project data. | **D** (review) |
+| 6.4 | In the project form, the other departments are **idle: demand 0**, with a footnote. The request names the `parent` by id, with its stored settings; it still competes under the pool's rules, so it gets at most its limit, else the capacity. | **D** |
 | 6.5 | The assumption must not depend on who's looking or on which rows were requested: two requests with the same scenario give the same numbers. The assumptions are fixed per `orgUnitType` in the backend, never inferred from permissions or from the rows. | **D** (review, simplified 2026-11-15) |
-| 6.7 | A department with no projects asks for 0 in the department forms, so it gets 0 even with quota (scheduler behaviour). The row stays, with `demand: 0`. | **T** |
+| 6.7 | A department with no projects asks for 0 in the project form, so it gets 0 even with quota (scheduler behaviour). The row stays, with `demand: 0`. | **T** |
 | 6.6 | Possible later addition: a second number per unit, "up to, when the others use only their quota". | Deferred |
 
 ## 7. Scale and efficiency
@@ -73,7 +73,7 @@ The code is KAI's `pkg/fairshare` (merged, kai-scheduler/KAI-Scheduler#2572; not
 - The calculation needs every competing org unit, so it runs on the backend (Shiri 2026-11-12; #2949 POC conclusion). It cannot run in the FE.
 - Per-rank aggregates of hidden units are **not** sufficient (water-filling depends on each weight/limit pair), so the backend holds the full set and returns only visible rows (T).
 - Live updates: one call per edit, debounced; every call carries the whole scenario (stateless). Response size must not depend on the pool's size beyond the visible rows of the requested level. No paging (a scenario changes every row).
-- Node pool form: no project rows and no project counts (6.3). Department and project forms: one department's projects (rank, weight, limit), bounded by the department.
+- Node pool and department forms: no project rows and no project counts (6.3). Project form: one department's projects (rank, weight, limit), bounded by the department.
 - The client sends the rows it wants back (the mounted rows, up to 500), with its unsaved edits; the backend returns exactly those.
 
 ## 8. Validation and errors shown before save (D: "errors on change, not only on save")
@@ -98,21 +98,21 @@ The code is KAI's `pkg/fairshare` (merged, kai-scheduler/KAI-Scheduler#2572; not
 
 ## 11. Contract rules (from the design review)
 
-- Required in every request: `nodePool.capacity`, `nodePool.schedulingCapabilities`, `orgUnitType`, at least one row; `parent` (id and optional rank and GPU edits) for projects only. No server-side fallback to saved node pool values.
+- Required in every request: `nodePool.capacity`, `nodePool.schedulingCapabilities`, `orgUnitType`, at least one row; `parent` (id only) for projects only. No server-side fallback to saved node pool values.
 - Row edits merge over stored values field by field (`rank`, `gpu.deserved`, `gpu.limit`, `gpu.overQuotaWeight`, `demand`), each optional.
-- 400 for: `limits` on with `quota` off; a `limit` on a row while `limits` is off; a `rank` while `ranks` is off; a duplicate id; an id not in the pool or not readable (same message); a row outside the parent; `parent` missing for projects or set for departments; a parent limit below its quota; `capacity < 0`; `demand < 0`. A demand above the limit is capped, not rejected. `capacity = 0` is valid (a pool with no nodes yet): the quota phase still runs, so each org unit gets its quota (capped by demand and limit) and nothing above it.
+- 400 for: `limits` on with `quota` off; a `limit` on a row while `limits` is off; a `rank` while `ranks` is off; a duplicate id; an id not in the pool or not readable (same message); a row outside the parent; `parent` missing for projects or set for departments; `capacity < 0`; `demand < 0`. A demand above the limit is capped, not rejected. `capacity = 0` is valid (a pool with no nodes yet): the quota phase still runs, so each org unit gets its quota (capped by demand and limit) and nothing above it.
 - Response: only `orgUnits`. Per row: `fairShare`, `guaranteed`, `overQuota`, `unmet`, `demand` (effective), `weightShareInRank`. Values may be fractional; the client rounds. The parent's own result isn't returned: with the other departments idle it repeats its capped demand, and no form shows it.
 - The parent needn't be readable, so a project's reader can open the project form; an unknown parent gets the same 400 as an unknown project.
-- Cost per call: the pool's departments (hundreds) plus, for the department forms, one department's projects (up to ~1.2k), two permitted-scopes calls, and KAI's division.
+- Cost per call: the pool's departments (hundreds) plus, for the project form, one department's projects (up to ~1.2k), two permitted-scopes calls, and KAI's division.
 
 ## 12. Decisions taken on the open questions (2026-11-12)
 
 1. Default demand: 50% of the node pool's capacity, for departments and projects.
-2. Other departments in the department and project forms: idle (demand 0).
+2. Other departments in the project form: idle (demand 0). The department form shows all departments, which compete with the default demand.
 3. Department and project forms show the simulation; no Figma yet, the API handles both levels.
 4. Ranked → Proportional in edit: not a simulation question.
 5. Overbooked banner with hidden departments: out of scope.
 
 Still open:
 6. Confirm with UX that unmet = demand − allocation, capped by the limit (the Figma tooltip's numbers don't add up).
-7. ~~In the department and project forms, is the parent department's own share shown?~~ Dropped from the API (2026-11-15); can be added back as an optional field.
+7. ~~In the project form, is the parent department's own share shown?~~ Dropped from the API (2026-11-15); can be added back as an optional field.

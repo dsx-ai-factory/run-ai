@@ -5547,6 +5547,17 @@ components:
           nullable: true
           allOf:
             - $ref: '#/components/schemas/FairShareSimulationSchedulingCapabilities'
+    FairShareSimulationParent:
+      type: object
+      description: |
+        The department whose projects are simulated, with its stored settings. Required when orgUnitType is project; not
+        allowed for departments. It needn't be readable by the caller.
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          example: '4500014'
     FairShareSimulationRank:
       type: string
       description: An unsaved rank. Only while ranks is on.
@@ -5590,27 +5601,6 @@ components:
           nullable: true
           description: The over-quota weight within the rank. Ignored while adjustableWeights is off, where the weight is the quota.
           example: 2
-    FairShareSimulationParent:
-      type: object
-      description: |
-        The department whose projects are simulated, with its unsaved changes. Required when orgUnitType is project; not
-        allowed for departments. It needn't be readable by the caller. Each field replaces the stored value on its own;
-        omitted fields keep it.
-      required:
-        - id
-      properties:
-        id:
-          type: string
-          example: '4500014'
-        rank:
-          description: An unsaved rank. Only while ranks is on. Omitted or null keeps the stored rank.
-          nullable: true
-          allOf:
-            - $ref: '#/components/schemas/FairShareSimulationRank'
-        gpu:
-          nullable: true
-          allOf:
-            - $ref: '#/components/schemas/FairShareSimulationGpuSettings'
     FairShareSimulationOrgUnit:
       type: object
       description: |
@@ -5642,8 +5632,8 @@ components:
       description: |
         A scenario to simulate: the node pool as it is in the form and the org units the form shows, with their unsaved
         changes. Every org unit without a demand asks for half the node pool's capacity, capped by its limit. For
-        departments, every department competes. For projects, the other departments ask for nothing, and the parent asks
-        for the sum of its projects' demand.
+        departments, every department competes; the node pool and department forms both send departments. For projects, the
+        other departments ask for nothing, and the parent asks for the sum of its projects' demand, capped by its limit.
       required:
         - nodePool
         - orgUnitType

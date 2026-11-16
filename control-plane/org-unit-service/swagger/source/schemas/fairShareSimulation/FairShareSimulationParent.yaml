@@ -1,20 +1,10 @@
 type: object
 description: |
-  The department whose projects are simulated, with its unsaved changes. Required when orgUnitType is project; not
-  allowed for departments. It needn't be readable by the caller. Each field replaces the stored value on its own;
-  omitted fields keep it.
+  The department whose projects are simulated, with its stored settings. Required when orgUnitType is project; not
+  allowed for departments. It needn't be readable by the caller.
 required:
   - id
 properties:
   id:
     type: string
     example: "4500014"
-  rank:
-    description: An unsaved rank. Only while ranks is on. Omitted or null keeps the stored rank.
-    nullable: true
-    allOf:
-      - $ref: "./FairShareSimulationRank.yaml"
-  gpu:
-    nullable: true
-    allOf:
-      - $ref: "./FairShareSimulationGpuSettings.yaml"

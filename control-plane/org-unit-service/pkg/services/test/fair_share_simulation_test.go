@@ -48,7 +48,7 @@ var _ = Describe("SimulateNodePoolFairShare", func() {
 				`"orgUnitType":"department","orgUnits":[{"id":"1"}]}`, true),
 		Entry("null and omitted edits",
 			`{"nodePool":{"capacity":{"gpu":8},"schedulingCapabilities":{"quota":true,"ranks":true,"adjustableWeights":true,"limits":true}},`+
-				`"orgUnitType":"project","parent":{"id":"2","gpu":{"limit":null}},"orgUnits":[{"id":"1","demand":null,"rank":null}]}`, true),
+				`"orgUnitType":"project","parent":{"id":"2"},"orgUnits":[{"id":"1","demand":null,"rank":null}]}`, true),
 		Entry("a null node pool", `{"nodePool":null,"orgUnitType":"department","orgUnits":[{"id":"1"}]}`, false),
 		Entry("an unknown rank",
 			`{"nodePool":{"capacity":{"gpu":8},"schedulingCapabilities":{"quota":true,"ranks":true,"adjustableWeights":true,"limits":true}},`+

@@ -20,7 +20,7 @@ var dummyFairShareSimulationRequest = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// FairShareSimulationRequest - A scenario to simulate: the node pool as it is in the form and the org units the form shows, with their unsaved changes. Every org unit without a demand asks for half the node pool's capacity, capped by its limit. For departments, every department competes. For projects, the other departments ask for nothing, and the parent asks for the sum of its projects' demand.
+// FairShareSimulationRequest - A scenario to simulate: the node pool as it is in the form and the org units the form shows, with their unsaved changes. Every org unit without a demand asks for half the node pool's capacity, capped by its limit. For departments, every department competes; the node pool and department forms both send departments. For projects, the other departments ask for nothing, and the parent asks for the sum of its projects' demand, capped by its limit.
 type FairShareSimulationRequest struct {
 
 	// Required; null is rejected.

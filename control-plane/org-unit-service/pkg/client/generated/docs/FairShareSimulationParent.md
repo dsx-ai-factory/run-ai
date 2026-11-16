@@ -5,8 +5,6 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** |  | 
-**Rank** | Pointer to [**NullableFairShareSimulationRank**](FairShareSimulationRank.md) | An unsaved rank. Only while ranks is on. Omitted or null keeps the stored rank. | [optional] 
-**Gpu** | Pointer to [**NullableFairShareSimulationGpuSettings**](FairShareSimulationGpuSettings.md) |  | [optional] 
 
 ## Methods
 
@@ -47,76 +45,6 @@ and a boolean to check if the value has been set.
 SetId sets Id field to given value.
 
 
-### GetRank
-
-`func (o *FairShareSimulationParent) GetRank() FairShareSimulationRank`
-
-GetRank returns the Rank field if non-nil, zero value otherwise.
-
-### GetRankOk
-
-`func (o *FairShareSimulationParent) GetRankOk() (*FairShareSimulationRank, bool)`
-
-GetRankOk returns a tuple with the Rank field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetRank
-
-`func (o *FairShareSimulationParent) SetRank(v FairShareSimulationRank)`
-
-SetRank sets Rank field to given value.
-
-### HasRank
-
-`func (o *FairShareSimulationParent) HasRank() bool`
-
-HasRank returns a boolean if a field has been set.
-
-### SetRankNil
-
-`func (o *FairShareSimulationParent) SetRankNil(b bool)`
-
- SetRankNil sets the value for Rank to be an explicit nil
-
-### UnsetRank
-`func (o *FairShareSimulationParent) UnsetRank()`
-
-UnsetRank ensures that no value is present for Rank, not even an explicit nil
-### GetGpu
-
-`func (o *FairShareSimulationParent) GetGpu() FairShareSimulationGpuSettings`
-
-GetGpu returns the Gpu field if non-nil, zero value otherwise.
-
-### GetGpuOk
-
-`func (o *FairShareSimulationParent) GetGpuOk() (*FairShareSimulationGpuSettings, bool)`
-
-GetGpuOk returns a tuple with the Gpu field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetGpu
-
-`func (o *FairShareSimulationParent) SetGpu(v FairShareSimulationGpuSettings)`
-
-SetGpu sets Gpu field to given value.
-
-### HasGpu
-
-`func (o *FairShareSimulationParent) HasGpu() bool`
-
-HasGpu returns a boolean if a field has been set.
-
-### SetGpuNil
-
-`func (o *FairShareSimulationParent) SetGpuNil(b bool)`
-
- SetGpuNil sets the value for Gpu to be an explicit nil
-
-### UnsetGpu
-`func (o *FairShareSimulationParent) UnsetGpu()`
-
-UnsetGpu ensures that no value is present for Gpu, not even an explicit nil
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

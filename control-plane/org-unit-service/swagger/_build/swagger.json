@@ -8205,6 +8205,19 @@
           }
         }
       },
+      "FairShareSimulationParent": {
+        "type": "object",
+        "description": "The department whose projects are simulated, with its stored settings. Required when orgUnitType is project; not\nallowed for departments. It needn't be readable by the caller.\n",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "4500014"
+          }
+        }
+      },
       "FairShareSimulationRank": {
         "type": "string",
         "description": "An unsaved rank. Only while ranks is on.",
@@ -8251,36 +8264,6 @@
           }
         }
       },
-      "FairShareSimulationParent": {
-        "type": "object",
-        "description": "The department whose projects are simulated, with its unsaved changes. Required when orgUnitType is project; not\nallowed for departments. It needn't be readable by the caller. Each field replaces the stored value on its own;\nomitted fields keep it.\n",
-        "required": [
-          "id"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "example": "4500014"
-          },
-          "rank": {
-            "description": "An unsaved rank. Only while ranks is on. Omitted or null keeps the stored rank.",
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FairShareSimulationRank"
-              }
-            ]
-          },
-          "gpu": {
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FairShareSimulationGpuSettings"
-              }
-            ]
-          }
-        }
-      },
       "FairShareSimulationOrgUnit": {
         "type": "object",
         "description": "A requested org unit with its unsaved changes. Each field replaces the stored value on its own; omitted fields keep\nit. `demand` is the GPUs the org unit asks for (the dragged slider), capped by its limit; without it, half the node\npool's capacity.\n",
@@ -8322,7 +8305,7 @@
       },
       "FairShareSimulationRequest": {
         "type": "object",
-        "description": "A scenario to simulate: the node pool as it is in the form and the org units the form shows, with their unsaved\nchanges. Every org unit without a demand asks for half the node pool's capacity, capped by its limit. For\ndepartments, every department competes. For projects, the other departments ask for nothing, and the parent asks\nfor the sum of its projects' demand.\n",
+        "description": "A scenario to simulate: the node pool as it is in the form and the org units the form shows, with their unsaved\nchanges. Every org unit without a demand asks for half the node pool's capacity, capped by its limit. For\ndepartments, every department competes; the node pool and department forms both send departments. For projects, the\nother departments ask for nothing, and the parent asks for the sum of its projects' demand, capped by its limit.\n",
         "required": [
           "nodePool",
           "orgUnitType",

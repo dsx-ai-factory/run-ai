@@ -22,12 +22,9 @@ import (
 // checks if the FairShareSimulationParent type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &FairShareSimulationParent{}
 
-// FairShareSimulationParent The department whose projects are simulated, with its unsaved changes. Required when orgUnitType is project; not allowed for departments. It needn't be readable by the caller. Each field replaces the stored value on its own; omitted fields keep it.
+// FairShareSimulationParent The department whose projects are simulated, with its stored settings. Required when orgUnitType is project; not allowed for departments. It needn't be readable by the caller.
 type FairShareSimulationParent struct {
 	Id string `json:"id"`
-	// An unsaved rank. Only while ranks is on. Omitted or null keeps the stored rank.
-	Rank NullableFairShareSimulationRank        `json:"rank,omitempty"`
-	Gpu  NullableFairShareSimulationGpuSettings `json:"gpu,omitempty"`
 }
 
 type _FairShareSimulationParent FairShareSimulationParent
@@ -74,92 +71,6 @@ func (o *FairShareSimulationParent) SetId(v string) {
 	o.Id = v
 }
 
-// GetRank returns the Rank field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *FairShareSimulationParent) GetRank() FairShareSimulationRank {
-	if o == nil || IsNil(o.Rank.Get()) {
-		var ret FairShareSimulationRank
-		return ret
-	}
-	return *o.Rank.Get()
-}
-
-// GetRankOk returns a tuple with the Rank field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *FairShareSimulationParent) GetRankOk() (*FairShareSimulationRank, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return o.Rank.Get(), o.Rank.IsSet()
-}
-
-// HasRank returns a boolean if a field has been set.
-func (o *FairShareSimulationParent) HasRank() bool {
-	if o != nil && o.Rank.IsSet() {
-		return true
-	}
-
-	return false
-}
-
-// SetRank gets a reference to the given NullableFairShareSimulationRank and assigns it to the Rank field.
-func (o *FairShareSimulationParent) SetRank(v FairShareSimulationRank) {
-	o.Rank.Set(&v)
-}
-
-// SetRankNil sets the value for Rank to be an explicit nil
-func (o *FairShareSimulationParent) SetRankNil() {
-	o.Rank.Set(nil)
-}
-
-// UnsetRank ensures that no value is present for Rank, not even an explicit nil
-func (o *FairShareSimulationParent) UnsetRank() {
-	o.Rank.Unset()
-}
-
-// GetGpu returns the Gpu field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *FairShareSimulationParent) GetGpu() FairShareSimulationGpuSettings {
-	if o == nil || IsNil(o.Gpu.Get()) {
-		var ret FairShareSimulationGpuSettings
-		return ret
-	}
-	return *o.Gpu.Get()
-}
-
-// GetGpuOk returns a tuple with the Gpu field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *FairShareSimulationParent) GetGpuOk() (*FairShareSimulationGpuSettings, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return o.Gpu.Get(), o.Gpu.IsSet()
-}
-
-// HasGpu returns a boolean if a field has been set.
-func (o *FairShareSimulationParent) HasGpu() bool {
-	if o != nil && o.Gpu.IsSet() {
-		return true
-	}
-
-	return false
-}
-
-// SetGpu gets a reference to the given NullableFairShareSimulationGpuSettings and assigns it to the Gpu field.
-func (o *FairShareSimulationParent) SetGpu(v FairShareSimulationGpuSettings) {
-	o.Gpu.Set(&v)
-}
-
-// SetGpuNil sets the value for Gpu to be an explicit nil
-func (o *FairShareSimulationParent) SetGpuNil() {
-	o.Gpu.Set(nil)
-}
-
-// UnsetGpu ensures that no value is present for Gpu, not even an explicit nil
-func (o *FairShareSimulationParent) UnsetGpu() {
-	o.Gpu.Unset()
-}
-
 func (o FairShareSimulationParent) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -171,12 +82,6 @@ func (o FairShareSimulationParent) MarshalJSON() ([]byte, error) {
 func (o FairShareSimulationParent) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id
-	if o.Rank.IsSet() {
-		toSerialize["rank"] = o.Rank.Get()
-	}
-	if o.Gpu.IsSet() {
-		toSerialize["gpu"] = o.Gpu.Get()
-	}
 	return toSerialize, nil
 }
 
