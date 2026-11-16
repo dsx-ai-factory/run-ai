@@ -1,0 +1,25 @@
+type: object
+description: |
+  A requested org unit with its unsaved changes. Each field replaces the stored value on its own; omitted fields keep
+  it. `demand` is the GPUs the org unit asks for (the dragged slider), capped by its limit; without it, half the node
+  pool's capacity.
+required:
+  - id
+properties:
+  id:
+    type: string
+    example: "4500014"
+  rank:
+    description: An unsaved rank. Only while ranks is on. Omitted or null keeps the stored rank.
+    nullable: true
+    allOf:
+      - $ref: "./FairShareSimulationRank.yaml"
+  gpu:
+    nullable: true
+    allOf:
+      - $ref: "./FairShareSimulationGpuSettings.yaml"
+  demand:
+    description: The dragged slider, capped by the limit. Omitted or null asks for half the capacity.
+    nullable: true
+    allOf:
+      - $ref: "./FairShareSimulationResources.yaml"

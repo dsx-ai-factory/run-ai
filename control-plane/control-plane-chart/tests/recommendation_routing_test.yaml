@@ -1,0 +1,15 @@
+suite: Recommendation routing uses service namespaces
+templates:
+  - templates/traefik/configmap.yaml
+tests:
+  - it: keeps inference routes on assets and catalog routes on catalog without endpoint exceptions
+    asserts:
+      - matchRegex:
+          path: data["routes.yaml"]
+          pattern: '(?m)^    assets-router:\n      rule: [^\n]*PathPrefix\(`/api/v1/inference`\)'
+      - matchRegex:
+          path: data["routes.yaml"]
+          pattern: '(?m)^    catalog-service-router:\n      rule: [^\n]*PathPrefix\(`/api/v1/catalog`\)'
+      - notMatchRegex:
+          path: data["routes.yaml"]
+          pattern: 'right-sizing/recommendation'
