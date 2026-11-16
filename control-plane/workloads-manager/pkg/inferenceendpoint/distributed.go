@@ -57,7 +57,15 @@ func validDefaults(defaults *Defaults) bool {
 }
 
 func newInferenceIntent(defaults *Defaults) *api.ExternalAccessInference {
-	return &api.ExternalAccessInference{Epp: map[string]interface{}{"profile": defaults.EPPProfile}, PathPrefix: PathPrefix}
+	return &api.ExternalAccessInference{
+		Epp:        map[string]interface{}{"profile": defaults.EPPProfile},
+		PathPrefix: PathPrefix,
+	}
+}
+
+// validPort reports whether port is in the valid TCP port range 1-65535.
+func validPort(port int32) bool {
+	return len(validation.IsValidPortNum(int(port))) == 0
 }
 
 func distributedServingService(lws *lwsv1.LeaderWorkerSet, endpoint api.NetworkingEndpoint) (*api.ServiceSpec, error) {
@@ -82,7 +90,7 @@ func distributedServingService(lws *lwsv1.LeaderWorkerSet, endpoint api.Networki
 		}
 	}
 	port := service.Ports[0]
-	if port.Port < 1 || port.Port > 65535 || port.TargetPort == nil || *port.TargetPort < 1 || *port.TargetPort > 65535 ||
+	if !validPort(port.Port) || port.TargetPort == nil || !validPort(*port.TargetPort) ||
 		(port.Protocol != nil && *port.Protocol != api.SERVICEPROTOCOL_TCP) {
 		return nil, fmt.Errorf("distributed inference serving Service requires an explicit TCP container target port")
 	}

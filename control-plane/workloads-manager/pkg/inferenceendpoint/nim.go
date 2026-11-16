@@ -35,7 +35,7 @@ func BuildNIMServiceIntent(endpoint api.NetworkingEndpoint, workloadName string,
 	}
 	service := (*endpoint.Services)[0]
 	if service.Spec != nil || service.Ref == nil || workloadName == "" || service.Ref.Name != workloadName ||
-		service.Ref.Port < 1 || service.Ref.Port > 65535 {
+		!validPort(service.Ref.Port) {
 		return nil, fmt.Errorf("NIM service requires a reference to the serving port of the operator Service %q", workloadName)
 	}
 	if service.Authorization != nil {

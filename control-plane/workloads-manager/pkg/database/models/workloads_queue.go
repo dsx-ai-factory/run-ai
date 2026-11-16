@@ -336,12 +336,8 @@ func cloneExternalAccessInference(in *api.ExternalAccessInference) *api.External
 	if in == nil {
 		return nil
 	}
-	data, err := json.Marshal(in)
-	if err != nil {
-		return nil
-	}
 	var out api.ExternalAccessInference
-	if err := json.Unmarshal(data, &out); err != nil {
+	if err := convutils.CopySpecs(&out, in); err != nil {
 		return nil
 	}
 	return &out
