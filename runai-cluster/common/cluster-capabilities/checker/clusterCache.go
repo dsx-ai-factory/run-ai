@@ -21,10 +21,11 @@ import (
 var ErrClusterVersionEmpty = errors.New("cluster version is empty")
 
 const (
-	KnativeDependency     = "knative"
-	ScaleToZeroDependency = "enable-scale-to-zero"
-	NodeTypeDependency    = "kubernetes.podspec-nodeselector"
-	LWSDependency         = "lws"
+	KnativeDependency          = "knative"
+	ScaleToZeroDependency      = "enable-scale-to-zero"
+	ZeroInitialScaleDependency = "allow-zero-initial-scale"
+	NodeTypeDependency         = "kubernetes.podspec-nodeselector"
+	LWSDependency              = "lws"
 )
 
 // clusterInfo holds the cluster information gathered from the cluster service
@@ -59,19 +60,20 @@ func setCacheClusterInfo(clusterId string, displayedCluster *clusterService.Disp
 		return nil, fmt.Errorf("malformed cluster version: %s, err: %w", version, err)
 	}
 
-	knativeAvailable, knativeScaleToZeroAvailable, knativeNodeTypeAvailable := isKnativeAvailable(displayedCluster)
+	knativeAvailable, knativeScaleToZeroAvailable, knativeNodeTypeAvailable, knativeZeroInitialScaleAvailable := isKnativeAvailable(displayedCluster)
 	lwsAvailable := isLWSAvailable(displayedCluster)
 	info := &clusterInfo{
 		Version: clusterSemverVersion,
 		Configuration: &ClusterConfiguration{
-			WorkloadOwnershipProtection: workloadOwnershipProtection(displayedCluster),
-			KnativeAvailable:            knativeAvailable,
-			KnativeScaleToZeroAvailable: knativeScaleToZeroAvailable,
-			KnativeNodeTypeAvailable:    knativeNodeTypeAvailable,
-			DistributedFrameworksStatus: constructDistributedFrameworksStatus(displayedCluster),
-			SubdomainRouting:            subdomainRouting(displayedCluster),
-			LWSAvailable:                lwsAvailable,
-			ClusterDomain:               displayedCluster.GetDomain(),
+			WorkloadOwnershipProtection:      workloadOwnershipProtection(displayedCluster),
+			KnativeAvailable:                 knativeAvailable,
+			KnativeZeroInitialScaleAvailable: knativeZeroInitialScaleAvailable,
+			KnativeScaleToZeroAvailable:      knativeScaleToZeroAvailable,
+			KnativeNodeTypeAvailable:         knativeNodeTypeAvailable,
+			DistributedFrameworksStatus:      constructDistributedFrameworksStatus(displayedCluster),
+			SubdomainRouting:                 subdomainRouting(displayedCluster),
+			LWSAvailable:                     lwsAvailable,
+			ClusterDomain:                    displayedCluster.GetDomain(),
 		},
 	}
 	if err := cache.Set[clusterInfo](context.Background(), clusterId, *info); err != nil {
@@ -114,39 +116,39 @@ func subdomainRouting(displayedCluster *clusterService.DisplayedCluster) bool {
 	return *protection
 }
 
-// isKnativeAvailable extract the value of the isKnativeAvailable, knativeScaleToZeroAvailable and knativeNodeTypeAvailable from the displayedCluster in safe manner
-func isKnativeAvailable(displayedCluster *clusterService.DisplayedCluster) (bool, bool, bool) {
+// isKnativeAvailable extracts Knative availability and optional features from the reported cluster status.
+func isKnativeAvailable(displayedCluster *clusterService.DisplayedCluster) (bool, bool, bool, *bool) {
 	status := displayedCluster.Status.Get()
 	if status == nil {
-		return false, false, false
+		return false, false, false, nil
 	}
 	optionalDeps := status.GetDependencies().Optional
 	if optionalDeps == nil {
-		return false, false, false
+		return false, false, false, nil
 	}
 	knativeStatus, ok := optionalDeps[KnativeDependency]
 	if !ok {
-		return false, false, false
+		return false, false, false, nil
 	}
 
 	if !knativeStatus.Available {
-		return false, false, false
+		return false, false, false, nil
 	}
 
 	knativeComponents := knativeStatus.Components
 	if knativeComponents == nil {
-		return true, false, false
+		return true, false, false, nil
 	}
 
 	knativeSubStatus, ok := (*knativeComponents)[KnativeDependency]
 	if !ok {
-		return true, false, false
+		return true, false, false, nil
 	}
 
 	knativeSubComponents := knativeSubStatus.Components
 	if knativeSubComponents == nil {
 		// if no subcomponents are available (e.g. for older clusters), we assume that they are all supported
-		return true, true, true
+		return true, true, true, nil
 	}
 
 	scaleToZero, ok := (*knativeSubComponents)[ScaleToZeroDependency]
@@ -167,7 +169,12 @@ func isKnativeAvailable(displayedCluster *clusterService.DisplayedCluster) (bool
 		nodeTypeAvailable = nodeType.Available
 	}
 
-	return true, scaleToZeroAvailable, nodeTypeAvailable
+	var zeroInitialScaleAvailable *bool
+	if feature, ok := (*knativeSubComponents)[ZeroInitialScaleDependency]; ok {
+		zeroInitialScaleAvailable = convutils.Ref(feature.Available)
+	}
+
+	return true, scaleToZeroAvailable, nodeTypeAvailable, zeroInitialScaleAvailable
 }
 
 // isLWSAvailable extract the value of the LWS availability from the displayedCluster in safe manner

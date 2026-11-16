@@ -11,6 +11,8 @@ import (
 	"net/http"
 	"time"
 
+	clusterApi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
+
 	clientsclusterservice "github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/clusterservice"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/clusterservice"
 
@@ -131,6 +133,73 @@ var _ = Describe("inference service validations", Ordered, func() {
 
 	AfterAll(func() {
 		testing.CleanTables()
+	})
+
+	Context("zero initial replicas", func() {
+		setCapability := func(enabled bool, version string) {
+			displayedCluster := testing.BuildDisplayedClusterWithKnative(randoms.ClusterId, version, true, true, true)
+			components := (*displayedCluster.Status.Get().GetDependencies().Optional[checker.KnativeDependency].Components)[checker.KnativeDependency].Components
+			(*components)[checker.ZeroInitialScaleDependency] = clusterApi.ClusterDependencyStatus{Available: enabled}
+			checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().WithCluster(randoms.ClusterId, displayedCluster))
+			checker.InitClustersCache(testing.GetDefaultClustersCacheConfig())
+			clusterservice.SetMock(clientsclusterservice.NewSimpleMock().WithCluster(randoms.ClusterId, &displayedCluster).WithDefaultNodePool(randoms.ClusterId))
+		}
+
+		BeforeEach(func() {
+			creationRequest.Spec.Autoscaling = &api.AutoScaling{
+				MinReplicas:     convutils.Ref(int32(0)),
+				MaxReplicas:     convutils.Ref(int32(1)),
+				InitialReplicas: convutils.Ref(int32(0)),
+			}
+		})
+
+		It("rejects native creation before persisting when the feature is disabled", func() {
+			setCapability(false, testing.TestClusterVersionNativeSubmission)
+			response, err := inferencesService.CreateInference(ctx, creationRequest)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(response.Code).To(Equal(http.StatusBadRequest))
+			Expect(response.Body.(*workloadsApi.SubmissionErrorV2).Message).To(ContainSubstring("allow-zero-initial-scale=true"))
+		})
+
+		It("checks retained initial replicas on a native partial update", func() {
+			setCapability(true, testing.TestClusterVersionNativeSubmission)
+			created, err := inferencesService.CreateInference(ctx, creationRequest)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(created.Code).To(Equal(http.StatusAccepted))
+			id := created.Body.(workloadsApi.SupersetWorkload).WorkloadId
+
+			setCapability(false, testing.TestClusterVersionNativeSubmission)
+			updated, err := inferencesService.UpdateInferenceSpec(ctx, id, updateRequest)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(updated.Code).To(Equal(http.StatusBadRequest))
+			Expect(updated.Body.(*workloadsApi.SubmissionErrorV2).Message).To(ContainSubstring("allow-zero-initial-scale=true"))
+			stored, err := inferencesService.GetInference(ctx, id)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(stored.Code).To(Equal(http.StatusOK))
+			Expect(stored.Body.(workloadsApi.SupersetWorkload).Spec.Image.Get()).To(Equal(convutils.Ref(image1)))
+		})
+
+		It("checks retained initial replicas on an any-workload partial update", func() {
+			setCapability(false, "3.0.0")
+			workloadID := uuid.New()
+			snapshot := workloadV2SnapshotForTest(workloadID, api.WORKLOADTYPE_INFERENCE, randoms)
+			snapshot.Name = "inference-v2-zero"
+			snapshot.RequestedName = snapshot.Name
+			snapshot.Namespace = "runai-project"
+			Expect(convutils.CopySpecs(snapshot.Spec, creationRequest.Spec)).To(Succeed())
+			Expect(dao_crud.DbUpsertWorkloadV2Snapshot(ctx, snapshot)).To(BeNil())
+			workload, err := workloadManagerUpdateResultForSnapshot(snapshot, knativeGroup, knativeVersion, knativeKind, "knative-existing")
+			Expect(err).NotTo(HaveOccurred())
+			mgr := &inferenceUpdateWorkloadsManagerMock{workload: workloadsMgrApi.NewWorkloadV2GetResponse(*workload)}
+			workloadsMgrClient.SetMock(mgr)
+
+			updated, err := inferencesService.UpdateInferenceSpec(ctx, workloadID.String(), updateRequest)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(updated.Code).To(Equal(http.StatusBadRequest))
+			Expect(updated.Body.(*workloadsApi.SubmissionErrorV2).Message).To(ContainSubstring("allow-zero-initial-scale=true"))
+			Expect(mgr.internalUpdateCalls).To(BeZero())
+			Expect(mgr.publicUpdateCalls).To(BeZero())
+		})
 	})
 
 	Context("create", func() {

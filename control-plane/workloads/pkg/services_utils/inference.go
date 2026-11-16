@@ -11,6 +11,8 @@ import (
 	"net/http"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 )
 
@@ -21,8 +23,9 @@ const (
 
 // KnativeFeatures represents the required Knative features for inference
 type KnativeFeatures struct {
-	ScaleToZero bool
-	NodeType    bool
+	ScaleToZero      bool
+	NodeType         bool
+	ZeroInitialScale bool
 	// Add more features here as needed
 }
 
@@ -38,9 +41,10 @@ func CheckKnativeAvailable(ctx context.Context, clusterId string, requiredFeatur
 	wouldFailOnAvailable := !available
 	wouldFailOnScaleToZero := requiredFeatures.ScaleToZero && !features.ScaleToZero
 	wouldFailOnNodeType := requiredFeatures.NodeType && !features.NodeType
+	wouldFailOnZeroInitialScale := requiredFeatures.ZeroInitialScale && !features.ZeroInitialScale
 
 	// If any check would fail, perform ONE sync request and re-evaluate
-	if wouldFailOnAvailable || wouldFailOnScaleToZero || wouldFailOnNodeType {
+	if wouldFailOnAvailable || wouldFailOnScaleToZero || wouldFailOnNodeType || wouldFailOnZeroInitialScale {
 		availableSync, featuresSync, apiErrSync := getKnativeStatusSync(ctx, clusterId)
 		if apiErrSync != nil {
 			return apiErrSync
@@ -60,11 +64,23 @@ func CheckKnativeAvailable(ctx context.Context, clusterId string, requiredFeatur
 		return api.NewError(http.StatusBadRequest, fmt.Sprintf(KnativeFeatureNotAvailableFormat, "scale to zero"), nil)
 	}
 
+	if requiredFeatures.ZeroInitialScale && !features.ZeroInitialScale {
+		return api.NewError(http.StatusBadRequest, "Inference initialReplicas=0 requires Knative allow-zero-initial-scale=true. Contact your administrator.", nil)
+	}
+
 	if requiredFeatures.NodeType && !features.NodeType {
 		return api.NewError(http.StatusBadRequest, fmt.Sprintf(KnativeFeatureNotAvailableFormat, "node type"), nil)
 	}
 
 	return nil
+}
+
+// CheckZeroInitialReplicas checks the composed spec so policy defaults and retained update fields are included.
+func CheckZeroInitialReplicas(ctx context.Context, clusterId string, autoscaling *workloadsApi.AutoScaling) *api.Error {
+	if autoscaling == nil || autoscaling.InitialReplicas.Get() == nil || *autoscaling.InitialReplicas.Get() != 0 {
+		return nil
+	}
+	return CheckKnativeAvailable(ctx, clusterId, KnativeFeatures{ZeroInitialScale: true})
 }
 
 func getKnativeStatus(ctx context.Context, clusterId string) (bool, KnativeFeatures, *api.Error) {
@@ -77,6 +93,8 @@ func getKnativeStatus(ctx context.Context, clusterId string) (bool, KnativeFeatu
 	features := KnativeFeatures{
 		ScaleToZero: config.KnativeScaleToZeroAvailable,
 		NodeType:    config.KnativeNodeTypeAvailable,
+		// Older clusters do not report this feature; preserve their admission behavior.
+		ZeroInitialScale: convutils.Deref(config.KnativeZeroInitialScaleAvailable, true),
 	}
 
 	return config.KnativeAvailable, features, nil
@@ -92,6 +110,8 @@ func getKnativeStatusSync(ctx context.Context, clusterId string) (bool, KnativeF
 	features := KnativeFeatures{
 		ScaleToZero: config.KnativeScaleToZeroAvailable,
 		NodeType:    config.KnativeNodeTypeAvailable,
+		// Older clusters do not report this feature; preserve their admission behavior.
+		ZeroInitialScale: convutils.Deref(config.KnativeZeroInitialScaleAvailable, true),
 	}
 
 	return config.KnativeAvailable, features, nil

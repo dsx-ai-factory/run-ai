@@ -91,6 +91,32 @@ func TestKnativeFieldFeatureSpecificChecks(t *testing.T) {
 	assert.Empty(t, status.Components["knative"].Components["kubernetes.podspec-init-containers"].Reason)
 }
 
+func TestKnativeZeroInitialScaleAvailability(t *testing.T) {
+	for _, tc := range []struct {
+		name      string
+		value     *string
+		available bool
+	}{
+		{name: "default is disabled"},
+		{name: "explicitly disabled", value: ptr.To("false")},
+		{name: "explicitly enabled", value: ptr.To("true"), available: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			_, _, deployment, features, autoscaler := initKnativeResources()
+			if tc.value != nil {
+				autoscaler.Data[consts.KnativeFeatureAllowZeroInitialScale] = *tc.value
+			}
+			status := GetKnativeStatus(&contextMock{}, newFakeClient(deployment, features, autoscaler))
+			knative := status.Components["knative"]
+			assert.Equal(t, true, *knative.Available)
+			feature, exists := knative.Components[consts.KnativeFeatureAllowZeroInitialScale]
+			if assert.True(t, exists) && assert.NotNil(t, feature.Available) {
+				assert.Equal(t, tc.available, *feature.Available)
+			}
+		})
+	}
+}
+
 func TestKnativeFieldRequiredFeaturesNotAvailable(t *testing.T) {
 	_, _, deploymentKnative, cmKnative, cmKnativeAutoscaler := initKnativeResources()
 	cmKnative.Data["kubernetes.podspec-schedulername"] = "disabled"

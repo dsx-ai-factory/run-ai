@@ -118,6 +118,9 @@ func autoScalingToKnative(src *workloadsApi.AutoScaling, target any, _ any) *wor
 	if v := src.MinReplicas.Get(); v != nil {
 		ann[annotationAutoscalingMin] = strconv.FormatInt(int64(*v), 10)
 	}
+	if v := src.InitialReplicas.Get(); v != nil {
+		podMeta.Annotations[annotationAutoscalingInitial] = strconv.FormatInt(int64(*v), 10)
+	}
 	if v := src.MaxReplicas.Get(); v != nil {
 		ann[annotationAutoscalingMax] = strconv.FormatInt(int64(*v), 10)
 	}
