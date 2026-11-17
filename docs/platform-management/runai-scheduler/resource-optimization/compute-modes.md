@@ -74,20 +74,9 @@ GPU compute modes require the following on every GPU node in the cluster. GPU no
 | CUDA driver | r615 or later |
 | NVIDIA GPU Operator | 26.7.1 or later |
 
-## Setting the GPU Compute Mode
+## Using GPU Compute Modes in Workloads
 
-The compute mode is set per workload with the `nvidia.com/container.<container-name>.gpu-compute.mode` annotation, whether you submit through the UI, the CLI, the API, or directly in YAML. Set this in addition to the [GPU memory fraction](memory-fractions.md) or [dynamic GPU memory fraction](dynamic-memory-fractions.md) request - the compute mode has no effect without a memory fraction already requested on the same container. After the workload is submitted, the compute mode is visible in the workload's [YAML tab](../../../workloads-in-nvidia-run-ai/workloads.md#yaml). For a full step-by-step walkthrough of each interface, refer to [Launching Workloads with GPU Compute Modes](quick-starts/compute-modes-quickstart.md).
-
-### Annotation Reference
-
-Substitute `<container-name>` with the name of the container receiving the GPU memory fraction. A GPU fraction is always allocated to a single container, and NVIDIA Run:ai currently supports one fractional container per pod. This is the same container named by `gpu-fraction-container-name`, or the first container in the pod when that annotation is omitted. If both are used, the container names must be identical or the request is rejected.
-
-| Value | Behavior |
-|---|---|
-| `time-slicing` | Workloads take sequential turns on the GPU compute engines. This is the default and can be omitted. |
-| `sm-sharing` | Workloads run concurrently on separate streaming multiprocessors. |
-
-If the annotation is omitted, time-slicing applies.
+When you submit a workload, you can set its GPU compute mode with an annotation. If you do not set it, the workload uses time-slicing. For the annotation reference and an example, refer to [Configure GPU compute mode](../../../workloads-in-nvidia-run-ai/configure-workload-scheduling/configure-gpu-sharing/configure-gpu-compute-mode.md).
 
 <Note>
 
@@ -97,9 +86,7 @@ Clusters upgraded from the proprietary GPU sharing implementation keep running w
 
 </Note>
 
-This annotation applies the same way to [supported workload types](../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) submitted via YAML and to [workloads submitted externally](../../../workloads-in-nvidia-run-ai/workload-types/supported-features.md#externally-submitted-kubernetes-workloads), outside of NVIDIA Run:ai.
-
-### Enforcing a Compute Mode with a Policy
+## Enforcing a Compute Mode with a Policy
 
 Administrators can also control the compute mode centrally with a [workload policy](../../policies/policies-and-rules.md). A policy can supply a default compute mode for workloads that do not set one, or enforce a specific mode so that users cannot change it. This is available for both [native workloads](../../policies/native-workload-policies.md) and [supported workload types](../../policies/supported-workload-type-policies.md).
 
@@ -110,21 +97,6 @@ Administrators can also control the compute mode centrally with a [workload poli
 Policy enforcement is not supported for [externally submitted workloads](../../../workloads-in-nvidia-run-ai/workload-types/supported-features.md#externally-submitted-kubernetes-workloads).
 
 </Note>
-
-### Example
-
-The following example requests an absolute amount of GPU memory and enables SM-sharing:
-
-```yaml
-metadata:
-  annotations:
-    gpu-memory: "20000"   # MiB
-    # "time-slicing" (the default, may be omitted) or "sm-sharing"
-    nvidia.com/container.app.gpu-compute.mode: "sm-sharing"
-spec:
-  containers:
-    - name: app          # the <container-name> used in the mode annotation
-```
 
 ## Deployment Considerations
 

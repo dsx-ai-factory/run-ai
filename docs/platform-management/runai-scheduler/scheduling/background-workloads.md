@@ -53,45 +53,11 @@ These settings mean the project is never entitled to resources of its own, but c
 
 ### Label the Workloads
 
-Add the `kai.scheduler/background` label to each workload that should be treated as a background workload, and submit it under the project created for background workloads.
-
-| Field | Value | Notes |
-| --- | --- | --- |
-| `kai.scheduler/background` | `"true"` | Identifies the workload as a background workload. Set on the workload. |
-| Termination grace period (`terminationGracePeriodSeconds`) | `5` | Recommended. Controls how long the workload has to shut down when evicted. The Kubernetes default is 30 seconds. |
-
-The following are handled for you and do not need to be set manually:
-
-* **Project** - Derived from the project the workload is submitted under. There is no need to set a queue name.
-* **Scheduler name** - Set automatically by the NVIDIA Run:ai platform.
-
-#### NVIDIA Run:ai Native Workloads
-
-For [native NVIDIA Run:ai workloads](../../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md), the label can be set during workload submission using one of the following methods:
-
-* **UI** - Under **General** settings, click **+LABEL** in **Set label(s)**. In **Name**, enter `kai.scheduler/background`, and in **Value**, enter `true`
-* **API** - Set using the `labels` field, with `kai.scheduler/background` as the `name` and `true` as the `value`
-* **CLI** - Set using the `--label` flag, for example `--label kai.scheduler/background=true`
-
-#### Supported Workload Types
-
-For [supported workload types](../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) submitted with a YAML manifest, add the label to your YAML manifest under the `metadata.labels` section of your workload definition:
-
-```yaml
-metadata:
-  labels:
-    kai.scheduler/background: "true"
-spec:
-  terminationGracePeriodSeconds: 5
-```
+Add the `kai.scheduler/background` label to each background workload, and submit it under the project created for background workloads. For the label, the ways to set it, and the considerations for background workloads, refer to [Label a workload as background](../../../workloads-in-nvidia-run-ai/configure-workload-scheduling/label-a-workload-as-background.md).
 
 ## Deployment Considerations
 
-* **Resource types** - Background workloads can use CPU or GPU resources. GPU background workloads must request whole GPUs.
-* **Preemptibility** - Background workloads must be preemptible. Any [workload priority](workload-priority-control.md) can be used, as long as the workload's preemptibility is set to preemptible. Non-preemptible and semi-preemptible workloads require in-quota resources, and a background workload project has no quota, so those workloads are never scheduled.
-* **Termination grace period** - Set a short termination grace period. A background workload is evicted whenever an AI workload needs its resources. A long grace period delays the AI workload while the background workload shuts down. A short period, such as 5 seconds, keeps that delay small.
 * **Pending state** - Expect background workloads to sit in `Pending` state. When the cluster is fully used by AI workloads, background workloads remain pending until resources free up. This is the intended behavior.
-* **Controller** - Use a controller that recreates pods. Any workload type can be a background workload. Because background workloads are evicted as a normal part of operation, submit them through a controller, such as a DaemonSet or Deployment, that recreates the pod after eviction.
 
 ## Using CLI
 
