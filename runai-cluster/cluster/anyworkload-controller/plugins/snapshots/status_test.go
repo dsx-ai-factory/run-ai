@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/utils/ptr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var optIn = map[string]string{optInAnnotation: "true"}
@@ -167,6 +168,121 @@ var _ = Describe("Status", func() {
 			reconcile.New())).To(Succeed())
 
 		Expect(status.AdditionalInfo).To(Equal(recorded))
+	})
+
+	// The framework hands Status the runner's own plugin status.
+	ownStatus := func(runner *dromosv1alpha1.WorkloadRunner) *dromosv1alpha1.PluginStatus {
+		if runner.Status.Plugins == nil {
+			runner.Status.Plugins = map[string]*dromosv1alpha1.PluginStatus{
+				PluginName: {Phase: dromosv1alpha1.PluginPhaseUnknown},
+			}
+		}
+		return runner.Status.Plugins[PluginName]
+	}
+
+	It("is Failed, saying why, while a key in use has a failed capture", func() {
+		ready := replica("llama-a", "rs-1", 100, true)
+		c := captureClient(ready, jobFailed(capturedJob(keyOf(ready), false)))
+		plugin := newPlugin(kartaStub{karta: deploymentKarta()}, true)
+		runner := runnerFor(deployment(optIn, gpu))
+		state := reconcile.New()
+
+		Expect(plugin.Status(ctx, runner, c, ownStatus(runner), state)).To(Succeed())
+
+		Expect(ownStatus(runner).Phase).To(Equal(dromosv1alpha1.PluginPhaseFailed))
+		Expect(ownStatus(runner).Conditions).To(haveEnabled(metav1.ConditionTrue, ReasonEnabled))
+		issues := state.PluginIssues(plugin)
+		Expect(issues).To(HaveLen(1))
+		Expect(issues[0].IsCritical).To(BeFalse(), "a failed capture leaves the workload serving")
+		Expect(issues[0].Error()).To(SatisfyAll(
+			ContainSubstring("snapshot capture failed"), ContainSubstring("DeadlineExceeded")))
+	})
+
+	It("is Failed for the newest key's failed capture while no replica runs", func() {
+		c := captureClient(jobFailed(capturedJob("k1", false)))
+		plugin := newPlugin(kartaStub{karta: deploymentKarta()}, true)
+		runner := withNewestKey(runnerFor(deployment(optIn, gpu)), "k1")
+
+		Expect(plugin.Status(ctx, runner, c, ownStatus(runner), reconcile.New())).To(Succeed())
+
+		Expect(ownStatus(runner).Phase).To(Equal(dromosv1alpha1.PluginPhaseFailed))
+	})
+
+	DescribeTable("stays Ready",
+		func(objects func() []client.Object) {
+			plugin := newPlugin(kartaStub{karta: deploymentKarta()}, true)
+			runner := runnerFor(deployment(optIn, gpu))
+			state := reconcile.New()
+
+			Expect(plugin.Status(ctx, runner, captureClient(objects()...), ownStatus(runner), state)).To(Succeed())
+
+			Expect(ownStatus(runner).Phase).To(Equal(dromosv1alpha1.PluginPhaseReady))
+			Expect(state.PluginIssues(plugin)).To(BeEmpty())
+		},
+		Entry("after a capture that succeeded", func() []client.Object {
+			ready := replica("llama-a", "rs-1", 100, true)
+			return []client.Object{ready, jobCaptured(capturedJob(keyOf(ready), true))}
+		}),
+		// The deletion drops it.
+		Entry("after a failed capture of a key no longer in use", func() []client.Object {
+			return []client.Object{replica("llama-a", "rs-1", 100, true), jobFailed(capturedJob("old-key", false))}
+		}),
+		Entry("after a failed capture being deleted", func() []client.Object {
+			ready := replica("llama-a", "rs-1", 100, true)
+			deleting := jobFailed(capturedJob(keyOf(ready), false))
+			deleting.Finalizers = []string{"nvidia.com/snapshot-cleanup"}
+			deleting.DeletionTimestamp = ptr.To(metav1.Unix(400, 0))
+			return []client.Object{ready, deleting}
+		}),
+	)
+
+	// A key whose snapshots the deletion dropped can come back, as on a
+	// rollback, and is then captured afresh.
+	It("forgets the events of a key with neither a capture nor a place in the keep-set", func() {
+		current := replica("llama-new", "rs-new", 200, true)
+		runner := withRecord(runnerFor(deployment(optIn, gpu)), statusInfo{
+			NewestKey: keyOf(current),
+			Events: map[string]keyEvents{
+				keyOf(current): {Reasons: []string{eventDisabled}},
+				"draining":     {Reasons: []string{eventCaptureFailed}},
+				"gone":         {Reasons: []string{eventCaptured}},
+			},
+		})
+		// The deletion has yet to drop draining's capture.
+		c := captureClient(current, capturedJob("draining", true))
+		plugin := newPlugin(kartaStub{karta: deploymentKarta()}, true)
+
+		Expect(plugin.Status(ctx, runner, c, ownStatus(runner), reconcile.New())).To(Succeed())
+
+		info := recorded(runner)
+		Expect(info.Events).To(SatisfyAll(HaveKey(keyOf(current)), HaveKey("draining"), Not(HaveKey("gone"))))
+		Expect(info.NewestKey).To(Equal(keyOf(current)))
+	})
+
+	It("keeps the recorded events when it records a newer key", func() {
+		newer := replica("llama-new", "rs-new", 200, true)
+		runner := withRecord(runnerFor(deployment(optIn, gpu)), statusInfo{
+			NewestKey: "k1",
+			Events:    map[string]keyEvents{keyOf(newer): {Reasons: []string{eventCaptureFailed}}},
+		})
+		plugin := newPlugin(kartaStub{karta: deploymentKarta()}, true)
+
+		Expect(plugin.Status(ctx, runner, captureClient(newer), ownStatus(runner), reconcile.New())).To(Succeed())
+
+		Expect(recorded(runner)).To(Equal(statusInfo{
+			NewestKey: keyOf(newer),
+			Events:    map[string]keyEvents{keyOf(newer): {Reasons: []string{eventCaptureFailed}}},
+		}))
+	})
+
+	// Nothing else rewrites it, and the deletion waits for a record it can read.
+	It("starts an unreadable record over", func() {
+		plugin := newPlugin(kartaStub{karta: deploymentKarta()}, true)
+		runner := withUnreadableRecord(runnerFor(deployment(optIn, gpu)))
+
+		Expect(plugin.Status(ctx, runner, captureClient(), ownStatus(runner), reconcile.New())).To(Succeed())
+
+		Expect(recorded(runner)).To(Equal(statusInfo{}))
 	})
 
 	// NotInstalled is for an opt-in that can't be honoured; a workload that never
