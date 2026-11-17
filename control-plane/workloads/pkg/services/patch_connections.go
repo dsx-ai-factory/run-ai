@@ -15,6 +15,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	"net"
 	"net/url"
+	"strconv"
 	"strings"
 	"unicode"
 )
@@ -299,7 +300,7 @@ func loadNetworkStatusInfo(networkStatus *api.WorkloadNetworkStatus) NetworkStat
 
 		if loadBalancerHost := firstLoadBalancerHost(service.LoadBalancer.Ingress); loadBalancerHost != "" {
 			for _, port := range service.Ports {
-				assignedURL := fmt.Sprintf("%s:%d", loadBalancerHost, port.Port)
+				assignedURL := net.JoinHostPort(loadBalancerHost, strconv.Itoa(int(port.Port)))
 				result.loadBalancerUrls[port.TargetPort] = assignedURL
 				result.loadBalancerURLsByServicePort[ServiceAndPortName{
 					ServiceName: service.Name,
@@ -471,7 +472,7 @@ func matchUrlWithPreProcessingInfo(ctx context.Context, connInfo ConnectionsInfo
 				}
 
 				if urls.ipAddress != nil {
-					env.Connections[idx].Url = fmt.Sprintf("%s:%s", *urls.ipAddress, assignedPort)
+					env.Connections[idx].Url = net.JoinHostPort(*urls.ipAddress, assignedPort)
 				}
 			}
 		}
@@ -492,6 +493,17 @@ type UrlsInfo struct {
 // in the list of urls there are two parts:
 // exposed urls -> in format http://domain/path or http://subdomain.domain
 // exposed ports -> in format 123.456.789.012:5678
+func isIPPortUrl(u string) bool {
+	return unicode.IsDigit(rune(u[0])) || u[0] == '['
+}
+
+func ipFromIPPortUrl(u string) string {
+	if host, _, err := net.SplitHostPort(u); err == nil {
+		return host
+	}
+	return strings.Split(u, colon)[0]
+}
+
 func loadUrlsInfo(urls []string) (*UrlsInfo, error) {
 	result := UrlsInfo{
 		urls: urls,
@@ -504,7 +516,7 @@ func loadUrlsInfo(urls []string) (*UrlsInfo, error) {
 	// exposedUrls are always on top, so if first entry is not of exposedUrls then it indicates
 	// that we do not have any urls in the list
 	firstUrl := urls[0]
-	if !unicode.IsDigit(rune(firstUrl[0])) {
+	if !isIPPortUrl(firstUrl) {
 		parsed, err := url.Parse(firstUrl)
 		if err != nil {
 			return nil, err
@@ -529,8 +541,8 @@ func loadUrlsInfo(urls []string) (*UrlsInfo, error) {
 
 	// now look for the first entry having ip:port, load the ip address
 	for _, aUrl := range urls {
-		if unicode.IsDigit(rune(aUrl[0])) {
-			result.ipAddress = convutils.Ref(strings.Split(aUrl, colon)[0])
+		if isIPPortUrl(aUrl) {
+			result.ipAddress = convutils.Ref(ipFromIPPortUrl(aUrl))
 			break
 		}
 	}

@@ -85,6 +85,19 @@ var _ = Describe("patching test", func() {
 			Expect(urlsInfo.domain).To(BeNil())
 		})
 
+		It("only port - ipv6", func() {
+			urlsInfo, err := loadUrlsInfo([]string{
+				"[2600:1f18::1]:5",
+			})
+			Expect(err).To(BeNil())
+			Expect(len(urlsInfo.urls)).To(Equal(1))
+
+			Expect(urlsInfo.ipAddress).NotTo(BeNil())
+			Expect(*urlsInfo.ipAddress).To(Equal("2600:1f18::1"))
+
+			Expect(urlsInfo.domain).To(BeNil())
+		})
+
 		It("only exposedUrl - subdomain", func() {
 			urlsInfo, err := loadUrlsInfo([]string{
 				"https://a.domain.com",
