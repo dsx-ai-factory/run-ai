@@ -26,9 +26,7 @@ import (
 // workload's own status changing after the pod cache saw the replica Ready; the
 // framework never requeues on a timer.
 //
-// The SnapshotJob and PodSnapshot watches also catch a runner deleted while the
-// controller was down: the startup list arrives as creates, the framework finds
-// no runner of that name, and calls HandleRunnerDeleted.
+// A PodSnapshot being created reconciles it too, to make the runner its owner.
 //
 // Only with Snapshot installed: a watch on a kind whose CRD is missing stops the
 // controller starting.

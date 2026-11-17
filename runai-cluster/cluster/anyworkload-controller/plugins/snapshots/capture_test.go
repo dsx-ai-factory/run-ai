@@ -18,13 +18,16 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 )
 
 var agentSelector = map[string]string{"nvidia.com/snapshot-node": "true"}
@@ -39,7 +42,7 @@ var _ = Describe("HandleAdditionalResources", func() {
 	gpu := gpuContainer("main")
 	optedIn := func() *unstructured.Unstructured { return deployment(optIn, gpu) }
 
-	It("captures the newest uncaptured replica, labelled with its runner and not owned by it", func() {
+	It("captures the newest uncaptured replica, labelled with its runner and owned by it", func() {
 		older := replica("llama-old", "rs-old", 100, true)
 		newer := replica("llama-new", "rs-new", 200, true)
 		c := captureClient(older, newer)
@@ -50,7 +53,7 @@ var _ = Describe("HandleAdditionalResources", func() {
 		Expect(jobs).To(HaveLen(1))
 		Expect(jobs[0].Name).To(Equal(snapshotkey.SnapshotName(keyOf(newer), "llama")), "want the newest key")
 		Expect(jobs[0].Labels).To(HaveKeyWithValue(commonconstants.WorkloadRunnerUidLabel, "runner-uid"))
-		Expect(jobs[0].OwnerReferences).To(BeEmpty())
+		Expect(jobs[0].OwnerReferences).To(ConsistOf(ownedBy(testRunner())))
 	})
 
 	It("runs one capture at a time", func() {
@@ -98,37 +101,6 @@ var _ = Describe("HandleAdditionalResources", func() {
 		handle(ctx, capturePlugin(), c, optedIn())
 
 		Expect(snapshotJobs(ctx, c)).To(BeEmpty())
-	})
-
-	// A workload deleted and resubmitted at once is never seen to be gone, so
-	// its new runner's reconcile deletes what the earlier one left.
-	DescribeTable("deletes what an earlier runner of the same name left behind",
-		func(workload func() *unstructured.Unstructured) {
-			earlier := capturedJob("old-key", true)
-			earlier.Labels[commonconstants.WorkloadRunnerUidLabel] = "earlier-runner-uid"
-			c := captureClient(
-				earlier, capturedPodSnapshot("old-key", "earlier-runner-uid"),
-				capturedJob("k1", true), capturedPodSnapshot("k1", "runner-uid"))
-
-			Expect(handle(ctx, capturePlugin(), c, workload())).To(BeEmpty())
-
-			Expect(snapshotJobs(ctx, c)).To(ConsistOf(HaveField("Name", snapshotkey.SnapshotName("k1", "llama"))))
-			Expect(podSnapshots(ctx, c)).To(ConsistOf(HaveField("Name", snapshotkey.SnapshotName("k1", "llama"))))
-		},
-		Entry("opted in", optedIn),
-		// The earlier runner may have been.
-		Entry("not opted in", func() *unstructured.Unstructured { return deployment(nil, gpu) }),
-	)
-
-	It("warns when it can't delete an earlier runner's, and still captures", func() {
-		ready := replica("llama-a", "rs-1", 100, true)
-		earlier := capturedJob("old-key", true)
-		earlier.Labels[commonconstants.WorkloadRunnerUidLabel] = "earlier-runner-uid"
-		c := failingDeletes(captureClient(ready, earlier), errors.New("the API server is unreachable"))
-
-		Expect(handle(ctx, capturePlugin(), c, optedIn())).To(ConsistOf(ContainSubstring("unreachable")))
-
-		Expect(hasSnapshotJob(ctx, c, keyOf(ready))).To(BeTrue(), "the replica was not captured")
 	})
 
 	It("needs a Ready replica", func() {
@@ -211,6 +183,89 @@ var _ = Describe("HandleAdditionalResources", func() {
 	})
 })
 
+var _ = Describe("Owning PodSnapshots", func() {
+	var ctx context.Context
+
+	BeforeEach(func() {
+		ctx = context.Background()
+	})
+
+	gpu := gpuContainer("main")
+	optedIn := func() *unstructured.Unstructured { return deployment(optIn, gpu) }
+	captureOff := capturePlugin()
+	captureOff.captureEnabled = false
+
+	// Snapshot creates a PodSnapshot with no owner, so garbage collection would
+	// leave it, and its checkpoint, behind when the workload is deleted.
+	DescribeTable("makes the runner the owner of its PodSnapshots",
+		func(plugin *Plugin, workload func() *unstructured.Unstructured) {
+			c := captureClient(capturedPodSnapshot("k1", "runner-uid"))
+
+			Expect(handle(ctx, plugin, c, workload())).To(BeEmpty())
+
+			Expect(podSnapshots(ctx, c)).To(ConsistOf(HaveField("OwnerReferences", ConsistOf(ownedBy(testRunner())))))
+		},
+		Entry("opted in", capturePlugin(), optedIn),
+		// They were captured while it was.
+		Entry("opt-in removed", capturePlugin(), func() *unstructured.Unstructured { return deployment(nil, gpu) }),
+		Entry("capture turned off", captureOff, optedIn),
+	)
+
+	// Every reconcile gets here, so one already owned must not be patched again.
+	DescribeTable("leaves one that already has an owner",
+		func(owner metav1.OwnerReference) {
+			owned := capturedPodSnapshot("k1", "runner-uid")
+			owned.OwnerReferences = []metav1.OwnerReference{owner}
+			c := failingPatches(captureClient(owned), errors.New("patched again"))
+
+			Expect(handle(ctx, capturePlugin(), c, optedIn())).To(BeEmpty())
+
+			Expect(podSnapshots(ctx, c)).To(ConsistOf(HaveField("OwnerReferences", ConsistOf(owner))))
+		},
+		Entry("the runner", ownedBy(testRunner())),
+		Entry("another owner", metav1.OwnerReference{APIVersion: "v1", Kind: "ConfigMap", Name: "other", UID: "other-uid"}),
+	)
+
+	It("leaves other runners' PodSnapshots", func() {
+		earlier := capturedPodSnapshot("old-key", "earlier-runner-uid")
+		otherName := capturedPodSnapshot("k2", "mistral-uid")
+		otherName.Labels[commonconstants.WorkloadRunnerNameLabel] = "mistral"
+		c := captureClient(earlier, otherName)
+
+		handle(ctx, capturePlugin(), c, optedIn())
+
+		Expect(podSnapshots(ctx, c)).To(HaveEach(HaveField("OwnerReferences", BeEmpty())))
+	})
+
+	It("warns when it can't, and still captures", func() {
+		ready := replica("llama-a", "rs-1", 100, true)
+		c := failingPatches(captureClient(ready, capturedPodSnapshot("k1", "runner-uid")),
+			errors.New("the API server is unreachable"))
+
+		Expect(handle(ctx, capturePlugin(), c, optedIn())).To(ConsistOf(ContainSubstring("unreachable")))
+
+		Expect(hasSnapshotJob(ctx, c, keyOf(ready))).To(BeTrue(), "the replica was not captured")
+	})
+
+	It("takes one deleted meanwhile for done", func() {
+		gone := apierrors.NewNotFound(schema.GroupResource{Group: "nvidia.com", Resource: "podsnapshots"}, "k1")
+		c := failingPatches(captureClient(capturedPodSnapshot("k1", "runner-uid")), gone)
+
+		Expect(handle(ctx, capturePlugin(), c, optedIn())).To(BeEmpty())
+	})
+
+	// Listing a kind whose CRD is missing fails, so it would warn on every workload.
+	It("does nothing without Snapshot", func() {
+		c := captureClient(capturedPodSnapshot("k1", "runner-uid"))
+		plugin := capturePlugin()
+		plugin.snapshotInstalled = false
+
+		Expect(handle(ctx, plugin, c, optedIn())).To(BeEmpty())
+
+		Expect(podSnapshots(ctx, c)).To(ConsistOf(HaveField("OwnerReferences", BeEmpty())))
+	})
+})
+
 var _ = Describe("buildSnapshotJob", func() {
 	var (
 		source *corev1.Pod
@@ -257,7 +312,7 @@ var _ = Describe("buildSnapshotJob", func() {
 	})
 
 	// The cleanup finds them by these labels; the runner owns neither.
-	It("labels the job and its PodSnapshot with the runner and key, with no owner", func() {
+	It("labels the job and its PodSnapshot with the runner and key", func() {
 		identity := map[string]string{
 			constants.SnapshotKeyLabel:              "k1",
 			commonconstants.WorkloadRunnerNameLabel: "llama",
@@ -265,7 +320,14 @@ var _ = Describe("buildSnapshotJob", func() {
 		}
 		Expect(job.Labels).To(Equal(identity))
 		Expect(job.Spec.PodSnapshotTemplate.Metadata.Labels).To(Equal(identity))
-		Expect(job.OwnerReferences).To(BeEmpty())
+	})
+
+	// Garbage collection deletes it with the runner. Not as its controller:
+	// that would also make deleting the runner wait for it.
+	It("makes the runner the job's owner, not its controller", func() {
+		Expect(job.OwnerReferences).To(ConsistOf(metav1.OwnerReference{
+			APIVersion: "run.ai/v1alpha1", Kind: "WorkloadRunner", Name: "llama", UID: "runner-uid",
+		}))
 	})
 
 	It("captures the target container within the timeout", func() {
@@ -416,4 +478,33 @@ func hasSnapshotJob(ctx context.Context, c client.Client, key string) bool {
 func keyOf(pod *corev1.Pod) string {
 	key, _ := snapshotkey.SnapshotKeyOf(pod)
 	return key
+}
+
+// failingPatches is c with every patch failing with err.
+func failingPatches(c client.Client, err error) client.Client {
+	return interceptor.NewClient(c.(client.WithWatch), interceptor.Funcs{
+		Patch: func(context.Context, client.WithWatch, client.Object, client.Patch, ...client.PatchOption) error {
+			return err
+		},
+	})
+}
+
+// capturedPodSnapshot is the PodSnapshot Snapshot creates for a capture of key,
+// with the labels the SnapshotJob passes on.
+func capturedPodSnapshot(key, runnerUID string) *snapshotv1alpha1.PodSnapshot {
+	return &snapshotv1alpha1.PodSnapshot{ObjectMeta: metav1.ObjectMeta{
+		Name:      snapshotkey.SnapshotName(key, "llama"),
+		Namespace: "runai-proj",
+		Labels: map[string]string{
+			constants.SnapshotKeyLabel:              key,
+			commonconstants.WorkloadRunnerNameLabel: "llama",
+			commonconstants.WorkloadRunnerUidLabel:  runnerUID,
+		},
+	}}
+}
+
+func podSnapshots(ctx context.Context, c client.Client) []snapshotv1alpha1.PodSnapshot {
+	list := &snapshotv1alpha1.PodSnapshotList{}
+	Expect(c.List(ctx, list)).To(Succeed())
+	return list.Items
 }

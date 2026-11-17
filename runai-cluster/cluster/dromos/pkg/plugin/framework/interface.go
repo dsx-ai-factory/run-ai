@@ -15,7 +15,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -95,14 +94,4 @@ type PostPhasePlugin interface {
 		karta *kartav1alpha1.Karta,
 		k8sClient client.Client,
 	) error
-}
-
-// RunnerDeletedPlugin is a plugin interface that lets plugins react once a WorkloadRunner is gone,
-// e.g. delete resources they created for it that it does not own, which garbage collection leaves behind.
-//
-// It runs whenever a reconcile finds no WorkloadRunner of that name, which also happens for a name
-// that never had one, so it must be idempotent. No other reconcile of that name runs meanwhile.
-type RunnerDeletedPlugin interface {
-	Plugin
-	HandleRunnerDeleted(ctx context.Context, runner types.NamespacedName, k8sClient client.Client) error
 }

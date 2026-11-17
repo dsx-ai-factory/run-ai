@@ -7,7 +7,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	reconsilestate "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/reconcile"
@@ -18,7 +17,6 @@ import (
 	kartautils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/utils/karta"
 	templateutils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/utils/template"
 	kartav1alpha1 "github.com/run-ai/karta/pkg/api/runai/v1alpha1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -103,14 +101,7 @@ func (c *WorkloadRunnerController) Reconcile(ctx context.Context, req ctrl.Reque
 
 	var runner dromosv1alpha1.WorkloadRunner
 	if err := c.client.Get(ctx, req.NamespacedName, &runner); err != nil {
-		if !apierrors.IsNotFound(err) {
-			return ctrl.Result{}, err
-		}
-		// Gone, so plugins get to delete what they made for it and it did not own.
-		if err := c.pluginFramework.RunRunnerDeleted(ctx, req.NamespacedName, c.client); err != nil {
-			return ctrl.Result{}, fmt.Errorf("run runner-deleted plugins: %w", err)
-		}
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	if runner.DeletionTimestamp != nil {

@@ -292,6 +292,7 @@ rules:
       - get
       - list
       - watch
+      - patch
       - delete
   - apiGroups:
       - nvidia.com

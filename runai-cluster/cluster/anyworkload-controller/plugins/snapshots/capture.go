@@ -71,9 +71,8 @@ type captureInput struct {
 }
 
 // HandleAdditionalResources captures each key from its first Ready replica, one
-// capture at a time per workload, newest key first. Before that it deletes what
-// an earlier runner of the same name left behind: a runner replaced at once is
-// never seen to be gone, so HandleRunnerDeleted doesn't run for it.
+// capture at a time per workload, newest key first. Before that it makes the
+// runner the owner of the PodSnapshots Snapshot created for its captures.
 //
 // A problem is reported as a warning and never returned: an error here would
 // stop the workload being applied.
@@ -88,8 +87,8 @@ func (p *Plugin) HandleAdditionalResources(
 	if !p.snapshotInstalled {
 		return nil
 	}
-	// Opted in or not: the earlier runner may have been.
-	if err := deleteOthers(ctx, k8sClient, client.ObjectKeyFromObject(runner), runner.UID); err != nil {
+	// Opted in or not: it may have been when they were captured.
+	if err := ownPodSnapshots(ctx, k8sClient, runner); err != nil {
 		_ = state.AddPluginIssue(ctx, p, resource, err, false, "", issue.Compute)
 	}
 	if !p.captureEnabled || !optedIn(resource) {
@@ -148,6 +147,43 @@ func (p *Plugin) capture(ctx context.Context, c client.Client, runner *dromosv1a
 		return fmt.Errorf("create SnapshotJob %s: %w", job.Name, err)
 	}
 	return nil
+}
+
+// ownPodSnapshots makes the runner the owner of its PodSnapshots. Snapshot
+// creates them with no owner, and a SnapshotJob passes on only labels, so the
+// owner is added once they exist. One whose runner is deleted before that is
+// left behind.
+func ownPodSnapshots(ctx context.Context, c client.Client, runner *dromosv1alpha1.WorkloadRunner) error {
+	snapshots := &snapshotv1alpha1.PodSnapshotList{}
+	if err := c.List(ctx, snapshots, client.InNamespace(runner.Namespace),
+		client.MatchingLabels{commonconstants.WorkloadRunnerUidLabel: string(runner.UID)}); err != nil {
+		return fmt.Errorf("list PodSnapshots: %w", err)
+	}
+	for i := range snapshots.Items {
+		snapshot := &snapshots.Items[i]
+		// By the runner, or by another owner, which then decides when it goes.
+		if len(snapshot.OwnerReferences) > 0 {
+			continue
+		}
+		unowned := snapshot.DeepCopy()
+		snapshot.OwnerReferences = []metav1.OwnerReference{ownedBy(runner)}
+		if err := c.Patch(ctx, snapshot, client.MergeFrom(unowned)); client.IgnoreNotFound(err) != nil {
+			return fmt.Errorf("own PodSnapshot %s: %w", snapshot.Name, err)
+		}
+	}
+	return nil
+}
+
+// ownedBy makes the runner the owner of a SnapshotJob or PodSnapshot, so it is
+// garbage-collected with the runner. Not its controller: Snapshot manages both,
+// and the runner only ties their lifetime to the workload's.
+func ownedBy(runner *dromosv1alpha1.WorkloadRunner) metav1.OwnerReference {
+	return metav1.OwnerReference{
+		APIVersion: dromosv1alpha1.GroupVersion.String(),
+		Kind:       dromosv1alpha1.WorkloadRunnerKind,
+		Name:       runner.Name,
+		UID:        runner.UID,
+	}
 }
 
 // runnerSnapshotJobs lists the runner's captures. The UID tells them from those
@@ -262,8 +298,7 @@ func serviceSelectors(ctx context.Context, c client.Reader, namespace string) ([
 }
 
 // buildSnapshotJob copies a Ready replica into the SnapshotJob that captures its
-// key. The runner doesn't own it: its labels tie it to the runner, and
-// HandleRunnerDeleted deletes it once the runner is gone.
+// key. The runner owns it, so it is deleted with the runner.
 func buildSnapshotJob(runner *dromosv1alpha1.WorkloadRunner, replica *corev1.Pod,
 	in captureInput) (*snapshotv1alpha1.SnapshotJob, error) {
 	target, err := snapshotkey.TargetContainer(replica)
@@ -282,9 +317,10 @@ func buildSnapshotJob(runner *dromosv1alpha1.WorkloadRunner, replica *corev1.Pod
 	}
 	return &snapshotv1alpha1.SnapshotJob{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      snapshotkey.SnapshotName(in.key, runner.Name),
-			Namespace: replica.Namespace,
-			Labels:    identity,
+			Name:            snapshotkey.SnapshotName(in.key, runner.Name),
+			Namespace:       replica.Namespace,
+			Labels:          identity,
+			OwnerReferences: []metav1.OwnerReference{ownedBy(runner)},
 		},
 		Spec: snapshotv1alpha1.SnapshotJobSpec{
 			PodTemplate: corev1.PodTemplateSpec{
