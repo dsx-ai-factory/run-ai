@@ -334,8 +334,8 @@ spec:
                             - message: both name and namespace are required when gatewayAPI
                                 override is specified
                               rule: '!has(self.name) && !has(self.__namespace__) ||
-                                (has(self.name) && self.name != '' && has(self.__namespace__)
-                                && self.__namespace__ != '')'
+                                (has(self.name) && self.name != '''' && has(self.__namespace__)
+                                && self.__namespace__ != '''')'
                           mgmtPrometheusIngress:
                             description: Ingress defines configuration of the researcher-service
                               ingress
