@@ -70,6 +70,7 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/golang-jwt/jwt/v5 v5.3.1 // indirect
+	github.com/google/btree v1.1.3 // indirect
 	github.com/google/gnostic-models v0.7.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-containerregistry v0.20.3 // indirect
@@ -109,7 +110,6 @@ require (
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/crypto v0.57.0 // indirect
-	golang.org/x/exp v0.0.0-20260508232706-74f9aab9d74a // indirect
 	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.23.0 // indirect
@@ -143,10 +143,21 @@ require (
 exclude google.golang.org/grpc/stats/opentelemetry v0.0.0-00010101000000-000000000000
 
 // Currently, KEDA requires 0.19 but GIE uses 0.21
-replace sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.19.7
+replace sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.23.3
 
 // CVE-2025-68156: Update expr-lang/expr to v1.17.7
 replace github.com/expr-lang/expr => github.com/expr-lang/expr v1.17.7
 
 // github.com/lyft/protoc-gen-validate was moved to github.com/envoyproxy/protoc-gen-validate
 replace github.com/lyft/protoc-gen-validate => github.com/envoyproxy/protoc-gen-validate v1.0.4
+
+// Match the k8s.io v0.35.4 line that the parent modules pin. keda v2.20.0 requires
+// the v0.36 line, which controller-runtime v0.23.3 does not build against.
+replace (
+	k8s.io/api => k8s.io/api v0.35.4
+	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.35.4
+	k8s.io/apimachinery => k8s.io/apimachinery v0.35.4
+	k8s.io/apiserver => k8s.io/apiserver v0.35.4
+	k8s.io/client-go => k8s.io/client-go v0.35.4
+	k8s.io/component-base => k8s.io/component-base v0.35.4
+)
