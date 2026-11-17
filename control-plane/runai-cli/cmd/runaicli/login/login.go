@@ -7,6 +7,8 @@ package login
 
 import (
 	"fmt"
+	"net"
+	"strconv"
 
 	commAttr "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/cmd/common/attributes"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/auth"
@@ -76,7 +78,7 @@ var Cmd = &cobra.Command{
 
 	// PreRunE will only be executed the interactive mode if the user has not set the login method
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		browser.address = fmt.Sprintf("%s:%d", browser.host, browser.port)
+		browser.address = net.JoinHostPort(browser.host, strconv.Itoa(browser.port))
 		cmdHelper.AddValidation(network.NewAddressValidator(browser.address))
 		if msg, err := cmdHelper.Check(); err != nil {
 			return cmdtxn.CmdErrorValidationMessage(cmd, msg, err)
