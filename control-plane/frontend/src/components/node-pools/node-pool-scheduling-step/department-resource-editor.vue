@@ -57,14 +57,19 @@
       <div :class="{ 'weight-input-row': kind === 'weight' }">
         <q-input
           v-model="input"
-          :type="kind === 'limit' ? 'text' : 'number'"
+          type="number"
+          :inputmode="kind === 'weight' ? 'numeric' : 'decimal'"
+          @keydown="numericKeydown($event, kind === 'weight')"
+          @paste="numericPaste($event, kind === 'weight')"
+          @beforeinput="numericBeforeInput($event, kind === 'weight')"
+          @input.capture="updateNativeValidity"
           min="0"
           :dense="kind !== 'limit'"
           :label="kind === 'limit' ? editorTitle : undefined"
           :stack-label="kind === 'limit'"
           :aria-label="editorTitle"
           :max="kind === 'weight' ? 20 : undefined"
-          :step="kind === 'weight' ? 1 : undefined"
+          :step="kind === 'weight' ? 1 : 'any'"
           :placeholder="kind === 'limit' ? 'Unlimited' : undefined"
           :error="validation.errors.length > 0"
           :color="!validation.errors.length && validation.warnings.length ? 'warning' : 'primary'"
@@ -102,6 +107,7 @@
   </editable-cell-popup>
 </template>
 <script setup lang="ts">
+import { numericKeydown, numericPaste, numericBeforeInput } from "./scheduling-numeric-input";
 import { computed, ref, watch } from "vue";
 import SchedulingHelpTooltip from "./scheduling-help-tooltip.vue";
 import { EditableCellPopup } from "@/components/common/runai-table/runai-custom-table-columns/editable-cell-popup";
@@ -137,14 +143,19 @@ const weightHelp = computed(
     `Weight determines a department’s share relative to the other departments${rankedWeight.value ? " in the same rank" : ""}. A higher weight means a larger portion of the resources. The weight is expressed as a percentage, calculated as the weight divided by the total weight of all departments${rankedWeight.value ? " in the rank" : ""}. For example, a department with a weight of 2${rankedWeight.value ? " in a rank" : ""} where the weights total 20 receives 10%.`,
 );
 const initialInput = () =>
-  props.kind === "limit" && (props.value == null || props.value === -1) ? "Unlimited" : (props.value ?? "");
+  props.kind === "limit" && (props.value == null || props.value === -1) ? "" : (props.value ?? "");
+const nativeBadInput = ref(false);
+function updateNativeValidity(event: Event) {
+  if (event.target instanceof HTMLInputElement) nativeBadInput.value = event.target.validity.badInput;
+}
 const parsedValue = () =>
-  props.kind === "limit" &&
-  (String(input.value).trim().toLowerCase() === "unlimited" || String(input.value).trim() === "")
-    ? -1
-    : String(input.value).trim() === ""
-      ? NaN
-      : Number(input.value);
+  nativeBadInput.value
+    ? NaN
+    : props.kind === "limit" && String(input.value).trim() === ""
+      ? -1
+      : String(input.value).trim() === ""
+        ? NaN
+        : Number(input.value);
 const input = ref<string | number>(props.value ?? "");
 const proposedWeightPercentage = computed(() => {
   const value = parsedValue();
@@ -211,12 +222,14 @@ const validation = computed(() => {
 function reset() {
   active.value = false;
   request++;
+  nativeBadInput.value = false;
   input.value = initialInput();
   loading.value = false;
   loadError.value = "";
 }
 async function opened() {
   active.value = true;
+  nativeBadInput.value = false;
   input.value = props.kind === "weight" ? (props.value ?? 2) : initialInput();
   context.value = props.context ?? {};
   if (!props.loadContext) return;

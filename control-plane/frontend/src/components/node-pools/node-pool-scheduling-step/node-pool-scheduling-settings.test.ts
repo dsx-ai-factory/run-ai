@@ -75,6 +75,20 @@ describe("scheduling settings draft interactions", () => {
     expect(wrapper.find(".historical-fields .q-field--error").exists()).toBe(false);
     wrapper.unmount();
   });
+  it("does not convert incomplete numeric input to an empty or default value", async () => {
+    const wrapper = mount(Settings, {
+      props: { draft: { ...draft, timeFairshare: true, historicalWeight: 1 } },
+      global: { plugins: [Quasar] },
+    });
+    const input = wrapper.find(".historical-weight-input input");
+    Object.defineProperty(input.element, "validity", { configurable: true, value: { badInput: true } });
+    await input.setValue("");
+    expect(wrapper.emitted("patch")?.at(-1)).toEqual([{ historicalWeight: NaN }]);
+    Object.defineProperty(input.element, "validity", { configurable: true, value: { badInput: false } });
+    await input.setValue("1.5");
+    expect(wrapper.emitted("patch")?.at(-1)).toEqual([{ historicalWeight: 1.5 }]);
+    wrapper.unmount();
+  });
   it("keeps unsaved limits when disabling the capability; backend resets stored limits", async () => {
     const wrapper = mount(Settings, {
       props: { draft, savedMaxAllocation: true, savedCpuQuota: false, canResetResources: true },

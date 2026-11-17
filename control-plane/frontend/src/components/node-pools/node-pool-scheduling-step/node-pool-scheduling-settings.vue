@@ -121,9 +121,15 @@
               <q-input
                 stack-label
                 class="historical-weight-input"
+                @input.capture="trackNumericValidity($event, 'historicalWeight')"
                 :model-value="draft.historicalWeight"
-                @update:model-value="patch({ historicalWeight: number($event) })"
+                @update:model-value="patch({ historicalWeight: number($event, 'historicalWeight') })"
                 type="number"
+                inputmode="decimal"
+                step="any"
+                @keydown="numericKeydown($event)"
+                @paste="numericPaste($event)"
+                @beforeinput="numericBeforeInput($event)"
                 min="0"
                 label="Historical usage weight"
                 :disable="readonly"
@@ -148,10 +154,16 @@
               <q-input
                 v-for="unit in windowUnits"
                 :key="unit"
+                @input.capture="trackNumericValidity($event, `historicalWindow.${unit}`)"
                 :model-value="draft.historicalWindow?.[unit] ?? 0"
                 @update:model-value="setDuration('historicalWindow', unit, $event)"
                 stack-label
                 type="number"
+                inputmode="decimal"
+                step="any"
+                @keydown="numericKeydown($event)"
+                @paste="numericPaste($event)"
+                @beforeinput="numericBeforeInput($event)"
                 min="0"
                 :label="unit"
                 :disable="readonly"
@@ -177,10 +189,16 @@
           <q-input
             v-for="unit in runtimeUnits"
             :key="unit"
+            @input.capture="trackNumericValidity($event, `minimumRuntime.${unit}`)"
             :model-value="draft.minimumRuntime?.[unit] ?? 0"
             @update:model-value="setDuration('minimumRuntime', unit, $event)"
             stack-label
             type="number"
+            inputmode="decimal"
+            step="any"
+            @keydown="numericKeydown($event)"
+            @paste="numericPaste($event)"
+            @beforeinput="numericBeforeInput($event)"
             min="0"
             :label="unit"
             :disable="readonly"
@@ -250,6 +268,7 @@
   </aside>
 </template>
 <script setup lang="ts">
+import { numericKeydown, numericPaste, numericBeforeInput } from "./scheduling-numeric-input";
 import { ref } from "vue";
 import { DOCS } from "@/constants/docs";
 import SchedulingSectionTitle from "./scheduling-section-title.vue";
@@ -294,11 +313,16 @@ function patch(value: Partial<SchedulingDraft>) {
 function invalid(value: number | null | undefined) {
   return value != null && (!Number.isFinite(value) || value < 0);
 }
-function number(value: string | number | null) {
+const invalidNumericInputs = new Map<string, boolean>();
+function trackNumericValidity(event: Event, key: string) {
+  if (event.target instanceof HTMLInputElement) invalidNumericInputs.set(key, event.target.validity.badInput);
+}
+function number(value: string | number | null, key: string) {
+  if (invalidNumericInputs.get(key)) return NaN;
   return value === "" || value === null ? null : Number(value);
 }
 function setDuration(field: "historicalWindow" | "minimumRuntime", unit: string, value: string | number | null) {
-  patch({ [field]: { ...props.draft[field], [unit]: number(value) } });
+  patch({ [field]: { ...props.draft[field], [unit]: number(value, `${field}.${unit}`) } });
 }
 function setMax(value: boolean) {
   if (

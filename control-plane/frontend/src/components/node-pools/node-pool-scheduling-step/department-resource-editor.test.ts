@@ -32,6 +32,22 @@ describe("resource editor opening transition", () => {
   });
 });
 describe("department resource editor", () => {
+  it("rejects letters, exponents and decimal entry in the whole-number weight input", () => {
+    const wrapper = mount(Editor, {
+      props: { id: "a", kind: "weight", value: 2 },
+      global: { plugins: [Quasar], stubs: { EditableCellPopup: popup } },
+    });
+    const input = wrapper.get("input").element;
+    for (const key of ["a", "e", "E", "+", "-", "."]) {
+      const event = new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true });
+      input.dispatchEvent(event);
+      expect(event.defaultPrevented, key).toBe(true);
+    }
+    const navigation = new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true, cancelable: true });
+    input.dispatchEvent(navigation);
+    expect(navigation.defaultPrevented).toBe(false);
+    wrapper.unmount();
+  });
   it("shows the maximum-allocation input label as well as its popup title", () => {
     const wrapper = mount(Editor, {
       props: { id: "a", kind: "limit", value: -1 },
@@ -121,6 +137,23 @@ describe("department resource editor", () => {
     expect(wrapper.get('[role="button"]').text()).toBe("Unlimited");
     wrapper.unmount();
   });
+  it("does not interpret incomplete native numeric input as Unlimited", async () => {
+    const wrapper = mount(Editor, {
+      props: { id: "a", kind: "limit", value: 12 },
+      global: { plugins: [Quasar], stubs: { EditableCellPopup: popup } },
+    });
+    const input = wrapper.get("input");
+    await input.setValue("");
+    Object.defineProperty(input.element, "validity", { configurable: true, value: { badInput: true } });
+    await input.trigger("input");
+    wrapper.findComponent(popup).vm.$emit("apply");
+    expect(wrapper.emitted("apply")).toBeUndefined();
+    Object.defineProperty(input.element, "validity", { configurable: true, value: { badInput: false } });
+    await input.trigger("input");
+    wrapper.findComponent(popup).vm.$emit("apply");
+    expect(wrapper.emitted("apply")).toEqual([[-1]]);
+    wrapper.unmount();
+  });
   it("blocks a maximum below quota and preserves Unlimited without project-quota reads", async () => {
     const wrapper = mount(Editor, {
       props: { value: -1, kind: "limit", quota: 5, id: "a" },
@@ -129,7 +162,7 @@ describe("department resource editor", () => {
     const menu = wrapper.findComponent(popup);
     menu.vm.$emit("before-show");
     await wrapper.vm.$nextTick();
-    expect((wrapper.get("input").element as HTMLInputElement).value).toBe("Unlimited");
+    expect((wrapper.get("input").element as HTMLInputElement).value).toBe("");
     menu.vm.$emit("apply");
     expect(wrapper.emitted("apply")).toEqual([[-1]]);
     await wrapper.get("input").setValue("4");
