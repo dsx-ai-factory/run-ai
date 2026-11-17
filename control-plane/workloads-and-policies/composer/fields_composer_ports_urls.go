@@ -468,7 +468,7 @@ func ValidateUrlSyntax(url *string, absolute bool) *workloadsApi.Error {
 		}
 	}
 
-	address := net.ParseIP(parsedUrl.Host)
+	address := net.ParseIP(parsedUrl.Hostname())
 	if address == nil {
 		if !strings.Contains(parsedUrl.Host, ".") {
 			return workloadsApi.NewError(http.StatusBadRequest, "malformed url host")
