@@ -7,9 +7,11 @@ package configprovider
 
 import (
 	"fmt"
+	"net"
 	"net/url"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/internal/config/advanced/http_listener/encryption"
@@ -409,7 +411,7 @@ func CreateDsn(database *postgres.DataBaseConfig) url.URL {
 	dsn := url.URL{
 		User:     url.UserPassword(database.User, database.Password),
 		Scheme:   "postgres",
-		Host:     fmt.Sprintf("%s:%s", database.Host, database.Port),
+		Host:     net.JoinHostPort(strings.Trim(database.Host, "[]"), database.Port),
 		Path:     database.Database,
 		RawQuery: url.Values(flags).Encode(),
 	}
