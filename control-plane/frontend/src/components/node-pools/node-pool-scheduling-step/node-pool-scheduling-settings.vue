@@ -315,8 +315,9 @@ function confirmDisable() {
 </script>
 <style scoped lang="scss">
 .scheduling-settings {
-  width: 380px;
-  flex: 0 0 380px;
+  width: 100%;
+  min-width: 0;
+  flex: 0 1 auto;
   border-left: 1px solid var(--border-subtle);
 }
 .scheduling-settings--compact {
@@ -373,6 +374,7 @@ header :deep(.q-icon) {
 }
 .toggle-section :deep(.runai-section-title) {
   flex: 1;
+  min-width: 0;
   margin-bottom: 0;
 }
 .toggle-section :deep(.q-toggle) {
@@ -405,6 +407,9 @@ header :deep(.q-icon) {
   font-weight: 400;
   line-height: 20px;
 }
+.duration-grid :deep(.q-field) {
+  min-width: 0;
+}
 .duration-grid :deep(.q-field--with-bottom) {
   padding: 5px 0 29px;
 }
@@ -417,14 +422,14 @@ header :deep(.q-icon) {
 }
 .duration-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0 20px;
   align-items: center;
   margin-top: 10px;
 }
 .historical-window {
   align-items: start;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
   margin-top: 0;
 }
@@ -542,6 +547,11 @@ header :deep(.q-icon) {
 }
 </style>
 <style lang="scss">
+.scheduling-settings-popup {
+  width: 420px;
+  max-width: calc(100vw - 32px) !important;
+  scrollbar-gutter: stable;
+}
 .historical-weight-help {
   margin: 0;
   padding-left: 20px;
