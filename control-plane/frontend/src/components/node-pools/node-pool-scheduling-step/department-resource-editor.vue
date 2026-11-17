@@ -92,7 +92,7 @@
         {{ context.nonPreemptibleUsage == null ? "Unknown" : `${context.nonPreemptibleUsage} GPUs` }}.<br />
         <template v-if="context.capacity != null">Node pool’s total: {{ context.capacity }} GPUs.</template>
       </p>
-      <p v-if="loading" role="status">Loading project quotas…</p>
+      <q-spinner v-if="loading" color="primary" size="20px" role="progressbar" aria-label="Loading project quotas" />
       <template v-if="!validation.errors.length">
         <p v-for="warning in validation.warnings" :key="warning" class="text-warning" role="status">
           {{ warningMessage(warning) }}

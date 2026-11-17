@@ -113,7 +113,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useAccessRuleRoles } from "./use-access-rule-roles.composable";
 import { useAuthStore } from "@/stores/auth.store";
 import { errorMessages } from "@/common/error-message.constant";
-import { QForm, useQuasar } from "quasar";
+import { QForm } from "quasar";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 import { accessRuleService } from "@/services/control-plane/rbac/access-rule.service/access-rule.service";
 import { usePermissionStore } from "@/stores/permissions.store";
@@ -121,7 +121,6 @@ import type { SubjectType } from "@/swagger-models/authorization-client";
 import { Action, ResourceType, ScopeType } from "@/swagger-models/authorization-client";
 import type { Department } from "@/swagger-models/org-unit-service-client";
 import { extractErrorMessages } from "@/utils/error-alert.util";
-import { alertUtil } from "@/utils/alert.util";
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
 import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
 import { RunaiSectionTitle } from "@/components/common/runai-section-title";
@@ -142,7 +141,6 @@ const createdDepartment = ref<Department>();
 const completedSubjects = new Set<string>();
 const permissionStore = usePermissionStore();
 const canCreateDepartment = computed(() => permissionStore.hasPermission(ResourceType.Department, Action.Create));
-const $q = useQuasar();
 const authStore = useAuthStore();
 const subjectOptions = computed(() => (authStore.isSSO ? subjectTypeOptionsWithSSO : subjectTypeOptions));
 const subject = ref<ISelectOption | null>(null);
@@ -219,7 +217,6 @@ async function createDepartment() {
         }
       }
     }
-    $q.notify(alertUtil.getSuccess(`Department ${createdDepartment.value.name} created`));
     emit("close");
   } catch (error) {
     const message = extractErrorMessages(error, "Could not complete department creation.").join(" ");

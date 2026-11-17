@@ -600,6 +600,7 @@ describe("scheduling department table", () => {
     expect(wrapper.findComponent(QToggle).props("disable")).toBe(false);
     wrapper.findComponent(QToggle).vm.$emit("update:modelValue", true);
     await wrapper.vm.$nextTick();
+    expect(wrapper.text()).not.toContain("Calculating simulation");
     await vi.advanceTimersByTimeAsync(300);
     expect((wrapper.get(".demand-slider").element as HTMLInputElement).value).toBe("72");
     expect(wrapper.get(".allocated").text()).toBe("12");
@@ -607,6 +608,10 @@ describe("scheduling department table", () => {
     expect(wrapper.get(".demand-slider").attributes("disabled")).toBeUndefined();
     expect(wrapper.text()).toContain("25%");
     expect(wrapper.text()).not.toContain("mock results");
+    expect(wrapper.text()).not.toContain("Updating simulation");
+    expect(wrapper.text()).not.toContain("Previous results shown");
+    expect(wrapper.text()).not.toContain("Calculating simulation");
+    expect(wrapper.text()).not.toContain("Simulation results are not available yet");
     transport.mockRejectedValue({ response: { status: 501 } });
     await wrapper.setProps({ draft: { ...draft, departments: { a: { id: "a", weight: 8 } } } });
     await vi.advanceTimersByTimeAsync(300);

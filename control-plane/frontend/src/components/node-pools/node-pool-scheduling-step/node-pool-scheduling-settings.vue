@@ -231,7 +231,7 @@
       }}</template>
       <template #body>{{
         confirmation === "maxAllocation"
-          ? "On save, the backend removes existing department and project limits. Unsaved values remain in this draft."
+          ? 'Disabling this will reset the max GPU allocation of all departments in this node pool to "Unlimited"'
           : "The CPU compute and CPU memory quotas of departments and projects in this node pool will be removed. Their limit will be set to Auto, and workloads can use up to the node pool’s maximum available CPU resources. Running workloads are not affected."
       }}</template>
       <template #footer
@@ -242,7 +242,7 @@
           label="Keep enabled"
           @click="confirmation = undefined" /><runai-btn
           color="primary"
-          label="Disable"
+          :label="confirmation === 'maxAllocation' ? 'Reset & disable' : 'Disable'"
           aid="confirm-disable-setting"
           @click="confirmDisable"
       /></template>

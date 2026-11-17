@@ -4,7 +4,9 @@
 -->
 <template>
   <runai-form-wrapper v-if="!pool" :form-state="{}" full-width>
-    <div v-if="loading" class="q-pa-lg" role="status">Loading node pool…</div>
+    <div v-if="loading" class="q-pa-lg">
+      <q-spinner color="primary" role="progressbar" aria-label="Loading node pool" />
+    </div>
     <q-banner v-else-if="loadError" class="bg-red-1 text-negative q-ma-lg" role="alert">
       {{ loadError }}
       <template #action
@@ -63,17 +65,13 @@ import { requestToLeave } from "@/services/infra/router.service/router.service";
 import { usePermissionStore } from "@/stores/permissions.store";
 import { Action, ResourceType } from "@/swagger-models/authorization-client";
 import { NODE_POOL_ROUTE_NAMES } from "@/router/node-pool.routes/node-pool.routes.names";
-import { useQuasar } from "quasar";
-import { alertUtil } from "@/utils/alert.util/alert.util";
 const route = useRoute();
 const router = useRouter();
-const $q = useQuasar();
 const permissionStore = usePermissionStore();
 const canSavePool = computed(() => permissionStore.hasPermission(ResourceType.Nodepools, Action.Update));
 const saving = ref(false);
 async function onSaved() {
   leaveApproved.value = true;
-  $q.notify(alertUtil.getSuccess("Node pool scheduling saved"));
   await router.push({ name: NODE_POOL_ROUTE_NAMES.NODE_POOL_INDEX });
 }
 const appStore = useAppStore();

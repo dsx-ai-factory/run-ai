@@ -78,7 +78,6 @@ const rankOptions = computed<ISelectOption[]>(() => {
       label: "No over quota",
       value: unsupportedNoOverQuota,
       disable: true,
-      disabledTooltip: "This rank is not supported by the current department API.",
     },
   ];
 });

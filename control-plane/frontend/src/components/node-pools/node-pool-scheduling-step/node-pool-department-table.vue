@@ -239,8 +239,8 @@
                         >
                       </div>
                     </div>
-                    <div v-if="simulation && !simulationResults?.[row.id]" class="result-tooltip-unavailable">
-                      {{ simulationMessage || "Simulation results are not available yet." }}
+                    <div v-if="simulation && !!simulationMessage" class="result-tooltip-unavailable">
+                      {{ simulationMessage }}
                     </div>
                   </q-tooltip>
                   <input
@@ -266,7 +266,7 @@
                 !canView
                   ? "You’re missing permissions to view departments"
                   : loading
-                    ? "Loading departments…"
+                    ? ""
                     : hasError
                       ? "Department data is unavailable."
                       : searchTerm || rankFilter || filters.advancedFilters?.length
@@ -276,11 +276,8 @@
             </div></template
           >
         </q-table>
-        <div v-if="simulation" class="simulation-notice" role="status" aria-live="polite">
-          <span v-if="simulationStatus === 'loading'">{{
-            simulationResults ? "Updating simulation… Previous results shown." : "Calculating simulation…"
-          }}</span>
-          <span v-else-if="simulationMessage">{{ simulationMessage }}</span>
+        <div v-if="simulation && simulationMessage" class="simulation-notice" role="alert">
+          <span>{{ simulationMessage }}</span>
           <runai-btn
             v-if="simulationStatus === 'error' || simulationStatus === 'unavailable'"
             flat
