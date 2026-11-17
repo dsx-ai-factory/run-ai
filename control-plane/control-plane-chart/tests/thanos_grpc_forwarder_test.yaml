@@ -1,0 +1,19 @@
+suite: Test Thanos gRPC forwarder
+
+templates:
+  - templates/thanos/thanos-grpc-forwarder.yaml
+
+tests:
+  - it: should listen on both IPv4 and IPv6
+    set:
+      thanos:
+        query:
+          stores:
+            - thanos-grpc-port-forwarder:10901
+    documentSelector:
+      path: kind
+      value: Deployment
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].command
+          content: "--address=0.0.0.0,::"
