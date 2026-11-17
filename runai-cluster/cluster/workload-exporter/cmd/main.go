@@ -14,6 +14,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra"
 	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	diwv2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/distributedworkload/v2alpha1"
@@ -22,7 +23,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/controller/node"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/controller/pod"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/controller/podGroup"
+	podgroup "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/controller/podGroup"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/controller/utils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/controller/workload"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/metrics"
@@ -32,6 +33,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
@@ -109,6 +111,13 @@ func main() {
 		log.Fatal().Msgf("Failed creating manager client, error: %s", err.Error())
 	}
 
+	kubeClient, err := kubernetes.NewForConfig(clientConfig)
+	if err != nil {
+		log.Fatal().Msgf("Failed creating kubernetes client, error: %s", err.Error())
+	}
+	// Read claims and templates through the manager's cache instead of issuing an API request for each Pod lookup.
+	draParser := dra.NewDRAParser(mgr.GetClient(), kubeClient)
+
 	legacyReconcilers, err := availableLegacyReconcilers(mgr.GetRESTMapper(), []legacyReconcilerRegistration{
 		{
 			gvk:        twv2a1.GroupVersion.WithKind("TrainingWorkload"),
@@ -137,7 +146,7 @@ func main() {
 
 	err = setUpReconcilers(mgr, append([]utils.Reconciler{
 		node.NewNodeController(mgr.GetClient()),
-		pod.NewPodController(mgr.GetClient()),
+		pod.NewPodController(mgr.GetClient(), draParser),
 		podgroup.NewPodGroupController(mgr.GetClient()),
 		workload.NewExternalWorkloadController(mgr.GetClient()),
 	}, legacyReconcilers...))
