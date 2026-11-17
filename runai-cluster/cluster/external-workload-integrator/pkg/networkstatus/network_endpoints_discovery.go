@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/utils/ptr"
+	"net"
 	"net/url"
 	"sort"
 
@@ -391,7 +392,7 @@ func (n *NetworkStatusUpdater) findNodePortEndpoints(svc *corev1.Service, nodeAd
 		}
 		nodePortStr := strconv.FormatInt(int64(port.NodePort), 10)
 		var tls *bool
-		endpointUrl := fmt.Sprintf("%s:%s", nodeAddress, nodePortStr)
+		endpointUrl := net.JoinHostPort(nodeAddress, nodePortStr)
 		if port.AppProtocol != nil {
 			scheme, tlsEnabled := normalizeAppProtocol(*port.AppProtocol)
 			tls = ptr.To(tlsEnabled)
@@ -429,7 +430,7 @@ func (n *NetworkStatusUpdater) findLoadBalancerEndpoints(svc *corev1.Service) []
 		for _, port := range svc.Spec.Ports {
 			portStr := strconv.FormatInt(int64(port.Port), 10)
 			var tls *bool
-			endpointUrl := fmt.Sprintf("%s:%s", host, portStr)
+			endpointUrl := net.JoinHostPort(host, portStr)
 			if port.AppProtocol != nil {
 				scheme, tlsEnabled := normalizeAppProtocol(*port.AppProtocol)
 				tls = ptr.To(tlsEnabled)
@@ -862,11 +863,18 @@ func isRouteAccepted(status gwv1.RouteParentStatus) bool {
 
 // getUrl builds a display URL, omitting the port when it's the default for the protocol
 // (443 for https, 80 for http).
+func bracketIPv6(host string) string {
+	if strings.Contains(host, ":") && !strings.HasPrefix(host, "[") {
+		return "[" + host + "]"
+	}
+	return host
+}
+
 func getUrl(protocol string, host string, port string, path string) string {
 	if port == "" || (protocol == protocolHTTPS && port == port443) || (protocol == protocolHTTP && port == port80) {
-		return fmt.Sprintf("%s://%s%s", protocol, host, path)
+		return fmt.Sprintf("%s://%s%s", protocol, bracketIPv6(host), path)
 	}
-	return fmt.Sprintf("%s://%s:%s%s", protocol, host, port, path)
+	return fmt.Sprintf("%s://%s%s", protocol, net.JoinHostPort(host, port), path)
 }
 
 func hasTlsAnnotation(annotations map[string]string) bool {
@@ -929,7 +937,7 @@ func getNodeAddressFromNode(node *corev1.Node) string {
 		}
 	}
 	if annotatedExternalIP := node.Annotations[externalNodeIPAnnotation]; annotatedExternalIP != "" {
-		return annotatedExternalIP
+		return strings.Trim(annotatedExternalIP, "[]")
 	}
 	return internalIP
 }
