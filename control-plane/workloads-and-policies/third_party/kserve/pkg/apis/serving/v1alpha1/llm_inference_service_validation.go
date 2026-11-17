@@ -44,8 +44,10 @@ type LLMInferenceServiceValidator struct{}
 var _ webhook.CustomValidator = &LLMInferenceServiceValidator{}
 
 func (l *LLMInferenceServiceValidator) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewWebhookManagedBy(mgr).
-		For(&LLMInferenceService{}).
+	// controller-runtime v0.23 made the webhook builder generic and removed For().
+	// The validator is written against runtime.Object, so T must be runtime.Object.
+	var obj runtime.Object = &LLMInferenceService{}
+	return ctrl.NewWebhookManagedBy(mgr, obj).
 		WithValidator(l).
 		Complete()
 }
