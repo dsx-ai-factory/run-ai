@@ -21,12 +21,10 @@ import (
 	ctrlreconcile "sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-// Watchers reconciles the runner when one of its replicas turns Ready, and when
-// a capture changes. Without the pod watch the capture would depend on the
-// workload's own status changing after the pod cache saw the replica Ready; the
-// framework never requeues on a timer.
-//
-// A PodSnapshot being created reconciles it too, to make the runner its owner.
+// Watchers reconciles the runner when a replica's readiness changes, and when a
+// capture or its PodSnapshot changes. The framework never requeues on a timer,
+// so without these the capture, the deletion and owning a new PodSnapshot would
+// wait for the workload's own status to change.
 //
 // Only with Snapshot installed: a watch on a kind whose CRD is missing stops the
 // controller starting.
@@ -37,7 +35,7 @@ func (p *Plugin) Watchers(bldr *builder.Builder) (*builder.Builder, error) {
 	toRunner := handler.EnqueueRequestsFromMapFunc(mapToRunner)
 	return bldr.
 		Watches(&snapshotv1alpha1.SnapshotJob{}, toRunner).
-		Watches(&snapshotv1alpha1.PodSnapshot{}, toRunner, builder.WithPredicates(onlyCreates())).
+		Watches(&snapshotv1alpha1.PodSnapshot{}, toRunner).
 		Watches(&corev1.Pod{}, toRunner, builder.WithPredicates(replicaReadinessChanged())), nil
 }
 
@@ -53,6 +51,9 @@ func mapToRunner(_ context.Context, object client.Object) []ctrlreconcile.Reques
 
 // replicaReadinessChanged passes opted-in replicas whose Ready condition changed,
 // and on a restart those that are already Ready.
+//
+// Not a deleted one: it is terminating before that, and keepSet no longer counts
+// its key then.
 func replicaReadinessChanged() predicate.Predicate {
 	return predicate.Funcs{
 		CreateFunc: func(e event.CreateEvent) bool {
@@ -76,13 +77,4 @@ func asReplica(object client.Object) (*corev1.Pod, bool) {
 		return nil, false
 	}
 	return pod, true
-}
-
-func onlyCreates() predicate.Predicate {
-	return predicate.Funcs{
-		CreateFunc:  func(event.CreateEvent) bool { return true },
-		UpdateFunc:  func(event.UpdateEvent) bool { return false },
-		DeleteFunc:  func(event.DeleteEvent) bool { return false },
-		GenericFunc: func(event.GenericEvent) bool { return false },
-	}
 }
