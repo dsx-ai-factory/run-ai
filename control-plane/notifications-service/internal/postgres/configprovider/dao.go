@@ -7,6 +7,7 @@ package configprovider
 
 import (
 	"fmt"
+	"net"
 	"net/url"
 	"path/filepath"
 	"strconv"
@@ -409,7 +410,7 @@ func CreateDsn(database *postgres.DataBaseConfig) url.URL {
 	dsn := url.URL{
 		User:     url.UserPassword(database.User, database.Password),
 		Scheme:   "postgres",
-		Host:     fmt.Sprintf("%s:%s", database.Host, database.Port),
+		Host:     net.JoinHostPort(database.Host, database.Port),
 		Path:     database.Database,
 		RawQuery: url.Values(flags).Encode(),
 	}
