@@ -28,10 +28,12 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/services"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/services/departments"
+	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/services/fair_share_simulation"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/services/projects"
-	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/services/simulation"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 )
+
+const seedingWorkers = 16
 
 // Opt-in: seeding takes minutes, so it only runs with FAIR_SHARE_SIMULATION_SCALE=1.
 var _ = Describe("Fair share simulation at scale", Ordered, func() {
@@ -170,8 +172,7 @@ var _ = Describe("Fair share simulation at scale", Ordered, func() {
 		projectLevel500 := request("project", rowsOf(projectIds[:500]))
 		projectLevel20 := request("project", rowsOf(projectIds[:20]))
 
-		// Reads stay slow for a while after seeding, even once analyzed, so warm up before timing, as a long-lived database
-		// would be. A slow machine just gets slower numbers rather than a failure.
+		// Reads stay slow for a while after seeding, even once analyzed, so warm up before timing.
 		for warmUntil := time.Now().Add(2 * time.Minute); time.Now().Before(warmUntil); {
 			start := time.Now()
 			simulate(projectLevel20)
@@ -190,12 +191,12 @@ var _ = Describe("Fair share simulation at scale", Ordered, func() {
 		measure("projects, 1,500 in the parent, 20 sent (again)", func() { simulate(projectLevel20) })
 		measure("departments, 300 sent", func() { simulate(departmentLevel) })
 
-		units := make([]simulation.Unit, projectCount)
+		units := make([]fair_share_simulation.Unit, projectCount)
 		for i := range units {
-			units[i] = simulation.Unit{ID: strconv.Itoa(i), Priority: i % 4, CreatedAt: time.Unix(int64(i), 0),
-				Deserved: float64(i % 3), Limit: simulation.Unlimited, Weight: float64(1 + i%3), Demand: capacity / 2}
+			units[i] = fair_share_simulation.Unit{ID: strconv.Itoa(i), Priority: i % 4, CreatedAt: time.Unix(int64(i), 0),
+				Deserved: float64(i % 3), Limit: fair_share_simulation.Unlimited, Weight: float64(1 + i%3), Demand: capacity / 2}
 		}
-		measure("  part: KAI division, 1,500 units", func() { simulation.Divide(capacity, units) })
+		measure("  part: KAI division, 1,500 units", func() { fair_share_simulation.Divide(capacity, units) })
 
 		response500 := simulate(projectLevel500)
 		measure("  part: JSON of a 500-row response", func() {
@@ -206,10 +207,9 @@ var _ = Describe("Fair share simulation at scale", Ordered, func() {
 })
 
 func parallel(n int, do func(i int)) {
-	const workers = 16
 	var wg sync.WaitGroup
 	next := make(chan int)
-	for w := 0; w < workers; w++ {
+	for w := 0; w < seedingWorkers; w++ {
 		wg.Add(1)
 		go func() {
 			// GinkgoRecover must run before wg.Done, so a failure is recorded before the producer is released.

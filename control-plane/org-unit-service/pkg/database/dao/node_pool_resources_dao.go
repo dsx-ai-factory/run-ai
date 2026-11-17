@@ -21,6 +21,22 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/orm"
 )
 
+const (
+	schedulingInputsColumns = "org_unit_id, rank, gpu_deserved, gpu_limit, gpu_over_quota_weight, created_at"
+	visibleToEveryCaller    = "true"
+)
+
+type NodePoolSchedulingInputs struct {
+	OrgUnitId          string
+	Rank               string
+	GpuDeserved        *float64
+	GpuLimit           *float64
+	GpuOverQuotaWeight *float64
+	CreatedAt          time.Time
+	// Rows outside the caller's scopes are loaded too, because they compete; Visible is false for them.
+	Visible bool
+}
+
 func GetDepartmentNodePoolResources(
 	ctx context.Context,
 	tenantId string,
@@ -369,18 +385,6 @@ func PatchDepartmentNodePoolResources(ctx context.Context,
 	return nil
 }
 
-// NodePoolSchedulingInputs are an org unit's scheduler inputs on a node pool. Hidden org units compete too, so they are
-// loaded with the rest, and Visible says whether the caller's scopes cover them (always, when scopes is nil).
-type NodePoolSchedulingInputs struct {
-	OrgUnitId          string
-	Rank               string
-	GpuDeserved        *float64
-	GpuLimit           *float64
-	GpuOverQuotaWeight *float64
-	CreatedAt          time.Time
-	Visible            bool
-}
-
 func GetDepartmentSchedulingInputs(ctx context.Context, tenantId, nodePoolId string, scopes *openapi.PermittedScopes,
 ) ([]NodePoolSchedulingInputs, error) {
 	query := runaidb.DB().WithContext(ctx).Table(models.DepartmentNodePoolResourcesView).
@@ -399,13 +403,12 @@ func GetProjectSchedulingInputs(ctx context.Context, tenantId, nodePoolId string
 func getSchedulingInputs(query orm.DB, tenantId string, scopes *openapi.PermittedScopes,
 	scopesPredicate func(openapi.PermittedScopes) string,
 ) ([]NodePoolSchedulingInputs, error) {
-	visible := "true"
+	visible := visibleToEveryCaller
 	if scopes != nil && !ptr.Deref(scopes.System, false) && !IsTenantPermitted(tenantId, scopes) {
 		visible = scopesPredicate(*scopes)
 	}
 	rows := []NodePoolSchedulingInputs{}
-	if err := query.Select("org_unit_id, rank, gpu_deserved, gpu_limit, gpu_over_quota_weight, created_at, " +
-		visible + " AS visible").Find(&rows); err != nil {
+	if err := query.Select(schedulingInputsColumns + ", " + visible + " AS visible").Find(&rows); err != nil {
 		return nil, err
 	}
 	return rows, nil

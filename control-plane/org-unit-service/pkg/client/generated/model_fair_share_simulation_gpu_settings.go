@@ -22,7 +22,7 @@ var _ MappedNullable = &FairShareSimulationGpuSettings{}
 
 // FairShareSimulationGpuSettings GPU settings that replace the stored ones. An omitted or null field keeps its stored value; unlike the org unit APIs, null doesn't mean unlimited here: send -1.
 type FairShareSimulationGpuSettings struct {
-	// The GPU quota; -1 means unlimited. Values between -1 and 0 are rejected.
+	// The GPU quota; -1 means unlimited. Values between -1 and 0 are rejected. Ignored while quota is off.
 	Deserved NullableFloat64 `json:"deserved,omitempty"`
 	// The maximum GPU allocation; -1 means unlimited. Values between -1 and 0 are rejected. Only while limits is on, and not below the quota.
 	Limit NullableFloat64 `json:"limit,omitempty"`

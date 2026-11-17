@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package simulation
+package fair_share_simulation
 
 import (
 	"fmt"

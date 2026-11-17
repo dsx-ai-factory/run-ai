@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package simulation
+package fair_share_simulation
 
 import (
 	"cmp"
@@ -16,8 +16,6 @@ import (
 
 const Unlimited = fairshare.Unlimited
 
-// Unit is one org unit on one level of the queue tree, already mapped the way the cluster sync sends it to the
-// scheduler.
 type Unit struct {
 	ID       string
 	Priority int
@@ -40,7 +38,6 @@ type Result struct {
 	WeightShareInRank float64
 }
 
-// Divide splits capacity between the units of one level of the queue tree with the scheduler's own division.
 func Divide(capacity float64, units []Unit) map[string]Result {
 	// A round can run out of capacity midway, so the units visited first get more; a fixed order keeps the same
 	// scenario from giving different results.

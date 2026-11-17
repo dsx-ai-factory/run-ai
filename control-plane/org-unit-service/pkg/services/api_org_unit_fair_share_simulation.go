@@ -22,21 +22,24 @@ import (
 	authorization_utils "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/helpers"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/database/dao"
-	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/services/simulation"
+	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/services/fair_share_simulation"
 )
 
 const (
 	orgUnitTypeDepartment = "department"
 	orgUnitTypeProject    = "project"
 
-	maxSimulatedOrgUnits = 500
-
-	// Product decision: an org unit sent without a demand, or not sent, asks for half the node pool.
+	maxSimulatedOrgUnits         = 500
 	defaultDemandShareOfCapacity = 0.5
-
-	// The cluster agent sends a nil over-quota weight to the scheduler as 1.
-	agentDefaultOverQuotaWeight = 1.0
+	agentDefaultOverQuotaWeight  = 1.0
 )
+
+type simulationScenario struct {
+	capacity     float64
+	capabilities api.FairShareSimulationSchedulingCapabilities
+	orgUnits     []api.FairShareSimulationOrgUnit
+	changes      map[string]api.FairShareSimulationOrgUnit
+}
 
 func (o OrgUnitApiService) SimulateNodePoolFairShare(ctx context.Context, nodepoolId string, request api.FairShareSimulationRequest,
 ) (api.ImplResponse, error) {
@@ -75,11 +78,12 @@ func (o OrgUnitApiService) SimulateNodePoolFairShare(ctx context.Context, nodepo
 	if request.OrgUnitType == orgUnitTypeDepartment {
 		departmentScopes = scopes
 	}
-	departments, err := loadSchedulingInputs(dao.GetDepartmentSchedulingInputs(ctx, *tenantId, nodepoolId, departmentScopes))
+	departmentRows, err := dao.GetDepartmentSchedulingInputs(ctx, *tenantId, nodepoolId, departmentScopes)
 	if err != nil {
 		return HandleDbError(ctx, fmt.Errorf("load departments of node pool %s: %w", nodepoolId, err),
 			"Failed to get the node pool's departments"), nil
 	}
+	departments := schedulingInputsById(departmentRows)
 	if len(departments) == 0 {
 		if _, err := GetNodePoolMetadata(ctx, o.clusterExternalClient, nodepoolId); err != nil {
 			if isNotFound(err) {
@@ -92,21 +96,30 @@ func (o OrgUnitApiService) SimulateNodePoolFairShare(ctx context.Context, nodepo
 
 	scenario := newSimulationScenario(request)
 	if request.OrgUnitType == orgUnitTypeDepartment {
-		return scenario.respond(scenario.simulateDepartments(departments))
+		results, err := scenario.simulateDepartments(departments)
+		if err != nil {
+			return HandleError(err, http.StatusBadRequest, err.Error()), nil
+		}
+		return api.Response(http.StatusOK, scenario.toResponse(results)), nil
 	}
 
 	parentId := request.Parent.Id
 	parentKey, err := strconv.ParseInt(parentId, 10, 64)
 	if _, onNodePool := departments[parentId]; !onNodePool || err != nil {
-		// An unknown parent gets the same error as an unknown project, so it can't be used to probe for departments.
-		return scenario.respond(nil, notFoundInNodePool(orgUnitTypeProject, request.OrgUnits[0].Id))
+		// Same error as an unknown project, so the parent can't be used to probe for departments.
+		err := notFoundInNodePool(orgUnitTypeProject, request.OrgUnits[0].Id)
+		return HandleError(err, http.StatusBadRequest, err.Error()), nil
 	}
-	projects, err := loadSchedulingInputs(dao.GetProjectSchedulingInputs(ctx, *tenantId, nodepoolId, parentKey, scopes))
+	projectRows, err := dao.GetProjectSchedulingInputs(ctx, *tenantId, nodepoolId, parentKey, scopes)
 	if err != nil {
 		return HandleDbError(ctx, fmt.Errorf("load projects of department %s on node pool %s: %w", parentId, nodepoolId, err),
 			"Failed to get the department's projects"), nil
 	}
-	return scenario.respond(scenario.simulateProjects(departments, projects, parentId))
+	results, err := scenario.simulateProjects(departments, schedulingInputsById(projectRows), parentId)
+	if err != nil {
+		return HandleError(err, http.StatusBadRequest, err.Error()), nil
+	}
+	return api.Response(http.StatusOK, scenario.toResponse(results)), nil
 }
 
 func validateFairShareSimulationRequest(request api.FairShareSimulationRequest) error {
@@ -174,14 +187,7 @@ func validateSimulatedChange(rank *api.FairShareSimulationRank, gpu *api.FairSha
 }
 
 func isQuotaValue(value *float64) bool {
-	return value == nil || *value >= 0 || *value == simulation.Unlimited
-}
-
-type simulationScenario struct {
-	capacity     float64
-	capabilities api.FairShareSimulationSchedulingCapabilities
-	orgUnits     []api.FairShareSimulationOrgUnit
-	changes      map[string]api.FairShareSimulationOrgUnit
+	return value == nil || *value >= 0 || *value == fair_share_simulation.Unlimited
 }
 
 func newSimulationScenario(request api.FairShareSimulationRequest) simulationScenario {
@@ -197,15 +203,12 @@ func newSimulationScenario(request api.FairShareSimulationRequest) simulationSce
 	}
 }
 
-func (s simulationScenario) respond(results map[string]simulation.Result, err error) (api.ImplResponse, error) {
-	if err != nil {
-		return HandleError(err, http.StatusBadRequest, err.Error()), nil
-	}
+func (s simulationScenario) toResponse(results map[string]fair_share_simulation.Result) api.FairShareSimulationResponse {
 	response := api.FairShareSimulationResponse{OrgUnits: make([]api.FairShareSimulationResult, 0, len(s.orgUnits))}
 	for _, orgUnit := range s.orgUnits {
 		response.OrgUnits = append(response.OrgUnits, toFairShareSimulationResult(orgUnit.Id, results[orgUnit.Id]))
 	}
-	return api.Response(http.StatusOK, response), nil
+	return response
 }
 
 func (s simulationScenario) demandOf(id string) float64 {
@@ -215,22 +218,20 @@ func (s simulationScenario) demandOf(id string) float64 {
 	return s.capacity * defaultDemandShareOfCapacity
 }
 
-// simulateDepartments uses each department's own demand (sent, else the default), not its projects', so it needs no
-// project data.
+// A department asks for its own demand here, not the sum of its projects', so no project data is needed.
 func (s simulationScenario) simulateDepartments(departments map[string]*dao.NodePoolSchedulingInputs,
-) (map[string]simulation.Result, error) {
+) (map[string]fair_share_simulation.Result, error) {
 	units, err := s.requestedLevel(orgUnitTypeDepartment, departments)
 	if err != nil {
 		return nil, err
 	}
-	return simulation.Divide(s.capacity, slices.Collect(maps.Values(units))), nil
+	return fair_share_simulation.Divide(s.capacity, slices.Collect(maps.Values(units))), nil
 }
 
-// simulateProjects divides the parent's share among its projects, with the other departments idle. The parent asks for
-// the sum of its projects' demand, as the scheduler does for a parent queue. The parent needn't be readable, so a
-// caller with read on a project but not on its department can still simulate it.
+// The other departments are idle, and the parent asks for the sum of its projects' demand, as the scheduler does for a
+// parent queue. The parent needn't be readable: a caller may read a project without reading its department.
 func (s simulationScenario) simulateProjects(departments, projects map[string]*dao.NodePoolSchedulingInputs, parentId string,
-) (map[string]simulation.Result, error) {
+) (map[string]fair_share_simulation.Result, error) {
 	projectUnits, err := s.requestedLevel(orgUnitTypeProject, projects)
 	if err != nil {
 		return nil, err
@@ -239,7 +240,7 @@ func (s simulationScenario) simulateProjects(departments, projects map[string]*d
 	for _, project := range projectUnits {
 		parentDemand += project.Demand
 	}
-	departmentUnits := make([]simulation.Unit, 0, len(departments))
+	departmentUnits := make([]fair_share_simulation.Unit, 0, len(departments))
 	for id, department := range departments {
 		unit := s.toSchedulerUnit(id, department)
 		if id == parentId {
@@ -247,15 +248,14 @@ func (s simulationScenario) simulateProjects(departments, projects map[string]*d
 		}
 		departmentUnits = append(departmentUnits, unit)
 	}
-	parentShare := simulation.Divide(s.capacity, departmentUnits)[parentId].FairShare
-	return simulation.Divide(parentShare, slices.Collect(maps.Values(projectUnits))), nil
+	parentShare := fair_share_simulation.Divide(s.capacity, departmentUnits)[parentId].FairShare
+	return fair_share_simulation.Divide(parentShare, slices.Collect(maps.Values(projectUnits))), nil
 }
 
-// requestedLevel applies the requested changes and maps every org unit of the level, hidden ones included. A requested
-// org unit the caller can't read gets the same error as an unknown one, so the request can't be used to learn which
-// org units exist.
+// A requested org unit the caller can't read gets the same error as an unknown one, so the request can't be used to
+// learn which org units exist. Hidden org units still compete.
 func (s simulationScenario) requestedLevel(orgUnitType string, rows map[string]*dao.NodePoolSchedulingInputs,
-) (map[string]simulation.Unit, error) {
+) (map[string]fair_share_simulation.Unit, error) {
 	for _, orgUnit := range s.orgUnits {
 		row, ok := rows[orgUnit.Id]
 		if !ok || !row.Visible {
@@ -263,14 +263,14 @@ func (s simulationScenario) requestedLevel(orgUnitType string, rows map[string]*
 		}
 		applyChange(row, orgUnit.Rank, orgUnit.Gpu)
 	}
-	units := make(map[string]simulation.Unit, len(rows))
+	units := make(map[string]fair_share_simulation.Unit, len(rows))
 	for id, row := range rows {
 		unit := s.toSchedulerUnit(id, row)
 		unit.Demand = s.demandOf(id)
 		units[id] = unit
 	}
 	for _, orgUnit := range s.orgUnits {
-		if unit := units[orgUnit.Id]; unit.Deserved >= 0 && unit.Limit != simulation.Unlimited && unit.Limit < unit.Deserved {
+		if unit := units[orgUnit.Id]; unit.Deserved >= 0 && unit.Limit != fair_share_simulation.Unlimited && unit.Limit < unit.Deserved {
 			return nil, fmt.Errorf("%s %s: the limit is below the quota", orgUnitType, orgUnit.Id)
 		}
 	}
@@ -295,16 +295,16 @@ func applyChange(row *dao.NodePoolSchedulingInputs, rank *api.FairShareSimulatio
 	}
 }
 
-// toSchedulerUnit maps an org unit the way the cluster sync sends it to the scheduler. A capability that is off
-// resets its values on every org unit, not only on the changed ones.
-func (s simulationScenario) toSchedulerUnit(id string, row *dao.NodePoolSchedulingInputs) simulation.Unit {
+// Mirrors what the cluster sync sends to the scheduler: a capability that is off resets its values on every org unit,
+// not only on the changed ones.
+func (s simulationScenario) toSchedulerUnit(id string, row *dao.NodePoolSchedulingInputs) fair_share_simulation.Unit {
 	deserved := UnlimitedOrNil(row.GpuDeserved)
 	limit := UnlimitedOrNil(row.GpuLimit)
 	if !s.capabilities.Quota {
 		deserved = 0
 	}
 	if !s.capabilities.Limits {
-		limit = simulation.Unlimited
+		limit = fair_share_simulation.Unlimited
 	}
 	rank := &row.Rank
 	if !s.capabilities.Ranks {
@@ -312,9 +312,14 @@ func (s simulationScenario) toSchedulerUnit(id string, row *dao.NodePoolScheduli
 	}
 	weight := row.GpuOverQuotaWeight
 	if !s.capabilities.AdjustableWeights {
-		weight = nonAdjustableOverQuotaWeight(ptr.To(deserved))
+		// From the stored quota, as the sync does: no quota gives no weight, and the agent then sends the default.
+		storedDeserved := row.GpuDeserved
+		if !s.capabilities.Quota {
+			storedDeserved = ptr.To(0.0)
+		}
+		weight = nonAdjustableOverQuotaWeight(storedDeserved)
 	}
-	return simulation.Unit{
+	return fair_share_simulation.Unit{
 		ID:        id,
 		Priority:  int(MapRankToNumber(rank)),
 		CreatedAt: row.CreatedAt,
@@ -324,7 +329,7 @@ func (s simulationScenario) toSchedulerUnit(id string, row *dao.NodePoolScheduli
 	}
 }
 
-func toFairShareSimulationResult(id string, result simulation.Result) api.FairShareSimulationResult {
+func toFairShareSimulationResult(id string, result fair_share_simulation.Result) api.FairShareSimulationResult {
 	return api.FairShareSimulationResult{
 		Id:                id,
 		Demand:            api.FairShareSimulationResources{Gpu: result.Demand},
@@ -340,15 +345,12 @@ func notFoundInNodePool(orgUnitType, id string) error {
 	return fmt.Errorf("%s %s not found in the node pool", orgUnitType, id)
 }
 
-func loadSchedulingInputs(rows []dao.NodePoolSchedulingInputs, err error) (map[string]*dao.NodePoolSchedulingInputs, error) {
-	if err != nil {
-		return nil, err
-	}
+func schedulingInputsById(rows []dao.NodePoolSchedulingInputs) map[string]*dao.NodePoolSchedulingInputs {
 	byId := make(map[string]*dao.NodePoolSchedulingInputs, len(rows))
 	for i := range rows {
 		byId[rows[i].OrgUnitId] = &rows[i]
 	}
-	return byId, nil
+	return byId
 }
 
 // isNotFound reads the status the cluster-service client puts at the start of its errors, as in "404 Not Found".

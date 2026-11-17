@@ -51,7 +51,6 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 		Return(&clustersOpenapi.GetNodepoolsMinimal200Response{Nodepools: []clustersOpenapi.NodepoolMinimal{pool}}, nil)
 	clusterServiceClient.On("GetNodepoolMinimal", mock.Anything, pool.Id).Return(&pool, nil)
 	clusterServiceClient.On("GetNodepoolMinimal", mock.Anything, "999997").Return(nil, errors.New("connection refused"))
-	clusterServiceClient.On("GetNodepoolMinimal", mock.Anything, pool.Id+"||7201").Return(nil, errors.New("500 Internal Server Error"))
 	clusterServiceClient.On("GetNodepoolMinimal", mock.Anything, mock.Anything).Return(nil, errors.New("404 Not Found"))
 	departmentApiService := departments.NewDepartmentApiService(&clusterServiceClient, nil)
 	projectApiService := projects.NewProjectApiService(services.NewProjectDeletionService(&clusterServiceClient, nil, nil), &clusterServiceClient, nil)
