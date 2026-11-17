@@ -17,13 +17,15 @@ jobs:
   renovate-pr-updater:
     name: Renovate PR Updater
     # The branch name alone is not proof of a Renovate PR: anyone with write access
-    # can push a renovate/* branch. Require the Renovate bot to have opened the PR
+    # can push a renovate/* branch. Require a Renovate account to have opened the PR
     # and to be the one triggering this event (pushes by others are not approved).
+    # Renovate opens PRs as runai-infra-team; devops-runai until 2026-11, whose
+    # PRs are still open.
     if: >-
       github.event.pull_request.head.repo.full_name == github.repository &&
       startsWith(github.head_ref, 'renovate/') &&
-      github.event.pull_request.user.login == 'devops-runai' &&
-      github.event.sender.login == 'devops-runai'
+      contains(fromJSON('["devops-runai", "runai-infra-team"]'), github.event.pull_request.user.login) &&
+      contains(fromJSON('["devops-runai", "runai-infra-team"]'), github.event.sender.login)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -48,8 +50,8 @@ jobs:
       github.event.action == 'synchronize' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       startsWith(github.head_ref, 'renovate/') &&
-      github.event.pull_request.user.login == 'devops-runai' &&
-      github.event.sender.login != 'devops-runai'
+      contains(fromJSON('["devops-runai", "runai-infra-team"]'), github.event.pull_request.user.login) &&
+      !contains(fromJSON('["devops-runai", "runai-infra-team"]'), github.event.sender.login)
     runs-on: ubuntu-latest
     steps:
       - name: Disable Pull Request Automerge
