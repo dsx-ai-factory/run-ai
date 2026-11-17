@@ -127,7 +127,7 @@ env:
   # Automated dependency updates need no issue. Anyone can push a branch with
   # these prefixes, so a pull request is exempt only when its head branch has
   # the prefix AND it was opened by the matching account ("prefix=login").
-  EXEMPT_UPDATES: renovate/=runai-infra-team renovate/=devops-runai dependabot/=dependabot[bot]
+  EXEMPT_UPDATES: renovate/=runai-infra-team dependabot/=dependabot[bot]
 
 jobs:
   validate:
