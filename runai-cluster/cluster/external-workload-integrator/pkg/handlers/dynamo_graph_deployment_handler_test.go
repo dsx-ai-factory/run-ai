@@ -463,31 +463,6 @@ var _ = Describe("TestDynamoGraphDeploymentHandler", Ordered, func() {
 		Expect(limGPU.Equal(resource.MustParse("2"))).To(BeTrue(), "gpu limits = 2*1")
 	})
 
-	It("keeps existing resource totals when active beta components have no pod template", func() {
-		worker := newV1beta1Component("worker", dynamov1beta1.ComponentTypeWorker, 2, 1, dgdImage,
-			corev1.ResourceList{corev1.ResourceCPU: resource.MustParse("1")}, nil)
-		dgd := newV1beta1DGD("missing-template", "", worker)
-		ew := &v1alpha1.ExternalWorkload{}
-		Expect(dgdfTopOwnerHandler.Parse(ctx, dgd, ew)).To(Succeed())
-		dgd.Spec.Components[0].PodTemplate = nil
-		Expect(dgdfTopOwnerHandler.Parse(ctx, dgd, ew)).To(Succeed())
-		Expect(*ew.Spec.RequestedPods.Replicas).To(Equal(int32(2)))
-		Expect(ew.Spec.RequestedResources.Requests.Cpu().String()).To(Equal("2"))
-	})
-
-	It("clears beta totals when all components scale to zero", func() {
-		worker := newV1beta1Component("worker", dynamov1beta1.ComponentTypeWorker, 2, 1, dgdImage,
-			corev1.ResourceList{corev1.ResourceCPU: resource.MustParse("1")}, nil)
-		dgd := newV1beta1DGD("zero", "", worker)
-		ew := &v1alpha1.ExternalWorkload{}
-		Expect(dgdfTopOwnerHandler.Parse(ctx, dgd, ew)).To(Succeed())
-		Expect(*ew.Spec.RequestedPods.Replicas).To(Equal(int32(2)))
-		dgd.Spec.Components[0].Replicas = ptr.To(int32(0))
-		Expect(dgdfTopOwnerHandler.Parse(ctx, dgd, ew)).To(Succeed())
-		Expect(*ew.Spec.RequestedPods.Replicas).To(BeZero())
-		Expect(ew.Spec.RequestedResources.Requests.Cpu().IsZero()).To(BeTrue())
-	})
-
 	DescribeTable("counts role templates from the original beta object",
 		func(replicas *int32, nodeCount int32, explicitRoleReplicas, sharedTemplate bool, expectedPods int32, expectedCPU string) {
 			object := &unstructured.Unstructured{}
@@ -550,7 +525,6 @@ var _ = Describe("TestDynamoGraphDeploymentHandler", Ordered, func() {
 		Entry("default replicas and node count", nil, int32(0), false, false, int32(2), "300m"),
 		Entry("explicit role replicas", ptr.To(int32(2)), int32(3), true, false, int32(6), "1"),
 		Entry("shared template with role overrides", ptr.To(int32(2)), int32(3), false, true, int32(6), "600m"),
-		Entry("zero component replicas", ptr.To(int32(0)), int32(3), false, false, int32(0), "0"),
 	)
 
 	It("DRA GPU resources from ExtraPodSpec ResourceClaims", func() {

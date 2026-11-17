@@ -150,8 +150,7 @@ func (p *Plugin) mutateInstance(
 	instance kartaresource.ExtractedInstance,
 	podAffinity *corev1.PodAffinity,
 ) {
-	// Skip instances with zero replicas; their MNNVL claim template may not exist.
-	if !kartautils.HasGPU(instance) || kartautils.CalcInstanceReplicas(instance) == 0 {
+	if !kartautils.HasGPU(instance) {
 		return
 	}
 

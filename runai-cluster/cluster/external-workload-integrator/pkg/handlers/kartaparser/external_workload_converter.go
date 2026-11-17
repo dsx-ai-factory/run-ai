@@ -161,8 +161,11 @@ func (h *EWConverter) fillReplicasAndMultiplyResources(extractedInstance riresou
 	sumReplicas(&externalWorkload.Spec.RequestedPods.MinReplicas, scale.MinReplicas)
 	sumReplicas(&externalWorkload.Spec.RequestedPods.MaxReplicas, scale.MaxReplicas)
 
-	// Use replicas if set. If missing, use minReplicas or default to 1.
-	replicas := ptr.Deref(scale.Replicas, ptr.Deref(scale.MinReplicas, 1))
+	replicas := utils.DerefInt32(scale.Replicas, 0)
+
+	if replicas == 0 {
+		replicas = utils.DerefInt32(scale.MinReplicas, 1)
+	}
 
 	requestedResources := commonparsers.MultiplyResources(replicas, externalWorkload.Spec.RequestedResources)
 	return requestedResources
