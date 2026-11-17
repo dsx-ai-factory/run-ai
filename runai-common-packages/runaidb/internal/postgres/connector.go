@@ -7,7 +7,9 @@ package postgres
 
 import (
 	"fmt"
+	"net"
 	"net/url"
+	"strconv"
 	"strings"
 
 	dbconfig "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/config"
@@ -170,8 +172,8 @@ func buildHostList(host string, port int) string {
 	hosts := strings.Split(host, ",")
 	for i, h := range hosts {
 		h = strings.TrimSpace(h)
-		if !strings.Contains(h, ":") {
-			h = fmt.Sprintf("%s:%d", h, port)
+		if _, _, err := net.SplitHostPort(h); err != nil {
+			h = net.JoinHostPort(strings.Trim(h, "[]"), strconv.Itoa(port))
 		}
 		hosts[i] = h
 	}
