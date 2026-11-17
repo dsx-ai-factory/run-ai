@@ -24,12 +24,9 @@
     "control-plane/control-plane-chart/**",
     "build/makefile/**",
     "control-plane/infra/openapi/scripts/openapi-scanner/pyproject.toml",
-    "control-plane/fielder/requirements.txt",
     "control-plane/infra/openapi/scripts/stringvalidator/requirements.txt",
     "control-plane/infra/openapi/scripts/xtestcoverage/requirements.txt",
-    "control-plane/infra/service-cookiecutter/requirements.txt",
-    "runai-cluster/cluster/new-service-template/requirements.txt",
-    "scale-tests/unified_tests/scripts/requirements.txt"
+    "control-plane/infra/service-cookiecutter/requirements.txt"
   ],
   "prConcurrentLimit": 60,
   "prHourlyLimit": 40,
