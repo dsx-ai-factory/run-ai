@@ -794,6 +794,39 @@ var _ = Describe("Org unit tests", Ordered, func() {
 			Expect(syncProjects[0].Id).To(Equal(projA.Id))
 		})
 
+		It("DepartmentsResetResources LIMITS_TO_DEFAULT clears limits only on the target nodepool and keeps quotas", func() {
+			depAResources := func() map[string]api.Resources {
+				getA, err := departmentApiService.GetDepartment(ctx, depA.Id)
+				Expect(err).To(BeNil())
+				byNodePool := map[string]api.Resources{}
+				for _, r := range getA.Body.(api.Department).Resources {
+					byNodePool[r.NodePool.Name] = r
+				}
+				return byNodePool
+			}
+			before := depAResources()
+
+			res, err := departmentApiService.DepartmentsResetResources(ctx, api.DepartmentsResourcesResetRequest{
+				ClusterId:   clusterId,
+				NodePoolIds: []string{nodePoolId2},
+				Action:      api.RESOURCESRESETACTION_LIMITS_TO_DEFAULT,
+			})
+			Expect(err).To(BeNil())
+			Expect(res.Code).To(Equal(http.StatusNoContent))
+
+			after := depAResources()
+			np2Before, np2After := before[nodePoolName2], after[nodePoolName2]
+			Expect(np2After.Gpu.Limit).To(BeNil())
+			Expect(np2After.Gpu.Deserved).To(Equal(np2Before.Gpu.Deserved))
+			Expect(np2After.Cpu).ToNot(BeNil())
+			Expect(np2After.Cpu.Limit).To(Equal(ptr.To(-1.0)))
+			Expect(np2After.Cpu.Deserved).To(Equal(np2Before.Cpu.Deserved))
+			Expect(np2After.Memory).ToNot(BeNil())
+			Expect(np2After.Memory.Limit).To(Equal(ptr.To(-1.0)))
+			Expect(np2After.Memory.Deserved).To(Equal(np2Before.Memory.Deserved))
+			Expect(after[defaultNodePoolName]).To(Equal(before[defaultNodePoolName]))
+		})
+
 		Context("some tests with 3 nodepools", func() {
 			var nodePool3Name, nodePool3Id string
 

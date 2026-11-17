@@ -538,7 +538,7 @@ func TestSetAppAdminSecret_Success(t *testing.T) {
 
 	mockKcClient.On("GetClientSecret", mock.Anything, adminToken, MasterRealmName, testClientID).Return(getMockCredential(clientSecret), nil)
 
-	err := authenticator.setAppAdminSecret(context.Background(), testClientID)
+	err := authenticator.setAdminClientSecret(context.Background(), testClientID)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, authenticator.appAuth.appSecret)
@@ -552,7 +552,7 @@ func TestSetAppAdminSecret_GetSecretFails(t *testing.T) {
 
 	mockKcClient.On("GetClientSecret", mock.Anything, adminToken, MasterRealmName, testClientID).Return(nil, errors.New("get secret failed"))
 
-	err := authenticator.setAppAdminSecret(context.Background(), testClientID)
+	err := authenticator.setAdminClientSecret(context.Background(), testClientID)
 
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "failed to get admin client secret")
@@ -566,7 +566,7 @@ func TestSetAppAdminSecret_NilSecret(t *testing.T) {
 	nilSecret := &gocloak.CredentialRepresentation{Value: nil}
 	mockKcClient.On("GetClientSecret", mock.Anything, adminToken, MasterRealmName, testClientID).Return(nilSecret, nil)
 
-	err := authenticator.setAppAdminSecret(context.Background(), testClientID)
+	err := authenticator.setAdminClientSecret(context.Background(), testClientID)
 
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "failed to get admin client secret")
@@ -635,7 +635,7 @@ func TestCreateNewAppAdminClient_Success(t *testing.T) {
 	mockKcClient.On("GetRealmRole", mock.Anything, adminToken, MasterRealmName, DefaultMasterRole).Return(getMockRole(DefaultMasterRole), nil)
 	mockKcClient.On("AddRealmRoleToUser", mock.Anything, adminToken, MasterRealmName, serviceAccountID, mock.Anything).Return(nil)
 
-	clientID, err := authenticator.createNewAppAdminClient(context.Background())
+	clientID, err := authenticator.createAdminClient(context.Background())
 
 	assert.NoError(t, err)
 	assert.Equal(t, testClientID, clientID)
@@ -648,7 +648,7 @@ func TestCreateNewAppAdminClient_CreateClientFails(t *testing.T) {
 
 	mockKcClient.On("CreateClient", mock.Anything, adminToken, MasterRealmName, mock.Anything).Return("", errors.New("failed to create client"))
 
-	clientID, err := authenticator.createNewAppAdminClient(context.Background())
+	clientID, err := authenticator.createAdminClient(context.Background())
 
 	assert.Error(t, err)
 	assert.Empty(t, clientID)
@@ -663,7 +663,7 @@ func TestCreateNewAppAdminClient_GetServiceAccountFails(t *testing.T) {
 	mockKcClient.On("CreateClient", mock.Anything, adminToken, MasterRealmName, mock.Anything).Return(testClientID, nil)
 	mockKcClient.On("GetClientServiceAccount", mock.Anything, adminToken, MasterRealmName, testClientID).Return(nil, errors.New("failed to get service account"))
 
-	clientID, err := authenticator.createNewAppAdminClient(context.Background())
+	clientID, err := authenticator.createAdminClient(context.Background())
 
 	assert.Error(t, err)
 	assert.Empty(t, clientID)
