@@ -16,7 +16,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: nvcr.io/nvidia/runai/go-operator:3.0.20
+          value: nvcr.io/op-containers-lab-virt/go-operator:3.0.20
       - contains:
           path: spec.template.spec.containers[0].env
           content:
@@ -25,6 +25,7 @@ tests:
 
   - it: should pin the operator by digest and keep the default version bare
     set:
+      runai-operator.image.registry: nvcr.io/nvidia/runai
       runai-operator.image.tag: 3.0.20
       runai-operator.image.digest: sha256:0000000000000000000000000000000000000000000000000000000000000001
     documentSelector:
@@ -43,6 +44,7 @@ tests:
   - it: should honour global.image.registry for a pinned operator
     set:
       global.image.registry: registry.example.com/mirror
+      runai-operator.image.registry: nvcr.io/nvidia/runai
       runai-operator.image.tag: 3.0.20
       runai-operator.image.digest: sha256:0000000000000000000000000000000000000000000000000000000000000001
     documentSelector:
@@ -60,6 +62,7 @@ tests:
 
   - it: should not leak a digest embedded in the tag onto operands
     set:
+      runai-operator.image.registry: nvcr.io/nvidia/runai
       runai-operator.image.tag: 3.0.20@sha256:0000000000000000000000000000000000000000000000000000000000000001
     documentSelector:
       path: kind

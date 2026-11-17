@@ -104,6 +104,10 @@ func (i *Image) Reference() string {
 	return fmt.Sprintf("%s/%s:%s", *i.Registry, *i.Name, i.tag())
 }
 
+func (i *Image) TagWithDigest() string {
+	return i.tag()
+}
+
 func (i *Image) tag() string {
 	tag := ptr.Deref(i.Tag, "")
 	if digest := ptr.Deref(i.Digest, ""); digest != "" {
