@@ -4,6 +4,8 @@
 ARG NGINX_IMAGE=nginx:1.31.10
 FROM ${NGINX_IMAGE} AS nginx-source
 
+FROM busybox:1.37.0-musl AS shell
+
 FROM registry.access.redhat.com/ubi9/ubi-minimal AS fips-builder
 RUN microdnf install -y openssl-libs && microdnf clean all && \
     test -f /usr/lib64/ossl-modules/fips.so
@@ -110,6 +112,9 @@ COPY --from=nginx-source /etc/ssl/certs/ /etc/ssl/certs/
 # nginx binary
 COPY --from=nginx-source /usr/sbin/nginx /usr/sbin/nginx
 
+COPY --from=shell /bin/busybox /bin/sh
+COPY --chmod=0755 docker-entrypoint.sh /docker-entrypoint.sh
+
 # Shared libraries and dynamic linker (arch-specific Debian paths, staged in base)
 COPY --from=base /dynlib/ /
 
@@ -132,4 +137,4 @@ EXPOSE 8080
 
 USER 1001:0
 
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
