@@ -51,12 +51,12 @@ spec:
         - name: kubectl
           image: {{ .Values.global.image.registry }}/kubectl:1.25
           command:
-            - kubectl
-            - port-forward
-            - --namespace=openshift-monitoring
-            - svc/thanos-querier-grpc
-            - "--address=0.0.0.0"
-            - "10901:10901"
+            - sh
+            - -c
+            - |
+              ADDRESS=0.0.0.0
+              [ -e /proc/net/if_inet6 ] && ADDRESS=0.0.0.0,::
+              exec kubectl port-forward --namespace=openshift-monitoring svc/thanos-querier-grpc --address=$ADDRESS 10901:10901
           ports:
             - containerPort: 10901
               protocol: TCP
