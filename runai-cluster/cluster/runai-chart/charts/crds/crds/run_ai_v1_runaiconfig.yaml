@@ -460,11 +460,8 @@ spec:
                       image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -599,11 +596,8 @@ spec:
                       image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -721,11 +715,8 @@ spec:
                       image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -897,11 +888,8 @@ spec:
                     description: Image is the configuration of the agent image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -1193,11 +1181,8 @@ spec:
                       injected container.
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -1228,11 +1213,8 @@ spec:
                       image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -1364,11 +1346,8 @@ spec:
                       which is used to authenticate users for external URL workloads.
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -1408,11 +1387,8 @@ spec:
                       oauth2-proxy.
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -1447,11 +1423,8 @@ spec:
                       S3 filesystem injected container.
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -1512,11 +1485,8 @@ spec:
                       image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -1705,11 +1675,8 @@ spec:
                     description: Image is the configuration of the binder image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -1744,11 +1711,8 @@ spec:
                           image
                         properties:
                           digest:
-                            description: |-
-                              Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                              The container runtime pulls by digest and ignores the tag, which is kept in the
-                              reference for readability only. It is never defaulted: a digest is only valid
-                              for the one image it was computed from.
+                            description: Digest pins the image by content digest,
+                              in the form sha256:<64 hex characters>.
                             pattern: ^sha256:[a-f0-9]{64}$
                             type: string
                           env:
@@ -2032,11 +1996,8 @@ spec:
                     description: Image is the configuration of the cluster-api image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -2374,11 +2335,8 @@ spec:
                     description: Image specifies the redis image to use
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -2647,11 +2605,8 @@ spec:
                     description: Image is the configuration of the cluster-sync image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -3016,11 +2971,8 @@ spec:
                     description: ImageSpec is a struct describing a container image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -3270,11 +3222,8 @@ spec:
                       image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -5258,11 +5207,8 @@ spec:
                     description: Image is the configuration of the init-ca image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -5447,11 +5393,8 @@ spec:
                       image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -5706,11 +5649,8 @@ spec:
                     description: Image specifies the mps server image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -5766,11 +5706,8 @@ spec:
                       image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -5861,11 +5798,8 @@ spec:
                       pod
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -5917,11 +5851,8 @@ spec:
                       image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -7317,11 +7248,8 @@ spec:
                       image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -7587,11 +7515,8 @@ spec:
                       image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -7833,11 +7758,8 @@ spec:
                     description: Image is the configuration of the pod-grouper image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -8133,11 +8055,8 @@ spec:
                       image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -21809,11 +21728,8 @@ spec:
                       image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -22117,11 +22033,8 @@ spec:
                       image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -22457,11 +22370,8 @@ spec:
                     description: ImageSpec is a struct describing a container image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -22491,11 +22401,8 @@ spec:
                     description: ImageSpec is a struct describing a container image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -22621,11 +22528,8 @@ spec:
                     description: ImageSpec is a struct describing a container image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -22672,11 +22576,8 @@ spec:
                     description: ImageSpec is a struct describing a container image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -22706,11 +22607,8 @@ spec:
                     description: ImageSpec is a struct describing a container image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -22813,11 +22711,8 @@ spec:
                     description: ImageSpec is a struct describing a container image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -23006,11 +22901,8 @@ spec:
                     description: Image specifies the image configuration for the runai-scheduler
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -23287,11 +23179,8 @@ spec:
                     description: Image is the configuration of the runtime-rules image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -23553,11 +23442,8 @@ spec:
                       image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -23843,11 +23729,8 @@ spec:
                       image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
@@ -24088,11 +23971,8 @@ spec:
                       image
                     properties:
                       digest:
-                        description: |-
-                          Digest pins the image by content digest, in the form sha256:<64 hex characters>.
-                          The container runtime pulls by digest and ignores the tag, which is kept in the
-                          reference for readability only. It is never defaulted: a digest is only valid
-                          for the one image it was computed from.
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
                         pattern: ^sha256:[a-f0-9]{64}$
                         type: string
                       env:
