@@ -7,7 +7,6 @@ package dao
 
 import (
 	"context"
-	"slices"
 	"time"
 
 	"k8s.io/utils/ptr"
@@ -32,7 +31,6 @@ func GetDepartmentNodePoolResources(
 	limit int32,
 	permittedScopes *openapi.PermittedScopes,
 	search string,
-	columns NodePoolResourcesColumns,
 ) (*[]models.DepartmentNodePoolResources, error) {
 	var permittedScopesQuery *string = nil
 	if permittedScopes != nil {
@@ -43,8 +41,7 @@ func GetDepartmentNodePoolResources(
 	}
 
 	nodePoolResources := &[]models.DepartmentNodePoolResources{}
-	query, err := getNodePoolResources(ctx, tenantId, filterBy, sortBy, sortOrder, offset, limit, permittedScopesQuery, search,
-		models.DepartmentNodePoolResourcesView, columns, schedulingNodePoolResourcesColumns)
+	query, err := getNodePoolResources(ctx, tenantId, filterBy, sortBy, sortOrder, offset, limit, permittedScopesQuery, search, models.DepartmentNodePoolResourcesView)
 	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get department node pool resources, err: %v", err)
 		return nil, err
@@ -67,7 +64,6 @@ func GetProjectNodePoolResources(
 	limit int32,
 	permittedScopes *openapi.PermittedScopes,
 	search string,
-	columns NodePoolResourcesColumns,
 ) (*[]models.ProjectNodePoolResources, error) {
 	var permittedScopesQuery *string = nil
 	if permittedScopes != nil {
@@ -78,8 +74,7 @@ func GetProjectNodePoolResources(
 	}
 
 	nodePoolResources := &[]models.ProjectNodePoolResources{}
-	query, err := getNodePoolResources(ctx, tenantId, filterBy, sortBy, sortOrder, offset, limit, permittedScopesQuery, search,
-		models.ProjectNodePoolResourcesView, columns, schedulingProjectNodePoolResourcesColumns)
+	query, err := getNodePoolResources(ctx, tenantId, filterBy, sortBy, sortOrder, offset, limit, permittedScopesQuery, search, models.ProjectNodePoolResourcesView)
 	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get project node pool resources, err: %v", err)
 		return nil, err
@@ -92,20 +87,6 @@ func GetProjectNodePoolResources(
 	return nodePoolResources, nil
 }
 
-type NodePoolResourcesColumns int
-
-const (
-	// AllNodePoolResourcesColumns is the zero value, so a caller that doesn't choose gets full, sorted rows.
-	AllNodePoolResourcesColumns NodePoolResourcesColumns = iota
-	// SchedulingNodePoolResourcesColumns reads only the scheduler's inputs, unsorted, so it must not be paged.
-	SchedulingNodePoolResourcesColumns
-)
-
-var (
-	schedulingNodePoolResourcesColumns        = []string{"org_unit_id", "rank", "gpu_deserved", "gpu_limit", "gpu_over_quota_weight", "created_at"}
-	schedulingProjectNodePoolResourcesColumns = append(slices.Clone(schedulingNodePoolResourcesColumns), "parent_id")
-)
-
 func getNodePoolResources(
 	ctx context.Context,
 	tenantId string,
@@ -117,15 +98,10 @@ func getNodePoolResources(
 	permittedScopesQuery *string,
 	search string,
 	viewName string,
-	columns NodePoolResourcesColumns,
-	schedulingColumns []string,
 ) (orm.DB, error) {
 	query := runaidb.DB().WithContext(ctx).
 		Table(viewName).
 		Where("tenant_id = ?", tenantId)
-	if columns == SchedulingNodePoolResourcesColumns {
-		query = query.Select(schedulingColumns)
-	}
 
 	if permittedScopesQuery != nil {
 		query = query.Where(*permittedScopesQuery)
@@ -138,9 +114,7 @@ func getNodePoolResources(
 	if search != "" {
 		query = query.Where("org_unit_name like ?", "%"+search+"%")
 	}
-	if columns != SchedulingNodePoolResourcesColumns {
-		query = query.Order("id DESC")
-	}
+	query = query.Order("id DESC")
 
 	if offset != 0 {
 		query = query.Offset(int(offset))
@@ -393,4 +367,46 @@ func PatchDepartmentNodePoolResources(ctx context.Context,
 	InvalidateAllCache(ctx, tenantId, clusterId)
 
 	return nil
+}
+
+// NodePoolSchedulingInputs are an org unit's scheduler inputs on a node pool. Hidden org units compete too, so they are
+// loaded with the rest, and Visible says whether the caller's scopes cover them (always, when scopes is nil).
+type NodePoolSchedulingInputs struct {
+	OrgUnitId          string
+	Rank               string
+	GpuDeserved        *float64
+	GpuLimit           *float64
+	GpuOverQuotaWeight *float64
+	CreatedAt          time.Time
+	Visible            bool
+}
+
+func GetDepartmentSchedulingInputs(ctx context.Context, tenantId, nodePoolId string, scopes *openapi.PermittedScopes,
+) ([]NodePoolSchedulingInputs, error) {
+	query := runaidb.DB().WithContext(ctx).Table(models.DepartmentNodePoolResourcesView).
+		Where("tenant_id = ? AND node_pool_id = ?", tenantId, nodePoolId)
+	return getSchedulingInputs(query, tenantId, scopes, getPermittedScopesForDepartmentResources)
+}
+
+func GetProjectSchedulingInputs(ctx context.Context, tenantId, nodePoolId string, departmentId int64,
+	scopes *openapi.PermittedScopes,
+) ([]NodePoolSchedulingInputs, error) {
+	query := runaidb.DB().WithContext(ctx).Table(models.ProjectNodePoolResourcesView).
+		Where("tenant_id = ? AND node_pool_id = ? AND parent_id = ?", tenantId, nodePoolId, departmentId)
+	return getSchedulingInputs(query, tenantId, scopes, getPermittedScopesForProjectResources)
+}
+
+func getSchedulingInputs(query orm.DB, tenantId string, scopes *openapi.PermittedScopes,
+	scopesPredicate func(openapi.PermittedScopes) string,
+) ([]NodePoolSchedulingInputs, error) {
+	visible := "true"
+	if scopes != nil && !ptr.Deref(scopes.System, false) && !IsTenantPermitted(tenantId, scopes) {
+		visible = scopesPredicate(*scopes)
+	}
+	rows := []NodePoolSchedulingInputs{}
+	if err := query.Select("org_unit_id, rank, gpu_deserved, gpu_limit, gpu_over_quota_weight, created_at, " +
+		visible + " AS visible").Find(&rows); err != nil {
+		return nil, err
+	}
+	return rows, nil
 }

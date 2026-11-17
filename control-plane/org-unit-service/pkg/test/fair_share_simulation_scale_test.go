@@ -26,13 +26,10 @@ import (
 	clustersOpenapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/mocks"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/generated/pkg/api"
-	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/database/dao"
-	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/services"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/services/departments"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/services/projects"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/services/simulation"
-	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 )
 
@@ -168,47 +165,30 @@ var _ = Describe("Fair share simulation at scale", Ordered, func() {
 		return r
 	}
 
-	It("times every level and its parts", func() {
+	It("times every level, the division and the response", func() {
 		departmentLevel := request("department", rowsOf(departmentIds))
 		projectLevel500 := request("project", rowsOf(projectIds[:500]))
 		projectLevel20 := request("project", rowsOf(projectIds[:20]))
+
+		// Reads stay slow for a while after seeding, even once analyzed, so warm up before timing, as a long-lived database
+		// would be. A slow machine just gets slower numbers rather than a failure.
+		for warmUntil := time.Now().Add(2 * time.Minute); time.Now().Before(warmUntil); {
+			start := time.Now()
+			simulate(projectLevel20)
+			if time.Since(start) < 50*time.Millisecond {
+				break
+			}
+		}
 
 		body := simulate(departmentLevel)
 		Expect(body.OrgUnits).To(HaveLen(departmentCount))
 		body = simulate(projectLevel500)
 		Expect(body.OrgUnits).To(HaveLen(500))
 
-		departmentFilters, err := queryapi.NewParser(models.DepartmentNodePoolResources{}.FilterByFieldsToColumn()).Filters([]string{"nodePoolId==" + pool.Id})
-		Expect(err).To(BeNil())
-		projectFilters, err := queryapi.NewParser(models.ProjectNodePoolResources{}.FilterByFieldsToColumn()).
-			Filters([]string{"nodePoolId==" + pool.Id, "parentId==" + focus})
-		Expect(err).To(BeNil())
-		measure("  part: departments query (300 rows)", func() {
-			rows, err := dao.GetDepartmentNodePoolResources(ctx, TestTenant, departmentFilters, "", "", 0, 0, nil, "", dao.SchedulingNodePoolResourcesColumns)
-			Expect(err).To(BeNil())
-			Expect(*rows).To(HaveLen(departmentCount))
-		})
-		measure("  part: projects query, full row (1,500 rows)", func() {
-			rows, err := dao.GetProjectNodePoolResources(ctx, TestTenant, projectFilters, "", "", 0, 0, nil, "", dao.AllNodePoolResourcesColumns)
-			Expect(err).To(BeNil())
-			Expect(*rows).To(HaveLen(projectCount))
-		})
-		measure("  part: projects query, slim (1,500 rows)", func() {
-			rows, err := dao.GetProjectNodePoolResources(ctx, TestTenant, projectFilters, "", "", 0, 0, nil, "", dao.SchedulingNodePoolResourcesColumns)
-			Expect(err).To(BeNil())
-			Expect(*rows).To(HaveLen(projectCount))
-		})
-
 		measure("projects, 1,500 in the parent, 20 sent (first)", func() { simulate(projectLevel20) })
 		measure("projects, 1,500 in the parent, 500 sent", func() { simulate(projectLevel500) })
 		measure("projects, 1,500 in the parent, 20 sent (again)", func() { simulate(projectLevel20) })
 		measure("departments, 300 sent", func() { simulate(departmentLevel) })
-
-		measure("  part again: projects query (1,500 rows)", func() {
-			rows, err := dao.GetProjectNodePoolResources(ctx, TestTenant, projectFilters, "", "", 0, 0, nil, "", dao.SchedulingNodePoolResourcesColumns)
-			Expect(err).To(BeNil())
-			Expect(*rows).To(HaveLen(projectCount))
-		})
 
 		units := make([]simulation.Unit, projectCount)
 		for i := range units {

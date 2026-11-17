@@ -12,6 +12,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/database/models"
 	dbtesting "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/testing"
 	"k8s.io/utils/ptr"
@@ -20,8 +21,6 @@ import (
 const (
 	sqlSelectDeptNodePoolResources = `SELECT * FROM department_node_pool_resources_view WHERE tenant_id = ? ORDER BY id DESC LIMIT ? OFFSET ?`
 	sqlSelectProjNodePoolResources = `SELECT * FROM project_node_pool_resources_view WHERE tenant_id = ? ORDER BY id DESC LIMIT ? OFFSET ?`
-	sqlSelectSlimDeptResources     = `SELECT org_unit_id,rank,gpu_deserved,gpu_limit,gpu_over_quota_weight,created_at FROM department_node_pool_resources_view WHERE tenant_id = ?`
-	sqlSelectSlimProjResources     = `SELECT org_unit_id,rank,gpu_deserved,gpu_limit,gpu_over_quota_weight,created_at,parent_id FROM project_node_pool_resources_view WHERE tenant_id = ?`
 	sqlCountDeptNodePoolResources  = `SELECT count(*) FROM department_node_pool_resources_view WHERE tenant_id = ?`
 	sqlCountProjNodePoolResources  = `SELECT count(*) FROM project_node_pool_resources_view WHERE tenant_id = ?`
 	sqlSumProjGPUWeights           = `SELECT COALESCE(SUM(gpu_over_quota_weight), 0) FROM project_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ?`
@@ -42,7 +41,7 @@ var _ = Describe("Node pool resources DAO SQL", func() {
 			mocker.ExpectQuery(sqlSelectDeptNodePoolResources, testTenantID, 10, 5).
 				Returns([]models.DepartmentNodePoolResources{expected})
 
-			got, err := GetDepartmentNodePoolResources(context.Background(), testTenantID, nil, "", "", 5, 10, nil, "", AllNodePoolResourcesColumns)
+			got, err := GetDepartmentNodePoolResources(context.Background(), testTenantID, nil, "", "", 5, 10, nil, "")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(*got).To(HaveLen(1))
 			Expect((*got)[0].OrgUnitName).To(Equal(expected.OrgUnitName))
@@ -52,7 +51,7 @@ var _ = Describe("Node pool resources DAO SQL", func() {
 			mocker.ExpectQuery(sqlSelectDeptNodePoolResources, testTenantID, 10, 5).
 				ReturnsError(errors.New("db error"))
 
-			got, err := GetDepartmentNodePoolResources(context.Background(), testTenantID, nil, "", "", 5, 10, nil, "", AllNodePoolResourcesColumns)
+			got, err := GetDepartmentNodePoolResources(context.Background(), testTenantID, nil, "", "", 5, 10, nil, "")
 			Expect(err).To(MatchError("db error"))
 			Expect(got).To(BeNil())
 		})
@@ -64,34 +63,10 @@ var _ = Describe("Node pool resources DAO SQL", func() {
 			mocker.ExpectQuery(sqlSelectProjNodePoolResources, testTenantID, 10, 5).
 				Returns([]models.ProjectNodePoolResources{expected})
 
-			got, err := GetProjectNodePoolResources(context.Background(), testTenantID, nil, "", "", 5, 10, nil, "", AllNodePoolResourcesColumns)
+			got, err := GetProjectNodePoolResources(context.Background(), testTenantID, nil, "", "", 5, 10, nil, "")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(*got).To(HaveLen(1))
 			Expect((*got)[0].OrgUnitName).To(Equal(expected.OrgUnitName))
-		})
-	})
-	Describe("GetDepartmentNodePoolResources with the scheduling columns", func() {
-		It("reads only the scheduling inputs, unsorted", func() {
-			mocker := setupSQLMock()
-			expected := testDepartmentNodePoolResources()
-			mocker.ExpectQuery(sqlSelectSlimDeptResources, testTenantID).
-				Returns([]models.DepartmentNodePoolResources{expected})
-
-			got, err := GetDepartmentNodePoolResources(context.Background(), testTenantID, nil, "", "", 0, 0, nil, "", SchedulingNodePoolResourcesColumns)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(*got).To(HaveLen(1))
-		})
-	})
-	Describe("GetProjectNodePoolResources with the scheduling columns", func() {
-		It("reads only the scheduling inputs, unsorted", func() {
-			mocker := setupSQLMock()
-			expected := testProjectNodePoolResources()
-			mocker.ExpectQuery(sqlSelectSlimProjResources, testTenantID).
-				Returns([]models.ProjectNodePoolResources{expected})
-
-			got, err := GetProjectNodePoolResources(context.Background(), testTenantID, nil, "", "", 0, 0, nil, "", SchedulingNodePoolResourcesColumns)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(*got).To(HaveLen(1))
 		})
 	})
 	Describe("CountDepartmentNodePoolResources", func() {
@@ -215,6 +190,52 @@ var _ = Describe("Node pool resources DAO SQL", func() {
 				map[string]interface{}{"gpu_deserved": float64(2)},
 			)
 			Expect(err).To(MatchError("update failed"))
+		})
+	})
+	Describe("Get*SchedulingInputs", func() {
+		const columns = `org_unit_id, rank, gpu_deserved, gpu_limit, gpu_over_quota_weight, created_at, `
+		It("marks every department visible when the scopes cover the tenant", func() {
+			mocker := setupSQLMock()
+			mocker.ExpectQuery(`SELECT `+columns+`true AS visible FROM department_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ?`,
+				testTenantID, testNodePoolID).
+				Returns([]NodePoolSchedulingInputs{{OrgUnitId: "11", Visible: true}})
+
+			got, err := GetDepartmentSchedulingInputs(context.Background(), testTenantID, testNodePoolID,
+				&openapi.PermittedScopes{Tenants: []string{testTenantID}})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(got).To(HaveLen(1))
+		})
+		It("marks every department visible for system scopes and when no scopes are given", func() {
+			for _, scopes := range []*openapi.PermittedScopes{{System: ptr.To(true)}, nil} {
+				mocker := setupSQLMock()
+				mocker.ExpectQuery(`SELECT `+columns+`true AS visible FROM department_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ?`,
+					testTenantID, testNodePoolID).
+					Returns([]NodePoolSchedulingInputs{{OrgUnitId: "11", Visible: true}})
+
+				_, err := GetDepartmentSchedulingInputs(context.Background(), testTenantID, testNodePoolID, scopes)
+				Expect(err).NotTo(HaveOccurred())
+			}
+		})
+		It("computes department visibility from cluster and department scopes", func() {
+			mocker := setupSQLMock()
+			mocker.ExpectQuery(`SELECT `+columns+`(false OR cluster_id IN ( 'c1') OR org_unit_id IN ( '11')) AS visible FROM department_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ?`,
+				testTenantID, testNodePoolID).
+				Returns([]NodePoolSchedulingInputs{{OrgUnitId: "11", Visible: true}})
+
+			_, err := GetDepartmentSchedulingInputs(context.Background(), testTenantID, testNodePoolID,
+				&openapi.PermittedScopes{Clusters: []string{"c1"}, Departments: []string{"11"}})
+			Expect(err).NotTo(HaveOccurred())
+		})
+		It("computes project visibility from the scopes in the same query", func() {
+			mocker := setupSQLMock()
+			mocker.ExpectQuery(`SELECT `+columns+`(false OR org_unit_id IN ( '21')) AS visible FROM project_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ? AND parent_id = ?`,
+				testTenantID, testNodePoolID, int64(11)).
+				Returns([]NodePoolSchedulingInputs{{OrgUnitId: "21", Visible: true}})
+
+			got, err := GetProjectSchedulingInputs(context.Background(), testTenantID, testNodePoolID, 11,
+				&openapi.PermittedScopes{Projects: []string{"21"}})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(got).To(HaveLen(1))
 		})
 	})
 })

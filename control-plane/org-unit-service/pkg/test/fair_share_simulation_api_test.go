@@ -51,40 +51,64 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 		Return(&clustersOpenapi.GetNodepoolsMinimal200Response{Nodepools: []clustersOpenapi.NodepoolMinimal{pool}}, nil)
 	clusterServiceClient.On("GetNodepoolMinimal", mock.Anything, pool.Id).Return(&pool, nil)
 	clusterServiceClient.On("GetNodepoolMinimal", mock.Anything, "999997").Return(nil, errors.New("connection refused"))
+	clusterServiceClient.On("GetNodepoolMinimal", mock.Anything, pool.Id+"||7201").Return(nil, errors.New("500 Internal Server Error"))
 	clusterServiceClient.On("GetNodepoolMinimal", mock.Anything, mock.Anything).Return(nil, errors.New("404 Not Found"))
 	departmentApiService := departments.NewDepartmentApiService(&clusterServiceClient, nil)
 	projectApiService := projects.NewProjectApiService(services.NewProjectDeletionService(&clusterServiceClient, nil, nil), &clusterServiceClient, nil)
 
 	var a, b, a1, a2, b1 string
 
-	resources := func(deserved float64, rank string) []api.ResourcesNullable {
+	resources := func(deserved, limit float64, rank string) []api.ResourcesNullable {
 		return []api.ResourcesNullable{{
 			NodePool: &api.ResourcesNodePool{Id: pool.Id, Name: pool.Name},
-			Gpu:      api.ResourcesNullableGpu{Deserved: ptr.To(deserved), Limit: ptr.To(-1.0), OverQuotaWeight: ptr.To(1.0)},
+			Gpu:      api.ResourcesNullableGpu{Deserved: ptr.To(deserved), Limit: ptr.To(limit), OverQuotaWeight: ptr.To(1.0)},
 			Rank:     ptr.To(rank),
 		}}
 	}
-	createDepartment := func(deserved float64, rank string) string {
+	createDepartment := func(deserved, limit float64, rank string) string {
 		response, err := departmentApiService.CreateDepartment(ctx,
-			getDepartmentResourcesCreateRequest("fss-dep-"+uuid.NewString()[:8], clusterId, resources(deserved, rank)))
+			getDepartmentResourcesCreateRequest("fss-dep-"+uuid.NewString()[:8], clusterId, resources(deserved, limit, rank)))
 		Expect(err).To(BeNil())
 		Expect(response.Code).To(Equal(http.StatusCreated), "%+v", response.Body)
 		return response.Body.(api.Department).Id
 	}
 	createProject := func(parentId string, deserved float64) string {
 		response, err := projectApiService.CreateProject(ctx,
-			getProjectResourcesCreateRequest("fss-proj-"+uuid.NewString()[:8], parentId, clusterId, resources(deserved, "MediumLow")))
+			getProjectResourcesCreateRequest("fss-proj-"+uuid.NewString()[:8], parentId, clusterId, resources(deserved, -1, "MediumLow")))
 		Expect(err).To(BeNil())
 		Expect(response.Code).To(Equal(http.StatusCreated), "%+v", response.Body)
 		return response.Body.(api.Project).Id
 	}
+	deleteProjects := func(ids ...string) {
+		for _, id := range ids {
+			if id == "" {
+				continue
+			}
+			response, err := projectApiService.DeleteProject(ctx, id, "", false)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(response.Code).To(Equal(http.StatusNoContent), "%+v", response.Body)
+		}
+	}
+	deleteDepartments := func(ids ...string) {
+		for _, id := range ids {
+			if id == "" {
+				continue
+			}
+			response, err := departmentApiService.DeleteDepartment(ctx, id)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(response.Code).To(Equal(http.StatusNoContent), "%+v", response.Body)
+		}
+	}
 
-	serviceFor := func(read authorization_api.PermittedScopes) api.OrgUnitAPIServicer {
+	readOn := func(departments, projects authorization_api.PermittedScopes) api.OrgUnitAPIServicer {
 		authMock := auth_mocks.IAuthorizationClient{}
-		authMock.On("GetPermittedScopes", mock.Anything, mock.Anything, mock.Anything).
-			Return(&authorization_api.PermittedScopesActions{Read: read}, 0, nil)
+		authMock.On("GetPermittedScopes", mock.Anything, authorization_api.RESOURCETYPE_DEPARTMENT, mock.Anything).
+			Return(&authorization_api.PermittedScopesActions{Read: departments}, 0, nil)
+		authMock.On("GetPermittedScopes", mock.Anything, authorization_api.RESOURCETYPE_PROJECT, mock.Anything).
+			Return(&authorization_api.PermittedScopesActions{Read: projects}, 0, nil)
 		return services.NewOrgUnitApiService(&authMock, &clusterServiceClient, mockTenantsClient, &clusterServiceClient)
 	}
+	serviceFor := func(read authorization_api.PermittedScopes) api.OrgUnitAPIServicer { return readOn(read, read) }
 	fullAccess := serviceFor(authorization_api.PermittedScopes{Tenants: []string{TestTenant}})
 	allOn := api.FairShareSimulationSchedulingCapabilities{Quota: true, Ranks: true, AdjustableWeights: true, Limits: true}
 
@@ -107,8 +131,8 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 		return api.FairShareSimulationOrgUnit{Id: id, Demand: &api.FairShareSimulationResources{Gpu: demand}}
 	}
 
-	call := func(s api.OrgUnitAPIServicer, sc scenario) api.ImplResponse {
-		response, err := s.SimulateNodePoolFairShare(ctx, pool.Id, api.FairShareSimulationRequest{
+	callOn := func(nodepoolId string, s api.OrgUnitAPIServicer, sc scenario) api.ImplResponse {
+		response, err := s.SimulateNodePoolFairShare(ctx, nodepoolId, api.FairShareSimulationRequest{
 			NodePool: &api.FairShareSimulationNodePool{
 				Capacity: &api.FairShareSimulationResources{Gpu: sc.capacity}, SchedulingCapabilities: &sc.capabilities,
 			},
@@ -119,6 +143,7 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 		Expect(err).To(BeNil())
 		return response
 	}
+	call := func(s api.OrgUnitAPIServicer, sc scenario) api.ImplResponse { return callOn(pool.Id, s, sc) }
 	simulate := func(s api.OrgUnitAPIServicer, sc scenario) api.FairShareSimulationResponse {
 		response := call(s, sc)
 		Expect(response.Code).To(Equal(http.StatusOK), "%+v", response.Body)
@@ -139,30 +164,16 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 	}
 
 	BeforeAll(func() {
-		a = createDepartment(4, "High")
-		b = createDepartment(2, "Low")
+		a = createDepartment(4, -1, "High")
+		b = createDepartment(2, -1, "Low")
 		a1 = createProject(a, 2)
 		a2 = createProject(a, 0)
 		b1 = createProject(b, 1)
 	})
 
 	AfterAll(func() {
-		for _, id := range []string{a1, a2, b1} {
-			if id == "" {
-				continue
-			}
-			response, err := projectApiService.DeleteProject(ctx, id, "", false)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(response.Code).To(Equal(http.StatusNoContent), "%+v", response.Body)
-		}
-		for _, id := range []string{a, b} {
-			if id == "" {
-				continue
-			}
-			response, err := departmentApiService.DeleteDepartment(ctx, id)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(response.Code).To(Equal(http.StatusNoContent), "%+v", response.Body)
-		}
+		deleteProjects(a1, a2, b1)
+		deleteDepartments(a, b)
 	})
 
 	Context("departments", func() {
@@ -280,15 +291,6 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 	})
 
 	Context("authorization", func() {
-		readOn := func(departments, projects authorization_api.PermittedScopes) api.OrgUnitAPIServicer {
-			authMock := auth_mocks.IAuthorizationClient{}
-			authMock.On("GetPermittedScopes", mock.Anything, authorization_api.RESOURCETYPE_DEPARTMENT, mock.Anything).
-				Return(&authorization_api.PermittedScopesActions{Read: departments}, 0, nil)
-			authMock.On("GetPermittedScopes", mock.Anything, authorization_api.RESOURCETYPE_PROJECT, mock.Anything).
-				Return(&authorization_api.PermittedScopesActions{Read: projects}, 0, nil)
-			return services.NewOrgUnitApiService(&authMock, &clusterServiceClient, mockTenantsClient, &clusterServiceClient)
-		}
-
 		It("answers 503 when the caller's permissions can't be fetched", func() {
 			authMock := auth_mocks.IAuthorizationClient{}
 			authMock.On("GetPermittedScopes", mock.Anything, mock.Anything, mock.Anything).
@@ -376,73 +378,34 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 		})
 
 		It("answers 404 for a node pool that doesn't exist", func() {
-			response, err := fullAccess.SimulateNodePoolFairShare(ctx, "999998", api.FairShareSimulationRequest{
-				NodePool: &api.FairShareSimulationNodePool{
-					Capacity: &api.FairShareSimulationResources{}, SchedulingCapabilities: &allOn,
-				},
-				OrgUnitType: "department", OrgUnits: []api.FairShareSimulationOrgUnit{row(a)},
-			})
-			Expect(err).To(BeNil())
-			Expect(response.Code).To(Equal(http.StatusNotFound))
+			Expect(callOn("999998", fullAccess, departmentsScenario(row(a))).Code).To(Equal(http.StatusNotFound))
 		})
 
 		It("answers 503 when cluster-service can't say whether the node pool exists", func() {
-			response, err := fullAccess.SimulateNodePoolFairShare(ctx, "999997", api.FairShareSimulationRequest{
-				NodePool: &api.FairShareSimulationNodePool{
-					Capacity: &api.FairShareSimulationResources{}, SchedulingCapabilities: &allOn,
-				},
-				OrgUnitType: "department", OrgUnits: []api.FairShareSimulationOrgUnit{row(a)},
-			})
-			Expect(err).To(BeNil())
-			Expect(response.Code).To(Equal(http.StatusServiceUnavailable))
+			Expect(callOn("999997", fullAccess, departmentsScenario(row(a))).Code).To(Equal(http.StatusServiceUnavailable))
 		})
 
-		It("refuses ids that would change the filter", func() {
-			response, err := fullAccess.SimulateNodePoolFairShare(ctx, pool.Id+"||7201", api.FairShareSimulationRequest{
-				NodePool: &api.FairShareSimulationNodePool{
-					Capacity: &api.FairShareSimulationResources{}, SchedulingCapabilities: &allOn,
-				},
-				OrgUnitType: "department", OrgUnits: []api.FairShareSimulationOrgUnit{row(a)},
-			})
-			Expect(err).To(BeNil())
-			Expect(response.Code).To(Equal(http.StatusNotFound))
+		It("treats ids that try to widen the query as unknown", func() {
+			Expect(callOn(pool.Id+"||7201", fullAccess, departmentsScenario(row(a))).Code).To(Equal(http.StatusNotFound))
 
 			parent := call(fullAccess, projectsScenario(a+"||"+b, row(a1)))
 			Expect(parent.Code).To(Equal(http.StatusBadRequest))
 			Expect(parent.Body.(api.Error).Message).To(Equal("project " + a1 + " not found in the node pool"))
 		})
 	})
+
 	Context("a department with a stored limit", Ordered, func() {
 		var c, c1, c2 string
 
 		BeforeAll(func() {
-			response, err := departmentApiService.CreateDepartment(ctx, getDepartmentResourcesCreateRequest(
-				"fss-dep-"+uuid.NewString()[:8], clusterId, []api.ResourcesNullable{{
-					NodePool: &api.ResourcesNodePool{Id: pool.Id, Name: pool.Name},
-					Gpu:      api.ResourcesNullableGpu{Deserved: ptr.To(0.0), Limit: ptr.To(6.0), OverQuotaWeight: ptr.To(1.0)},
-					Rank:     ptr.To("High"),
-				}}))
-			Expect(err).To(BeNil())
-			Expect(response.Code).To(Equal(http.StatusCreated), "%+v", response.Body)
-			c = response.Body.(api.Department).Id
+			c = createDepartment(0, 6, "High")
 			c1 = createProject(c, 0)
 			c2 = createProject(c, 0)
 		})
 
 		AfterAll(func() {
-			for _, id := range []string{c1, c2} {
-				if id == "" {
-					continue
-				}
-				response, err := projectApiService.DeleteProject(ctx, id, "", false)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(response.Code).To(Equal(http.StatusNoContent), "%+v", response.Body)
-			}
-			if c != "" {
-				response, err := departmentApiService.DeleteDepartment(ctx, c)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(response.Code).To(Equal(http.StatusNoContent), "%+v", response.Body)
-			}
+			deleteProjects(c1, c2)
+			deleteDepartments(c)
 		})
 
 		It("caps a department that wasn't sent at its stored limit", func() {

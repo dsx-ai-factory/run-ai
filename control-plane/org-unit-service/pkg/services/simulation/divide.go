@@ -40,19 +40,12 @@ type Result struct {
 	WeightShareInRank float64
 }
 
-// RequestableDemand mirrors KAI's RequestableShare.
-func (u Unit) RequestableDemand() float64 {
-	if u.Limit == Unlimited {
-		return u.Demand
-	}
-	return math.Min(u.Demand, u.Limit)
-}
-
 // Divide splits capacity between the units of one level of the queue tree with the scheduler's own division.
 func Divide(capacity float64, units []Unit) map[string]Result {
 	// A round can run out of capacity midway, so the units visited first get more; a fixed order keeps the same
 	// scenario from giving different results.
-	units = slices.SortedFunc(slices.Values(units), func(a, b Unit) int {
+	units = slices.Clone(units)
+	slices.SortFunc(units, func(a, b Unit) int {
 		if c := a.CreatedAt.Compare(b.CreatedAt); c != 0 {
 			return c
 		}
@@ -71,7 +64,7 @@ func Divide(capacity float64, units []Unit) map[string]Result {
 
 	results := make(map[string]Result, len(units))
 	for i, u := range units {
-		demand := u.RequestableDemand()
+		demand := queues[i].RequestableShare()
 		// KAI's remainder round hands out whole GPUs without checking the remaining request, so a fractional demand or
 		// limit can get more than it asks for. The scheduler never allocates past that, so neither does the simulation.
 		fairShare := math.Min(queues[i].FairShare, demand)
