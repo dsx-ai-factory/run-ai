@@ -23,6 +23,16 @@ var _ = Describe("Network Package", func() {
 			})
 		})
 
+		Context("when the address is an IPv6 literal", func() {
+			It("should accept a bracketed address with a port", func() {
+				Expect(network.ValidAddress("[::1]:8080")).To(Succeed())
+			})
+
+			It("should reject a bare IPv6 address without a port", func() {
+				Expect(network.ValidAddress("::1")).NotTo(Succeed())
+			})
+		})
+
 		Context("when the address is invalid", func() {
 			It("should return an error for missing port", func() {
 				invalidAddress := "localhost"
