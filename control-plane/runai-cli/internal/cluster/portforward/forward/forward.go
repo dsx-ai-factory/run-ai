@@ -7,7 +7,6 @@ package forward
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"net/url"
 	"strconv"
@@ -128,5 +127,5 @@ func (f *Forward) buildUrl() error {
 }
 
 func getAddressUrl(a string, p int32) string {
-	return fmt.Sprintf("%s:%d", a, p)
+	return net.JoinHostPort(a, strconv.FormatInt(int64(p), 10))
 }
