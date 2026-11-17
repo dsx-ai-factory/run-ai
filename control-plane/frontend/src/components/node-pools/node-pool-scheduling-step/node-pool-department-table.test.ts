@@ -95,6 +95,81 @@ const rows: DepartmentNodePoolResources[] = [
 ];
 const draft: SchedulingDraft = { mode: "proportional", automaticWeights: false, cpuQuota: false, departments: {} };
 describe("scheduling department table", () => {
+  it("clamps demand and immediately corrects the native handle without changing the pool scale", async () => {
+    const wrapper = mount(Table, {
+      props: {
+        rows,
+        draft: {
+          ...draft,
+          mode: "guaranteed",
+          automaticWeights: false,
+          maxAllocation: true,
+          departments: { a: { id: "a", limit: 50 } },
+        },
+        capacity: 64,
+        aggregates: {},
+        ranks: ["MediumLow"],
+        readonly: false,
+        loading: false,
+      },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+      },
+    });
+    try {
+      await wrapper.findComponent(QToggle).vm.$emit("update:modelValue", true);
+      await wrapper.vm.$nextTick();
+      const input = wrapper.get('input[type="range"]');
+      await input.setValue("64");
+      expect((input.element as HTMLInputElement).value).toBe("50");
+      expect(input.attributes("max")).toBe("64");
+      await input.setValue("64");
+      expect((input.element as HTMLInputElement).value).toBe("50");
+      await wrapper.setProps({
+        draft: { ...draft, mode: "guaranteed", maxAllocation: true, departments: { a: { id: "a", limit: 12 } } },
+      });
+      expect((input.element as HTMLInputElement).value).toBe("12");
+    } finally {
+      wrapper.unmount();
+    }
+  });
+  it.each([
+    { value: 0.001, automatic: true, display: "<0.1%", marker: "0.01%" },
+    { value: 0, automatic: true, display: "0%", marker: "0%" },
+    { value: 4.996, automatic: true, display: "50%", marker: "49.96%" },
+    { value: 4.996, automatic: false, display: "49.96%", marker: "49.96%" },
+  ])(
+    "formats weight $value with automatic=$automatic without rounding geometry",
+    ({ value, automatic, display, marker }) => {
+      const tiny = { ...rows[0], resources: { gpu: { deserved: value, overQuotaWeight: value } } };
+      const wrapper = mount(Table, {
+        props: {
+          rows: [tiny],
+          baselineRows: [tiny],
+          draft: { ...draft, mode: "guaranteed", automaticWeights: automatic },
+          aggregates: { MediumLow: { weightsSum: 10, automaticWeightsSum: 10, deservedSum: 10 } },
+          ranks: ["MediumLow"],
+          readonly: false,
+          loading: false,
+        },
+        global: {
+          plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+          directives: { "click-outside": {}, permission: {} },
+        },
+      });
+      try {
+        const editor = wrapper.findAllComponents(DepartmentResourceEditor).find((e) => e.props("kind") === "weight");
+        expect(editor?.props("displayValue")).toBe(display);
+        expect(parseFloat((wrapper.get(".quota-marker").element as HTMLElement).style.left)).toBeCloseTo(
+          parseFloat(marker),
+          8,
+        );
+      } finally {
+        wrapper.unmount();
+      }
+    },
+  );
   const weightPopup = {
     template: '<td><span class="applied-weight">{{ displayValue }}</span><slot name="input" /></td>',
     props: ["displayValue", "isSubmitDisabled"],
@@ -561,7 +636,7 @@ describe("scheduling department table", () => {
     expect(wrapper.get(".quota-marker").attributes("style")).toContain("left: 20%");
     await wrapper.setProps({ draft: { ...draft, departments: { a: { id: "a", weight: 5 } } } });
     expect(wrapper.text()).toContain("38.46%");
-    expect(wrapper.get(".quota-marker").attributes("style")).toContain("left: 38.46%");
+    expect(parseFloat((wrapper.get(".quota-marker").element as HTMLElement).style.left)).toBeCloseTo(38.4615, 3);
     await wrapper.setProps({ rows: [] });
     await wrapper.setProps({ rows });
     expect(wrapper.text()).toContain("38.46%");

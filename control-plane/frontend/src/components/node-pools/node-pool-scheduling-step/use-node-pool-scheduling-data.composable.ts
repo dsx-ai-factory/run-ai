@@ -228,16 +228,9 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
       };
       const departments = async () => {
         if (!permissions.value.view) return;
-        const [totals, counts, departmentSnapshot, scopes, projects] = await Promise.all([
-          Promise.all([
-            loadSchedulingTotals(scope),
-            ...ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => loadSchedulingTotals({ ...scope, rank: option.value })),
-          ]),
-          Promise.all(
-            ENTITY_PRIORITY_SELECT_OPTIONS.map((option) =>
-              orgUnitService.countDepartmentNodePoolResources(schedulingFilters({ ...scope, rank: option.value })),
-            ),
-          ),
+        const [total, totalCount, departmentSnapshot, scopes, projects] = await Promise.all([
+          loadSchedulingTotals(scope),
+          orgUnitService.countDepartmentNodePoolResources(schedulingFilters(scope)),
           loadSchedulingDepartmentSnapshot(scope, pool.schedulingCapabilities?.adjustableWeights === true),
           permissionService.getPermittedScopesForAction(ResourceType.Department),
           permissionService.getPermittedScopesForAction(ResourceType.Project).catch(() => ({})),
@@ -245,14 +238,44 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
         if (scopeVersion !== current) return;
         departmentScopes.value = scopes;
         projectScopes.value = projects;
+        const complete = coversCluster(scopes[Action.Read]);
+        const visibleCounts: Record<string, number> = {};
+        for (const row of departmentSnapshot.rows) visibleCounts[row.rank] = (visibleCounts[row.rank] ?? 0) + 1;
+        // Complete scoped snapshots already contain the rows behind every rank.
+        // Retain authoritative rank reads when visibility is restricted.
+        const [rankTotals, counts] = complete
+          ? ([
+              ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => {
+                const totals = departmentSnapshot.totals[option.value];
+                return {
+                  weightsSum:
+                    pool.schedulingCapabilities?.adjustableWeights === true
+                      ? (totals?.rawWeightsSum ?? 0)
+                      : (totals?.automaticWeightsSum ?? 0),
+                  deservedSum: totals?.deservedSum ?? 0,
+                };
+              }),
+              ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => visibleCounts[option.value] ?? 0),
+            ] as const)
+          : await Promise.all([
+              Promise.all(
+                ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => loadSchedulingTotals({ ...scope, rank: option.value })),
+              ),
+              Promise.all(
+                ENTITY_PRIORITY_SELECT_OPTIONS.map((option) =>
+                  orgUnitService.countDepartmentNodePoolResources(schedulingFilters({ ...scope, rank: option.value })),
+                ),
+              ),
+            ]);
+        if (scopeVersion !== current) return;
         const weightTotals = departmentSnapshot.totals;
         baselineRows.value = departmentSnapshot.rows;
         aggregates.value = Object.fromEntries([
-          ["all", { ...totals[0], ...weightTotals.all }],
+          ["all", { ...total, ...weightTotals.all }],
           ...ENTITY_PRIORITY_SELECT_OPTIONS.map((option, i) => [
             option.value,
             {
-              ...totals[i + 1],
+              ...rankTotals[i],
               ...(weightTotals[option.value] ?? {
                 rawWeightsSum: pool.schedulingCapabilities?.adjustableWeights === true ? 0 : undefined,
                 automaticWeightsSum: 0,
@@ -266,7 +289,15 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
         rankCounts.value = Object.fromEntries(
           ENTITY_PRIORITY_SELECT_OPTIONS.map((option, i) => [option.value, counts[i]]),
         );
-        await loadRows();
+        if (!search.value && !rank.value && totalCount === departmentSnapshot.rows.length) {
+          rowsVersion++;
+          appending = false;
+          rowsLoading.value = false;
+          pages.value = departmentSnapshot.rows.slice(0, 50);
+          count.value = totalCount;
+          globalOffset.value = pages.value.length;
+          completedQuery.value = queryKey.value;
+        } else await loadRows();
       };
       await Promise.all([refreshCapacity(pool, current), policy(), departments()]);
     } catch (error) {

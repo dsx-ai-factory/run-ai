@@ -55,6 +55,45 @@ beforeEach(() => {
   });
 });
 describe("scoped scheduling reads", () => {
+  it("reuses the complete baseline for initial rows and rank data without duplicate requests", async () => {
+    const rows = Array.from({ length: 58 }, (_, i) => ({
+      id: String(i),
+      orgUnitId: String(i),
+      orgUnitName: `Dept ${i}`,
+      clusterId: "c",
+      nodePoolId: "p",
+      nodePoolName: "pool",
+      rank: "High",
+      resources: { gpu: { overQuotaWeight: 2, deserved: 0 } },
+    }));
+    vi.mocked(clusterService.getNodepool).mockResolvedValue({
+      id: "p",
+      clusterId: "c",
+      name: "pool",
+      phase: "Empty",
+      schedulingCapabilities: { quota: false, ranks: false, adjustableWeights: true },
+    } as never);
+    vi.mocked(orgUnitService.getDepartmentNodePoolResources).mockImplementation(
+      async (_filters, _sort, _order, offset, limit) => ({
+        nodePoolResources: rows.slice(offset ?? 0, (offset ?? 0) + (limit ?? 50)),
+      }),
+    );
+    vi.mocked(orgUnitService.countDepartmentNodePoolResources).mockResolvedValue(58);
+    vi.mocked(orgUnitService.sumDepartmentNodePoolResources).mockResolvedValue({ weightsSum: 116, deservedSum: 0 });
+    const data = useNodePoolSchedulingData(ref("p"));
+    await flushPromises();
+    expect(data.baselineRows.value).toHaveLength(58);
+    expect(data.pages.value).toHaveLength(50);
+    expect(data.rankCounts.value.High).toBe(58);
+    expect(vi.mocked(orgUnitService.getDepartmentNodePoolResources)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(orgUnitService.sumDepartmentNodePoolResources)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(orgUnitService.countDepartmentNodePoolResources)).toHaveBeenCalledTimes(1);
+    const first = data.pages.value.slice();
+    await data.loadMore();
+    expect(data.pages.value).toHaveLength(58);
+    expect(data.pages.value.slice(0, 50)).toEqual(first);
+    expect(data.hasMore.value).toBe(false);
+  });
   it("treats an explicit empty department child list as zero project quota", async () => {
     vi.mocked(orgUnitService.getDepartment).mockResolvedValue({ clusterId: "c", children: [] } as never);
     expect(await loadChildQuotaSum({ poolId: "p", clusterId: "c" }, "empty")).toBe(0);
@@ -454,10 +493,16 @@ describe("scoped scheduling reads", () => {
       delete: {},
       sync: {},
     }));
+    vi.mocked(orgUnitService.sumDepartmentNodePoolResources).mockClear();
     const data = useNodePoolSchedulingData(ref("p"));
     await flushPromises();
     expect(data.pages.value.map((value) => value.orgUnitId)).toEqual(["visible"]);
     expect(data.totalsComplete.value).toBe(false);
+    expect(
+      vi
+        .mocked(orgUnitService.sumDepartmentNodePoolResources)
+        .mock.calls.filter(([, filters]) => filters?.some((value) => value.startsWith("rank=="))),
+    ).toHaveLength(9);
     expect(data.canEditDepartment("visible")).toBe(true);
     expect(data.canEditDepartment("hidden")).toBe(false);
     expect(data.canResetResources.value).toBe(false);

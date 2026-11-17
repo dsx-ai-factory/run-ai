@@ -202,36 +202,20 @@
               />
               <q-td class="result-cell">
                 <div class="result-bar" :class="{ 'simulation-bar': simulation }">
-                  <div v-if="simulation && simulationResults?.[row.id]" class="simulation-segments">
-                    <span
-                      class="allocated"
-                      :style="{
-                        width: `${Math.min(100, (simulationResults[row.id].allocated / (capacity || 1)) * 100)}%`,
-                        background: allocationBackground(row),
-                      }"
-                      >{{ Number(simulationResults[row.id].allocated.toFixed(2)) }}</span
-                    >
-                    <span
-                      class="unmet"
-                      :style="{ width: `${Math.min(100, (simulationResults[row.id].unmet / (capacity || 1)) * 100)}%` }"
-                      >{{ Number(simulationResults[row.id].unmet.toFixed(2)) }}</span
-                    >
-                    <img
-                      class="allocation-marker"
-                      :src="weightLegend"
-                      alt=""
-                      :style="{
-                        left: `${Math.min(100, (simulationResults[row.id].allocated / (capacity || 1)) * 100)}%`,
-                      }"
-                    />
-                  </div>
+                  <simulation-result-bar
+                    v-if="simulation && simulationResults?.[row.id]"
+                    :allocated="simulationResults[row.id].allocated"
+                    :unmet="simulationResults[row.id].unmet"
+                    :capacity="capacity ?? 0"
+                    :background="allocationBackground(row)"
+                  />
                   <div v-else-if="percentage(row) !== 'Unknown'" class="simulation-segments">
                     <img
                       class="quota-marker"
                       :src="weightLegend"
                       alt=""
                       :style="{
-                        left: `${Math.min(100, Math.max(0, parseFloat(percentage(row))))}%`,
+                        left: `${Math.min(100, Math.max(0, rowWeightPercentage(row) ?? 0))}%`,
                       }"
                     />
                   </div>
@@ -255,14 +239,13 @@
                   </q-tooltip>
                   <input
                     v-if="simulation"
-                    @input="demand[row.id] = Number(($event.target as HTMLInputElement).value)"
+                    @input="setDemand(row, $event)"
                     type="range"
                     step="any"
                     min="0"
                     :max="capacity ?? 0"
-                    :value="
-                      demand[row.id] ?? simulationResults?.[row.id]?.demand ?? defaultSimulationDemand(capacity ?? 0)
-                    "
+                    :value="sliderDemand(row)"
+                    :aria-valuemax="maximumDemand(row)"
                     :disabled="!canView || capacity == null"
                     :aria-label="`Simulated GPU demand for ${row.name}`"
                     class="demand-slider"
@@ -334,6 +317,7 @@
 <script setup lang="ts">
 import { NotificationAlertBar, ENotificationBarVariant } from "@/components/common/notification-alert-bar";
 import weightLegend from "@/assets/icons/scheduling/weight-legend.png";
+import SimulationResultBar from "./simulation-result-bar.vue";
 import maximumLegend from "@/assets/icons/scheduling/maximum-legend.png";
 import { computed, inject, ref, watch } from "vue";
 import type { QTableColumn } from "quasar";
@@ -571,9 +555,11 @@ const headerTooltips = computed<Record<string, string>>(() => ({
     "These GPUs are guaranteed to the department and allocated before any sharing whenever its workloads request them. Cluster conditions such as fragmentation can occasionally prevent the full quota from being allocated. Across all departments, quota cannot exceed the node pool capacity.",
   department:
     "The highest rank receives over-quota capacity first. Unused capacity flows down to the next rank, where it is distributed proportionally by weight within the rank. Select departments to move them to another rank.",
-  weight: ranked.value
-    ? "The weight determines each department’s proportional share of the over-quota resources within its rank. Unused capacity flows down to the next rank, where it is distributed by weight."
-    : "The weight determines each department’s proportional share of the resources.",
+  weight: automatic.value
+    ? "Automatic weight is derived from the department’s Guaranteed GPU quota. Zero-quota departments receive a small minimum weight. Custom weights can be set in Advanced settings."
+    : ranked.value
+      ? "The weight determines each department’s proportional share of the over-quota resources within its rank. Unused capacity flows down to the next rank, where it is distributed by weight."
+      : "The weight determines each department’s proportional share of the resources.",
   limit:
     "This is the upper limit of GPUs a department can consume from a node pool, combining assigned quota and over-quota.",
   result:
@@ -657,6 +643,16 @@ const displayRows = computed(() => {
     ];
   });
 });
+watch(
+  () => [props.capacity, maxAllocation.value, baseline.value, props.draft.departments],
+  () => {
+    for (const id of Object.keys(demand.value)) {
+      const row = { ...baseline.value[id], ...props.draft.departments[id], id };
+      demand.value[id] = clampDemand(row, demand.value[id]);
+    }
+  },
+  { deep: true, flush: "sync" },
+);
 const preview = inject(simulationPreviewKey, undefined);
 const scenario = computed(() =>
   simulation.value && props.canView && props.poolId && props.capacity != null
@@ -689,9 +685,10 @@ function resultLegend(row: DepartmentSchedulingEdit) {
       value: row.quota === -1 ? "Unlimited" : (row.quota ?? "Unknown"),
       kind: "guaranteed",
     });
+  const weightShare = rowWeightPercentage(row);
   entries.push({
     label: ranked.value ? "Weight within rank" : "Weight",
-    value: percentage(row),
+    value: weightShare == null ? "Unknown" : `${Number(weightShare.toPrecision(6))}%`,
     kind: "weight",
     image: weightLegend,
   });
@@ -745,13 +742,37 @@ function previewWeightPercentage(row: DepartmentSchedulingEdit, weight: number) 
   }
   return weightPercentage(weight, otherWeights + weight);
 }
-function percentage(row: DepartmentSchedulingEdit) {
+function rowWeightPercentage(row: DepartmentSchedulingEdit): number | undefined {
   const simulated = simulation.value ? simulationResults.value?.[row.id] : undefined;
-  if (simulated) return `${Number(simulated.weightPercentage.toFixed(2))}%`;
-  if (props.totalsComplete === false) return "Unknown";
+  if (simulated) return simulated.weightPercentage;
+  if (props.totalsComplete === false) return undefined;
   const value = automatic.value ? Math.max(0, row.quota ?? 0) : row.weight;
-  const percent = value == null ? undefined : weightPercentage(value, weightTotal(row));
-  return percent == null ? "Unknown" : `${Number(percent.toFixed(2))}%`;
+  return value == null ? undefined : weightPercentage(value, weightTotal(row));
+}
+function percentage(row: DepartmentSchedulingEdit) {
+  const value = rowWeightPercentage(row);
+  if (value == null || !Number.isFinite(value)) return "Unknown";
+  if (value > 0 && value < 0.1) return "<0.1%";
+  return `${Number(value.toFixed(automatic.value ? 1 : 2))}%`;
+}
+function maximumDemand(row: DepartmentSchedulingEdit) {
+  const capacity = Number.isFinite(props.capacity) ? Math.max(0, props.capacity ?? 0) : 0;
+  return maxAllocation.value && row.limit != null && row.limit >= 0 ? Math.min(capacity, row.limit) : capacity;
+}
+function clampDemand(row: DepartmentSchedulingEdit, value: number) {
+  return Math.min(maximumDemand(row), Math.max(0, Number.isFinite(value) ? value : 0));
+}
+function sliderDemand(row: DepartmentSchedulingEdit) {
+  return clampDemand(
+    row,
+    demand.value[row.id] ?? simulationResults.value?.[row.id]?.demand ?? defaultSimulationDemand(props.capacity ?? 0),
+  );
+}
+function setDemand(row: DepartmentSchedulingEdit, event: Event) {
+  const input = event.target as HTMLInputElement;
+  const value = clampDemand(row, Number(input.value));
+  input.value = String(value);
+  demand.value[row.id] = value;
 }
 function toggle(rank: string) {
   const next = new Set(expanded.value);
@@ -1060,23 +1081,19 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   line-height: 16.8px;
   font-weight: 500;
 }
+.result-bar.simulation-bar {
+  // Reserve label space so crossing the fit threshold never moves the slider.
+  margin-bottom: 29px;
+}
 .result-bar:not(.simulation-bar) {
   height: 18px;
 }
-.quota-marker,
-.allocation-marker {
+.quota-marker {
   position: absolute;
   top: 50%;
   width: 4px;
   height: 38px;
   transform: translate(-3px, -50%);
-}
-.allocated {
-  background: #90caf9;
-  height: 100%;
-  text-align: center;
-  overflow: hidden;
-  flex: 0 0 auto;
 }
 .simulation-segments {
   position: relative;
@@ -1085,13 +1102,6 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   height: 100%;
   overflow: hidden;
   border-radius: 2px;
-}
-.unmet {
-  background: #ffe082;
-  flex: 0 1 auto;
-  min-width: 0;
-  text-align: center;
-  height: 100%;
 }
 .demand-slider {
   appearance: none;
@@ -1145,11 +1155,6 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
 }
 .scheduling-table :deep(.result-cell) {
   padding-right: 20px;
-}
-.allocated,
-.unmet {
-  -webkit-text-stroke: 1.4px white;
-  paint-order: stroke fill;
 }
 :global(.q-tooltip.scheduling-result-tooltip) {
   background: rgba(0, 0, 0, 0.87);
