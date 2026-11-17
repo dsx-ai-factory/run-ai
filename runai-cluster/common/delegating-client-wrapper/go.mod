@@ -6,7 +6,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/supported-workloads v0.0.0-00010101000000-000000000000
 	k8s.io/apimachinery v0.37.0
 	k8s.io/client-go v0.37.0
-	sigs.k8s.io/controller-runtime v0.25.2
+	sigs.k8s.io/controller-runtime v0.25.3
 )
 
 require (

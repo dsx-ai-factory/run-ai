@@ -26,7 +26,7 @@ type whoamiOutput struct {
 	Email     string `json:"email,omitempty"      jsonschema:"The email address of the authenticated principal."`
 	Name      string `json:"name,omitempty"       jsonschema:"The display name of the authenticated principal."`
 	TenantID  string `json:"tenant_id,omitempty"  jsonschema:"The Run:ai tenant ID the principal belongs to."`
-	TokenType string `json:"token_type,omitempty" jsonschema:"The type of the bearer token (e.g. Bearer or Application)."`
+	TokenType string `json:"token_type,omitempty" jsonschema:"The type of the bearer token (e.g. Bearer or AccessKey)."`
 }
 
 func registerWhoami(r *runaimcp.Registry, client *runaiclient.Client) {

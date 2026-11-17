@@ -1,0 +1,50 @@
+apiVersion: nvidia.com/v1beta1
+kind: DynamoGraphDeployment
+metadata:
+  name: test-dynamo
+spec:
+  components:
+  - name: component-a
+    podTemplate:
+      metadata:
+        labels:
+          app: inference
+      spec:
+        containers:
+        - image: placeholder
+          name: main
+        - image: placeholder
+          name: sidecar
+        initContainers:
+        - image: placeholder
+          name: init
+        serviceAccountName: inference-sa
+    replicas: 0
+    type: worker
+  - name: component-b
+    podTemplate:
+      metadata:
+        annotations:
+          example.com/component: worker-b
+        labels:
+          app: inference
+      spec:
+        containers:
+        - image: placeholder
+          name: main
+        - image: placeholder
+          name: sidecar
+        initContainers:
+        - image: placeholder
+          name: init
+        priorityClassName: high-priority
+        serviceAccountName: inference-sa
+    replicas: 1
+    type: worker
+  - name: component-c
+    podTemplate:
+      metadata:
+        labels:
+          app: inference
+    replicas: 1
+    type: worker

@@ -4131,6 +4131,12 @@ export interface NodepoolGpuTypeDetails {
      * @memberof NodepoolGpuTypeDetails
      */
     'totalDevices': number;
+    /**
+     * Largest installed GPU count on a single node for this exact GPU type and per-device memory capacity. Not a sum across nodes or a free-device count. Omitted when per-node count evidence is unavailable.
+     * @type {number}
+     * @memberof NodepoolGpuTypeDetails
+     */
+    'maxDevicesPerNode'?: number;
 }
 /**
  * 
@@ -4792,6 +4798,12 @@ export interface SchedulingCapabilities {
      * @memberof SchedulingCapabilities
      */
     'cpuQuota': boolean;
+    /**
+     * Whether to allow GPU, CPU and memory limits for the nodepool\'s resources. Only allowed when quota=true.
+     * @type {boolean}
+     * @memberof SchedulingCapabilities
+     */
+    'limits': boolean;
 }
 /**
  * 
@@ -4823,6 +4835,12 @@ export interface SchedulingCapabilitiesNullable {
      * @memberof SchedulingCapabilitiesNullable
      */
     'cpuQuota'?: boolean | null;
+    /**
+     * Whether to allow GPU, CPU and memory limits for the nodepool\'s resources. Only allowed when quota=true.
+     * @type {boolean}
+     * @memberof SchedulingCapabilitiesNullable
+     */
+    'limits'?: boolean | null;
 }
 /**
  * 
