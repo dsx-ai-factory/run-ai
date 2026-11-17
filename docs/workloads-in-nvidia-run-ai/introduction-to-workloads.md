@@ -41,3 +41,7 @@ NVIDIA Run:ai enables support for workload types that originate from any ML fram
 Some workload types are already available in the platform, ready to use with default category and priority mappings applied. See [Supported workload types](workload-types/supported-workload-types.md) for a full list.
 
 Administrators can extend workload support by introducing new workload types at any time using the [Workload Types](api:main-api:POST/api/v1/workload-types) API. The Karta infrastructure interprets and manages these workloads, enabling advanced orchestration, scheduling, and monitoring. See [Extending workload support with Karta](workload-types/extending-workload-support/) for more details.
+
+## AI Applications
+
+An AI application groups the workloads and other Kubernetes resources that together deliver one AI solution, such as a Retrieval-Augmented Generation (RAG) system. The workloads in an AI application are scheduled, managed, and monitored like any other workload, and NVIDIA Run:ai shows their status and resource use together at the application level. See [Introduction to AI applications](../ai-applications/introduction-to-ai-applications.md) for more details.
