@@ -17,6 +17,22 @@ const draft: SchedulingDraft = {
   departments: { a: { id: "a", limit: 8, weight: 2, quota: 3, rank: "High" } },
 };
 describe("scheduling settings draft interactions", () => {
+  it.each(["proportional", "ranked"] as const)(
+    "hides quota-only advanced settings in %s even with stale enabled values",
+    (mode) => {
+      const wrapper = mount(Settings, {
+        props: { draft: { ...draft, mode, cpuQuota: true } },
+        global: { plugins: [Quasar] },
+      });
+      expect(wrapper.find('[aid="max-allocation-toggle"]').exists()).toBe(false);
+      expect(wrapper.find('[aid="cpu-quota-toggle"]').exists()).toBe(false);
+      expect(wrapper.text()).not.toContain("Max GPU allocation");
+      expect(wrapper.text()).not.toContain("Preview only");
+      expect(wrapper.find('[aid="time-fairshare-toggle"]').exists()).toBe(true);
+      expect(wrapper.find(".runtime-section").exists()).toBe(true);
+      wrapper.unmount();
+    },
+  );
   it("reveals historical usage settings when fairshare is enabled and validates negative values", async () => {
     const wrapper = mount(Settings, {
       props: { draft, savedMaxAllocation: true, savedCpuQuota: false, canResetResources: true },

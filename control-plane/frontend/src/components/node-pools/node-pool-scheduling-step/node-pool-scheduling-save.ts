@@ -16,8 +16,6 @@ export function buildSchedulingSave(pool: Nodepool, draft: SchedulingDraft) {
   if (!draft.mode) throw new Error("Select a supported scheduling mode.");
   if (pool.schedulingCapabilities?.quota && draft.mode !== "guaranteed")
     throw new Error("A saved Guaranteed quota pool cannot downgrade.");
-  if (draft.maxAllocation && draft.mode !== "guaranteed")
-    throw new Error("Max GPU allocation in this mode is preview-only. Turn it off before saving.");
   const capabilities = toSchedulingCapabilities(draft);
   const minimum = serializeSchedulingDuration(draft.minimumRuntime);
   const window = draft.timeFairshare ? serializeSchedulingDuration(draft.historicalWindow, false) : undefined;

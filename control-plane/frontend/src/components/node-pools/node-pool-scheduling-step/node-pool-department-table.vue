@@ -88,7 +88,7 @@
           :pagination="{ rowsPerPage: 0 }"
           hide-pagination
           :rows-per-page-options="[0]"
-          :style="{ '--scheduling-table-min-width': draft.maxAllocation ? '998px' : '960px' }"
+          :style="{ '--scheduling-table-min-width': maxAllocation ? '998px' : '960px' }"
         >
           <template #header="{ cols }"
             ><q-tr>
@@ -170,7 +170,7 @@
                 :id="row.id"
                 kind="quota"
                 :value="row.quota"
-                :limit="draft.maxAllocation ? row.limit : undefined"
+                :limit="maxAllocation ? row.limit : undefined"
                 :disabled="readonly || canEditDepartment?.(row.id) === false"
                 :load-context="() => quotaContext(row)"
                 @apply="emit('edit', { id: row.id, quota: $event })"
@@ -192,7 +192,7 @@
                 @apply="emit('edit', { id: row.id, weight: $event })"
               />
               <department-resource-editor
-                v-if="draft.maxAllocation"
+                v-if="maxAllocation"
                 :id="row.id"
                 kind="limit"
                 :value="row.limit ?? -1"
@@ -434,6 +434,7 @@ watch(
 const selected = ref(new Set<string>());
 const expanded = ref(new Set<string>([ENTITY_PRIORITY_DEFAULT_VALUE]));
 const showMove = ref(false);
+const maxAllocation = computed(() => props.draft.mode === "guaranteed" && !!props.draft.maxAllocation);
 const ranked = computed(() => props.draft.mode === "ranked" || props.draft.mode === "guaranteed");
 const automatic = computed(() => props.draft.mode === "guaranteed" && props.draft.automaticWeights);
 const completeCustomWeightTotals = computed(() => {
@@ -547,7 +548,7 @@ const columns = computed<QTableColumn[]>(() => [
     : []),
   { name: "department", label: ranked.value ? "Rank" : "Department", field: "name", align: "left" },
   { name: "weight", label: ranked.value ? "Weight within rank" : "Weight", field: "weight", align: "left" },
-  ...(props.draft.maxAllocation
+  ...(maxAllocation.value
     ? [{ name: "limit", label: "Max GPU allocation", field: "limit", align: "left" as const }]
     : []),
   { name: "result", label: "Result", field: "id", align: "left" },
@@ -694,7 +695,7 @@ function resultLegend(row: DepartmentSchedulingEdit) {
     kind: "weight",
     image: weightLegend,
   });
-  if (props.draft.maxAllocation)
+  if (maxAllocation.value)
     entries.push({
       label: "Max GPU allocation",
       value: row.limit == null || row.limit === -1 ? "Unlimited" : row.limit,

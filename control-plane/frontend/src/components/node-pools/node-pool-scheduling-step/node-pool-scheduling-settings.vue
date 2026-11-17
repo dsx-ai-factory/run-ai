@@ -38,7 +38,7 @@
           @update:model-value="patch({ automaticWeights: $event === 'automatic' })"
         />
       </section>
-      <section class="toggle-section">
+      <section v-if="draft.mode === 'guaranteed'" class="toggle-section">
         <runai-section-title title="Max GPU allocation" tooltip-icon="ph-bold ph-info" :tooltip-text="maxHelp">
           <template #tooltip-content>
             <span class="node-pool-settings-help node-pool-settings-help--standard">{{ maxHelp }}</span>
@@ -51,9 +51,6 @@
           @update:model-value="setMax"
         />
       </section>
-      <p v-if="draft.maxAllocation && draft.mode !== 'guaranteed'" class="text-b-caption" role="status">
-        Preview only: Max GPU allocation in this mode is not supported by the backend yet.
-      </p>
       <section>
         <div class="toggle-section">
           <runai-section-title
@@ -293,7 +290,11 @@ function setDuration(field: "historicalWindow" | "minimumRuntime", unit: string,
   patch({ [field]: { ...props.draft[field], [unit]: number(value) } });
 }
 function setMax(value: boolean) {
-  if (props.readonly || (!value && (props.savedMaxAllocation ?? props.draft.maxAllocation) && !props.canResetResources))
+  if (
+    props.draft.mode !== "guaranteed" ||
+    props.readonly ||
+    (!value && (props.savedMaxAllocation ?? props.draft.maxAllocation) && !props.canResetResources)
+  )
     return;
   if (!value && (props.savedMaxAllocation ?? props.draft.maxAllocation)) confirmation.value = "maxAllocation";
   else patch({ maxAllocation: value });

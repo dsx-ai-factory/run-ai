@@ -49,7 +49,7 @@ describe("simulation contract", () => {
     });
     expect(JSON.stringify(input)).toBe(before);
   });
-  it("maps active edits in Guaranteed quota and keeps unsupported limits preview-only", () => {
+  it("maps Guaranteed limits and omits inactive limits in other modes", () => {
     const input = scenario();
     input.draft.mode = "guaranteed";
     input.draft.maxAllocation = true;
@@ -60,7 +60,8 @@ describe("simulation contract", () => {
       gpu: { deserved: 4, limit: 12, overQuotaWeight: 9 },
     });
     input.draft.mode = "ranked";
-    expect(() => buildSimulationRequest(input)).toThrow(/preview-only/);
+    expect(buildSimulationRequest(input).nodePool?.schedulingCapabilities?.limits).toBe(false);
+    expect(buildSimulationRequest(input).orgUnits[1].gpu).not.toHaveProperty("limit");
     expect(input.draft.departments.hidden.limit).toBe(12);
   });
   it("debounces rapid edits, aborts outstanding work, and reports ordinary errors", async () => {
@@ -246,7 +247,7 @@ describe("simulation contract", () => {
       state.retry();
       expect(state.results.value).toBeUndefined();
       await vi.advanceTimersByTimeAsync(300);
-      expect(state.status.value).toBe((code === 404 || code === 501) ? "unavailable" : "error");
+      expect(state.status.value).toBe(code === 404 || code === 501 ? "unavailable" : "error");
       expect(state.message.value).toMatch(/preserved/);
       state.retry();
       await vi.advanceTimersByTimeAsync(300);

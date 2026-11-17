@@ -21,10 +21,6 @@ export function buildSimulationRequest(scenario: SimulationScenario): FairShareS
   const { capacity, draft, demand } = scenario;
   if (!Number.isFinite(capacity) || capacity < 0) throw new Error("Node pool capacity is unavailable.");
   if (!draft.mode) throw new Error("Select a supported scheduling mode to simulate.");
-  if (draft.maxAllocation && draft.mode !== "guaranteed")
-    throw new Error(
-      "Max GPU allocation in this mode is preview-only. The simulation backend currently requires Guaranteed quota. Your changes are preserved.",
-    );
   const capabilities = toSchedulingCapabilities(draft);
   // orgUnits serves both as requested rows and scenario overrides. Include all
   // off-screen edits; splitting requests would silently change the competition.

@@ -33,8 +33,10 @@ describe("scheduling persistence", () => {
     expect(result.pool.schedulingConfiguration).not.toHaveProperty("gpuPodsPlacementStrategy");
     expect(result.pool).not.toHaveProperty("labelKey");
   });
-  it("rejects preview-only limits, downgrade and invalid durations before any writes", () => {
-    expect(() => buildSchedulingSave(pool, { ...draft(), maxAllocation: true })).toThrow(/preview-only/);
+  it("omits inactive limits and rejects downgrade or invalid durations before any writes", () => {
+    const inactive = buildSchedulingSave(pool, { ...draft(), maxAllocation: true });
+    expect(inactive.pool.schedulingCapabilities?.limits).toBe(false);
+    expect(inactive.departments[0].resources?.gpu).not.toHaveProperty("limit");
     expect(() =>
       buildSchedulingSave(
         {

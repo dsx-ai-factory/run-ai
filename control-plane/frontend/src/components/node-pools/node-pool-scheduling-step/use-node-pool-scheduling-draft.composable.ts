@@ -12,8 +12,18 @@ export function useNodePoolSchedulingDraft(initial: SchedulingSnapshot) {
   const resetRevision = ref(0);
   const isDirty = computed(() => JSON.stringify(draft.value) !== JSON.stringify(baseline));
   function requestMode(mode: SchedulingMode) {
-    // Nov 12 requirements supersede the original discard-on-mode-change design.
-    // Keep inactive values in the draft; request mapping omits inactive fields.
+    // Preserve other edits; maximum allocations belong only to Guaranteed quota.
+    if (mode !== "guaranteed") {
+      const departments = Object.fromEntries(
+        Object.entries(draft.value.departments).map(([id, edit]) => {
+          const next = { ...edit };
+          delete next.limit;
+          return [id, next];
+        }),
+      );
+      draft.value = { ...draft.value, mode, maxAllocation: false, departments };
+      return;
+    }
     draft.value.mode = mode;
   }
   function confirmModeChange() {
