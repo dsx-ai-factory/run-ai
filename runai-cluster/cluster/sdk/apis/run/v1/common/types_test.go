@@ -112,6 +112,16 @@ var _ = Describe("common", func() {
 			Entry("with the digest after the tag", ptr.To(digest), "registry.example/agent:3.0.20@"+digest),
 		)
 
+		It("omits the colon before the digest when the tag is explicitly empty", func() {
+			image := &Image{
+				Registry: ptr.To("registry.example"),
+				Name:     ptr.To("agent"),
+				Tag:      ptr.To(""),
+				Digest:   ptr.To(digest),
+			}
+			Expect(image.Reference()).To(Equal("registry.example/agent@" + digest))
+		})
+
 		It("renders the tag with the digest for APIs that carry no digest field", func() {
 			Expect(newImage(nil).tag()).To(Equal("3.0.20"))
 			Expect(newImage(ptr.To(digest)).tag()).To(Equal("3.0.20@" + digest))

@@ -9,6 +9,7 @@ templates:
 tests:
   - it: should pull the operator by tag alone when no digest is set
     set:
+      runai-operator.image.registry: nvcr.io/nvidia/runai
       runai-operator.image.tag: 3.0.20
     documentSelector:
       path: kind
@@ -16,7 +17,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: nvcr.io/op-containers-lab-virt/go-operator:3.0.20
+          value: nvcr.io/nvidia/runai/go-operator:3.0.20
       - contains:
           path: spec.template.spec.containers[0].env
           content:

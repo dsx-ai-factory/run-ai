@@ -100,7 +100,11 @@ func (i *Image) SetDefaultsWhereNeeded(defaultImageValues *Image) {
 }
 
 // Reference returns the pullable image reference: registry/name:tag, plus @digest when one is set
+// (omitting :tag when the tag is empty and a digest is set).
 func (i *Image) Reference() string {
+	if ptr.Deref(i.Tag, "") == "" && ptr.Deref(i.Digest, "") != "" {
+		return fmt.Sprintf("%s/%s@%s", *i.Registry, *i.Name, *i.Digest)
+	}
 	return fmt.Sprintf("%s/%s:%s", *i.Registry, *i.Name, i.tag())
 }
 
