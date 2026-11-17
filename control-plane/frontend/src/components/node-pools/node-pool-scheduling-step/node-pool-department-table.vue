@@ -16,13 +16,10 @@
     <runai-page-actions
       class="scheduling-actions"
       :class="{ 'actions-readonly': readonly }"
-      :columns="filterColumns"
+      :columns="[]"
       :filters="{ ...filters, searchTerm }"
       advanced-filters
       search-tooltip-text="Search departments"
-      filter-menu-width="208px"
-      filter-menu-max-height="512px"
-      filter-menu-class="node-pool-scheduling-filter-popup"
       hide-cluster-filter
       hide-columns-btn
       hide-export-csv
@@ -35,6 +32,9 @@
       @refresh-data="emit('refresh')"
       @selected-actions-close="selected = new Set()"
     >
+      <template #filters>
+        <scheduling-filters :filter-by="{ ...filters, searchTerm }" :ranked="ranked" @update-filter-by="updateFilters" />
+      </template>
       <template #primary-btn
         ><runai-btn
           aid="new-department"
@@ -214,10 +214,9 @@
                     :background="allocationBackground(row)"
                   />
                   <div v-else-if="percentage(row) !== 'Unknown'" class="simulation-segments">
-                    <img
+                    <span
                       class="quota-marker"
-                      :src="weightLegend"
-                      alt=""
+                      aria-hidden="true"
                       :style="{
                         left: `${Math.min(100, Math.max(0, rowWeightPercentage(row) ?? 0))}%`,
                       }"
@@ -227,9 +226,12 @@
                     <div class="result-tooltip-title">{{ row.name }}</div>
                     <div class="result-tooltip-legend">
                       <div v-for="entry in resultLegend(row)" :key="entry.label" class="result-tooltip-entry">
-                        <span v-if="entry.image" class="result-tooltip-line" aria-hidden="true">
-                          <img :src="entry.image" alt="" width="4" height="38" />
-                        </span>
+                        <span
+                          v-if="entry.kind === 'weight' || entry.kind === 'maximum'"
+                          class="result-tooltip-line"
+                          :class="`marker-${entry.kind}`"
+                          aria-hidden="true"
+                        />
                         <span v-else class="result-tooltip-swatch" :class="`swatch-${entry.kind}`" aria-hidden="true" />
                         <span class="result-tooltip-description"
                           ><span>{{ entry.label }}</span
@@ -301,9 +303,6 @@
     <move-to-rank-modal
       v-if="showMove"
       :selected-count="selected.size"
-      descending
-      compact
-      show-unsupported-no-over-quota
       :current-rank="currentRank"
       :entity-type="EQuotaEntity.department"
       @close="showMove = false"
@@ -313,27 +312,21 @@
 </template>
 <script setup lang="ts">
 import { NotificationAlertBar, ENotificationBarVariant } from "@/components/common/notification-alert-bar";
-import weightLegend from "@/assets/icons/scheduling/weight-legend.png";
 import SimulationResultBar from "./simulation-result-bar.vue";
-import maximumLegend from "@/assets/icons/scheduling/maximum-legend.png";
+import SchedulingFilters from "./scheduling-filters.vue";
 import { computed, ref, watch } from "vue";
 import type { QTableColumn } from "quasar";
 import { RunaiPageActions } from "@/components/common/runai-page-actions";
 import { RunaiEllipsisTextWithTooltip } from "@/components/common/runai-ellipsis-text-with-tooltip";
 import { RunaiActionButton } from "@/components/common/runai-page-actions/runai-action-button";
-import { EColumnFilterType, EFilterOperator, type IFilterBy } from "@/models/filter.model";
-import type { ITableColumn } from "@/models/table.model";
+import type { IFilterBy } from "@/models/filter.model";
 import { matchesSchedulingFilters } from "./node-pool-scheduling-filters";
 import { useNodePoolSimulation } from "./use-node-pool-simulation.composable";
 import { simulateNodePool } from "./node-pool-simulation.service";
 import { defaultSimulationDemand } from "./node-pool-simulation.util";
 import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
-import MoveToRankModal from "@/components/org-unit/v2/common/peer-org-unit-rank-list/move-to-rank-modal/move-to-rank-modal.vue";
-import {
-  ENTITY_PRIORITY_DEFAULT_VALUE,
-  ENTITY_PRIORITY_SELECT_OPTIONS,
-  entityPriorityMap,
-} from "@/models/org-unit.model";
+import MoveToRankModal from "./scheduling-move-to-rank-dialog.vue";
+import { ENTITY_PRIORITY_DEFAULT_VALUE, entityPriorityMap } from "@/models/org-unit.model";
 import { EQuotaEntity } from "@/models/resource.model";
 import type { DepartmentNodePoolResources } from "@/swagger-models/org-unit-service-client";
 import DepartmentResourceEditor from "./department-resource-editor.vue";
@@ -484,40 +477,6 @@ const preserveTableSpace = computed(
 function rememberTableHeight(size: { height: number }) {
   if (!preserveTableSpace.value) unfilteredHeight.value = size.height;
 }
-const filterColumns = computed<ITableColumn[]>(() => [
-  {
-    name: "department",
-    label: "Department",
-    field: "orgUnitName",
-    filter: {
-      type: EColumnFilterType.FreeText,
-      maxWidth: "282px",
-      operatorMenuWidth: "208px",
-      operatorLabels: {
-        [EFilterOperator.Contains]: "Contains",
-        [EFilterOperator.DoesNotContain]: "Does not contain",
-        [EFilterOperator.Equals]: "Equals",
-        [EFilterOperator.NotEquals]: "Does not equal",
-      },
-      excludeOperators: [EFilterOperator.StartsWith, EFilterOperator.EndsWith],
-    },
-  },
-  ...(ranked.value
-    ? [
-        {
-          name: "rank",
-          label: "Rank",
-          field: "rank",
-          filter: {
-            type: EColumnFilterType.EnumBased,
-            maxWidth: "208px",
-            selectOptions: ENTITY_PRIORITY_SELECT_OPTIONS,
-            inputType: "checkbox" as const,
-          },
-        },
-      ]
-    : []),
-]);
 function updateFilters(value: IFilterBy) {
   filters.value = value;
   if (value.searchTerm !== props.searchTerm) emit("search", value.searchTerm ?? "");
@@ -674,7 +633,7 @@ function allocationBackground(row: DepartmentSchedulingEdit) {
   return `linear-gradient(to right, #42a5f5 ${guaranteed}%, #90caf9 ${guaranteed}%)`;
 }
 function resultLegend(row: DepartmentSchedulingEdit) {
-  const entries: { label: string; value: string | number; kind: string; image?: string }[] = [];
+  const entries: { label: string; value: string | number; kind: string }[] = [];
   if (props.draft.mode === "guaranteed")
     entries.push({
       label: "Guaranteed GPU allocation",
@@ -686,14 +645,12 @@ function resultLegend(row: DepartmentSchedulingEdit) {
     label: ranked.value ? "Weight within rank" : "Weight",
     value: weightShare == null ? "Unknown" : `${Number(weightShare.toPrecision(6))}%`,
     kind: "weight",
-    image: weightLegend,
   });
   if (maxAllocation.value)
     entries.push({
       label: "Max GPU allocation",
       value: row.limit == null || row.limit === -1 ? "Unlimited" : row.limit,
       kind: "maximum",
-      image: maximumLegend,
     });
   const result = simulation.value ? simulationResults.value?.[row.id] : undefined;
   if (result) {
@@ -1085,6 +1042,8 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   height: 18px;
 }
 .quota-marker {
+  border-inline: 1px solid white;
+  background: repeating-linear-gradient(to bottom, #212121 0 3px, white 3px 6px);
   position: absolute;
   top: 50%;
   width: 4px;
@@ -1198,10 +1157,18 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   position: relative;
   flex-shrink: 0;
 }
-.result-tooltip-line img {
+.result-tooltip-line::before {
+  content: "";
   position: absolute;
   left: 4px;
   top: -9px;
+  width: 4px;
+  height: 38px;
+  border-inline: 1px solid white;
+  background: repeating-linear-gradient(to bottom, #212121 0 3px, white 3px 6px);
+}
+.result-tooltip-line.marker-maximum::before {
+  background: repeating-linear-gradient(to bottom, #fb8c00 0 3px, white 3px 6px);
 }
 .result-tooltip-swatch {
   width: 12px;
@@ -1225,82 +1192,5 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
 }
 .result-tooltip-unavailable {
   margin-top: 7px;
-}
-</style>
-
-<style lang="scss">
-.node-pool-scheduling-filter-popup:has(.checkbox-container[aria-label="Rank"]) {
-  padding: 16px 10px;
-  border-radius: 3px;
-  box-shadow: -1px 0 7px rgba(0, 0, 0, 0.15);
-
-  > .q-card__section {
-    padding: 0;
-  }
-  > .q-card__section:first-child {
-    height: 32px;
-    margin-bottom: 16px;
-
-    > .text-weight-medium {
-      font-size: 14px;
-      font-weight: 500;
-      line-height: 20px;
-    }
-    > .q-btn {
-      width: 32px;
-      height: 32px;
-      min-height: 32px;
-      padding: 0;
-
-      .q-icon {
-        font-size: 20px;
-      }
-    }
-  }
-  .checkbox-container > span {
-    margin-bottom: 16px;
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 18px;
-  }
-  .checkbox-container > .q-item {
-    height: 32px;
-    min-height: 32px;
-    padding-right: 10px;
-
-    &:not(:last-child) {
-      margin-bottom: 7px;
-    }
-  }
-  .q-checkbox {
-    width: 100%;
-    height: 32px;
-    min-height: 32px;
-  }
-  .q-checkbox__inner {
-    font-size: 32px;
-  }
-  .q-checkbox__label {
-    flex: 1;
-    min-width: 0;
-    padding-left: 8px;
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 19.5px;
-  }
-  > .q-card__section:last-child {
-    height: 38px;
-    margin-top: 16px;
-
-    > .q-btn {
-      width: 62px;
-      height: 38px;
-      min-height: 38px;
-      padding: 0 10px;
-      font-size: 14px;
-      font-weight: 500;
-      line-height: 20px;
-    }
-  }
 }
 </style>

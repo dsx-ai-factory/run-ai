@@ -12,7 +12,7 @@
       <span ref="unmetSegment" class="unmet" :style="{ width: `${width(unmet)}%` }">
         <span ref="unmetLabel" class="segment-value" :aria-hidden="outside">{{ number(unmet) }}</span>
       </span>
-      <img class="allocation-marker" :src="weightLegend" alt="" :style="{ left: `${width(allocated)}%` }" />
+      <span class="allocation-marker" aria-hidden="true" :style="{ left: `${width(allocated)}%` }" />
     </div>
     <div v-if="outside" class="simulation-outside-labels">
       <span
@@ -26,7 +26,6 @@
 </template>
 <script setup lang="ts">
 import { nextTick, onMounted, ref, watch } from "vue";
-import weightLegend from "@/assets/icons/scheduling/weight-legend.png";
 const props = defineProps<{ allocated: number; unmet: number; capacity: number; background: string }>();
 const allocatedSegment = ref<HTMLElement>();
 const unmetSegment = ref<HTMLElement>();
@@ -115,6 +114,8 @@ onMounted(() => {
   top: 50%;
   width: 4px;
   height: 38px;
+  border-inline: 1px solid white;
+  background: repeating-linear-gradient(to bottom, #212121 0 3px, white 3px 6px);
   transform: translate(-3px, -50%);
   transition: left 180ms ease-out;
 }

@@ -8,16 +8,7 @@
     <div class="row items-center">
       <span v-if="title" class="q-mr-xs" v-text="title"></span>
       <slot v-else name="title-content" />
-      <runai-tooltip
-        v-if="tooltipText"
-        :tooltip-text="tooltipText"
-        :icon="tooltipIcon"
-        :width="width"
-        :tooltip-position="tooltipPosition"
-        :interactive="interactiveTooltip"
-      >
-        <template v-if="$slots['tooltip-content']" #content><slot name="tooltip-content" /></template>
-      </runai-tooltip>
+      <runai-tooltip v-if="tooltipText" :tooltip-text="tooltipText" :width="width" :tooltip-position="tooltipPosition" />
     </div>
     <slot name="title-right-content" />
   </div>
@@ -35,12 +26,10 @@ export default defineComponent({
     RunaiTooltip,
   },
   props: {
-    interactiveTooltip: { type: Boolean, default: false },
     title: {
       type: String as PropType<string>,
       required: false, // if no title is provided, the slot will be used
     },
-    tooltipIcon: { type: String, default: "ph-bold ph-question" },
     tooltipText: {
       type: String as PropType<string>,
       required: false,

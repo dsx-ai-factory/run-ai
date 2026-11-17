@@ -14,13 +14,7 @@
     />
     <runai-advanced-filter-summary :filters="filtersExcludingCluster" @remove="removeFilter" @select="selectFilter" />
     <q-btn class="add-filter-btn q-ml-xs" ref="add-filter-btn" flat no-caps label="Add filter">
-      <q-menu
-        :fit="!menuWidth"
-        :style="menuWidth ? { width: menuWidth } : undefined"
-        transition-show="scale"
-        transition-hide="scale"
-        transition-duration="500"
-      >
+      <q-menu fit transition-show="scale" transition-hide="scale" transition-duration="500">
         <q-list>
           <q-item
             v-for="option in availableFilterOptions"
@@ -40,8 +34,6 @@
         @close="selectFilter(null)"
         @save="saveFilter"
         :filter="selectedFilter"
-        :max-height="menuMaxHeight"
-        :class="menuClass"
         :is="filterComponent(selectedFilter.name)"
       />
     </q-btn>
@@ -94,9 +86,6 @@ export default defineComponent({
   },
   emits: ["update-filter-by"],
   props: {
-    menuWidth: { type: String, default: undefined },
-    menuMaxHeight: { type: String, default: undefined },
-    menuClass: { type: String, default: undefined },
     initialFiltersModel: {
       type: Array as PropType<Array<IAdvancedFilterModel>>,
       default: () => [],

@@ -5,13 +5,13 @@
 import { mount } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
 import { Quasar } from "quasar";
-import MoveModal from "./move-to-rank-modal.vue";
+import MoveModal from "./scheduling-move-to-rank-dialog.vue";
 import type { ISelectOption } from "@/models/global.model";
 import { RunaiSelect } from "@/components/common/runai-select";
 describe("move-to-rank unsupported option", () => {
   it("leaves Destination rank empty when an unsupported option is displayed", async () => {
     const wrapper = mount(MoveModal, {
-      props: { selectedCount: 2, showUnsupportedNoOverQuota: true },
+      props: { selectedCount: 2 },
       global: { plugins: [Quasar] },
     });
     await wrapper.vm.$nextTick();
@@ -30,7 +30,7 @@ describe("move-to-rank unsupported option", () => {
   });
   it("never emits an unsupported rank, even if supplied programmatically", async () => {
     const wrapper = mount(MoveModal, {
-      props: { selectedCount: 2, showUnsupportedNoOverQuota: true },
+      props: { selectedCount: 2 },
       global: { plugins: [Quasar] },
     });
     await wrapper.vm.$nextTick();

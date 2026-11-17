@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia } from "pinia";
 import { Quasar, Notify } from "quasar";
 import Dialog from "./node-pool-new-department-dialog.vue";
-import DepartmentNameSection from "@/components/department/department-edit-form/department-name-section/department-name-section.vue";
+import SchedulingDepartmentNameFields from "./scheduling-department-name-fields.vue";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 vi.mock("@/services/control-plane/org-unit.service/org-unit.service", () => ({
   orgUnitService: {
@@ -16,7 +16,7 @@ vi.mock("@/services/control-plane/org-unit.service/org-unit.service", () => ({
   },
 }));
 vi.mock("@/stores/permissions.store", () => ({ usePermissionStore: () => ({ hasPermission: () => true }) }));
-vi.mock("@/composables/access-rule/use-access-rule-roles.composable", async () => {
+vi.mock("./use-access-rule-roles.composable", async () => {
   const { ref } = await import("vue");
   return {
     useAccessRuleRoles: () => ({
@@ -44,6 +44,7 @@ vi.mock("@/services/control-plane/user.service/user.service", () => ({
 }));
 let wrapper: VueWrapper;
 beforeEach(() => {
+  vi.mocked(orgUnitService.isDepartmentNameUnique).mockReset().mockResolvedValue(true);
   vi.mocked(orgUnitService.createDepartment)
     .mockReset()
     .mockResolvedValue({ id: "new", name: "department-preview", clusterId: "cluster" } as never);
@@ -58,9 +59,29 @@ async function render() {
     global: { plugins: [[Quasar, { plugins: { Notify } }], createPinia()], mocks: { $route: { query: {} } } },
   });
   await flushPromises();
-  return wrapper.findComponent(DepartmentNameSection).get("input");
+  return wrapper.findComponent(SchedulingDepartmentNameFields).get("input");
 }
 describe("new department creation", () => {
+  it("rejects an invalid department name before creation", async () => {
+    const name = await render();
+    await name.setValue("invalid department name");
+    await new Promise((resolve) => setTimeout(resolve, 350));
+    (document.querySelector('[aid="create-department"]') as HTMLButtonElement).click();
+    await flushPromises();
+    expect(orgUnitService.createDepartment).not.toHaveBeenCalled();
+    expect(wrapper.emitted("close")).toBeUndefined();
+  });
+  it("rejects an existing department name before creation", async () => {
+    vi.mocked(orgUnitService.isDepartmentNameUnique).mockResolvedValue(false);
+    const name = await render();
+    await name.setValue("existing-department");
+    await new Promise((resolve) => setTimeout(resolve, 350));
+    (document.querySelector('[aid="create-department"]') as HTMLButtonElement).click();
+    await flushPromises();
+    expect(orgUnitService.isDepartmentNameUnique).toHaveBeenCalledWith("cluster", "existing-department");
+    expect(orgUnitService.createDepartment).not.toHaveBeenCalled();
+    expect(wrapper.emitted("close")).toBeUndefined();
+  });
   it("defaults the administrator row to the eligible API-backed department administrator role", async () => {
     await render();
     (document.querySelector('[aid="add-department-administrator"]') as HTMLButtonElement).click();
@@ -134,7 +155,7 @@ describe("new department creation", () => {
     await new Promise((resolve) => setTimeout(resolve, 400));
     await flushPromises();
     vi.mocked(orgUnitService.isDepartmentNameUnique).mockClear();
-    wrapper.findComponent(DepartmentNameSection).vm.$emit("update:description", "Description draft");
+    wrapper.findComponent(SchedulingDepartmentNameFields).vm.$emit("update:description", "Description draft");
     await flushPromises();
     await new Promise((resolve) => setTimeout(resolve, 400));
     expect(orgUnitService.isDepartmentNameUnique).not.toHaveBeenCalled();

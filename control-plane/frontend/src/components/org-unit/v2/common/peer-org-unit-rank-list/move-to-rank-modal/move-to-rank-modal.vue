@@ -4,13 +4,7 @@
 -->
 
 <template>
-  <runai-base-dialog
-    :model-value="true"
-    @close="$emit('close')"
-    size="width-sm"
-    :custom-class="compact ? 'scheduling-move-dialog' : undefined"
-    :no-padding="compact"
-  >
+  <runai-base-dialog :model-value="true" @close="$emit('close')" size="width-sm">
     <template #header>Move to Rank</template>
 
     <template #body>
@@ -33,7 +27,7 @@
     </template>
 
     <template #footer>
-      <q-btn label="Cancel" :color="compact ? 'primary' : 'grey-7'" flat @click="$emit('close')" />
+      <q-btn label="Cancel" color="grey-7" flat @click="$emit('close')" />
       <q-btn
         :label="`Move ${selectedCount} ${entityType}${selectedCount !== 1 ? 's' : ''}`"
         color="primary"
@@ -48,16 +42,12 @@ import { ref, computed } from "vue";
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
 import { ENTITY_PRIORITY_SELECT_OPTIONS } from "@/models/org-unit.model";
 import { RunaiSelect } from "@/components/common/runai-select";
-import type { ISelectOption } from "@/models/global.model";
 import { EQuotaEntity } from "@/models/resource.model";
 
 export interface Props {
   selectedCount: number;
   entityType?: EQuotaEntity;
   currentRank?: string;
-  descending?: boolean;
-  compact?: boolean;
-  showUnsupportedNoOverQuota?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -71,49 +61,19 @@ const emit = defineEmits<{
 }>();
 
 const selectedRank = ref<string | null>(null);
-const unsupportedNoOverQuota = "__unsupported_no_over_quota__";
 
-const rankOptions = computed<ISelectOption[]>(() => {
-  const options = props.descending ? [...ENTITY_PRIORITY_SELECT_OPTIONS].reverse() : ENTITY_PRIORITY_SELECT_OPTIONS;
-  return [
-    ...options.map((option) => ({ ...option, disable: option.value === props.currentRank })),
-    ...(props.showUnsupportedNoOverQuota
-      ? [
-          {
-            label: "No over quota",
-            value: unsupportedNoOverQuota,
-            disable: true,
-            disabledTooltip: "This rank is not supported by the current department API.",
-          },
-        ]
-      : []),
-  ];
+const rankOptions = computed(() => {
+  return ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => ({
+    ...option,
+    disable: option.value === props.currentRank,
+  }));
 });
 
 const handleMove = () => {
-  if (
-    selectedRank.value &&
-    selectedRank.value !== props.currentRank &&
-    ENTITY_PRIORITY_SELECT_OPTIONS.some((option) => option.value === selectedRank.value)
-  ) {
+  if (selectedRank.value) {
     emit("move", selectedRank.value);
   }
 };
 </script>
 
-<style lang="scss">
-.scheduling-move-dialog {
-  width: 500px !important;
-}
-.scheduling-move-dialog .runai-base-dialog-header {
-  height: 64px;
-  padding: 16px;
-}
-.scheduling-move-dialog .runai-base-dialog-body {
-  min-height: 155px;
-}
-.scheduling-move-dialog .runai-base-dialog-footer {
-  min-height: 70px;
-  padding: 16px;
-}
-</style>
+<style scoped lang="scss"></style>

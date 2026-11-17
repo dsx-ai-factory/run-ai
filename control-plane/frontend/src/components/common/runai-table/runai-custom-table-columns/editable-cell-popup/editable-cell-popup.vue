@@ -23,11 +23,11 @@
       self="top middle"
       class="editable-cell-popup-menu"
       :class="popupClass"
-      @before-show="handleBeforeShow"
-      @show="handleShow"
+      @before-show="emit('before-show')"
+      @show="emit('opened')"
       @hide="handleMenuHide"
     >
-      <q-card class="popup-card" :style="popupWidth ? { width: popupWidth } : undefined">
+      <q-card class="popup-card">
         <q-card-section class="row justify-between items-center q-py-sm">
           <div class="text-weight-medium">
             <slot name="title">{{ title }}</slot>
@@ -65,13 +65,11 @@ const props = withDefaults(
   defineProps<{
     title: string;
     popupClass?: string;
-    popupWidth?: string;
     displayValue?: string | number;
     state?: EditableCellState;
     isSubmitDisabled?: boolean; // Disables the Apply/Submit button (e.g., when validation fails)
     disabled?: boolean; // Disables the entire cell (prevents opening the popup)
     disabledTooltip?: string;
-    prepareBeforeShow?: boolean;
   }>(),
   {
     displayValue: "-",
@@ -79,7 +77,6 @@ const props = withDefaults(
     isSubmitDisabled: false,
     disabled: false,
     disabledTooltip: "",
-    prepareBeforeShow: false,
   },
 );
 
@@ -87,6 +84,7 @@ const emit = defineEmits<{
   apply: [];
   reset: [];
   opened: [];
+  "before-show": [];
 }>();
 
 const isOpen = ref(false);
@@ -102,14 +100,6 @@ const cellClass = computed(() => {
 const handleTriggerClick = () => {
   if (props.disabled) return;
   isOpen.value = true;
-};
-
-const handleBeforeShow = () => {
-  if (props.prepareBeforeShow) emit("opened");
-};
-
-const handleShow = () => {
-  if (!props.prepareBeforeShow) emit("opened");
 };
 
 const handleMenuHide = () => {

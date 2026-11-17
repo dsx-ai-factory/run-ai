@@ -8,7 +8,7 @@ import { createTestingPinia } from "@pinia/testing";
 import { QCheckbox, QToggle, QResizeObserver, Quasar } from "quasar";
 import type { SchedulingDraft } from "./node-pool-scheduling.model";
 import type { DepartmentNodePoolResources } from "@/swagger-models/org-unit-service-client";
-import MoveToRankModal from "@/components/org-unit/v2/common/peer-org-unit-rank-list/move-to-rank-modal/move-to-rank-modal.vue";
+import MoveToRankModal from "./scheduling-move-to-rank-dialog.vue";
 import { RunaiPageActions } from "@/components/common/runai-page-actions";
 import { simulateNodePool } from "./node-pool-simulation.service";
 vi.mock("./node-pool-simulation.service", () => ({ simulateNodePool: vi.fn() }));
@@ -174,7 +174,7 @@ describe("scheduling department table", () => {
   const weightPopup = {
     template: '<td><span class="applied-weight">{{ displayValue }}</span><slot name="input" /></td>',
     props: ["displayValue", "isSubmitDisabled"],
-    emits: ["apply", "reset", "opened"],
+    emits: ["apply", "reset", "before-show"],
   };
   it.each(["proportional", "ranked"] as const)(
     "never shows maximum-allocation columns or editors in %s with stale draft limits",
@@ -265,7 +265,7 @@ describe("scheduling department table", () => {
       if (!editor) throw new Error("Weight editor is unavailable.");
       const applied = editor.get(".applied-weight").text();
       const markerBefore = wrapper.findAll(".quota-marker").map((marker) => marker.attributes("style"));
-      editor.findComponent(weightPopup).vm.$emit("opened");
+      editor.findComponent(weightPopup).vm.$emit("before-show");
       await editor.get("input").setValue("7");
       expect(editor.get(".weight-percentage").text()).toBe(`(${proposed})`);
       expect(editor.get(".applied-weight").text()).toBe(applied);
@@ -335,7 +335,7 @@ describe("scheduling department table", () => {
     });
     const editor = wrapper.findAllComponents(DepartmentResourceEditor).find((item) => item.props("id") === "a");
     if (!editor) throw new Error("Weight editor is unavailable.");
-    editor.findComponent(weightPopup).vm.$emit("opened");
+    editor.findComponent(weightPopup).vm.$emit("before-show");
     await editor.get("input").setValue("7");
     expect(editor.get(".weight-percentage").text()).toBe("(70%)");
     expect(editor.get(".applied-weight").text()).toBe("Unknown");
@@ -351,7 +351,7 @@ describe("scheduling department table", () => {
   it("allows quota above a preserved limit only after maximum allocation is disabled", async () => {
     const resourcePopup = {
       template: '<td><slot name="input" /></td>',
-      emits: ["apply", "reset", "opened"],
+      emits: ["apply", "reset", "before-show"],
     };
     const currentDraft: SchedulingDraft = {
       ...draft,
@@ -378,7 +378,7 @@ describe("scheduling department table", () => {
     });
     const quota = wrapper.findAllComponents(DepartmentResourceEditor).find((editor) => editor.props("kind") === "quota");
     if (!quota) throw new Error("Quota editor is unavailable.");
-    quota.findComponent(resourcePopup).vm.$emit("opened");
+    quota.findComponent(resourcePopup).vm.$emit("before-show");
     await flushPromises();
     await quota.get("input").setValue("40");
     quota.findComponent(resourcePopup).vm.$emit("apply");
@@ -395,7 +395,7 @@ describe("scheduling department table", () => {
   it.each(["proportional", "ranked"] as const)(
     "enforces maximum allocation only while Guaranteed quota is active, starting from %s",
     async (mode) => {
-      const resourcePopup = { template: '<td><slot name="input" /></td>', emits: ["apply", "reset", "opened"] };
+      const resourcePopup = { template: '<td><slot name="input" /></td>', emits: ["apply", "reset", "before-show"] };
       const currentDraft: SchedulingDraft = {
         ...draft,
         mode,
@@ -578,7 +578,6 @@ describe("scheduling department table", () => {
   it("renders API results, defaults demand to half capacity, and preserves drafts on errors", async () => {
     vi.useFakeTimers();
     const transport = vi.mocked(simulateNodePool).mockResolvedValue({
-      capacity: { gpu: 144 },
       orgUnits: [
         {
           id: "a",

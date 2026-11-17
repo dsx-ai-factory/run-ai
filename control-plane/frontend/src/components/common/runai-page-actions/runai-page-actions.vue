@@ -56,28 +56,27 @@
             </slot>
           </template>
         </div>
-        <runai-page-filter
-          v-if="!advancedFilters"
-          :initial-filters-model="columnFilters"
-          @update-filter-by="updateFilterBy($event)"
-          :filter-options="filterOptions"
-          :filter-input-label="filterInputLabel"
-          :hide-all-cluster-filter-option="hideAllClusterFilterOption || !isMultiCluster"
-          :filter-by="filters"
-          :hide-cluster-filter="hideClusterFilter"
-        ></runai-page-filter>
-        <runai-advanced-filters
-          :menu-width="filterMenuWidth"
-          :menu-max-height="filterMenuMaxHeight"
-          :menu-class="filterMenuClass"
-          v-else
-          @update-filter-by="updateFilterBy($event)"
-          :filter-options="advancedFilterOptions"
-          :initial-filters-model="advancedColumnFilters"
-          :hide-all-cluster-filter-option="hideAllClusterFilterOption || !isMultiCluster"
-          :filter-by="filters"
-          :hide-cluster-filter="hideClusterFilter"
-        />
+        <slot name="filters">
+          <runai-page-filter
+            v-if="!advancedFilters"
+            :initial-filters-model="columnFilters"
+            @update-filter-by="updateFilterBy($event)"
+            :filter-options="filterOptions"
+            :filter-input-label="filterInputLabel"
+            :hide-all-cluster-filter-option="hideAllClusterFilterOption || !isMultiCluster"
+            :filter-by="filters"
+            :hide-cluster-filter="hideClusterFilter"
+          ></runai-page-filter>
+          <runai-advanced-filters
+            v-else
+            @update-filter-by="updateFilterBy($event)"
+            :filter-options="advancedFilterOptions"
+            :initial-filters-model="advancedColumnFilters"
+            :hide-all-cluster-filter-option="hideAllClusterFilterOption || !isMultiCluster"
+            :filter-by="filters"
+            :hide-cluster-filter="hideClusterFilter"
+          />
+        </slot>
         <div class="right-actions-container">
           <runai-general-search
             v-if="showSearch"
@@ -222,9 +221,6 @@ export default defineComponent({
     "refresh-data",
   ],
   props: {
-    filterMenuWidth: { type: String, default: undefined },
-    filterMenuMaxHeight: { type: String, default: undefined },
-    filterMenuClass: { type: String, default: undefined },
     advancedFilters: {
       type: Boolean as PropType<boolean>,
       default: false,

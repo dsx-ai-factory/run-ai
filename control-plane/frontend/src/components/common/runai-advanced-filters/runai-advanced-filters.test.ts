@@ -5,7 +5,7 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
-import { QMenu, Quasar } from "quasar";
+import { Quasar } from "quasar";
 import { createTestingPinia } from "@pinia/testing";
 import { setActivePinia } from "pinia";
 import RunaiAdvancedFilters from "./runai-advanced-filters.vue";
@@ -31,17 +31,6 @@ function createFilterBy(overrides: Partial<IFilterBy> = {}): IFilterBy {
 }
 
 describe("runai-advanced-filters", () => {
-  it("keeps the default Add filter menu fit and supports an explicit scheduling width", async () => {
-    const wrapper = mount(RunaiAdvancedFilters, {
-      props: { filterOptions: [], filterBy: {}, hideClusterFilter: true },
-      global: { plugins: [Quasar] },
-    });
-    expect(wrapper.findComponent(QMenu).props("fit")).toBe(true);
-    await wrapper.setProps({ menuWidth: "208px" });
-    expect(wrapper.findComponent(QMenu).props("fit")).toBe(false);
-    expect(wrapper.findComponent(QMenu).vm.$attrs.style).toEqual({ width: "208px" });
-    wrapper.unmount();
-  });
   describe("selectFilter - autocomplete injection", () => {
     it("should inject autocompleteOptionsFn for FreeText filter with autocomplete", () => {
       const mockAutocompleteFn = vi.fn().mockResolvedValue(["r1"]);

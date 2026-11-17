@@ -23,13 +23,10 @@
             stack-label
             class="department-cluster"
           />
-          <department-name-section
-            compact
-            auto-focus
+          <scheduling-department-name-fields
             v-model:department-name="name"
             v-model:description="description"
             :cluster-id="clusterId"
-            :read-only="false"
           />
           <runai-section-title
             flat
@@ -113,7 +110,7 @@
 </template>
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
-import { useAccessRuleRoles } from "@/composables/access-rule/use-access-rule-roles.composable";
+import { useAccessRuleRoles } from "./use-access-rule-roles.composable";
 import { useAuthStore } from "@/stores/auth.store";
 import { errorMessages } from "@/common/error-message.constant";
 import { QForm, useQuasar } from "quasar";
@@ -129,7 +126,7 @@ import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
 import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
 import { RunaiSectionTitle } from "@/components/common/runai-section-title";
 import { RunaiSelect } from "@/components/common/runai-select";
-import DepartmentNameSection from "@/components/department/department-edit-form/department-name-section/department-name-section.vue";
+import SchedulingDepartmentNameFields from "./scheduling-department-name-fields.vue";
 import { SubjectAddableMultiSelect } from "@/components/rbac/common/subject-addable-multi-select";
 import { subjectTypeOptions, subjectTypeOptionsWithSSO } from "@/models/access-rule.model";
 import { SubjectTypeExtended } from "@/swagger-models/authorization-client";
@@ -313,13 +310,13 @@ async function createDepartment() {
   padding: 0 0 10px;
   line-height: 21px;
 }
-.scheduling-new-department .department-name-section--compact .q-field__native {
+.scheduling-new-department .scheduling-department-name-fields .q-field__native {
   line-height: 21px;
 }
-.scheduling-new-department .department-name-section--compact .q-textarea .q-field__control-container {
+.scheduling-new-department .scheduling-department-name-fields .q-textarea .q-field__control-container {
   padding: 0;
 }
-.scheduling-new-department .department-name-section--compact textarea.q-field__native {
+.scheduling-new-department .scheduling-department-name-fields textarea.q-field__native {
   overflow-y: auto !important;
 }
 .scheduling-new-department .q-field__messages,
@@ -353,11 +350,6 @@ async function createDepartment() {
 }
 .new-department-form .administrator-title .q-icon {
   font-size: 20px;
-}
-.new-department-form .runai-expansion-item {
-  border: 0;
-  box-shadow: none;
-  margin: 0 0 26px;
 }
 .new-department-form .runai-section-title {
   font-weight: 400;
@@ -453,9 +445,6 @@ async function createDepartment() {
 }
 .scheduling-new-department .q-field:not(.q-field--error) .q-field__control:before {
   border-color: #bdbdbd;
-}
-.scheduling-new-department .department-name-section--compact .runai-expansion-header {
-  line-height: 21px;
 }
 .scheduling-new-department .administrator-title > .row > span {
   min-width: 224px;

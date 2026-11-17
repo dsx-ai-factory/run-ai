@@ -10,7 +10,7 @@ import { Action, ResourceType } from "@/swagger-models/authorization-client";
 import type { ISelectOption } from "@/models/global.model";
 import { errorMessages } from "@/common/error-message.constant";
 
-// Shared by the department/project access-rule form and the node-pool preview.
+// Eligible administrator roles for department creation from node-pool scheduling.
 export function useAccessRuleRoles() {
   const roleStore = useRoleStore();
   const permissionStore = usePermissionStore();

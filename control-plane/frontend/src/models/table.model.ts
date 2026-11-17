@@ -136,8 +136,6 @@ export interface ITableColumn {
   hideExport?: boolean;
   sanitizeCell?: boolean; // Whether to force quotes around this field's value in CSV export
   filter?: {
-    operatorLabels?: Partial<Record<EFilterOperator, string>>;
-    operatorMenuWidth?: string;
     type: EColumnFilterType;
     selectOptions?: ISelectOption[];
     excludeOperators?: EFilterOperator[];

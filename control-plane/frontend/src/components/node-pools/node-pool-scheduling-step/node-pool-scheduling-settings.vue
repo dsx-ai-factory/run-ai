@@ -16,7 +16,7 @@
     </header>
     <div class="settings-body">
       <section v-if="draft.mode === 'guaranteed'">
-        <runai-section-title
+        <scheduling-section-title
           title="Weight within rank"
           interactive-tooltip
           tooltip-icon="ph-bold ph-info"
@@ -30,20 +30,35 @@
               >
             </span>
           </template>
-        </runai-section-title>
-        <runai-radio-options
+        </scheduling-section-title>
+        <q-option-group
+          class="weight-options runai-option-group"
           :model-value="draft.automaticWeights ? 'automatic' : 'custom'"
           :options="weightOptions"
+          type="radio"
+          aria-label="Weight within rank"
           :disable="readonly"
           @update:model-value="patch({ automaticWeights: $event === 'automatic' })"
-        />
+        >
+          <template #label="option">
+            <div class="weight-option-label" :aid="`radio-option-${option.label}`">
+              <span class="text-b-subtitle2">{{ option.label }}</span>
+              <scheduling-help-tooltip
+                :tooltip-text="option.toolTip"
+                width="374px"
+                popup-class="node-pool-settings-option-help"
+                @click.stop
+              />
+            </div>
+          </template>
+        </q-option-group>
       </section>
       <section v-if="draft.mode === 'guaranteed'" class="toggle-section">
-        <runai-section-title title="Max GPU allocation" tooltip-icon="ph-bold ph-info" :tooltip-text="maxHelp">
+        <scheduling-section-title title="Max GPU allocation" tooltip-icon="ph-bold ph-info" :tooltip-text="maxHelp">
           <template #tooltip-content>
             <span class="node-pool-settings-help node-pool-settings-help--standard">{{ maxHelp }}</span>
           </template>
-        </runai-section-title>
+        </scheduling-section-title>
         <runai-toggle
           :model-value="!!draft.maxAllocation"
           :disable="readonly || (!canResetResources && (savedMaxAllocation ?? draft.maxAllocation))"
@@ -53,7 +68,7 @@
       </section>
       <section>
         <div class="toggle-section">
-          <runai-section-title
+          <scheduling-section-title
             title="Time-based fairshare"
             interactive-tooltip
             tooltip-icon="ph-bold ph-info"
@@ -74,7 +89,7 @@
                 >.
               </span>
             </template>
-          </runai-section-title>
+          </scheduling-section-title>
           <runai-toggle
             :model-value="!!draft.timeFairshare"
             :disable="readonly"
@@ -84,7 +99,7 @@
         </div>
         <div v-if="draft.timeFairshare" class="historical-fields">
           <div class="historical-weight-group">
-            <runai-section-title
+            <scheduling-section-title
               flat
               class="historical-weight-title"
               title="Set the weight value that determines how a project's historical resource usage affects its fairshare"
@@ -100,7 +115,7 @@
                     <li>&gt;1 — History dominates; higher values amplify its effect.</li>
                   </ul>
                 </div>
-              </template></runai-section-title
+              </template></scheduling-section-title
             >
             <div class="historical-weight-field">
               <q-input
@@ -119,7 +134,7 @@
             </div>
           </div>
           <div class="historical-window-group">
-            <runai-section-title
+            <scheduling-section-title
               flat
               title="Set the duration of the historical usage window"
               width="374px"
@@ -128,7 +143,7 @@
               <template #tooltip-content>
                 <span class="node-pool-settings-help node-pool-settings-help--standard">{{ windowHelp }}</span>
               </template>
-            </runai-section-title>
+            </scheduling-section-title>
             <div class="duration-grid historical-window">
               <q-input
                 v-for="unit in windowUnits"
@@ -149,7 +164,7 @@
         </div>
       </section>
       <section class="runtime-section">
-        <runai-section-title
+        <scheduling-section-title
           title="Set the minimum guaranteed runtime"
           tooltip-icon="ph-bold ph-info"
           :tooltip-text="runtimeHelp"
@@ -157,7 +172,7 @@
           <template #tooltip-content>
             <span class="node-pool-settings-help node-pool-settings-help--standard">{{ runtimeHelp }}</span>
           </template>
-        </runai-section-title>
+        </scheduling-section-title>
         <div class="duration-grid">
           <q-input
             v-for="unit in runtimeUnits"
@@ -177,7 +192,7 @@
       </section>
       <template v-if="draft.mode === 'guaranteed'">
         <section class="toggle-section">
-          <runai-section-title
+          <scheduling-section-title
             title="CPU quota"
             interactive-tooltip
             tooltip-icon="ph-bold ph-info"
@@ -194,7 +209,7 @@
                 >.
               </span>
             </template>
-          </runai-section-title>
+          </scheduling-section-title>
           <runai-toggle
             :model-value="draft.cpuQuota"
             :disable="readonly || (!canResetResources && (savedCpuQuota ?? draft.cpuQuota))"
@@ -237,8 +252,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { DOCS } from "@/constants/docs";
-import { RunaiSectionTitle } from "@/components/common/runai-section-title";
-import { RunaiRadioOptions } from "@/components/common/runai-radio-options";
+import SchedulingSectionTitle from "./scheduling-section-title.vue";
+import SchedulingHelpTooltip from "./scheduling-help-tooltip.vue";
 import { RunaiToggle } from "@/components/common/runai-toggle";
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
 import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
@@ -255,16 +270,12 @@ const weightOptions = [
   {
     label: "Automatic",
     value: "automatic",
-    toolTipClass: "node-pool-settings-option-help",
-    toolTipWidth: "374px",
     toolTip:
       "A project or department gets a proportion of unused resources relative to its quota, and it can't be modified.",
   },
   {
     label: "Custom",
     value: "custom",
-    toolTipClass: "node-pool-settings-option-help",
-    toolTipWidth: "374px",
     toolTip: "Set the proportion of unused resources a project or department can get on top of its quota.",
   },
 ];
@@ -396,11 +407,24 @@ header :deep(.q-icon) {
 .settings-body > .runtime-section:last-child {
   padding-bottom: 0 !important;
 }
-.settings-body :deep(.runai-radio-options) {
+.weight-options {
   margin-top: 7px;
 }
-.settings-body :deep(.runai-section .q-field) {
-  display: none;
+.weight-option-label {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 40px;
+  margin-right: 16px;
+}
+.weight-options :deep(.q-radio__label) {
+  padding-left: var(--space-xs);
+}
+.weight-options :deep(.q-radio.disabled) {
+  opacity: 1;
+}
+.weight-options :deep(.q-radio.disabled .q-radio__inner) {
+  color: var(--icon-disabled);
 }
 .settings-body :deep(.runai-section-title) {
   font-size: 14px;
@@ -574,8 +598,8 @@ header :deep(.q-icon) {
 </style>
 
 <style lang="scss">
-.runai-tooltip:has(> .node-pool-settings-help),
-.runai-tooltip.node-pool-settings-option-help,
+.scheduling-help-popup:has(> .node-pool-settings-help),
+.scheduling-help-popup.node-pool-settings-option-help,
 .q-tooltip.node-pool-settings-hide-help {
   padding: 10px;
   border-radius: 3px;
@@ -587,20 +611,20 @@ header :deep(.q-icon) {
   font-weight: 400;
   line-height: 16.8px;
 }
-.runai-tooltip:has(> .node-pool-settings-help--standard),
-.runai-tooltip.node-pool-settings-option-help {
+.scheduling-help-popup:has(> .node-pool-settings-help--standard),
+.scheduling-help-popup.node-pool-settings-option-help {
   width: 374px;
   max-width: min(374px, calc(100vw - 20px)) !important;
 }
-.runai-tooltip:has(> .node-pool-settings-help--fairshare) {
+.scheduling-help-popup:has(> .node-pool-settings-help--fairshare) {
   width: 427px;
   max-width: min(427px, calc(100vw - 20px)) !important;
 }
-.runai-tooltip:has(> .node-pool-settings-help--cpu) {
+.scheduling-help-popup:has(> .node-pool-settings-help--cpu) {
   width: 429px;
   max-width: min(429px, calc(100vw - 20px)) !important;
 }
-.runai-tooltip:has(> .node-pool-settings-help--historical) {
+.scheduling-help-popup:has(> .node-pool-settings-help--historical) {
   width: 475px;
   max-width: min(475px, calc(100vw - 20px)) !important;
 }

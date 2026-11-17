@@ -246,8 +246,6 @@ function getAdvancedFilterOptions(columns: Array<ITableColumn>): Array<IAdvanced
       ...(filter?.excludeOperators && { excludeOperators: filter.excludeOperators }),
       ...(filter?.inputType && { inputType: filter.inputType }),
       ...(filter?.maxWidth && { maxWidth: filter.maxWidth }),
-      ...(filter?.operatorLabels && { operatorLabels: filter.operatorLabels }),
-      ...(filter?.operatorMenuWidth && { operatorMenuWidth: filter.operatorMenuWidth }),
       ...(filter?.autocompleteOptionsFn && { autocompleteOptionsFn: filter.autocompleteOptionsFn }),
     }),
   );

@@ -65,7 +65,6 @@ export interface ISelectOption {
   disable?: boolean;
   toolTip?: string;
   toolTipWidth?: string;
-  toolTipClass?: string;
   disabledTooltip?: string; // when the line is disabled, you can add a tooltip without a question mark icon
   disabledTooltipWidth?: string;
   svg?: string;

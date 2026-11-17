@@ -61,7 +61,6 @@
                   @revealed="innerToolTipShown = true"
                   @hidden="innerToolTipShown = false"
                   :tooltip-text="opt.toolTip"
-                  :tooltip-class="opt.toolTipClass"
                   tooltip-position="right"
                   :width="opt.toolTipWidth ?? tooltipWidth"
                 />

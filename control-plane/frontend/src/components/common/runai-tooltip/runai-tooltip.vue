@@ -14,27 +14,15 @@
     :color="color"
     :class="{ 'runai-tooltip-icon': !color }"
     :aria-label="ariaLabel || 'More information: ' + tooltipText"
-    @mouseenter="openInteractive"
-    @mouseleave="closeInteractive"
-    @focusin="openInteractive"
-    @focusout="closeInteractive"
-    @click="openInteractive"
   >
     <q-tooltip
-      v-model="visible"
-      :no-parent-event="interactive"
       class="q-pa-sm runai-tooltip"
-      :class="[tooltipClass, { 'dark-mode': darkMode, 'all-pointer-events': interactive }]"
+      :class="{ 'dark-mode': darkMode }"
       :max-width="width"
       :anchor="anchorPosition"
       :self="selfPosition"
-      :offset="tooltipOffset"
       @show="$emit('revealed')"
       @hide="$emit('hidden')"
-      @mouseenter="openInteractive"
-      @mouseleave="closeInteractive"
-      @focusin="openInteractive"
-      @focusout="closeInteractive"
     >
       <slot name="content">{{ tooltipText }} </slot>
     </q-tooltip>
@@ -42,17 +30,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onBeforeUnmount, ref, type PropType } from "vue";
+import { defineComponent, type PropType } from "vue";
 export type TPosition = "bottom middle" | "top middle" | "center left" | "center right";
 export default defineComponent({
   name: "runai-tooltip",
   props: {
-    interactive: { type: Boolean, default: false },
-    tooltipOffset: { type: Array as PropType<number[]>, default: undefined },
-    tooltipClass: {
-      type: String,
-      default: undefined,
-    },
     tooltipText: {
       type: String as PropType<string>,
       required: true,
@@ -94,24 +76,6 @@ export default defineComponent({
       type: String as PropType<string>,
       required: false,
     },
-  },
-  setup(props) {
-    const visible = ref(false);
-    let hideTimer: ReturnType<typeof setTimeout> | undefined;
-    function openInteractive() {
-      if (!props.interactive) return;
-      clearTimeout(hideTimer);
-      visible.value = true;
-    }
-    function closeInteractive() {
-      if (!props.interactive) return;
-      clearTimeout(hideTimer);
-      hideTimer = setTimeout(() => {
-        visible.value = false;
-      }, 200);
-    }
-    onBeforeUnmount(() => clearTimeout(hideTimer));
-    return { visible, openInteractive, closeInteractive };
   },
   computed: {
     selfPosition(): TPosition {

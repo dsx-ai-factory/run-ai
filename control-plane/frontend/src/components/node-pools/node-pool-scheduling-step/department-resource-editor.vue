@@ -6,9 +6,7 @@
   <editable-cell-popup
     :class="{ 'unlimited-allocation': kind === 'limit' && (value == null || value === -1) }"
     :title="editorTitle"
-    popup-class="scheduling-resource-popup"
-    prepare-before-show
-    :popup-width="kind === 'weight' ? '274px' : '200px'"
+    :popup-class="`scheduling-resource-popup scheduling-resource-popup--${kind}`"
     :state="
       active && !loading
         ? validation.errors.length
@@ -26,21 +24,22 @@
     :disabled="disabled"
     :disabled-tooltip="disabledTooltip"
     :is-submit-disabled="loading || validation.errors.length > 0"
-    @opened="opened"
+    @before-show="opened"
     @reset="reset"
     @apply="apply"
   >
     <template #title>
       <span class="resource-editor-title">
         {{ editorTitle }}
-        <runai-tooltip
+        <scheduling-help-tooltip
           v-if="kind === 'weight'"
           class="weight-editor-help q-ml-xs"
           icon="ph-bold ph-question"
           width="300px"
           :tooltip-text="weightHelp"
-          tooltip-position="right"
-          :tooltip-offset="rankedWeight ? [120, 0] : [180, 0]"
+          anchor="center right"
+          self="center left"
+          :offset="rankedWeight ? [120, 0] : [180, 0]"
           ><template #content
             ><span class="node-pool-weight-help"
               ><strong>Weight</strong> determines a department’s share relative to the other departments{{
@@ -50,7 +49,7 @@
               weight of all departments{{ rankedWeight ? " in the rank" : "" }}.<br />For example, a department with a
               weight of 2{{ rankedWeight ? " in a rank" : "" }} where the weights total 20 receives 10%.</span
             ></template
-          ></runai-tooltip
+          ></scheduling-help-tooltip
         >
       </span>
     </template>
@@ -104,7 +103,7 @@
 </template>
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { RunaiTooltip } from "@/components/common/runai-tooltip";
+import SchedulingHelpTooltip from "./scheduling-help-tooltip.vue";
 import { EditableCellPopup } from "@/components/common/runai-table/runai-custom-table-columns/editable-cell-popup";
 import {
   recommendedDepartmentQuotaMinimum,
@@ -289,10 +288,14 @@ p {
   box-shadow: -1px 0 7px rgba(0, 0, 0, 0.15);
 }
 .scheduling-resource-popup .popup-card {
+  width: 200px;
   border-radius: 5px;
   box-shadow: none;
 }
-.runai-tooltip:has(> .node-pool-weight-help) {
+.scheduling-resource-popup--weight .popup-card {
+  width: 274px;
+}
+.scheduling-help-popup:has(> .node-pool-weight-help) {
   padding: 10px;
   border-radius: 3px;
   box-shadow: -1px 0 7px rgba(0, 0, 0, 0.15);

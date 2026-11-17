@@ -17,15 +17,15 @@ describe("editable cell popup", () => {
     expect(wrapper.emitted("opened")).toHaveLength(1);
     wrapper.unmount();
   });
-  it("prepares an opted-in editor before showing and does not open it again after the transition", async () => {
+  it("exposes before-show separately without changing the opened lifecycle", async () => {
     const wrapper = mount(EditableCellPopup, {
-      props: { title: "Weight", prepareBeforeShow: true },
+      props: { title: "Weight" },
       global: { plugins: [Quasar] },
     });
-    const menu = wrapper.findComponent(QMenu);
     await wrapper.get(".cell-trigger").trigger("click");
-    expect(wrapper.emitted("opened")).toHaveLength(1);
-    menu.vm.$emit("show");
+    expect(wrapper.emitted("before-show")).toHaveLength(1);
+    expect(wrapper.emitted("opened")).toBeUndefined();
+    wrapper.findComponent(QMenu).vm.$emit("show");
     expect(wrapper.emitted("opened")).toHaveLength(1);
     wrapper.unmount();
   });

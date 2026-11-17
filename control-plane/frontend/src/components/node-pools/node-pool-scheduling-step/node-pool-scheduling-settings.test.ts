@@ -4,7 +4,7 @@
  */
 import { mount } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
-import { QInput, Quasar } from "quasar";
+import { QInput, QOptionGroup, Quasar } from "quasar";
 import { RunaiToggle } from "@/components/common/runai-toggle";
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
 import Settings from "./node-pool-scheduling-settings.vue";
@@ -17,6 +17,22 @@ const draft: SchedulingDraft = {
   departments: { a: { id: "a", limit: 8, weight: 2, quota: 3, rank: "High" } },
 };
 describe("scheduling settings draft interactions", () => {
+  it("changes custom weights through the local radio group and prevents readonly patches", async () => {
+    const wrapper = mount(Settings, {
+      props: { draft },
+      global: { plugins: [Quasar] },
+    });
+    const options = wrapper.findComponent(QOptionGroup);
+    expect(options.attributes("aria-label")).toBe("Weight within rank");
+    expect(options.props("modelValue")).toBe("automatic");
+    options.vm.$emit("update:model-value", "custom");
+    expect(wrapper.emitted("patch")).toEqual([[{ automaticWeights: false }]]);
+    await wrapper.setProps({ readonly: true });
+    expect(options.props("disable")).toBe(true);
+    options.vm.$emit("update:model-value", "automatic");
+    expect(wrapper.emitted("patch")).toHaveLength(1);
+    wrapper.unmount();
+  });
   it.each(["proportional", "ranked"] as const)(
     "hides quota-only advanced settings in %s even with stale enabled values",
     (mode) => {

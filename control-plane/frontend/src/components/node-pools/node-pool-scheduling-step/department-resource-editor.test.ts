@@ -9,7 +9,7 @@ import Editor from "./department-resource-editor.vue";
 const popup = {
   template: '<td><slot name="input" /></td>',
   props: ["isSubmitDisabled"],
-  emits: ["apply", "reset", "opened"],
+  emits: ["apply", "reset", "before-show"],
 };
 describe("resource editor opening transition", () => {
   it("does not overwrite input entered while the popup is opening", async () => {
@@ -127,7 +127,7 @@ describe("department resource editor", () => {
       global: { plugins: [Quasar], stubs: { EditableCellPopup: popup } },
     });
     const menu = wrapper.findComponent(popup);
-    menu.vm.$emit("opened");
+    menu.vm.$emit("before-show");
     await wrapper.vm.$nextTick();
     expect((wrapper.get("input").element as HTMLInputElement).value).toBe("Unlimited");
     menu.vm.$emit("apply");

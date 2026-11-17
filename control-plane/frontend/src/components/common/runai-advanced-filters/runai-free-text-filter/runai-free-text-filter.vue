@@ -4,14 +4,7 @@
 -->
 
 <template>
-  <runai-page-filter-wrapper
-    display
-    :title="filter.label"
-    @save="saveFilter"
-    @close="$emit('close')"
-    :max-width="filter.maxWidth ?? '250px'"
-    :width="filter.maxWidth"
-  >
+  <runai-page-filter-wrapper display :title="filter.label" @save="saveFilter" @close="$emit('close')" max-width="250px">
     <template #body>
       <div class="row">
         <div class="col">
@@ -20,8 +13,6 @@
             outlined
             v-model="selectedOption"
             :options="options"
-            :menu-shrink="!!filter.operatorMenuWidth"
-            :popup-content-style="filter.operatorMenuWidth ? { width: filter.operatorMenuWidth } : undefined"
             :disable="isOperatorSelectDisabled"
             class="q-mb-lg"
           />
@@ -77,9 +68,12 @@ export default defineComponent({
   },
   computed: {
     options(): IFreeTextFilterSelectOption[] {
-      return freeTextFilterSelectOptions
-        .filter((option) => !this.filter.excludeOperators?.includes(option.value))
-        .map((option) => ({ ...option, label: this.filter.operatorLabels?.[option.value] ?? option.label }));
+      if (!this.filter.excludeOperators) {
+        return freeTextFilterSelectOptions;
+      }
+      return freeTextFilterSelectOptions.filter((option: IFreeTextFilterSelectOption) => {
+        return !this.filter?.excludeOperators?.includes(option.value);
+      });
     },
     isOperatorSelectDisabled(): boolean {
       return this.options.length <= 1;
