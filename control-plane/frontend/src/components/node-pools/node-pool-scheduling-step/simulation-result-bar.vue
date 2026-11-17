@@ -5,7 +5,7 @@
 <template>
   <div class="simulation-values" :class="{ 'simulation-values-outside': outside }">
     <q-resize-observer @resize="measure" />
-    <div class="simulation-segments">
+    <div class="simulation-segments" @transitionend="measure">
       <span ref="allocatedSegment" class="allocated" :style="{ width: `${width(allocated)}%`, background }">
         <span ref="allocatedLabel" class="segment-value" :aria-hidden="outside">{{ number(allocated) }}</span>
       </span>
@@ -37,10 +37,16 @@ const number = (value: number) => Number(value.toFixed(2));
 const width = (value: number) => Math.min(100, Math.max(0, (value / (props.capacity || 1)) * 100));
 function measure() {
   if (!allocatedSegment.value?.parentElement?.clientWidth) return;
+  const barWidth = allocatedSegment.value.parentElement.clientWidth;
   outside.value = [
-    [allocatedSegment.value, allocatedLabel.value],
-    [unmetSegment.value, unmetLabel.value],
-  ].some(([segment, label]) => segment && label && label.getBoundingClientRect().width + 8 > segment.clientWidth);
+    { segment: allocatedSegment.value, label: allocatedLabel.value, value: props.allocated },
+    { segment: unmetSegment.value, label: unmetLabel.value, value: props.unmet },
+  ].some(
+    ({ segment, label, value }) =>
+      segment &&
+      label &&
+      label.getBoundingClientRect().width + 8 > Math.min(segment.clientWidth, (barWidth * width(value)) / 100),
+  );
 }
 watch(
   () => [props.allocated, props.unmet, props.capacity],
@@ -72,6 +78,7 @@ onMounted(() => {
   text-align: center;
   -webkit-text-stroke: 1.4px white;
   paint-order: stroke fill;
+  transition: width 180ms ease-out;
 }
 .allocated {
   flex: 0 0 auto;
@@ -109,5 +116,13 @@ onMounted(() => {
   width: 4px;
   height: 38px;
   transform: translate(-3px, -50%);
+  transition: left 180ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .allocated,
+  .unmet,
+  .allocation-marker {
+    transition: none;
+  }
 }
 </style>

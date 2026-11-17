@@ -201,7 +201,11 @@
                 @apply="emit('edit', { id: row.id, limit: $event })"
               />
               <q-td class="result-cell">
-                <div class="result-bar" :class="{ 'simulation-bar': simulation }">
+                <div
+                  class="result-bar"
+                  :class="{ 'simulation-bar': simulation }"
+                  :aria-busy="simulation && simulationStatus === 'loading'"
+                >
                   <simulation-result-bar
                     v-if="simulation && simulationResults?.[row.id]"
                     :allocated="simulationResults[row.id].allocated"
@@ -272,7 +276,9 @@
         </q-table>
         <div v-if="simulation" class="simulation-notice" role="status" aria-live="polite">
           <span v-if="preview">Simulation preview — mock results. Authored examples, not scheduler predictions.</span>
-          <span v-if="simulationStatus === 'loading'">Calculating simulation…</span>
+          <span v-if="simulationStatus === 'loading'">{{
+            simulationResults ? "Updating simulation… Previous results shown." : "Calculating simulation…"
+          }}</span>
           <span v-else-if="simulationMessage">{{ simulationMessage }}</span>
           <runai-btn
             v-if="simulationStatus === 'error' || simulationStatus === 'unavailable'"

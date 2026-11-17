@@ -228,6 +228,53 @@ describe("simulation contract", () => {
       },
     });
   });
+  it("keeps the previous result throughout debounce and request, then replaces it", async () => {
+    vi.useFakeTimers();
+    let resolveNext!: (value: typeof response) => void;
+    const transport = vi
+      .fn()
+      .mockResolvedValueOnce(response)
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveNext = resolve;
+          }),
+      );
+    const source = ref(scenario());
+    const scope = effectScope();
+    const state = scope.run(() => useNodePoolSimulation(source, transport));
+    if (!state) throw new Error("Simulation test scope is inactive.");
+    await vi.advanceTimersByTimeAsync(300);
+    const previous = state.results.value;
+    source.value.demand.dragged = 40;
+    expect(state.status.value).toBe("loading");
+    expect(state.results.value).toBe(previous);
+    await vi.advanceTimersByTimeAsync(300);
+    expect(state.results.value).toBe(previous);
+    resolveNext({ orgUnits: [{ ...response.orgUnits[0], fairShare: { gpu: 20 } }] });
+    await nextTick();
+    expect(state.status.value).toBe("ready");
+    expect(state.results.value?.visible.allocated).toBe(20);
+    scope.stop();
+  });
+  it.each(["pool", "capacity", "mode", "disabled"])(
+    "clears previous results when simulation context changes: %s",
+    async (change) => {
+      vi.useFakeTimers();
+      const source = ref<SimulationScenario | undefined>(scenario());
+      const scope = effectScope();
+      const state = scope.run(() => useNodePoolSimulation(source, vi.fn().mockResolvedValue(response)));
+      if (!state || !source.value) throw new Error("Simulation test scope is inactive.");
+      await vi.advanceTimersByTimeAsync(300);
+      expect(state.results.value?.visible.allocated).toBe(12);
+      if (change === "pool") source.value.poolId = "other";
+      if (change === "capacity") source.value.capacity = 64;
+      if (change === "mode") source.value.draft.mode = "ranked";
+      if (change === "disabled") source.value = undefined;
+      expect(state.results.value).toBeUndefined();
+      scope.stop();
+    },
+  );
   it.each([400, 401, 403, 404, 500, 501, undefined])(
     "clears stale results on failure %s and retries the same draft",
     async (code) => {
@@ -245,8 +292,9 @@ describe("simulation contract", () => {
       await vi.advanceTimersByTimeAsync(300);
       expect(state.results.value?.visible.allocated).toBe(12);
       state.retry();
-      expect(state.results.value).toBeUndefined();
+      expect(state.results.value?.visible.allocated).toBe(12);
       await vi.advanceTimersByTimeAsync(300);
+      expect(state.results.value).toBeUndefined();
       expect(state.status.value).toBe(code === 404 || code === 501 ? "unavailable" : "error");
       expect(state.message.value).toMatch(/preserved/);
       state.retry();

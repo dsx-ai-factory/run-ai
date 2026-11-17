@@ -9,6 +9,7 @@ export function useNodePoolSimulation(source: Ref<SimulationScenario | undefined
   const results = ref<ReturnType<typeof mapSimulationResponse>>();
   const status = ref<"idle" | "loading" | "ready" | "error" | "unavailable">("idle");
   const message = ref("");
+  let resultContext: string | undefined;
   let revision = 0;
   let timer: ReturnType<typeof setTimeout> | undefined;
   let controller: AbortController | undefined;
@@ -19,9 +20,10 @@ export function useNodePoolSimulation(source: Ref<SimulationScenario | undefined
   }
   function retry() {
     cancel();
-    results.value = undefined;
     message.value = "";
     const scenario = source.value;
+    const context = scenario && JSON.stringify([scenario.poolId, scenario.capacity, scenario.draft.mode]);
+    if (context !== resultContext || !scenario) results.value = undefined;
     if (!scenario) {
       status.value = "idle";
       return;
@@ -31,6 +33,7 @@ export function useNodePoolSimulation(source: Ref<SimulationScenario | undefined
     try {
       request = buildSimulationRequest(scenario);
     } catch (error) {
+      results.value = undefined;
       status.value = "unavailable";
       message.value = (error as Error).message;
       return;
@@ -42,9 +45,11 @@ export function useNodePoolSimulation(source: Ref<SimulationScenario | undefined
         const response = await transport(scenario.poolId, request, controller.signal);
         if (current !== revision) return;
         results.value = mapSimulationResponse(response);
+        resultContext = context;
         status.value = "ready";
       } catch (error) {
         if (current !== revision) return;
+        results.value = undefined;
         const code = (error as { response?: { status?: number } }).response?.status;
         const unavailable = code === 404 || code === 501;
         status.value = unavailable ? "unavailable" : "error";
