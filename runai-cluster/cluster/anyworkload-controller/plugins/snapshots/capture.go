@@ -26,10 +26,12 @@ import (
 	kartav1alpha1 "github.com/run-ai/karta/pkg/api/runai/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -73,7 +75,8 @@ type captureInput struct {
 // HandleAdditionalResources deletes the workload's snapshots that are no longer
 // needed and makes the runner the owner of the PodSnapshots that stay. Then it
 // captures each key from its first Ready replica, one capture at a time per
-// workload, newest key first.
+// workload, newest key first. Each capture event goes on the runner once per
+// key, which puts it in the workload's history (§8.6).
 //
 // A problem is reported as a warning and never returned: an error here would
 // stop the workload being applied.
@@ -96,29 +99,33 @@ func (p *Plugin) HandleAdditionalResources(
 	if err := ownPodSnapshots(ctx, k8sClient, runner); err != nil {
 		_ = state.AddPluginIssue(ctx, p, resource, err, false, "", issue.Compute)
 	}
-	if !p.captureEnabled || !optedIn(resource) {
+	if !optedIn(resource) {
 		return nil
 	}
 	if err := checkEligibility(ctx, resource, karta); err != nil {
 		return nil //nolint:nilerr // Status reports it.
 	}
-	if err := p.capture(ctx, k8sClient, runner, resource); err != nil {
+	events := p.captureEvents(runner)
+	if err := errors.Join(p.capture(ctx, k8sClient, runner, resource, events), events.save()); err != nil {
 		_ = state.AddPluginIssue(ctx, p, resource, err, false, "", issue.Compute)
 	}
 	return nil
 }
 
 func (p *Plugin) capture(ctx context.Context, c client.Client, runner *dromosv1alpha1.WorkloadRunner,
-	workload *unstructured.Unstructured) error {
+	workload *unstructured.Unstructured, events *captureEvents) error {
 	jobs, err := runnerSnapshotJobs(ctx, c, runner)
 	if err != nil {
 		return err
 	}
+	running := false
 	for i := range jobs {
-		// One at a time: each capture holds a GPU until it ends.
-		if !snapshotv1alpha1.IsSnapshotJobTerminal(&jobs[i]) {
-			return nil
-		}
+		events.reportCapture(&jobs[i])
+		running = running || !snapshotv1alpha1.IsSnapshotJobTerminal(&jobs[i])
+	}
+	// One at a time: each capture holds a GPU until it ends.
+	if running {
+		return nil
 	}
 
 	replicas, err := readyReplicas(ctx, c, runner)
@@ -130,6 +137,9 @@ func (p *Plugin) capture(ctx context.Context, c client.Client, runner *dromosv1a
 		return nil
 	}
 	if err := checkShape(replicas, replica); err != nil {
+		if errors.Is(err, errShapeDrift) {
+			events.emit(key, "", corev1.EventTypeWarning, eventDisabled, err.Error())
+		}
 		return err
 	}
 	if len(p.agentNodeSelector) == 0 {
@@ -147,11 +157,85 @@ func (p *Plugin) capture(ctx context.Context, c client.Client, runner *dromosv1a
 	if err != nil {
 		return fmt.Errorf("capture key %s: %w", key, err)
 	}
-	// Already there: an earlier reconcile created it.
-	if err := c.Create(ctx, job); err != nil && !apierrors.IsAlreadyExists(err) {
+	if err := c.Create(ctx, job); err != nil {
+		// Already there: an earlier reconcile created it and reported its start.
+		if apierrors.IsAlreadyExists(err) {
+			return nil
+		}
 		return fmt.Errorf("create SnapshotJob %s: %w", job.Name, err)
 	}
+	// Not recorded: a SnapshotJob is created once, so its start is reported once.
+	p.events.Event(runner, corev1.EventTypeNormal, eventCaptureStarted, "Capturing snapshot "+job.Name)
 	return nil
+}
+
+// Capture events, on the runner (§8.6).
+const (
+	eventCaptureStarted = "SnapshotCaptureStarted"
+	eventCaptured       = "SnapshotCaptured"
+	eventCaptureFailed  = "SnapshotCaptureFailed"
+	eventDisabled       = "SnapshotDisabled"
+)
+
+// captureEvents emits each event a capture reaches after its start once per
+// key. Its record goes in the runner's status, so a restarted controller
+// neither loses nor repeats one.
+type captureEvents struct {
+	recorder record.EventRecorder
+	runner   *dromosv1alpha1.WorkloadRunner
+	info     statusInfo
+	changed  bool
+}
+
+func (p *Plugin) captureEvents(runner *dromosv1alpha1.WorkloadRunner) *captureEvents {
+	// An unreadable record starts over, which can repeat an event, so it
+	// doesn't hold up the capture; Status rewrites it.
+	info, _ := recordedStatus(runner)
+	return &captureEvents{recorder: p.events, runner: runner, info: info}
+}
+
+// reportCapture emits how an existing capture ended, if it has.
+func (e *captureEvents) reportCapture(job *snapshotv1alpha1.SnapshotJob) {
+	// The deletion is dropping its key.
+	if job.DeletionTimestamp != nil {
+		return
+	}
+	key := job.Labels[constants.SnapshotKeyLabel]
+	if meta.IsStatusConditionTrue(job.Status.Conditions, snapshotv1alpha1.SnapshotJobConditionCaptured) {
+		e.emit(key, job.UID, corev1.EventTypeNormal, eventCaptured,
+			"Captured snapshot "+job.Name+"; new replicas restore from it")
+	}
+	if snapshotv1alpha1.IsSnapshotJobFailed(job) {
+		e.emit(key, job.UID, corev1.EventTypeWarning, eventCaptureFailed, captureFailure(job).Error())
+	}
+}
+
+// emit emits reason for key unless the record has it. A capture with a UID
+// other than the recorded one is new, and starts the key's record over.
+func (e *captureEvents) emit(key string, job types.UID, eventType, reason, message string) {
+	emitted := e.info.Events[key]
+	if job != "" && job != emitted.SnapshotJob {
+		emitted = keyEvents{SnapshotJob: job}
+	}
+	if slices.Contains(emitted.Reasons, reason) {
+		return
+	}
+	e.recorder.Event(e.runner, eventType, reason, message)
+	emitted.Reasons = append(emitted.Reasons, reason)
+	if e.info.Events == nil {
+		e.info.Events = map[string]keyEvents{}
+	}
+	e.info.Events[key] = emitted
+	e.changed = true
+}
+
+// save puts the record on the runner's plugin status, which the framework hands
+// to Status and then applies.
+func (e *captureEvents) save() error {
+	if !e.changed {
+		return nil
+	}
+	return writeStatusInfo(pluginStatus(e.runner), e.info)
 }
 
 // deleteUnused deletes the runner's snapshots outside the keep-set. A failed
@@ -206,6 +290,18 @@ func keepSet(ctx context.Context, c client.Reader, runner *dromosv1alpha1.Worklo
 	if err != nil {
 		return nil, err
 	}
+	if !optedIn {
+		return keysInUse(replicas, ""), nil
+	}
+	info, err := recordedStatus(runner)
+	if err != nil {
+		return nil, err
+	}
+	return keysInUse(replicas, info.NewestKey), nil
+}
+
+// keysInUse is the replicas' keys, and newest unless it's empty.
+func keysInUse(replicas []corev1.Pod, newest string) datastructs.Set[string] {
 	keep := datastructs.NewSet[string]()
 	for i := range replicas {
 		// Not a terminating one: nothing reconciles the runner once it is gone.
@@ -215,17 +311,10 @@ func keepSet(ctx context.Context, c client.Reader, runner *dromosv1alpha1.Worklo
 		key, _ := snapshotkey.SnapshotKeyOf(&replicas[i])
 		keep.Add(key)
 	}
-	if !optedIn {
-		return keep, nil
-	}
-	newest, err := recordedNewestKey(runner)
-	if err != nil {
-		return nil, err
-	}
 	if newest != "" {
 		keep.Add(newest)
 	}
-	return keep, nil
+	return keep
 }
 
 // ownPodSnapshots makes the runner the owner of its PodSnapshots. Snapshot
