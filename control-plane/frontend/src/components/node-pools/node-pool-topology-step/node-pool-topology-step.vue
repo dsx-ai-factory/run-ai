@@ -16,21 +16,33 @@
     :disable-navigation="busy"
     @step-click="onStepClick"
   >
-    <runai-form-wrapper ref="form" :form-state="draft" full-width @leave-page="emit('leave-approved')">
-      <runai-expansion-wrapper no-first-top-padding>
-        <runai-expansion-item label="Network & placement" default-opened disable-closing body-no-padding>
+    <runai-form-wrapper
+      ref="form"
+      :form-state="draft"
+      :prevent-leave="busy"
+      full-width
+      @leave-page="emit('leave-approved')"
+    >
+      <runai-expansion-wrapper role="presentation" no-first-top-padding>
+        <runai-expansion-item
+          :label="canSave ? 'Network & placement' : 'Network & placement View only'"
+          default-opened
+          disable-closing
+          body-no-padding
+        >
           <template #header
             ><span>Network &amp; placement</span
             ><span v-if="!canSave" class="view-only"><q-icon name="ph-fill ph-eye" /> View only</span></template
           >
           <fieldset class="topology-fields" :disabled="busy || !canSave">
             <network-topology-selection
-              v-if="supports.networkTopology && canReadTopologies"
+              v-if="supports.networkTopology && (canReadTopologies || topologyCreating)"
               class="topology-selection"
+              tooltip-width="300px"
               :cluster-id="pool.clusterId"
               :network-topology-id="draft.networkTopologyId"
               :network-topology-name="selectedTopologyName"
-              :disable="busy || !canSave"
+              :disable="busy || !canSave || !canReadTopologies"
               :can-create="canCreateTopology && canSave"
               @select="draft.networkTopologyId = $event"
               @loaded="topologies = $event"
@@ -47,6 +59,9 @@
             <section class="mnnvl-section">
               <runai-radio-options
                 aid="topology-mnnvl"
+                separate-tooltips
+                title-tooltip-width="300px"
+                tooltip-width="300px"
                 title="Define whether MNNVL is present on this node pool"
                 :title-tooltip="mnnvlTooltip"
                 :options="NODE_POOL_NETWORK_DISCOVERY_OPTIONS"
@@ -74,8 +89,14 @@
                 :placeholder="DEFAULT_GPU_NETWORK_ACCELERATION_LABEL_KEY"
                 :read-only="busy || !canSave || !supports.mnnvl"
                 :rules="[validateTopologyLabelKey]"
+                :aria-invalid="validationError ? 'true' : undefined"
+                :aria-describedby="
+                  validationError
+                    ? 'node-pool-topology-label-help node-pool-topology-save-error'
+                    : 'node-pool-topology-label-help'
+                "
               />
-              <p class="label-help text-b-body1">
+              <p id="node-pool-topology-label-help" class="label-help text-b-body1">
                 Use letters, numbers, '-', '_' or '.', with an optional DNS prefix followed by '/'.
               </p>
             </runai-section>
@@ -93,7 +114,11 @@
                   label="NUMA-aware scheduling"
                   left-label
                   :disable="busy || !canSave"
-                /><runai-tooltip :tooltip-text="numaTooltip" width="779px" tooltip-position="right" />
+                /><runai-tooltip :tooltip-text="numaTooltip" width="300px" tooltip-position="right">
+                  <template #content
+                    ><span class="numa-tooltip-content">{{ numaTooltip }}</span></template
+                  >
+                </runai-tooltip>
               </div>
               <p class="guide-link text-b-subtitle2">
                 For more information on the prerequisites and configuration requirements, see the
@@ -111,6 +136,9 @@
                 <h3 class="text-b-subtitle1">GPU pods</h3>
                 <runai-radio-options
                   aid="topology-gpu-node-placement"
+                  separate-tooltips
+                  title-tooltip-width="300px"
+                  tooltip-width="300px"
                   title="Set the node placement strategy"
                   title-tooltip="Specify how GPU pods are placed across nodes."
                   :options="placementOptions.gpu"
@@ -121,6 +149,9 @@
                 <runai-radio-options
                   v-if="supports.gpuDevice"
                   aid="topology-gpu-device-placement"
+                  separate-tooltips
+                  title-tooltip-width="300px"
+                  tooltip-width="300px"
                   title="Set the device placement strategy"
                   title-tooltip="Specify how GPU pods are placed across GPU devices within a node when using GPU fractions."
                   :options="placementOptions.gpuDevice"
@@ -133,6 +164,9 @@
                 <h3 class="text-b-subtitle1">CPU pods</h3>
                 <runai-radio-options
                   aid="topology-cpu-node-placement"
+                  separate-tooltips
+                  title-tooltip-width="300px"
+                  tooltip-width="300px"
                   title="Set the node placement strategy"
                   title-tooltip="Specify how CPU pods are placed across nodes."
                   :options="placementOptions.cpu"
@@ -148,7 +182,14 @@
     </runai-form-wrapper>
     <template #content-footer
       ><div class="topology-footer">
-        <p v-if="saveError || validationError" class="text-negative" role="alert">{{ saveError || validationError }}</p>
+        <p
+          v-if="saveError || validationError"
+          id="node-pool-topology-save-error"
+          class="text-negative"
+          :role="saveError ? 'alert' : undefined"
+        >
+          {{ saveError || validationError }}
+        </p>
         <div class="row q-gutter-md">
           <runai-btn
             aid="topology-cancel"
@@ -335,6 +376,12 @@ async function save() {
   margin: 0;
   font-style: italic;
 }
+.guide-link a {
+  text-decoration: underline;
+}
+.numa-tooltip-content {
+  white-space: pre-line;
+}
 .numa-section {
   margin-top: 26px;
 }
@@ -395,5 +442,10 @@ async function save() {
 }
 .node-pool-topology-wizard :deep(.runai-option-group) {
   max-width: 100%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .node-pool-topology-wizard :deep(.folding-icon) {
+    transition: none;
+  }
 }
 </style>

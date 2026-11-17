@@ -9,6 +9,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import type { RouteLocationRaw } from "vue-router";
 
 // stores
 import { useAuthStore } from "@/stores/auth.store";
@@ -54,9 +55,9 @@ export default defineComponent({
   },
   methods: {
     async redirectToApp(): Promise<void> {
-      const location = storageUtil.get<string>(STORAGE_KEYS.LOCATION);
+      const location = storageUtil.get<RouteLocationRaw>(STORAGE_KEYS.LOCATION);
       if (location) {
-        await this.$router.replace({ name: location });
+        await this.$router.replace(typeof location === "string" ? { name: location } : location);
         storageUtil.remove(STORAGE_KEYS.LOCATION);
       } else {
         await this.$router.replace("/");

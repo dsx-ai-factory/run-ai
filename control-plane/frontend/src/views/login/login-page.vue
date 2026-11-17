@@ -28,7 +28,12 @@ export default defineComponent({
   },
   beforeRouteEnter(to: RouteLocationNormalized, from: RouteLocationNormalized) {
     if (from.name) {
-      storageUtil.save(STORAGE_KEYS.LOCATION, from.name);
+      storageUtil.save(STORAGE_KEYS.LOCATION, {
+        name: from.name,
+        params: from.params,
+        query: from.query,
+        hash: from.hash,
+      });
     }
   },
   async created() {

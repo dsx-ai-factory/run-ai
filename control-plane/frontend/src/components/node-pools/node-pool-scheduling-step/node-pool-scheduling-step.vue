@@ -17,6 +17,7 @@
   >
     <runai-form-wrapper
       :form-state="{ pool: previewPool, scheduling: draft, saving }"
+      :prevent-leave="saving || creatingDepartment"
       full-width
       @leave-page="emit('leave-approved')"
     >
@@ -164,12 +165,12 @@
                 </node-pool-department-table>
               </div>
               <node-pool-new-department-dialog
-                v-if="showNewDepartment && canEditDepartments && canViewDepartments"
+                v-if="showNewDepartment && ((canEditDepartments && canViewDepartments) || creatingDepartment)"
                 :cluster-id="pool.clusterId"
                 :cluster-name="pool.clusterName"
                 @close="showNewDepartment = false"
                 @created="emit('refresh')"
-                @saving="emit('saving', $event)"
+                @saving="onDepartmentSaving"
               />
             </div>
           </runai-expansion-item>
@@ -429,6 +430,11 @@ function applyEdit(edit: DepartmentSchedulingEdit) {
 }
 
 const saving = ref(false);
+const creatingDepartment = ref(false);
+function onDepartmentSaving(value: boolean) {
+  creatingDepartment.value = value;
+  emit("saving", saving.value || value);
+}
 const saveError = ref("");
 const saver = createSchedulingSaver({ patchPool: patchSchedulingPool, patchDepartments: patchSchedulingDepartments });
 const validationError = computed(() => {
@@ -463,7 +469,13 @@ watch(
   { deep: true },
 );
 const saveDisabled = computed(
-  () => saving.value || props.loading || !props.canSavePool || !props.canEditDepartments || !!validationError.value,
+  () =>
+    saving.value ||
+    creatingDepartment.value ||
+    props.loading ||
+    !props.canSavePool ||
+    !props.canEditDepartments ||
+    !!validationError.value,
 );
 async function save(destination: "close" | "continue" = "close") {
   if (saveDisabled.value) return;

@@ -68,6 +68,31 @@ describe("node pool topology step", () => {
     expect(saveTopologyPool).not.toHaveBeenCalled();
     wrapper.unmount();
   });
+  it("associates the invalid label with its help and error for assistive technology", async () => {
+    const wrapper = await render({ pool: { ...pool, gpuNetworkAccelerationLabelKey: "bad key" } });
+    try {
+      const input = wrapper.get<HTMLInputElement>('[aid="topology-mnnvl-label"]');
+      expect(input.attributes("aria-invalid")).toBe("true");
+      const descriptions = (input.attributes("aria-describedby") ?? "")
+        .split(" ")
+        .filter(Boolean)
+        .map((id) => wrapper.get(`#${id}`).text())
+        .join(" ");
+      expect(descriptions).toContain("optional DNS prefix");
+      expect(descriptions).toContain("Enter a valid Kubernetes label key");
+    } finally {
+      wrapper.unmount();
+    }
+  });
+  it("names the view-only card without exposing an invalid list container", async () => {
+    const wrapper = await render({ canSave: false });
+    try {
+      expect(wrapper.get(".runai-expansion-header").attributes("aria-label")).toContain("View only");
+      expect(wrapper.find('.q-list[role="list"]').exists()).toBe(false);
+    } finally {
+      wrapper.unmount();
+    }
+  });
   it("reflects draft placement and topology names in the shared summary", async () => {
     const wrapper = await render();
     const selector = wrapper.findComponent({ name: "NetworkTopologySelection" });

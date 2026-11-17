@@ -53,11 +53,7 @@ export function validateTopologyLabelKey(value: string): true | string {
   const validPrefix =
     prefix === undefined ||
     (prefix.length <= 253 &&
-      prefix
-        .split(".")
-        .every(
-          (part) => part.length <= 63 && /^[a-z0-9]/.test(part) && /[a-z0-9]$/.test(part) && !/[^a-z0-9-]/.test(part),
-        ));
+      prefix.split(".").every((part) => /^[a-z0-9]/.test(part) && /[a-z0-9]$/.test(part) && !/[^a-z0-9-]/.test(part)));
   return parts.length <= 2 && validName && validPrefix
     ? true
     : "Enter a valid Kubernetes label key: a name up to 63 characters with an optional lowercase DNS prefix.";

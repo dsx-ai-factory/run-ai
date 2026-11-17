@@ -117,6 +117,9 @@ describe("Kubernetes topology label keys", () => {
     "GPU_Cl.ique-1",
     "example.com/gpu.clique",
     "a".repeat(63),
+    `${"a".repeat(64)}.example/key`,
+    `${"a".repeat(253)}/key`,
+    `${"a".repeat(253)}/${"b".repeat(63)}`,
     `${"a".repeat(63)}.${"b".repeat(63)}.${"c".repeat(63)}.${"d".repeat(61)}/key`,
   ])("accepts a valid qualified key or blank default: %s", (value) => {
     expect(validateTopologyLabelKey(value)).toBe(true);
@@ -138,7 +141,7 @@ describe("Kubernetes topology label keys", () => {
     "key ",
     "key$",
     "a".repeat(64),
-    `${"a".repeat(64)}.example/key`,
+    `${"a".repeat(254)}/key`,
     `${"a".repeat(63)}.${"b".repeat(63)}.${"c".repeat(63)}.${"d".repeat(62)}/key`,
   ])("rejects an invalid qualified key: %s", (value) => {
     expect(validateTopologyLabelKey(value)).toEqual(expect.any(String));

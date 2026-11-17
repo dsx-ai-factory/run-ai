@@ -12,6 +12,7 @@ import Table from "./node-pool-department-table.vue";
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
 import { RunaiSegmentedButton } from "@/components/common/runai-segmented-button";
 import NodePoolSchedulingStep from "./node-pool-scheduling-step.vue";
+import NewDepartment from "./node-pool-new-department-dialog.vue";
 import RunaiWizardLayout from "@/components/common/runai-wizard-layout/runai-wizard-layout.vue";
 import NodePoolWizardSummary from "../node-pool-wizard-summary/node-pool-wizard-summary.vue";
 import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
@@ -33,17 +34,49 @@ const pool = {
   networkTopologyName: "Existing fabric",
 } as Nodepool;
 
-function render(input = pool) {
+function render(input = pool, stubs = {}) {
   return mount(NodePoolSchedulingStep, {
     props: { pool: input },
     global: {
       plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
       directives: { "click-outside": {}, permission: {} },
+      stubs,
     },
   });
 }
 
 describe("scheduling step foundation", () => {
+  it.each(["canEditDepartments", "canViewDepartments"] as const)(
+    "finishes a pending department request when %s is revoked",
+    async (permission) => {
+      const wrapper = render(pool, {
+        NodePoolNewDepartmentDialog: {
+          emits: ["saving"],
+          template: "<div />",
+        },
+      });
+      try {
+        await wrapper.setProps({ canSavePool: true });
+        wrapper.findComponent(Table).vm.$emit("new-department");
+        await flushPromises();
+        const department = wrapper.findComponent(NewDepartment);
+        department.vm.$emit("saving", true);
+        await flushPromises();
+        expect(await requestToLeave()).toBe(false);
+        await wrapper.setProps({ [permission]: false });
+        expect(wrapper.findComponent(NewDepartment).exists()).toBe(true);
+        department.vm.$emit("saving", false);
+        await flushPromises();
+        expect(wrapper.emitted("saving")?.at(-1)).toEqual([false]);
+        expect(wrapper.findComponent(NewDepartment).exists()).toBe(false);
+        await wrapper.setProps({ [permission]: true });
+        expect(wrapper.get('[aid="scheduling-save-continue"]').attributes("disabled")).toBeUndefined();
+      } finally {
+        wrapper.unmount();
+      }
+    },
+  );
+
   it.each([
     { quota: false, ranks: false },
     { quota: false, ranks: true },

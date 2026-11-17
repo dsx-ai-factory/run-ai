@@ -63,17 +63,19 @@
 
       <template #body>
         <section aid="network-topologies-modal-body">
-          <div class="q-px-md q-my-md">Add a topology that represents this node pool's network</div>
+          <fieldset class="topology-form-fields" :disabled="creating" :inert="creating || undefined">
+            <div class="q-px-md q-my-md">Add a topology that represents this node pool's network</div>
 
-          <network-topology-form
-            ref="topologyFormComponent"
-            :bordered="false"
-            :show-action-buttons="false"
-            :cluster-id="clusterId"
-            :external-submit-trigger="externalSubmitTrigger"
-            @close="setModalOpen(false)"
-            @submit="createNetworkTopology"
-          />
+            <network-topology-form
+              ref="topologyFormComponent"
+              :bordered="false"
+              :show-action-buttons="false"
+              :cluster-id="clusterId"
+              :external-submit-trigger="externalSubmitTrigger"
+              @close="setModalOpen(false)"
+              @submit="createNetworkTopology"
+            />
+          </fieldset>
         </section>
       </template>
 
@@ -231,6 +233,14 @@ export default defineComponent({
     this.createRequestId++;
   },
   watch: {
+    showCreationModal(value: boolean, previous: boolean) {
+      if (value || !previous) return;
+      void this.$nextTick(() => {
+        if (this.disposed || this.disable || this.loadingNetworkTopologies || this.creating || this.showCreationModal)
+          return;
+        this.$el.querySelector('[role="combobox"]')?.focus();
+      });
+    },
     creating: {
       handler(value: boolean) {
         this.$emit("creating", value);
@@ -252,3 +262,12 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.topology-form-fields {
+  border: 0;
+  margin: 0;
+  min-width: 0;
+  padding: 0;
+}
+</style>

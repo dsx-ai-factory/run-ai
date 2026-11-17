@@ -5,6 +5,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { Notify, Quasar } from "quasar";
+import type { Component } from "vue";
 import NetworkTopologySelection from "./network-topology-selection.vue";
 import { RunaiSelect } from "@/components/common/runai-select";
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
@@ -30,12 +31,13 @@ function deferred<T>() {
   return { promise, resolve, reject };
 }
 let wrapper: VueWrapper<InstanceType<typeof NetworkTopologySelection>>;
-function mountComponent(props = {}) {
+function mountComponent(props = {}, attachTo?: HTMLElement, formStub: Component | boolean = true) {
   wrapper = mount(NetworkTopologySelection, {
+    attachTo,
     props: { clusterId: "cluster-1", ...props },
     global: {
       plugins: [[Quasar, { plugins: { Notify } }]],
-      stubs: { NetworkTopologyForm: true },
+      stubs: { NetworkTopologyForm: formStub },
     },
   });
   return wrapper;
@@ -52,6 +54,91 @@ afterEach(() => {
 });
 
 describe("network topology selection", () => {
+  it("locks all creation fields while saving and retains the draft when the request fails", async () => {
+    const pending = deferred<NetworkTopology>();
+    vi.mocked(clusterService.createNetworkTopology).mockReturnValueOnce(pending.promise);
+    mountComponent({}, document.body, {
+      data: () => ({ name: "Draft fabric" }),
+      template: '<div><input aid="draft-name" v-model="name"><button>Add label</button></div>',
+    });
+    await flushPromises();
+    wrapper.getComponent(RunaiSelect).vm.$emit("custom-action");
+    await flushPromises();
+    const input = document.body.querySelector('[aid="draft-name"]') as HTMLInputElement;
+    const button = input.parentElement?.querySelector("button") as HTMLButtonElement;
+    expect(input.value).toBe("Draft fabric");
+    const creating = wrapper.vm.createNetworkTopology({ ...request, name: input.value });
+    await flushPromises();
+    expect(input.matches(":disabled")).toBe(true);
+    expect(button.matches(":disabled")).toBe(true);
+    expect(input.closest("fieldset")?.hasAttribute("inert")).toBe(true);
+    pending.reject(new Error("unavailable"));
+    await creating;
+    await flushPromises();
+    expect(input.matches(":disabled")).toBe(false);
+    expect(input.closest("fieldset")?.hasAttribute("inert")).toBe(false);
+    expect(input.value).toBe("Draft fabric");
+    expect(wrapper.getComponent(RunaiBaseDialog).props("modelValue")).toBe(true);
+    await wrapper.vm.createNetworkTopology({ ...request, name: input.value });
+    expect(clusterService.createNetworkTopology).toHaveBeenLastCalledWith({ ...request, name: "Draft fabric" });
+    expect(clusterService.createNetworkTopology).toHaveBeenCalledTimes(2);
+  });
+
+  it("returns focus to the selector when the creation menu trigger has been removed", async () => {
+    mountComponent({}, document.body);
+    await flushPromises();
+    const menuAction = document.createElement("button");
+    document.body.append(menuAction);
+    menuAction.focus();
+    wrapper.getComponent(RunaiSelect).vm.$emit("custom-action");
+    await flushPromises();
+    menuAction.remove();
+    wrapper.getComponent(RunaiBaseDialog).vm.$emit("close");
+    await flushPromises();
+    expect(document.activeElement).toBe(wrapper.get('[role="combobox"]').element);
+  });
+
+  it("does not restore focus to the selector after it becomes disabled", async () => {
+    mountComponent({}, document.body);
+    await flushPromises();
+    const focus = vi.spyOn(wrapper.get<HTMLElement>('[role="combobox"]').element, "focus");
+    wrapper.getComponent(RunaiSelect).vm.$emit("custom-action");
+    await flushPromises();
+    await wrapper.setProps({ disable: true });
+    wrapper.getComponent(RunaiBaseDialog).vm.$emit("close");
+    await flushPromises();
+    expect(focus).not.toHaveBeenCalled();
+  });
+
+  it("does not restore focus while a different cluster's topologies are loading", async () => {
+    mountComponent({}, document.body);
+    await flushPromises();
+    const focus = vi.spyOn(wrapper.get<HTMLElement>('[role="combobox"]').element, "focus");
+    wrapper.getComponent(RunaiSelect).vm.$emit("custom-action");
+    await flushPromises();
+    const pending = deferred<NetworkTopology[]>();
+    vi.mocked(clusterService.getNetworkTopologies).mockReturnValueOnce(pending.promise);
+    await wrapper.setProps({ clusterId: "cluster-2" });
+    await flushPromises();
+    expect(focus).not.toHaveBeenCalled();
+    pending.resolve([]);
+    await flushPromises();
+  });
+
+  it("returns focus to the selector after successful topology creation", async () => {
+    mountComponent({}, document.body);
+    await flushPromises();
+    const menuAction = document.createElement("button");
+    document.body.append(menuAction);
+    menuAction.focus();
+    wrapper.getComponent(RunaiSelect).vm.$emit("custom-action");
+    await flushPromises();
+    menuAction.remove();
+    await wrapper.vm.createNetworkTopology(request);
+    await flushPromises();
+    expect(document.activeElement).toBe(wrapper.get('[role="combobox"]').element);
+  });
+
   it("reports successfully loaded topology records to the summary owner", async () => {
     mountComponent();
     await flushPromises();
