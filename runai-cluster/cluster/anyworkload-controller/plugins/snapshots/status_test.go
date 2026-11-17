@@ -47,7 +47,7 @@ var _ = Describe("Status", func() {
 			status := &dromosv1alpha1.PluginStatus{Phase: dromosv1alpha1.PluginPhaseUnknown}
 			state := reconcile.New()
 
-			Expect(plugin.Status(ctx, runnerFor(workload()), nil, status, state)).To(Succeed())
+			Expect(plugin.Status(ctx, runnerFor(workload()), captureClient(), status, state)).To(Succeed())
 
 			Expect(status.Phase).To(Equal(wantPhase))
 			wantEnabled := metav1.ConditionFalse
@@ -114,7 +114,7 @@ var _ = Describe("Status", func() {
 		status := &dromosv1alpha1.PluginStatus{Phase: dromosv1alpha1.PluginPhaseUnknown}
 		setEnabled(status, metav1.ConditionTrue, ReasonEnabled, msgEnabled)
 
-		err := plugin.Status(ctx, runnerFor(deployment(optIn, gpu)), nil, status, reconcile.New())
+		err := plugin.Status(ctx, runnerFor(deployment(optIn, gpu)), captureClient(), status, reconcile.New())
 
 		Expect(err).To(HaveOccurred())
 		Expect(status.Phase).To(Equal(dromosv1alpha1.PluginPhaseDisabled))
@@ -127,7 +127,7 @@ var _ = Describe("Status", func() {
 		plugin := newPlugin(kartaStub{err: errors.New("cache not synced")}, true)
 		status := &dromosv1alpha1.PluginStatus{Phase: dromosv1alpha1.PluginPhaseUnknown}
 
-		Expect(plugin.Status(ctx, runnerFor(deployment(nil, gpu)), nil, status, reconcile.New())).To(Succeed())
+		Expect(plugin.Status(ctx, runnerFor(deployment(nil, gpu)), captureClient(), status, reconcile.New())).To(Succeed())
 
 		Expect(status.Phase).To(Equal(dromosv1alpha1.PluginPhaseDisabled))
 		Expect(status.Conditions).To(haveEnabled(metav1.ConditionFalse, ReasonDisabled))
@@ -138,11 +138,35 @@ var _ = Describe("Status", func() {
 		status := &dromosv1alpha1.PluginStatus{Phase: dromosv1alpha1.PluginPhaseUnknown}
 		state := reconcile.New()
 
-		Expect(plugin.Status(ctx, runnerFor(deployment(optIn, gpu)), nil, status, state)).To(Succeed())
+		Expect(plugin.Status(ctx, runnerFor(deployment(optIn, gpu)), captureClient(), status, state)).To(Succeed())
 
 		Expect(status.Phase).To(Equal(dromosv1alpha1.PluginPhaseDisabled))
 		Expect(status.Conditions).To(haveEnabled(metav1.ConditionFalse, ReasonNotInstalled))
 		Expect(state.PluginIssues(plugin)).To(BeEmpty())
+	})
+
+	It("records the key of the most recently created replica, Ready or not", func() {
+		older := replica("llama-old", "rs-old", 100, true)
+		newer := replica("llama-new", "rs-new", 200, false)
+		plugin := newPlugin(kartaStub{karta: deploymentKarta()}, true)
+		status := &dromosv1alpha1.PluginStatus{Phase: dromosv1alpha1.PluginPhaseUnknown}
+
+		Expect(plugin.Status(ctx, runnerFor(deployment(optIn, gpu)), captureClient(older, newer), status,
+			reconcile.New())).To(Succeed())
+
+		Expect(status.AdditionalInfo).NotTo(BeNil())
+		Expect(status.AdditionalInfo.Raw).To(MatchJSON(`{"newestKey":"` + keyOf(newer) + `"}`))
+	})
+
+	It("keeps the recorded key while no replica runs", func() {
+		plugin := newPlugin(kartaStub{karta: deploymentKarta()}, true)
+		recorded := &runtime.RawExtension{Raw: []byte(`{"newestKey":"k1"}`)}
+		status := &dromosv1alpha1.PluginStatus{Phase: dromosv1alpha1.PluginPhaseUnknown, AdditionalInfo: recorded}
+
+		Expect(plugin.Status(ctx, runnerFor(deployment(optIn, gpu)), captureClient(), status,
+			reconcile.New())).To(Succeed())
+
+		Expect(status.AdditionalInfo).To(Equal(recorded))
 	})
 
 	// NotInstalled is for an opt-in that can't be honoured; a workload that never
@@ -151,7 +175,7 @@ var _ = Describe("Status", func() {
 		plugin := newPlugin(kartaStub{karta: deploymentKarta()}, false)
 		status := &dromosv1alpha1.PluginStatus{Phase: dromosv1alpha1.PluginPhaseUnknown}
 
-		Expect(plugin.Status(ctx, runnerFor(deployment(nil, gpu)), nil, status, reconcile.New())).To(Succeed())
+		Expect(plugin.Status(ctx, runnerFor(deployment(nil, gpu)), captureClient(), status, reconcile.New())).To(Succeed())
 
 		Expect(status.Conditions).To(haveEnabled(metav1.ConditionFalse, ReasonDisabled))
 	})

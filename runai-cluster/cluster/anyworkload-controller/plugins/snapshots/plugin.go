@@ -29,14 +29,16 @@ type kartaGetter interface {
 // Plugin captures a snapshot of each opted-in workload. dromos calls it on every
 // reconcile of the runner, in this order:
 //
-//  1. HandleAdditionalResources (capture.go): once a replica is Ready, creates
-//     the SnapshotJob that captures its key. It runs before this reconcile's
-//     mutate and apply; the replicas it captures come from an earlier one.
+//  1. HandleAdditionalResources (capture.go): deletes the snapshots no longer
+//     needed, then, once a replica is Ready, creates the SnapshotJob that
+//     captures its key. It runs before this reconcile's mutate and apply; the
+//     replicas it captures come from an earlier one.
 //  2. MutateResource (mutate.go): stamps the opt-in and runner labels on the pod
 //     template, which the restore webhook and the capture find replicas by.
 //  3. dromos applies the workload.
 //  4. Status (status.go): Ready when the workload can be captured; otherwise
-//     Disabled, with a warning when its opt-in can't be honoured.
+//     Disabled, with a warning when its opt-in can't be honoured. It records the
+//     newest key, which step 1 keeps through a scale to zero.
 //
 // A replica turning Ready, or a capture changing, reconciles the runner again
 // (watches.go). The runner owns its SnapshotJobs and PodSnapshots, so they are
