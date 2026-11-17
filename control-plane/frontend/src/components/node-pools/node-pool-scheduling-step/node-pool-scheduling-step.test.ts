@@ -327,7 +327,14 @@ describe("scheduling step foundation", () => {
     expect(wrapper.get('[aid="mode-ranked"]').attributes("aria-checked")).toBe("true");
     expect(wrapper.get('[aid="scheduling-save-close"]').attributes("disabled")).toBeDefined();
     expect(wrapper.get('[aid="scheduling-save-continue"]').attributes("disabled")).toBeDefined();
-    expect(wrapper.text()).toContain("Topology & placement is not available yet.");
+    expect(wrapper.text()).not.toContain("Topology & placement is not available yet.");
+    expect(wrapper.find(".preview-notice").exists()).toBe(false);
+    expect(
+      wrapper
+        .findAll(".mode-icon")
+        .map((icon) => icon.attributes("class"))
+        .join(" "),
+    ).toContain("ph-chart-pie-slice");
     await flushPromises();
     wrapper.unmount();
   });

@@ -54,7 +54,7 @@ export function useNodePoolSimulation(source: Ref<SimulationScenario | undefined
         const unavailable = code === 404 || code === 501;
         status.value = unavailable ? "unavailable" : "error";
         message.value = unavailable
-          ? "Simulation is not available on this backend yet. Your changes are preserved."
+          ? "Simulation is unavailable. Your changes are preserved."
           : "Simulation failed. Your changes are preserved. Try again.";
       }
     }, 300);

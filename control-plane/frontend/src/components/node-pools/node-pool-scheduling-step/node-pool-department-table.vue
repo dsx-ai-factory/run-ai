@@ -275,7 +275,6 @@
           >
         </q-table>
         <div v-if="simulation" class="simulation-notice" role="status" aria-live="polite">
-          <span v-if="preview">Simulation preview — mock results. Authored examples, not scheduler predictions.</span>
           <span v-if="simulationStatus === 'loading'">{{
             simulationResults ? "Updating simulation… Previous results shown." : "Calculating simulation…"
           }}</span>
@@ -287,14 +286,6 @@
             aid="retry-simulation"
             @click="retrySimulation"
           />
-          <span v-if="draft.timeFairshare">Time-based fairshare is not included in this simulation.</span>
-        </div>
-        <div v-if="totalsComplete === false && !simulationResults" class="data-notice" role="status">
-          Weight percentages are unavailable because you cannot view every department in this node pool.
-        </div>
-        <div v-if="!automatic && !rawWeightsAvailable" class="data-notice" role="status">
-          Raw weights are unavailable while the saved mode uses automatic weighting. Percentages require a complete set
-          of custom weights.
         </div>
         <div v-if="hasMore" class="q-pa-md text-center">
           <runai-btn
@@ -325,7 +316,7 @@ import { NotificationAlertBar, ENotificationBarVariant } from "@/components/comm
 import weightLegend from "@/assets/icons/scheduling/weight-legend.png";
 import SimulationResultBar from "./simulation-result-bar.vue";
 import maximumLegend from "@/assets/icons/scheduling/maximum-legend.png";
-import { computed, inject, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import type { QTableColumn } from "quasar";
 import { RunaiPageActions } from "@/components/common/runai-page-actions";
 import { RunaiEllipsisTextWithTooltip } from "@/components/common/runai-ellipsis-text-with-tooltip";
@@ -334,7 +325,7 @@ import { EColumnFilterType, EFilterOperator, type IFilterBy } from "@/models/fil
 import type { ITableColumn } from "@/models/table.model";
 import { matchesSchedulingFilters } from "./node-pool-scheduling-filters";
 import { useNodePoolSimulation } from "./use-node-pool-simulation.composable";
-import { simulateNodePool, simulationPreviewKey } from "./node-pool-simulation.service";
+import { simulateNodePool } from "./node-pool-simulation.service";
 import { defaultSimulationDemand } from "./node-pool-simulation.util";
 import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
 import MoveToRankModal from "@/components/org-unit/v2/common/peer-org-unit-rank-list/move-to-rank-modal/move-to-rank-modal.vue";
@@ -659,7 +650,6 @@ watch(
   },
   { deep: true, flush: "sync" },
 );
-const preview = inject(simulationPreviewKey, undefined);
 const scenario = computed(() =>
   simulation.value && props.canView && props.poolId && props.capacity != null
     ? {
@@ -676,7 +666,7 @@ const {
   status: simulationStatus,
   message: simulationMessage,
   retry: retrySimulation,
-} = useNodePoolSimulation(scenario, preview?.transport ?? simulateNodePool);
+} = useNodePoolSimulation(scenario, simulateNodePool);
 function allocationBackground(row: DepartmentSchedulingEdit) {
   const result = simulationResults.value?.[row.id];
   if (props.draft.mode !== "guaranteed" || !result?.allocated) return "#42a5f5";
@@ -1150,8 +1140,7 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
 .scheduling-table :deep(.q-table__bottom:has(.scheduling-empty)) {
   padding: 0;
 }
-.simulation-notice,
-.data-notice {
+.simulation-notice {
   color: var(--b-text-sub);
   padding: 8px 16px;
   font-size: 12px;

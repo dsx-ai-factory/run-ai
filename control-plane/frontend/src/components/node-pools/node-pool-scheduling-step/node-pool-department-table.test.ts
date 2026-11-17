@@ -10,7 +10,8 @@ import type { SchedulingDraft } from "./node-pool-scheduling.model";
 import type { DepartmentNodePoolResources } from "@/swagger-models/org-unit-service-client";
 import MoveToRankModal from "@/components/org-unit/v2/common/peer-org-unit-rank-list/move-to-rank-modal/move-to-rank-modal.vue";
 import { RunaiPageActions } from "@/components/common/runai-page-actions";
-import { simulationPreviewKey } from "./node-pool-simulation.service";
+import { simulateNodePool } from "./node-pool-simulation.service";
+vi.mock("./node-pool-simulation.service", () => ({ simulateNodePool: vi.fn() }));
 import Table from "./node-pool-department-table.vue";
 import DepartmentResourceEditor from "./department-resource-editor.vue";
 
@@ -576,7 +577,7 @@ describe("scheduling department table", () => {
   });
   it("renders API results, defaults demand to half capacity, and preserves drafts on errors", async () => {
     vi.useFakeTimers();
-    const transport = vi.fn().mockResolvedValue({
+    const transport = vi.mocked(simulateNodePool).mockResolvedValue({
       capacity: { gpu: 144 },
       orgUnits: [
         {
@@ -595,7 +596,6 @@ describe("scheduling department table", () => {
       global: {
         plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
         directives: { "click-outside": {}, permission: {} },
-        provide: { [simulationPreviewKey as symbol]: { transport } },
       },
     });
     expect(wrapper.findComponent(QToggle).props("disable")).toBe(false);
@@ -607,12 +607,12 @@ describe("scheduling department table", () => {
     expect(wrapper.get(".unmet").attributes("style")).toContain("41.666");
     expect(wrapper.get(".demand-slider").attributes("disabled")).toBeUndefined();
     expect(wrapper.text()).toContain("25%");
-    expect(wrapper.text()).toContain("mock results");
+    expect(wrapper.text()).not.toContain("mock results");
     transport.mockRejectedValue({ response: { status: 501 } });
     await wrapper.setProps({ draft: { ...draft, departments: { a: { id: "a", weight: 8 } } } });
     await vi.advanceTimersByTimeAsync(300);
     expect(wrapper.find(".allocated").exists()).toBe(false);
-    expect(wrapper.text()).toContain("not available on this backend");
+    expect(wrapper.text()).toContain("Simulation is unavailable.");
     expect(wrapper.props("draft").departments.a.weight).toBe(8);
     wrapper.unmount();
     vi.useRealTimers();
@@ -730,7 +730,7 @@ describe("scheduling department table", () => {
     });
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).not.toContain("Alpha");
-    expect(wrapper.text()).toContain("cannot view every department");
+    expect(wrapper.text()).not.toContain("cannot view every department");
     wrapper.unmount();
   });
   it("does not present an automatic quota as a saved adjustable weight", () => {
@@ -749,7 +749,7 @@ describe("scheduling department table", () => {
         directives: { "click-outside": {}, permission: {} },
       },
     });
-    expect(wrapper.text()).toContain("Raw weights are unavailable");
+    expect(wrapper.text()).not.toContain("Raw weights are unavailable");
     expect(wrapper.text()).toContain("Unknown");
     expect(wrapper.findComponent({ name: "EditableCellPopup" }).props("displayValue")).toBe("Unknown");
     wrapper.unmount();

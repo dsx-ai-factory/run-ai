@@ -70,6 +70,7 @@
                     @update:model-value="selectMode"
                   >
                     <template #option-end="{ selected, option }">
+                      <q-icon class="mode-icon" :name="modeIcons[String(option.value)]" size="20px" aria-hidden="true" />
                       <div class="mode-details">
                         <q-slide-transition :duration="511">
                           <div v-show="modeHelpExpanded" class="mode-explanation-transition">
@@ -177,9 +178,6 @@
     <template #content-footer>
       <div class="scheduling-footer">
         <p v-if="saveError || validationError" class="text-negative" role="alert">{{ saveError || validationError }}</p>
-        <p class="text-b-body1 preview-notice" role="status">
-          Topology & placement is not available yet. Use Save & close to save scheduling.
-        </p>
         <div class="row justify-end q-gutter-md">
           <runai-btn
             aid="scheduling-save-close"
@@ -311,7 +309,6 @@ const options = computed(() => [
         : undefined),
     label: "Proportional",
     description: "Weight-based distribution",
-    icon: "node-pool-proportional",
     aid: "mode-proportional",
   },
   {
@@ -324,18 +321,21 @@ const options = computed(() => [
         : undefined),
     label: "Ranked",
     description: "Rank-based distribution",
-    icon: "node-pool-ranked",
     aid: "mode-ranked",
   },
   {
     value: "guaranteed",
     label: "Guaranteed quota",
     description: "Guaranteed quota, redistribute unused",
-    icon: "node-pool-guaranteed",
     disabledTooltip: modePermissionTooltip.value,
     aid: "mode-guaranteed",
   },
 ]);
+const modeIcons: Record<string, string> = {
+  proportional: "ph ph-chart-pie-slice",
+  ranked: "ph ph-ranking",
+  guaranteed: "ph ph-shield-check",
+};
 const savedMode = getSchedulingMode(props.pool.schedulingCapabilities);
 const mode = (
   { Proportional: "proportional", Ranked: "ranked", "Guaranteed quota": "guaranteed" } as Record<string, SchedulingMode>
@@ -532,8 +532,7 @@ async function save() {
   container-type: inline-size;
   padding: 18px 20px 40px;
 }
-.capacity-label,
-.preview-notice {
+.capacity-label {
   color: var(--b-text-sub);
 }
 .capacity {
@@ -611,7 +610,9 @@ async function save() {
   :deep(.runai-segment--selected:hover:not(.runai-segment--disabled)) {
     background: #e8f2d9;
   }
-  :deep(.runai-segment__icon) {
+  :deep(.mode-icon) {
+    grid-column: 1;
+    color: var(--b-text-sub);
     grid-row: 1;
     align-self: center;
   }
@@ -632,13 +633,13 @@ async function save() {
     line-height: 18px;
   }
   :deep(.runai-segment__text) {
+    grid-column: 2;
     grid-row: 1;
     min-height: 41px;
     align-items: flex-start;
   }
-  :deep(.runai-segment--selected:not(.runai-segment--disabled) .runai-segment__icon path) {
-    fill: #689f38;
-    fill-opacity: 1;
+  :deep(.runai-segment--selected:not(.runai-segment--disabled) .mode-icon) {
+    color: var(--border-pressed);
   }
 }
 .mode-check {
@@ -659,11 +660,8 @@ async function save() {
   gap: 16px;
   padding: 40px 0 8px;
 }
-.preview-notice {
-  flex: 1;
-  margin: 0;
-  text-align: left;
-  font-size: 12px;
+.scheduling-footer > .row {
+  margin-left: auto;
 }
 .scheduling-content {
   display: block;
@@ -729,9 +727,8 @@ async function save() {
 .mode-cards :deep(.runai-segment--disabled .mode-explanation) {
   color: #939398;
 }
-.mode-cards :deep(.runai-segment--disabled .runai-segment__icon path) {
-  fill: #939398;
-  fill-opacity: 1;
+.mode-cards :deep(.runai-segment--disabled .mode-icon) {
+  color: #939398;
 }
 .mode-check--hover-only {
   visibility: hidden;
@@ -743,8 +740,8 @@ async function save() {
 .mode-cards :deep(.runai-segment--disabled:hover .runai-segment__label) {
   color: #65a800;
 }
-.mode-cards :deep(.runai-segment--disabled:hover .runai-segment__icon path) {
-  fill: #65a800;
+.mode-cards :deep(.runai-segment--disabled:hover .mode-icon) {
+  color: #65a800;
 }
 .mode-cards :deep(.runai-segment--disabled:hover .mode-check--hover-only) {
   visibility: visible;
