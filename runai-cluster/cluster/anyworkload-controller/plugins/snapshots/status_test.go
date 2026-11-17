@@ -77,6 +77,13 @@ var _ = Describe("Status", func() {
 		Entry("eligible", deploymentKarta(),
 			func() *unstructured.Unstructured { return deployment(optIn, gpu) },
 			dromosv1alpha1.PluginPhaseReady, ReasonEnabled, ""),
+		// Only the target is restored, so a sidecar keeps its own.
+		Entry("a sidecar's own seccomp profile and startup probe", deploymentKarta(),
+			func() *unstructured.Unstructured {
+				sidecar := corev1.Container{Name: "sidecar", Image: "busybox"}
+				return deployment(optIn, gpu, withStartupProbe(withSeccomp(sidecar, ownProfile)))
+			},
+			dromosv1alpha1.PluginPhaseReady, ReasonEnabled, ""),
 		Entry("two pod templates", pairKarta(),
 			func() *unstructured.Unstructured { return pair(optIn, gpu) },
 			dromosv1alpha1.PluginPhaseDisabled, ReasonIneligible, "2 pod templates"),
@@ -94,6 +101,9 @@ var _ = Describe("Status", func() {
 		Entry("own seccomp profile", deploymentKarta(),
 			func() *unstructured.Unstructured { return deployment(optIn, withSeccomp(gpu, ownProfile)) },
 			dromosv1alpha1.PluginPhaseDisabled, ReasonIneligible, "seccomp"),
+		Entry("own startup probe", deploymentKarta(),
+			func() *unstructured.Unstructured { return deployment(optIn, withStartupProbe(gpu)) },
+			dromosv1alpha1.PluginPhaseDisabled, ReasonIneligible, "startup probe"),
 	)
 
 	// The framework starts a plugin at Unknown, which holds the workload in
@@ -169,7 +179,7 @@ func runnerFor(workload *unstructured.Unstructured) *dromosv1alpha1.WorkloadRunn
 	raw, err := json.Marshal(workload.Object)
 	Expect(err).NotTo(HaveOccurred())
 	return &dromosv1alpha1.WorkloadRunner{
-		ObjectMeta: metav1.ObjectMeta{Name: "llama", Namespace: "runai-proj"},
+		ObjectMeta: metav1.ObjectMeta{Name: "llama", Namespace: "runai-proj", UID: "runner-uid"},
 		Spec:       dromosv1alpha1.WorkloadRunnerSpec{Template: runtime.RawExtension{Raw: raw}},
 	}
 }
@@ -280,5 +290,12 @@ func gpuContainer(name string) corev1.Container {
 
 func withSeccomp(container corev1.Container, profile corev1.SeccompProfile) corev1.Container {
 	container.SecurityContext = &corev1.SecurityContext{SeccompProfile: &profile}
+	return container
+}
+
+func withStartupProbe(container corev1.Container) corev1.Container {
+	container.StartupProbe = &corev1.Probe{ProbeHandler: corev1.ProbeHandler{
+		HTTPGet: &corev1.HTTPGetAction{Path: "/health"},
+	}}
 	return container
 }

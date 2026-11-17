@@ -51,11 +51,19 @@ func checkEligibility(ctx context.Context, template *unstructured.Unstructured, 
 		return fmt.Errorf("%w: %w", errIneligible, err)
 	}
 	for _, container := range containers {
+		if container.Name != target {
+			continue
+		}
 		// A restore pod refuses a target with a seccomp profile of its own, and
 		// capture doesn't check it, so without this every restore would fail.
-		if container.Name == target && container.SecurityContext != nil &&
-			container.SecurityContext.SeccompProfile != nil {
+		if container.SecurityContext != nil && container.SecurityContext.SeccompProfile != nil {
 			return fmt.Errorf("%w: container %q sets its own seccomp profile, which a restore pod cannot keep",
+				errIneligible, target)
+		}
+		// Same for a startup probe: a container has one, and the restore gate
+		// takes its place, so the restore webhook leaves such a replica cold.
+		if container.StartupProbe != nil {
+			return fmt.Errorf("%w: container %q defines its own startup probe, which a restore pod cannot keep",
 				errIneligible, target)
 		}
 	}

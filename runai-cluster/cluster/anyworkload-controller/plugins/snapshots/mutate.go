@@ -21,9 +21,10 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-// MutateResource stamps two labels on an eligible, opted-in workload's pod
-// template: the opt-in, which the restore webhook selects pods by, and the
-// runner's name, by which the capture finds the workload's replicas.
+// MutateResource stamps an eligible, opted-in workload's pod template with the
+// opt-in, which the restore webhook selects pods by, and the runner's name and
+// UID, by which the capture finds the workload's replicas. The UID tells them
+// from those of an earlier runner of the same name.
 //
 // It does not check that Snapshot is installed, so the labels depend only on
 // the workload and installing or removing Snapshot never rolls it.
@@ -44,6 +45,7 @@ func (p *Plugin) MutateResource(
 	labels := map[string]string{
 		constants.SnapshotOptInLabel:            "true",
 		commonconstants.WorkloadRunnerNameLabel: runner.Name,
+		commonconstants.WorkloadRunnerUidLabel:  string(runner.UID),
 	}
 	err := kartautils.MutatePodInstances(ctx, karta, resource, func(instance kartaresource.ExtractedInstance) error {
 		stampLabels(instance, labels)
