@@ -287,6 +287,49 @@ func TestToStringMap_NestedAndDotted(t *testing.T) {
 			in:   map[string]any{"hosts": []any{"a", "b,c", `d\e`}},
 			want: map[string]string{"hosts": `{a,b\,c,d\\e}`},
 		},
+		"empty string value": {
+			in:   map[string]any{"a": ""},
+			want: map[string]string{"a": ""},
+		},
+		"null value": {
+			in:   map[string]any{"a": nil, "b": map[string]any{"c": nil}},
+			want: map[string]string{"a": "null", "b.c": "null"},
+		},
+		"numbers and bools": {
+			in:   map[string]any{"i": 1, "big": int64(9007199254740993), "f": 1.5, "whole": 2.0, "b": false},
+			want: map[string]string{"i": "1", "big": "9007199254740993", "f": "1.5", "whole": "2", "b": "false"},
+		},
+		"empty list is skipped": {
+			in:   map[string]any{"a": []any{}, "b": 1},
+			want: map[string]string{"b": "1"},
+		},
+		"list of maps uses indexed paths": {
+			in: map[string]any{"hosts": []any{
+				map[string]any{"name": "a", "port": 80},
+				map[string]any{"name": "b"},
+			}},
+			want: map[string]string{"hosts[0].name": "a", "hosts[0].port": "80", "hosts[1].name": "b"},
+		},
+		"nested list inside list": {
+			in:   map[string]any{"a": []any{[]any{"x", "y"}, []any{"z"}}},
+			want: map[string]string{"a[0]": "{x,y}", "a[1]": "{z}"},
+		},
+		"map in list in map": {
+			in:   map[string]any{"a": map[string]any{"l": []any{map[string]any{"k": "v"}}}},
+			want: map[string]string{"a.l[0].k": "v"},
+		},
+		"non-string keys": {
+			in:   map[string]any{"a": map[any]any{1: "x", "b": true}},
+			want: map[string]string{"a.1": "x", "a.b": "true"},
+		},
+		"nested and dotted conflict resolves deterministically": {
+			in:   map[string]any{"a": map[string]any{"b": 1}, "a.b": 2},
+			want: map[string]string{"a.b": "2"},
+		},
+		"all empty maps gives nil": {
+			in:   map[string]any{"a": map[string]any{}, "b": map[string]any{"c": map[string]any{}}},
+			want: nil,
+		},
 		"empty nested map skipped": {
 			in:   map[string]any{"a": map[string]any{}, "b": 1},
 			want: map[string]string{"b": "1"},
