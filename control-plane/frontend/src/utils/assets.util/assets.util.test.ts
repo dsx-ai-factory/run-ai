@@ -45,6 +45,7 @@ describe("asset status support CTA", () => {
     );
 
     expect(result.tooltipText).toContain('href="https://support.example.test/contact"');
+    expect(result.tooltipText).toContain(".<br/><a ");
     expect(result.tooltipText).not.toContain("legacy-support.example.test");
   });
 });

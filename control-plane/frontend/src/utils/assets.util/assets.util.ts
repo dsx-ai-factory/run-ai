@@ -192,7 +192,7 @@ function getAssetStatusOptions(status: AssetClusterStatusInfo, createdAt: string
 
   if (status.url && colStatusOption.tooltipText) {
     if (DOCS.SUPPORT.URL) {
-      colStatusOption.tooltipText += `. <a href="${DOCS.SUPPORT.URL}" target="_blank">Contact NVIDIA Run:ai support.</a>`;
+      colStatusOption.tooltipText += `.<br/><a href="${DOCS.SUPPORT.URL}" target="_blank">Contact NVIDIA Run:ai support.</a>`;
     } else if (!/[.!?]$/.test(colStatusOption.tooltipText)) {
       colStatusOption.tooltipText += ".";
     }
