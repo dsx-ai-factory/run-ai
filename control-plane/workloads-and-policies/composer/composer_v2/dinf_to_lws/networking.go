@@ -14,6 +14,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/init_containers"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func (dinfComposer *DistributedInferenceToLWSComposer) processNetworkingFields(
@@ -120,6 +122,12 @@ func (dinfComposer *DistributedInferenceToLWSComposer) buildAuthProxySidecar(
 				ProjectName:                   cookie.projectName,
 				Config:                        cookie.config,
 				OAuth2ProxyTemplatesSupported: dinfComposer.fc.Options.OAuth2ProxyTemplatesSupported,
+				CustomizeServingProxy: func(_ *corev1.PodSpec, proxy *corev1.Container) *workloadsApi.Error {
+					if err := builders.CreateTcpReadinessProbe(proxy.Ports, proxy); err != nil {
+						return workloadsApi.NewError(http.StatusInternalServerError, err.Error())
+					}
+					return nil
+				},
 			},
 		)
 	}

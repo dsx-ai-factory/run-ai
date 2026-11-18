@@ -116,6 +116,9 @@ LeaderWorkerSet:
             name: runai-oauth2-proxy-0
             ports:
             - containerPort: 4180
+            readinessProbe:
+              tcpSocket:
+                port: 4180
             resources: {}
             securityContext:
               allowPrivilegeEscalation: false
