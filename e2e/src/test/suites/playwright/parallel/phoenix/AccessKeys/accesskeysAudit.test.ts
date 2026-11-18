@@ -115,7 +115,7 @@ test.describe(`Access Keys Audit tags: ${tags.resource.audit} ${tags.teams.phoen
         const s = new Date(new Date().getTime() - 1000 * 60 * 10);
         const filters = new Array<string>();
         filters.push('url==/api/v1/org-unit/projects');
-        filters.push('subjectType==AccessKey');
+        filters.push('subject_type==AccessKey');
         filters.push(`subject==${editorUser.body.username}`);
         await waitUtils.waitForCondition(
             async () => {
