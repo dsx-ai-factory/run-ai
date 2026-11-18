@@ -5,10 +5,10 @@
 
 <template>
   <runai-select-card :value="isSelected" @clicked="$emit('card-clicked')" :aid="getAid(data.meta.name)">
-    <div class="template-card workload-card-content">
+    <div class="template-card workload-card-content relative-position">
       <runai-tooltip
         v-if="isDeprecatedTgi"
-        class="template-card-deprecation"
+        class="absolute-top-right"
         aid="template-card-tgi-deprecation"
         icon="ph-bold ph-warning-circle"
         color="warning"
@@ -209,16 +209,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style lang="scss" scoped>
-.template-card {
-  position: relative;
-}
-
-.template-card-deprecation {
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 1;
-}
-</style>
