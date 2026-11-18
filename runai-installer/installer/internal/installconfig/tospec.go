@@ -291,12 +291,6 @@ func toSpecTLS(t *TLS) *spec.TLS {
 	return &spec.TLS{CertPath: t.CertPath, KeyPath: t.KeyPath, CAChainPath: t.CAChainPath}
 }
 
-// toStringMap flattens customHelmValues into the flat key=value form that Helm
-// --set expects. Nested maps become dotted paths (a: {b: 1} -> "a.b": "1"), so
-// the nested YAML form and the dotted-key form are equivalent. Scalar lists use
-// Helm's brace syntax. Empty maps are skipped. A top-level key is taken as
-// written (it may already be a dotted path); a dot inside a nested key is
-// escaped so Helm does not read it as a path separator.
 func toStringMap(m map[string]any) map[string]string {
 	if len(m) == 0 {
 		return nil

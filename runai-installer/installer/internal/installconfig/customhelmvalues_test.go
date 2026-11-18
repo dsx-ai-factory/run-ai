@@ -15,8 +15,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// helmSetArgs loads a config YAML, converts it to a spec and returns the
-// control plane --set arguments the installer would pass to Helm.
 func helmSetArgs(t *testing.T, customHelmValues string) []string {
 	t.Helper()
 	path := filepath.Join(t.TempDir(), "config.yaml")
@@ -28,8 +26,6 @@ func helmSetArgs(t *testing.T, customHelmValues string) []string {
 	return actions.MergeValues(nil, cfg.ToSpec(RunOptions{}).ControlPlane.CustomHelmValues)
 }
 
-// Regression test for #2464: the nested form used in the guided-installation
-// docs and the dotted-key form must produce identical Helm --set arguments.
 func TestCustomHelmValues_NestedAndDottedAreEquivalent(t *testing.T) {
 	nested := helmSetArgs(t, `    supportEntitled: true
     telemetryService:
