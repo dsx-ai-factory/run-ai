@@ -70,6 +70,8 @@ func (p *Plugin) MutateResource(
 	// Saving full Dynamo beta templates can add an empty podTemplate where none
 	// existed. Alpha reads individual fields and keeps the existing null cleanup.
 	// Don't remove empty objects from other workloads; selector: {} can be valid.
+	// TODO: Remove this Dynamo-specific cleanup once Karta preserves missing templates.
+	// https://github.com/dsx-ai-factory/workload-map/issues/346
 	removeEmptyObjects := resource.GetAPIVersion() == "nvidia.com/v1beta1" && resource.GetKind() == "DynamoGraphDeployment"
 	removeIntroducedNullFields(originalObject, resource.Object, removeEmptyObjects)
 
