@@ -20,6 +20,7 @@ export const toolTypeIconsMap: Record<string, string> = {
 };
 
 export const NVIDIA_WORKLOAD_ICON = "nvidia";
+export const AMD_WORKLOAD_ICON = "amd";
 export const GENERIC_WORKLOAD_ICON = "custom-tool";
 
 export const jobKindIconsMap: Record<string, string> = {
@@ -45,6 +46,7 @@ export const jobKindIconsMap: Record<string, string> = {
   HuggingFace: "hugging-face",
   NvidiaNim: "nvidianim",
   Nvidia: NVIDIA_WORKLOAD_ICON,
+  Amd: AMD_WORKLOAD_ICON,
   VLLM: "vllm",
   TGI: "tgi",
 };
