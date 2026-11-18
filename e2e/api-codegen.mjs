@@ -34,6 +34,11 @@ const specs = {
     workloadsManagerApi: serviceSpec('workloads-manager')
 };
 
+const retainedClients = {
+    backendApi: 'Existing tests still import its legacy models and enums.',
+    backendClusterApi: 'Existing tests still exercise its legacy cluster, node-pool, job and pod APIs.'
+};
+
 function main() {
     const args = process.argv.slice(2);
     const checkOnly = args.includes('--check');
@@ -47,8 +52,8 @@ function main() {
         args.splice(outputIndex, 2);
     }
     const names = args.filter((arg) => arg !== '--check' && arg !== '--all');
-    const clients = args.includes('--all') ? Object.keys(specs) : names;
-    if (!clients.length) {
+    const requested = args.includes('--all') ? Object.keys(specs) : names;
+    if (!requested.length) {
         throw new Error('Select a client or --all. Use --check to validate inputs without generation.');
     }
     const directories = readdirSync(clientsRoot, { withFileTypes: true })
@@ -58,6 +63,15 @@ function main() {
     if (unlisted.length) {
         throw new Error(`Clients missing from generation coverage: ${unlisted.join(', ')}`);
     }
+    const retained = requested.filter((name) => Object.hasOwn(retainedClients, name));
+    if (retained.length && !args.includes('--all')) {
+        throw new Error(`${retained.join(', ')}: intentionally retained unchanged, without a verified generation input. See the API-client development notes.`);
+    }
+    for (const name of retained) {
+        if (!directories.includes(name)) throw new Error(`Missing retained client directory: ${name}`);
+        console.log(`Retaining ${name} unchanged: ${retainedClients[name]}`);
+    }
+    const clients = requested.filter((name) => !Object.hasOwn(retainedClients, name));
     // Check every requested input before writing any generated output.
     const errors = clients.flatMap((name) => {
         if (!Object.hasOwn(specs, name)) return [`Unknown client: ${name}`];
@@ -67,7 +81,7 @@ function main() {
     });
     if (errors.length) throw new Error(errors.join('\n'));
     if (checkOnly) {
-        console.log(`Validated source specs for ${clients.length} clients.`);
+        console.log(`Validated source specs for ${clients.length} clients; ${retained.length} legacy clients retained unchanged.`);
         return;
     }
     const outputs = new Map(clients.map((name) => [name, outputRoot

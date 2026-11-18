@@ -140,7 +140,14 @@ RUNAI_REPO_PATH=/path/to/run-ai npm run api-codegen-assetsApi -- --output-dir /t
 
 Generator version 6.2.1 and the existing templates are retained. Specs are read directly from the monorepo and are not copied into `e2e/`. The default runner uses Docker; local tooling can instead set `OPENAPI_GENERATOR_JAR` to the same generator version, with `JAVA_HOME` pointing to its Java runtime.
 
-Generation requires an empty output directory to avoid retaining stale generated files. Review the preview, removed files and compatibility changes before replacing committed clients. `api-codegen-all` checks every mapping before generating; unresolved legacy mappings stop the command rather than silently skipping clients.
+Generation requires an empty output directory to avoid retaining stale generated files. Review the preview, removed files and compatibility changes before replacing committed clients. `api-codegen-all` validates every generation input before writing output.
+
+Two legacy clients are retained unchanged as temporary regeneration exceptions:
+
+- `backendApi`: existing tests still import its models and enums.
+- `backendClusterApi`: existing tests still exercise its legacy cluster, node-pool, job and pod APIs.
+
+Their original generation inputs have no verified replacement in the public monorepo. The all-client commands explicitly report these exceptions and process the other 19 clients. Requesting generation of either retained client directly fails with an explanation. Replacing the legacy dependencies and deciding which legacy endpoints remain covered are follow-up work; retaining these clients does not mean they were regenerated.
 
 Documentation links must be corrected in the service API source definitions before regeneration. Review generated API/type changes and run type-checks before submitting changes.
 
