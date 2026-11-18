@@ -7,6 +7,8 @@ package installconfig
 
 import (
 	"fmt"
+	"sort"
+	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/artifacts"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/spec"
@@ -289,13 +291,50 @@ func toSpecTLS(t *TLS) *spec.TLS {
 	return &spec.TLS{CertPath: t.CertPath, KeyPath: t.KeyPath, CAChainPath: t.CAChainPath}
 }
 
+// toStringMap flattens customHelmValues into the flat key=value form that Helm
+// --set expects. Nested maps become dotted paths (a: {b: 1} -> "a.b": "1"), so
+// the nested YAML form and the dotted-key form are equivalent. Scalar lists use
+// Helm's brace syntax. Empty maps are skipped. A top-level key is taken as
+// written (it may already be a dotted path); a dot inside a nested key is
+// escaped so Helm does not read it as a path separator.
 func toStringMap(m map[string]any) map[string]string {
 	if len(m) == 0 {
 		return nil
 	}
 	out := make(map[string]string, len(m))
-	for k, v := range m {
-		out[k] = fmt.Sprintf("%v", v)
+	for _, k := range sortedKeys(m) {
+		flattenValue(out, k, m[k])
+	}
+	if len(out) == 0 {
+		return nil
 	}
 	return out
+}
+
+func flattenValue(out map[string]string, path string, v any) {
+	switch t := v.(type) {
+	case map[string]any:
+		for _, k := range sortedKeys(t) {
+			flattenValue(out, path+"."+strings.ReplaceAll(k, ".", `\.`), t[k])
+		}
+	case []any:
+		items := make([]string, len(t))
+		for i, e := range t {
+			items[i] = helmListEscaper.Replace(fmt.Sprintf("%v", e))
+		}
+		out[path] = "{" + strings.Join(items, ",") + "}"
+	default:
+		out[path] = fmt.Sprintf("%v", v)
+	}
+}
+
+var helmListEscaper = strings.NewReplacer(`\`, `\\`, ",", `\,`)
+
+func sortedKeys(m map[string]any) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
 }

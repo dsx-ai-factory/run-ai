@@ -237,3 +237,64 @@ func TestToSpec_ControlPlaneCredentials(t *testing.T) {
 	cfg.Cluster.ControlPlaneCredentials = nil
 	assert.Nil(t, cfg.ToSpec(RunOptions{}).Cluster.ControlPlaneCredentials)
 }
+
+func TestToStringMap_NestedAndDotted(t *testing.T) {
+	cases := map[string]struct {
+		in   map[string]any
+		want map[string]string
+	}{
+		"empty": {in: nil, want: nil},
+		"scalars unchanged": {
+			in:   map[string]any{"supportEntitled": true, "replicas": 3, "name": "x"},
+			want: map[string]string{"supportEntitled": "true", "replicas": "3", "name": "x"},
+		},
+		"dotted key stays as is": {
+			in:   map[string]any{"telemetryService.enabled": true},
+			want: map[string]string{"telemetryService.enabled": "true"},
+		},
+		"nested map flattened": {
+			in: map[string]any{
+				"telemetryService": map[string]any{"enabled": true},
+				"global":           map[string]any{"fipsMode": "only"},
+			},
+			want: map[string]string{"telemetryService.enabled": "true", "global.fipsMode": "only"},
+		},
+		"deeply nested": {
+			in:   map[string]any{"a": map[string]any{"b": map[string]any{"c": 1}}},
+			want: map[string]string{"a.b.c": "1"},
+		},
+		"dotted and nested mixed": {
+			in: map[string]any{
+				"supportEntitled":  true,
+				"global.fipsMode":  "only",
+				"telemetryService": map[string]any{"telemetryAuth": map[string]any{"secretKey": "k"}},
+			},
+			want: map[string]string{
+				"supportEntitled":                          "true",
+				"global.fipsMode":                          "only",
+				"telemetryService.telemetryAuth.secretKey": "k",
+			},
+		},
+		"dotted key with nested value": {
+			in:   map[string]any{"a.b": map[string]any{"c": 1}},
+			want: map[string]string{"a.b.c": "1"},
+		},
+		"dot inside nested key is escaped": {
+			in:   map[string]any{"ann": map[string]any{"foo.bar/baz": "v"}},
+			want: map[string]string{`ann.foo\.bar/baz`: "v"},
+		},
+		"scalar list in helm brace syntax": {
+			in:   map[string]any{"hosts": []any{"a", "b,c", `d\e`}},
+			want: map[string]string{"hosts": `{a,b\,c,d\\e}`},
+		},
+		"empty nested map skipped": {
+			in:   map[string]any{"a": map[string]any{}, "b": 1},
+			want: map[string]string{"b": "1"},
+		},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, tc.want, toStringMap(tc.in))
+		})
+	}
+}
