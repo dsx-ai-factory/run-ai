@@ -172,8 +172,6 @@ func buildDynamoGraphDeploymentV1beta1ChildComponents() []karta.ComponentDefinit
 			OwnerRef: ptr.To("dynamographdeployment"),
 			SpecDefinition: &karta.SpecDefinition{
 				// Keep sidecars and init containers when Karta saves changes to the pod.
-				// Karta writes the template back through Kubernetes Go types. Fields missing
-				// from those types, including spec.schedulingGroup in v0.35.4, are dropped.
 				PodTemplateSpecPath: ptr.To(".spec.components[] | .podTemplate"),
 			},
 			ScaleDefinition: &karta.ScaleDefinition{

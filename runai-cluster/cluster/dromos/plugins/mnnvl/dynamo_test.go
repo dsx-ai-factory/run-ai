@@ -241,6 +241,7 @@ func TestDynamoClaimRoundTrip(t *testing.T) {
   },
   "podTemplate": {
     "spec": {
+      "schedulingGroup": {"podGroupName": "model-group"},
       "containers": [
         {
           "name": "main",
@@ -293,6 +294,9 @@ func TestDynamoClaimRoundTrip(t *testing.T) {
 				g.Expect(workerLabels).To(HaveKeyWithValue(WorkloadNameLabel, runner.Name))
 				pod, _, err := unstructured.NestedMap(worker, podPath...)
 				g.Expect(err).NotTo(HaveOccurred())
+				if tc.beta {
+					g.Expect(pod["schedulingGroup"]).To(Equal(map[string]interface{}{"podGroupName": "model-group"}))
+				}
 				claims, _, err := unstructured.NestedSlice(pod, "resourceClaims")
 				g.Expect(err).NotTo(HaveOccurred())
 				g.Expect(claims).To(Equal([]interface{}{
