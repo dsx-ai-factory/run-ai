@@ -31,7 +31,7 @@ require (
 )
 
 require (
-	github.com/MicahParks/jwkset v0.11.4 // indirect
+	github.com/MicahParks/jwkset v0.11.5 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.6 // indirect
