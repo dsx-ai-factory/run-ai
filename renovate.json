@@ -32,6 +32,14 @@
   "dependencyDashboard": false,
   "packageRules": [
     {
+      "description": "Python bumps are grouped by the file they change, not by package: one PR per pyproject.toml or requirements.txt.",
+      "matchManagers": [
+        "poetry",
+        "pip_requirements"
+      ],
+      "groupName": "{{{packageFile}}} dependencies"
+    },
+    {
       "description": "frontend and frontend-v2 are two separate npm apps that happen to share a folder. Keep them in separate PRs rather than letting the folder-based group key merge them.",
       "matchFileNames": [
         "control-plane/frontend/frontend-v2/**"
