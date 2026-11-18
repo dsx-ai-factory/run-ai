@@ -325,6 +325,24 @@ var _ = Describe("InferenceToKnativeComposer", func() {
 			},
 		}),
 
+		Entry("largeShmRequest mounts a memory-backed emptyDir at /dev/shm", composerCase{
+			specFile:     "large_shm",
+			expectedFile: "large_shm",
+			assert: func(target *KnativeServiceTarget) {
+				podSpec := target.Service.Spec.Template.Spec.PodSpec
+				Expect(podSpec.Volumes).To(ContainElement(corev1.Volume{
+					Name: composer.DshmVolumeName,
+					VolumeSource: corev1.VolumeSource{
+						EmptyDir: &corev1.EmptyDirVolumeSource{Medium: corev1.StorageMediumMemory},
+					},
+				}))
+				Expect(podSpec.Containers[0].VolumeMounts).To(ContainElement(corev1.VolumeMount{
+					Name:      composer.DshmVolumeName,
+					MountPath: composer.DshmMountPath,
+				}))
+			},
+		}),
+
 		Entry("workingDir is propagated to the container", composerCase{
 			specFile:     "working_dir",
 			expectedFile: "working_dir",

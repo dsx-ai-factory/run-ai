@@ -202,7 +202,7 @@ func (itc *InferenceToKnativeComposer) Compose(
 			return rc
 		}
 
-		runner.Run(itc.processStorageFields(ctx, src.Storage.Get(), target))
+		runner.Run(itc.processStorageFields(ctx, src.Storage.Get(), getLargeShmRequest(src.Compute.Get()), target))
 
 		runner.Run(itc.processPlacementFields(ctx, src, target))
 		if convutils.HasValue(src.Probes) {
