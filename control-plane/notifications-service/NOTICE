@@ -51,9 +51,9 @@ Dependencies
 | `github.com/go-openapi/jsonpointer` | v1.0.3 | Apache-2.0 | https://github.com/go-openapi/jsonpointer/blob/v1.0.3/LICENSE |
 | `github.com/go-openapi/jsonreference` | v1.0.3 | Apache-2.0 | https://github.com/go-openapi/jsonreference/blob/v1.0.3/LICENSE |
 | `github.com/go-openapi/loads` | v0.25.4 | Apache-2.0 | https://github.com/go-openapi/loads/blob/v0.25.4/LICENSE |
-| `github.com/go-openapi/runtime` | v0.33.4 | Apache-2.0 | https://github.com/go-openapi/runtime/blob/v0.33.4/LICENSE |
-| `github.com/go-openapi/runtime/middleware/denco` | v0.33.4 | MIT | https://github.com/go-openapi/runtime/blob/v0.33.4/middleware/denco/LICENSE |
-| `github.com/go-openapi/runtime/server-middleware` | v0.33.4 | Apache-2.0 | https://github.com/go-openapi/runtime/blob/server-middleware/v0.33.4/server-middleware/LICENSE |
+| `github.com/go-openapi/runtime` | v0.33.5 | Apache-2.0 | https://github.com/go-openapi/runtime/blob/v0.33.5/LICENSE |
+| `github.com/go-openapi/runtime/middleware/denco` | v0.33.5 | MIT | https://github.com/go-openapi/runtime/blob/v0.33.5/middleware/denco/LICENSE |
+| `github.com/go-openapi/runtime/server-middleware` | v0.33.5 | Apache-2.0 | https://github.com/go-openapi/runtime/blob/server-middleware/v0.33.5/server-middleware/LICENSE |
 | `github.com/go-openapi/spec` | v1.0.1 | Apache-2.0 | https://github.com/go-openapi/spec/blob/v1.0.1/LICENSE |
 | `github.com/go-openapi/strfmt` | v0.27.4 | Apache-2.0 | https://github.com/go-openapi/strfmt/blob/v0.27.4/LICENSE |
 | `github.com/go-openapi/swag` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/v0.29.2/LICENSE |
@@ -4776,7 +4776,7 @@ limitations under the License.
 
 --------------------------------------------------------------------------------
 Notice of:
-  - `github.com/go-openapi/runtime` v0.33.4
+  - `github.com/go-openapi/runtime` v0.33.5
 --------------------------------------------------------------------------------
 
 Copyright 2015-2025 go-swagger maintainers
