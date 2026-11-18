@@ -36,6 +36,7 @@ const (
 	PROJECTNODEPOOLRESOURCESFILTERSORTFIELDS_CLUSTER_ID            ProjectNodePoolResourcesFilterSortFields = "clusterId"
 	PROJECTNODEPOOLRESOURCESFILTERSORTFIELDS_GPU_DESERVED          ProjectNodePoolResourcesFilterSortFields = "gpuDeserved"
 	PROJECTNODEPOOLRESOURCESFILTERSORTFIELDS_GPU_OVER_QUOTA_WEIGHT ProjectNodePoolResourcesFilterSortFields = "gpuOverQuotaWeight"
+	PROJECTNODEPOOLRESOURCESFILTERSORTFIELDS_GPU_LIMIT             ProjectNodePoolResourcesFilterSortFields = "gpuLimit"
 )
 
 // AllowedProjectNodePoolResourcesFilterSortFieldsEnumValues is all the allowed values of ProjectNodePoolResourcesFilterSortFields enum
@@ -48,6 +49,7 @@ var AllowedProjectNodePoolResourcesFilterSortFieldsEnumValues = []ProjectNodePoo
 	"clusterId",
 	"gpuDeserved",
 	"gpuOverQuotaWeight",
+	"gpuLimit",
 }
 
 // validProjectNodePoolResourcesFilterSortFieldsEnumValue provides a map of ProjectNodePoolResourcesFilterSortFieldss for fast verification of use input
@@ -60,6 +62,7 @@ var validProjectNodePoolResourcesFilterSortFieldsEnumValues = map[ProjectNodePoo
 	"clusterId":          {},
 	"gpuDeserved":        {},
 	"gpuOverQuotaWeight": {},
+	"gpuLimit":           {},
 }
 
 // IsValid return true if the value is valid for the enum, false otherwise

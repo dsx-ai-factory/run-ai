@@ -4978,7 +4978,8 @@ paths:
           \ value. Operators are == Equals, != Not equals, <= Less than or equal,\
           \ >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts\
           \ with and =$ Ends with. Dates are in ISO 8601 timestamp format and available\
-          \ for operators ==, !=, <= and >=."
+          \ for operators ==, !=, <= and >=. gpuLimit treats a missing limit as -1\
+          \ (unlimited), so gpuLimit!=-1 matches only org units with a GPU limit."
         explode: false
         in: query
         name: filterBy
@@ -4986,8 +4987,9 @@ paths:
         schema:
           example:
           - nodePoolName!=some-name
+          - gpuLimit!=-1
           items:
-            pattern: ^(nodePoolName|nodePoolId|orgUnitId|orgUnitName|rank|clusterId)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            pattern: ^(nodePoolName|nodePoolId|orgUnitId|orgUnitName|rank|clusterId|gpuLimit)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
             type: string
           maxItems: 10
           type: array
@@ -5104,7 +5106,8 @@ paths:
           \ value. Operators are == Equals, != Not equals, <= Less than or equal,\
           \ >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts\
           \ with and =$ Ends with. Dates are in ISO 8601 timestamp format and available\
-          \ for operators ==, !=, <= and >=."
+          \ for operators ==, !=, <= and >=. gpuLimit treats a missing limit as -1\
+          \ (unlimited), so gpuLimit!=-1 matches only org units with a GPU limit."
         explode: false
         in: query
         name: filterBy
@@ -5112,8 +5115,9 @@ paths:
         schema:
           example:
           - nodePoolName!=some-name
+          - gpuLimit!=-1
           items:
-            pattern: ^(nodePoolName|nodePoolId|orgUnitId|orgUnitName|rank|clusterId)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            pattern: ^(nodePoolName|nodePoolId|orgUnitId|orgUnitName|rank|clusterId|gpuLimit)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
             type: string
           maxItems: 10
           type: array
@@ -5446,7 +5450,8 @@ paths:
           \ value. Operators are == Equals, != Not equals, <= Less than or equal,\
           \ >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts\
           \ with and =$ Ends with. Dates are in ISO 8601 timestamp format and available\
-          \ for operators ==, !=, <= and >=."
+          \ for operators ==, !=, <= and >=. gpuLimit treats a missing limit as -1\
+          \ (unlimited), so gpuLimit!=-1 matches only org units with a GPU limit."
         explode: false
         in: query
         name: filterBy
@@ -5454,8 +5459,9 @@ paths:
         schema:
           example:
           - nodePoolName!=some-name
+          - gpuLimit!=-1
           items:
-            pattern: ^(nodePoolName|nodePoolId|parentId|orgUnitId|orgUnitName|rank|clusterId)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            pattern: ^(nodePoolName|nodePoolId|parentId|orgUnitId|orgUnitName|rank|clusterId|gpuLimit)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
             type: string
           maxItems: 10
           type: array
@@ -5572,7 +5578,8 @@ paths:
           \ value. Operators are == Equals, != Not equals, <= Less than or equal,\
           \ >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts\
           \ with and =$ Ends with. Dates are in ISO 8601 timestamp format and available\
-          \ for operators ==, !=, <= and >=."
+          \ for operators ==, !=, <= and >=. gpuLimit treats a missing limit as -1\
+          \ (unlimited), so gpuLimit!=-1 matches only org units with a GPU limit."
         explode: false
         in: query
         name: filterBy
@@ -5580,8 +5587,9 @@ paths:
         schema:
           example:
           - nodePoolName!=some-name
+          - gpuLimit!=-1
           items:
-            pattern: ^(nodePoolName|nodePoolId|parentId|orgUnitId|orgUnitName|rank|clusterId)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            pattern: ^(nodePoolName|nodePoolId|parentId|orgUnitId|orgUnitName|rank|clusterId|gpuLimit)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
             type: string
           maxItems: 10
           type: array
@@ -7289,7 +7297,8 @@ components:
         \ value. Operators are == Equals, != Not equals, <= Less than or equal, >=\
         \ Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with\
         \ and =$ Ends with. Dates are in ISO 8601 timestamp format and available for\
-        \ operators ==, !=, <= and >=."
+        \ operators ==, !=, <= and >=. gpuLimit treats a missing limit as -1 (unlimited),\
+        \ so gpuLimit!=-1 matches only org units with a GPU limit."
       explode: false
       in: query
       name: filterBy
@@ -7297,8 +7306,9 @@ components:
       schema:
         example:
         - nodePoolName!=some-name
+        - gpuLimit!=-1
         items:
-          pattern: ^(nodePoolName|nodePoolId|orgUnitId|orgUnitName|rank|clusterId)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+          pattern: ^(nodePoolName|nodePoolId|orgUnitId|orgUnitName|rank|clusterId|gpuLimit)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
           type: string
         maxItems: 10
         type: array
@@ -7346,7 +7356,8 @@ components:
         \ value. Operators are == Equals, != Not equals, <= Less than or equal, >=\
         \ Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with\
         \ and =$ Ends with. Dates are in ISO 8601 timestamp format and available for\
-        \ operators ==, !=, <= and >=."
+        \ operators ==, !=, <= and >=. gpuLimit treats a missing limit as -1 (unlimited),\
+        \ so gpuLimit!=-1 matches only org units with a GPU limit."
       explode: false
       in: query
       name: filterBy
@@ -7354,8 +7365,9 @@ components:
       schema:
         example:
         - nodePoolName!=some-name
+        - gpuLimit!=-1
         items:
-          pattern: ^(nodePoolName|nodePoolId|parentId|orgUnitId|orgUnitName|rank|clusterId)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+          pattern: ^(nodePoolName|nodePoolId|parentId|orgUnitId|orgUnitName|rank|clusterId|gpuLimit)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
           type: string
         maxItems: 10
         type: array
@@ -10588,6 +10600,7 @@ components:
       - clusterId
       - gpuDeserved
       - gpuOverQuotaWeight
+      - gpuLimit
       type: string
     ResourcesPerNodePool:
       example:
@@ -11104,6 +11117,7 @@ components:
       - clusterId
       - gpuDeserved
       - gpuOverQuotaWeight
+      - gpuLimit
       type: string
     ProjectNodePoolResources:
       example:

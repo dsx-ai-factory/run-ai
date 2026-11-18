@@ -5079,16 +5079,17 @@
         "name": "filterBy",
         "in": "query",
         "required": false,
-        "description": "Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=.",
+        "description": "Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!=-1 matches only org units with a GPU limit.",
         "schema": {
           "type": "array",
           "maxItems": 10,
           "items": {
             "type": "string",
-            "pattern": "^(nodePoolName|nodePoolId|orgUnitId|orgUnitName|rank|clusterId)(==|!=|<=|>=|=@|!@|=\\^|=\\$).+$"
+            "pattern": "^(nodePoolName|nodePoolId|orgUnitId|orgUnitName|rank|clusterId|gpuLimit)(==|!=|<=|>=|=@|!@|=\\^|=\\$).+$"
           },
           "example": [
-            "nodePoolName!=some-name"
+            "nodePoolName!=some-name",
+            "gpuLimit!=-1"
           ]
         },
         "explode": false
@@ -5134,16 +5135,17 @@
         "name": "filterBy",
         "in": "query",
         "required": false,
-        "description": "Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=.",
+        "description": "Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!=-1 matches only org units with a GPU limit.",
         "schema": {
           "type": "array",
           "maxItems": 10,
           "items": {
             "type": "string",
-            "pattern": "^(nodePoolName|nodePoolId|parentId|orgUnitId|orgUnitName|rank|clusterId)(==|!=|<=|>=|=@|!@|=\\^|=\\$).+$"
+            "pattern": "^(nodePoolName|nodePoolId|parentId|orgUnitId|orgUnitName|rank|clusterId|gpuLimit)(==|!=|<=|>=|=@|!@|=\\^|=\\$).+$"
           },
           "example": [
-            "nodePoolName!=some-name"
+            "nodePoolName!=some-name",
+            "gpuLimit!=-1"
           ]
         },
         "explode": false
@@ -7808,7 +7810,8 @@
           "orgUnitName",
           "clusterId",
           "gpuDeserved",
-          "gpuOverQuotaWeight"
+          "gpuOverQuotaWeight",
+          "gpuLimit"
         ]
       },
       "ResourcesPerNodePool": {
@@ -8414,7 +8417,8 @@
           "orgUnitName",
           "clusterId",
           "gpuDeserved",
-          "gpuOverQuotaWeight"
+          "gpuOverQuotaWeight",
+          "gpuLimit"
         ]
       },
       "ProjectNodePoolResources": {
