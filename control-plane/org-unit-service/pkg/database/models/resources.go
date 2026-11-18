@@ -6,7 +6,12 @@
 package models
 
 import (
+	"fmt"
+	"slices"
+	"strconv"
+
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"k8s.io/utils/ptr"
@@ -28,6 +33,37 @@ const (
 	// NULL and -1 both mean unlimited, so filters and sorting treat them as one value.
 	gpuLimitOrUnlimitedColumn = "COALESCE(gpu_limit, -1)"
 )
+
+// A non-numeric value would reach the numeric column and fail in the database instead of answering 400.
+type numberValidator struct{}
+
+func (numberValidator) Validate(value string) error {
+	if _, err := strconv.ParseFloat(value, 64); err != nil {
+		return fmt.Errorf("invalid number: %s", value)
+	}
+	return nil
+}
+
+func gpuLimitFieldMapping() queryapi.FieldMapping {
+	return queryapi.NewFieldMapping(gpuLimitOrUnlimitedColumn, numberValidator{})
+}
+
+var gpuLimitOperators = []string{"=", "is distinct from", "<=", ">="}
+
+// The parser allows the text operators (contains, starts with, ...) on every field; on the numeric gpuLimit they would
+// fail in the database instead of answering 400.
+func ParseNodePoolResourcesFilters(mapping queryapi.APIFieldsMapping, filterBy []string) ([]queryapi.Filter, error) {
+	filters, err := queryapi.NewParser(mapping).Filters(filterBy)
+	if err != nil {
+		return nil, err
+	}
+	for _, filter := range filters {
+		if filter.Field == gpuLimitOrUnlimitedColumn && !slices.Contains(gpuLimitOperators, filter.Operator) {
+			return nil, fmt.Errorf("gpuLimit supports only the operators ==, !=, <= and >=")
+		}
+	}
+	return filters, nil
+}
 
 type Resources struct {
 	dbmodels.BaseModel

@@ -1102,7 +1102,7 @@ func (s *DepartmentApiService) GetDepartmentNodePoolResources(ctx context.Contex
 	if err != nil {
 		return services.HandleError(err, http.StatusBadRequest, "Failed to parse tenant id"), nil
 	}
-	filters, filterErr := queryapi.NewParser(models.DepartmentNodePoolResources{}.FilterByFieldsToColumn()).Filters(filterBy)
+	filters, filterErr := models.ParseNodePoolResourcesFilters(models.DepartmentNodePoolResources{}.FilterByFieldsToColumn(), filterBy)
 	if filterErr != nil {
 		errResponse := services.HandleError(filterErr, http.StatusBadRequest, fmt.Sprintf("filters %s invalid", filterBy))
 		return errResponse, nil
@@ -1169,7 +1169,7 @@ func (s *DepartmentApiService) CountDepartmentNodePoolResources(ctx context.Cont
 	if err != nil {
 		return services.HandleError(err, http.StatusBadRequest, "Failed to parse tenant id"), nil
 	}
-	filters, filterErr := queryapi.NewParser(models.DepartmentNodePoolResources{}.FilterByFieldsToColumn()).Filters(filterBy)
+	filters, filterErr := models.ParseNodePoolResourcesFilters(models.DepartmentNodePoolResources{}.FilterByFieldsToColumn(), filterBy)
 	if filterErr != nil {
 		errResponse := services.HandleError(filterErr, http.StatusBadRequest, fmt.Sprintf("filters %s invalid", filterBy))
 		return errResponse, nil

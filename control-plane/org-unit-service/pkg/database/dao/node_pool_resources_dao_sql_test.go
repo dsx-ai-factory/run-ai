@@ -8,10 +8,12 @@ package dao
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
 	dbtesting "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/testing"
@@ -19,19 +21,18 @@ import (
 )
 
 const (
-	sqlSelectDeptNodePoolResources            = `SELECT * FROM department_node_pool_resources_view WHERE tenant_id = ? ORDER BY id DESC LIMIT ? OFFSET ?`
-	sqlSelectProjNodePoolResources            = `SELECT * FROM project_node_pool_resources_view WHERE tenant_id = ? ORDER BY id DESC LIMIT ? OFFSET ?`
-	sqlCountDeptNodePoolResources             = `SELECT count(*) FROM department_node_pool_resources_view WHERE tenant_id = ?`
-	sqlCountProjNodePoolResources             = `SELECT count(*) FROM project_node_pool_resources_view WHERE tenant_id = ?`
-	sqlCountProjNodePoolResourcesWithGpuLimit = `SELECT count(*) FROM project_node_pool_resources_view WHERE tenant_id = ? AND COALESCE(gpu_limit, -1) is distinct from ?`
-	sqlSumProjGPUWeights                      = `SELECT COALESCE(SUM(gpu_over_quota_weight), 0) FROM project_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ?`
-	sqlSumProjGPUDeserved                     = `SELECT COALESCE(SUM(CASE WHEN gpu_deserved >= 0 THEN gpu_deserved ELSE 0 END), 0) FROM project_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ?`
-	sqlSumDeptResourcesAdjustable             = `SELECT CASE WHEN COUNT(CASE WHEN gpu_deserved IS NULL OR gpu_deserved < 0 THEN 1 END) > 0 THEN -1 ELSE COALESCE(SUM(gpu_deserved), 0) END AS deserved_sum, COALESCE(SUM(gpu_over_quota_weight), 0) AS weights_sum FROM department_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ?`
-	sqlSumDeptResourcesFixed                  = `SELECT CASE WHEN COUNT(CASE WHEN gpu_deserved IS NULL OR gpu_deserved < 0 THEN 1 END) > 0 THEN -1 ELSE COALESCE(SUM(gpu_deserved), 0) END AS deserved_sum, COALESCE(SUM(CASE WHEN gpu_deserved >= 0 THEN gpu_deserved ELSE 0 END), 0) AS weights_sum FROM department_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ?`
-	sqlSelectDeptNodePoolPerPair              = `SELECT * FROM department_node_pool_resources_view WHERE tenant_id = ? AND org_unit_id = ? AND node_pool_id = ? ORDER BY department_node_pool_resources_view.id LIMIT ?`
-	sqlSelectProjNodePoolPerPair              = `SELECT * FROM project_node_pool_resources_view WHERE tenant_id = ? AND org_unit_id = ? AND node_pool_id = ? ORDER BY project_node_pool_resources_view.id LIMIT ?`
-	sqlPatchResources                         = `UPDATE resources SET gpu_deserved=? WHERE id = ? AND node_pool_id = ?`
-	sqlPatchDepartmentMetadata                = `UPDATE department SET updated_at=?,updated_by=? WHERE tenant_id = ? AND cluster_id = ? AND id = ?`
+	sqlSelectDeptNodePoolResources = `SELECT * FROM department_node_pool_resources_view WHERE tenant_id = ? ORDER BY id DESC LIMIT ? OFFSET ?`
+	sqlSelectProjNodePoolResources = `SELECT * FROM project_node_pool_resources_view WHERE tenant_id = ? ORDER BY id DESC LIMIT ? OFFSET ?`
+	sqlCountDeptNodePoolResources  = `SELECT count(*) FROM department_node_pool_resources_view WHERE tenant_id = ?`
+	sqlCountProjNodePoolResources  = `SELECT count(*) FROM project_node_pool_resources_view WHERE tenant_id = ?`
+	sqlSumProjGPUWeights           = `SELECT COALESCE(SUM(gpu_over_quota_weight), 0) FROM project_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ?`
+	sqlSumProjGPUDeserved          = `SELECT COALESCE(SUM(CASE WHEN gpu_deserved >= 0 THEN gpu_deserved ELSE 0 END), 0) FROM project_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ?`
+	sqlSumDeptResourcesAdjustable  = `SELECT CASE WHEN COUNT(CASE WHEN gpu_deserved IS NULL OR gpu_deserved < 0 THEN 1 END) > 0 THEN -1 ELSE COALESCE(SUM(gpu_deserved), 0) END AS deserved_sum, COALESCE(SUM(gpu_over_quota_weight), 0) AS weights_sum FROM department_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ?`
+	sqlSumDeptResourcesFixed       = `SELECT CASE WHEN COUNT(CASE WHEN gpu_deserved IS NULL OR gpu_deserved < 0 THEN 1 END) > 0 THEN -1 ELSE COALESCE(SUM(gpu_deserved), 0) END AS deserved_sum, COALESCE(SUM(CASE WHEN gpu_deserved >= 0 THEN gpu_deserved ELSE 0 END), 0) AS weights_sum FROM department_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ?`
+	sqlSelectDeptNodePoolPerPair   = `SELECT * FROM department_node_pool_resources_view WHERE tenant_id = ? AND org_unit_id = ? AND node_pool_id = ? ORDER BY department_node_pool_resources_view.id LIMIT ?`
+	sqlSelectProjNodePoolPerPair   = `SELECT * FROM project_node_pool_resources_view WHERE tenant_id = ? AND org_unit_id = ? AND node_pool_id = ? ORDER BY project_node_pool_resources_view.id LIMIT ?`
+	sqlPatchResources              = `UPDATE resources SET gpu_deserved=? WHERE id = ? AND node_pool_id = ?`
+	sqlPatchDepartmentMetadata     = `UPDATE department SET updated_at=?,updated_by=? WHERE tenant_id = ? AND cluster_id = ? AND id = ?`
 )
 
 var _ = Describe("Node pool resources DAO SQL", func() {
@@ -89,17 +90,31 @@ var _ = Describe("Node pool resources DAO SQL", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(*got).To(Equal(int64(5)))
 		})
-		It("treats a NULL gpu limit as unlimited when filtering by gpuLimit", func() {
+	})
+	DescribeTable("filters node pool resources by gpuLimit, counting a NULL limit as -1",
+		func(view string, mapping queryapi.APIFieldsMapping,
+			count func(context.Context, string, []queryapi.Filter, string, *openapi.PermittedScopes) (*int64, error),
+			filter, operator, value string,
+		) {
 			mocker := setupSQLMock()
-			filters, err := queryapi.NewParser(models.ProjectNodePoolResources{}.FilterByFieldsToColumn()).Filters([]string{"gpuLimit!=-1"})
+			filters, err := models.ParseNodePoolResourcesFilters(mapping, []string{filter})
 			Expect(err).NotTo(HaveOccurred())
-			mocker.ExpectQuery(sqlCountProjNodePoolResourcesWithGpuLimit, testTenantID, "-1").Returns([]countResult{{Count: 1}})
+			mocker.ExpectQuery(fmt.Sprintf("SELECT count(*) FROM %s WHERE tenant_id = ? AND COALESCE(gpu_limit, -1) %s ?", view, operator),
+				testTenantID, value).Returns([]countResult{{Count: 1}})
 
-			got, err := CountProjectNodePoolResources(context.Background(), testTenantID, filters, "", nil)
+			got, err := count(context.Background(), testTenantID, filters, "", nil)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(*got).To(Equal(int64(1)))
-		})
-	})
+		},
+		Entry("departments ==", models.DepartmentNodePoolResourcesView, models.DepartmentNodePoolResources{}.FilterByFieldsToColumn(), CountDepartmentNodePoolResources, "gpuLimit==-1", "=", "-1"),
+		Entry("departments !=", models.DepartmentNodePoolResourcesView, models.DepartmentNodePoolResources{}.FilterByFieldsToColumn(), CountDepartmentNodePoolResources, "gpuLimit!=-1", "is distinct from", "-1"),
+		Entry("departments <=", models.DepartmentNodePoolResourcesView, models.DepartmentNodePoolResources{}.FilterByFieldsToColumn(), CountDepartmentNodePoolResources, "gpuLimit<=2", "<=", "2"),
+		Entry("departments >=", models.DepartmentNodePoolResourcesView, models.DepartmentNodePoolResources{}.FilterByFieldsToColumn(), CountDepartmentNodePoolResources, "gpuLimit>=4", ">=", "4"),
+		Entry("projects ==", models.ProjectNodePoolResourcesView, models.ProjectNodePoolResources{}.FilterByFieldsToColumn(), CountProjectNodePoolResources, "gpuLimit==-1", "=", "-1"),
+		Entry("projects !=", models.ProjectNodePoolResourcesView, models.ProjectNodePoolResources{}.FilterByFieldsToColumn(), CountProjectNodePoolResources, "gpuLimit!=-1", "is distinct from", "-1"),
+		Entry("projects <=", models.ProjectNodePoolResourcesView, models.ProjectNodePoolResources{}.FilterByFieldsToColumn(), CountProjectNodePoolResources, "gpuLimit<=2", "<=", "2"),
+		Entry("projects >=", models.ProjectNodePoolResourcesView, models.ProjectNodePoolResources{}.FilterByFieldsToColumn(), CountProjectNodePoolResources, "gpuLimit>=4", ">=", "4"),
+	)
 	Describe("SumProjectNodePoolResourcesGpuWeights", func() {
 		It("adjustable", func() {
 			mocker := setupSQLMock()

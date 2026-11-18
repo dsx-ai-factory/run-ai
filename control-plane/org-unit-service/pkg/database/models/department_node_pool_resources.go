@@ -40,7 +40,7 @@ func (DepartmentNodePoolResources) FilterByFieldsToColumn() queryapi.APIFieldsMa
 		"nodePoolId":   queryapi.NewFieldMapping(ResourcesNodePoolIdColumn),
 		"rank":         queryapi.NewFieldMapping("rank"),
 		"clusterId":    queryapi.NewFieldMapping("cluster_id", queryapi.UUIDValidator{}),
-		"gpuLimit":     queryapi.NewFieldMapping(gpuLimitOrUnlimitedColumn),
+		"gpuLimit":     gpuLimitFieldMapping(),
 	}
 }
 
