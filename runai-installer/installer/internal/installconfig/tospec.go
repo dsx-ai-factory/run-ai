@@ -7,7 +7,8 @@ package installconfig
 
 import (
 	"fmt"
-	"sort"
+	"maps"
+	"slices"
 	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/artifacts"
@@ -291,13 +292,14 @@ func toSpecTLS(t *TLS) *spec.TLS {
 	return &spec.TLS{CertPath: t.CertPath, KeyPath: t.KeyPath, CAChainPath: t.CAChainPath}
 }
 
-func toStringMap(m map[string]any) map[string]string {
-	if len(m) == 0 {
-		return nil
-	}
-	out := make(map[string]string, len(m))
-	for _, k := range sortedKeys(m) {
-		flattenValue(out, k, m[k])
+func toStringMap(values map[string]any) map[string]string {
+	out := map[string]string{}
+	for _, key := range slices.Sorted(maps.Keys(values)) {
+		if value := values[key]; value != nil && !isContainer(value) {
+			out[key] = fmt.Sprint(value)
+			continue
+		}
+		flatten(out, key, values[key])
 	}
 	if len(out) == 0 {
 		return nil
@@ -305,30 +307,50 @@ func toStringMap(m map[string]any) map[string]string {
 	return out
 }
 
-func flattenValue(out map[string]string, path string, v any) {
-	switch t := v.(type) {
+func flatten(out map[string]string, path string, value any) {
+	switch value := value.(type) {
+	case nil:
+		out[path] = "null"
 	case map[string]any:
-		for _, k := range sortedKeys(t) {
-			flattenValue(out, path+"."+strings.ReplaceAll(k, ".", `\.`), t[k])
+		for _, key := range slices.Sorted(maps.Keys(value)) {
+			flatten(out, path+"."+keyEscaper.Replace(key), value[key])
 		}
+	case map[any]any:
+		stringKeyed := make(map[string]any, len(value))
+		for key, item := range value {
+			stringKeyed[fmt.Sprint(key)] = item
+		}
+		flatten(out, path, stringKeyed)
 	case []any:
-		items := make([]string, len(t))
-		for i, e := range t {
-			items[i] = helmListEscaper.Replace(fmt.Sprintf("%v", e))
+		if slices.ContainsFunc(value, isContainer) {
+			for i, item := range value {
+				flatten(out, fmt.Sprintf("%s[%d]", path, i), item)
+			}
+			return
+		}
+		if len(value) == 0 {
+			return
+		}
+		items := make([]string, len(value))
+		for i, item := range value {
+			items[i] = listItemEscaper.Replace(fmt.Sprint(item))
 		}
 		out[path] = "{" + strings.Join(items, ",") + "}"
 	default:
-		out[path] = fmt.Sprintf("%v", v)
+		out[path] = valueEscaper.Replace(fmt.Sprint(value))
 	}
 }
 
-var helmListEscaper = strings.NewReplacer(`\`, `\\`, ",", `\,`)
-
-func sortedKeys(m map[string]any) []string {
-	keys := make([]string, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
+func isContainer(value any) bool {
+	switch value.(type) {
+	case map[string]any, map[any]any, []any:
+		return true
 	}
-	sort.Strings(keys)
-	return keys
+	return false
 }
+
+var (
+	keyEscaper      = strings.NewReplacer(`\`, `\\`, ".", `\.`, "[", `\[`, "]", `\]`, "=", `\=`, ",", `\,`)
+	valueEscaper    = strings.NewReplacer(`\`, `\\`, ",", `\,`)
+	listItemEscaper = strings.NewReplacer(`\`, `\\`, ",", `\,`, "}", `\}`)
+)
