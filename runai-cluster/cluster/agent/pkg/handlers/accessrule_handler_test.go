@@ -138,6 +138,19 @@ var _ = Describe("AccessRulesHandler", func() {
 		})
 	})
 
+	Context("an access rule of a custom role", func() {
+		// accessrule-controller relies on this mark to accept a role that has no ClusterRole.
+		It("carries the backend's custom role mark onto the cluster object", func() {
+			customRoleRule := departmentAdminRule("control-plane-only")
+			customRoleRule.CustomRole = ptrTo(true)
+
+			accessRule, err := convertBackendToClusterAccessRule(&customRoleRule)
+
+			Expect(err).ToNot(HaveOccurred())
+			Expect(accessRule.Spec.CustomRole).To(BeTrue())
+		})
+	})
+
 	Context("deleteAccessRulesByIds", func() {
 		It("deletes the object left behind by a role rename", func() {
 			// The object on the cluster was created before the role was renamed, so its name is the

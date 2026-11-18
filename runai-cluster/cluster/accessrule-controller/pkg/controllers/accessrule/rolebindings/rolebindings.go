@@ -103,12 +103,21 @@ func (r *RoleBindingsHandler) ValidateClusterRoleExists(ctx context.Context, clu
 	return statusMessage, err
 }
 
+// IsMissingClusterRoleOfCustomRole reports whether err is the missing ClusterRole of a custom role.
+// Such a role carries control-plane permissions only, so there is nothing to bind in the cluster.
+func IsMissingClusterRoleOfCustomRole(accessRule *v1alpha1.AccessRule, err error) bool {
+	return accessRule.Spec.CustomRole && k8s_errors.IsNotFound(err)
+}
+
 func (r *RoleBindingsHandler) handleRunaiNamespaceRoleBindingForAccessRule(ctx context.Context, accessRule *v1alpha1.AccessRule,
 ) (string, error) {
 	runaiNamespaceRoleBindingName := rolebindingsutils.GetRunaiNamespaceRoleBindingName(accessRule.Spec.RoleName)
 
 	statusMessage, err := r.ValidateClusterRoleExists(ctx, runaiNamespaceRoleBindingName)
 	if err != nil {
+		if IsMissingClusterRoleOfCustomRole(accessRule, err) {
+			return "", nil
+		}
 		log.Ctx(ctx).Error().Msgf("Failed getting ClusterRole <%s> for access rule <%s>, error: %s",
 			runaiNamespaceRoleBindingName, accessRule.Name, err.Error())
 		return statusMessage, err
@@ -128,6 +137,9 @@ func (r *RoleBindingsHandler) handleClusterRoleBindingForAccessRule(ctx context.
 
 	statusMessage, err := r.ValidateClusterRoleExists(ctx, clusterRoleBindingName)
 	if err != nil {
+		if IsMissingClusterRoleOfCustomRole(accessRule, err) {
+			return "", nil
+		}
 		log.Ctx(ctx).Error().Msgf("Failed getting ClusterRole <%s> for access rule <%s>, error: %s",
 			clusterRoleBindingName, accessRule.Name, err.Error())
 		return statusMessage, err

@@ -19,6 +19,7 @@ Name | Type | Description | Notes
 **CreatedBy** | **string** | Identifier of the user who created the access rule. | 
 **SubjectType** | [**SubjectTypeExtended**](SubjectTypeExtended.md) |  | 
 **PredefinedRole** | Pointer to [**NullableAccessRuleSyncAllOfPredefinedRole**](AccessRuleSyncAllOfPredefinedRole.md) |  | [optional] 
+**CustomRole** | Pointer to **bool** | Indicates if the access rule&#39;s role is a custom role with no predefined role for cluster permissions. Such a role has no ClusterRole in the cluster. | [optional] [default to false]
 **IsDeleting** | Pointer to **bool** | Indicates if the access rule is in &#39;Deleting&#39; phase and should be deleted from the cluster | [optional] [default to false]
 
 ## Methods
@@ -380,6 +381,31 @@ HasPredefinedRole returns a boolean if a field has been set.
 `func (o *AccessRuleSync) UnsetPredefinedRole()`
 
 UnsetPredefinedRole ensures that no value is present for PredefinedRole, not even an explicit nil
+### GetCustomRole
+
+`func (o *AccessRuleSync) GetCustomRole() bool`
+
+GetCustomRole returns the CustomRole field if non-nil, zero value otherwise.
+
+### GetCustomRoleOk
+
+`func (o *AccessRuleSync) GetCustomRoleOk() (*bool, bool)`
+
+GetCustomRoleOk returns a tuple with the CustomRole field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetCustomRole
+
+`func (o *AccessRuleSync) SetCustomRole(v bool)`
+
+SetCustomRole sets CustomRole field to given value.
+
+### HasCustomRole
+
+`func (o *AccessRuleSync) HasCustomRole() bool`
+
+HasCustomRole returns a boolean if a field has been set.
+
 ### GetIsDeleting
 
 `func (o *AccessRuleSync) GetIsDeleting() bool`

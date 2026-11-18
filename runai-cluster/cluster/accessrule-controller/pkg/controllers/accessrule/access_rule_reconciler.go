@@ -150,6 +150,9 @@ func (r *AccessRuleReconciler) handleProjectsRoleBindingsForAccessRule(ctx conte
 	statusMessage, err := r.roleBindingsHandler.ValidateClusterRoleExists(ctx,
 		namespacedRoleBindingName)
 	if err != nil {
+		if rolebindings.IsMissingClusterRoleOfCustomRole(accessRule, err) {
+			return map[string]bool{}, "", nil
+		}
 		log.Ctx(ctx).Error().Msgf("Failed getting ClusterRole <%s> for access rule <%s>, error: %s",
 			namespacedRoleBindingName, accessRule.Name, err.Error())
 		return map[string]bool{}, statusMessage, err

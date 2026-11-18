@@ -39,6 +39,10 @@ spec:
           spec:
             description: AccessRuleSpec defines the desired state of AccessRule
             properties:
+              customRole:
+                description: true when the role is a custom role with no predefined
+                  role for cluster permissions
+                type: boolean
               roleName:
                 description: the role name the access rule refers to
                 type: string
