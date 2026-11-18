@@ -116,6 +116,8 @@ func (r *RoleBindingsHandler) handleRunaiNamespaceRoleBindingForAccessRule(ctx c
 	statusMessage, err := r.ValidateClusterRoleExists(ctx, runaiNamespaceRoleBindingName)
 	if err != nil {
 		if IsMissingClusterRoleOfCustomRole(accessRule, err) {
+			log.Ctx(ctx).Debug().Msgf("ClusterRole <%s> not found for access rule <%s> of a custom role, nothing to bind",
+				runaiNamespaceRoleBindingName, accessRule.Name)
 			return "", nil
 		}
 		log.Ctx(ctx).Error().Msgf("Failed getting ClusterRole <%s> for access rule <%s>, error: %s",
@@ -138,6 +140,8 @@ func (r *RoleBindingsHandler) handleClusterRoleBindingForAccessRule(ctx context.
 	statusMessage, err := r.ValidateClusterRoleExists(ctx, clusterRoleBindingName)
 	if err != nil {
 		if IsMissingClusterRoleOfCustomRole(accessRule, err) {
+			log.Ctx(ctx).Debug().Msgf("ClusterRole <%s> not found for access rule <%s> of a custom role, nothing to bind",
+				clusterRoleBindingName, accessRule.Name)
 			return "", nil
 		}
 		log.Ctx(ctx).Error().Msgf("Failed getting ClusterRole <%s> for access rule <%s>, error: %s",
