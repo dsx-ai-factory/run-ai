@@ -14,7 +14,6 @@ import (
 	"net/http"
 	"slices"
 	"strconv"
-	"strings"
 
 	"k8s.io/utils/ptr"
 
@@ -41,85 +40,129 @@ type simulationScenario struct {
 	changes      map[string]api.FairShareSimulationOrgUnit
 }
 
+// simulationError carries the response a failed step answers with, so the steps can return plain errors.
+type simulationError struct {
+	response api.ImplResponse
+}
+
+func (e *simulationError) Error() string {
+	return fmt.Sprint(e.response.Body)
+}
+
 func (o OrgUnitApiService) SimulateNodePoolFairShare(ctx context.Context, nodepoolId string, request api.FairShareSimulationRequest,
 ) (api.ImplResponse, error) {
-	if request.OrgUnitType != orgUnitTypeDepartment && request.OrgUnitType != orgUnitTypeProject {
-		err := fmt.Errorf("orgUnitType must be %s or %s", orgUnitTypeDepartment, orgUnitTypeProject)
-		return HandleError(err, http.StatusBadRequest, err.Error()), nil
+	response, err := o.simulateNodePoolFairShare(ctx, nodepoolId, request)
+	var failed *simulationError
+	if errors.As(err, &failed) {
+		return failed.response, nil
 	}
-	// The spec can't require department or project read depending on orgUnitType, so the handler checks it.
-	resourceType := authorization_api.RESOURCETYPE_DEPARTMENT
-	if request.OrgUnitType == orgUnitTypeProject {
-		resourceType = authorization_api.RESOURCETYPE_PROJECT
-	}
-	scopes, err := o.readScopes(ctx, resourceType)
 	if err != nil {
-		return HandleError(fmt.Errorf("get permitted %s scopes: %w", resourceType, err), http.StatusServiceUnavailable,
-			"Failed to get permitted scopes"), nil
+		return HandleError(err, http.StatusInternalServerError, err.Error()), nil
 	}
-	if authorization_utils.IsPermittedScopesEmpty(scopes) {
-		return api.Response(http.StatusForbidden, api.NewError(http.StatusForbidden,
-			fmt.Sprintf("simulating %ss requires read on %ss", request.OrgUnitType, resourceType), nil)), nil
+	return api.Response(http.StatusOK, response), nil
+}
+
+func (o OrgUnitApiService) simulateNodePoolFairShare(ctx context.Context, nodepoolId string, request api.FairShareSimulationRequest,
+) (api.FairShareSimulationResponse, error) {
+	scopes, err := o.readScopesForOrgUnitType(ctx, request.OrgUnitType)
+	if err != nil {
+		return api.FairShareSimulationResponse{}, err
 	}
 	if err := validateFairShareSimulationRequest(request); err != nil {
-		return HandleError(err, http.StatusBadRequest, err.Error()), nil
+		return api.FairShareSimulationResponse{}, badRequest(err)
 	}
 	tenantId, err := ParseTenantId(ctx)
 	if err != nil {
-		return HandleError(err, http.StatusBadRequest, "Failed to parse tenant id"), nil
+		return api.FairShareSimulationResponse{}, &simulationError{HandleError(err, http.StatusBadRequest, "Failed to parse tenant id")}
 	}
 
-	// Node pool ids are numbers in cluster-service, which fails on anything else instead of answering not found.
-	if _, err := strconv.ParseUint(nodepoolId, 10, 64); err != nil {
-		return api.Response(http.StatusNotFound, api.NewError(http.StatusNotFound,
-			fmt.Sprintf("node pool %s not found", nodepoolId), nil)), nil
-	}
-	var departmentScopes *authorization_api.PermittedScopes
-	if request.OrgUnitType == orgUnitTypeDepartment {
-		departmentScopes = scopes
-	}
-	departmentRows, err := dao.GetDepartmentSchedulingInputs(ctx, *tenantId, nodepoolId, departmentScopes)
+	departments, err := loadDepartmentsOfNodePool(ctx, *tenantId, nodepoolId, departmentVisibilityScopes(request.OrgUnitType, scopes))
 	if err != nil {
-		return HandleDbError(ctx, fmt.Errorf("load departments of node pool %s: %w", nodepoolId, err),
-			"Failed to get the node pool's departments"), nil
+		return api.FairShareSimulationResponse{}, err
 	}
-	departments := schedulingInputsById(departmentRows)
-	if len(departments) == 0 {
-		if _, err := GetNodePoolMetadata(ctx, o.clusterExternalClient, nodepoolId); err != nil {
-			if isNotFound(err) {
-				return HandleError(err, http.StatusNotFound, fmt.Sprintf("node pool %s not found", nodepoolId)), nil
-			}
-			return HandleError(fmt.Errorf("get node pool %s: %w", nodepoolId, err), http.StatusServiceUnavailable,
-				"Failed to get the node pool"), nil
-		}
-	}
-
 	scenario := newSimulationScenario(request)
-	if request.OrgUnitType == orgUnitTypeDepartment {
-		results, err := scenario.simulateDepartments(departments)
-		if err != nil {
-			return HandleError(err, http.StatusBadRequest, err.Error()), nil
-		}
-		return api.Response(http.StatusOK, scenario.toResponse(results)), nil
-	}
 
-	parentId := request.Parent.Id
-	parentKey, err := strconv.ParseInt(parentId, 10, 64)
-	if _, onNodePool := departments[parentId]; !onNodePool || err != nil {
+	var results map[string]fair_share_simulation.Result
+	if request.OrgUnitType == orgUnitTypeDepartment {
+		results, err = scenario.simulateDepartments(departments)
+	} else {
+		var projects map[string]*dao.NodePoolSchedulingInputs
+		projects, err = loadProjectsOfParent(ctx, *tenantId, nodepoolId, request, scopes)
+		if err == nil {
+			results, err = scenario.simulateProjects(departments, projects, request.Parent.Id)
+		}
+	}
+	if err != nil {
+		return api.FairShareSimulationResponse{}, err
+	}
+	return scenario.toResponse(results), nil
+}
+
+// The spec can't require department or project read depending on orgUnitType, so the handler checks it.
+func (o OrgUnitApiService) readScopesForOrgUnitType(ctx context.Context, orgUnitType string) (*authorization_api.PermittedScopes, error) {
+	var resourceType authorization_api.ResourceType
+	switch orgUnitType {
+	case orgUnitTypeDepartment:
+		resourceType = authorization_api.RESOURCETYPE_DEPARTMENT
+	case orgUnitTypeProject:
+		resourceType = authorization_api.RESOURCETYPE_PROJECT
+	default:
+		return nil, badRequest(fmt.Errorf("orgUnitType must be %s or %s", orgUnitTypeDepartment, orgUnitTypeProject))
+	}
+	scopes, _, err := o.AuthorizationClient.GetPermittedScopes(ctx, resourceType, ptr.To(authorization_api.ACTION_READ))
+	if err != nil {
+		return nil, &simulationError{HandleError(fmt.Errorf("get permitted %s scopes: %w", resourceType, err),
+			http.StatusServiceUnavailable, "Failed to get permitted scopes")}
+	}
+	if authorization_utils.IsPermittedScopesEmpty(&scopes.Read) {
+		return nil, &simulationError{api.Response(http.StatusForbidden, api.NewError(http.StatusForbidden,
+			fmt.Sprintf("simulating %ss requires read on %ss", orgUnitType, resourceType), nil))}
+	}
+	return &scopes.Read, nil
+}
+
+// Only the department level returns departments; for projects, scopes are project scopes and departments load unscoped.
+func departmentVisibilityScopes(orgUnitType string, scopes *authorization_api.PermittedScopes) *authorization_api.PermittedScopes {
+	if orgUnitType == orgUnitTypeDepartment {
+		return scopes
+	}
+	return nil
+}
+
+func loadDepartmentsOfNodePool(ctx context.Context, tenantId, nodepoolId string, scopes *authorization_api.PermittedScopes,
+) (map[string]*dao.NodePoolSchedulingInputs, error) {
+	rows, err := dao.GetDepartmentSchedulingInputs(ctx, tenantId, nodepoolId, scopes)
+	if err != nil {
+		return nil, &simulationError{HandleDbError(ctx, fmt.Errorf("load departments of node pool %s: %w", nodepoolId, err),
+			"Failed to get the node pool's departments")}
+	}
+	// The default department has resources on every node pool, so a node pool without department rows doesn't exist.
+	if len(rows) == 0 {
+		return nil, &simulationError{api.Response(http.StatusNotFound, api.NewError(http.StatusNotFound,
+			fmt.Sprintf("node pool %s not found", nodepoolId), nil))}
+	}
+	return schedulingInputsById(rows), nil
+}
+
+func loadProjectsOfParent(ctx context.Context, tenantId, nodepoolId string, request api.FairShareSimulationRequest,
+	scopes *authorization_api.PermittedScopes,
+) (map[string]*dao.NodePoolSchedulingInputs, error) {
+	parentId, err := strconv.ParseInt(request.Parent.Id, 10, 64)
+	if err != nil {
 		// Same error as an unknown project, so the parent can't be used to probe for departments.
-		err := notFoundInNodePool(orgUnitTypeProject, request.OrgUnits[0].Id)
-		return HandleError(err, http.StatusBadRequest, err.Error()), nil
+		return nil, badRequest(notFoundInNodePool(orgUnitTypeProject, request.OrgUnits[0].Id))
 	}
-	projectRows, err := dao.GetProjectSchedulingInputs(ctx, *tenantId, nodepoolId, parentKey, scopes)
+	rows, err := dao.GetProjectSchedulingInputs(ctx, tenantId, nodepoolId, parentId, scopes)
 	if err != nil {
-		return HandleDbError(ctx, fmt.Errorf("load projects of department %s on node pool %s: %w", parentId, nodepoolId, err),
-			"Failed to get the department's projects"), nil
+		return nil, &simulationError{HandleDbError(ctx,
+			fmt.Errorf("load projects of department %s on node pool %s: %w", request.Parent.Id, nodepoolId, err),
+			"Failed to get the department's projects")}
 	}
-	results, err := scenario.simulateProjects(departments, schedulingInputsById(projectRows), parentId)
-	if err != nil {
-		return HandleError(err, http.StatusBadRequest, err.Error()), nil
-	}
-	return api.Response(http.StatusOK, scenario.toResponse(results)), nil
+	return schedulingInputsById(rows), nil
+}
+
+func badRequest(err error) error {
+	return &simulationError{HandleError(err, http.StatusBadRequest, err.Error())}
 }
 
 func validateFairShareSimulationRequest(request api.FairShareSimulationRequest) error {
@@ -221,7 +264,7 @@ func (s simulationScenario) demandOf(id string) float64 {
 // A department asks for its own demand here, not the sum of its projects', so no project data is needed.
 func (s simulationScenario) simulateDepartments(departments map[string]*dao.NodePoolSchedulingInputs,
 ) (map[string]fair_share_simulation.Result, error) {
-	units, err := s.requestedLevel(orgUnitTypeDepartment, departments)
+	units, err := s.applyRequestToLevel(orgUnitTypeDepartment, departments)
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +275,7 @@ func (s simulationScenario) simulateDepartments(departments map[string]*dao.Node
 // parent queue. The parent needn't be readable: a caller may read a project without reading its department.
 func (s simulationScenario) simulateProjects(departments, projects map[string]*dao.NodePoolSchedulingInputs, parentId string,
 ) (map[string]fair_share_simulation.Result, error) {
-	projectUnits, err := s.requestedLevel(orgUnitTypeProject, projects)
+	projectUnits, err := s.applyRequestToLevel(orgUnitTypeProject, projects)
 	if err != nil {
 		return nil, err
 	}
@@ -252,14 +295,14 @@ func (s simulationScenario) simulateProjects(departments, projects map[string]*d
 	return fair_share_simulation.Divide(parentShare, slices.Collect(maps.Values(projectUnits))), nil
 }
 
-// A requested org unit the caller can't read gets the same error as an unknown one, so the request can't be used to
-// learn which org units exist. Hidden org units still compete.
-func (s simulationScenario) requestedLevel(orgUnitType string, rows map[string]*dao.NodePoolSchedulingInputs,
+// Hidden org units are mapped too, because they compete. A requested org unit the caller can't read gets the same error
+// as an unknown one, so the request can't be used to learn which org units exist.
+func (s simulationScenario) applyRequestToLevel(orgUnitType string, rows map[string]*dao.NodePoolSchedulingInputs,
 ) (map[string]fair_share_simulation.Unit, error) {
 	for _, orgUnit := range s.orgUnits {
 		row, ok := rows[orgUnit.Id]
 		if !ok || !row.Visible {
-			return nil, notFoundInNodePool(orgUnitType, orgUnit.Id)
+			return nil, badRequest(notFoundInNodePool(orgUnitType, orgUnit.Id))
 		}
 		applyChange(row, orgUnit.Rank, orgUnit.Gpu)
 	}
@@ -271,7 +314,7 @@ func (s simulationScenario) requestedLevel(orgUnitType string, rows map[string]*
 	}
 	for _, orgUnit := range s.orgUnits {
 		if unit := units[orgUnit.Id]; unit.Deserved >= 0 && unit.Limit != fair_share_simulation.Unlimited && unit.Limit < unit.Deserved {
-			return nil, fmt.Errorf("%s %s: the limit is below the quota", orgUnitType, orgUnit.Id)
+			return nil, badRequest(fmt.Errorf("%s %s: the limit is below the quota", orgUnitType, orgUnit.Id))
 		}
 	}
 	return units, nil
@@ -351,17 +394,4 @@ func schedulingInputsById(rows []dao.NodePoolSchedulingInputs) map[string]*dao.N
 		byId[rows[i].OrgUnitId] = &rows[i]
 	}
 	return byId
-}
-
-// isNotFound reads the status the cluster-service client puts at the start of its errors, as in "404 Not Found".
-func isNotFound(err error) bool {
-	return strings.HasPrefix(err.Error(), strconv.Itoa(http.StatusNotFound)+" ")
-}
-
-func (o OrgUnitApiService) readScopes(ctx context.Context, resourceType authorization_api.ResourceType) (*authorization_api.PermittedScopes, error) {
-	scopes, _, err := o.AuthorizationClient.GetPermittedScopes(ctx, resourceType, ptr.To(authorization_api.ACTION_READ))
-	if err != nil {
-		return nil, err
-	}
-	return &scopes.Read, nil
 }

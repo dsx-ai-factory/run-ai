@@ -50,8 +50,6 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 	clusterServiceClient.On("GetNodePoolsMinimalByCluster", mock.Anything, clusterId).
 		Return(&clustersOpenapi.GetNodepoolsMinimal200Response{Nodepools: []clustersOpenapi.NodepoolMinimal{pool}}, nil)
 	clusterServiceClient.On("GetNodepoolMinimal", mock.Anything, pool.Id).Return(&pool, nil)
-	clusterServiceClient.On("GetNodepoolMinimal", mock.Anything, "999997").Return(nil, errors.New("connection refused"))
-	clusterServiceClient.On("GetNodepoolMinimal", mock.Anything, mock.Anything).Return(nil, errors.New("404 Not Found"))
 	departmentApiService := departments.NewDepartmentApiService(&clusterServiceClient, nil)
 	projectApiService := projects.NewProjectApiService(services.NewProjectDeletionService(&clusterServiceClient, nil, nil), &clusterServiceClient, nil)
 
@@ -378,10 +376,6 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 
 		It("answers 404 for a node pool that doesn't exist", func() {
 			Expect(callOn("999998", fullAccess, departmentsScenario(row(a))).Code).To(Equal(http.StatusNotFound))
-		})
-
-		It("answers 503 when cluster-service can't say whether the node pool exists", func() {
-			Expect(callOn("999997", fullAccess, departmentsScenario(row(a))).Code).To(Equal(http.StatusServiceUnavailable))
 		})
 
 		It("treats ids that try to widen the query as unknown", func() {
