@@ -1,0 +1,97 @@
+# Ignore Node.js packages
+node_modules
+node_modules/
+node_modules/*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Ignore test results and reports
+test-results/
+test-results/*
+playwright-report/
+playwright-report/*
+allure-results/
+allure-results/*
+allure-report/
+allure-report/*
+videos/
+videos/*
+logs/
+logs/*
+network-activity/
+network-activity/*
+
+# Ignore OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Ignore IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore Git
+.git/
+.gitignore
+.gitattributes
+
+# Ignore Environment files (all variations)
+.env
+.env.*
+.env-list
+.envExample
+*.env
+
+# Ignore Build artifacts
+*.tgz
+
+# Ignore Temporary files
+*.tmp
+temp/
+tmp/
+
+# Ignore Docker build cache
+dgxc_e2e_common/kubeconfig_env_vars.sh
+
+# Ignore test cases mapping file
+test-cases-mapping.json
+
+# Ignore cluster_admin.config
+*cluster_admin.config
+
+# Ignore dgxc-customized-envs.sh
+dgxc-customized-envs.sh
+
+# Ignore log files
+*.log
+
+# Ignore Docker files (not needed inside container)
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+
+# Ignore Makefile (not needed inside container)
+Makefile
+
+# Ignore linting and formatting configs
+.eslintignore
+.eslintrc.json
+.prettierignore
+.prettierrc
+.mocharc.cjs
+.reporterConfig.json
+
+# Ignore kit build artifacts
+workloads_kit/*.tar.gz
+workloads_kit/*.zip
+certificate_kit/*.tar.gz
+certificate_kit/*.zip

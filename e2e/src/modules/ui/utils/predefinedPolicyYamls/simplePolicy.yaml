@@ -1,0 +1,7 @@
+defaults:
+    args: x=1
+    command: dummy-command
+rules:
+    compute:
+        gpuDevicesRequest:
+            max: 1
