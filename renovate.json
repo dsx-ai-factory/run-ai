@@ -32,6 +32,10 @@
   "dependencyDashboard": false,
   "packageRules": [
     {
+      "enabled": true,
+      "major": {
+        "enabled": false
+      },
       "description": "Python bumps are grouped by the file they change, not by package: one PR per pyproject.toml or requirements.txt.",
       "matchManagers": [
         "poetry",
