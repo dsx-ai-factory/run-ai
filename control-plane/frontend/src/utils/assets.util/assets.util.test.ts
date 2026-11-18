@@ -48,4 +48,18 @@ describe("asset status support CTA", () => {
     expect(result.tooltipText).toContain(".<br/><a ");
     expect(result.tooltipText).not.toContain("legacy-support.example.test");
   });
+
+  it("escapes the support URL before placing it in the href", () => {
+    support.URL = 'https://support.example.test/?a=1&b="x"><script>';
+
+    const result = assetsUtil.getStatusColOptions(
+      { status: AssetSyncStatusEnum.IssuesFound, message: "Issue", url: "flag" },
+      "2020-01-01T00:00:00Z",
+    );
+
+    expect(result.tooltipText).toContain(
+      'href="https://support.example.test/?a=1&amp;b=&quot;x&quot;&gt;&lt;script&gt;"',
+    );
+    expect(result.tooltipText).not.toContain("<script>");
+  });
 });

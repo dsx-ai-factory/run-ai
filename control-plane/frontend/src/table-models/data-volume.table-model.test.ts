@@ -11,7 +11,8 @@ import { allDataVolumeColumnsMap } from "./data-volume.table-model";
 
 const support = DOCS.SUPPORT as { URL: string };
 const originalSupportUrl = support.URL;
-const SUPPORT_LINK = '<a href="https://support.example.test/contact" target="_blank">Contact NVIDIA Run:ai support.</a>';
+const SUPPORT_LINK =
+  '<a href="https://support.example.test/contact" target="_blank" rel="noopener noreferrer">Contact NVIDIA Run:ai support.</a>';
 
 function formatStatus(phase: DatavolumePhase, phaseMessage?: string): IStatusColOptions {
   const row = { createdAt: "2020-01-01T00:00:00Z", status: { phase, phaseMessage } } as DatavolumeNoSharedScopes;
