@@ -48,7 +48,7 @@ Dependencies
 | `github.com/go-logr/zapr` | v1.3.0 | Apache-2.0 | https://github.com/go-logr/zapr/blob/v1.3.0/LICENSE |
 | `github.com/go-openapi/analysis` | v1.0.2 | Apache-2.0 | https://github.com/go-openapi/analysis/blob/v1.0.2/LICENSE |
 | `github.com/go-openapi/errors` | v0.22.9 | Apache-2.0 | https://github.com/go-openapi/errors/blob/v0.22.9/LICENSE |
-| `github.com/go-openapi/jsonpointer` | v1.0.2 | Apache-2.0 | https://github.com/go-openapi/jsonpointer/blob/v1.0.2/LICENSE |
+| `github.com/go-openapi/jsonpointer` | v1.0.3 | Apache-2.0 | https://github.com/go-openapi/jsonpointer/blob/v1.0.3/LICENSE |
 | `github.com/go-openapi/jsonreference` | v1.0.3 | Apache-2.0 | https://github.com/go-openapi/jsonreference/blob/v1.0.3/LICENSE |
 | `github.com/go-openapi/loads` | v0.25.4 | Apache-2.0 | https://github.com/go-openapi/loads/blob/v0.25.4/LICENSE |
 | `github.com/go-openapi/runtime` | v0.33.4 | Apache-2.0 | https://github.com/go-openapi/runtime/blob/v0.33.4/LICENSE |
@@ -72,7 +72,7 @@ Dependencies
 | `github.com/go-playground/locales` | v0.14.2 | MIT | https://github.com/go-playground/locales/blob/v0.14.2/LICENSE |
 | `github.com/go-playground/universal-translator` | v0.18.2 | MIT | https://github.com/go-playground/universal-translator/blob/v0.18.2/LICENSE |
 | `github.com/go-playground/validator/v10` | v10.30.6 | MIT | https://github.com/go-playground/validator/blob/v10.30.6/LICENSE |
-| `github.com/go-sql-driver/mysql` | v1.10.1 | MPL-2.0 | https://github.com/go-sql-driver/mysql/blob/v1.10.1/LICENSE |
+| `github.com/go-sql-driver/mysql` | v1.10.2 | MPL-2.0 | https://github.com/go-sql-driver/mysql/blob/v1.10.2/LICENSE |
 | `github.com/go-viper/mapstructure/v2` | v2.5.0 | MIT | https://pkg.go.dev/github.com/go-viper/mapstructure/v2@v2.5.0?tab=licenses |
 | `github.com/google/gnostic-models` | v0.7.1 | Apache-2.0 | https://github.com/google/gnostic-models/blob/v0.7.1/LICENSE |
 | `github.com/google/uuid` | v1.6.0 | BSD-3-Clause | https://github.com/google/uuid/blob/v1.6.0/LICENSE |
@@ -126,8 +126,8 @@ Dependencies
 | `go.yaml.in/yaml/v2` | v2.4.5 | Apache-2.0 | https://pkg.go.dev/go.yaml.in/yaml/v2@v2.4.5?tab=licenses |
 | `go.yaml.in/yaml/v3` | v3.0.6 | MIT | https://pkg.go.dev/go.yaml.in/yaml/v3@v3.0.6?tab=licenses |
 | `golang.org/x/crypto/sha3` | v0.59.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/crypto@v0.59.0?tab=licenses |
-| `golang.org/x/exp` | v0.0.0-20261113113407-e3970619a1a4 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/exp@v0.0.0-20261113113407-e3970619a1a4?tab=licenses |
-| `golang.org/x/net` | v0.62.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/net@v0.62.0?tab=licenses |
+| `golang.org/x/exp` | v0.0.0-20261117202309-7a49493bfd90 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/exp@v0.0.0-20261117202309-7a49493bfd90?tab=licenses |
+| `golang.org/x/net` | v0.63.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/net@v0.63.0?tab=licenses |
 | `golang.org/x/oauth2` | v0.38.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/oauth2@v0.38.0?tab=licenses |
 | `golang.org/x/sync` | v0.25.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sync@v0.25.0?tab=licenses |
 | `golang.org/x/sys` | v0.50.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sys@v0.50.0?tab=licenses |
@@ -4686,7 +4686,7 @@ section 4(d) of the Apache License, Version 2.0 requires.
 
 --------------------------------------------------------------------------------
 Notice of:
-  - `github.com/go-openapi/jsonpointer` v1.0.2
+  - `github.com/go-openapi/jsonpointer` v1.0.3
 --------------------------------------------------------------------------------
 
 Copyright 2015-2025 go-swagger maintainers
