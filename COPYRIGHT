@@ -13460,7 +13460,7 @@ Components:
 Copyright Micah Parks - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
-  github.com/MicahParks/jwkset v0.11.4
+  github.com/MicahParks/jwkset v0.11.5
 
                                  Apache License
                            Version 2.0, January 2004
@@ -14960,7 +14960,7 @@ THE SOFTWARE.
 Copyright Naoya Inada <naoina@kuune.org> - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/go-openapi/runtime/middleware/denco v0.33.4
+  github.com/go-openapi/runtime/middleware/denco v0.33.5
 
 Copyright (c) 2014 Naoya Inada <naoina@kuune.org>
 
@@ -17745,8 +17745,8 @@ Components:
   github.com/go-openapi/jsonreference v1.0.2
   github.com/go-openapi/jsonreference v1.0.3
   github.com/go-openapi/loads v0.25.4
-  github.com/go-openapi/runtime v0.33.4
-  github.com/go-openapi/runtime/server-middleware v0.33.4
+  github.com/go-openapi/runtime v0.33.5
+  github.com/go-openapi/runtime/server-middleware v0.33.5
   github.com/go-openapi/spec v1.0.1
   github.com/go-openapi/strfmt v0.27.4
   github.com/go-openapi/swag v0.25.1
@@ -25629,7 +25629,7 @@ limitations under the License.
 --------------------------------------------------------------------------------
 NOTICE of github.com/go-openapi/runtime
 Components:
-  github.com/go-openapi/runtime v0.33.4
+  github.com/go-openapi/runtime v0.33.5
 
 Copyright 2015-2025 go-swagger maintainers
 
