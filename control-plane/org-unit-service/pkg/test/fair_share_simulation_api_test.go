@@ -256,6 +256,7 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 			Expect(unknown.Code).To(Equal(http.StatusBadRequest))
 			Expect(hidden.Body.(api.Error).Message).To(Equal("department " + a + " not found in the node pool"))
 			Expect(unknown.Body.(api.Error).Message).To(Equal("department 999999 not found in the node pool"))
+			Expect(call(onlyB, departmentsScenario(row(b), row(a))).Code).To(Equal(http.StatusBadRequest))
 		})
 	})
 
@@ -277,6 +278,7 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 			body := simulate(onlyA1, projectsScenario(a, row(a1)))
 			expectResult(body.OrgUnits[0], a1, expected{demand: 10, fairShare: 10, guaranteed: 2, unmet: 0, weightShare: 0.5})
 			expectBadRequest(onlyA1, projectsScenario(a, row(a2)))
+			expectBadRequest(onlyA1, projectsScenario(a, row(a1), row(a2)))
 		})
 
 		It("refuses projects of another department, and an unknown parent like an unknown project", func() {
