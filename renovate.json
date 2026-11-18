@@ -118,6 +118,27 @@
       "major": {
         "enabled": false
       }
+    },
+    {
+      "branchName": "{{{branchPrefix}}}notifications-service",
+      "description": "Enable notifications-service patch-only pins across Chart.yaml and both Dockerfiles (this rule must stay after the helm and docker disables).",
+      "matchFileNames": [
+        "control-plane/control-plane-chart/Chart.yaml",
+        "control-plane/notifications-service/Dockerfile",
+        "control-plane/notifications-proxy/integration_tests/notifications-service.Dockerfile"
+      ],
+      "matchPackageNames": [
+        "notifications-service",
+        "runai.jfrog.io/base-containers/notifications-service",
+        "runai.jfrog.io/cp-containers-prod/notifications-service"
+      ],
+      "enabled": true,
+      "minor": { "enabled": false },
+      "major": { "enabled": false },
+      "groupName": "notifications-service",
+      "groupSlug": "notifications-service",
+      "commitMessage": "Update notifications-service to v{{{newVersion}}}",
+      "commitMessageSuffix": "({{baseBranch}})"
     }
   ]
 }
