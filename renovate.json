@@ -37,9 +37,9 @@
         "poetry",
         "pip_requirements"
       ],
-      "branchName": "{{{branchPrefix}}} {{{packageFile}}} dependencies",
-      "groupName": "{{{branchPrefix}}} {{{packageFile}}} dependencies",
-      "groupSlug": "{{{branchPrefix}}} {{{packageFile}}}-dependencies"
+      "branchName": "{{{branchPrefix}}}-{{{packageFileDir}}}-dependencies",
+      "groupName": "{{{packageFileDir}}} dependencies",
+      "groupSlug": "{{{packageFileDir}}}-dependencies"
     },
     {
       "description": "frontend and frontend-v2 are two separate npm apps that happen to share a folder. Keep them in separate PRs rather than letting the folder-based group key merge them.",
