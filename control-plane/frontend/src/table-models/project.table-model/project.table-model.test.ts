@@ -38,6 +38,30 @@ describe("project.table-model - workloads column (viewLinkColumn)", () => {
   });
 });
 
+describe("project.table-model - CPU memory allocation ratio column", () => {
+  const column = allProjectColumnsMap.memoryUtilization;
+  const getCellValue = (project: IProjectTable): string =>
+    column.format?.((column.field as (row: IProjectTable) => unknown)(project), project);
+
+  it("compares the allocated memory and the memory quota in the same unit (MB)", () => {
+    const project = {
+      status: { quotaStatus: { allocated: { memory: 512 } } },
+      totalResources: { memoryQuota: 1024 },
+    } as IProjectTable;
+
+    expect(getCellValue(project)).toBe("50.00%");
+  });
+
+  it("shows '-' when the project has no memory quota", () => {
+    const project = {
+      status: { quotaStatus: { allocated: { memory: 512 } } },
+      totalResources: { memoryQuota: 0 },
+    } as IProjectTable;
+
+    expect(getCellValue(project)).toBe("-");
+  });
+});
+
 describe("project.table-model - CSV export flow (projectIndexColumns via tableUtil.exportTableAsCsv)", () => {
   const mockedExportFile = vi.mocked(exportFile);
 

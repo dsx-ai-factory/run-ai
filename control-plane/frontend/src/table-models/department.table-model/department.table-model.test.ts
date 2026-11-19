@@ -38,6 +38,30 @@ describe("department.table-model - workloads column (viewLinkColumn)", () => {
   });
 });
 
+describe("department.table-model - CPU memory allocation ratio column", () => {
+  const column = allDepartmentColumnsMap.memoryUtilization;
+  const getCellValue = (department: IDepartmentTable): string =>
+    column.format?.((column.field as (row: IDepartmentTable) => unknown)(department), department);
+
+  it("compares the allocated memory and the memory quota in the same unit (MB)", () => {
+    const department = {
+      status: { quotaStatus: { allocated: { memory: 512 } } },
+      totalResources: { memoryQuota: 1024 },
+    } as IDepartmentTable;
+
+    expect(getCellValue(department)).toBe("50.00%");
+  });
+
+  it("shows '-' when the department has no memory quota", () => {
+    const department = {
+      status: { quotaStatus: { allocated: { memory: 512 } } },
+      totalResources: { memoryQuota: 0 },
+    } as IDepartmentTable;
+
+    expect(getCellValue(department)).toBe("-");
+  });
+});
+
 describe("department.table-model - CSV export flow (departmentIndexColumns via tableUtil.exportTableAsCsv)", () => {
   const mockedExportFile = vi.mocked(exportFile);
 

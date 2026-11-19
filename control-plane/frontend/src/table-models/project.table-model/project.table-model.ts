@@ -248,7 +248,7 @@ export const allProjectColumnsMap: Record<string, ITableColumn> = {
     sortable: true,
     align: "left",
     format: (allocatedMemory: number | undefined, project: IProjectTable) =>
-      toPercent(resourceUtil.fromBytesToMiB(allocatedMemory || 0), project.totalResources?.memoryQuota || 0),
+      toPercent(allocatedMemory || 0, project.totalResources?.memoryQuota || 0),
     hideFilter: true,
   },
   gpuQuota: {
