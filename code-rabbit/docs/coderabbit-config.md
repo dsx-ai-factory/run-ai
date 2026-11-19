@@ -113,7 +113,7 @@ These rules come from 72 remediated AIVO (Sourcerer SAST) findings on this repo.
 | Registry SSRF and credential forwarding | `control-plane/{catalog-service,assets-service}/**` | NGC key sent to a user-supplied registry URL, DNS rebinding after the private-IP check |
 | Fail closed, non-SQL injection, secrets, availability | All control-plane, runai-cluster and runai-installer Go | PromQL, SMTP header and CSV injection, hard-coded Valkey password, UUID-derived key, 0644 config file, unchecked type assertions, concurrent map |
 | Annotation-driven mutation, service-account matching | `runai-cluster/**/admission-controller/**`, `runai-cluster/**/validator/**` | `run.ai/patch-volumes` hostPath injection, prefix match on service-account names |
-| Keycloak theme XSS and CSRF | `control-plane/keycloak-extensions/**` | `error_description` into `innerHTML`, auto-submitting logout form |
+| Keycloak theme XSS and CSRF | `control-plane/keycloak-extensions/**/*.{ftl,js,html,css}` | `error_description` into `innerHTML`, auto-submitting logout form |
 | `window.open` with API data | `control-plane/frontend/**` | Stored XSS through workload URLs |
 | GitHub Actions injection and gating | `.github/workflows/**`, `.github/scripts/**` | Branch name in `github-script`, Renovate auto-merge gated on branch prefix, `verify=False` |
 

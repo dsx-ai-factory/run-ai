@@ -260,7 +260,7 @@ reviews:
         INFORMATIONAL — note but do not block:
         Object injection: bracket-notation property access on plain objects with external
         keys (already caught by eslint-plugin-security, note only if pattern is high-risk).
-    - path: "control-plane/keycloak-extensions/**/*.{ftl,js,html}"
+    - path: "control-plane/keycloak-extensions/**/*.{ftl,js,html,css}"
       instructions: |
         Keycloak theme templates run in the login origin. Flag innerHTML, outerHTML or
         document.write with values from window.location, URLSearchParams or other URL data;
