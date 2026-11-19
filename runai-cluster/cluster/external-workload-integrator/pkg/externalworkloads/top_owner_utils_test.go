@@ -8,6 +8,7 @@ package externalworkloads
 import (
 	"context"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
@@ -29,14 +30,16 @@ var _ = Describe("ExternalWorkloadHandler.getTopResourceOwnerWithHandler", func(
 		return metav1.OwnerReference{APIVersion: apiVersion, Kind: kind, Name: name, UID: uid}
 	}
 	endpointRef := ownerRef("inference.platform.run.ai/v1alpha1", "InferenceEndpoint", "inference", "endpoint-uid")
+	endpointLabels := map[string]string{endpoints.InferenceEndpointLabel: "inference"}
 
-	newHandler := func(deploymentOwners []metav1.OwnerReference) (*ExternalWorkloadHandler, *corev1.Pod) {
+	newHandler := func(deploymentOwners []metav1.OwnerReference, deploymentLabels map[string]string) (*ExternalWorkloadHandler, *corev1.Pod) {
 		scheme := runtime.NewScheme()
 		Expect(appsv1.AddToScheme(scheme)).To(Succeed())
 		Expect(corev1.AddToScheme(scheme)).To(Succeed())
 
 		deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{
 			Name: deploymentName, Namespace: namespace, UID: "deployment-uid", OwnerReferences: deploymentOwners,
+			Labels: deploymentLabels,
 		}}
 		replicaSet := &appsv1.ReplicaSet{ObjectMeta: metav1.ObjectMeta{
 			Name: deploymentName + "-rs", Namespace: namespace, UID: "rs-uid",
@@ -51,27 +54,27 @@ var _ = Describe("ExternalWorkloadHandler.getTopResourceOwnerWithHandler", func(
 		return &ExternalWorkloadHandler{cachedClient: c}, pod
 	}
 
-	It("drops a Deployment owned by an InferenceEndpoint without reading the endpoint", func() {
-		handler, _ := newHandler([]metav1.OwnerReference{endpointRef})
+	It("drops a Deployment labeled by the InferenceEndpoint controller without reading the endpoint", func() {
+		handler, _ := newHandler([]metav1.OwnerReference{endpointRef}, endpointLabels)
 		deployment := &appsv1.Deployment{}
 		Expect(handler.cachedClient.Get(context.Background(),
 			client.ObjectKey{Namespace: namespace, Name: deploymentName}, deployment)).To(Succeed())
 
 		_, _, err := handler.getTopResourceOwnerWithHandler(context.Background(), deployment)
 
-		Expect(isOwnedByDroppedKind(err)).To(BeTrue(), "got: %v", err)
+		Expect(isDroppedByLabel(err)).To(BeTrue(), "got: %v", err)
 	})
 
-	It("drops a pod whose Deployment is owned by an InferenceEndpoint", func() {
-		handler, pod := newHandler([]metav1.OwnerReference{endpointRef})
+	It("drops a pod whose Deployment is labeled by the InferenceEndpoint controller", func() {
+		handler, pod := newHandler([]metav1.OwnerReference{endpointRef}, endpointLabels)
 
 		_, _, err := handler.getTopResourceOwnerWithHandler(context.Background(), pod)
 
-		Expect(isOwnedByDroppedKind(err)).To(BeTrue(), "got: %v", err)
+		Expect(isDroppedByLabel(err)).To(BeTrue(), "got: %v", err)
 	})
 
 	It("keeps resolving the top owner of a pod under an ordinary Deployment", func() {
-		handler, pod := newHandler(nil)
+		handler, pod := newHandler(nil, nil)
 
 		topOwner, _, err := handler.getTopResourceOwnerWithHandler(context.Background(), pod)
 

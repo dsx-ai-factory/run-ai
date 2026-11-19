@@ -20,6 +20,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/pkg/cachedclient"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/pkg/constants"
@@ -1016,17 +1017,18 @@ var _ = Describe("TestExternalWorkloadIntegrator", Ordered, func() {
 		})
 	})
 
-	Describe("Test InferenceEndpoint owner: no externalworkload created for the objects it owns", func() {
-		newDeployment := func(name string, uid types.UID, ownerRefs []metav1.OwnerReference) *appsv1.Deployment {
+	Describe("Test InferenceEndpoint label: no externalworkload created for the objects it creates", func() {
+		newDeployment := func(name string, uid types.UID, ownerRefs []metav1.OwnerReference, labels map[string]string) *appsv1.Deployment {
 			deployment := TestDeployment.DeepCopy()
 			deployment.Name = name
 			deployment.UID = uid
 			deployment.OwnerReferences = ownerRefs
+			deployment.Labels = labels
 			return deployment
 		}
 
-		It("Deployment owned by an InferenceEndpoint", func() {
-			// the owner is never created: it must be dropped by its reference alone
+		It("Deployment labeled by the InferenceEndpoint controller", func() {
+			// the owner is never created: the label alone must drop the Deployment
 			endpointOwnerRef := metav1.OwnerReference{
 				APIVersion:         "inference.platform.run.ai/v1alpha1",
 				Kind:               "InferenceEndpoint",
@@ -1036,11 +1038,11 @@ var _ = Describe("TestExternalWorkloadIntegrator", Ordered, func() {
 				BlockOwnerDeletion: ptr.To(true),
 			}
 			ownedDeployment := newDeployment("inference-owner-epp", "inference-epp-uid",
-				[]metav1.OwnerReference{endpointOwnerRef})
+				[]metav1.OwnerReference{endpointOwnerRef}, map[string]string{endpoints.InferenceEndpointLabel: "inference-owner"})
 			createObject(ctx, ownedDeployment, watchClient, &testCreatedObjects)
 
-			// a Deployment without the InferenceEndpoint owner is still a native workload
-			plainDeployment := newDeployment("plain-deployment", "plain-deployment-uid", nil)
+			// a Deployment without the InferenceEndpoint label is still a native workload
+			plainDeployment := newDeployment("plain-deployment", "plain-deployment-uid", nil, nil)
 			createObject(ctx, plainDeployment, watchClient, &testCreatedObjects)
 
 			Eventually(func(g Gomega) {

@@ -70,9 +70,9 @@ const (
 	nimAppLabel        = "app"
 	nimLeaderRoleLabel = "nim-llm-role"
 	nimLeaderRole      = "leader"
-	// nimLWSSuffix is appended to the NIMService name to name the LeaderWorkerSet
-	// of a multi-node NIMService.
-	nimLWSSuffix = "-lws"
+	// nimLeaderWorkerSetSuffix is appended to the NIMService name to name the
+	// LeaderWorkerSet (LWS) that the NIM operator runs a multi-node NIMService as.
+	nimLeaderWorkerSetSuffix = "-lws"
 )
 
 // resolveInferenceWorkload returns the Pod selector and container port the
@@ -116,7 +116,7 @@ func nimInferenceWorkload(runner *dromosv1alpha1.WorkloadRunner, ref *endpoints.
 	}
 	selector := map[string]string{nimAppLabel: name}
 	if multiNode, found, _ := unstructured.NestedFieldNoCopy(template.Object, "spec", "multiNode"); found && multiNode != nil {
-		selector = map[string]string{nimAppLabel: name + nimLWSSuffix, nimLeaderRoleLabel: nimLeaderRole}
+		selector = map[string]string{nimAppLabel: name + nimLeaderWorkerSetSuffix, nimLeaderRoleLabel: nimLeaderRole}
 	}
 	return inferenceWorkload{selector: selector, port: ref.Port}, nil
 }

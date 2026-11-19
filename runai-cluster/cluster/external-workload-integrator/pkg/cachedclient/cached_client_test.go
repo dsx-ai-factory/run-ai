@@ -12,6 +12,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints"
 	runv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -139,21 +140,19 @@ var _ = Describe("ExternalWorkloadsCachedClient", func() {
 			Expect(ShouldDropWorkload(obj)).To(BeFalse())
 		})
 
-		It("ShouldDropOwnedBy matches InferenceEndpoint owners of any version", func() {
-			for _, apiVersion := range []string{"inference.platform.run.ai/v1alpha1", "inference.platform.run.ai/v1"} {
-				Expect(ShouldDropOwnedBy(metav1.OwnerReference{APIVersion: apiVersion, Kind: "InferenceEndpoint"})).To(BeTrue())
-			}
+		It("ShouldDropByLabel matches objects labeled by the InferenceEndpoint controller", func() {
+			obj := makeUnstructured(makeGVK("apps", "v1", "Deployment"))
+			obj.SetLabels(map[string]string{endpoints.InferenceEndpointLabel: "llama3"})
+			Expect(ShouldDropByLabel(obj)).To(BeTrue())
 		})
 
-		It("ShouldDropOwnedBy ignores other owners", func() {
-			for _, ref := range []metav1.OwnerReference{
-				{APIVersion: "apps/v1", Kind: "Deployment"},
-				{APIVersion: "inference.platform.run.ai/v1alpha1", Kind: "Other"},
-				{APIVersion: "example.com/v1", Kind: "InferenceEndpoint"},
-				{APIVersion: "not/a/valid/version", Kind: "InferenceEndpoint"},
-			} {
-				Expect(ShouldDropOwnedBy(ref)).To(BeFalse(), ref.APIVersion+"/"+ref.Kind)
-			}
+		It("ShouldDropByLabel ignores objects without the label", func() {
+			plain := makeUnstructured(makeGVK("apps", "v1", "Deployment"))
+			Expect(ShouldDropByLabel(plain)).To(BeFalse())
+
+			other := makeUnstructured(makeGVK("apps", "v1", "Deployment"))
+			other.SetLabels(map[string]string{"app": "llama3"})
+			Expect(ShouldDropByLabel(other)).To(BeFalse())
 		})
 
 		It("AdditionalGroupKind counter increments and decrements correctly", func() {

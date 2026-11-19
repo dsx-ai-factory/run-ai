@@ -22,6 +22,10 @@ const InferenceEndpointReadyCondition = "InferenceEndpointReady"
 
 var InferenceEndpointGVK = schema.GroupVersionKind{Group: "inference.platform.run.ai", Version: "v1alpha1", Kind: "InferenceEndpoint"}
 
+// InferenceEndpointLabel is set by the inference-endpoint-controller on every object it creates for an
+// InferenceEndpoint. It must match EndpointLabel in that controller, which is a separate Go module.
+const InferenceEndpointLabel = "inference.platform.run.ai/endpoint"
+
 // DefaultInferencePathPrefix is the request path whose requests go through the
 // endpoint picker when externalAccess.inference.pathPrefix is not set. It
 // matches the default of the InferenceEndpoint CRD.

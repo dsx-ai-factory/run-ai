@@ -41,20 +41,22 @@ var kindsToDrop = map[schema.GroupKind]bool{
 	{Group: "run.ai", Kind: "DistributedWorkload"}:          true,
 }
 
-// ownerKindsToDrop - kinds that Run:ai creates under a workload that is already reported through its own object.
-// Whatever they own is part of that workload, so it must not get an ExternalWorkload of its own.
-// Unlike kindsToDrop, the owner is matched by its reference only: the integrator does not read these kinds.
-var ownerKindsToDrop = map[schema.GroupKind]bool{
-	endpoints.InferenceEndpointGVK.GroupKind(): true,
+// labelsToDrop - labels that Run:ai puts on the objects it creates for a workload that is already reported through
+// its own object. An object that carries one, or is owned by an object that carries one, is part of that workload,
+// so it must not get an ExternalWorkload of its own.
+var labelsToDrop = []string{
+	endpoints.InferenceEndpointLabel,
 }
 
-// ShouldDropOwnedBy returns true if the owner reference points to a kind in ownerKindsToDrop.
-func ShouldDropOwnedBy(ownerRef metav1.OwnerReference) bool {
-	gv, err := schema.ParseGroupVersion(ownerRef.APIVersion)
-	if err != nil {
-		return false
+// ShouldDropByLabel returns true if the object carries a label from labelsToDrop.
+func ShouldDropByLabel(obj metav1.Object) bool {
+	objLabels := obj.GetLabels()
+	for _, label := range labelsToDrop {
+		if _, found := objLabels[label]; found {
+			return true
+		}
 	}
-	return ownerKindsToDrop[schema.GroupKind{Group: gv.Group, Kind: ownerRef.Kind}]
+	return false
 }
 
 type CachedClient interface {
