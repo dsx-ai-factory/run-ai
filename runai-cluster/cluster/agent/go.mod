@@ -48,7 +48,7 @@ require (
 	go.uber.org/zap v1.28.0
 	golang.org/x/oauth2 v0.37.0
 	k8s.io/api v0.36.2
-	k8s.io/apiextensions-apiserver v0.35.4
+	k8s.io/apiextensions-apiserver v0.36.0
 	k8s.io/apimachinery v0.36.2
 	k8s.io/client-go v1.5.2
 	k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab
@@ -203,10 +203,10 @@ require (
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gorm.io/gorm v1.31.2 // indirect
-	k8s.io/apiserver v0.35.4 // indirect
+	k8s.io/apiserver v0.36.0 // indirect
 	k8s.io/autoscaler/vertical-pod-autoscaler v1.5.1 // indirect
 	k8s.io/cloud-provider v0.35.4 // indirect
-	k8s.io/component-base v0.35.4 // indirect
+	k8s.io/component-base v0.36.0 // indirect
 	k8s.io/component-helpers v0.35.4 // indirect
 	k8s.io/controller-manager v0.35.4 // indirect
 	k8s.io/cri-api v0.35.4 // indirect
@@ -277,3 +277,10 @@ replace k8s.io/apimachinery => k8s.io/apimachinery v0.35.4
 replace k8s.io/apiserver => k8s.io/apiserver v0.35.4
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1 => ../dromos/api/v1alpha1
+
+// keda v2.20.0 requires the k8s.io v0.36 line for these modules, which does not
+// work with the k8s.io v0.35.4 pins in this file. Keep them on the same line.
+replace (
+	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.35.4
+	k8s.io/component-base => k8s.io/component-base v0.35.4
+)

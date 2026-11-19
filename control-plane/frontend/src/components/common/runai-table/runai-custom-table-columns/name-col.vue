@@ -10,7 +10,10 @@
         <img height="34" v-if="brandingLogo" :src="brandingLogo" alt="logo" />
         <runai-svg-icon v-else :key="icon" :name="icon" size="34"></runai-svg-icon>
       </span>
-      {{ name }}
+      <slot name="name"
+        ><span class="name-text">{{ name }}</span></slot
+      >
+      <slot></slot>
     </div>
   </q-td>
 </template>

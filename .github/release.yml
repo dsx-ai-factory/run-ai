@@ -7,7 +7,7 @@
 # GitHub puts each pull request in the FIRST category whose labels match, and
 # renders the categories in the order listed here. So every category above the
 # last one excludes the dependency labels, and all dependency updates land in
-# the final section: Renovate's (opened by devops-runai, always labelled
+# the final section: Renovate's (opened by runai-infra-team, always labelled
 # `renovate`) and manual bumps (labelled `type/deps`).
 #
 # The type/* labels come from the PR title's conventional-commit prefix

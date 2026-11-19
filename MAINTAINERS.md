@@ -23,7 +23,8 @@ Maintainers are responsible for:
   [Contributing](CONTRIBUTING.md#code-review)
 - Triaging incoming issues and applying labels
 - Running the full CI pipeline on external contributions (the `/ok-to-test` step
-  described in [Contributing](CONTRIBUTING.md#ci-for-contributors--what-runs-and-when))
+  described in [Contributing](CONTRIBUTING.md#ci-for-contributors--what-runs-and-when));
+  anyone with write access to the repository can also do this
 - Applying `backport-<branch>` labels (e.g. `backport-release-3.0`) so fixes reach supported releases
 - Making release decisions for the versions listed in [Support](SUPPORT.md)
 - Responding to reports received through [Security](SECURITY.md)

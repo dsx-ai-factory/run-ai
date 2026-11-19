@@ -5,20 +5,20 @@
     "skip-env-setup"
   ],
   "baseBranchPatterns": [
-    "NOTE: this list is replaced at run time. runai-actions .github/workflows/renovate.yml runs renovate/scan_candidates, which finds the newest release branches in this repository and starts one Renovate run per branch, each scoped to its own. This line is not a branch pattern and matches nothing, so a run that skips that step scans nothing rather than everything."
+    "NOTE: this list is replaced at run time. repo-housekeeper .github/workflows/renovate.yml runs renovate/scan_candidates, which finds the newest release branches in this repository and starts one Renovate run per branch, each scoped to its own. This line is not a branch pattern and matches nothing, so a run that skips that step scans nothing rather than everything."
   ],
   "extends": [
     "config:recommended",
     "mergeConfidence:all-badges",
-    "github>run-ai/runai-actions//renovate/presets/go-common",
-    "github>run-ai/runai-actions//renovate/presets/custom_annotation",
-    "github>run-ai/runai-actions//renovate/presets/runai-internal",
-    "github>run-ai/runai-actions//renovate/presets/mockery",
-    "github>run-ai/runai-actions//renovate/presets/notice(NVIDIA Run:ai)",
-    "github>run-ai/runai-actions//renovate/presets/copyright"
+    "github>run-ai/repo-housekeeper//renovate/presets/go-common",
+    "github>run-ai/repo-housekeeper//renovate/presets/custom_annotation",
+    "github>run-ai/repo-housekeeper//renovate/presets/runai-internal",
+    "github>run-ai/repo-housekeeper//renovate/presets/mockery",
+    "github>run-ai/repo-housekeeper//renovate/presets/notice(NVIDIA Run:ai)",
+    "github>run-ai/repo-housekeeper//renovate/presets/copyright"
   ],
   "includePaths": [
-    "NOTE: the rest of this list is added at run time. runai-actions .github/workflows/renovate.yml runs renovate/scan_candidates, which adds every Go module it finds safe to bump. Keep only entries it cannot work out from the module layout, such as a folder holding no Go module. This line is not a path and is dropped before the list reaches Renovate.",
+    "NOTE: the rest of this list is added at run time. repo-housekeeper .github/workflows/renovate.yml runs renovate/scan_candidates, which adds every Go module it finds safe to bump. Keep only entries it cannot work out from the module layout, such as a folder holding no Go module. This line is not a path and is dropped before the list reaches Renovate.",
     "control-plane/frontend/**",
     "control-plane/keycloak-extensions/**",
     "control-plane/control-plane-chart/**",
@@ -122,7 +122,10 @@
       "groupName": "keycloak",
       "groupSlug": "keycloak",
       "automerge": false,
-      "branchName": "{{{branchPrefix}}}keycloak"
+      "branchName": "{{{branchPrefix}}}keycloak",
+      "group": {
+        "commitMessageTopic": "keycloak"
+      }
     },
     {
       "matchPackageNames": [

@@ -7,6 +7,9 @@ package installconfig
 
 import (
 	"fmt"
+	"maps"
+	"slices"
+	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/artifacts"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/spec"
@@ -289,13 +292,65 @@ func toSpecTLS(t *TLS) *spec.TLS {
 	return &spec.TLS{CertPath: t.CertPath, KeyPath: t.KeyPath, CAChainPath: t.CAChainPath}
 }
 
-func toStringMap(m map[string]any) map[string]string {
-	if len(m) == 0 {
-		return nil
+func toStringMap(values map[string]any) map[string]string {
+	out := map[string]string{}
+	for _, key := range slices.Sorted(maps.Keys(values)) {
+		if value := values[key]; value != nil && !isContainer(value) {
+			out[key] = fmt.Sprint(value)
+			continue
+		}
+		flatten(out, key, values[key])
 	}
-	out := make(map[string]string, len(m))
-	for k, v := range m {
-		out[k] = fmt.Sprintf("%v", v)
+	if len(out) == 0 {
+		return nil
 	}
 	return out
 }
+
+func flatten(out map[string]string, path string, value any) {
+	switch value := value.(type) {
+	case nil:
+		out[path] = "null"
+	case map[string]any:
+		for _, key := range slices.Sorted(maps.Keys(value)) {
+			flatten(out, path+"."+keyEscaper.Replace(key), value[key])
+		}
+	case map[any]any:
+		stringKeyed := make(map[string]any, len(value))
+		for key, item := range value {
+			stringKeyed[fmt.Sprint(key)] = item
+		}
+		flatten(out, path, stringKeyed)
+	case []any:
+		if slices.ContainsFunc(value, isContainer) {
+			for i, item := range value {
+				flatten(out, fmt.Sprintf("%s[%d]", path, i), item)
+			}
+			return
+		}
+		if len(value) == 0 {
+			return
+		}
+		items := make([]string, len(value))
+		for i, item := range value {
+			items[i] = listItemEscaper.Replace(fmt.Sprint(item))
+		}
+		out[path] = "{" + strings.Join(items, ",") + "}"
+	default:
+		out[path] = valueEscaper.Replace(fmt.Sprint(value))
+	}
+}
+
+func isContainer(value any) bool {
+	switch value.(type) {
+	case map[string]any, map[any]any, []any:
+		return true
+	}
+	return false
+}
+
+var (
+	keyEscaper      = strings.NewReplacer(`\`, `\\`, ".", `\.`, "[", `\[`, "]", `\]`, "=", `\=`, ",", `\,`)
+	valueEscaper    = strings.NewReplacer(`\`, `\\`, ",", `\,`)
+	listItemEscaper = strings.NewReplacer(`\`, `\\`, ",", `\,`, "}", `\}`)
+)
