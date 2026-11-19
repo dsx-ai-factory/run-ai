@@ -697,7 +697,7 @@ export interface AccessRuleSync {
      */
     'predefinedRole'?: AccessRuleSyncAllOfPredefinedRole | null;
     /**
-     * Indicates if the access rule\'s role is a custom role with no predefined role for cluster permissions.
+     * Indicates if the access rule\'s role is marked as having no cluster permissions, or is a custom role with no predefined role for cluster permissions.
      * @type {boolean}
      * @memberof AccessRuleSync
      */
@@ -722,7 +722,7 @@ export interface AccessRuleSyncAllOf {
      */
     'predefinedRole'?: AccessRuleSyncAllOfPredefinedRole | null;
     /**
-     * Indicates if the access rule\'s role is a custom role with no predefined role for cluster permissions.
+     * Indicates if the access rule\'s role is marked as having no cluster permissions, or is a custom role with no predefined role for cluster permissions.
      * @type {boolean}
      * @memberof AccessRuleSyncAllOf
      */
