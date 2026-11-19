@@ -6,6 +6,7 @@
 import { test, expect } from '@playwright/test';
 import {
     config,
+    settings,
     Utils,
     logger,
     objectGenerator,
@@ -208,7 +209,13 @@ test.describe(`Workload info check ${tags.tool.ui} ${tags.resource.workloads} ${
             for (const workloadConfig of testWorkloads) {
                 let createdTraining: any;
                 await test.step(`Create ${workloadConfig.name} and wait for it to be running`, async () => {
-                    createdTraining = await createWorkload(workloadConfig);
+                    const options = { ...workloadConfig.options };
+                    if (settings.gpuType === 'fake') {
+                        options.annotations = [
+                            { name: 'run.ai/simulated-gpu-utilization', value: '50-60' }
+                        ];
+                    }
+                    createdTraining = await createWorkload({ ...workloadConfig, options });
                 });
                 const now = new Date();
                 const start = new Date(now.getTime() - 2 * 60 * 1000);
@@ -232,7 +239,7 @@ test.describe(`Workload info check ${tags.tool.ui} ${tags.resource.workloads} ${
                                 start,
                                 end
                             );
-                            return metricUtils.validateMetrics(measurements);
+                            return metricUtils.validateMetrics(measurements, workloadMetrics);
                         },
                         `Wait for metrics data for workload ${createdTraining.workloadId}`,
                         true,
@@ -271,7 +278,7 @@ test.describe(`Workload info check ${tags.tool.ui} ${tags.resource.workloads} ${
                                         start,
                                         end
                                     );
-                                    return metricUtils.validateMetrics(measurements);
+                                    return metricUtils.validateMetrics(measurements, podMetrics);
                                 },
                                 `Wait for metrics data for pod ${pod.id}`,
                                 true,
