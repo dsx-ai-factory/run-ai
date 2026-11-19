@@ -9,6 +9,8 @@ import { Quasar } from "quasar";
 import { createTestingPinia } from "@pinia/testing";
 import { setActivePinia } from "pinia";
 import RunaiAdvancedFilters from "./runai-advanced-filters.vue";
+import { RunaiFreeTextFilter } from "./runai-free-text-filter";
+import { RunaiPageFilterWrapper } from "./runai-page-filter-wrapper";
 import {
   EColumnFilterType,
   EFilterOperator,
@@ -31,6 +33,63 @@ function createFilterBy(overrides: Partial<IFilterBy> = {}): IFilterBy {
 }
 
 describe("runai-advanced-filters", () => {
+  it("keeps the default shared editor and menu sizing when no presentation overrides are provided", async () => {
+    const option: IAdvancedFilterOption = {
+      name: "name",
+      label: "Name",
+      field: "name",
+      type: EColumnFilterType.FreeText,
+    };
+    const cmp = mount(RunaiAdvancedFilters, {
+      global: {
+        plugins: [Quasar],
+        stubs: { QMenu: { template: "<div><slot /></div>", methods: { updatePosition() {} } } },
+      },
+      props: { hideClusterFilter: true, filterOptions: [option], filterBy: createFilterBy() },
+    });
+    await cmp.get(".add-filter-item").trigger("click");
+    const editor = cmp.getComponent(RunaiFreeTextFilter);
+    expect(editor.vm.options.map((item) => item.label)).toEqual([
+      "contains",
+      "does not contain",
+      "equals",
+      "does not equal",
+    ]);
+    expect(editor.getComponent(RunaiPageFilterWrapper).props("maxWidth")).toBe("250px");
+    expect(editor.getComponent(RunaiPageFilterWrapper).props("width")).toBeUndefined();
+    editor.vm.$emit("close");
+    await cmp.vm.$nextTick();
+    expect(cmp.findComponent(RunaiFreeTextFilter).exists()).toBe(false);
+    expect(cmp.emitted("update-filter-by")).toBeUndefined();
+    cmp.unmount();
+  });
+
+  it("copies refreshed initial models so later saves cannot mutate the caller's applied filters", async () => {
+    const option: IAdvancedFilterOption = {
+      name: "name",
+      label: "Name",
+      field: "name",
+      type: EColumnFilterType.FreeText,
+    };
+    const initial: IFreeTextFilterModel = {
+      name: "name",
+      label: "Name",
+      type: EColumnFilterType.FreeText,
+      term: "Alpha",
+      value: EFilterOperator.Contains,
+    };
+    const cmp = mount(RunaiAdvancedFilters, {
+      global: { plugins: [Quasar] },
+      props: { hideClusterFilter: true, filterOptions: [option], filterBy: createFilterBy(), initialFiltersModel: [] },
+    });
+    const applied = [initial];
+    await cmp.setProps({ initialFiltersModel: applied });
+    cmp.vm.saveFilter({ ...initial, term: "Beta" });
+    expect(applied).toEqual([initial]);
+    expect(cmp.emitted("update-filter-by")?.[0][0]).toMatchObject({ advancedFilters: [{ term: "Beta" }] });
+    cmp.unmount();
+  });
+
   describe("selectFilter - autocomplete injection", () => {
     it("should inject autocompleteOptionsFn for FreeText filter with autocomplete", () => {
       const mockAutocompleteFn = vi.fn().mockResolvedValue(["r1"]);

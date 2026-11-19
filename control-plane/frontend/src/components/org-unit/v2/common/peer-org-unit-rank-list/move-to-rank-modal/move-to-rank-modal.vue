@@ -16,7 +16,7 @@
 
         <runai-select
           v-model="selectedRank"
-          :options="rankOptions"
+          :options="availableRankOptions"
           option-value="value"
           option-label="label"
           emit-value
@@ -42,17 +42,20 @@ import { ref, computed } from "vue";
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
 import { ENTITY_PRIORITY_SELECT_OPTIONS } from "@/models/org-unit.model";
 import { RunaiSelect } from "@/components/common/runai-select";
+import type { ISelectOption } from "@/models/global.model";
 import { EQuotaEntity } from "@/models/resource.model";
 
 export interface Props {
   selectedCount: number;
   entityType?: EQuotaEntity;
   currentRank?: string;
+  rankOptions?: ISelectOption[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
   entityType: EQuotaEntity.project,
   currentRank: undefined,
+  rankOptions: () => ENTITY_PRIORITY_SELECT_OPTIONS,
 });
 
 const emit = defineEmits<{
@@ -62,15 +65,18 @@ const emit = defineEmits<{
 
 const selectedRank = ref<string | null>(null);
 
-const rankOptions = computed(() => {
-  return ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => ({
+const availableRankOptions = computed(() => {
+  return props.rankOptions.map((option) => ({
     ...option,
-    disable: option.value === props.currentRank,
+    disable: !!option.disable || option.value === props.currentRank,
   }));
 });
 
 const handleMove = () => {
-  if (selectedRank.value) {
+  if (
+    selectedRank.value &&
+    availableRankOptions.value.some((option) => option.value === selectedRank.value && !option.disable)
+  ) {
     emit("move", selectedRank.value);
   }
 };

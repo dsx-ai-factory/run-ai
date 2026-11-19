@@ -8,6 +8,7 @@ import { Quasar } from "quasar";
 import { getSchedulingMode } from "@/models/node-pool.model";
 import NodePoolWizardSummary from "./node-pool-wizard-summary.vue";
 import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
+const { createNodePoolDraft } = nodePoolUtil;
 import { NodepoolGPUNetworkAccelerationDetection, PlacementStrategy } from "@/swagger-models/cluster-service-client";
 
 describe("node pool wizard summary", () => {
@@ -19,7 +20,7 @@ describe("node pool wizard summary", () => {
   });
   function render() {
     return mount(NodePoolWizardSummary, {
-      props: { pool: nodePoolUtil.createNodePoolDraft("cluster"), clusterName: "Tokyo" },
+      props: { pool: createNodePoolDraft("cluster"), clusterName: "Tokyo" },
       global: { plugins: [Quasar] },
     });
   }
@@ -37,7 +38,7 @@ describe("node pool wizard summary", () => {
     const wrapper = render();
     await wrapper.setProps({
       pool: {
-        ...nodePoolUtil.createNodePoolDraft("cluster"),
+        ...createNodePoolDraft("cluster"),
         networkTopologyId: "topology-id",
         networkTopologyName: "Fabric",
         schedulingCapabilities: { adjustableWeights: true, quota: false, ranks: true, cpuQuota: false },
@@ -57,7 +58,7 @@ describe("node pool wizard summary", () => {
     expect(wrapper.text()).toContain("GPU device placement strategy: Spread");
     await wrapper.setProps({
       pool: {
-        ...nodePoolUtil.createNodePoolDraft(),
+        ...createNodePoolDraft(),
         schedulingCapabilities: undefined,
         gpuNetworkAccelerationDetection: NodepoolGPUNetworkAccelerationDetection.DontUse,
       },
