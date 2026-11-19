@@ -243,7 +243,8 @@ var _ = Describe("KartaController (Karta-centric)", Ordered, func() {
 			Expect(k8s.Get(ctx, client.ObjectKey{Name: "role-enabled-crud"}, updatedCRCrud)).To(Succeed())
 			Expect(hasAnyRuleWithAllVerbs(updatedCRCrud, "mock-q7z3k.example.com", "bars", true)).To(BeTrue())
 			Expect(hasAnyRuleWithAllVerbs(updatedCRCrud, "mock-q7z3k.example.com", "bazs", true)).To(BeTrue())
-			Expect(hasAnyRuleWithAllVerbs(updatedCRCrud, "other.run.ai", "quxs", true)).To(BeTrue())
+			// the API server does not serve Baz and Qux here, so their names are guessed from the kind
+			Expect(hasAnyRuleWithAllVerbs(updatedCRCrud, "other.run.ai", "quxes", true)).To(BeTrue())
 			Expect(exitCalled).To(BeFalse())
 
 			additionalGvks := fakeCachedClient.GetAdditionalGroupKinds()
