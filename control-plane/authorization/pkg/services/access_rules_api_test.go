@@ -1331,6 +1331,54 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 			Expect(foundLegacyRule).To(BeTrue(), "the access rule on the renamed role should be in the sync response")
 		})
 	})
+	Context("Get access rules sync - custom role", func() {
+		// A custom role gets its cluster permissions only from a predefined role. Without one it has
+		// no ClusterRole on the cluster, and the sync must say so or the cluster fails the access rule.
+		var controlPlaneOnlyRole *api.Role
+
+		BeforeEach(func() {
+			SetAncestorsCache(ctx, TestScopeId, api.RESOURCETYPE_PROJECT, &authorization_utils.Ancestors{
+				TenantId: tenantId,
+			})
+
+			controlPlaneOnlyRole = createTestRole(ctx, rolesApiService, api.RoleCreationFieldsInternal{
+				Name:        "control plane only role",
+				Description: "has no kubernetes permissions",
+				Permissions: []api.PostPermission{{
+					ResourceType: api.RESOURCETYPE_PROJECT,
+					Actions:      []api.Action{api.ACTION_READ},
+				}},
+			}, &createdRoles, false, http.StatusCreated)
+
+			for _, roleId := range []int32{controlPlaneOnlyRole.Id, int32(RolesMap[static_roles.DepartmentAdmin.Name])} {
+				createTestAccessRule(ctx, accessRulesApiService, api.AccessRuleCreationFields{
+					ScopeId:     TestScopeId,
+					ScopeType:   api.SCOPETYPE_PROJECT,
+					SubjectId:   TestUser2Id,
+					SubjectType: api.SUBJECTTYPE_USER,
+					RoleId:      roleId,
+				}, &createdAccessRules, false, http.StatusCreated)
+			}
+		})
+
+		It("marks only a custom role with no predefined role", func() {
+			apiResponse, err := accessRulesApiService.GetAccessRulesSync(ctx, 0, 0, "", "")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(apiResponse.Code).To(Equal(http.StatusOK))
+
+			clusterRoleOptionalByRoleId := map[int32]bool{}
+			for _, rule := range httpResponseBodyToAccessRulesSync(apiResponse).AccessRules {
+				clusterRoleOptionalByRoleId[rule.RoleId] = rule.ClusterRoleOptional
+			}
+
+			Expect(clusterRoleOptionalByRoleId).To(HaveKeyWithValue(controlPlaneOnlyRole.Id, true),
+				"a custom role with no predefined role has no ClusterRole")
+			Expect(clusterRoleOptionalByRoleId).To(HaveKeyWithValue(createdRoles[0].Id, false),
+				"a custom role with a predefined role binds to that role's ClusterRole")
+			Expect(clusterRoleOptionalByRoleId).To(HaveKeyWithValue(int32(RolesMap[static_roles.DepartmentAdmin.Name]), false),
+				"a predefined role has its own ClusterRole")
+		})
+	})
 
 	Context("Get access rules sync", func() {
 		BeforeEach(func() {
