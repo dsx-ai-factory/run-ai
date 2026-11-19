@@ -7,9 +7,8 @@ package models
 
 import (
 	"fmt"
-	"math"
+	"regexp"
 	"slices"
-	"strconv"
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
@@ -35,15 +34,14 @@ const (
 	gpuLimitOrUnlimitedColumn = "COALESCE(gpu_limit, -1)"
 )
 
-// A non-numeric value would reach the numeric column and fail in the database instead of answering 400.
+// Only a plain decimal: strconv.ParseFloat also accepts Go syntax (1_0, 0x1p2, NaN, Inf) that the database wouldn't
+// read as the same number, and a non-numeric value would fail there instead of answering 400.
+var plainDecimal = regexp.MustCompile(`^-?\d+(\.\d+)?$`)
+
 type numberValidator struct{}
 
 func (numberValidator) Validate(value string) error {
-	number, err := strconv.ParseFloat(value, 64)
-	if err != nil {
-		return fmt.Errorf("invalid number %s: %w", value, err)
-	}
-	if math.IsNaN(number) || math.IsInf(number, 0) {
+	if !plainDecimal.MatchString(value) {
 		return fmt.Errorf("invalid number: %s", value)
 	}
 	return nil

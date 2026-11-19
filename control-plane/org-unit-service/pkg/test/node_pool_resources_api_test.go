@@ -1384,6 +1384,8 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 			Entry("text operator", "gpuLimit=@4"),
 			Entry("non-numeric value", "gpuLimit==abc"),
 			Entry("non-finite value", "gpuLimit==NaN"),
+			Entry("Go digit separator", "gpuLimit==1_0"),
+			Entry("hex float", "gpuLimit==0x1p2"),
 		)
 	})
 
