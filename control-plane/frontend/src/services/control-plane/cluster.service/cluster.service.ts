@@ -57,6 +57,7 @@ export const clusterService = {
   getTenantNodes,
   createNodepool,
   updateNodepool,
+  patchNodepool,
   isNodePoolNameUnique,
   countNodepools,
   countTenantNodes,
@@ -548,5 +549,13 @@ async function getNodepoolsMinimal(
     return response.data.nodepools || [];
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
+  }
+}
+
+async function patchNodepool(nodepoolId: string, payload: NodepoolUpdateFields): Promise<Nodepool> {
+  try {
+    return (await clusterServiceApi.nodePoolsApi.patchNodepool(nodepoolId, payload)).data;
+  } catch (error) {
+    throw httpService.handleHttpError(error);
   }
 }

@@ -10,9 +10,11 @@ import { fileService } from "@/services/file.service/file.service";
 import { MetricsType } from "@/swagger-models/cluster-service-client";
 
 const getNetworkTopologies = vi.fn();
+const patchNodepool = vi.fn();
 
 vi.mock("@/services/infra/client-apis/cluster-service-api/cluster-service-api", () => ({
   clusterServiceApi: {
+    nodePoolsApi: { patchNodepool: (...args: unknown[]) => patchNodepool(...args) },
     networkTopologiesApi: {
       getNetworkTopologies: (...args: unknown[]) => getNetworkTopologies(...args),
     },
@@ -73,5 +75,16 @@ describe("clusterService.getNodepoolMetricsCsv", () => {
       end: "2026-01-02T00:00:00.000Z",
       numberOfSamples: 10,
     });
+  });
+});
+
+describe("clusterService.patchNodepool", () => {
+  it("patches only supplied fields and returns the updated pool", async () => {
+    patchNodepool.mockResolvedValue({ data: { id: "p", name: "pool" } });
+    await expect(clusterService.patchNodepool("p", { schedulingCapabilities: { quota: true } })).resolves.toEqual({
+      id: "p",
+      name: "pool",
+    });
+    expect(patchNodepool).toHaveBeenCalledWith("p", { schedulingCapabilities: { quota: true } });
   });
 });

@@ -2,14 +2,15 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { ENodePoolSchedulingModeId as ESchedulingMode } from "@/models/node-pool.model";
+import type { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
+import type { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { mount, flushPromises } from "@vue/test-utils";
 import { Quasar } from "quasar";
 import { describe, expect, it, vi } from "vitest";
 import { createTestingPinia } from "@pinia/testing";
 import { requestToLeave } from "@/services/infra/router.service/router.service";
-import Settings from "./node-pool-scheduling-settings.vue";
-import Table from "./node-pool-department-table.vue";
+import { NodePoolSchedulingSettings as Settings } from "@/components/node-pools/node-pool-scheduling-settings";
+import { NodePoolDepartmentTable as Table } from "@/components/node-pools/node-pool-department-table";
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
 import { RunaiSegmentedButton } from "@/components/common/runai-segmented-button";
 import NodePoolSchedulingStep from "./node-pool-scheduling-step.vue";
@@ -20,11 +21,17 @@ const { createNodePoolDraft } = nodePoolUtil;
 import type { Nodepool } from "@/swagger-models/cluster-service-client";
 
 const saveMocks = vi.hoisted(() => ({ patchPool: vi.fn(), patchDepartments: vi.fn() }));
-vi.mock("./node-pool-scheduling.service", async (original) => ({
-  ...(await original<object>()),
-  patchSchedulingPool: saveMocks.patchPool,
-  patchSchedulingDepartments: saveMocks.patchDepartments,
-}));
+vi.mock("@/services/control-plane/cluster.service/cluster.service", async (original) => {
+  const actual = await original<{ clusterService: typeof clusterService }>();
+  return { ...actual, clusterService: { ...actual.clusterService, patchNodepool: saveMocks.patchPool } };
+});
+vi.mock("@/services/control-plane/org-unit.service/org-unit.service", async (original) => {
+  const actual = await original<{ orgUnitService: typeof orgUnitService }>();
+  return {
+    ...actual,
+    orgUnitService: { ...actual.orgUnitService, batchPatchDepartmentNodePoolResources: saveMocks.patchDepartments },
+  };
+});
 
 const pool = {
   ...createNodePoolDraft("cluster"),
@@ -348,8 +355,8 @@ describe("scheduling step foundation", () => {
     expect(wrapper.findComponent(RunaiBaseDialog).exists()).toBe(false);
     expect(wrapper.findComponent(Table).props("draft").departments.a.weight).toBe(5);
     expect(wrapper.get('[aid="mode-ranked"]').attributes("aria-checked")).toBe("true");
-    for (const mode of [ESchedulingMode.Guaranteed, ESchedulingMode.Proportional, ESchedulingMode.Ranked]) {
-      await wrapper.get(`[aid="mode-${mode}"]`).trigger("click");
+    for (const aid of ["mode-guaranteed", "mode-proportional", "mode-ranked"]) {
+      await wrapper.get(`[aid="${aid}"]`).trigger("click");
       expect(wrapper.findComponent(Table).vm.$.uid).toBe(tableUid);
       expect(wrapper.findComponent(Table).props("draft").departments.a.weight).toBe(5);
     }

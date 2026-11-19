@@ -198,26 +198,26 @@
 </template>
 
 <script setup lang="ts">
-import { ENodePoolSchedulingModeId as ESchedulingMode } from "@/models/node-pool.model";
+import { ENodePoolSchedulingMode as ESchedulingMode } from "@/models/node-pool.model";
 
 import { computed, onBeforeUnmount, ref, watch } from "vue";
-import { createSchedulingSaver, buildSchedulingSave } from "./node-pool-scheduling-save";
-import { patchSchedulingPool, patchSchedulingDepartments } from "./node-pool-scheduling.service";
+import { buildSchedulingSave } from "@/utils/node-pool-scheduling.util/node-pool-scheduling-save.util";
+import { useNodePoolSchedulingSave } from "@/composables/node-pool/use-node-pool-scheduling-save.composable";
 import { extractErrorMessages } from "@/utils/error-alert.util";
-import { schedulingDurationToFields } from "./scheduling-duration.util";
+import { schedulingDurationToFields } from "@/utils/node-pool-scheduling.util/scheduling-duration.util";
 import NotificationAlertBar from "@/components/common/notification-alert-bar/notification-alert-bar.vue";
 import { ENotificationBarVariant } from "@/components/common/notification-alert-bar/notification-alert-bar.model";
-import NodePoolDepartmentTable from "./node-pool-department-table.vue";
-import NodePoolSchedulingSettings from "./node-pool-scheduling-settings.vue";
-import NodePoolNewDepartmentDialog from "./node-pool-new-department-dialog.vue";
-import { useNodePoolSchedulingDraft } from "./use-node-pool-scheduling-draft.composable";
+import { NodePoolDepartmentTable } from "@/components/node-pools/node-pool-department-table";
+import { NodePoolSchedulingSettings } from "@/components/node-pools/node-pool-scheduling-settings";
+import { NodePoolNewDepartmentDialog } from "@/components/node-pools/node-pool-new-department-dialog";
+import { useNodePoolSchedulingDraft } from "@/composables/node-pool/use-node-pool-scheduling-draft.composable";
 import {
   toSchedulingCapabilities,
-  type SchedulingMode,
+  isDepartmentLimitBelowQuota,
   type IDepartmentSchedulingEdit,
   type ISchedulingTotals,
   type IDepartmentValidationContext,
-} from "./node-pool-scheduling.model";
+} from "@/models/node-pool-scheduling.model";
 import type { DepartmentNodePoolResources } from "@/swagger-models/org-unit-service-client";
 import RunaiWizardLayout from "@/components/common/runai-wizard-layout/runai-wizard-layout.vue";
 import RunaiFormWrapper from "@/components/common/runai-form-wrapper/runai-form-wrapper.vue";
@@ -227,7 +227,7 @@ import RunaiSectionTitle from "@/components/common/runai-section-title/runai-sec
 import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
 import { RunaiSegmentedButton } from "@/components/common/runai-segmented-button";
 import NodePoolWizardSummary from "../node-pool-wizard-summary/node-pool-wizard-summary.vue";
-import { getSchedulingMode, type INodePoolSummaryResources } from "@/models/node-pool.model";
+import { isSupportedSchedulingMode, getSchedulingMode, type INodePoolSummaryResources } from "@/models/node-pool.model";
 import type { Nodepool } from "@/swagger-models/cluster-service-client";
 
 const props = withDefaults(
@@ -277,10 +277,12 @@ const emit = defineEmits<{
 const showSettings = ref(false);
 const showNewDepartment = ref(false);
 const modeExplanations: Record<string, string> = {
-  proportional: "GPU resources are distributed proportionally according to each department's and project's weight.",
-  ranked:
+  [ESchedulingMode.Proportional]:
+    "GPU resources are distributed proportionally according to each department's and project's weight.",
+  [ESchedulingMode.Ranked]:
     "Higher-ranked departments and projects receive GPU resources first. Remaining capacity goes to lower-ranked ones, in rank order.",
-  guaranteed: "Each department has a guaranteed GPU quota. Any unused quota is redistributed by rank and weight.",
+  [ESchedulingMode.Guaranteed]:
+    "Each department has a guaranteed GPU quota. Any unused quota is redistributed by rank and weight.",
 };
 const steps = [
   {
@@ -333,18 +335,12 @@ const options = computed(() => [
   },
 ]);
 const modeIcons: Record<string, string> = {
-  proportional: "ph ph-chart-pie-slice",
-  ranked: "ph ph-ranking",
-  guaranteed: "ph ph-shield-check",
+  [ESchedulingMode.Proportional]: "ph ph-chart-pie-slice",
+  [ESchedulingMode.Ranked]: "ph ph-ranking",
+  [ESchedulingMode.Guaranteed]: "ph ph-shield-check",
 };
 const savedMode = getSchedulingMode(props.pool.schedulingCapabilities);
-const mode = (
-  {
-    Proportional: ESchedulingMode.Proportional,
-    Ranked: ESchedulingMode.Ranked,
-    "Guaranteed quota": ESchedulingMode.Guaranteed,
-  } as Record<string, SchedulingMode>
-)[savedMode];
+const mode = isSupportedSchedulingMode(savedMode) ? savedMode : undefined;
 const { draft, requestMode } = useNodePoolSchedulingDraft({
   mode,
   automaticWeights:
@@ -395,7 +391,8 @@ function openModeHelp() {
 function hoverModeHelp(event: MouseEvent) {
   clearTimeout(modeHelpCloseTimer);
   modeCardsHovered.value = true;
-  hoveredMode.value = (event.target as Element).closest("[role=radio]")?.getAttribute("aid")?.replace("mode-", "");
+  const aid = (event.target as Element).closest("[role=radio]")?.getAttribute("aid");
+  hoveredMode.value = options.value.find((option) => option.aid === aid)?.value;
 }
 function leaveModeHelp() {
   clearTimeout(modeHelpCloseTimer);
@@ -427,7 +424,7 @@ function applyEdit(edit: IDepartmentSchedulingEdit) {
 
 const saving = ref(false);
 const saveError = ref("");
-const saver = createSchedulingSaver({ patchPool: patchSchedulingPool, patchDepartments: patchSchedulingDepartments });
+const saver = useNodePoolSchedulingSave();
 const validationError = computed(() => {
   try {
     buildSchedulingSave(props.pool, draft.value);
@@ -444,7 +441,7 @@ const validationError = computed(() => {
       const original = (props.baselineRows ?? props.rows).find((row) => row.orgUnitId === edit.id)?.resources.gpu;
       const quota = edit.quota ?? original?.deserved;
       const limit = edit.limit === undefined ? original?.limit : edit.limit;
-      if (capabilities.quota && capabilities.limits && limit != null && limit !== -1 && quota != null && limit < quota)
+      if (capabilities.quota && capabilities.limits && isDepartmentLimitBelowQuota(limit, quota))
         return "Maximum allocation must be at least guaranteed GPUs.";
     }
     return "";
@@ -510,20 +507,20 @@ async function save() {
   line-height: 20px !important;
 }
 .node-pool-scheduling-wizard :deep(.wizard-step--disabled .wizard-step-title) {
-  color: #9e9e9e !important;
+  color: var(--text-disabled) !important;
 }
 .node-pool-scheduling-wizard :deep([aria-current="step"] .wizard-step-title) {
-  color: #4a4a4a !important;
+  color: var(--b-text-main) !important;
 }
 .node-pool-scheduling-wizard :deep(.wizard-step--completed .wizard-step-indicator),
 .node-pool-scheduling-wizard :deep(.wizard-step--selected .wizard-step-indicator) {
-  background-color: #689f38 !important;
+  background-color: var(--feedback-success) !important;
 }
 .node-pool-scheduling-wizard :deep(.wizard-step--default.wizard-step--disabled .wizard-step-indicator) {
-  background-color: #9e9e9e !important;
+  background-color: var(--text-disabled) !important;
 }
 .node-pool-scheduling-wizard :deep(.wizard-step-icon) {
-  color: #fafafa !important;
+  color: var(--text-inverse) !important;
 }
 .node-pool-scheduling-wizard :deep(.wizard-step-number) {
   font-weight: 800 !important;
@@ -575,7 +572,7 @@ async function save() {
   font-weight: 600;
   line-height: 32px;
   letter-spacing: 0.0703px;
-  color: #0f172b;
+  color: var(--b-text-main);
 }
 .capacity-unit {
   font-size: 14px;

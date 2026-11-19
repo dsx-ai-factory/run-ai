@@ -18,11 +18,11 @@ import { EQuotaEntity } from "@/models/resource.model";
 import type { Department } from "@/swagger-models/org-unit-service-client";
 
 // Mock orgUnitService
-vi.mock("@/services/control-plane/org-unit.service/org-unit.service", () => ({
-  orgUnitService: {
-    getDepartment: vi.fn(),
-  },
-}));
+vi.mock("@/services/control-plane/org-unit.service/org-unit.service", async (original) => {
+  const actual = await original<{ orgUnitService: typeof orgUnitService }>();
+  actual.orgUnitService.getDepartment = vi.fn();
+  return actual;
+});
 
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 
