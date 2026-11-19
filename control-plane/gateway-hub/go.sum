@@ -220,8 +220,8 @@ github.com/vmihailenco/msgpack v4.0.4+incompatible h1:dSLoQfGFAo3F6OoNhwUmLwVgaU
 github.com/vmihailenco/msgpack v4.0.4+incompatible/go.mod h1:fy3FlTQTDXWkZ7Bh6AcGMlsjHatGryHQYUTf1ShIgkk=
 github.com/xdg-go/scram v1.4.0 h1:3/wY9vMc786lAsuowR1CGxl0oVQDUWnCliDnWKhiZJs=
 github.com/xdg-go/scram v1.4.0/go.mod h1:rWC+ac5XyfRhG8rI7Css3P9K+/sjzldRjM9PI7VPlNM=
-github.com/xdg-go/stringprep v1.0.4 h1:XLI/Ng3O1Atzq0oBs3TWm+5ZVgkq2aqdlvP9JtoZ6c8=
-github.com/xdg-go/stringprep v1.0.4/go.mod h1:mPGuuIYwz7CmR2bT9j4GbQqutWS1zV24gijq1dTyGkM=
+github.com/xdg-go/stringprep v1.0.5 h1:Rgri1XSzcg780jOCTQNt/SwPb1ALPZe68IUWLhZec4E=
+github.com/xdg-go/stringprep v1.0.5/go.mod h1:t7YwVsmDQ/llDjuHE8Ycab7qf5RyUIcclD3D5T7dnU0=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 github.com/zeebo/xxh3 v1.1.0 h1:s7DLGDK45Dyfg7++yxI0khrfwq9661w9EN78eP/UZVs=
 github.com/zeebo/xxh3 v1.1.0/go.mod h1:IisAie1LELR4xhVinxWS5+zf1lA4p0MW4T+w+W07F5s=
@@ -259,8 +259,8 @@ golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACk
 golang.org/x/crypto v0.0.0-20210921155107-089bfa567519/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=
 golang.org/x/crypto v0.59.0 h1:xS2jhqYbzNrpvkWP2YTDf4TJwBy3ykR03i8vFDxEc7c=
 golang.org/x/crypto v0.59.0/go.mod h1:veDyUwATGs3c+vN3VfTbzViMGXeTBk3WyhBOkn+F/4U=
-golang.org/x/exp v0.0.0-20261118215729-2791e4028fd4 h1:XUjsO37lvrmMZj81B2qUFhnGRTGdG9jYMljMO65o6CQ=
-golang.org/x/exp v0.0.0-20261118215729-2791e4028fd4/go.mod h1:xeYMf2GfgE/gQmBtvdPsBN608YETsXuvoiEhaOxGg/w=
+golang.org/x/exp v0.0.0-20261119141654-b15d094f3610 h1:bT3evuloD7Y8n1TA3NUVVL51/Y4GsLNTHmqiQkViumw=
+golang.org/x/exp v0.0.0-20261119141654-b15d094f3610/go.mod h1:xeYMf2GfgE/gQmBtvdPsBN608YETsXuvoiEhaOxGg/w=
 golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4/go.mod h1:jJ57K6gSWd91VN4djpZkiMVwK6gcyfeH4XE8wZrZaV4=
 golang.org/x/net v0.0.0-20190620200207-3b0461eec859/go.mod h1:z5CRVTTTmAJ677TzLLGU+0bjPO0LkuOLi4/5GtJWs/s=
 golang.org/x/net v0.0.0-20210226172049-e18ecbb05110/go.mod h1:m0MpNAwzfU5UDzcl9v0D8zg8gWTRqZa9RBIspLL5mdg=
