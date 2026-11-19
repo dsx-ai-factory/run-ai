@@ -13,6 +13,10 @@ import RunaiDescriptionInput from "@/components/common/runai-description-input/r
 import NodePoolEditFormV2 from "./node-pool-edit-form-v2.vue";
 import { BadRequestError } from "@/models/http-response.model";
 import { ENABLE_NODE_POOL_CREATE_FLOW } from "@/constants/node-pool.constants";
+import { requestToLeave } from "@/services/infra/router.service/router.service";
+import { eventEmitter } from "@/services/infra/event-emitter.service/event-emitter.service";
+import { NAVIGATION_EVENTS } from "@/common/event.constant";
+import type { Nodepool } from "@/swagger-models/cluster-service-client";
 vi.mock("@/services/control-plane/cluster.service/cluster.service", () => ({
   clusterService: { getNodepools: vi.fn().mockResolvedValue([]), createNodepool: vi.fn() },
 }));
@@ -172,5 +176,49 @@ describe("Step 1 form", () => {
     }
     expect(clusterService.createNodepool).not.toHaveBeenCalled();
     wrapper.unmount();
+  });
+  it("refuses header Close while creation is pending without queuing a leave dialog", async () => {
+    let finish!: (value: Nodepool) => void;
+    vi.mocked(clusterService.getNodepools).mockResolvedValue([]);
+    vi.mocked(clusterService.createNodepool)
+      .mockReset()
+      .mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            finish = resolve;
+          }),
+      );
+    const wrapper = renderForm("cluster");
+    vi.spyOn(wrapper.vm.$q, "notify").mockImplementation(() => () => {});
+    try {
+      await flushPromises();
+      wrapper.findComponent(RunaiNameValidation).vm.$emit("update:modelValue", "pending-pool");
+      wrapper
+        .findAllComponents(QSelect)
+        .find((input) => input.props("label") === "Key")
+        ?.vm.$emit("update:modelValue", "night.test/pool");
+      await flushPromises();
+      wrapper
+        .findAllComponents(QSelect)
+        .find((input) => input.props("label") === "Value")
+        ?.vm.$emit("update:modelValue", "pending");
+      await flushPromises();
+      await wrapper.get('[aid="create-node-pool-continue"]').trigger("click");
+      await flushPromises();
+      expect(clusterService.createNodepool).toHaveBeenCalledTimes(1);
+      let allowed: boolean | undefined;
+      void requestToLeave().then((value) => {
+        allowed = value;
+      });
+      await flushPromises();
+      expect(allowed).toBe(false);
+      expect(document.querySelector('[aid="leave-page-modal-cancel-btn"]')).toBeNull();
+      expect(wrapper.emitted("leave-approved")).toBeUndefined();
+    } finally {
+      eventEmitter.emit(NAVIGATION_EVENTS.LEAVE_PAGE_STATUS, { allowToLeave: false });
+      finish?.({ id: "created", name: "pending-pool", clusterId: "cluster" } as Nodepool);
+      await flushPromises();
+      wrapper.unmount();
+    }
   });
 });

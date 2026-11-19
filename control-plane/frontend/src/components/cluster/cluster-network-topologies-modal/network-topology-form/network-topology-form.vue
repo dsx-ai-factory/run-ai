@@ -22,44 +22,51 @@
           Set node labels representing the network topology and drag to order by their distance from the node (far to
           close)
           <runai-tooltip
-            tooltip-text="Order the labels by their distance from the node: farthest (last) to closest (first), and make sure they match the corresponding keys on the nodes."
+            tooltip-text="Order levels from farthest (top) to closest (bottom). Use the Kubernetes label key on the nodes for each level."
             width="542px"
           />
         </div>
 
-        <runai-draggable-list-order
-          class="q-mb-md"
-          :list="labels"
-          row-key="id"
-          main-list-title="Label"
-          @change="labelsChanged"
-          :show-border="false"
-          :show-header="false"
-          item-size="md"
-        >
-          <template #list-item="item">
-            <div class="row items-center justify-between">
-              <policy-string-field
-                class="col-11 q-mb-md q-mt-sm"
-                aid="network-topology-label-key-input"
-                label="Label key"
-                input-class="placeholder-italic"
-                stack-label
-                placeholder="e.g., topology.kubernetes.io/zone"
-                :model-value="item.name"
-                :rules="[isValidTopologyKey]"
-                @update:model-value="onUpdateLabel(item.id, $event)"
-              />
-              <runai-tooltip
-                icon="ph-bold ph-x"
-                @click="onRemoveLabel(item.id)"
-                tooltip-text="Remove"
-                class="remove-button"
-                v-show="labels.length > 1"
-              />
-            </div>
-          </template>
-        </runai-draggable-list-order>
+        <div class="topology-levels q-mb-md">
+          <div v-if="showDistanceGuide" class="topology-distance-guide text-b-body1" aria-hidden="true">
+            <span class="topology-distance-label">Far</span>
+            <span class="topology-distance-line"></span>
+            <span class="topology-distance-label">Close</span>
+          </div>
+          <runai-draggable-list-order
+            class="topology-level-list"
+            :list="labels"
+            row-key="id"
+            main-list-title="Label"
+            @change="labelsChanged"
+            :show-border="false"
+            :show-header="false"
+            item-size="md"
+          >
+            <template #list-item="item">
+              <div class="row items-center justify-between">
+                <policy-string-field
+                  class="col-11 q-mb-md q-mt-sm"
+                  aid="network-topology-label-key-input"
+                  label="Label key"
+                  input-class="placeholder-italic"
+                  stack-label
+                  placeholder="e.g., topology.kubernetes.io/zone"
+                  :model-value="item.name"
+                  :rules="[isValidTopologyKey]"
+                  @update:model-value="onUpdateLabel(item.id, $event)"
+                />
+                <runai-tooltip
+                  icon="ph-bold ph-x"
+                  @click="onRemoveLabel(item.id)"
+                  tooltip-text="Remove"
+                  class="remove-button"
+                  v-show="labels.length > 1"
+                />
+              </div>
+            </template>
+          </runai-draggable-list-order>
+        </div>
         <runai-btn
           flat
           aid="network-topology-add-label-btn"
@@ -134,6 +141,7 @@ export default defineComponent({
       type: Boolean as PropType<boolean>,
       default: true,
     },
+    showDistanceGuide: Boolean,
     externalSubmitTrigger: {
       type: Number as PropType<number>,
       default: 0,
@@ -220,3 +228,33 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped lang="scss">
+.topology-levels {
+  display: flex;
+  gap: 10px;
+}
+
+.topology-level-list {
+  flex: 1;
+  min-width: 0;
+}
+
+.topology-distance-guide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.topology-distance-label {
+  writing-mode: vertical-rl;
+  color: var(--text-tertiary);
+}
+
+.topology-distance-line {
+  flex: 1;
+  width: 1px;
+  background-color: var(--border-default);
+}
+</style>

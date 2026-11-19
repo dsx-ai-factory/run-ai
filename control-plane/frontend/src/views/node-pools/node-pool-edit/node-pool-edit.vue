@@ -4,7 +4,8 @@
 -->
 
 <template>
-  <node-pool-scheduling v-if="schedulingFlowEnabled" />
+  <node-pool-topology v-if="topologyFlowEnabled" />
+  <node-pool-scheduling v-else-if="schedulingFlowEnabled" />
   <node-pool-edit-form-v2
     v-else-if="newFlowEnabled"
     :initial-cluster-id="initialClusterId"
@@ -59,6 +60,7 @@ export default defineComponent({
   components: {
     NodePoolEditForm,
     NodePoolEditFormV2,
+    NodePoolTopology: defineAsyncComponent(() => import("../node-pool-topology/node-pool-topology.vue")),
     NodePoolScheduling: defineAsyncComponent(() => import("../node-pool-scheduling/node-pool-scheduling.vue")),
   },
   data() {
@@ -88,6 +90,12 @@ export default defineComponent({
         route.name === NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT &&
         route.query.stepName === "scheduling",
     );
+    const topologyFlowEnabled = computed(
+      () =>
+        ENABLE_NODE_POOL_CREATE_FLOW &&
+        route.name === NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT &&
+        route.query.stepName === "topology",
+    );
     const initialClusterId = typeof route.query.clusterId === "string" ? route.query.clusterId : "";
     onBeforeRouteLeave(() => {
       if (!newFlowEnabled.value) return true;
@@ -109,10 +117,18 @@ export default defineComponent({
           : { name: NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT, params: { id: pool.id }, query: { stepName: "scheduling" } },
       );
     }
-    return { schedulingFlowEnabled, newFlowEnabled, initialClusterId, onCreatedV2, savingV2, leaveApproved };
+    return {
+      topologyFlowEnabled,
+      schedulingFlowEnabled,
+      newFlowEnabled,
+      initialClusterId,
+      onCreatedV2,
+      savingV2,
+      leaveApproved,
+    };
   },
   async created() {
-    if (this.newFlowEnabled || this.schedulingFlowEnabled) {
+    if (this.newFlowEnabled || this.schedulingFlowEnabled || this.topologyFlowEnabled) {
       this.appStore.setPageLoading(false);
       return;
     }
@@ -240,8 +256,11 @@ export default defineComponent({
     },
   },
   watch: {
+    topologyFlowEnabled(enabled: boolean) {
+      if (!enabled && !this.schedulingFlowEnabled && !this.newFlowEnabled && !this.nodePool) void this.loadNodePool();
+    },
     schedulingFlowEnabled(enabled: boolean) {
-      if (!enabled && !this.newFlowEnabled && !this.nodePool) void this.loadNodePool();
+      if (!enabled && !this.topologyFlowEnabled && !this.newFlowEnabled && !this.nodePool) void this.loadNodePool();
     },
   },
   unmounted() {

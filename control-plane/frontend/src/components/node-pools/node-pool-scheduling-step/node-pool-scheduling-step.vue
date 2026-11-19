@@ -13,9 +13,11 @@
     left-width="200px"
     right-width="200px"
     hide-right-on-small-screen
+    @step-click="onStepClick"
   >
     <runai-form-wrapper
       :form-state="{ pool: previewPool, scheduling: draft, saving }"
+      :prevent-leave="saving || creatingDepartment"
       full-width
       @leave-page="emit('leave-approved')"
     >
@@ -162,12 +164,12 @@
                 </node-pool-department-table>
               </div>
               <node-pool-new-department-dialog
-                v-if="showNewDepartment && canEditDepartments && canViewDepartments"
+                v-if="showNewDepartment && ((canEditDepartments && canViewDepartments) || creatingDepartment)"
                 :cluster-id="pool.clusterId"
                 :cluster-name="pool.clusterName"
                 @close="showNewDepartment = false"
                 @created="emit('refresh')"
-                @saving="emit('saving', $event)"
+                @saving="onDepartmentSaving"
               />
             </div>
           </runai-expansion-item>
@@ -184,15 +186,22 @@
             flat
             color="primary"
             :loading="saving"
-            :disable="saving || loading || !canSavePool || !canEditDepartments || !!validationError"
-            @click="save"
+            :disable="saveDisabled"
+            @click="save('close')"
           />
-          <runai-btn aid="scheduling-save-continue" label="Save & continue" color="primary" :disable="true" />
+          <runai-btn
+            aid="scheduling-save-continue"
+            label="Save & continue"
+            color="primary"
+            :loading="saving"
+            :disable="saveDisabled"
+            @click="save('continue')"
+          />
         </div>
       </div>
     </template>
     <template #right-sidebar>
-      <node-pool-wizard-summary scheduling :pool="previewPool" :resources="resources" />
+      <node-pool-wizard-summary :pool="previewPool" :resources="resources" />
     </template>
   </runai-wizard-layout>
 </template>
@@ -265,7 +274,7 @@ const props = withDefaults(
 );
 const emit = defineEmits<{
   "leave-approved": [];
-  saved: [Nodepool];
+  saved: [pool: Nodepool, destination?: "close" | "continue"];
   "pool-saved": [Nodepool];
   saving: [boolean];
   refresh: [];
@@ -284,7 +293,7 @@ const modeExplanations: Record<string, string> = {
   [ESchedulingMode.Guaranteed]:
     "Each department has a guaranteed GPU quota. Any unused quota is redistributed by rank and weight.",
 };
-const steps = [
+const steps = computed(() => [
   {
     name: "identity",
     title: "Cluster & name",
@@ -292,8 +301,11 @@ const steps = [
     disabled: true,
   },
   { name: "scheduling", title: "Scheduling mode", done: false },
-  { name: "topology", title: "Topology & placement", done: false, disabled: true },
-];
+  { name: "topology", title: "Topology & placement", done: false, disabled: saveDisabled.value },
+]);
+function onStepClick({ name }: { name: string }) {
+  if (name === "topology") void save("continue");
+}
 const modePermissionTooltip = computed(() =>
   !props.canViewDepartments
     ? "You do not have permission to view departments."
@@ -423,6 +435,11 @@ function applyEdit(edit: IDepartmentSchedulingEdit) {
 }
 
 const saving = ref(false);
+const creatingDepartment = ref(false);
+function onDepartmentSaving(value: boolean) {
+  creatingDepartment.value = value;
+  emit("saving", saving.value || value);
+}
 const saveError = ref("");
 const saver = useNodePoolSchedulingSave();
 const validationError = computed(() => {
@@ -456,8 +473,17 @@ watch(
   },
   { deep: true },
 );
-async function save() {
-  if (saving.value || props.loading || !props.canSavePool || !props.canEditDepartments || validationError.value) return;
+const saveDisabled = computed(
+  () =>
+    saving.value ||
+    creatingDepartment.value ||
+    props.loading ||
+    !props.canSavePool ||
+    !props.canEditDepartments ||
+    !!validationError.value,
+);
+async function save(destination: "close" | "continue" = "close") {
+  if (saveDisabled.value) return;
   saving.value = true;
   emit("saving", true);
   saveError.value = "";
@@ -474,7 +500,7 @@ async function save() {
     const pool = await saver.save(props.pool, draft.value);
     saving.value = false;
     emit("saving", false);
-    emit("saved", pool);
+    emit("saved", pool, destination);
   } catch (error) {
     if (saver.savedPool) emit("pool-saved", saver.savedPool);
     saveError.value =

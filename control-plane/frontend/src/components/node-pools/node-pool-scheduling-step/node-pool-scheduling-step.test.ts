@@ -14,6 +14,7 @@ import { NodePoolDepartmentTable as Table } from "@/components/node-pools/node-p
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
 import { RunaiSegmentedButton } from "@/components/common/runai-segmented-button";
 import NodePoolSchedulingStep from "./node-pool-scheduling-step.vue";
+import { NodePoolNewDepartmentDialog as NewDepartment } from "@/components/node-pools/node-pool-new-department-dialog";
 import RunaiWizardLayout from "@/components/common/runai-wizard-layout/runai-wizard-layout.vue";
 import NodePoolWizardSummary from "../node-pool-wizard-summary/node-pool-wizard-summary.vue";
 import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
@@ -41,17 +42,49 @@ const pool = {
   networkTopologyName: "Existing fabric",
 } as Nodepool;
 
-function render(input = pool) {
+function render(input = pool, stubs = {}) {
   return mount(NodePoolSchedulingStep, {
     props: { pool: input },
     global: {
       plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
       directives: { "click-outside": {}, permission: {} },
+      stubs,
     },
   });
 }
 
 describe("scheduling step foundation", () => {
+  it.each(["canEditDepartments", "canViewDepartments"] as const)(
+    "finishes a pending department request when %s is revoked",
+    async (permission) => {
+      const wrapper = render(pool, {
+        NodePoolNewDepartmentDialog: {
+          emits: ["saving"],
+          template: "<div />",
+        },
+      });
+      try {
+        await wrapper.setProps({ canSavePool: true });
+        wrapper.findComponent(Table).vm.$emit("new-department");
+        await flushPromises();
+        const department = wrapper.findComponent(NewDepartment);
+        department.vm.$emit("saving", true);
+        await flushPromises();
+        expect(await requestToLeave()).toBe(false);
+        await wrapper.setProps({ [permission]: false });
+        expect(wrapper.findComponent(NewDepartment).exists()).toBe(true);
+        department.vm.$emit("saving", false);
+        await flushPromises();
+        expect(wrapper.emitted("saving")?.at(-1)).toEqual([false]);
+        expect(wrapper.findComponent(NewDepartment).exists()).toBe(false);
+        await wrapper.setProps({ [permission]: true });
+        expect(wrapper.get('[aid="scheduling-save-continue"]').attributes("disabled")).toBeUndefined();
+      } finally {
+        wrapper.unmount();
+      }
+    },
+  );
+
   it.each([
     { quota: false, ranks: false },
     { quota: false, ranks: true },
@@ -329,7 +362,7 @@ describe("scheduling step foundation", () => {
     expect(wrapper.emitted("saved")).toHaveLength(1);
     wrapper.unmount();
   });
-  it("supports keyboard mode selection and keeps unfinished save actions disabled", async () => {
+  it("supports keyboard mode selection and keeps save actions disabled without pool permission", async () => {
     const wrapper = render();
     await wrapper.get('[aid="mode-proportional"]').trigger("keydown", { key: "ArrowRight" });
     expect(wrapper.get('[aid="mode-ranked"]').attributes("aria-checked")).toBe("true");
@@ -346,6 +379,91 @@ describe("scheduling step foundation", () => {
     await flushPromises();
     wrapper.unmount();
   });
+  it("continues only after the pool and department changes finish saving", async () => {
+    const wrapper = render();
+    await wrapper.setProps({ canSavePool: true });
+    let finishDepartments!: (value: unknown) => void;
+    saveMocks.patchPool.mockReset().mockImplementation(async (_id, payload) => ({ ...pool, ...payload }));
+    saveMocks.patchDepartments.mockReset().mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          finishDepartments = resolve;
+        }),
+    );
+    wrapper.findComponent(Table).vm.$emit("edit", { id: "a", weight: 5 });
+    await wrapper.get('[aid="scheduling-save-continue"]').trigger("click");
+    await flushPromises();
+    expect(wrapper.emitted("saved")).toBeUndefined();
+    expect(wrapper.get('[aid="scheduling-save-continue"]').attributes("disabled")).toBeDefined();
+    finishDepartments({ succeeded: [{ orgUnitId: "a", nodePoolId: "pool-1" }], failed: [], totalFailed: 0 });
+    await flushPromises();
+    expect(wrapper.emitted("saved")?.[0]?.[1]).toBe("continue");
+    wrapper.unmount();
+  });
+
+  it("stays on scheduling when the pool save fails before continuing", async () => {
+    const wrapper = render();
+    await wrapper.setProps({ canSavePool: true });
+    saveMocks.patchPool.mockReset().mockRejectedValue(new Error("pool update failed"));
+    saveMocks.patchDepartments.mockReset();
+    await wrapper.get('[aid="mode-ranked"]').trigger("click");
+    await wrapper.get('[aid="scheduling-save-continue"]').trigger("click");
+    await flushPromises();
+    expect(wrapper.emitted("saved")).toBeUndefined();
+    expect(wrapper.emitted("pool-saved")).toBeUndefined();
+    expect(saveMocks.patchDepartments).not.toHaveBeenCalled();
+    expect(wrapper.get('[role="alert"]').text()).toContain("pool update failed");
+    expect(wrapper.get('[aid="mode-ranked"]').attributes("aria-checked")).toBe("true");
+    wrapper.unmount();
+  });
+
+  it("keeps the scheduling draft after partial failure and continues only when retry completes", async () => {
+    const wrapper = render();
+    await wrapper.setProps({ canSavePool: true });
+    saveMocks.patchPool.mockReset().mockImplementation(async (_id, payload) => ({ ...pool, ...payload }));
+    saveMocks.patchDepartments
+      .mockReset()
+      .mockResolvedValueOnce({ succeeded: [], failed: [{ message: "department conflict" }], totalFailed: 1 })
+      .mockResolvedValueOnce({ succeeded: [{ orgUnitId: "a", nodePoolId: "pool-1" }], failed: [], totalFailed: 0 });
+    wrapper.findComponent(Table).vm.$emit("edit", { id: "a", weight: 5 });
+    await wrapper.get('[aid="scheduling-save-continue"]').trigger("click");
+    await flushPromises();
+    expect(wrapper.emitted("saved")).toBeUndefined();
+    expect(wrapper.get('[role="alert"]').text()).toContain("remain unsaved");
+    expect(wrapper.findComponent(Table).props("draft").departments.a.weight).toBe(5);
+    await wrapper.get('[aid="scheduling-save-continue"]').trigger("click");
+    await flushPromises();
+    expect(wrapper.emitted("saved")?.[0]?.[1]).toBe("continue");
+    expect(saveMocks.patchPool).toHaveBeenCalledTimes(1);
+    wrapper.unmount();
+  });
+
+  it("saves before entering topology from the step panel and keeps identity unavailable", async () => {
+    const wrapper = render();
+    await wrapper.setProps({ canSavePool: true });
+    saveMocks.patchPool.mockReset().mockImplementation(async (_id, payload) => ({ ...pool, ...payload }));
+    await wrapper.get('[aid="wizard-step-item-identity"]').trigger("click");
+    expect(saveMocks.patchPool).not.toHaveBeenCalled();
+    await wrapper.get('[aid="wizard-step-item-topology"]').trigger("click");
+    await flushPromises();
+    expect(saveMocks.patchPool).toHaveBeenCalledTimes(1);
+    expect(wrapper.emitted("saved")?.[0]?.[1]).toBe("continue");
+    wrapper.unmount();
+  });
+
+  it("prevents continuing or using the topology step when scheduling validation fails", async () => {
+    const wrapper = render();
+    await wrapper.setProps({ canSavePool: true });
+    saveMocks.patchPool.mockReset();
+    wrapper.findComponent(Table).vm.$emit("edit", { id: "a", weight: 1.5 });
+    await wrapper.vm.$nextTick();
+    expect(wrapper.get('[aid="scheduling-save-continue"]').attributes("disabled")).toBeDefined();
+    await wrapper.get('[aid="wizard-step-item-topology"]').trigger("click");
+    expect(saveMocks.patchPool).not.toHaveBeenCalled();
+    expect(wrapper.emitted("saved")).toBeUndefined();
+    wrapper.unmount();
+  });
+
   it("preserves applied edits when changing mode without a discard dialog", async () => {
     const wrapper = render();
     const tableUid = wrapper.findComponent(Table).vm.$.uid;

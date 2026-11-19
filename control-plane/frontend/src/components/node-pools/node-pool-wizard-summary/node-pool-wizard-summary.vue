@@ -3,40 +3,44 @@
   SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-  <div class="creation-summary" :class="{ 'creation-summary--scheduling': scheduling }">
+  <div class="creation-summary text-b-body1">
     <section class="summary-section">
-      <div class="summary-heading">Cluster</div>
+      <h2 class="summary-heading">Cluster</h2>
       <div>{{ pool.clusterName || clusterName || "None" }}</div>
     </section>
-    <q-separator class="q-my-md" />
+    <q-separator class="summary-divider" />
     <section class="summary-section">
-      <div class="summary-heading resources-heading">
-        Resources
+      <div class="resources-heading">
+        <h2 class="summary-heading">Resources</h2>
         <runai-tooltip
           size="xs"
           class="resources-help"
           tooltip-text="All the resources available for matching labeled nodes within the node pool"
-          aria-label="Node pool resources"
+          aria-label="About node pool resources"
         />
       </div>
-      <div>
-        <div v-for="row in resourceRows" :key="row.label">{{ row.label }}: {{ row.value }}</div>
-      </div>
+      <dl class="summary-rows resource-rows">
+        <div v-for="row in resourceRows" :key="row.label">
+          <dt>{{ row.label }}</dt>
+          <dd>{{ row.value }}</dd>
+        </div>
+      </dl>
     </section>
-    <q-separator class="q-my-md" />
+    <q-separator class="summary-divider" />
     <section class="summary-section summary-mode">
-      <div class="summary-heading">Scheduling mode</div>
-      <div>
-        <div class="summary-mode-name text-weight-bold q-mb-xs">{{ schedulingMode }}</div>
-        <div v-if="modeDescription">{{ modeDescription }}</div>
-      </div>
+      <h2 class="summary-heading">Scheduling mode</h2>
+      <div class="text-b-body1-bold">{{ schedulingMode }}</div>
+      <div v-if="modeDescription">{{ modeDescription }}</div>
     </section>
-    <q-separator class="q-my-md" />
+    <q-separator class="summary-divider" />
     <section class="summary-section summary-topology">
-      <div class="summary-heading">Topology &amp; placement</div>
-      <div>
-        <div v-for="row in configurationRows" :key="row.label">{{ row.label }}: {{ row.value }}</div>
-      </div>
+      <h2 class="summary-heading">Topology &amp; placement</h2>
+      <dl class="summary-rows topology-rows">
+        <div v-for="row in configurationRows" :key="row.label">
+          <dt>{{ row.label }}</dt>
+          <dd>{{ row.value }}</dd>
+        </div>
+      </dl>
     </section>
   </div>
 </template>
@@ -54,12 +58,16 @@ import {
   type INodePoolSummaryResources,
 } from "@/models/node-pool.model";
 
-const props = defineProps<{
-  pool: INodePoolSummaryConfiguration;
-  scheduling?: boolean;
-  clusterName?: string;
-  resources?: INodePoolSummaryResources;
-}>();
+const props = withDefaults(
+  defineProps<{
+    pool: INodePoolSummaryConfiguration;
+    clusterName?: string;
+    resources?: INodePoolSummaryResources;
+    showNuma?: boolean;
+    showGpuDevice?: boolean;
+  }>(),
+  { showNuma: true, showGpuDevice: true },
+);
 const schedulingMode = computed(() => getSchedulingMode(props.pool.schedulingCapabilities));
 const modeDescription = computed(() => SCHEDULING_MODE_DESCRIPTIONS[schedulingMode.value]);
 const resourceRows = computed(() => [
@@ -97,69 +105,90 @@ const configurationRows = computed(() => {
       label: "CPU node placement strategy",
       value: nodePoolUtil.placementStrategyText(config?.cpuPodsPlacementStrategy?.node ?? defaults.cpuNodePlacement),
     },
-  ];
+  ].filter(
+    (row) =>
+      (props.showNuma || row.label !== "NUMA-aware scheduling") &&
+      (props.showGpuDevice || row.label !== "GPU device placement strategy"),
+  );
 });
 </script>
 <style scoped lang="scss">
 .creation-summary {
-  padding: 16px;
-  font-size: 12px;
-  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+  padding-block: var(--space-xs) var(--space-m);
   overflow-wrap: anywhere;
+}
+.summary-divider {
+  background: var(--border-subtle);
+}
+.summary-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+  padding-inline: var(--space-m);
+}
+.summary-heading {
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+  margin: 0;
+  color: var(--b-text-sub);
+  font-size: inherit;
+  font-weight: 500;
+  line-height: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 .resources-heading {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-xs);
 }
 .resources-help {
-  width: 20px;
-  height: 20px;
-  min-height: 20px;
+  width: 32px;
+  min-height: 32px;
   padding: 0;
 }
 .resources-help :deep(.q-icon) {
-  font-size: 16px;
+  font-size: 20px;
 }
-.summary-heading {
-  color: var(--b-text-sub);
-  margin-bottom: 10px;
-}
-.creation-summary--scheduling {
-  padding: 7px 16px 16px;
-}
-.creation-summary--scheduling .summary-section {
+.summary-rows {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-}
-.creation-summary--scheduling .summary-heading {
-  display: flex;
-  align-items: center;
-  height: 32px;
   margin: 0;
-  font-weight: 500;
+
+  dt {
+    color: var(--b-text-sub);
+  }
+
+  dd {
+    margin: 0;
+  }
 }
-.creation-summary--scheduling .summary-mode,
-.creation-summary--scheduling .summary-topology {
-  gap: 5px;
+.summary-mode,
+.resource-rows {
+  gap: var(--space-2xs);
 }
-.creation-summary--scheduling .summary-mode-name {
-  margin-bottom: 5px;
-  font-weight: 800;
+.resource-rows > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2xs);
+
+  dt {
+    flex-shrink: 0;
+  }
+
+  dd {
+    text-align: end;
+  }
 }
-.creation-summary--scheduling > .q-separator {
-  margin: 20px 0;
+.summary-topology {
+  gap: var(--space-xs);
 }
-.creation-summary--scheduling .resources-heading {
-  gap: 7px;
-}
-.creation-summary--scheduling .resources-help {
-  width: 32px;
-  height: 32px;
-  min-height: 32px;
-}
-.creation-summary--scheduling .resources-help :deep(.q-icon) {
-  font-size: 20px;
+.topology-rows {
+  gap: var(--space-s);
 }
 </style>

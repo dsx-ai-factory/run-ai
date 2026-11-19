@@ -37,6 +37,15 @@ const success = (ids: string[]) => ({
   totalFailed: 0,
 });
 describe("scheduling persistence", () => {
+  it.each(["saved-topology", null, undefined])(
+    "preserves the intended topology association during a Step 2 save: %s",
+    (networkTopologyId) => {
+      expect(buildSchedulingSave({ ...pool, networkTopologyId }, draft()).pool).toHaveProperty(
+        "networkTopologyId",
+        networkTopologyId ?? null,
+      );
+    },
+  );
   it.each([ESchedulingMode.Unknown, ESchedulingMode.Custom])("does not save unsupported mode %s", (mode) => {
     expect(() => buildSchedulingSave(pool, { ...draft(), mode })).toThrow(/supported scheduling mode/);
   });

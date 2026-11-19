@@ -14,7 +14,14 @@
       right-width="200px"
       hide-right-on-small-screen
     >
-      <runai-form-wrapper ref="form" :form-state="draft" full-width greedy @leave-page="emit('leave-approved')">
+      <runai-form-wrapper
+        ref="form"
+        :form-state="draft"
+        :prevent-leave="validating || submitting"
+        full-width
+        greedy
+        @leave-page="emit('leave-approved')"
+      >
         <runai-expansion-wrapper no-first-top-padding>
           <runai-expansion-item label="Cluster" default-opened disable-closing>
             <runai-section-title title="Select the cluster under which to create this node pool" />

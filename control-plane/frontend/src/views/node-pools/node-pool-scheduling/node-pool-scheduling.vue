@@ -4,9 +4,7 @@
 -->
 <template>
   <runai-form-wrapper v-if="!pool" :form-state="{}" full-width>
-    <div v-if="loading" class="q-pa-lg">
-      <q-spinner color="primary" role="progressbar" aria-label="Loading node pool" />
-    </div>
+    <runai-default-loader v-if="loading" />
     <q-banner v-else-if="loadError" class="bg-red-1 text-negative q-ma-lg" role="alert">
       {{ loadError }}
       <template #action
@@ -55,6 +53,7 @@ import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
 import { NodePoolSchedulingStep } from "@/components/node-pools/node-pool-scheduling-step";
 import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
+import { RunaiDefaultLoader } from "@/components/common/runai-default-loader";
 import RunaiFormWrapper from "@/components/common/runai-form-wrapper/runai-form-wrapper.vue";
 import { useNodePoolSchedulingData } from "@/composables/node-pool/use-node-pool-scheduling-data.composable";
 import { ENTITY_PRIORITY_SELECT_OPTIONS } from "@/models/org-unit.model";
@@ -64,14 +63,19 @@ import { requestToLeave } from "@/services/infra/router.service/router.service";
 import { usePermissionStore } from "@/stores/permissions.store";
 import { Action, ResourceType } from "@/swagger-models/authorization-client";
 import { NODE_POOL_ROUTE_NAMES } from "@/router/node-pool.routes/node-pool.routes.names";
+import type { Nodepool } from "@/swagger-models/cluster-service-client";
 const route = useRoute();
 const router = useRouter();
 const permissionStore = usePermissionStore();
 const canSavePool = computed(() => permissionStore.hasPermission(ResourceType.Nodepools, Action.Update));
 const saving = ref(false);
-async function onSaved() {
+async function onSaved(savedPool: Nodepool, destination: "close" | "continue" = "close") {
   leaveApproved.value = true;
-  await router.push({ name: NODE_POOL_ROUTE_NAMES.NODE_POOL_INDEX });
+  await router.push(
+    destination === "continue"
+      ? { name: NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT, params: { id: savedPool.id }, query: { stepName: "topology" } }
+      : { name: NODE_POOL_ROUTE_NAMES.NODE_POOL_INDEX },
+  );
 }
 const appStore = useAppStore();
 const poolId = computed(() => (typeof route.params.id === "string" ? route.params.id : ""));
