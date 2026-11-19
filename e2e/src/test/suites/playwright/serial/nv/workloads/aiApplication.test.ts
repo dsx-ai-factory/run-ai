@@ -39,25 +39,27 @@ test.describe(`Runai  ${tags.tool.ui} ${tags.resource.workloads}  ${tags.teams.l
             'https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-vss-2.3.1.tgz';
         const VSS_RELEASE_NAME = 'vss-blueprint';
 
-        // RAG deployment workload names
-        const RAG_WORKLOAD_NAMES = [
-            'ingestor-server',
-            'milvus-standalone',
-            'nv-ingest-paddle',
-            'rag-etcd',
-            'rag-frontend',
-            'rag-minio',
-            'rag-nemoretriever-graphic-elements-v1',
-            'rag-nemoretriever-page-elements-v2',
-            'rag-nemoretriever-table-structure-v1',
-            'rag-nim-llm',
-            'rag-nvidia-nim-llama-32-nv-embedqa-1b-v2',
-            'rag-nv-ingest',
-            'rag-redis-master',
-            'rag-redis-replicas',
-            'rag-server',
-            'rag-text-reranking-nim'
-        ];
+        // Keep representative workload resources while avoiding the large model images.
+        const RAG_WORKLOAD_NAMES = ['rag-frontend', 'rag-server'];
+        const RAG_HELM_OVERRIDES = [
+            '--set nim-llm.enabled=false',
+            '--set nvidia-nim-llama-32-nv-embedqa-1b-v2.enabled=false',
+            '--set text-reranking-nim.enabled=false',
+            '--set ingestor-server.enabled=false',
+            '--set frontend.image.pullPolicy=Always',
+            '--set frontend.image.repository=nvcr.io/nvidia/blueprint/rag-frontend',
+            '--set frontend.image.tag=2.3.0',
+            '--set replicaCount=0'
+        ].join(' ');
+        const VSS_HELM_OVERRIDES = [
+            '--set nim-llm.replicaCount=0',
+            '--set nemo-embedding.workloadSpecs.wl-env.wl_units=0',
+            '--set nemo-rerank.workloadSpecs.wl-env.wl_units=0',
+            '--set vss.workloadSpecs.wl-env.wl_units=0',
+            '--set milvus.replicas=0',
+            '--set minio.replicas=0',
+            '--set neo4j.replicas=0'
+        ].join(' ');
 
         // VSS deployment workload names
         const VSS_WORKLOAD_NAMES = [
@@ -186,7 +188,8 @@ test.describe(`Runai  ${tags.tool.ui} ${tags.resource.workloads}  ${tags.teams.l
             chartUrl: string
         ): Promise<void> {
             const chartFile = ensureChartDownloaded(chartUrl);
-            const command = `helm install ${releaseName} -n ${namespace} ${chartFile}`;
+            const overrides = releaseName === RAG_RELEASE_NAME ? RAG_HELM_OVERRIDES : VSS_HELM_OVERRIDES;
+            const command = `helm install ${releaseName} -n ${namespace} ${chartFile} ${overrides}`;
 
             logger.info(`Helm install command: ${command}`);
             for (let attempt = 1; attempt <= 3; attempt++) {
@@ -202,6 +205,10 @@ test.describe(`Runai  ${tags.tool.ui} ${tags.resource.workloads}  ${tags.teams.l
                 60,
                 3
             );
+            if (releaseName === RAG_RELEASE_NAME) {
+                // Verify the NGC source with the small frontend image.
+                await kubeCli.waitForPodToRun(namespace, 'rag-frontend', 180);
+            }
         }
 
         async function uninstallApplication(releaseName: string, namespace: string): Promise<void> {

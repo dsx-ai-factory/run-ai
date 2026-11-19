@@ -15,6 +15,7 @@ import {
     config
 } from '../../../../../../modules/helpers';
 import { Phase } from '../../../../../../modules/api/apis/workloadsApi/generated/model/phase';
+import { Preemptibility } from '../../../../../../modules/api/apis/workloadsApi/generated/model/preemptibility';
 import { tags } from '../../../../../../modules/helpers/config/tags';
 import {
     supportedFrom,
@@ -69,7 +70,8 @@ test.describe(`worload preempt tags: ${tags.tool.ui} ${tags.resource.workloads} 
                         image: config.quickStartImage.ubuntu,
                         command: sleepInfinityCommand,
                         compute: { gpuDevicesRequest: 1 },
-                        priorityClass: lowPriorityClass
+                        priorityClass: lowPriorityClass,
+                        preemptibility: Preemptibility.Preemptible
                     }
                 );
                 lowPriorityTraining = training;

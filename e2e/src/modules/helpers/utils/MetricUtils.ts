@@ -9,6 +9,7 @@ import { clusterApi, workloadsService } from '../../api';
 import { flowRootState } from '../config/config';
 import { WorkloadMetricType } from '../../api/apis/workloadsApi/generated/model/workloadMetricType';
 import { PodMetricType } from '../../api/apis/workloadsApi/generated/model/podMetricType';
+import { MeasurementResponse } from '../../api/apis/workloadsApi/generated/model/measurementResponse';
 export class MetricUtils {
     public async getClusterMetrics(
         start: Date,
@@ -103,8 +104,30 @@ export class MetricUtils {
         return { start, end };
     }
 
-    public validateMetrics(measurements: any[]): boolean {
+    public validateMetrics(
+        measurements: MeasurementResponse[],
+        requestedTypes?: Array<WorkloadMetricType | PodMetricType>
+    ): boolean {
         if (!measurements?.length) return false;
+
+        if (requestedTypes) {
+            if (!requestedTypes.every((type) => measurements.some((m) => m.type === String(type)))) {
+                return false;
+            }
+
+            return measurements.every(({ type, values }) => {
+                if (!values?.length) return false;
+                const samples = values.map(({ value }) =>
+                    value == null || String(value).trim() === '' ? NaN : Number(value)
+                );
+                const isGpuUtilization = type.startsWith('GPU_UTILIZATION');
+                return (
+                    samples.every((value) => Number.isFinite(value) && value >= 0 && (!isGpuUtilization || value <= 100)) &&
+                    (!isGpuUtilization || samples.some((value) => value > 0))
+                );
+            });
+        }
+
         return measurements.every((m) => {
             const values = m.values;
             const metricType = m.type;
