@@ -1652,6 +1652,48 @@ func DefaultRuleGroups(ruleGroupsConfig *RuleGroupsConfig) []monitoringv1.RuleGr
 				Record: "runai_vllm_generation_tokens_per_second_per_workload",
 				Expr:   intstr.FromString(fmt.Sprintf(`sum(runai_vllm_generation_tokens_per_second_per_pod) by (%s)`, workloadLabels)),
 			},
+			// Keep counters separate for each pod and vLLM engine so resets can be
+			// handled independently. Workload queries must apply increase() to each
+			// recorded series before summing the results.
+			// Join pod information from all node pools so replicas are not excluded
+			// because they run in a different node pool.
+			monitoringv1.Rule{
+				Record: "runai_vllm_prompt_tokens_total_per_pod",
+				Expr:   intstr.FromString(vllmEnrichedAllPodsExpr(`sum(vllm:prompt_tokens_total) by (pod, namespace, engine)`)),
+			},
+			monitoringv1.Rule{
+				Record: "runai_vllm_generation_tokens_total_per_pod",
+				Expr:   intstr.FromString(vllmEnrichedAllPodsExpr(`sum(vllm:generation_tokens_total) by (pod, namespace, engine)`)),
+			},
+			// Exposed by vLLM v0.16.0 and later; older engines produce no series.
+			monitoringv1.Rule{
+				Record: "runai_vllm_prompt_tokens_cached_total_per_pod",
+				Expr:   intstr.FromString(vllmEnrichedAllPodsExpr(`sum(vllm:prompt_tokens_cached_total) by (pod, namespace, engine)`)),
+			},
+			monitoringv1.Rule{
+				Record: "runai_vllm_request_prompt_tokens_bucket_per_pod",
+				Expr:   intstr.FromString(vllmEnrichedAllPodsExpr(`sum(vllm:request_prompt_tokens_bucket) by (pod, namespace, engine, le)`)),
+			},
+			monitoringv1.Rule{
+				Record: "runai_vllm_request_prompt_tokens_sum_per_pod",
+				Expr:   intstr.FromString(vllmEnrichedAllPodsExpr(`sum(vllm:request_prompt_tokens_sum) by (pod, namespace, engine)`)),
+			},
+			monitoringv1.Rule{
+				Record: "runai_vllm_request_prompt_tokens_count_per_pod",
+				Expr:   intstr.FromString(vllmEnrichedAllPodsExpr(`sum(vllm:request_prompt_tokens_count) by (pod, namespace, engine)`)),
+			},
+			monitoringv1.Rule{
+				Record: "runai_vllm_request_generation_tokens_bucket_per_pod",
+				Expr:   intstr.FromString(vllmEnrichedAllPodsExpr(`sum(vllm:request_generation_tokens_bucket) by (pod, namespace, engine, le)`)),
+			},
+			monitoringv1.Rule{
+				Record: "runai_vllm_request_generation_tokens_sum_per_pod",
+				Expr:   intstr.FromString(vllmEnrichedAllPodsExpr(`sum(vllm:request_generation_tokens_sum) by (pod, namespace, engine)`)),
+			},
+			monitoringv1.Rule{
+				Record: "runai_vllm_request_generation_tokens_count_per_pod",
+				Expr:   intstr.FromString(vllmEnrichedAllPodsExpr(`sum(vllm:request_generation_tokens_count) by (pod, namespace, engine)`)),
+			},
 			monitoringv1.Rule{
 				Record: "runai_vllm_kv_cache_usage_perc_per_pod",
 				Expr:   intstr.FromString(vllmEnrichedPodExpr(`avg(vllm:kv_cache_usage_perc) by (pod, namespace)`)),
@@ -1816,11 +1858,24 @@ func DefaultRuleGroups(ruleGroupsConfig *RuleGroupsConfig) []monitoringv1.RuleGr
 	return rgs
 }
 
+// vllmEnrichedPodExpr enriches a per-pod vLLM expression with the pod labels, keeping only the
+// pods of one node pool per workload (runai_pod_info_enriched_nodepool_unique).
 func vllmEnrichedPodExpr(expr string) string {
+	return vllmJoinPodInfo(expr, "runai_pod_info_enriched_nodepool_unique")
+}
+
+// vllmEnrichedAllPodsExpr enriches a per-pod vLLM expression with the pod labels, keeping every
+// pod of the workload in all node pools (runai_pod_info_enriched).
+func vllmEnrichedAllPodsExpr(expr string) string {
+	return vllmJoinPodInfo(expr, "runai_pod_info_enriched")
+}
+
+func vllmJoinPodInfo(expr string, podInfoMetric string) string {
 	return fmt.Sprintf(
-		`label_replace(label_replace(%s, "pod_name", "$1", "pod", "(.*)"), "pod_namespace", "$1", "namespace", "(.*)") * on(pod_name, pod_namespace) group_left(%s) runai_pod_info_enriched_nodepool_unique`,
+		`label_replace(label_replace(%s, "pod_name", "$1", "pod", "(.*)"), "pod_namespace", "$1", "namespace", "(.*)") * on(pod_name, pod_namespace) group_left(%s) %s`,
 		expr,
 		podLabelsWithoutPodKeys,
+		podInfoMetric,
 	)
 }
 
