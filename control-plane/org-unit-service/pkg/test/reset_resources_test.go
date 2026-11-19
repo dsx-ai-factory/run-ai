@@ -22,7 +22,10 @@ import (
 	"k8s.io/utils/ptr"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/generated/pkg/api"
+	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/database/dao"
+	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/services"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -1015,6 +1018,60 @@ var _ = Describe("Org unit tests", Ordered, func() {
 					}
 				}
 			})
+		})
+
+		It("NodepoolResetResources DEPARTMENT_WEIGHTS_TO_DEFAULT sets only the departments' unset weights on the target nodepool", func() {
+			setGpuWeight := func(table string, orgUnitId string, nodePoolId string, weight float64) {
+				_, err := runaidb.DB().Exec(fmt.Sprintf(`UPDATE resources SET gpu_over_quota_weight = ? FROM %s
+					WHERE %s.org_unit_data_id = resources.org_unit_data_id AND %s.id = ? AND resources.node_pool_id = ?`, table, table, table),
+					weight, orgUnitId, nodePoolId)
+				Expect(err).To(BeNil())
+			}
+			gpuWeight := func(resources []api.Resources, nodePoolId string) float64 {
+				for _, r := range resources {
+					if r.NodePool.Id == nodePoolId {
+						Expect(r.Gpu.OverQuotaWeight).ToNot(BeNil())
+						return *r.Gpu.OverQuotaWeight
+					}
+				}
+				Fail("no resources for nodepool " + nodePoolId)
+				return 0
+			}
+			departmentGpuWeight := func(departmentId string, nodePoolId string) float64 {
+				res, err := departmentApiService.GetDepartment(ctx, departmentId)
+				Expect(err).To(BeNil())
+				Expect(res.Code).To(Equal(http.StatusOK))
+				return gpuWeight(res.Body.(api.Department).Resources, nodePoolId)
+			}
+			projectGpuWeight := func(projectId string, nodePoolId string) float64 {
+				res, err := projectApiService.GetProject(ctx, projectId)
+				Expect(err).To(BeNil())
+				Expect(res.Code).To(Equal(http.StatusOK))
+				return gpuWeight(res.Body.(api.Project).Resources, nodePoolId)
+			}
+			defaultNodePool := fmt.Sprint(defaultNodePoolId)
+
+			setGpuWeight(models.DepartmentTable, depA.Id, nodePoolId2, 0)
+			setGpuWeight(models.DepartmentTable, depB.Id, nodePoolId2, -1)
+			setGpuWeight(models.DepartmentTable, depA.Id, defaultNodePool, 0)
+			setGpuWeight(models.ProjectTable, projA.Id, nodePoolId2, 0)
+			setGpuWeight(models.ProjectTable, projB.Id, nodePoolId2, 7)
+			dao.InvalidateAllCache(ctx, TestTenant, clusterId)
+
+			Expect(dao.NodepoolResetResources(ctx, TestTenant, clusterId, nodePoolId2,
+				api.NODEPOOLRESOURCESRESETACTION_DEPARTMENT_WEIGHTS_TO_DEFAULT)).To(Succeed())
+
+			Expect(departmentGpuWeight(depA.Id, nodePoolId2)).To(Equal(models.DefaultOverQuotaWeight))
+			Expect(departmentGpuWeight(depB.Id, nodePoolId2)).To(Equal(models.DefaultOverQuotaWeight))
+			Expect(departmentGpuWeight(depA.Id, defaultNodePool)).To(Equal(float64(0)))
+			Expect(projectGpuWeight(projA.Id, nodePoolId2)).To(Equal(float64(0)))
+			Expect(projectGpuWeight(projB.Id, nodePoolId2)).To(Equal(float64(7)))
+
+			setGpuWeight(models.DepartmentTable, depB.Id, nodePoolId2, 5)
+			dao.InvalidateAllCache(ctx, TestTenant, clusterId)
+			Expect(dao.NodepoolResetResources(ctx, TestTenant, clusterId, nodePoolId2,
+				api.NODEPOOLRESOURCESRESETACTION_DEPARTMENT_WEIGHTS_TO_DEFAULT)).To(Succeed())
+			Expect(departmentGpuWeight(depB.Id, nodePoolId2)).To(Equal(float64(5)))
 		})
 
 		Context("test invalid requests", func() {

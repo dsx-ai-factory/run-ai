@@ -260,6 +260,7 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		turnOnCpuQuotaAndWeights(np.Id)
 		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_QUOTA, nil, nil)
 		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT, nil)
+		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_DEPARTMENT_WEIGHTS_TO_DEFAULT, nil)
 
 		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Quota: ptr.To(false), CpuQuota: ptr.To(false), Limits: ptr.To(false)})
 		Expect(response.Code).To(Equal(http.StatusOK))
@@ -268,6 +269,46 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		Expect(stored.Quota).To(BeFalse())
 		Expect(stored.CpuQuota).To(BeFalse())
 		Expect(stored.Limits).To(BeFalse())
+	})
+
+	turnQuotaOff := func(nodepoolId string) {
+		expectSummary(nodepoolId, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_QUOTA, nil, nil)
+		response := patchCapabilities(nodepoolId, api.SchedulingCapabilitiesNullable{Quota: ptr.To(false), Limits: ptr.To(false)})
+		Expect(response.Code).To(Equal(http.StatusOK))
+	}
+
+	It("resets the departments' unset weights when weights turn on for a nodepool without quota", func() {
+		np := createNodepool(clusterId)
+		turnQuotaOff(np.Id)
+		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_DEPARTMENT_WEIGHTS_TO_DEFAULT, nil)
+
+		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{AdjustableWeights: ptr.To(true)})
+		Expect(response.Code).To(Equal(http.StatusOK))
+		Expect(storedCapabilities(np.Id).AdjustableWeights).To(BeTrue())
+	})
+
+	It("leaves the departments' weights alone when quota turns off with weights off", func() {
+		np := createNodepool(clusterId)
+		turnQuotaOff(np.Id)
+		Expect(storedCapabilities(np.Id).Quota).To(BeFalse())
+	})
+
+	It("leaves the departments' weights alone when weights turn on for a nodepool with quota", func() {
+		np := createNodepool(clusterId)
+
+		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{AdjustableWeights: ptr.To(true)})
+		Expect(response.Code).To(Equal(http.StatusOK))
+		Expect(storedCapabilities(np.Id).AdjustableWeights).To(BeTrue())
+	})
+
+	It("does not save the nodepool when the department weights reset fails", func() {
+		np := createNodepool(clusterId)
+		turnQuotaOff(np.Id)
+		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_DEPARTMENT_WEIGHTS_TO_DEFAULT, errors.New("org-unit-service is down"))
+
+		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{AdjustableWeights: ptr.To(true)})
+		Expect(response.Code).To(Equal(http.StatusServiceUnavailable))
+		Expect(storedCapabilities(np.Id).AdjustableWeights).To(BeFalse())
 	})
 
 	withLimits := []openapi.OrgUnitsNodepoolSummaryInner{{Type: ptr.To("project"), Name: ptr.To("team-c")}}

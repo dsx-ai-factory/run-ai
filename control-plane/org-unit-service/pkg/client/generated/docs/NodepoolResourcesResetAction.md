@@ -7,6 +7,8 @@
 
 * `LIMITS_TO_DEFAULT` (value: `"LIMITS_TO_DEFAULT"`)
 
+* `DEPARTMENT_WEIGHTS_TO_DEFAULT` (value: `"DEPARTMENT_WEIGHTS_TO_DEFAULT"`)
+
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
