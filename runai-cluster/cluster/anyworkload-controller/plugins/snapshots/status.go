@@ -212,9 +212,13 @@ func newestKey(replicas []corev1.Pod) string {
 	return key
 }
 
-// captureFailure is why a failed capture failed, from Snapshot's condition.
+// captureFailure is why a failed capture failed, from Snapshot's condition. If
+// the condition is missing, it says only which capture failed.
 func captureFailure(job *snapshotv1alpha1.SnapshotJob) error {
 	failed := meta.FindStatusCondition(job.Status.Conditions, snapshotv1alpha1.SnapshotJobConditionFailed)
+	if failed == nil {
+		return fmt.Errorf("%w: SnapshotJob %s", errCaptureFailed, job.Name)
+	}
 	return fmt.Errorf("%w: SnapshotJob %s: %s: %s", errCaptureFailed, job.Name, failed.Reason, failed.Message)
 }
 
