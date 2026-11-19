@@ -243,14 +243,20 @@ export const NETWORK_ACCELERATION_LABELS: Record<NodepoolGPUNetworkAccelerationD
   [NodepoolGPUNetworkAccelerationDetection.DontUse]: "Is not present",
 };
 
-export type NodePoolSchedulingMode = "proportional" | "ranked" | "guaranteed";
-
 export enum ENodePoolSchedulingMode {
   Unknown = "Unknown",
   Guaranteed = "Guaranteed quota",
   Ranked = "Ranked",
   Proportional = "Proportional",
   Custom = "Custom",
+}
+
+export function isSupportedSchedulingMode(mode: ENodePoolSchedulingMode | undefined) {
+  return (
+    mode === ENodePoolSchedulingMode.Proportional ||
+    mode === ENodePoolSchedulingMode.Ranked ||
+    mode === ENodePoolSchedulingMode.Guaranteed
+  );
 }
 
 export function getSchedulingMode(capabilities?: SchedulingCapabilitiesNullable): ENodePoolSchedulingMode {

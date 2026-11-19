@@ -10,9 +10,9 @@ import type { INodePoolSummaryResources } from "@/models/node-pool.model";
 vi.mock("@/services/control-plane/cluster.service/cluster.service", () => ({
   clusterService: { getNodepool: vi.fn() },
 }));
-vi.mock("../node-pool-scheduling-step/node-pool-scheduling.service", () => ({ loadSchedulingResources: vi.fn() }));
+vi.mock("@/composables/node-pool/node-pool-scheduling-data.util", () => ({ loadSchedulingResources: vi.fn() }));
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
-import { loadSchedulingResources } from "../node-pool-scheduling-step/node-pool-scheduling.service";
+import { loadSchedulingResources } from "@/composables/node-pool/node-pool-scheduling-data.util";
 import { useNodePoolTopologyData } from "./use-node-pool-topology-data.composable";
 
 function deferred<T>() {

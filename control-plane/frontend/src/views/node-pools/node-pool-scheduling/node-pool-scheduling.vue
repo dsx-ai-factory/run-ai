@@ -51,12 +51,11 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
-import NodePoolSchedulingStep from "@/components/node-pools/node-pool-scheduling-step/node-pool-scheduling-step.vue";
+import { NodePoolSchedulingStep } from "@/components/node-pools/node-pool-scheduling-step";
 import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
 import { RunaiDefaultLoader } from "@/components/common/runai-default-loader";
 import RunaiFormWrapper from "@/components/common/runai-form-wrapper/runai-form-wrapper.vue";
-import { useNodePoolSchedulingData } from "@/components/node-pools/node-pool-scheduling-step/use-node-pool-scheduling-data.composable";
-import { loadChildQuotaSum } from "@/components/node-pools/node-pool-scheduling-step/node-pool-scheduling.service";
+import { useNodePoolSchedulingData } from "@/composables/node-pool/use-node-pool-scheduling-data.composable";
 import { ENTITY_PRIORITY_SELECT_OPTIONS } from "@/models/org-unit.model";
 import { useAppStore } from "@/stores/app.store";
 import { requestToLeave } from "@/services/infra/router.service/router.service";
@@ -102,14 +101,14 @@ const {
   refresh,
   loadMore,
   loadRank,
+  loadChildQuotaSum,
 } = useNodePoolSchedulingData(poolId);
 const leaveApproved = ref(false);
 const ranks = computed(() => ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => option.value).reverse());
 async function loadQuotaContext(id: string) {
   if (!pool.value || quotaPolicy.value === undefined)
     throw new Error(policyError.value || "Quota policy is unavailable.");
-  const selected = pool.value;
-  const childQuotaSum = await loadChildQuotaSum({ poolId: selected.id, clusterId: selected.clusterId }, id);
+  const childQuotaSum = await loadChildQuotaSum(id);
   return { childQuotaSum, enforceChildQuota: quotaPolicy.value };
 }
 watch(

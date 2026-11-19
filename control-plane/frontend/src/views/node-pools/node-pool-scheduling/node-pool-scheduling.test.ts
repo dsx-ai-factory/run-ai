@@ -8,7 +8,7 @@ import { createTestingPinia } from "@pinia/testing";
 import { Notify, Quasar } from "quasar";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import View from "./node-pool-scheduling.vue";
-import Step from "@/components/node-pools/node-pool-scheduling-step/node-pool-scheduling-step.vue";
+import { NodePoolSchedulingStep as Step } from "@/components/node-pools/node-pool-scheduling-step";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
 const { createNodePoolDraft } = nodePoolUtil;

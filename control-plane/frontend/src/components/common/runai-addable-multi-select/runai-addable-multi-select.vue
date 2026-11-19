@@ -22,6 +22,11 @@
       :model-value="selectedOptions"
       :loading="loading"
       :rules="[multiSelectValidation, requiredByPolicyValidation, allowedByPolicyValidation]"
+      :error="selectionLimitError || undefined"
+      :error-message="
+        selectionLimitError ? `Select up to ${maxValues} ${maxValues === 1 ? 'value' : 'values'}` : undefined
+      "
+      @input.capture="selectionLimitError = false"
       @new-value="createNewValue"
       @filter="filterFn"
       @clear="onClear"
@@ -151,6 +156,7 @@ export default defineComponent({
     return {
       filterOptions: this.options as ISelectOption[],
       currentFilterValue: "" as string,
+      selectionLimitError: false,
     };
   },
   computed: {
@@ -193,9 +199,11 @@ export default defineComponent({
       selectRef.hidePopup();
     },
     onClear(): void {
+      this.selectionLimitError = false;
       this.$emit("options-select", []);
     },
     onSelect(options: ISelectOption[]): void {
+      this.selectionLimitError = false;
       let updatedOptions: ISelectOption[] = [];
       if (options) {
         updatedOptions = options.filter((option: ISelectOption) => {
@@ -210,9 +218,13 @@ export default defineComponent({
       this.$emit("options-select", updatedOptions);
     },
     createNewValue(val: string) {
-      if (!this.supportAddingNewValue || (this.maxValues != null && this.selectedOptions.length >= this.maxValues))
-        return;
+      if (!this.supportAddingNewValue) return;
       if (val.length > 0) {
+        if (this.maxValues != null && this.selectedOptions.length >= this.maxValues) {
+          this.selectionLimitError = true;
+          return;
+        }
+        this.selectionLimitError = false;
         this.$emit("add-option", val, () => {
           this.resetInput();
         });
@@ -274,6 +286,9 @@ export default defineComponent({
     },
   },
   watch: {
+    selectedOptions() {
+      this.selectionLimitError = false;
+    },
     options() {
       (this.$refs.multiSelect as QSelect)?.filter(this.currentFilterValue);
     },

@@ -38,7 +38,6 @@ import { EQuotaInputState } from "@/models/org-unit.model";
 import { EditableCellPopup, type EditableCellState } from "./editable-cell-popup";
 import { EQuotaEntity } from "@/models/resource.model";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
-import type { Department, AggregatedResources } from "@/swagger-models/org-unit-service-client";
 
 defineOptions({ name: "OrgUnitGpuEditableQuotaCol" });
 
@@ -74,18 +73,9 @@ const fetchDepartmentSubordinateQuota = async () => {
   isLoadingDepartment.value = true;
 
   try {
-    const department: Department = await orgUnitService.getDepartment(departmentId);
-    const projectsAggregated = department.projectsAggregatedResources?.find(
-      (resource: AggregatedResources) => resource.nodePool?.name === nodePoolName,
-    );
-    if (!projectsAggregated) {
-      // No data means no quota assigned
-      subordinateGpuQuota.value = undefined;
-      return;
-    }
-    const gpuDeserved = projectsAggregated?.gpu?.deserved;
+    const gpuDeserved = await orgUnitService.getDepartmentSubordinateGpuQuota(departmentId, { nodePoolName });
     subordinateGpuQuota.value =
-      gpuDeserved === null || gpuDeserved === undefined || gpuDeserved === -1 ? null : gpuDeserved;
+      gpuDeserved === undefined ? undefined : gpuDeserved === null || gpuDeserved === -1 ? null : gpuDeserved;
   } catch (error) {
     console.error("Failed to fetch department subordinate quota:", error);
     subordinateGpuQuota.value = undefined; // Allow editing if fetch fails

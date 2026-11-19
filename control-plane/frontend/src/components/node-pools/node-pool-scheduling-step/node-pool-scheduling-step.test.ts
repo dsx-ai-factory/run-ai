@@ -2,17 +2,19 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
+import type { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
+import type { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { mount, flushPromises } from "@vue/test-utils";
 import { Quasar } from "quasar";
 import { describe, expect, it, vi } from "vitest";
 import { createTestingPinia } from "@pinia/testing";
 import { requestToLeave } from "@/services/infra/router.service/router.service";
-import Settings from "./node-pool-scheduling-settings.vue";
-import Table from "./node-pool-department-table.vue";
+import { NodePoolSchedulingSettings as Settings } from "@/components/node-pools/node-pool-scheduling-settings";
+import { NodePoolDepartmentTable as Table } from "@/components/node-pools/node-pool-department-table";
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
 import { RunaiSegmentedButton } from "@/components/common/runai-segmented-button";
 import NodePoolSchedulingStep from "./node-pool-scheduling-step.vue";
-import NewDepartment from "./node-pool-new-department-dialog.vue";
+import { NodePoolNewDepartmentDialog as NewDepartment } from "@/components/node-pools/node-pool-new-department-dialog";
 import RunaiWizardLayout from "@/components/common/runai-wizard-layout/runai-wizard-layout.vue";
 import NodePoolWizardSummary from "../node-pool-wizard-summary/node-pool-wizard-summary.vue";
 import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
@@ -20,11 +22,17 @@ const { createNodePoolDraft } = nodePoolUtil;
 import type { Nodepool } from "@/swagger-models/cluster-service-client";
 
 const saveMocks = vi.hoisted(() => ({ patchPool: vi.fn(), patchDepartments: vi.fn() }));
-vi.mock("./node-pool-scheduling.service", async (original) => ({
-  ...(await original<object>()),
-  patchSchedulingPool: saveMocks.patchPool,
-  patchSchedulingDepartments: saveMocks.patchDepartments,
-}));
+vi.mock("@/services/control-plane/cluster.service/cluster.service", async (original) => {
+  const actual = await original<{ clusterService: typeof clusterService }>();
+  return { ...actual, clusterService: { ...actual.clusterService, patchNodepool: saveMocks.patchPool } };
+});
+vi.mock("@/services/control-plane/org-unit.service/org-unit.service", async (original) => {
+  const actual = await original<{ orgUnitService: typeof orgUnitService }>();
+  return {
+    ...actual,
+    orgUnitService: { ...actual.orgUnitService, batchPatchDepartmentNodePoolResources: saveMocks.patchDepartments },
+  };
+});
 
 const pool = {
   ...createNodePoolDraft("cluster"),
@@ -458,12 +466,18 @@ describe("scheduling step foundation", () => {
 
   it("preserves applied edits when changing mode without a discard dialog", async () => {
     const wrapper = render();
+    const tableUid = wrapper.findComponent(Table).vm.$.uid;
     wrapper.findComponent(Table).vm.$emit("edit", { id: "a", weight: 5 });
     await wrapper.vm.$nextTick();
     await wrapper.get('[aid="mode-ranked"]').trigger("click");
     expect(wrapper.findComponent(RunaiBaseDialog).exists()).toBe(false);
     expect(wrapper.findComponent(Table).props("draft").departments.a.weight).toBe(5);
     expect(wrapper.get('[aid="mode-ranked"]').attributes("aria-checked")).toBe("true");
+    for (const aid of ["mode-guaranteed", "mode-proportional", "mode-ranked"]) {
+      await wrapper.get(`[aid="${aid}"]`).trigger("click");
+      expect(wrapper.findComponent(Table).vm.$.uid).toBe(tableUid);
+      expect(wrapper.findComponent(Table).props("draft").departments.a.weight).toBe(5);
+    }
     wrapper.unmount();
   });
   it("shows permission denial instead of an empty department table", async () => {

@@ -18,7 +18,7 @@ import type { Nodepool } from "@/swagger-models/cluster-service-client";
 vi.mock("@/services/control-plane/cluster.service/cluster.service", () => ({
   clusterService: { getNodepool: vi.fn() },
 }));
-vi.mock("@/components/node-pools/node-pool-scheduling-step/node-pool-scheduling.service", () => ({
+vi.mock("@/composables/node-pool/node-pool-scheduling-data.util", () => ({
   loadSchedulingResources: vi.fn().mockResolvedValue({ nodes: 0, gpus: 0 }),
 }));
 const pool = { ...nodePoolUtil.createNodePoolDraft("cluster"), id: "one", name: "Training" } as Nodepool;

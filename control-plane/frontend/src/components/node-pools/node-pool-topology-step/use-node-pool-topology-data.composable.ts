@@ -7,7 +7,7 @@ import { clusterService } from "@/services/control-plane/cluster.service/cluster
 import type { Nodepool } from "@/swagger-models/cluster-service-client";
 import type { INodePoolSummaryResources } from "@/models/node-pool.model";
 import { extractErrorMessages } from "@/utils/error-alert.util";
-import { loadSchedulingResources } from "../node-pool-scheduling-step/node-pool-scheduling.service";
+import { loadSchedulingResources } from "@/composables/node-pool/node-pool-scheduling-data.util";
 
 export function useNodePoolTopologyData(poolId: Ref<string>) {
   const pool = ref<Nodepool>();
