@@ -5,6 +5,7 @@ All URIs are relative to *http://localhost:8080*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**BatchPatchProjectNodePoolResources**](ProjectsAPI.md#BatchPatchProjectNodePoolResources) | **Post** /api/v1/org-unit/projects/node-pool-resources/batch-patch | Patch multiple projects node pool resources in batch.
+[**CountInternalProjects**](ProjectsAPI.md#CountInternalProjects) | **Get** /internal/org-unit/projects/count | Count internal projects
 [**CountProjectNodePoolResources**](ProjectsAPI.md#CountProjectNodePoolResources) | **Get** /api/v1/org-unit/projects/node-pool-resources/count | Count projects node pool resources
 [**CountProjects**](ProjectsAPI.md#CountProjects) | **Get** /api/v1/org-unit/projects/count | Count projects
 [**CreateProject**](ProjectsAPI.md#CreateProject) | **Post** /api/v1/org-unit/projects | Create project
@@ -88,6 +89,74 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## CountInternalProjects
+
+> CountResponse CountInternalProjects(ctx).FilterBy(filterBy).Search(search).Execute()
+
+Count internal projects
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
+)
+
+func main() {
+	filterBy := []string{"Inner_example"} // []string | Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=. (optional)
+	search := "test project" // string | Filter results by a free text search. (optional)
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.ProjectsAPI.CountInternalProjects(context.Background()).FilterBy(filterBy).Search(search).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `ProjectsAPI.CountInternalProjects``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `CountInternalProjects`: CountResponse
+	fmt.Fprintf(os.Stdout, "Response from `ProjectsAPI.CountInternalProjects`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiCountInternalProjectsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **filterBy** | **[]string** | Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. | 
+ **search** | **string** | Filter results by a free text search. | 
+
+### Return type
+
+[**CountResponse**](CountResponse.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
 - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
