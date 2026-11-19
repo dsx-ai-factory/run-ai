@@ -19,7 +19,7 @@ Name | Type | Description | Notes
 **CreatedBy** | **string** | Identifier of the user who created the access rule. | 
 **SubjectType** | [**SubjectTypeExtended**](SubjectTypeExtended.md) |  | 
 **PredefinedRole** | Pointer to [**NullableAccessRuleSyncAllOfPredefinedRole**](AccessRuleSyncAllOfPredefinedRole.md) |  | [optional] 
-**CustomRole** | Pointer to **bool** | Indicates if the access rule&#39;s role is a custom role with no predefined role for cluster permissions. Such a role has no ClusterRole in the cluster. | [optional] [default to false]
+**CustomRole** | Pointer to **bool** | Indicates if the access rule&#39;s role is a custom role with no predefined role for cluster permissions. | [optional] [default to false]
 **IsDeleting** | Pointer to **bool** | Indicates if the access rule is in &#39;Deleting&#39; phase and should be deleted from the cluster | [optional] [default to false]
 
 ## Methods

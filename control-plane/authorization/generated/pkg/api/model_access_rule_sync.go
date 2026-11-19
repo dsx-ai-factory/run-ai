@@ -113,7 +113,7 @@ type AccessRuleSync struct {
 	PredefinedRole *AccessRuleSyncAllOfPredefinedRole `json:"predefinedRole,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Indicates if the access rule's role is a custom role with no predefined role for cluster permissions. Such a role has no ClusterRole in the cluster.
+	// Indicates if the access rule's role is a custom role with no predefined role for cluster permissions.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//CustomRole bool `json:"customRole,omitempty"`
 	CustomRole bool `json:"customRole,omitempty" gorm:"not null;"`

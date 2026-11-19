@@ -4255,8 +4255,7 @@ components:
           customRole:
             default: false
             description: Indicates if the access rule's role is a custom role with
-              no predefined role for cluster permissions. Such a role has no ClusterRole
-              in the cluster.
+              no predefined role for cluster permissions.
             example: false
             type: boolean
           isDeleting:

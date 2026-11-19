@@ -52,7 +52,7 @@ type AccessRuleSync struct {
 	CreatedBy      string                                    `json:"createdBy"`
 	SubjectType    SubjectTypeExtended                       `json:"subjectType"`
 	PredefinedRole NullableAccessRuleSyncAllOfPredefinedRole `json:"predefinedRole,omitempty"`
-	// Indicates if the access rule's role is a custom role with no predefined role for cluster permissions. Such a role has no ClusterRole in the cluster.
+	// Indicates if the access rule's role is a custom role with no predefined role for cluster permissions.
 	CustomRole *bool `json:"customRole,omitempty"`
 	// Indicates if the access rule is in 'Deleting' phase and should be deleted from the cluster
 	IsDeleting *bool `json:"isDeleting,omitempty"`
