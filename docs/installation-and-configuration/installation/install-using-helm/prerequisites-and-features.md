@@ -231,7 +231,7 @@ NVIDIA Run:ai supports distributed training - training AI models across multiple
 *   To install the Kubeflow Training Operator for TensorFlow, PyTorch, XGBoost and JAX frameworks, run the following command:
 
     ```bash
-    kubectl apply --server-side -k "github.com/kubeflow/training-operator.git/manifests/overlays/standalone?ref=v1.9.2"
+    kubectl apply --server-side -k "github.com/kubeflow/training-operator.git/manifests/overlays/standalone?ref=v1.9.4"
     ```
 *   To install the MPI Operator for MPI v2, run the following command:
 

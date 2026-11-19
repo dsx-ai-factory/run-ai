@@ -169,12 +169,12 @@ To enable NVIDIA Run:ai capabilities such as Distributed Training and Inference,
 
 NVIDIA Run:ai supports distributed training - training AI models across multiple nodes - using the [Kubeflow Training Operator](https://www.kubeflow.org/docs/components/training/installation/) for [TensorFlow](https://www.tensorflow.org/), [PyTorch](https://pytorch.org/), [XGBoost](https://xgboost.readthedocs.io/), and [JAX](https://docs.jax.dev/en/latest/index.html) workloads, and the [MPI Operator](https://github.com/kubeflow/mpi-operator) for [MPI v2](https://docs.open-mpi.org/)-based workloads. Both are required for compatibility with advanced workload capabilities such as stopping a workload and scheduling rules.
 
-It is recommended to use **Kubeflow Training Operator v1.9.2**, and **MPI Operator v0.6.0 or later**.
+It is recommended to use **Kubeflow Training Operator v1.9.4**, and **MPI Operator v0.6.0 or later**.
 
 *   To install the Kubeflow Training Operator for TensorFlow, PyTorch, XGBoost and JAX frameworks, run the following command:
 
     ```bash
-    kubectl apply --server-side -k "github.com/kubeflow/training-operator.git/manifests/overlays/standalone?ref=v1.9.2"
+    kubectl apply --server-side -k "github.com/kubeflow/training-operator.git/manifests/overlays/standalone?ref=v1.9.4"
     ```
 *   To install the MPI Operator for MPI v2, run the following command:
 
