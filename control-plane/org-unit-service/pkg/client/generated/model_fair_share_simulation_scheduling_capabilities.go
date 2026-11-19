@@ -22,7 +22,7 @@ import (
 // checks if the FairShareSimulationSchedulingCapabilities type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &FairShareSimulationSchedulingCapabilities{}
 
-// FairShareSimulationSchedulingCapabilities The node pool's scheduling capabilities as set in the form, saved or not.
+// FairShareSimulationSchedulingCapabilities The node pool's scheduling capabilities to simulate, saved or not.
 type FairShareSimulationSchedulingCapabilities struct {
 	Quota             bool `json:"quota"`
 	Ranks             bool `json:"ranks"`

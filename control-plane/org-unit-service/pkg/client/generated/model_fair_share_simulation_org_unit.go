@@ -22,13 +22,13 @@ import (
 // checks if the FairShareSimulationOrgUnit type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &FairShareSimulationOrgUnit{}
 
-// FairShareSimulationOrgUnit A requested org unit with its unsaved changes. Each field replaces the stored value on its own; omitted fields keep it. `demand` is the GPUs the org unit asks for (the dragged slider), capped by its limit; without it, half the node pool's capacity.
+// FairShareSimulationOrgUnit A requested org unit with its unsaved changes. Each field replaces the stored value on its own; omitted fields keep it. `demand` is the GPUs the org unit asks for, capped by its limit; without it, half the node pool's capacity.
 type FairShareSimulationOrgUnit struct {
 	Id string `json:"id"`
 	// An unsaved rank. Only while ranks is on. Omitted or null keeps the stored rank.
 	Rank NullableFairShareSimulationRank        `json:"rank,omitempty"`
 	Gpu  NullableFairShareSimulationGpuSettings `json:"gpu,omitempty"`
-	// The dragged slider, capped by the limit. Omitted or null asks for half the capacity.
+	// The GPUs the org unit asks for, capped by its limit. Omitted or null asks for half the capacity.
 	Demand NullableFairShareSimulationResources `json:"demand,omitempty"`
 }
 

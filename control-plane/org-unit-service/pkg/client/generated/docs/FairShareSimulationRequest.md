@@ -7,7 +7,7 @@ Name | Type | Description | Notes
 **NodePool** | [**NullableFairShareSimulationNodePool**](FairShareSimulationNodePool.md) | Required; null is rejected. | 
 **OrgUnitType** | **string** | The type of the requested org units. One type per request. | 
 **Parent** | Pointer to [**NullableFairShareSimulationParent**](FairShareSimulationParent.md) | Required for projects; not allowed for departments. | [optional] 
-**OrgUnits** | [**[]FairShareSimulationOrgUnit**](FairShareSimulationOrgUnit.md) | The org units to return, with their unsaved changes. Send the rows the screen shows and every edited row: an edit that isn&#39;t sent is lost.  | 
+**OrgUnits** | [**[]FairShareSimulationOrgUnit**](FairShareSimulationOrgUnit.md) | The org units to return, with their unsaved changes. Every org unit with an unsaved change must be sent: a change that isn&#39;t sent isn&#39;t simulated.  | 
 
 ## Methods
 

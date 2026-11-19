@@ -1,5 +1,5 @@
 type: object
-description: The node pool as it is in the form.
+description: The node pool to simulate, saved or not.
 required:
   - capacity
   - schedulingCapabilities

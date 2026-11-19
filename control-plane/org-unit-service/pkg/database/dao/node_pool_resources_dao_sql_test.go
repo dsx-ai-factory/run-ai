@@ -8,10 +8,12 @@ package dao
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/database/models"
 	dbtesting "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/testing"
 	"k8s.io/utils/ptr"
@@ -29,6 +31,8 @@ const (
 	sqlSelectDeptNodePoolPerPair   = `SELECT * FROM department_node_pool_resources_view WHERE tenant_id = ? AND org_unit_id = ? AND node_pool_id = ? ORDER BY department_node_pool_resources_view.id LIMIT ?`
 	sqlSelectProjNodePoolPerPair   = `SELECT * FROM project_node_pool_resources_view WHERE tenant_id = ? AND org_unit_id = ? AND node_pool_id = ? ORDER BY project_node_pool_resources_view.id LIMIT ?`
 	sqlPatchResources              = `UPDATE resources SET gpu_deserved=? WHERE id = ? AND node_pool_id = ?`
+	sqlSelectDeptSchedulingInputs  = `SELECT org_unit_id, rank, gpu_deserved, gpu_limit, gpu_over_quota_weight, created_at, %s AS visible FROM department_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ?`
+	sqlSelectProjSchedulingInputs  = `SELECT org_unit_id, rank, gpu_deserved, gpu_limit, gpu_over_quota_weight, created_at, %s AS visible FROM project_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ? AND parent_id = ?`
 	sqlPatchDepartmentMetadata     = `UPDATE department SET updated_at=?,updated_by=? WHERE tenant_id = ? AND cluster_id = ? AND id = ?`
 )
 
@@ -189,6 +193,51 @@ var _ = Describe("Node pool resources DAO SQL", func() {
 				map[string]interface{}{"gpu_deserved": float64(2)},
 			)
 			Expect(err).To(MatchError("update failed"))
+		})
+	})
+	Describe("Get*SchedulingInputs", func() {
+		It("marks every department visible when the scopes cover the tenant", func() {
+			mocker := setupSQLMock()
+			mocker.ExpectQuery(fmt.Sprintf(sqlSelectDeptSchedulingInputs, "true"),
+				testTenantID, testNodePoolID).
+				Returns([]NodePoolSchedulingInputs{{OrgUnitId: "11", Visible: true}})
+
+			got, err := GetDepartmentSchedulingInputs(context.Background(), testTenantID, testNodePoolID,
+				&openapi.PermittedScopes{Tenants: []string{testTenantID}})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(got).To(HaveLen(1))
+		})
+		It("marks every department visible for system scopes and when no scopes are given", func() {
+			for _, scopes := range []*openapi.PermittedScopes{{System: ptr.To(true)}, nil} {
+				mocker := setupSQLMock()
+				mocker.ExpectQuery(fmt.Sprintf(sqlSelectDeptSchedulingInputs, "true"),
+					testTenantID, testNodePoolID).
+					Returns([]NodePoolSchedulingInputs{{OrgUnitId: "11", Visible: true}})
+
+				_, err := GetDepartmentSchedulingInputs(context.Background(), testTenantID, testNodePoolID, scopes)
+				Expect(err).NotTo(HaveOccurred())
+			}
+		})
+		It("computes department visibility from cluster and department scopes", func() {
+			mocker := setupSQLMock()
+			mocker.ExpectQuery(fmt.Sprintf(sqlSelectDeptSchedulingInputs, "(false OR cluster_id IN ( 'c1') OR org_unit_id IN ( '11'))"),
+				testTenantID, testNodePoolID).
+				Returns([]NodePoolSchedulingInputs{{OrgUnitId: "11", Visible: true}})
+
+			_, err := GetDepartmentSchedulingInputs(context.Background(), testTenantID, testNodePoolID,
+				&openapi.PermittedScopes{Clusters: []string{"c1"}, Departments: []string{"11"}})
+			Expect(err).NotTo(HaveOccurred())
+		})
+		It("computes project visibility from the scopes in the same query", func() {
+			mocker := setupSQLMock()
+			mocker.ExpectQuery(fmt.Sprintf(sqlSelectProjSchedulingInputs, "(false OR org_unit_id IN ( '21'))"),
+				testTenantID, testNodePoolID, int64(11)).
+				Returns([]NodePoolSchedulingInputs{{OrgUnitId: "21", Visible: true}})
+
+			got, err := GetProjectSchedulingInputs(context.Background(), testTenantID, testNodePoolID, 11,
+				&openapi.PermittedScopes{Projects: []string{"21"}})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(got).To(HaveLen(1))
 		})
 	})
 })
