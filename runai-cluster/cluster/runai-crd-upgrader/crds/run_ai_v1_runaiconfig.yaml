@@ -329,6 +329,11 @@ spec:
                                   resource.
                                 minLength: 1
                                 type: string
+                              sectionName:
+                                description: |-
+                                  SectionName is the name of the Gateway listener to attach the route to.
+                                  When empty, the route attaches to every compatible listener of the Gateway.
+                                type: string
                             type: object
                             x-kubernetes-validations:
                             - message: both name and namespace are required when gatewayAPI
@@ -336,6 +341,9 @@ spec:
                               rule: '!has(self.name) && !has(self.__namespace__) ||
                                 (has(self.name) && self.name != '''' && has(self.__namespace__)
                                 && self.__namespace__ != '''')'
+                            - message: sectionName requires name and namespace in
+                                a gatewayAPI override
+                              rule: '!has(self.sectionName) || has(self.name)'
                           mgmtPrometheusIngress:
                             description: Ingress defines configuration of the researcher-service
                               ingress
@@ -1920,6 +1928,11 @@ spec:
                         description: Namespace is the namespace of the Gateway resource.
                         minLength: 1
                         type: string
+                      sectionName:
+                        description: |-
+                          SectionName is the name of the Gateway listener to attach the route to.
+                          When empty, the route attaches to every compatible listener of the Gateway.
+                        type: string
                     type: object
                     x-kubernetes-validations:
                     - message: both name and namespace are required when gatewayAPI
@@ -1927,6 +1940,9 @@ spec:
                       rule: '!has(self.name) && !has(self.__namespace__) || (has(self.name)
                         && self.name != '''' && has(self.__namespace__) && self.__namespace__
                         != '''')'
+                    - message: sectionName requires name and namespace in a gatewayAPI
+                        override
+                      rule: '!has(self.sectionName) || has(self.name)'
                   idleTimeout:
                     description: IdleTimeout specifies the time in seconds for router
                       idle timeout
@@ -3639,6 +3655,11 @@ spec:
                         type: string
                       namespace:
                         description: Namespace is the namespace of the Gateway resource.
+                        type: string
+                      sectionName:
+                        description: |-
+                          SectionName is the name of the Gateway listener to attach routes to.
+                          When empty, routes attach to every compatible listener of the Gateway.
                         type: string
                     type: object
                     x-kubernetes-validations:
@@ -21881,6 +21902,11 @@ spec:
                         description: Namespace is the namespace of the Gateway resource.
                         minLength: 1
                         type: string
+                      sectionName:
+                        description: |-
+                          SectionName is the name of the Gateway listener to attach the route to.
+                          When empty, the route attaches to every compatible listener of the Gateway.
+                        type: string
                     type: object
                     x-kubernetes-validations:
                     - message: both name and namespace are required when gatewayAPI
@@ -21888,6 +21914,9 @@ spec:
                       rule: '!has(self.name) && !has(self.__namespace__) || (has(self.name)
                         && self.name != '''' && has(self.__namespace__) && self.__namespace__
                         != '''')'
+                    - message: sectionName requires name and namespace in a gatewayAPI
+                        override
+                      rule: '!has(self.sectionName) || has(self.name)'
                   image:
                     description: Image is the configuration of the researcher-service
                       image

@@ -16,17 +16,21 @@ import (
 )
 
 // BuildParentRef creates a Gateway API ParentReference from the GatewayAPI config.
-// If override is non-nil and has a non-empty Name, it takes precedence over the global config.
+// If override is non-nil and has a non-empty Name, it takes precedence over the global config,
+// including its SectionName. A non-empty SectionName restricts attachment to that listener.
 func BuildParentRef(gatewayAPI *global.GatewayAPI, override *common.GatewayRef) gwv1.ParentReference {
 	name := ""
 	namespace := ""
+	sectionName := ""
 
 	if override != nil && override.Name != "" {
 		name = override.Name
 		namespace = override.Namespace
+		sectionName = override.SectionName
 	} else if gatewayAPI != nil {
 		name = gatewayAPI.Name
 		namespace = gatewayAPI.Namespace
+		sectionName = gatewayAPI.SectionName
 	}
 
 	if name == "" {
@@ -39,6 +43,10 @@ func BuildParentRef(gatewayAPI *global.GatewayAPI, override *common.GatewayRef) 
 	if namespace != "" {
 		ns := gwv1.Namespace(namespace)
 		ref.Namespace = &ns
+	}
+	if sectionName != "" {
+		section := gwv1.SectionName(sectionName)
+		ref.SectionName = &section
 	}
 	return ref
 }

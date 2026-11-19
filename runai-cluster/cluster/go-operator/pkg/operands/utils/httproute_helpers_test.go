@@ -141,6 +141,56 @@ var _ = Describe("HTTPRoute helpers", func() {
 			Expect(ref.Namespace).NotTo(BeNil())
 			Expect(*ref.Namespace).To(Equal(gwv1.Namespace("global-ns")))
 		})
+
+		It("should leave SectionName unset when not configured", func() {
+			gw := &global.GatewayAPI{
+				Name:      "global-gateway",
+				Namespace: "global-ns",
+			}
+			ref := BuildParentRef(gw, nil)
+			Expect(ref.SectionName).To(BeNil())
+		})
+
+		It("should set SectionName from the global config", func() {
+			gw := &global.GatewayAPI{
+				Name:        "global-gateway",
+				Namespace:   "global-ns",
+				SectionName: "https",
+			}
+			ref := BuildParentRef(gw, nil)
+			Expect(ref.SectionName).NotTo(BeNil())
+			Expect(*ref.SectionName).To(Equal(gwv1.SectionName("https")))
+		})
+
+		It("should use override SectionName when override is provided", func() {
+			gw := &global.GatewayAPI{
+				Name:        "global-gateway",
+				Namespace:   "global-ns",
+				SectionName: "http",
+			}
+			override := &common.GatewayRef{
+				Name:        "override-gateway",
+				Namespace:   "override-ns",
+				SectionName: "https",
+			}
+			ref := BuildParentRef(gw, override)
+			Expect(ref.SectionName).NotTo(BeNil())
+			Expect(*ref.SectionName).To(Equal(gwv1.SectionName("https")))
+		})
+
+		It("should not inherit global SectionName when override omits it", func() {
+			gw := &global.GatewayAPI{
+				Name:        "global-gateway",
+				Namespace:   "global-ns",
+				SectionName: "https",
+			}
+			override := &common.GatewayRef{
+				Name:      "override-gateway",
+				Namespace: "override-ns",
+			}
+			ref := BuildParentRef(gw, override)
+			Expect(ref.SectionName).To(BeNil())
+		})
 	})
 
 	Context("HTTPRouteHostname", func() {
