@@ -4798,6 +4798,7 @@ Copyright Alex Saskevich - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   k8s.io/kube-openapi/pkg/internal/third_party/govalidator v0.0.0-20260317180543-43fb72c5454a
+  k8s.io/kube-openapi/pkg/internal/third_party/govalidator v0.0.0-20260427204847-8949caaa1199
   k8s.io/kube-openapi/pkg/internal/third_party/govalidator v0.0.0-20260519202549-bbf5c5577288
 
 The MIT License (MIT)
@@ -5297,7 +5298,7 @@ SOFTWARE.
 Copyright Anton Medvedev - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/expr-lang/expr v1.17.7
+  github.com/expr-lang/expr v1.17.8
 
 MIT License
 
@@ -11173,7 +11174,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Copyright Google Inc - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
-  google.golang.org/api v0.278.0
+  google.golang.org/api v0.281.0
   google.golang.org/api v0.312.0
   google.golang.org/api/support/bundler v0.278.0
 
@@ -12288,7 +12289,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Copyright Joshua Tacoma - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
-  google.golang.org/api/internal/third_party/uritemplates v0.278.0
+  google.golang.org/api/internal/third_party/uritemplates v0.281.0
   google.golang.org/api/internal/third_party/uritemplates v0.312.0
 
 Copyright (c) 2013 Joshua Tacoma. All rights reserved.
@@ -13951,9 +13952,9 @@ Components:
 Copyright Microsoft Corporation - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/Azure/azure-sdk-for-go/sdk/azcore v1.20.0
+  github.com/Azure/azure-sdk-for-go/sdk/azcore v1.21.1
   github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.13.1
-  github.com/Azure/azure-sdk-for-go/sdk/internal v1.11.2
+  github.com/Azure/azure-sdk-for-go/sdk/internal v1.12.0
 
 MIT License
 
@@ -14038,7 +14039,7 @@ Copyright Microsoft Corporation - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/Azure/azure-pipeline-go/pipeline v0.2.3
-  github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.6.3
+  github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.7.0
   github.com/Azure/azure-storage-blob-go/azblob v0.14.0
 
     MIT License
@@ -14116,7 +14117,7 @@ Components:
   @types/sortablejs 1.15.9
   @types/trusted-types 2.0.7
   @types/web-bluetooth 0.0.20
-  github.com/AzureAD/microsoft-authentication-library-for-go/apps v1.6.0
+  github.com/AzureAD/microsoft-authentication-library-for-go/apps v1.7.2
 
     MIT License
 
@@ -17016,7 +17017,6 @@ Copyright Segment - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/segmentio/kafka-go v0.4.48
-  github.com/segmentio/kafka-go v0.4.49
   github.com/segmentio/kafka-go v0.4.51
 
 MIT License
@@ -17712,19 +17712,18 @@ Components:
   cloud.google.com/go/compute/metadata v0.10.0
   cloud.google.com/go/compute/metadata v0.9.0
   cloud.google.com/go/iam v1.15.1
-  cloud.google.com/go/iam v1.5.3
-  cloud.google.com/go/internal v0.121.6
+  cloud.google.com/go/iam v1.7.0
   cloud.google.com/go/internal v0.123.0
-  cloud.google.com/go/monitoring v1.24.3
+  cloud.google.com/go/monitoring v1.29.0
   cloud.google.com/go/monitoring v1.32.1
-  cloud.google.com/go/storage v1.56.0
+  cloud.google.com/go/storage v1.62.2
   cloud.google.com/go/storage v1.71.0
   dompurify 3.4.16
   echarts 6.1.0
   github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.34.0
-  github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.53.0
+  github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.55.0
   github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.62.0
-  github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.53.0
+  github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.55.0
   github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.62.0
   github.com/Masterminds/goutils v1.1.1
   github.com/NVIDIA/k8s-dra-driver-gpu v0.0.0-20260329235847-c657396bd619
@@ -17795,7 +17794,7 @@ Components:
   github.com/google/go-containerregistry/pkg/name v0.20.5
   github.com/google/s2a-go v0.1.11
   github.com/google/s2a-go v0.1.9
-  github.com/googleapis/enterprise-certificate-proxy/client v0.3.15
+  github.com/googleapis/enterprise-certificate-proxy/client v0.3.16
   github.com/googleapis/enterprise-certificate-proxy/client v0.3.25
   github.com/googleapis/google-cloud-go-testing/storage/stiface v0.0.0-20210719221736-1c9a4c676720
   github.com/jmespath/go-jmespath v0.4.1-0.20220621161143-b0104c826a24
@@ -17847,6 +17846,7 @@ Components:
   k8s.io/api v0.37.1
   k8s.io/api v0.37.2
   k8s.io/apiextensions-apiserver/pkg v0.35.4
+  k8s.io/apiextensions-apiserver/pkg v0.36.0
   k8s.io/apiextensions-apiserver/pkg v0.36.2
   k8s.io/apiextensions-apiserver/pkg v0.37.1
   k8s.io/apiextensions-apiserver/pkg v0.37.2
@@ -17863,6 +17863,7 @@ Components:
   k8s.io/apimachinery/pkg v0.37.2
   k8s.io/apimachinery/pkg/util v0.32.0-alpha.3
   k8s.io/apiserver/pkg v0.35.4
+  k8s.io/apiserver/pkg v0.36.0
   k8s.io/apiserver/pkg v0.36.2
   k8s.io/apiserver/pkg/endpoints/deprecation v0.37.1
   k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1 v1.5.1
@@ -17875,8 +17876,9 @@ Components:
   k8s.io/client-go v0.37.2
   k8s.io/client-go v1.5.2
   k8s.io/client-go/util/workqueue v0.32.0-alpha.3
-  k8s.io/code-generator v0.35.4
+  k8s.io/code-generator v0.36.0
   k8s.io/component-base v0.35.4
+  k8s.io/component-base v0.36.0
   k8s.io/component-base v0.36.2
   k8s.io/component-base/cli/flag v0.37.2
   k8s.io/component-base/version v0.37.1
@@ -17890,17 +17892,21 @@ Components:
   k8s.io/kube-aggregator/pkg/apis/apiregistration v0.35.4
   k8s.io/kube-openapi/pkg v0.0.0-20250910181357-589584f1c912
   k8s.io/kube-openapi/pkg v0.0.0-20260317180543-43fb72c5454a
+  k8s.io/kube-openapi/pkg v0.0.0-20260427204847-8949caaa1199
   k8s.io/kube-openapi/pkg v0.0.0-20260501160325-927ab1f70cd6
   k8s.io/kube-openapi/pkg v0.0.0-20260519202549-bbf5c5577288
   k8s.io/kube-openapi/pkg v0.0.0-20260721132016-d427ff9ee9ad
   k8s.io/kube-openapi/pkg/validation/errors v0.0.0-20260317180543-43fb72c5454a
+  k8s.io/kube-openapi/pkg/validation/errors v0.0.0-20260427204847-8949caaa1199
   k8s.io/kube-openapi/pkg/validation/errors v0.0.0-20260519202549-bbf5c5577288
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20250910181357-589584f1c912
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260317180543-43fb72c5454a
+  k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260427204847-8949caaa1199
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260501160325-927ab1f70cd6
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260519202549-bbf5c5577288
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260721132016-d427ff9ee9ad
   k8s.io/kube-openapi/pkg/validation/strfmt v0.0.0-20260317180543-43fb72c5454a
+  k8s.io/kube-openapi/pkg/validation/strfmt v0.0.0-20260427204847-8949caaa1199
   k8s.io/kube-openapi/pkg/validation/strfmt v0.0.0-20260519202549-bbf5c5577288
   k8s.io/kube-scheduler v0.35.4
   k8s.io/kube-scheduler v0.36.2
@@ -20951,6 +20957,7 @@ License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20250910181357-589584f1c912
   k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20260317180543-43fb72c5454a
+  k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20260427204847-8949caaa1199
   k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20260501160325-927ab1f70cd6
   k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20260519202549-bbf5c5577288
   k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20260721132016-d427ff9ee9ad
@@ -22075,7 +22082,7 @@ Components:
 Copyright The KEDA Authors - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
-  github.com/kedacore/keda/v2 v2.18.3
+  github.com/kedacore/keda/v2 v2.20.0
 
 
                                  Apache License
