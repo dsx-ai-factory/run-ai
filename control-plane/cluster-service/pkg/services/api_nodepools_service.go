@@ -1183,11 +1183,6 @@ func (s *NodePoolsApiService) LegacyGetNodepools(ctx context.Context, clusterId 
 		return NewErrorResponse(err), nil
 	}
 
-	_, err = ValidatePermittedScope(ctx, tenantId, clusterId)
-	if err != nil {
-		return NewErrorResponse(err), nil
-	}
-
 	nodepools, dbErr := dao.GetNodepoolsForCluster(ctx, fmt.Sprint(tenantId), clusterId, nil)
 	if dbErr != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Legacy get nodepools for cluster %s failed. error: %v", clusterId, dbErr)

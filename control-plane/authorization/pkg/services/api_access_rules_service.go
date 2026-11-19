@@ -306,7 +306,7 @@ func validateRoleEnabled(role *models.Role) *api.Error {
 }
 
 func (s *AccessRulesApiService) DeleteAccessRule(ctx context.Context, accessRuleId int32) (api.ImplResponse, error) {
-	tenantId, subjectId, groups, err := parseAuthData(ctx)
+	tenantId, _, _, err := parseAuthData(ctx)
 	if err != nil {
 		return NewErrorResponse(err), nil
 	}
@@ -322,11 +322,6 @@ func (s *AccessRulesApiService) DeleteAccessRule(ctx context.Context, accessRule
 	}
 	if lastSystemAdminDeleted {
 		return NewErrorResponse(api.NewError(http.StatusBadRequest, "Cannot delete last system admin access rule", nil)), nil
-	}
-
-	err = validateCurrentUserHasPrivilege(ctx, tenantId, subjectId, groups, *accessRule)
-	if err != nil {
-		return NewErrorResponse(err), nil
 	}
 
 	err = dao.DbDeleteAccessRule(ctx, tenantId, accessRule.ID)

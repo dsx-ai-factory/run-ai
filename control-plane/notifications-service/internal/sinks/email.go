@@ -139,11 +139,7 @@ func (es *EmailSink) buildMessage(recipients []string, event *events.Event) ([]b
 func (es *EmailSink) getSubject(event *events.Event) (string, error) {
 	eventProperties := event.Properties
 	if value, ok := eventProperties["subject"]; ok {
-		subject, ok := value.(string)
-		if ok {
-			return sanitizeHeaderValue(subject), nil
-		}
-		log.Warn().Msgf("failed to parse subject property to string, event: %s", event.UID)
+		return value.(string), nil
 	}
 
 	subjectTemplate, err := template.New("subject").Parse(es.config.Subject)

@@ -605,7 +605,7 @@ export default defineComponent({
       // if the cluster is 2.9, URLs are arriving as a single string seperated by a comma, we need to take the first
       const urlString = selectedWorkload?.urls?.[0];
       const firstUrl = urlString?.split(", ")[0];
-      !!firstUrl && openNewWindow(firstUrl);
+      !!firstUrl && window.open(firstUrl, "_blank");
     },
   },
 });

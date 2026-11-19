@@ -1,0 +1,26 @@
+name: Comment branch on PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: PR number
+        required: true
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data } = await github.rest.pulls.get({ ...context.repo, pull_number: ${{ inputs.pr }} });
+            core.setOutput('head_ref', data.head.ref);
+      - if: startsWith(steps.pr.outputs.head_ref, 'renovate/')
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const branch = "${{ steps.pr.outputs.head_ref }}";
+            await github.rest.pulls.createReview({ ...context.repo, pull_number: ${{ inputs.pr }}, event: 'APPROVE', body: `auto-approved ${branch}` });

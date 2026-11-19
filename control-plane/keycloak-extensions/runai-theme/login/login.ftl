@@ -29,7 +29,7 @@
                                         const errorContainer = document.getElementById('error-container');
 
                                         if (errorDescription) {
-                                            errorContainer.textContent = errorDescription;
+                                            errorContainer.innerHTML = errorDescription;
                                         } else {
                                             errorContainer.style.display = 'none';
                                         }

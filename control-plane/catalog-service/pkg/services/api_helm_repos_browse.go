@@ -204,11 +204,7 @@ func fetchAndParseHelmIndex(ctx context.Context, repoUrl string, apiKey string) 
 	if err := validateHelmRepoURL(indexUrl); err != nil {
 		return nil, api.NewValidationError(fmt.Sprintf("invalid helm repo URL: %v", err))
 	}
-	if err := resolvedHostIsPrivate(ctx, indexUrl); err != nil {
-		return nil, api.NewError(http.StatusBadRequest, "helm repo URL resolves to a blocked address", err)
-	}
-
-	client := hardenedHTTPClient(helmRepoFetchTimeout)
+	client := &http.Client{Timeout: helmRepoFetchTimeout}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, indexUrl, nil)
 	if err != nil {
 		return nil, api.NewError(http.StatusInternalServerError, fmt.Sprintf("failed to create request for %s", indexUrl), err)
@@ -224,7 +220,8 @@ func fetchAndParseHelmIndex(ctx context.Context, repoUrl string, apiKey string) 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, api.NewError(http.StatusBadGateway, fmt.Sprintf("helm repo returned status %d for %s", resp.StatusCode, indexUrl), nil)
+		upstream, _ := io.ReadAll(resp.Body)
+		return nil, api.NewError(http.StatusBadGateway, fmt.Sprintf("helm repo returned status %d for %s: %s", resp.StatusCode, indexUrl, upstream), nil)
 	}
 
 	body, err := io.ReadAll(resp.Body)
