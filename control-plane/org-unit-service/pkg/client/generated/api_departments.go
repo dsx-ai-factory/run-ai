@@ -478,7 +478,7 @@ type ApiCountDepartmentNodePoolResourcesRequest struct {
 	search     *string
 }
 
-// Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit takes a number and the operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;; a missing limit counts as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
+// Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
 func (r ApiCountDepartmentNodePoolResourcesRequest) FilterBy(filterBy []string) ApiCountDepartmentNodePoolResourcesRequest {
 	r.filterBy = &filterBy
 	return r
@@ -1790,7 +1790,7 @@ type ApiGetDepartmentNodePoolResourcesRequest struct {
 	search     *string
 }
 
-// Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit takes a number and the operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;; a missing limit counts as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
+// Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
 func (r ApiGetDepartmentNodePoolResourcesRequest) FilterBy(filterBy []string) ApiGetDepartmentNodePoolResourcesRequest {
 	r.filterBy = &filterBy
 	return r

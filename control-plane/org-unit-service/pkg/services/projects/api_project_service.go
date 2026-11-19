@@ -1095,7 +1095,7 @@ func (s *ProjectApiService) GetProjectNodePoolResources(ctx context.Context, fil
 	if err != nil {
 		return services.HandleError(err, http.StatusBadRequest, "Failed to parse tenant id"), nil
 	}
-	filters, filterErr := models.ParseNodePoolResourcesFilters(models.ProjectNodePoolResources{}.FilterByFieldsToColumn(), filterBy)
+	filters, filterErr := queryapi.NewParser(models.ProjectNodePoolResources{}.FilterByFieldsToColumn()).Filters(filterBy)
 	if filterErr != nil {
 		errResponse := services.HandleError(filterErr, http.StatusBadRequest, fmt.Sprintf("filters %s invalid", filterBy))
 		return errResponse, nil
@@ -1159,7 +1159,7 @@ func (s *ProjectApiService) CountProjectNodePoolResources(ctx context.Context, f
 	if err != nil {
 		return services.HandleError(err, http.StatusBadRequest, "Failed to parse tenant id"), nil
 	}
-	filters, filterErr := models.ParseNodePoolResourcesFilters(models.ProjectNodePoolResources{}.FilterByFieldsToColumn(), filterBy)
+	filters, filterErr := queryapi.NewParser(models.ProjectNodePoolResources{}.FilterByFieldsToColumn()).Filters(filterBy)
 	if filterErr != nil {
 		errResponse := services.HandleError(filterErr, http.StatusBadRequest, fmt.Sprintf("filters %s invalid", filterBy))
 		return errResponse, nil

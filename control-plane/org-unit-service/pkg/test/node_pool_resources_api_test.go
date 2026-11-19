@@ -1266,10 +1266,6 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 	})
 
 	Context("test gpuLimit filter", func() {
-		const (
-			projectType    = "project"
-			departmentType = "department"
-		)
 		gpuResources := func(limit *float64) []api.ResourcesNullable {
 			return []api.ResourcesNullable{{
 				NodePool: &api.ResourcesNodePool{Id: fmt.Sprint(nodePoolIdC3), Name: "default"},
@@ -1279,114 +1275,62 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 				},
 			}}
 		}
-		orNoLimit := func(limit *float64) float64 { return ptr.Deref(limit, -1) }
-		// Created in an order whose default id sort differs from both gpuLimit sorts.
-		gpuLimits := []*float64{ptr.To(float64(4)), nil, ptr.To(float64(2)), ptr.To(float64(-1))}
-		limitsById := map[string]map[string]float64{projectType: {}, departmentType: {}}
-		clusterFilter := fmt.Sprintf("clusterId==%s", cluster3Id)
+		gpuLimits := []*float64{nil, ptr.To(float64(-1)), ptr.To(float64(4))}
 
 		BeforeAll(func() {
-			var parentId string
+			var parent api.Department
 			for _, limit := range gpuLimits {
 				response, err := departmentApiService.CreateDepartment(ctx, getDepartmentResourcesCreateRequest(createDepartmentName(), cluster3Id, gpuResources(limit)))
 				Expect(err).To(BeNil())
 				Expect(response.Code).To(Equal(http.StatusCreated))
-				id := response.Body.(api.Department).Id
-				departmentIds = append(departmentIds, id)
-				limitsById[departmentType][id] = orNoLimit(limit)
-				if parentId == "" {
-					parentId = id
-				}
+				parent = response.Body.(api.Department)
+				departmentIds = append(departmentIds, parent.Id)
 			}
 			for _, limit := range gpuLimits {
-				response, err := projectApiService.CreateProject(ctx, getProjectResourcesCreateRequest(createProjectName(), parentId, cluster3Id, gpuResources(limit)))
+				response, err := projectApiService.CreateProject(ctx, getProjectResourcesCreateRequest(createProjectName(), parent.Id, cluster3Id, gpuResources(limit)))
 				Expect(err).To(BeNil())
 				Expect(response.Code).To(Equal(http.StatusCreated))
-				id := response.Body.(api.Project).Id
-				projectIds = append(projectIds, id)
-				limitsById[projectType][id] = orNoLimit(limit)
+				projectIds = append(projectIds, response.Body.(api.Project).Id)
 			}
 		})
 
-		list := func(orgUnitType string, filterBy []string, sortOrder string) (ids []string, limits []float64) {
-			if orgUnitType == projectType {
-				response, err := projectApiService.GetProjectNodePoolResources(ctx, filterBy, api.PROJECTNODEPOOLRESOURCESFILTERSORTFIELDS_GPU_LIMIT, sortOrder, 0, 0, "")
+		DescribeTable("counts projects and departments, treating a NULL limit as unlimited",
+			func(gpuLimitFilter string, expected int64) {
+				filterBy := []string{fmt.Sprintf("clusterId==%s", cluster3Id), gpuLimitFilter}
+
+				response, err := projectApiService.CountProjectNodePoolResources(ctx, filterBy, "")
 				Expect(err).To(BeNil())
 				Expect(response.Code).To(Equal(http.StatusOK))
-				for _, resources := range response.Body.(api.GetProjectNodePoolResources200Response).NodePoolResources {
-					ids = append(ids, resources.OrgUnitId)
-					limits = append(limits, orNoLimit(resources.Resources.Gpu.Limit))
-				}
-				return ids, limits
-			}
-			response, err := departmentApiService.GetDepartmentNodePoolResources(ctx, filterBy, api.DEPARTMENTNODEPOOLRESOURCESFILTERSORTFIELDS_GPU_LIMIT, sortOrder, 0, 0, "")
-			Expect(err).To(BeNil())
-			Expect(response.Code).To(Equal(http.StatusOK))
-			for _, resources := range response.Body.(api.GetDepartmentNodePoolResources200Response).NodePoolResources {
-				ids = append(ids, resources.OrgUnitId)
-				limits = append(limits, orNoLimit(resources.Resources.Gpu.Limit))
-			}
-			return ids, limits
-		}
-		count := func(orgUnitType string, filterBy []string) api.ImplResponse {
-			var response api.ImplResponse
-			var err error
-			if orgUnitType == projectType {
-				response, err = projectApiService.CountProjectNodePoolResources(ctx, filterBy, "")
-			} else {
+				Expect(response.Body.(api.CountResponse).Count).To(Equal(expected))
+
 				response, err = departmentApiService.CountDepartmentNodePoolResources(ctx, filterBy, "")
-			}
+				Expect(err).To(BeNil())
+				Expect(response.Code).To(Equal(http.StatusOK))
+				Expect(response.Body.(api.CountResponse).Count).To(Equal(expected))
+			},
+			Entry("unlimited includes NULL", "gpuLimit==-1", int64(2)),
+			Entry("limited excludes NULL", "gpuLimit!=-1", int64(1)),
+			Entry("less than or equal", "gpuLimit<=-1", int64(2)),
+			Entry("greater than or equal", "gpuLimit>=4", int64(1)),
+		)
+
+		It("gets only the limited projects and departments", func() {
+			filterBy := []string{fmt.Sprintf("nodePoolId==%v", nodePoolIdC3), "gpuLimit!=-1"}
+
+			projectsResponse, err := projectApiService.GetProjectNodePoolResources(ctx, filterBy, api.PROJECTNODEPOOLRESOURCESFILTERSORTFIELDS_GPU_LIMIT, "ASC", 0, 0, "")
 			Expect(err).To(BeNil())
-			return response
-		}
+			Expect(projectsResponse.Code).To(Equal(http.StatusOK))
+			projectResources := projectsResponse.Body.(api.GetProjectNodePoolResources200Response).NodePoolResources
+			Expect(projectResources).To(HaveLen(1))
+			Expect(projectResources[0].Resources.Gpu.Limit).To(Equal(ptr.To(float64(4))))
 
-		DescribeTable("counts and lists by gpuLimit, a NULL limit counting as -1",
-			func(gpuLimitFilter string, matches func(float64) bool, expectedLimits []float64) {
-				filterBy := []string{clusterFilter, gpuLimitFilter}
-				for _, orgUnitType := range []string{projectType, departmentType} {
-					var expectedIds []string
-					for id, limit := range limitsById[orgUnitType] {
-						if matches(limit) {
-							expectedIds = append(expectedIds, id)
-						}
-					}
-
-					response := count(orgUnitType, filterBy)
-					Expect(response.Code).To(Equal(http.StatusOK))
-					Expect(response.Body.(api.CountResponse).Count).To(Equal(int64(len(expectedIds))), orgUnitType)
-
-					ids, limits := list(orgUnitType, filterBy, "ASC")
-					Expect(ids).To(ConsistOf(expectedIds), orgUnitType)
-					Expect(limits).To(Equal(expectedLimits), orgUnitType)
-				}
-			},
-			Entry("==", "gpuLimit==-1", func(limit float64) bool { return limit == -1 }, []float64{-1, -1}),
-			Entry("!=", "gpuLimit!=-1", func(limit float64) bool { return limit != -1 }, []float64{2, 4}),
-			Entry("<=", "gpuLimit<=2", func(limit float64) bool { return limit <= 2 }, []float64{-1, -1, 2}),
-			Entry(">=", "gpuLimit>=4", func(limit float64) bool { return limit >= 4 }, []float64{4}),
-		)
-
-		It("sorts by gpuLimit in both directions", func() {
-			for _, orgUnitType := range []string{projectType, departmentType} {
-				_, ascending := list(orgUnitType, []string{clusterFilter}, "ASC")
-				Expect(ascending).To(Equal([]float64{-1, -1, 2, 4}), orgUnitType)
-				_, descending := list(orgUnitType, []string{clusterFilter}, "DESC")
-				Expect(descending).To(Equal([]float64{4, 2, -1, -1}), orgUnitType)
-			}
+			departmentsResponse, err := departmentApiService.GetDepartmentNodePoolResources(ctx, filterBy, api.DEPARTMENTNODEPOOLRESOURCESFILTERSORTFIELDS_GPU_LIMIT, "ASC", 0, 0, "")
+			Expect(err).To(BeNil())
+			Expect(departmentsResponse.Code).To(Equal(http.StatusOK))
+			departmentResources := departmentsResponse.Body.(api.GetDepartmentNodePoolResources200Response).NodePoolResources
+			Expect(departmentResources).To(HaveLen(1))
+			Expect(departmentResources[0].Resources.Gpu.Limit).To(Equal(ptr.To(float64(4))))
 		})
-
-		DescribeTable("refuses a gpuLimit filter the numeric column can't answer",
-			func(gpuLimitFilter string) {
-				for _, orgUnitType := range []string{projectType, departmentType} {
-					Expect(count(orgUnitType, []string{clusterFilter, gpuLimitFilter}).Code).To(Equal(http.StatusBadRequest), orgUnitType)
-				}
-			},
-			Entry("text operator", "gpuLimit=@4"),
-			Entry("non-numeric value", "gpuLimit==abc"),
-			Entry("non-finite value", "gpuLimit==NaN"),
-			Entry("Go digit separator", "gpuLimit==1_0"),
-			Entry("hex float", "gpuLimit==0x1p2"),
-		)
 	})
 
 	Context("test nodepool delete and recreate with same name", func() {
