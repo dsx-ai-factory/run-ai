@@ -7,6 +7,7 @@ package models
 
 import (
 	"fmt"
+	"math"
 	"slices"
 	"strconv"
 
@@ -38,7 +39,11 @@ const (
 type numberValidator struct{}
 
 func (numberValidator) Validate(value string) error {
-	if _, err := strconv.ParseFloat(value, 64); err != nil {
+	number, err := strconv.ParseFloat(value, 64)
+	if err != nil {
+		return fmt.Errorf("invalid number %s: %w", value, err)
+	}
+	if math.IsNaN(number) || math.IsInf(number, 0) {
 		return fmt.Errorf("invalid number: %s", value)
 	}
 	return nil

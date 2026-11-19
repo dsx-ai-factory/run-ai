@@ -1383,6 +1383,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 			},
 			Entry("text operator", "gpuLimit=@4"),
 			Entry("non-numeric value", "gpuLimit==abc"),
+			Entry("non-finite value", "gpuLimit==NaN"),
 		)
 	})
 

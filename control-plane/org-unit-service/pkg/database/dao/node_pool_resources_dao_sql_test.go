@@ -21,18 +21,19 @@ import (
 )
 
 const (
-	sqlSelectDeptNodePoolResources = `SELECT * FROM department_node_pool_resources_view WHERE tenant_id = ? ORDER BY id DESC LIMIT ? OFFSET ?`
-	sqlSelectProjNodePoolResources = `SELECT * FROM project_node_pool_resources_view WHERE tenant_id = ? ORDER BY id DESC LIMIT ? OFFSET ?`
-	sqlCountDeptNodePoolResources  = `SELECT count(*) FROM department_node_pool_resources_view WHERE tenant_id = ?`
-	sqlCountProjNodePoolResources  = `SELECT count(*) FROM project_node_pool_resources_view WHERE tenant_id = ?`
-	sqlSumProjGPUWeights           = `SELECT COALESCE(SUM(gpu_over_quota_weight), 0) FROM project_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ?`
-	sqlSumProjGPUDeserved          = `SELECT COALESCE(SUM(CASE WHEN gpu_deserved >= 0 THEN gpu_deserved ELSE 0 END), 0) FROM project_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ?`
-	sqlSumDeptResourcesAdjustable  = `SELECT CASE WHEN COUNT(CASE WHEN gpu_deserved IS NULL OR gpu_deserved < 0 THEN 1 END) > 0 THEN -1 ELSE COALESCE(SUM(gpu_deserved), 0) END AS deserved_sum, COALESCE(SUM(gpu_over_quota_weight), 0) AS weights_sum FROM department_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ?`
-	sqlSumDeptResourcesFixed       = `SELECT CASE WHEN COUNT(CASE WHEN gpu_deserved IS NULL OR gpu_deserved < 0 THEN 1 END) > 0 THEN -1 ELSE COALESCE(SUM(gpu_deserved), 0) END AS deserved_sum, COALESCE(SUM(CASE WHEN gpu_deserved >= 0 THEN gpu_deserved ELSE 0 END), 0) AS weights_sum FROM department_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ?`
-	sqlSelectDeptNodePoolPerPair   = `SELECT * FROM department_node_pool_resources_view WHERE tenant_id = ? AND org_unit_id = ? AND node_pool_id = ? ORDER BY department_node_pool_resources_view.id LIMIT ?`
-	sqlSelectProjNodePoolPerPair   = `SELECT * FROM project_node_pool_resources_view WHERE tenant_id = ? AND org_unit_id = ? AND node_pool_id = ? ORDER BY project_node_pool_resources_view.id LIMIT ?`
-	sqlPatchResources              = `UPDATE resources SET gpu_deserved=? WHERE id = ? AND node_pool_id = ?`
-	sqlPatchDepartmentMetadata     = `UPDATE department SET updated_at=?,updated_by=? WHERE tenant_id = ? AND cluster_id = ? AND id = ?`
+	sqlSelectDeptNodePoolResources           = `SELECT * FROM department_node_pool_resources_view WHERE tenant_id = ? ORDER BY id DESC LIMIT ? OFFSET ?`
+	sqlSelectProjNodePoolResourcesByGpuLimit = `SELECT * FROM project_node_pool_resources_view WHERE tenant_id = ? ORDER BY COALESCE(gpu_limit, -1) ASC NULLS FIRST,id DESC LIMIT ? OFFSET ?`
+	sqlSelectProjNodePoolResources           = `SELECT * FROM project_node_pool_resources_view WHERE tenant_id = ? ORDER BY id DESC LIMIT ? OFFSET ?`
+	sqlCountDeptNodePoolResources            = `SELECT count(*) FROM department_node_pool_resources_view WHERE tenant_id = ?`
+	sqlCountProjNodePoolResources            = `SELECT count(*) FROM project_node_pool_resources_view WHERE tenant_id = ?`
+	sqlSumProjGPUWeights                     = `SELECT COALESCE(SUM(gpu_over_quota_weight), 0) FROM project_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ?`
+	sqlSumProjGPUDeserved                    = `SELECT COALESCE(SUM(CASE WHEN gpu_deserved >= 0 THEN gpu_deserved ELSE 0 END), 0) FROM project_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ?`
+	sqlSumDeptResourcesAdjustable            = `SELECT CASE WHEN COUNT(CASE WHEN gpu_deserved IS NULL OR gpu_deserved < 0 THEN 1 END) > 0 THEN -1 ELSE COALESCE(SUM(gpu_deserved), 0) END AS deserved_sum, COALESCE(SUM(gpu_over_quota_weight), 0) AS weights_sum FROM department_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ?`
+	sqlSumDeptResourcesFixed                 = `SELECT CASE WHEN COUNT(CASE WHEN gpu_deserved IS NULL OR gpu_deserved < 0 THEN 1 END) > 0 THEN -1 ELSE COALESCE(SUM(gpu_deserved), 0) END AS deserved_sum, COALESCE(SUM(CASE WHEN gpu_deserved >= 0 THEN gpu_deserved ELSE 0 END), 0) AS weights_sum FROM department_node_pool_resources_view WHERE tenant_id = ? AND node_pool_id = ?`
+	sqlSelectDeptNodePoolPerPair             = `SELECT * FROM department_node_pool_resources_view WHERE tenant_id = ? AND org_unit_id = ? AND node_pool_id = ? ORDER BY department_node_pool_resources_view.id LIMIT ?`
+	sqlSelectProjNodePoolPerPair             = `SELECT * FROM project_node_pool_resources_view WHERE tenant_id = ? AND org_unit_id = ? AND node_pool_id = ? ORDER BY project_node_pool_resources_view.id LIMIT ?`
+	sqlPatchResources                        = `UPDATE resources SET gpu_deserved=? WHERE id = ? AND node_pool_id = ?`
+	sqlPatchDepartmentMetadata               = `UPDATE department SET updated_at=?,updated_by=? WHERE tenant_id = ? AND cluster_id = ? AND id = ?`
 )
 
 var _ = Describe("Node pool resources DAO SQL", func() {
@@ -59,6 +60,16 @@ var _ = Describe("Node pool resources DAO SQL", func() {
 		})
 	})
 	Describe("GetProjectNodePoolResources", func() {
+		It("sorts by gpuLimit with a NULL limit counted as -1", func() {
+			mocker := setupSQLMock()
+			sortColumn, err := queryapi.NewParser(models.ProjectNodePoolResources{}.SortByFieldsToColumn()).GetMapping("gpuLimit")
+			Expect(err).NotTo(HaveOccurred())
+			mocker.ExpectQuery(sqlSelectProjNodePoolResourcesByGpuLimit, testTenantID, 10, 5).
+				Returns([]models.ProjectNodePoolResources{testProjectNodePoolResources()})
+
+			_, err = GetProjectNodePoolResources(context.Background(), testTenantID, nil, sortColumn, "ASC", 5, 10, nil, "")
+			Expect(err).NotTo(HaveOccurred())
+		})
 		It("succeeds", func() {
 			mocker := setupSQLMock()
 			expected := testProjectNodePoolResources()
