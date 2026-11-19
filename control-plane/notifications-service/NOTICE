@@ -68,7 +68,7 @@ Dependencies
 | `github.com/go-openapi/swag/stringutils` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/stringutils/v0.29.2/stringutils/LICENSE |
 | `github.com/go-openapi/swag/typeutils` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/typeutils/v0.29.2/typeutils/LICENSE |
 | `github.com/go-openapi/swag/yamlutils` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/yamlutils/v0.29.2/yamlutils/LICENSE |
-| `github.com/go-openapi/validate` | v1.0.2 | Apache-2.0 | https://github.com/go-openapi/validate/blob/v1.0.2/LICENSE |
+| `github.com/go-openapi/validate` | v1.0.3 | Apache-2.0 | https://github.com/go-openapi/validate/blob/v1.0.3/LICENSE |
 | `github.com/go-playground/locales` | v0.14.2 | MIT | https://github.com/go-playground/locales/blob/v0.14.2/LICENSE |
 | `github.com/go-playground/universal-translator` | v0.18.2 | MIT | https://github.com/go-playground/universal-translator/blob/v0.18.2/LICENSE |
 | `github.com/go-playground/validator/v10` | v10.30.6 | MIT | https://github.com/go-playground/validator/blob/v10.30.6/LICENSE |
@@ -126,7 +126,7 @@ Dependencies
 | `go.yaml.in/yaml/v2` | v2.4.5 | Apache-2.0 | https://pkg.go.dev/go.yaml.in/yaml/v2@v2.4.5?tab=licenses |
 | `go.yaml.in/yaml/v3` | v3.0.6 | MIT | https://pkg.go.dev/go.yaml.in/yaml/v3@v3.0.6?tab=licenses |
 | `golang.org/x/crypto/sha3` | v0.59.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/crypto@v0.59.0?tab=licenses |
-| `golang.org/x/exp` | v0.0.0-20261118215729-2791e4028fd4 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/exp@v0.0.0-20261118215729-2791e4028fd4?tab=licenses |
+| `golang.org/x/exp` | v0.0.0-20261119141654-b15d094f3610 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/exp@v0.0.0-20261119141654-b15d094f3610?tab=licenses |
 | `golang.org/x/net` | v0.63.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/net@v0.63.0?tab=licenses |
 | `golang.org/x/oauth2` | v0.38.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/oauth2@v0.38.0?tab=licenses |
 | `golang.org/x/sync` | v0.25.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sync@v0.25.0?tab=licenses |
