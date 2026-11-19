@@ -51,13 +51,13 @@ import { RunaiSelect } from "@/components/common/runai-select";
 import type { ISelectOption } from "@/models/global.model";
 import { EQuotaEntity } from "@/models/resource.model";
 
-export interface Props {
+export interface IProps {
   selectedCount: number;
   entityType?: EQuotaEntity;
   currentRank?: string;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<IProps>(), {
   entityType: EQuotaEntity.department,
   currentRank: undefined,
 });

@@ -2,6 +2,7 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
+import { ENodePoolSchedulingModeId as ESchedulingMode } from "@/models/node-pool.model";
 import type { Nodepool, NodepoolUpdateFields } from "@/swagger-models/cluster-service-client";
 import type {
   BatchPatchNodePoolResourcesRequest,
@@ -14,7 +15,7 @@ import { schedulingDurationSeconds, serializeSchedulingDuration } from "./schedu
 
 export function buildSchedulingSave(pool: Nodepool, draft: SchedulingDraft) {
   if (!draft.mode) throw new Error("Select a supported scheduling mode.");
-  if (pool.schedulingCapabilities?.quota && draft.mode !== "guaranteed")
+  if (pool.schedulingCapabilities?.quota && draft.mode !== ESchedulingMode.Guaranteed)
     throw new Error("A saved Guaranteed quota pool cannot downgrade.");
   const capabilities = toSchedulingCapabilities(draft);
   const minimum = serializeSchedulingDuration(draft.minimumRuntime);
@@ -84,11 +85,11 @@ export function buildSchedulingSave(pool: Nodepool, draft: SchedulingDraft) {
   }
   return { pool: poolUpdate, departments };
 }
-export interface SchedulingSaveTransport {
+export interface ISchedulingSaveTransport {
   patchPool: (id: string, payload: NodepoolUpdateFields) => Promise<Nodepool>;
   patchDepartments: (request: BatchPatchNodePoolResourcesRequest) => Promise<BatchPatchDepartmentResourcesResponse>;
 }
-export function createSchedulingSaver(transport: SchedulingSaveTransport) {
+export function createSchedulingSaver(transport: ISchedulingSaveTransport) {
   let busy = false;
   let poolKey = "";
   let savedPool: Nodepool | undefined;

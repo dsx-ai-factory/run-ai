@@ -8,7 +8,7 @@ import {
   getMockSchedulingResult,
   MOCK_SCHEDULING_IDS,
   MOCK_SCHEDULING_TEN_IDS,
-} from "./node-pool-scheduling-simulation.mock";
+} from "../../../../unit-test/fixtures/node-pool-scheduling-simulation";
 import { EColumnFilterType, EFilterOperator } from "@/models/filter.model";
 describe("scheduling preview boundaries", () => {
   it("uses authored guaranteed and over-quota values for the five-row Automatic profile", () => {

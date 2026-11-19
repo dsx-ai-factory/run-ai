@@ -2,14 +2,15 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
+import { ENodePoolSchedulingModeId as ESchedulingMode } from "@/models/node-pool.model";
 import { describe, expect, it, vi, afterEach } from "vitest";
 import { effectScope, ref, nextTick } from "vue";
 import { buildSimulationRequest, mapSimulationResponse, defaultSimulationDemand } from "./node-pool-simulation.util";
 import { useNodePoolSimulation } from "./use-node-pool-simulation.composable";
-import type { SimulationScenario } from "./node-pool-simulation.util";
+import type { ISimulationScenario } from "./node-pool-simulation.util";
 import type { SchedulingDraft } from "./node-pool-scheduling.model";
 const draft = (): SchedulingDraft => ({
-  mode: "proportional",
+  mode: ESchedulingMode.Proportional,
   automaticWeights: false,
   cpuQuota: false,
   departments: { hidden: { id: "hidden", weight: 9, rank: "High", limit: 12 } },
@@ -51,7 +52,7 @@ describe("simulation contract", () => {
   });
   it("maps Guaranteed limits and omits inactive limits in other modes", () => {
     const input = scenario();
-    input.draft.mode = "guaranteed";
+    input.draft.mode = ESchedulingMode.Guaranteed;
     input.draft.maxAllocation = true;
     input.draft.departments.hidden.quota = 4;
     expect(buildSimulationRequest(input).orgUnits[1]).toEqual({
@@ -59,7 +60,7 @@ describe("simulation contract", () => {
       rank: "High",
       gpu: { deserved: 4, limit: 12, overQuotaWeight: 9 },
     });
-    input.draft.mode = "ranked";
+    input.draft.mode = ESchedulingMode.Ranked;
     expect(buildSimulationRequest(input).nodePool?.schedulingCapabilities?.limits).toBe(false);
     expect(buildSimulationRequest(input).orgUnits[1].gpu).not.toHaveProperty("limit");
     expect(input.draft.departments.hidden.limit).toBe(12);
@@ -83,6 +84,84 @@ describe("simulation contract", () => {
     scope.stop();
     expect(transport.mock.calls[0][2].aborted).toBe(true);
   });
+  it("does not request or interrupt simulation when unrelated settings change", async () => {
+    vi.useFakeTimers();
+    let resolve!: (value: typeof response) => void;
+    const transport = vi.fn().mockImplementation(
+      () =>
+        new Promise((done) => {
+          resolve = done;
+        }),
+    );
+    const source = ref(scenario());
+    const scope = effectScope();
+    const state = scope.run(() => useNodePoolSimulation(source, transport));
+    if (!state) throw new Error("Simulation test scope is inactive.");
+    await vi.advanceTimersByTimeAsync(300);
+    source.value.draft.cpuQuota = true;
+    source.value.draft.timeFairshare = true;
+    source.value.draft.minimumRuntime = { Seconds: 30 };
+    await vi.advanceTimersByTimeAsync(500);
+    expect(transport).toHaveBeenCalledTimes(1);
+    expect(transport.mock.calls[0][2].aborted).toBe(false);
+    resolve(response);
+    await nextTick();
+    expect(state.results.value?.visible.allocated).toBe(12);
+    source.value.draft.historicalWeight = 5;
+    source.value = { ...source.value, draft: { ...source.value.draft } };
+    expect(state.status.value).toBe("ready");
+    await vi.advanceTimersByTimeAsync(500);
+    expect(transport).toHaveBeenCalledTimes(1);
+    state.retry();
+    await vi.advanceTimersByTimeAsync(300);
+    expect(transport).toHaveBeenCalledTimes(2);
+    scope.stop();
+  });
+  it("reschedules a previous payload after an intervening edit or disable", async () => {
+    vi.useFakeTimers();
+    const transport = vi.fn().mockResolvedValue(response);
+    const source = ref<ISimulationScenario | undefined>(scenario());
+    const scope = effectScope();
+    scope.run(() => useNodePoolSimulation(source, transport));
+    await vi.advanceTimersByTimeAsync(300);
+    if (!source.value) throw new Error("Simulation scenario is missing.");
+    source.value.demand.dragged = 40;
+    await vi.advanceTimersByTimeAsync(300);
+    source.value.demand.dragged = 23;
+    await vi.advanceTimersByTimeAsync(300);
+    expect(transport).toHaveBeenCalledTimes(3);
+    source.value = undefined;
+    source.value = scenario();
+    await vi.advanceTimersByTimeAsync(300);
+    expect(transport).toHaveBeenCalledTimes(4);
+    scope.stop();
+  });
+  it.each([
+    {
+      code: 400,
+      server: "Maximum allocation must be at least guaranteed GPUs.",
+      text: /Maximum allocation must be at least guaranteed GPUs/,
+    },
+    { code: 403, server: "internal authorization detail", text: /permission/i },
+  ])("shows actionable HTTP $code feedback without suggesting an identical retry", async ({ code, server, text }) => {
+    vi.useFakeTimers();
+    const source = ref(scenario());
+    const before = JSON.stringify(source.value);
+    const scope = effectScope();
+    const state = scope.run(() =>
+      useNodePoolSimulation(
+        source,
+        vi.fn().mockRejectedValue({ response: { status: code, data: { message: server } } }),
+      ),
+    );
+    if (!state) throw new Error("Simulation test scope is inactive.");
+    await vi.advanceTimersByTimeAsync(300);
+    expect(state.message.value).toMatch(text);
+    expect(state.canRetry.value).toBe(false);
+    expect(state.message.value).not.toContain("Try again");
+    expect(JSON.stringify(source.value)).toBe(before);
+    scope.stop();
+  });
   it("keeps fractional half-capacity slider defaults without sending assumptions", () => {
     expect(defaultSimulationDemand(145)).toBe(72.5);
     expect(buildSimulationRequest({ ...scenario(), capacity: 145 })).not.toHaveProperty("assumptions");
@@ -102,7 +181,7 @@ describe("simulation contract", () => {
       weightPercentage: 25,
     });
   });
-  it.each([404, 501])("reports an unavailable backend for HTTP %s without changing the draft", async (status) => {
+  it.each([404])("reports an unavailable backend for HTTP %s without changing the draft", async (status) => {
     vi.useFakeTimers();
     const source = ref(scenario());
     const before = JSON.stringify(source.value);
@@ -114,7 +193,7 @@ describe("simulation contract", () => {
     expect(JSON.stringify(source.value)).toBe(before);
     scope.stop();
   });
-  it("debounces, ignores obsolete responses, handles 501 and retries without changing drafts", async () => {
+  it("debounces, ignores obsolete responses and retries server failures without changing drafts", async () => {
     vi.useFakeTimers();
     const source = ref(scenario());
     const before = JSON.stringify(source.value);
@@ -144,7 +223,7 @@ describe("simulation contract", () => {
     expect(state.results.value?.visible.allocated).toBe(12);
     state.retry();
     await vi.advanceTimersByTimeAsync(300);
-    expect(state.status.value).toBe("unavailable");
+    expect(state.status.value).toBe("error");
     expect(state.results.value).toBeUndefined();
     state.retry();
     await vi.advanceTimersByTimeAsync(300);
@@ -186,7 +265,7 @@ describe("simulation contract", () => {
   });
   it("keeps zero demand, zero active edits, and explicit unlimited allocation", () => {
     const input = scenario();
-    input.draft.mode = "guaranteed";
+    input.draft.mode = ESchedulingMode.Guaranteed;
     input.draft.maxAllocation = true;
     input.draft.departments.hidden = { id: "hidden", weight: 0, quota: 0, limit: null, rank: "High" };
     input.demand.dragged = 0;
@@ -261,7 +340,7 @@ describe("simulation contract", () => {
     "clears previous results when simulation context changes: %s",
     async (change) => {
       vi.useFakeTimers();
-      const source = ref<SimulationScenario | undefined>(scenario());
+      const source = ref<ISimulationScenario | undefined>(scenario());
       const scope = effectScope();
       const state = scope.run(() => useNodePoolSimulation(source, vi.fn().mockResolvedValue(response)));
       if (!state || !source.value) throw new Error("Simulation test scope is inactive.");
@@ -269,7 +348,7 @@ describe("simulation contract", () => {
       expect(state.results.value?.visible.allocated).toBe(12);
       if (change === "pool") source.value.poolId = "other";
       if (change === "capacity") source.value.capacity = 64;
-      if (change === "mode") source.value.draft.mode = "ranked";
+      if (change === "mode") source.value.draft.mode = ESchedulingMode.Ranked;
       if (change === "disabled") source.value = undefined;
       expect(state.results.value).toBeUndefined();
       scope.stop();
@@ -295,7 +374,7 @@ describe("simulation contract", () => {
       expect(state.results.value?.visible.allocated).toBe(12);
       await vi.advanceTimersByTimeAsync(300);
       expect(state.results.value).toBeUndefined();
-      expect(state.status.value).toBe(code === 404 || code === 501 ? "unavailable" : "error");
+      expect(state.status.value).toBe(code === 404 ? "unavailable" : "error");
       expect(state.message.value).toMatch(/preserved/);
       state.retry();
       await vi.advanceTimersByTimeAsync(300);
@@ -368,7 +447,7 @@ describe("simulation contract", () => {
           resolvePending = resolve;
         }),
     );
-    const source = ref<SimulationScenario | undefined>(scenario());
+    const source = ref<ISimulationScenario | undefined>(scenario());
     const scope = effectScope();
     const state = scope.run(() => useNodePoolSimulation(source, transport));
     if (!state) throw new Error("Simulation test scope is inactive.");

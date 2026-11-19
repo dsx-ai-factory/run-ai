@@ -91,8 +91,6 @@ const isOpen = ref(false);
 
 const cellClass = computed(() => {
   if (props.disabled) return "cell--disabled";
-  if (props.state === "error") return "cell--error";
-  if (props.state === "warning") return "cell--warning";
   if (isOpen.value) return "cell--active";
   return "";
 });

@@ -12,12 +12,12 @@ import { filterUtil } from "@/utils/filter.util/filter.util";
 import { metricUtil } from "@/utils/metric.util";
 import { MetricsType, type MetricsResponse } from "@/swagger-models/cluster-service-client";
 import type { INodePoolSummaryResources } from "@/models/node-pool.model";
-export interface SchedulingScope {
+export interface ISchedulingScope {
   poolId: string;
   clusterId: string;
   rank?: string;
 }
-export function schedulingFilters(scope: SchedulingScope) {
+export function schedulingFilters(scope: ISchedulingScope) {
   const filters = [
     filterUtil.getEqualsFilterString("nodePoolId", scope.poolId),
     filterUtil.getEqualsFilterString("clusterId", scope.clusterId),
@@ -27,7 +27,7 @@ export function schedulingFilters(scope: SchedulingScope) {
 }
 export const loadSchedulingPool = (poolId: string) => clusterService.getNodepool(poolId);
 export async function loadDepartmentPage(
-  params: SchedulingScope & { search?: string; offset?: number; limit?: number },
+  params: ISchedulingScope & { search?: string; offset?: number; limit?: number },
 ) {
   const response = await orgUnitService.getDepartmentNodePoolResources(
     schedulingFilters(params),
@@ -39,13 +39,13 @@ export async function loadDepartmentPage(
   );
   return response.nodePoolResources;
 }
-export function loadSchedulingTotals(scope: SchedulingScope) {
+export function loadSchedulingTotals(scope: ISchedulingScope) {
   // The sum endpoint takes pool scope as nodepoolId, and rejects nodePoolId filters.
   return orgUnitService.sumDepartmentNodePoolResources(scope.poolId, schedulingFilters(scope).slice(1));
 }
 // Sum APIs use the saved capability's weight semantics. Read all scoped pages to
 // obtain both denominators while previewing an unsaved mode change.
-export async function loadSchedulingDepartmentSnapshot(scope: SchedulingScope, rawWeightsAvailable = true) {
+export async function loadSchedulingDepartmentSnapshot(scope: ISchedulingScope, rawWeightsAvailable = true) {
   const totals: Record<
     string,
     {
@@ -99,7 +99,7 @@ export async function loadSchedulingDepartmentSnapshot(scope: SchedulingScope, r
   for (const total of Object.values(totals)) total.deservedSum = total.unlimitedQuotaCount ? -1 : total.finiteQuotaSum;
   return { totals, rows };
 }
-export async function loadSchedulingWeightTotals(scope: SchedulingScope, rawWeightsAvailable = true) {
+export async function loadSchedulingWeightTotals(scope: ISchedulingScope, rawWeightsAvailable = true) {
   const snapshot = await loadSchedulingDepartmentSnapshot(scope, rawWeightsAvailable);
   return Object.fromEntries(
     Object.entries(snapshot.totals).map(([key, { rawWeightsSum, automaticWeightsSum }]) => [
@@ -108,7 +108,7 @@ export async function loadSchedulingWeightTotals(scope: SchedulingScope, rawWeig
     ]),
   );
 }
-export async function loadChildQuotaSum(scope: SchedulingScope, departmentId: string): Promise<number> {
+export async function loadChildQuotaSum(scope: ISchedulingScope, departmentId: string): Promise<number> {
   const department = await orgUnitService.getDepartment(departmentId);
   if (department.clusterId !== scope.clusterId) throw new Error("Department does not belong to this cluster.");
   const value = department.projectsAggregatedResources?.find((resource) => resource.nodePool.id === scope.poolId)?.gpu

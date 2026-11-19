@@ -2,6 +2,7 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
+import { ENodePoolSchedulingModeId as ESchedulingMode } from "@/models/node-pool.model";
 import { mount, flushPromises } from "@vue/test-utils";
 import { Quasar } from "quasar";
 import { describe, expect, it, vi } from "vitest";
@@ -340,12 +341,18 @@ describe("scheduling step foundation", () => {
   });
   it("preserves applied edits when changing mode without a discard dialog", async () => {
     const wrapper = render();
+    const tableUid = wrapper.findComponent(Table).vm.$.uid;
     wrapper.findComponent(Table).vm.$emit("edit", { id: "a", weight: 5 });
     await wrapper.vm.$nextTick();
     await wrapper.get('[aid="mode-ranked"]').trigger("click");
     expect(wrapper.findComponent(RunaiBaseDialog).exists()).toBe(false);
     expect(wrapper.findComponent(Table).props("draft").departments.a.weight).toBe(5);
     expect(wrapper.get('[aid="mode-ranked"]').attributes("aria-checked")).toBe("true");
+    for (const mode of [ESchedulingMode.Guaranteed, ESchedulingMode.Proportional, ESchedulingMode.Ranked]) {
+      await wrapper.get(`[aid="mode-${mode}"]`).trigger("click");
+      expect(wrapper.findComponent(Table).vm.$.uid).toBe(tableUid);
+      expect(wrapper.findComponent(Table).props("draft").departments.a.weight).toBe(5);
+    }
     wrapper.unmount();
   });
   it("shows permission denial instead of an empty department table", async () => {

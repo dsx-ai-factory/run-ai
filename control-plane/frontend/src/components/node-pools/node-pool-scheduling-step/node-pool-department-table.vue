@@ -141,7 +141,7 @@
                     :aria-expanded="expanded.has(row.rank)"
                     @click="toggle(row.rank)"
                   />
-                  <span :class="{ 'rank-label-quota': draft.mode === 'guaranteed' }"
+                  <span :class="{ 'rank-label-quota': draft.mode === ESchedulingMode.Guaranteed }"
                     >{{ row.name }} ({{ row.count }} {{ row.count === 1 ? "department" : "departments" }})</span
                   >
                   <runai-btn
@@ -166,9 +166,9 @@
                   @update:model-value="select(row.id, $event)"
               /></q-td>
               <department-resource-editor
-                v-if="draft.mode === 'guaranteed'"
+                v-if="draft.mode === ESchedulingMode.Guaranteed"
                 :id="row.id"
-                kind="quota"
+                :kind="EResourceEditorKind.Quota"
                 :value="row.quota"
                 :limit="maxAllocation ? row.limit : undefined"
                 :disabled="readonly || canEditDepartment?.(row.id) === false"
@@ -178,7 +178,7 @@
               <q-td class="department-name"><runai-ellipsis-text-with-tooltip :text="row.name" /></q-td>
               <department-resource-editor
                 :id="row.id"
-                kind="weight"
+                :kind="EResourceEditorKind.Weight"
                 :title="ranked ? 'Weight within rank' : 'Weight'"
                 :value="row.weight"
                 :display-value="percentage(row)"
@@ -194,9 +194,9 @@
               <department-resource-editor
                 v-if="maxAllocation"
                 :id="row.id"
-                kind="limit"
+                :kind="EResourceEditorKind.Limit"
                 :value="row.limit ?? -1"
-                :quota="draft.mode === 'guaranteed' ? row.quota : undefined"
+                :quota="draft.mode === ESchedulingMode.Guaranteed ? row.quota : undefined"
                 :disabled="readonly || canEditDepartment?.(row.id) === false"
                 @apply="emit('edit', { id: row.id, limit: $event })"
               />
@@ -211,7 +211,12 @@
                     :allocated="simulationResults[row.id].allocated"
                     :unmet="simulationResults[row.id].unmet"
                     :capacity="capacity ?? 0"
-                    :background="allocationBackground(row)"
+                    :demand="simulationResults[row.id].demand"
+                    :guaranteed="
+                      draft.mode === ESchedulingMode.Guaranteed
+                        ? simulationResults[row.id].guaranteed
+                        : simulationResults[row.id].allocated
+                    "
                   />
                   <div v-else-if="percentage(row) !== 'Unknown'" class="simulation-segments">
                     <span
@@ -245,9 +250,10 @@
                   </q-tooltip>
                   <input
                     v-if="simulation"
-                    @input="setDemand(row, $event)"
+                    @input="previewDemand(row, $event)"
+                    @change="setDemand(row, $event)"
                     type="range"
-                    step="any"
+                    step="1"
                     min="0"
                     :max="capacity ?? 0"
                     :value="sliderDemand(row)"
@@ -278,13 +284,7 @@
         </q-table>
         <div v-if="simulation && simulationMessage" class="simulation-notice" role="alert">
           <span>{{ simulationMessage }}</span>
-          <runai-btn
-            v-if="simulationStatus === 'error' || simulationStatus === 'unavailable'"
-            flat
-            label="Retry"
-            aid="retry-simulation"
-            @click="retrySimulation"
-          />
+          <runai-btn v-if="canRetrySimulation" flat label="Retry" aid="retry-simulation" @click="retrySimulation" />
         </div>
         <div v-if="hasMore" class="q-pa-md text-center">
           <runai-btn
@@ -308,6 +308,9 @@
   </section>
 </template>
 <script setup lang="ts">
+import { EResourceEditorKind } from "./node-pool-scheduling.model";
+import { ENodePoolSchedulingModeId as ESchedulingMode } from "@/models/node-pool.model";
+
 import { NotificationAlertBar, ENotificationBarVariant } from "@/components/common/notification-alert-bar";
 import SimulationResultBar from "./simulation-result-bar.vue";
 import SchedulingFilters from "./scheduling-filters.vue";
@@ -321,6 +324,7 @@ import { matchesSchedulingFilters } from "./node-pool-scheduling-filters";
 import { useNodePoolSimulation } from "./use-node-pool-simulation.composable";
 import { simulateNodePool } from "./node-pool-simulation.service";
 import { defaultSimulationDemand } from "./node-pool-simulation.util";
+import { integerSimulationValues } from "./node-pool-simulation-display";
 import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
 import MoveToRankModal from "./scheduling-move-to-rank-dialog.vue";
 import { ENTITY_PRIORITY_DEFAULT_VALUE, entityPriorityMap } from "@/models/org-unit.model";
@@ -331,9 +335,9 @@ import {
   schedulingTotalsWithEdits,
   weightPercentage,
   type SchedulingDraft,
-  type DepartmentSchedulingEdit,
-  type SchedulingTotals,
-  type DepartmentValidationContext,
+  type IDepartmentSchedulingEdit,
+  type ISchedulingTotals,
+  type IDepartmentValidationContext,
 } from "./node-pool-scheduling.model";
 const props = withDefaults(
   defineProps<{
@@ -341,7 +345,7 @@ const props = withDefaults(
     rows: DepartmentNodePoolResources[];
     baselineRows?: DepartmentNodePoolResources[];
     draft: SchedulingDraft;
-    aggregates: Record<string, SchedulingTotals>;
+    aggregates: Record<string, ISchedulingTotals>;
     ranks: string[];
     rankCounts?: Record<string, number>;
     capacity?: number;
@@ -356,12 +360,12 @@ const props = withDefaults(
     hasError?: boolean;
     searchTerm?: string;
     rankFilter?: string;
-    loadQuotaContext?: (id: string) => Promise<DepartmentValidationContext>;
+    loadQuotaContext?: (id: string) => Promise<IDepartmentValidationContext>;
   }>(),
   { totalsComplete: true, rawWeightsAvailable: true, canView: true },
 );
 const emit = defineEmits<{
-  edit: [DepartmentSchedulingEdit];
+  edit: [IDepartmentSchedulingEdit];
   search: [string];
   "filter-rank": [string | undefined];
   "load-more": [];
@@ -372,9 +376,9 @@ const emit = defineEmits<{
   "close-settings": [];
   "automatic-weights": [boolean];
 }>();
-const baseline = ref<Record<string, DepartmentSchedulingEdit>>({});
+const baseline = ref<Record<string, IDepartmentSchedulingEdit>>({});
 const knownRows = ref<Record<string, DepartmentNodePoolResources>>({});
-function baselineRecord(row: DepartmentNodePoolResources): DepartmentSchedulingEdit {
+function baselineRecord(row: DepartmentNodePoolResources): IDepartmentSchedulingEdit {
   return {
     id: row.orgUnitId,
     weight: props.rawWeightsAvailable ? (row.resources.gpu?.overQuotaWeight ?? undefined) : undefined,
@@ -405,9 +409,11 @@ watch(
 const selected = ref(new Set<string>());
 const expanded = ref(new Set<string>([ENTITY_PRIORITY_DEFAULT_VALUE]));
 const showMove = ref(false);
-const maxAllocation = computed(() => props.draft.mode === "guaranteed" && !!props.draft.maxAllocation);
-const ranked = computed(() => props.draft.mode === "ranked" || props.draft.mode === "guaranteed");
-const automatic = computed(() => props.draft.mode === "guaranteed" && props.draft.automaticWeights);
+const maxAllocation = computed(() => props.draft.mode === ESchedulingMode.Guaranteed && !!props.draft.maxAllocation);
+const ranked = computed(
+  () => props.draft.mode === ESchedulingMode.Ranked || props.draft.mode === ESchedulingMode.Guaranteed,
+);
+const automatic = computed(() => props.draft.mode === ESchedulingMode.Guaranteed && props.draft.automaticWeights);
 const completeCustomWeightTotals = computed(() => {
   const sums = new Map<string, number | undefined>();
   if (automatic.value || props.totalsComplete === false || !props.baselineRows) return sums;
@@ -432,7 +438,7 @@ const quotaExcess = computed(() => {
   const capacity = props.capacity;
   const assigned = totals.value.all;
   if (
-    props.draft.mode !== "guaranteed" ||
+    props.draft.mode !== ESchedulingMode.Guaranteed ||
     !props.canView ||
     props.totalsComplete === false ||
     capacity == null ||
@@ -480,7 +486,7 @@ function updateFilters(value: IFilterBy) {
 }
 const columns = computed<QTableColumn[]>(() => [
   { name: "selection", label: "", field: "id", align: "left" },
-  ...(props.draft.mode === "guaranteed"
+  ...(props.draft.mode === ESchedulingMode.Guaranteed
     ? [{ name: "quota", label: "Guaranteed GPUs", field: "quota", align: "left" as const }]
     : []),
   { name: "department", label: ranked.value ? "Rank" : "Department", field: "name", align: "left" },
@@ -492,6 +498,7 @@ const columns = computed<QTableColumn[]>(() => [
 ]);
 const simulation = ref(false);
 const demand = ref<Record<string, number>>({});
+const demandPreview = ref<Record<string, number>>({});
 const currentRank = computed(() => {
   const ranks = new Set([...selected.value].map((id) => props.draft.departments[id]?.rank ?? baseline.value[id]?.rank));
   return ranks.size === 1 ? [...ranks][0] : undefined;
@@ -524,9 +531,9 @@ function rankHeading(rank: string) {
 }
 function order(name: string) {
   if (name === "quota") return "#1";
-  if (name === "department") return ranked.value ? (props.draft.mode === "guaranteed" ? "#2" : "#1") : "";
-  if (name === "weight") return props.draft.mode === "guaranteed" ? "#3" : ranked.value ? "#2" : "#1";
-  if (name === "limit") return props.draft.mode === "guaranteed" ? "#4" : ranked.value ? "#3" : "#2";
+  if (name === "department") return ranked.value ? (props.draft.mode === ESchedulingMode.Guaranteed ? "#2" : "#1") : "";
+  if (name === "weight") return props.draft.mode === ESchedulingMode.Guaranteed ? "#3" : ranked.value ? "#2" : "#1";
+  if (name === "limit") return props.draft.mode === ESchedulingMode.Guaranteed ? "#4" : ranked.value ? "#3" : "#2";
   return "";
 }
 const effectiveRows = computed(() => {
@@ -599,10 +606,11 @@ const displayRows = computed(() => {
 watch(
   () => [props.capacity, maxAllocation.value, baseline.value, props.draft.departments],
   () => {
-    for (const id of Object.keys(demand.value)) {
-      const row = { ...baseline.value[id], ...props.draft.departments[id], id };
-      demand.value[id] = clampDemand(row, demand.value[id]);
-    }
+    for (const values of [demand.value, demandPreview.value])
+      for (const id of Object.keys(values)) {
+        const row = { ...baseline.value[id], ...props.draft.departments[id], id };
+        values[id] = clampDemand(row, values[id]);
+      }
   },
   { deep: true, flush: "sync" },
 );
@@ -622,20 +630,15 @@ const {
   status: simulationStatus,
   message: simulationMessage,
   retry: retrySimulation,
+  canRetry: canRetrySimulation,
 } = useNodePoolSimulation(scenario, simulateNodePool);
-function allocationBackground(row: DepartmentSchedulingEdit) {
-  const result = simulationResults.value?.[row.id];
-  if (props.draft.mode !== "guaranteed" || !result?.allocated) return "#42a5f5";
-  const guaranteed = (result.guaranteed / result.allocated) * 100;
-  return `linear-gradient(to right, #42a5f5 ${guaranteed}%, #90caf9 ${guaranteed}%)`;
-}
-function resultLegend(row: DepartmentSchedulingEdit) {
+function resultLegend(row: IDepartmentSchedulingEdit) {
   const entries: { label: string; value: string | number; kind: string }[] = [];
-  if (props.draft.mode === "guaranteed")
+  if (props.draft.mode === ESchedulingMode.Guaranteed)
     entries.push({
       label: "Guaranteed GPU allocation",
       value: row.quota === -1 ? "Unlimited" : (row.quota ?? "Unknown"),
-      kind: "guaranteed",
+      kind: ESchedulingMode.Guaranteed,
     });
   const weightShare = rowWeightPercentage(row);
   entries.push({
@@ -651,18 +654,23 @@ function resultLegend(row: DepartmentSchedulingEdit) {
     });
   const result = simulation.value ? simulationResults.value?.[row.id] : undefined;
   if (result) {
-    const guaranteed = props.draft.mode === "guaranteed";
+    const display = integerSimulationValues(result);
+    const guaranteed = props.draft.mode === ESchedulingMode.Guaranteed;
     if (guaranteed)
-      entries.push({ label: "Expected guaranteed GPU allocation", value: result.guaranteed, kind: "guaranteed" });
+      entries.push({
+        label: "Expected guaranteed GPU allocation",
+        value: display.guaranteed,
+        kind: ESchedulingMode.Guaranteed,
+      });
     entries.push({
       label: guaranteed ? "Expected over-quota GPU allocation" : "Expected GPU allocation",
-      value: guaranteed ? result.overQuota : result.allocated,
-      kind: guaranteed ? "over-quota" : "guaranteed",
+      value: guaranteed ? display.overQuota : display.allocated,
+      kind: guaranteed ? "over-quota" : ESchedulingMode.Guaranteed,
     });
-    entries.push({ label: "Unmet GPU demand", value: result.unmet, kind: "unmet" });
+    entries.push({ label: "Unmet GPU demand", value: display.unmet, kind: "unmet" });
     entries.push({
       label: "Simulated real-time GPU demand",
-      value: result.demand,
+      value: display.demand,
       kind: "demand",
     });
   }
@@ -671,11 +679,11 @@ function resultLegend(row: DepartmentSchedulingEdit) {
     value: typeof entry.value === "number" ? Number(entry.value.toFixed(2)) : entry.value,
   }));
 }
-function weightTotal(row: DepartmentSchedulingEdit) {
+function weightTotal(row: IDepartmentSchedulingEdit) {
   const key = ranked.value ? (row.rank ?? "") : "all";
   return totals.value[key]?.weightsSum ?? completeCustomWeightTotals.value.get(key);
 }
-function previewWeightPercentage(row: DepartmentSchedulingEdit, weight: number) {
+function previewWeightPercentage(row: IDepartmentSchedulingEdit, weight: number) {
   if (automatic.value || props.totalsComplete === false) return undefined;
   const total = weightTotal(row);
   if (total != null && Number.isFinite(total) && row.weight != null && row.weight >= 0 && total >= row.weight)
@@ -692,37 +700,49 @@ function previewWeightPercentage(row: DepartmentSchedulingEdit, weight: number) 
   }
   return weightPercentage(weight, otherWeights + weight);
 }
-function rowWeightPercentage(row: DepartmentSchedulingEdit): number | undefined {
+function rowWeightPercentage(row: IDepartmentSchedulingEdit): number | undefined {
   const simulated = simulation.value ? simulationResults.value?.[row.id] : undefined;
   if (simulated) return simulated.weightPercentage;
   if (props.totalsComplete === false) return undefined;
   const value = automatic.value ? Math.max(0, row.quota ?? 0) : row.weight;
   return value == null ? undefined : weightPercentage(value, weightTotal(row));
 }
-function percentage(row: DepartmentSchedulingEdit) {
+function percentage(row: IDepartmentSchedulingEdit) {
   const value = rowWeightPercentage(row);
   if (value == null || !Number.isFinite(value)) return "Unknown";
   if (value > 0 && value < 0.1) return "<0.1%";
   return `${Number(value.toFixed(automatic.value ? 1 : 2))}%`;
 }
-function maximumDemand(row: DepartmentSchedulingEdit) {
+function maximumDemand(row: IDepartmentSchedulingEdit) {
   const capacity = Number.isFinite(props.capacity) ? Math.max(0, props.capacity ?? 0) : 0;
-  return maxAllocation.value && row.limit != null && row.limit >= 0 ? Math.min(capacity, row.limit) : capacity;
-}
-function clampDemand(row: DepartmentSchedulingEdit, value: number) {
-  return Math.min(maximumDemand(row), Math.max(0, Number.isFinite(value) ? value : 0));
-}
-function sliderDemand(row: DepartmentSchedulingEdit) {
-  return clampDemand(
-    row,
-    demand.value[row.id] ?? simulationResults.value?.[row.id]?.demand ?? defaultSimulationDemand(props.capacity ?? 0),
+  return Math.floor(
+    maxAllocation.value && row.limit != null && row.limit >= 0 ? Math.min(capacity, row.limit) : capacity,
   );
 }
-function setDemand(row: DepartmentSchedulingEdit, event: Event) {
+function clampDemand(row: IDepartmentSchedulingEdit, value: number) {
+  return Math.min(maximumDemand(row), Math.max(0, Number.isFinite(value) ? Math.round(value) : 0));
+}
+function sliderDemand(row: IDepartmentSchedulingEdit) {
+  return clampDemand(
+    row,
+    demandPreview.value[row.id] ??
+      demand.value[row.id] ??
+      simulationResults.value?.[row.id]?.demand ??
+      defaultSimulationDemand(props.capacity ?? 0),
+  );
+}
+function previewDemand(row: IDepartmentSchedulingEdit, event: Event) {
+  const input = event.target as HTMLInputElement;
+  const value = clampDemand(row, Number(input.value));
+  input.value = String(value);
+  demandPreview.value[row.id] = value;
+}
+function setDemand(row: IDepartmentSchedulingEdit, event: Event) {
   const input = event.target as HTMLInputElement;
   const value = clampDemand(row, Number(input.value));
   input.value = String(value);
   demand.value[row.id] = value;
+  delete demandPreview.value[row.id];
 }
 function toggle(rank: string) {
   const next = new Set(expanded.value);
@@ -745,7 +765,7 @@ function move(rank: string) {
   showMove.value = false;
   selected.value = new Set();
 }
-async function quotaContext(row: DepartmentSchedulingEdit) {
+async function quotaContext(row: IDepartmentSchedulingEdit) {
   const result = await props.loadQuotaContext?.(row.id);
   return {
     ...result,
@@ -930,7 +950,7 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   color: #212121;
 }
 .order-quota {
-  color: #42a5f5;
+  color: $blue-5;
 }
 .order-department {
   color: #4a148c;
@@ -1024,7 +1044,7 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   position: relative;
   width: 100%;
   height: 18px;
-  border: 1px solid #bdbdbd;
+  border: 1px solid var(--border-default);
   border-radius: 3px;
   overflow: visible;
   font-size: 12px;
@@ -1039,8 +1059,8 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   height: 18px;
 }
 .quota-marker {
-  border-inline: 1px solid white;
-  background: repeating-linear-gradient(to bottom, #212121 0 3px, white 3px 6px);
+  border-inline: 1px solid var(--text-inverse);
+  background: repeating-linear-gradient(to bottom, var(--b-text-main) 0 3px, var(--text-inverse) 3px 6px);
   position: absolute;
   top: 50%;
   width: 4px;
@@ -1070,17 +1090,17 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   appearance: none;
   width: 20px;
   height: 20px;
-  border: 1px solid white;
+  border: 1px solid var(--text-inverse);
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.87);
+  background: var(--b-text-main);
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.25);
 }
 .demand-slider::-moz-range-thumb {
   width: 18px;
   height: 18px;
-  border: 1px solid white;
+  border: 1px solid var(--text-inverse);
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.87);
+  background: var(--b-text-main);
 }
 .scheduling-empty {
   width: 100%;
@@ -1108,8 +1128,8 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   padding-right: 20px;
 }
 :global(.q-tooltip.scheduling-result-tooltip) {
-  background: rgba(0, 0, 0, 0.87);
-  color: white;
+  background: var(--b-text-main);
+  color: var(--text-inverse);
   padding: 10px;
   border-radius: 3px;
   font-size: 12px;
@@ -1161,11 +1181,11 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   top: -9px;
   width: 4px;
   height: 38px;
-  border-inline: 1px solid white;
-  background: repeating-linear-gradient(to bottom, #212121 0 3px, white 3px 6px);
+  border-inline: 1px solid var(--text-inverse);
+  background: repeating-linear-gradient(to bottom, var(--b-text-main) 0 3px, var(--text-inverse) 3px 6px);
 }
 .result-tooltip-line.marker-maximum::before {
-  background: repeating-linear-gradient(to bottom, #fb8c00 0 3px, white 3px 6px);
+  background: repeating-linear-gradient(to bottom, #{$orange-7} 0 3px, var(--text-inverse) 3px 6px);
 }
 .result-tooltip-swatch {
   width: 12px;
@@ -1174,17 +1194,17 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   flex-shrink: 0;
 }
 .swatch-guaranteed {
-  background: #42a5f5;
+  background: $blue-5;
 }
 .swatch-over-quota {
-  background: #90caf9;
+  background: $blue-3;
 }
 .swatch-unmet {
-  background: #ffe082;
+  background: $amber-3;
 }
 .swatch-demand {
-  background: rgba(0, 0, 0, 0.87);
-  border: 2px solid white;
+  background: var(--b-text-main);
+  border: 2px solid var(--text-inverse);
   border-radius: 50%;
 }
 .result-tooltip-unavailable {

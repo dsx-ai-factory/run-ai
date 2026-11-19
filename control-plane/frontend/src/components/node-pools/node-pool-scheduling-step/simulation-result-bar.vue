@@ -6,33 +6,41 @@
   <div class="simulation-values" :class="{ 'simulation-values-outside': outside }">
     <q-resize-observer @resize="measure" />
     <div class="simulation-segments" @transitionend="measure">
-      <span ref="allocatedSegment" class="allocated" :style="{ width: `${width(allocated)}%`, background }">
-        <span ref="allocatedLabel" class="segment-value" :aria-hidden="outside">{{ number(allocated) }}</span>
+      <span
+        ref="allocatedSegment"
+        class="allocated"
+        :style="{ width: `${width(allocated)}%`, '--guaranteed-share': `${guaranteedShare}%` }"
+      >
+        <span ref="allocatedLabel" class="segment-value" :aria-hidden="outside">{{ display.allocated }}</span>
       </span>
       <span ref="unmetSegment" class="unmet" :style="{ width: `${width(unmet)}%` }">
-        <span ref="unmetLabel" class="segment-value" :aria-hidden="outside">{{ number(unmet) }}</span>
+        <span ref="unmetLabel" class="segment-value" :aria-hidden="outside">{{ display.unmet }}</span>
       </span>
       <span class="allocation-marker" aria-hidden="true" :style="{ left: `${width(allocated)}%` }" />
     </div>
     <div v-if="outside" class="simulation-outside-labels">
       <span
-        >Allocated <strong>{{ number(allocated) }}</strong></span
+        >Allocated <strong>{{ display.allocated }}</strong></span
       >
       <span
-        >Unmet <strong>{{ number(unmet) }}</strong></span
+        >Unmet <strong>{{ display.unmet }}</strong></span
       >
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch } from "vue";
-const props = defineProps<{ allocated: number; unmet: number; capacity: number; background: string }>();
+import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { integerSimulationValues } from "./node-pool-simulation-display";
+const props = defineProps<{ allocated: number; guaranteed: number; unmet: number; demand: number; capacity: number }>();
 const allocatedSegment = ref<HTMLElement>();
 const unmetSegment = ref<HTMLElement>();
 const allocatedLabel = ref<HTMLElement>();
 const unmetLabel = ref<HTMLElement>();
 const outside = ref(false);
-const number = (value: number) => Number(value.toFixed(2));
+const display = computed(() => integerSimulationValues(props));
+const guaranteedShare = computed(() =>
+  props.allocated > 0 ? Math.min(100, Math.max(0, (props.guaranteed / props.allocated) * 100)) : 100,
+);
 const width = (value: number) => Math.min(100, Math.max(0, (value / (props.capacity || 1)) * 100));
 function measure() {
   if (!allocatedSegment.value?.parentElement?.clientWidth) return;
@@ -48,7 +56,7 @@ function measure() {
   );
 }
 watch(
-  () => [props.allocated, props.unmet, props.capacity],
+  () => [props.allocated, props.unmet, props.demand, props.capacity],
   () => void nextTick(measure),
   { flush: "post" },
 );
@@ -75,19 +83,19 @@ onMounted(() => {
 .unmet {
   height: 100%;
   text-align: center;
-  -webkit-text-stroke: 1.4px white;
+  -webkit-text-stroke: 1.4px var(--text-inverse);
   paint-order: stroke fill;
   transition: width 180ms ease-out;
 }
 .allocated {
   flex: 0 0 auto;
-  background: #90caf9;
+  background: linear-gradient(to right, $blue-5 var(--guaranteed-share), $blue-3 var(--guaranteed-share));
   overflow: hidden;
 }
 .unmet {
   flex: 0 1 auto;
   min-width: 0;
-  background: #ffe082;
+  background: $amber-3;
 }
 .segment-value {
   display: inline-block;
@@ -114,8 +122,8 @@ onMounted(() => {
   top: 50%;
   width: 4px;
   height: 38px;
-  border-inline: 1px solid white;
-  background: repeating-linear-gradient(to bottom, #212121 0 3px, white 3px 6px);
+  border-inline: 1px solid var(--text-inverse);
+  background: repeating-linear-gradient(to bottom, var(--b-text-main) 0 3px, var(--text-inverse) 3px 6px);
   transform: translate(-3px, -50%);
   transition: left 180ms ease-out;
 }

@@ -4,20 +4,15 @@
 -->
 <template>
   <editable-cell-popup
-    :class="{ 'unlimited-allocation': kind === 'limit' && (value == null || value === -1) }"
+    :class="{
+      'unlimited-allocation': kind === EResourceEditorKind.Limit && (value == null || value === -1),
+      'resource-cell--error': active && !loading && validation.errors.length > 0,
+      'resource-cell--warning': active && !loading && !validation.errors.length && validation.warnings.length > 0,
+    }"
     :title="editorTitle"
     :popup-class="`scheduling-resource-popup scheduling-resource-popup--${kind}`"
-    :state="
-      active && !loading
-        ? validation.errors.length
-          ? 'error'
-          : validation.warnings.length
-            ? 'warning'
-            : 'active'
-        : 'default'
-    "
     :display-value="
-      (kind === 'limit' && value == null) || (kind !== 'weight' && value === -1)
+      (kind === EResourceEditorKind.Limit && value == null) || (kind !== EResourceEditorKind.Weight && value === -1)
         ? 'Unlimited'
         : (displayValue ?? value ?? 'Unknown')
     "
@@ -32,7 +27,7 @@
       <span class="resource-editor-title">
         {{ editorTitle }}
         <scheduling-help-tooltip
-          v-if="kind === 'weight'"
+          v-if="kind === EResourceEditorKind.Weight"
           class="weight-editor-help q-ml-xs"
           icon="ph-bold ph-question"
           width="300px"
@@ -54,38 +49,38 @@
       </span>
     </template>
     <template #input>
-      <div :class="{ 'weight-input-row': kind === 'weight' }">
+      <div :class="{ 'weight-input-row': kind === EResourceEditorKind.Weight }">
         <q-input
           v-model="input"
           type="number"
-          :inputmode="kind === 'weight' ? 'numeric' : 'decimal'"
-          @keydown="numericKeydown($event, kind === 'weight')"
-          @paste="numericPaste($event, kind === 'weight')"
-          @beforeinput="numericBeforeInput($event, kind === 'weight')"
+          :inputmode="kind === EResourceEditorKind.Weight ? 'numeric' : 'decimal'"
+          @keydown="numericKeydown($event, kind === EResourceEditorKind.Weight)"
+          @paste="numericPaste($event, kind === EResourceEditorKind.Weight)"
+          @beforeinput="numericBeforeInput($event, kind === EResourceEditorKind.Weight)"
           @input.capture="updateNativeValidity"
           min="0"
-          :dense="kind !== 'limit'"
-          :label="kind === 'limit' ? editorTitle : undefined"
-          :stack-label="kind === 'limit'"
+          :dense="kind !== EResourceEditorKind.Limit"
+          :label="kind === EResourceEditorKind.Limit ? editorTitle : undefined"
+          :stack-label="kind === EResourceEditorKind.Limit"
           :aria-label="editorTitle"
-          :max="kind === 'weight' ? 20 : undefined"
-          :step="kind === 'weight' ? 1 : 'any'"
-          :placeholder="kind === 'limit' ? 'Unlimited' : undefined"
+          :max="kind === EResourceEditorKind.Weight ? 20 : undefined"
+          :step="kind === EResourceEditorKind.Weight ? 1 : 'any'"
+          :placeholder="kind === EResourceEditorKind.Limit ? 'Unlimited' : undefined"
           :error="validation.errors.length > 0"
           :color="!validation.errors.length && validation.warnings.length ? 'warning' : 'primary'"
           :class="{
             'resource-input-warning': !validation.errors.length && validation.warnings.length,
-            'resource-limit-input': kind === 'limit',
+            'resource-limit-input': kind === EResourceEditorKind.Limit,
           }"
           :error-message="errorMessage"
           no-error-icon
         />
-        <span v-if="kind === 'weight' && !validation.errors.length" class="weight-percentage"
+        <span v-if="kind === EResourceEditorKind.Weight && !validation.errors.length" class="weight-percentage"
           >({{ proposedWeightPercentage }})</span
         >
       </div>
       <p
-        v-if="kind === 'quota' && !loading && !validation.errors.length && !validation.warnings.length"
+        v-if="kind === EResourceEditorKind.Quota && !loading && !validation.errors.length && !validation.warnings.length"
         class="quota-hint"
       >
         <template v-if="recommendedMinimum != null"
@@ -107,6 +102,7 @@
   </editable-cell-popup>
 </template>
 <script setup lang="ts">
+import { EResourceEditorKind } from "./node-pool-scheduling.model";
 import { numericKeydown, numericPaste, numericBeforeInput } from "./scheduling-numeric-input";
 import { computed, ref, watch } from "vue";
 import SchedulingHelpTooltip from "./scheduling-help-tooltip.vue";
@@ -115,12 +111,12 @@ import {
   recommendedDepartmentQuotaMinimum,
   departmentQuotaBudget,
   validateDepartmentEdit,
-  type DepartmentValidationContext,
+  type IDepartmentValidationContext,
 } from "./node-pool-scheduling.model";
 const props = defineProps<{
   id: string;
   value?: number;
-  kind: "weight" | "quota" | "limit";
+  kind: EResourceEditorKind;
   title?: string;
   quota?: number;
   displayValue?: string;
@@ -128,14 +124,18 @@ const props = defineProps<{
   disabled?: boolean;
   disabledTooltip?: string;
   limit?: number | null;
-  context?: DepartmentValidationContext;
-  loadContext?: () => Promise<DepartmentValidationContext>;
+  context?: IDepartmentValidationContext;
+  loadContext?: () => Promise<IDepartmentValidationContext>;
 }>();
 const emit = defineEmits<{ apply: [number] }>();
 const editorTitle = computed(
   () =>
     props.title ??
-    (props.kind === "weight" ? "Weight" : props.kind === "limit" ? "Max GPU allocation" : "Guaranteed GPUs"),
+    (props.kind === EResourceEditorKind.Weight
+      ? "Weight"
+      : props.kind === EResourceEditorKind.Limit
+        ? "Max GPU allocation"
+        : "Guaranteed GPUs"),
 );
 const rankedWeight = computed(() => props.title === "Weight within rank");
 const weightHelp = computed(
@@ -143,7 +143,7 @@ const weightHelp = computed(
     `Weight determines a department’s share relative to the other departments${rankedWeight.value ? " in the same rank" : ""}. A higher weight means a larger portion of the resources. The weight is expressed as a percentage, calculated as the weight divided by the total weight of all departments${rankedWeight.value ? " in the rank" : ""}. For example, a department with a weight of 2${rankedWeight.value ? " in a rank" : ""} where the weights total 20 receives 10%.`,
 );
 const initialInput = () =>
-  props.kind === "limit" && (props.value == null || props.value === -1) ? "" : (props.value ?? "");
+  props.kind === EResourceEditorKind.Limit && (props.value == null || props.value === -1) ? "" : (props.value ?? "");
 const nativeBadInput = ref(false);
 function updateNativeValidity(event: Event) {
   if (event.target instanceof HTMLInputElement) nativeBadInput.value = event.target.validity.badInput;
@@ -151,7 +151,7 @@ function updateNativeValidity(event: Event) {
 const parsedValue = () =>
   nativeBadInput.value
     ? NaN
-    : props.kind === "limit" && String(input.value).trim() === ""
+    : props.kind === EResourceEditorKind.Limit && String(input.value).trim() === ""
       ? -1
       : String(input.value).trim() === ""
         ? NaN
@@ -163,7 +163,7 @@ const proposedWeightPercentage = computed(() => {
   const percentage = props.previewWeightPercentage?.(value);
   return percentage == null || !Number.isFinite(percentage) ? "Unknown" : `${Number(percentage.toFixed(2))}%`;
 });
-const context = ref<DepartmentValidationContext>(props.context ?? {});
+const context = ref<IDepartmentValidationContext>(props.context ?? {});
 const recommendedMinimum = computed(() => recommendedDepartmentQuotaMinimum(context.value));
 const quotaBudget = computed(() => departmentQuotaBudget(props.value, context.value));
 const errorMessage = computed(() =>
@@ -196,23 +196,23 @@ const validation = computed(() => {
   const result = validateDepartmentEdit(
     {
       id: props.id,
-      ...(props.kind === "weight"
+      ...(props.kind === EResourceEditorKind.Weight
         ? { weight: value }
-        : props.kind === "limit"
+        : props.kind === EResourceEditorKind.Limit
           ? { limit: value }
           : { quota: value, limit: props.limit }),
     },
     {
       ...context.value,
       totalQuota:
-        props.kind === "quota" && quotaBudget.value
+        props.kind === EResourceEditorKind.Quota && quotaBudget.value
           ? quotaBudget.value.otherFiniteQuota + value
           : context.value.totalsComplete !== false && context.value.totalQuota != null && props.value != null
             ? context.value.totalQuota + value - props.value
             : undefined,
     },
   );
-  if (props.kind === "limit" && value !== -1 && props.quota != null && value < props.quota)
+  if (props.kind === EResourceEditorKind.Limit && value !== -1 && props.quota != null && value < props.quota)
     result.errors.push(
       `The department’s maximum GPU device allocation is below its quota. To stay above the quota, enter a number equal to or above ${props.quota} GPUs.`,
     );
@@ -230,7 +230,7 @@ function reset() {
 async function opened() {
   active.value = true;
   nativeBadInput.value = false;
-  input.value = props.kind === "weight" ? (props.value ?? 2) : initialInput();
+  input.value = props.kind === EResourceEditorKind.Weight ? (props.value ?? 2) : initialInput();
   context.value = props.context ?? {};
   if (!props.loadContext) return;
   const version = ++request;
@@ -252,6 +252,15 @@ watch(() => props.value, reset);
 </script>
 
 <style scoped lang="scss">
+.editable-cell-popup.resource-cell--error.cell--active :deep(.cell-trigger) {
+  border: 1px solid $negative;
+  color: $negative;
+}
+.editable-cell-popup.resource-cell--warning.cell--active :deep(.cell-trigger) {
+  border: 1px solid $amber-14;
+  color: $amber-14;
+}
+
 .unlimited-allocation :deep(.cell-trigger) {
   color: var(--text-placeholder);
   font-style: italic;

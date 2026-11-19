@@ -2,6 +2,7 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
+import { ENodePoolSchedulingModeId as ESchedulingMode } from "@/models/node-pool.model";
 import { mount } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
 import { QInput, QOptionGroup, Quasar } from "quasar";
@@ -10,7 +11,7 @@ import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
 import Settings from "./node-pool-scheduling-settings.vue";
 import type { SchedulingDraft } from "./node-pool-scheduling.model";
 const draft: SchedulingDraft = {
-  mode: "guaranteed",
+  mode: ESchedulingMode.Guaranteed,
   automaticWeights: true,
   cpuQuota: false,
   maxAllocation: true,
@@ -33,7 +34,7 @@ describe("scheduling settings draft interactions", () => {
     expect(wrapper.emitted("patch")).toHaveLength(1);
     wrapper.unmount();
   });
-  it.each(["proportional", "ranked"] as const)(
+  it.each([ESchedulingMode.Proportional, ESchedulingMode.Ranked] as const)(
     "hides quota-only advanced settings in %s even with stale enabled values",
     (mode) => {
       const wrapper = mount(Settings, {

@@ -8,7 +8,7 @@ import {
   type FairShareSimulationResponse,
 } from "@/swagger-models/org-unit-service-client";
 import { toSchedulingCapabilities, type SchedulingDraft } from "./node-pool-scheduling.model";
-export interface SimulationScenario {
+export interface ISimulationScenario {
   poolId: string;
   capacity: number;
   draft: SchedulingDraft;
@@ -17,7 +17,7 @@ export interface SimulationScenario {
 }
 // Initial slider position only. The backend owns the default demand and limit cap.
 export const defaultSimulationDemand = (capacity: number) => capacity / 2;
-export function buildSimulationRequest(scenario: SimulationScenario): FairShareSimulationRequest {
+export function buildSimulationRequest(scenario: ISimulationScenario): FairShareSimulationRequest {
   const { capacity, draft, demand } = scenario;
   if (!Number.isFinite(capacity) || capacity < 0) throw new Error("Node pool capacity is unavailable.");
   if (!draft.mode) throw new Error("Select a supported scheduling mode to simulate.");

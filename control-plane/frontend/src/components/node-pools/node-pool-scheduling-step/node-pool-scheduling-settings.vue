@@ -5,7 +5,7 @@
 <template>
   <aside
     class="scheduling-settings"
-    :class="{ 'scheduling-settings--compact': draft.mode === 'proportional' }"
+    :class="{ 'scheduling-settings--compact': draft.mode === ESchedulingMode.Proportional }"
     aria-label="Advanced settings"
   >
     <header>
@@ -15,7 +15,7 @@
       </q-btn>
     </header>
     <div class="settings-body">
-      <section v-if="draft.mode === 'guaranteed'">
+      <section v-if="draft.mode === ESchedulingMode.Guaranteed">
         <scheduling-section-title
           title="Weight within rank"
           interactive-tooltip
@@ -53,7 +53,7 @@
           </template>
         </q-option-group>
       </section>
-      <section v-if="draft.mode === 'guaranteed'" class="toggle-section">
+      <section v-if="draft.mode === ESchedulingMode.Guaranteed" class="toggle-section">
         <scheduling-section-title title="Max GPU allocation" tooltip-icon="ph-bold ph-info" :tooltip-text="maxHelp">
           <template #tooltip-content>
             <span class="node-pool-settings-help node-pool-settings-help--standard">{{ maxHelp }}</span>
@@ -208,7 +208,7 @@
           />
         </div>
       </section>
-      <template v-if="draft.mode === 'guaranteed'">
+      <template v-if="draft.mode === ESchedulingMode.Guaranteed">
         <section class="toggle-section">
           <scheduling-section-title
             title="CPU quota"
@@ -268,6 +268,8 @@
   </aside>
 </template>
 <script setup lang="ts">
+import { ENodePoolSchedulingModeId as ESchedulingMode } from "@/models/node-pool.model";
+
 import { numericKeydown, numericPaste, numericBeforeInput } from "./scheduling-numeric-input";
 import { ref } from "vue";
 import { DOCS } from "@/constants/docs";
@@ -326,7 +328,7 @@ function setDuration(field: "historicalWindow" | "minimumRuntime", unit: string,
 }
 function setMax(value: boolean) {
   if (
-    props.draft.mode !== "guaranteed" ||
+    props.draft.mode !== ESchedulingMode.Guaranteed ||
     props.readonly ||
     (!value && (props.savedMaxAllocation ?? props.draft.maxAllocation) && !props.canResetResources)
   )

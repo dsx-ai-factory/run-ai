@@ -2,6 +2,7 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
+import { ENodePoolSchedulingModeId as ESchedulingMode } from "@/models/node-pool.model";
 import { flushPromises, mount } from "@vue/test-utils";
 import { describe, expect, it, vi } from "vitest";
 import { createTestingPinia } from "@pinia/testing";
@@ -13,6 +14,7 @@ import { RunaiPageActions } from "@/components/common/runai-page-actions";
 import { simulateNodePool } from "./node-pool-simulation.service";
 vi.mock("./node-pool-simulation.service", () => ({ simulateNodePool: vi.fn() }));
 import Table from "./node-pool-department-table.vue";
+import SchedulingFilters from "./scheduling-filters.vue";
 import DepartmentResourceEditor from "./department-resource-editor.vue";
 
 describe("rank group identity after filtering", () => {
@@ -33,7 +35,7 @@ describe("rank group identity after filtering", () => {
         baselineRows: peers,
         aggregates: {},
         draft: {
-          mode: "ranked",
+          mode: ESchedulingMode.Ranked,
           automaticWeights: false,
           cpuQuota: false,
           departments: {},
@@ -55,7 +57,7 @@ describe("rank group identity after filtering", () => {
       expect(wrapper.findAll(".rank-header")).toHaveLength(3);
       await wrapper.setProps({
         draft: {
-          mode: "ranked",
+          mode: ESchedulingMode.Ranked,
           automaticWeights: false,
           cpuQuota: false,
           departments: {
@@ -94,15 +96,38 @@ const rows: DepartmentNodePoolResources[] = [
     resources: { gpu: { overQuotaWeight: 2, deserved: 3 } },
   },
 ];
-const draft: SchedulingDraft = { mode: "proportional", automaticWeights: false, cpuQuota: false, departments: {} };
+const draft: SchedulingDraft = {
+  mode: ESchedulingMode.Proportional,
+  automaticWeights: false,
+  cpuQuota: false,
+  departments: {},
+};
 describe("scheduling department table", () => {
+  it("shows rank filters and row selection only for ranked scheduling modes", async () => {
+    const wrapper = mount(Table, {
+      props: { rows, draft, aggregates: {}, ranks: ["MediumLow"], readonly: false, canView: true, loading: false },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+      },
+    });
+    try {
+      expect(wrapper.findComponent(SchedulingFilters).props("ranked")).toBe(false);
+      expect(wrapper.find('[aria-label="Select Alpha"]').exists()).toBe(false);
+      await wrapper.setProps({ draft: { ...draft, mode: ESchedulingMode.Ranked } });
+      expect(wrapper.findComponent(SchedulingFilters).props("ranked")).toBe(true);
+      expect(wrapper.find('[aria-label="Select Alpha"]').exists()).toBe(true);
+    } finally {
+      wrapper.unmount();
+    }
+  });
   it("clamps demand and immediately corrects the native handle without changing the pool scale", async () => {
     const wrapper = mount(Table, {
       props: {
         rows,
         draft: {
           ...draft,
-          mode: "guaranteed",
+          mode: ESchedulingMode.Guaranteed,
           automaticWeights: false,
           maxAllocation: true,
           departments: { a: { id: "a", limit: 50 } },
@@ -128,11 +153,154 @@ describe("scheduling department table", () => {
       await input.setValue("64");
       expect((input.element as HTMLInputElement).value).toBe("50");
       await wrapper.setProps({
-        draft: { ...draft, mode: "guaranteed", maxAllocation: true, departments: { a: { id: "a", limit: 12 } } },
+        draft: {
+          ...draft,
+          mode: ESchedulingMode.Guaranteed,
+          maxAllocation: true,
+          departments: { a: { id: "a", limit: 12 } },
+        },
       });
       expect((input.element as HTMLInputElement).value).toBe("12");
     } finally {
       wrapper.unmount();
+    }
+  });
+  it("commits integer demand on change, keeps drag previews local, and preserves demand across modes", async () => {
+    vi.useFakeTimers();
+    const transport = vi
+      .mocked(simulateNodePool)
+      .mockReset()
+      .mockResolvedValue({
+        orgUnits: [
+          {
+            id: "a",
+            fairShare: { gpu: 10.4 },
+            guaranteed: { gpu: 3.2 },
+            overQuota: { gpu: 7.2 },
+            unmet: { gpu: 22.1 },
+            demand: { gpu: 32.5 },
+            weightShareInRank: 0.25,
+          },
+        ],
+      });
+    const currentDraft: SchedulingDraft = {
+      ...draft,
+      mode: ESchedulingMode.Guaranteed,
+      maxAllocation: true,
+      departments: { a: { id: "a", limit: 40.8 } },
+    };
+    const wrapper = mount(Table, {
+      props: {
+        poolId: "17",
+        rows,
+        draft: currentDraft,
+        capacity: 65,
+        aggregates: {},
+        ranks: ["MediumLow"],
+        readonly: false,
+        loading: false,
+      },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+      },
+    });
+    try {
+      wrapper.findComponent(QToggle).vm.$emit("update:modelValue", true);
+      await wrapper.vm.$nextTick();
+      await vi.advanceTimersByTimeAsync(300);
+      expect(transport).toHaveBeenCalledTimes(1);
+      expect(transport.mock.calls[0][1].orgUnits[0].demand).toBeUndefined();
+      const input = wrapper.get('input[type="range"]');
+      expect(input.attributes("step")).toBe("1");
+      expect(input.attributes("max")).toBe("65");
+      expect(input.attributes("aria-valuemax")).toBe("40");
+      expect((input.element as HTMLInputElement).value).toBe("33");
+      (input.element as HTMLInputElement).value = "45.7";
+      await input.trigger("input");
+      expect((input.element as HTMLInputElement).value).toBe("40");
+      await vi.advanceTimersByTimeAsync(600);
+      expect(transport).toHaveBeenCalledTimes(1);
+      await input.trigger("change");
+      await vi.advanceTimersByTimeAsync(300);
+      expect(transport.mock.calls.at(-1)?.[1].orgUnits[0].demand).toEqual({ gpu: 40 });
+      // A native keyboard change also commits without requiring a drag/input event.
+      (input.element as HTMLInputElement).value = "39";
+      await input.trigger("change");
+      await vi.advanceTimersByTimeAsync(300);
+      expect(transport.mock.calls.at(-1)?.[1].orgUnits[0].demand).toEqual({ gpu: 39 });
+      for (const mode of [ESchedulingMode.Proportional, ESchedulingMode.Ranked, ESchedulingMode.Guaranteed] as const) {
+        await wrapper.setProps({ draft: { ...currentDraft, mode } });
+        await vi.advanceTimersByTimeAsync(300);
+        expect(wrapper.findComponent(QToggle).props("modelValue")).toBe(true);
+        expect((wrapper.get('input[type="range"]').element as HTMLInputElement).value).toBe("39");
+        expect(transport.mock.calls.at(-1)?.[1].orgUnits[0].demand).toEqual({ gpu: 39 });
+      }
+    } finally {
+      wrapper.unmount();
+      vi.useRealTimers();
+    }
+  });
+  it("uses consistent integer simulation totals in labels and tooltip while retaining fractional geometry and settings", async () => {
+    vi.useFakeTimers();
+    vi.mocked(simulateNodePool)
+      .mockReset()
+      .mockResolvedValue({
+        orgUnits: [
+          {
+            id: "a",
+            fairShare: { gpu: 1.4 },
+            guaranteed: { gpu: 0.6 },
+            overQuota: { gpu: 0.8 },
+            unmet: { gpu: 1.4 },
+            demand: { gpu: 2.8 },
+            weightShareInRank: 0.12345,
+          },
+        ],
+      });
+    const wrapper = mount(Table, {
+      props: {
+        poolId: "17",
+        rows,
+        draft: {
+          ...draft,
+          mode: ESchedulingMode.Guaranteed,
+          maxAllocation: true,
+          departments: { a: { id: "a", quota: 0.6, limit: 3.7 } },
+        },
+        capacity: 5,
+        aggregates: {},
+        ranks: ["MediumLow"],
+        readonly: false,
+        loading: false,
+      },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+        stubs: { QTooltip: { template: '<div class="rendered-tooltip"><slot /></div>' } },
+      },
+    });
+    try {
+      wrapper.findComponent(QToggle).vm.$emit("update:modelValue", true);
+      await wrapper.vm.$nextTick();
+      await vi.advanceTimersByTimeAsync(300);
+      expect(wrapper.get(".allocated").text()).toBe("1");
+      expect(wrapper.get(".unmet").text()).toBe("2");
+      expect(parseFloat((wrapper.get(".allocated").element as HTMLElement).style.width)).toBeCloseTo(28, 8);
+      expect(parseFloat((wrapper.get(".unmet").element as HTMLElement).style.width)).toBeCloseTo(28, 8);
+      const entries = wrapper.findAll(".result-tooltip-description").map((entry) => entry.text());
+      expect(entries).toEqual([
+        "Guaranteed GPU allocation 0.6",
+        "Weight within rank 12.345%",
+        "Max GPU allocation 3.7",
+        "Expected guaranteed GPU allocation 1",
+        "Expected over-quota GPU allocation 0",
+        "Unmet GPU demand 2",
+        "Simulated real-time GPU demand 3",
+      ]);
+    } finally {
+      wrapper.unmount();
+      vi.useRealTimers();
     }
   });
   it.each([
@@ -148,7 +316,7 @@ describe("scheduling department table", () => {
         props: {
           rows: [tiny],
           baselineRows: [tiny],
-          draft: { ...draft, mode: "guaranteed", automaticWeights: automatic },
+          draft: { ...draft, mode: ESchedulingMode.Guaranteed, automaticWeights: automatic },
           aggregates: { MediumLow: { weightsSum: 10, automaticWeightsSum: 10, deservedSum: 10 } },
           ranks: ["MediumLow"],
           readonly: false,
@@ -176,7 +344,7 @@ describe("scheduling department table", () => {
     props: ["displayValue", "isSubmitDisabled"],
     emits: ["apply", "reset", "before-show"],
   };
-  it.each(["proportional", "ranked"] as const)(
+  it.each([ESchedulingMode.Proportional, ESchedulingMode.Ranked] as const)(
     "never shows maximum-allocation columns or editors in %s with stale draft limits",
     (mode) => {
       const wrapper = mount(Table, {
@@ -219,9 +387,9 @@ describe("scheduling department table", () => {
     wrapper.unmount();
   });
   it.each([
-    ["proportional", "6.09%"],
-    ["ranked", "46.67%"],
-    ["guaranteed", "46.67%"],
+    [ESchedulingMode.Proportional, "6.09%"],
+    [ESchedulingMode.Ranked, "46.67%"],
+    [ESchedulingMode.Guaranteed, "46.67%"],
   ] as const)(
     "previews the proposed weight share in %s without changing applied table values",
     async (mode, proposed) => {
@@ -355,7 +523,7 @@ describe("scheduling department table", () => {
     };
     const currentDraft: SchedulingDraft = {
       ...draft,
-      mode: "guaranteed",
+      mode: ESchedulingMode.Guaranteed,
       maxAllocation: true,
       departments: { a: { id: "a", quota: 20, limit: 30 } },
     };
@@ -392,7 +560,7 @@ describe("scheduling department table", () => {
     expect(wrapper.emitted("edit")).toHaveLength(1);
     wrapper.unmount();
   });
-  it.each(["proportional", "ranked"] as const)(
+  it.each([ESchedulingMode.Proportional, ESchedulingMode.Ranked] as const)(
     "enforces maximum allocation only while Guaranteed quota is active, starting from %s",
     async (mode) => {
       const resourcePopup = { template: '<td><slot name="input" /></td>', emits: ["apply", "reset", "before-show"] };
@@ -420,7 +588,7 @@ describe("scheduling department table", () => {
       expect(
         wrapper.findAllComponents(DepartmentResourceEditor).some((editor) => editor.props("kind") === "limit"),
       ).toBe(false);
-      await wrapper.setProps({ draft: { ...currentDraft, mode: "guaranteed" } });
+      await wrapper.setProps({ draft: { ...currentDraft, mode: ESchedulingMode.Guaranteed } });
       const maximum = wrapper
         .findAllComponents(DepartmentResourceEditor)
         .find((editor) => editor.props("kind") === "limit");
@@ -442,7 +610,7 @@ describe("scheduling department table", () => {
   it("hides the rank action in Proportional and restores the selection when returning to Ranked", async () => {
     const currentDraft: SchedulingDraft = {
       ...draft,
-      mode: "ranked",
+      mode: ESchedulingMode.Ranked,
       departments: { a: { id: "a", rank: "MediumLow" } },
     };
     const wrapper = mount(Table, {
@@ -464,7 +632,7 @@ describe("scheduling department table", () => {
     alpha.vm.$emit("update:modelValue", true);
     await wrapper.vm.$nextTick();
     expect(wrapper.get('[aid="move-departments"]').isVisible()).toBe(true);
-    await wrapper.setProps({ draft: { ...currentDraft, mode: "proportional" } });
+    await wrapper.setProps({ draft: { ...currentDraft, mode: ESchedulingMode.Proportional } });
     expect(wrapper.find('[aid="move-departments"]').exists()).toBe(false);
     expect(wrapper.find(".selected-rows-actions").exists()).toBe(false);
     expect(wrapper.get('[aid="advanced-settings"]').isVisible()).toBe(true);
@@ -487,7 +655,7 @@ describe("scheduling department table", () => {
     ];
     const currentDraft: SchedulingDraft = {
       ...draft,
-      mode: "guaranteed",
+      mode: ESchedulingMode.Guaranteed,
       departments: { a: { id: "a", weight: 0 }, b: { id: "b", weight: 1 }, c: { id: "c", weight: 2 } },
     };
     const wrapper = mount(Table, {
@@ -534,7 +702,7 @@ describe("scheduling department table", () => {
     const wrapper = mount(Table, {
       props: {
         rows: [...rows, { ...rows[0], id: "resource-b", orgUnitId: "b", orgUnitName: "Beta", rank: "High" }],
-        draft: { ...draft, mode: "ranked", departments: { a: { id: "a", rank: "High" } } },
+        draft: { ...draft, mode: ESchedulingMode.Ranked, departments: { a: { id: "a", rank: "High" } } },
         aggregates: {},
         ranks: ["High", "MediumLow"],
         rankCounts: { High: 1, MediumLow: 1 },
@@ -616,7 +784,7 @@ describe("scheduling department table", () => {
     await wrapper.setProps({ draft: { ...draft, departments: { a: { id: "a", weight: 8 } } } });
     await vi.advanceTimersByTimeAsync(300);
     expect(wrapper.find(".allocated").exists()).toBe(false);
-    expect(wrapper.text()).toContain("Simulation is unavailable.");
+    expect(wrapper.text()).toContain("Simulation failed. Your changes are preserved. Try again.");
     expect(wrapper.props("draft").departments.a.weight).toBe(8);
     wrapper.unmount();
     vi.useRealTimers();
@@ -660,7 +828,7 @@ describe("scheduling department table", () => {
     const wrapper = mount(Table, {
       props: {
         rows: [...rows, { ...rows[0], id: "resource-b", orgUnitId: "b", orgUnitName: "Beta", rank: "High" }],
-        draft: { ...draft, mode: "ranked" },
+        draft: { ...draft, mode: ESchedulingMode.Ranked },
         aggregates: {},
         ranks: ["High", "MediumLow"],
         readonly: false,
@@ -685,7 +853,7 @@ describe("scheduling department table", () => {
     await wrapper.setProps({
       draft: {
         ...draft,
-        mode: "ranked",
+        mode: ESchedulingMode.Ranked,
         departments: { a: { id: "a", rank: "Highest" }, b: { id: "b", rank: "Highest" } },
       },
     });
@@ -698,7 +866,7 @@ describe("scheduling department table", () => {
     const wrapper = mount(Table, {
       props: {
         rows,
-        draft: { ...draft, mode: "guaranteed", automaticWeights: true },
+        draft: { ...draft, mode: ESchedulingMode.Guaranteed, automaticWeights: true },
         aggregates: { MediumLow: { weightsSum: 2, deservedSum: 12 } },
         ranks: ["MediumLow"],
         readonly: false,
@@ -717,7 +885,7 @@ describe("scheduling department table", () => {
     const wrapper = mount(Table, {
       props: {
         rows,
-        draft: { ...draft, mode: "ranked" },
+        draft: { ...draft, mode: ESchedulingMode.Ranked },
         aggregates: { MediumLow: { weightsSum: 10, deservedSum: 3 } },
         ranks: ["MediumLow"],
         totalsComplete: false,
@@ -762,7 +930,7 @@ describe("scheduling department table", () => {
     const wrapper = mount(Table, {
       props: {
         rows: [],
-        draft: { ...draft, mode: "ranked" },
+        draft: { ...draft, mode: ESchedulingMode.Ranked },
         aggregates: {},
         ranks: ["High", "MediumLow"],
         rankCounts: { High: 60, MediumLow: 10 },

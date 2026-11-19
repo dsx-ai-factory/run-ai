@@ -243,7 +243,12 @@ export const NETWORK_ACCELERATION_LABELS: Record<NodepoolGPUNetworkAccelerationD
   [NodepoolGPUNetworkAccelerationDetection.DontUse]: "Is not present",
 };
 
-export type NodePoolSchedulingMode = "proportional" | "ranked" | "guaranteed";
+// Serialized mode IDs differ from the display labels in ENodePoolSchedulingMode.
+export enum ENodePoolSchedulingModeId {
+  Proportional = "proportional",
+  Ranked = "ranked",
+  Guaranteed = "guaranteed",
+}
 
 export enum ENodePoolSchedulingMode {
   Unknown = "Unknown",

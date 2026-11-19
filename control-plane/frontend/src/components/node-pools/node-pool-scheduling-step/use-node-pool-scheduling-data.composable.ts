@@ -6,7 +6,7 @@ import { computed, getCurrentScope, onScopeDispose, ref, watch, type Ref } from 
 import { permissionService } from "@/services/authorization/permission.service/permission.service";
 import { useAuthStore } from "@/stores/auth.store";
 import type { PermittedScopes } from "@/swagger-models/authorization-client";
-import type { SchedulingTotals } from "./node-pool-scheduling.model";
+import type { ISchedulingTotals } from "./node-pool-scheduling.model";
 import { usePermissionStore } from "@/stores/permissions.store";
 import { useSettingStore } from "@/stores/setting.store";
 import { orgUnitSettingsService } from "@/services/control-plane/org-unit-settings.service/org-unit-settings.service";
@@ -54,7 +54,7 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
   const snapshot = ref<Nodepool>();
   const pages = ref<DepartmentNodePoolResources[]>([]);
   const baselineRows = ref<DepartmentNodePoolResources[]>([]);
-  const aggregates = ref<Record<string, SchedulingTotals>>({});
+  const aggregates = ref<Record<string, ISchedulingTotals>>({});
   const rankCounts = ref<Record<string, number>>({});
   const resources = ref<INodePoolSummaryResources>();
   const quotaPolicy = ref<boolean>();

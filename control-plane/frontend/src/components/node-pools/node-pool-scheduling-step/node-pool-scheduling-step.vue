@@ -81,7 +81,7 @@
                         </q-slide-transition>
                         <q-slide-transition :duration="511">
                           <div
-                            v-show="option.value === 'guaranteed' && showGuaranteedNotice"
+                            v-show="option.value === ESchedulingMode.Guaranteed && showGuaranteedNotice"
                             class="mode-warning-transition"
                           >
                             <div class="mode-warning-container">
@@ -117,7 +117,6 @@
               <p v-if="telemetryError" class="q-px-md text-b-subtitle2" role="status">{{ telemetryError }}</p>
               <div class="scheduling-content">
                 <node-pool-department-table
-                  :key="`department-draft-${resetRevision}`"
                   :pool-id="pool.id"
                   :rows="rows"
                   :baseline-rows="baselineRows"
@@ -199,6 +198,8 @@
 </template>
 
 <script setup lang="ts">
+import { ENodePoolSchedulingModeId as ESchedulingMode } from "@/models/node-pool.model";
+
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { createSchedulingSaver, buildSchedulingSave } from "./node-pool-scheduling-save";
 import { patchSchedulingPool, patchSchedulingDepartments } from "./node-pool-scheduling.service";
@@ -213,9 +214,9 @@ import { useNodePoolSchedulingDraft } from "./use-node-pool-scheduling-draft.com
 import {
   toSchedulingCapabilities,
   type SchedulingMode,
-  type DepartmentSchedulingEdit,
-  type SchedulingTotals,
-  type DepartmentValidationContext,
+  type IDepartmentSchedulingEdit,
+  type ISchedulingTotals,
+  type IDepartmentValidationContext,
 } from "./node-pool-scheduling.model";
 import type { DepartmentNodePoolResources } from "@/swagger-models/org-unit-service-client";
 import RunaiWizardLayout from "@/components/common/runai-wizard-layout/runai-wizard-layout.vue";
@@ -235,7 +236,7 @@ const props = withDefaults(
     resources?: INodePoolSummaryResources;
     rows?: DepartmentNodePoolResources[];
     baselineRows?: DepartmentNodePoolResources[];
-    aggregates?: Record<string, SchedulingTotals>;
+    aggregates?: Record<string, ISchedulingTotals>;
     ranks?: string[];
     rankCounts?: Record<string, number>;
     canViewDepartments?: boolean;
@@ -251,7 +252,7 @@ const props = withDefaults(
     searchTerm?: string;
     rankFilter?: string;
     quotaPolicy?: boolean;
-    loadQuotaContext?: (id: string) => Promise<DepartmentValidationContext>;
+    loadQuotaContext?: (id: string) => Promise<IDepartmentValidationContext>;
   }>(),
   {
     rows: () => [],
@@ -300,7 +301,7 @@ const modePermissionTooltip = computed(() =>
 );
 const options = computed(() => [
   {
-    value: "proportional",
+    value: ESchedulingMode.Proportional,
     disable: props.pool.schedulingCapabilities?.quota === true,
     disabledTooltip:
       modePermissionTooltip.value ??
@@ -312,7 +313,7 @@ const options = computed(() => [
     aid: "mode-proportional",
   },
   {
-    value: "ranked",
+    value: ESchedulingMode.Ranked,
     disable: props.pool.schedulingCapabilities?.quota === true,
     disabledTooltip:
       modePermissionTooltip.value ??
@@ -324,7 +325,7 @@ const options = computed(() => [
     aid: "mode-ranked",
   },
   {
-    value: "guaranteed",
+    value: ESchedulingMode.Guaranteed,
     label: "Guaranteed quota",
     description: "Guaranteed quota, redistribute unused",
     disabledTooltip: modePermissionTooltip.value,
@@ -338,11 +339,16 @@ const modeIcons: Record<string, string> = {
 };
 const savedMode = getSchedulingMode(props.pool.schedulingCapabilities);
 const mode = (
-  { Proportional: "proportional", Ranked: "ranked", "Guaranteed quota": "guaranteed" } as Record<string, SchedulingMode>
+  {
+    Proportional: ESchedulingMode.Proportional,
+    Ranked: ESchedulingMode.Ranked,
+    "Guaranteed quota": ESchedulingMode.Guaranteed,
+  } as Record<string, SchedulingMode>
 )[savedMode];
-const { draft, resetRevision, requestMode } = useNodePoolSchedulingDraft({
+const { draft, requestMode } = useNodePoolSchedulingDraft({
   mode,
-  automaticWeights: mode === "guaranteed" ? props.pool.schedulingCapabilities?.adjustableWeights === false : true,
+  automaticWeights:
+    mode === ESchedulingMode.Guaranteed ? props.pool.schedulingCapabilities?.adjustableWeights === false : true,
   cpuQuota: props.pool.schedulingCapabilities?.cpuQuota === true,
   maxAllocation: props.pool.schedulingCapabilities?.limits === true,
   timeFairshare: props.pool.schedulingConfiguration?.timeBasedFairShare?.enabled === true,
@@ -358,7 +364,8 @@ const { draft, resetRevision, requestMode } = useNodePoolSchedulingDraft({
 watch(
   () => draft.value.mode,
   (mode, previous) => {
-    if (mode === "proportional" && previous && previous !== "proportional") emit("filter-rank", undefined);
+    if (mode === ESchedulingMode.Proportional && previous && previous !== ESchedulingMode.Proportional)
+      emit("filter-rank", undefined);
   },
 );
 const selectedMode = computed(() => draft.value.mode ?? null);
@@ -367,7 +374,7 @@ const modeCardsFocused = ref(false);
 const hoveredMode = ref<string>();
 const modeHelpDismissed = ref(false);
 const unsavedGuaranteedMode = computed(
-  () => draft.value.mode === "guaranteed" && !props.pool.schedulingCapabilities?.quota,
+  () => draft.value.mode === ESchedulingMode.Guaranteed && !props.pool.schedulingCapabilities?.quota,
 );
 const modeHelpExpanded = computed(
   () => !modeHelpDismissed.value && (modeCardsHovered.value || modeCardsFocused.value || unsavedGuaranteedMode.value),
@@ -376,7 +383,7 @@ const showGuaranteedNotice = computed(
   () =>
     modeHelpExpanded.value &&
     !props.pool.schedulingCapabilities?.quota &&
-    (hoveredMode.value === "guaranteed" || draft.value.mode === "guaranteed"),
+    (hoveredMode.value === ESchedulingMode.Guaranteed || draft.value.mode === ESchedulingMode.Guaranteed),
 );
 let modeHelpCloseTimer: ReturnType<typeof setTimeout> | undefined;
 onBeforeUnmount(() => clearTimeout(modeHelpCloseTimer));
@@ -409,10 +416,11 @@ const previewPool = computed(() => ({
   schedulingCapabilities: draft.value.mode ? toSchedulingCapabilities(draft.value) : draft.value.capabilities,
 }));
 function selectMode(value: string | number | boolean | null) {
-  if (saving.value || (props.pool.schedulingCapabilities?.quota && value !== "guaranteed")) return;
-  if (value === "proportional" || value === "ranked" || value === "guaranteed") requestMode(value);
+  if (saving.value || (props.pool.schedulingCapabilities?.quota && value !== ESchedulingMode.Guaranteed)) return;
+  if (value === ESchedulingMode.Proportional || value === ESchedulingMode.Ranked || value === ESchedulingMode.Guaranteed)
+    requestMode(value);
 }
-function applyEdit(edit: DepartmentSchedulingEdit) {
+function applyEdit(edit: IDepartmentSchedulingEdit) {
   if (saving.value || !props.canEditDepartments) return;
   draft.value.departments[edit.id] = { ...draft.value.departments[edit.id], ...edit };
 }
@@ -457,7 +465,7 @@ async function save() {
   emit("saving", true);
   saveError.value = "";
   try {
-    if (draft.value.mode === "guaranteed") {
+    if (draft.value.mode === ESchedulingMode.Guaranteed) {
       for (const edit of Object.values(draft.value.departments)) {
         if (edit.quota === undefined) continue;
         if (!props.loadQuotaContext) throw new Error("Project quota validation is unavailable. Try again.");
@@ -551,7 +559,7 @@ async function save() {
 .scheduling-mode-section :deep(.runai-expansion-header) {
   height: 48px;
   min-height: 48px;
-  background: #fff;
+  background: var(--bg-primary-default);
   box-shadow: inset 0 -1px var(--border-subtle);
 }
 .scheduling-mode-section :deep(.runai-expansion-divider) {
@@ -601,14 +609,14 @@ async function save() {
     column-gap: 10px;
     row-gap: 0;
     text-align: left;
-    background: #fff;
+    background: var(--bg-primary-default);
     transition: none;
   }
   :deep(.runai-segment:hover:not(.runai-segment--selected):not(.runai-segment--disabled)) {
-    background: #eee;
+    background: var(--bg-primary-hover);
   }
   :deep(.runai-segment--selected:hover:not(.runai-segment--disabled)) {
-    background: #e8f2d9;
+    background: var(--bg-primary-pressed);
   }
   :deep(.mode-icon) {
     grid-column: 1;
@@ -651,7 +659,7 @@ async function save() {
   height: 20px;
   border-radius: 3px;
   background: var(--border-pressed);
-  color: #fafafa;
+  color: var(--text-inverse);
 }
 .scheduling-footer {
   display: flex;
@@ -706,7 +714,7 @@ async function save() {
   border-radius: 0;
   text-align: left;
   animation: none;
-  background-color: var(--b-bg-secondary-default, #f1f3f4);
+  background-color: var(--b-bg-secondary-default);
 }
 .view-only {
   margin-left: 10px;
@@ -717,31 +725,31 @@ async function save() {
   border-radius: 2px;
 }
 .mode-cards :deep(.runai-segment--disabled) {
-  background: #eee;
+  background: var(--bg-primary-hover);
   opacity: 1 !important;
 }
 .mode-cards :deep(.runai-segment--disabled:not(.runai-segment--selected) .runai-segment__label) {
-  color: rgba(0, 0, 0, 0.54);
+  color: var(--text-disabled);
 }
 .mode-cards :deep(.runai-segment--disabled .runai-segment__description),
 .mode-cards :deep(.runai-segment--disabled .mode-explanation) {
-  color: #939398;
+  color: var(--text-tertiary);
 }
 .mode-cards :deep(.runai-segment--disabled .mode-icon) {
-  color: #939398;
+  color: var(--text-tertiary);
 }
 .mode-check--hover-only {
   visibility: hidden;
 }
 .mode-cards :deep(.runai-segment--disabled:hover) {
-  border-color: #65a800;
-  box-shadow: inset 0 0 0 2px #65a800;
+  border-color: var(--border-pressed);
+  box-shadow: inset 0 0 0 2px var(--border-pressed);
 }
 .mode-cards :deep(.runai-segment--disabled:hover .runai-segment__label) {
-  color: #65a800;
+  color: var(--interactive-secondary-hover-text);
 }
 .mode-cards :deep(.runai-segment--disabled:hover .mode-icon) {
-  color: #65a800;
+  color: var(--interactive-secondary-hover-text);
 }
 .mode-cards :deep(.runai-segment--disabled:hover .mode-check--hover-only) {
   visibility: visible;

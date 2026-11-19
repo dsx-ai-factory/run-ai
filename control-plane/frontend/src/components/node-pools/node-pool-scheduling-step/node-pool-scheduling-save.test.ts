@@ -2,6 +2,7 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
+import { ENodePoolSchedulingModeId as ESchedulingMode } from "@/models/node-pool.model";
 import { describe, it, expect, vi } from "vitest";
 import { buildSchedulingSave, createSchedulingSaver } from "./node-pool-scheduling-save";
 import type { Nodepool } from "@/swagger-models/cluster-service-client";
@@ -12,7 +13,7 @@ const pool = {
   schedulingConfiguration: { gpuPodsPlacementStrategy: { node: "spread" } },
 } as Nodepool;
 const draft = (): SchedulingDraft => ({
-  mode: "proportional",
+  mode: ESchedulingMode.Proportional,
   automaticWeights: false,
   cpuQuota: false,
   departments: { a: { id: "a", weight: 3, quota: 8, limit: 9, rank: "High" } },
@@ -60,7 +61,7 @@ describe("scheduling persistence", () => {
     expect(() =>
       buildSchedulingSave(pool, {
         ...draft(),
-        mode: "guaranteed",
+        mode: ESchedulingMode.Guaranteed,
         maxAllocation: true,
         departments: { a: { id: "a", limit: -0.5 } },
       }),
@@ -113,7 +114,7 @@ describe("scheduling persistence", () => {
     const update = vi.fn(() => new Promise<Nodepool>((resolve) => (finish = resolve)));
     const batch = vi.fn();
     const saver = createSchedulingSaver({ patchPool: update, patchDepartments: batch });
-    const value = { ...draft(), mode: "ranked" as const };
+    const value = { ...draft(), mode: ESchedulingMode.Ranked as const };
     const pending = saver.save(pool, value);
     await expect(saver.save(pool, value)).rejects.toThrow(/already/);
     finish(pool);

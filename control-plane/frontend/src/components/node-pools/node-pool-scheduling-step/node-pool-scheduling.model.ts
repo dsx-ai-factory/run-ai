@@ -2,18 +2,19 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
+import { ENodePoolSchedulingModeId as ESchedulingMode } from "@/models/node-pool.model";
 import type { SchedulingCapabilitiesNullable } from "@/swagger-models/cluster-service-client";
 
-import { PROPORTIONAL_CAPABILITIES, type NodePoolSchedulingMode } from "@/models/node-pool.model";
-export type SchedulingMode = NodePoolSchedulingMode;
-export interface DepartmentSchedulingEdit {
+import { PROPORTIONAL_CAPABILITIES, type ENodePoolSchedulingModeId } from "@/models/node-pool.model";
+export type SchedulingMode = ENodePoolSchedulingModeId;
+export interface IDepartmentSchedulingEdit {
   id: string;
   weight?: number;
   quota?: number;
   limit?: number | null;
   rank?: string;
 }
-export interface SchedulingSnapshot {
+export interface ISchedulingSnapshot {
   mode?: SchedulingMode;
   automaticWeights: boolean;
   cpuQuota: boolean;
@@ -22,26 +23,26 @@ export interface SchedulingSnapshot {
   historicalWeight?: number | null;
   historicalWindow?: Record<string, number | null>;
   minimumRuntime?: Record<string, number | null>;
-  departments: Record<string, DepartmentSchedulingEdit>;
+  departments: Record<string, IDepartmentSchedulingEdit>;
   capabilities?: SchedulingCapabilitiesNullable;
 }
-export type SchedulingDraft = SchedulingSnapshot;
-export function createSchedulingDraft(snapshot: SchedulingSnapshot): SchedulingDraft {
+export type SchedulingDraft = ISchedulingSnapshot;
+export function createSchedulingDraft(snapshot: ISchedulingSnapshot): SchedulingDraft {
   return JSON.parse(JSON.stringify(snapshot));
 }
 export function toSchedulingCapabilities(draft: SchedulingDraft): SchedulingCapabilitiesNullable {
   if (!draft.mode) return { ...draft.capabilities };
-  if (draft.mode === "proportional") return { ...PROPORTIONAL_CAPABILITIES };
+  if (draft.mode === ESchedulingMode.Proportional) return { ...PROPORTIONAL_CAPABILITIES };
   return {
-    adjustableWeights: draft.mode !== "guaranteed" || !draft.automaticWeights,
-    quota: draft.mode === "guaranteed",
+    adjustableWeights: draft.mode !== ESchedulingMode.Guaranteed || !draft.automaticWeights,
+    quota: draft.mode === ESchedulingMode.Guaranteed,
     ranks: true,
-    limits: draft.mode === "guaranteed" && !!draft.maxAllocation,
-    cpuQuota: draft.mode === "guaranteed" && draft.cpuQuota,
+    limits: draft.mode === ESchedulingMode.Guaranteed && !!draft.maxAllocation,
+    cpuQuota: draft.mode === ESchedulingMode.Guaranteed && draft.cpuQuota,
   };
 }
 
-export interface DepartmentValidationContext {
+export interface IDepartmentValidationContext {
   totalsComplete?: boolean;
   childQuotaSum?: number;
   nonPreemptibleUsage?: number;
@@ -51,13 +52,13 @@ export interface DepartmentValidationContext {
   finiteQuotaSum?: number;
   unlimitedQuotaCount?: number;
 }
-export function recommendedDepartmentQuotaMinimum(context: DepartmentValidationContext) {
+export function recommendedDepartmentQuotaMinimum(context: IDepartmentValidationContext) {
   const known = [context.childQuotaSum, context.nonPreemptibleUsage].filter(
     (value): value is number => value != null && Number.isFinite(value) && value >= 0,
   );
   return known.length ? Math.max(...known) : undefined;
 }
-export function departmentQuotaBudget(originalQuota: number | undefined, context: DepartmentValidationContext) {
+export function departmentQuotaBudget(originalQuota: number | undefined, context: IDepartmentValidationContext) {
   const { capacity, finiteQuotaSum, unlimitedQuotaCount } = context;
   if (
     context.totalsComplete === false ||
@@ -84,7 +85,7 @@ export function weightPercentage(weight: number, total: number | undefined): num
   if (total == null || !Number.isFinite(total) || total < 0 || !Number.isFinite(weight)) return undefined;
   return total === 0 ? 0 : (weight / total) * 100;
 }
-export function validateDepartmentEdit(edit: DepartmentSchedulingEdit, context: DepartmentValidationContext) {
+export function validateDepartmentEdit(edit: IDepartmentSchedulingEdit, context: IDepartmentValidationContext) {
   const errors: string[] = [];
   const warnings: string[] = [];
   if (
@@ -116,7 +117,7 @@ export function validateDepartmentEdit(edit: DepartmentSchedulingEdit, context: 
     warnings.push("Assigned quota exceeds node pool capacity.");
   return { errors, warnings };
 }
-export interface SchedulingTotals {
+export interface ISchedulingTotals {
   rawWeightsSum?: number;
   automaticWeightsSum?: number;
   weightsSum: number;
@@ -125,9 +126,9 @@ export interface SchedulingTotals {
   unlimitedQuotaCount?: number;
 }
 export function schedulingTotalsWithEdits(
-  server: Record<string, SchedulingTotals>,
-  baseline: Record<string, DepartmentSchedulingEdit>,
-  edits: Record<string, DepartmentSchedulingEdit>,
+  server: Record<string, ISchedulingTotals>,
+  baseline: Record<string, IDepartmentSchedulingEdit>,
+  edits: Record<string, IDepartmentSchedulingEdit>,
   automatic: boolean,
 ) {
   const totals = Object.fromEntries(
@@ -173,4 +174,10 @@ export function schedulingTotalsWithEdits(
     }
   }
   return totals;
+}
+
+export enum EResourceEditorKind {
+  Weight = "weight",
+  Quota = "quota",
+  Limit = "limit",
 }

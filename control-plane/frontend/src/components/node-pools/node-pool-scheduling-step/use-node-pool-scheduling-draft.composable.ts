@@ -2,18 +2,18 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
+import { ENodePoolSchedulingModeId as ESchedulingMode } from "@/models/node-pool.model";
 import { computed, ref } from "vue";
-import { createSchedulingDraft, type SchedulingMode, type SchedulingSnapshot } from "./node-pool-scheduling.model";
+import { createSchedulingDraft, type SchedulingMode, type ISchedulingSnapshot } from "./node-pool-scheduling.model";
 
-export function useNodePoolSchedulingDraft(initial: SchedulingSnapshot) {
+export function useNodePoolSchedulingDraft(initial: ISchedulingSnapshot) {
   let baseline = createSchedulingDraft(initial);
   const draft = ref(createSchedulingDraft(initial));
   const pendingMode = ref<SchedulingMode>();
-  const resetRevision = ref(0);
   const isDirty = computed(() => JSON.stringify(draft.value) !== JSON.stringify(baseline));
   function requestMode(mode: SchedulingMode) {
     // Preserve other edits; maximum allocations belong only to Guaranteed quota.
-    if (mode !== "guaranteed") {
+    if (mode !== ESchedulingMode.Guaranteed) {
       const departments = Object.fromEntries(
         Object.entries(draft.value.departments).map(([id, edit]) => {
           const next = { ...edit };
@@ -33,7 +33,7 @@ export function useNodePoolSchedulingDraft(initial: SchedulingSnapshot) {
   function cancelModeChange() {
     pendingMode.value = undefined;
   }
-  function acceptSnapshot(snapshot: SchedulingSnapshot) {
+  function acceptSnapshot(snapshot: ISchedulingSnapshot) {
     baseline = createSchedulingDraft(snapshot);
     draft.value = createSchedulingDraft(snapshot);
     pendingMode.value = undefined;
@@ -42,7 +42,6 @@ export function useNodePoolSchedulingDraft(initial: SchedulingSnapshot) {
     draft,
     isDirty,
     pendingMode,
-    resetRevision,
     requestMode,
     confirmModeChange,
     cancelModeChange,
