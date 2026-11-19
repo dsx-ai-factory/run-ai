@@ -71,7 +71,6 @@ describe("saml-fields.vue", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockDryRun(new Date("2030-01-01T00:00:00.000Z"));
   });
 
   afterEach(() => {
