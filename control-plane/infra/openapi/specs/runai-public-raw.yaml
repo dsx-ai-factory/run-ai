@@ -49154,7 +49154,7 @@ components:
                   type: string
                   description: Name of the predefined role for cluster permissions
                   example: admin
-            customRole:
+            clusterRoleOptional:
               type: boolean
               default: false
               description: >-

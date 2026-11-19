@@ -115,8 +115,8 @@ type AccessRuleSync struct {
 
 	// Indicates if the access rule's role is a custom role with no predefined role for cluster permissions.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//CustomRole bool `json:"customRole,omitempty"`
-	CustomRole bool `json:"customRole,omitempty" gorm:"not null;"`
+	//ClusterRoleOptional bool `json:"clusterRoleOptional,omitempty"`
+	ClusterRoleOptional bool `json:"clusterRoleOptional,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	// Indicates if the access rule is in 'Deleting' phase and should be deleted from the cluster

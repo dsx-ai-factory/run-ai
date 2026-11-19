@@ -1292,19 +1292,20 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 		})
 
 		It("marks only a custom role with no predefined role", func() {
-			apiResponse, _ := accessRulesApiService.GetAccessRulesSync(ctx, 0, 0, "", "")
+			apiResponse, err := accessRulesApiService.GetAccessRulesSync(ctx, 0, 0, "", "")
+			Expect(err).ToNot(HaveOccurred())
 			Expect(apiResponse.Code).To(Equal(http.StatusOK))
 
-			customRoleByRoleId := map[int32]bool{}
+			clusterRoleOptionalByRoleId := map[int32]bool{}
 			for _, rule := range httpResponseBodyToAccessRulesSync(apiResponse).AccessRules {
-				customRoleByRoleId[rule.RoleId] = rule.CustomRole
+				clusterRoleOptionalByRoleId[rule.RoleId] = rule.ClusterRoleOptional
 			}
 
-			Expect(customRoleByRoleId).To(HaveKeyWithValue(controlPlaneOnlyRole.Id, true),
+			Expect(clusterRoleOptionalByRoleId).To(HaveKeyWithValue(controlPlaneOnlyRole.Id, true),
 				"a custom role with no predefined role has no ClusterRole")
-			Expect(customRoleByRoleId).To(HaveKeyWithValue(createdRoles[0].Id, false),
+			Expect(clusterRoleOptionalByRoleId).To(HaveKeyWithValue(createdRoles[0].Id, false),
 				"a custom role with a predefined role binds to that role's ClusterRole")
-			Expect(customRoleByRoleId).To(HaveKeyWithValue(int32(RolesMap[static_roles.DepartmentAdmin.Name]), false),
+			Expect(clusterRoleOptionalByRoleId).To(HaveKeyWithValue(int32(RolesMap[static_roles.DepartmentAdmin.Name]), false),
 				"a predefined role has its own ClusterRole")
 		})
 	})

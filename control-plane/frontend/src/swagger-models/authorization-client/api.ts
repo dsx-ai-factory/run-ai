@@ -701,7 +701,7 @@ export interface AccessRuleSync {
      * @type {boolean}
      * @memberof AccessRuleSync
      */
-    'customRole'?: boolean;
+    'clusterRoleOptional'?: boolean;
     /**
      * Indicates if the access rule is in \'Deleting\' phase and should be deleted from the cluster
      * @type {boolean}
@@ -726,7 +726,7 @@ export interface AccessRuleSyncAllOf {
      * @type {boolean}
      * @memberof AccessRuleSyncAllOf
      */
-    'customRole'?: boolean;
+    'clusterRoleOptional'?: boolean;
     /**
      * Indicates if the access rule is in \'Deleting\' phase and should be deleted from the cluster
      * @type {boolean}

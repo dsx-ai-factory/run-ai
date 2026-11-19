@@ -140,14 +140,14 @@ var _ = Describe("AccessRulesHandler", func() {
 
 	Context("an access rule of a custom role", func() {
 		// accessrule-controller relies on this mark to accept a role that has no ClusterRole.
-		It("carries the backend's custom role mark onto the cluster object", func() {
+		It("carries the backend's optional ClusterRole mark onto the cluster object", func() {
 			customRoleRule := departmentAdminRule("control-plane-only")
-			customRoleRule.CustomRole = ptrTo(true)
+			customRoleRule.ClusterRoleOptional = ptrTo(true)
 
 			accessRule, err := convertBackendToClusterAccessRule(&customRoleRule)
 
 			Expect(err).ToNot(HaveOccurred())
-			Expect(accessRule.Spec.CustomRole).To(BeTrue())
+			Expect(accessRule.Spec.ClusterRoleOptional).To(BeTrue())
 		})
 	})
 

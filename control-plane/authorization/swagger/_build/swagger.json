@@ -3268,7 +3268,7 @@
                   }
                 }
               },
-              "customRole": {
+              "clusterRoleOptional": {
                 "type": "boolean",
                 "default": false,
                 "description": "Indicates if the access rule's role is a custom role with no predefined role for cluster permissions.",

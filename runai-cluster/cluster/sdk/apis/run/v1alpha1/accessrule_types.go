@@ -35,7 +35,7 @@ type AccessRuleSpec struct {
 
 	// true when the role is a custom role with no predefined role for cluster permissions
 	// +optional
-	CustomRole bool `json:"customRole,omitempty"`
+	ClusterRoleOptional bool `json:"clusterRoleOptional,omitempty"`
 }
 
 // AccessRuleStatus defines the observed state of AccessRule

@@ -916,11 +916,11 @@ var _ = Describe("Access Rule Controller Tests", Ordered, func() {
 		It("ClusterRoles of the custom role don't exist - Ready with nothing bound", func() {
 			accessRuleName := generateAccessRuleName()
 			accessRule = createAccessRule(accessRuleName, &v1alpha1.AccessRuleSpec{
-				SubjectId:   userA,
-				SubjectType: v1alpha1.UserSubject,
-				ScopeType:   v1alpha1.ClusterScope,
-				RoleName:    "un-existing-role",
-				CustomRole:  true,
+				SubjectId:           userA,
+				SubjectType:         v1alpha1.UserSubject,
+				ScopeType:           v1alpha1.ClusterScope,
+				RoleName:            "un-existing-role",
+				ClusterRoleOptional: true,
 			}, k8sClient)
 
 			validateAccessRuleReady(accessRuleName, k8sClient)
@@ -935,12 +935,12 @@ var _ = Describe("Access Rule Controller Tests", Ordered, func() {
 		It("ClusterRoles of the custom role exist - subject is bound", func() {
 			accessRuleName := generateAccessRuleName()
 			accessRule = createAccessRule(accessRuleName, &v1alpha1.AccessRuleSpec{
-				SubjectId:   userA,
-				SubjectType: v1alpha1.UserSubject,
-				ScopeName:   testProjectA,
-				ScopeType:   v1alpha1.ProjectScope,
-				RoleName:    testClusterRoleA,
-				CustomRole:  true,
+				SubjectId:           userA,
+				SubjectType:         v1alpha1.UserSubject,
+				ScopeName:           testProjectA,
+				ScopeType:           v1alpha1.ProjectScope,
+				RoleName:            testClusterRoleA,
+				ClusterRoleOptional: true,
 			}, k8sClient)
 
 			eventuallyValidateRoleBindingsForAccessRule(accessRule, []string{testNamespaceA}, k8sClient)
