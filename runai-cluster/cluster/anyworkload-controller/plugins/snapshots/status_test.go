@@ -276,13 +276,27 @@ var _ = Describe("Status", func() {
 	})
 
 	// Nothing else rewrites it, and the deletion waits for a record it can read.
-	It("starts an unreadable record over", func() {
+	It("starts an unreadable record over from a replica's key", func() {
+		newest := replica("llama-a", "rs-1", 100, true)
 		plugin := newPlugin(kartaStub{karta: deploymentKarta()}, true)
 		runner := withUnreadableRecord(runnerFor(deployment(optIn, gpu)))
 
-		Expect(plugin.Status(ctx, runner, captureClient(), ownStatus(runner), reconcile.New())).To(Succeed())
+		Expect(plugin.Status(ctx, runner, captureClient(newest), ownStatus(runner), reconcile.New())).To(Succeed())
 
-		Expect(recorded(runner)).To(Equal(statusInfo{}))
+		Expect(recorded(runner)).To(Equal(statusInfo{NewestKey: keyOf(newest)}))
+	})
+
+	// Starting over would lose the newest key, and the deletion its snapshot.
+	It("leaves an unreadable record alone while no replica gives its key", func() {
+		plugin := newPlugin(kartaStub{karta: deploymentKarta()}, true)
+		runner := withUnreadableRecord(runnerFor(deployment(optIn, gpu)))
+		unreadable := ownStatus(runner).AdditionalInfo.DeepCopy()
+		state := reconcile.New()
+
+		Expect(plugin.Status(ctx, runner, captureClient(), ownStatus(runner), state)).To(Succeed())
+
+		Expect(ownStatus(runner).AdditionalInfo).To(Equal(unreadable))
+		Expect(state.PluginIssues(plugin)).To(BeEmpty(), "the deletion reports it")
 	})
 
 	// NotInstalled is for an opt-in that can't be honoured; a workload that never

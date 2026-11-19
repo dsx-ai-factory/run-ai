@@ -181,17 +181,18 @@ const (
 // key. Its record goes in the runner's status, so a restarted controller
 // neither loses nor repeats one.
 type captureEvents struct {
-	recorder record.EventRecorder
-	runner   *dromosv1alpha1.WorkloadRunner
-	info     statusInfo
-	changed  bool
+	recorder   record.EventRecorder
+	runner     *dromosv1alpha1.WorkloadRunner
+	info       statusInfo
+	unreadable bool
+	changed    bool
 }
 
 func (p *Plugin) captureEvents(runner *dromosv1alpha1.WorkloadRunner) *captureEvents {
-	// An unreadable record starts over, which can repeat an event, so it
-	// doesn't hold up the capture; Status rewrites it.
-	info, _ := recordedStatus(runner)
-	return &captureEvents{recorder: p.events, runner: runner, info: info}
+	// An unreadable record doesn't hold up the capture, but it emits nothing:
+	// saving it here would drop the newest key. Status starts it over.
+	info, err := recordedStatus(runner)
+	return &captureEvents{recorder: p.events, runner: runner, info: info, unreadable: err != nil}
 }
 
 // reportCapture emits how an existing capture ended, if it has.
@@ -213,6 +214,9 @@ func (e *captureEvents) reportCapture(job *snapshotv1alpha1.SnapshotJob) {
 // emit emits reason for key unless the record has it. A capture with a UID
 // other than the recorded one is new, and starts the key's record over.
 func (e *captureEvents) emit(key string, job types.UID, eventType, reason, message string) {
+	if e.unreadable {
+		return
+	}
 	emitted := e.info.Events[key]
 	if job != "" && job != emitted.SnapshotJob {
 		emitted = keyEvents{SnapshotJob: job}

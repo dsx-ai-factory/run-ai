@@ -142,7 +142,7 @@ type keyEvents struct {
 }
 
 // errCaptureFailed is reported while a key in use has a failed capture.
-var errCaptureFailed = errors.New("the snapshot capture failed, so replicas start cold")
+var errCaptureFailed = errors.New(constants.SnapshotCaptureFailedMessage)
 
 // recordKeys records the key of the runner's most recently created replica, and
 // leaves it alone while it has none. It forgets the events of a key with neither
@@ -158,12 +158,17 @@ func recordKeys(ctx context.Context, c client.Reader, runner *dromosv1alpha1.Wor
 	if err != nil {
 		return nil, err
 	}
-	// An unreadable record starts over. All of it can be derived again but the
-	// newest key of a workload at zero, whose next replica then starts cold.
+	// An unreadable record starts over from a replica's key, the one part that
+	// can't be derived again. With no replica it stays as it is, so the deletion
+	// keeps failing and the snapshot the next replica restores from survives.
 	info, readErr := recordedStatus(runner)
+	newest := newestKey(replicas)
+	if readErr != nil && newest == "" {
+		return nil, nil //nolint:nilerr // The deletion reports it.
+	}
 	changed := readErr != nil
 	// With no replica the recorded key stays, so it survives a scale to zero.
-	if newest := newestKey(replicas); newest != "" && newest != info.NewestKey {
+	if newest != "" && newest != info.NewestKey {
 		info.NewestKey = newest
 		changed = true
 	}

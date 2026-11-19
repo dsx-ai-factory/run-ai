@@ -85,6 +85,10 @@ var _ = Describe("ComputeInferenceStatus with the snapshot plugin", func() {
 		Phase:  dromosv1alpha1.PluginPhaseFailed,
 		Issues: []dromosv1alpha1.Issue{{Description: "the snapshot capture failed, so replicas start cold"}},
 	}
+	// As the plugin reports them: a problem of its own, then the failed capture.
+	otherIssue := dromosv1alpha1.Issue{Description: "[Service:llama] list PodSnapshots: context deadline exceeded"}
+	captureIssue := dromosv1alpha1.Issue{Description: "[Service:llama] the snapshot capture failed, " +
+		"so replicas start cold: SnapshotJob llama-k1: DeadlineExceeded: the capture did not finish in time"}
 	readyPod := corev1.Pod{Status: corev1.PodStatus{
 		Phase:      corev1.PodRunning,
 		Conditions: []corev1.PodCondition{{Type: corev1.PodReady, Status: corev1.ConditionTrue}},
@@ -109,8 +113,20 @@ var _ = Describe("ComputeInferenceStatus with the snapshot plugin", func() {
 		},
 		Entry("Failed, with the plugin's issue as the message", running, failed,
 			v1alpha1.ExWDegradedPhase, "the snapshot capture failed, so replicas start cold"),
+		Entry("Failed, with the failed capture's issue even when another comes first", running,
+			&dromosv1alpha1.PluginStatus{
+				Phase:  dromosv1alpha1.PluginPhaseFailed,
+				Issues: []dromosv1alpha1.Issue{otherIssue, captureIssue},
+			},
+			v1alpha1.ExWDegradedPhase, captureIssue.Description),
 		Entry("Failed with no issue keeps the message", runningAfterFailedUpdate,
 			&dromosv1alpha1.PluginStatus{Phase: dromosv1alpha1.PluginPhaseFailed},
+			v1alpha1.ExWDegradedPhase, "Workload is ready. Update failed: Failed to pull container image."),
+		Entry("Failed with only another issue keeps the message too", runningAfterFailedUpdate,
+			&dromosv1alpha1.PluginStatus{
+				Phase:  dromosv1alpha1.PluginPhaseFailed,
+				Issues: []dromosv1alpha1.Issue{otherIssue},
+			},
 			v1alpha1.ExWDegradedPhase, "Workload is ready. Update failed: Failed to pull container image."),
 		Entry("Ready", running, &dromosv1alpha1.PluginStatus{Phase: dromosv1alpha1.PluginPhaseReady},
 			v1alpha1.ExWRunningPhase, ""),

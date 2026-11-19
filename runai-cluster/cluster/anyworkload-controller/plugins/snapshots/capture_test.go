@@ -529,6 +529,22 @@ var _ = Describe("Deleting unused snapshots", func() {
 		Expect(podSnapshots(ctx, c)).To(HaveLen(1))
 	})
 
+	// A record rewritten without that key would delete the snapshot a reconcile later.
+	It("still deletes nothing on the reconciles after, while no replica gives the key", func() {
+		c := captureClient(jobCaptured(capturedJob("k1", true)), capturedPodSnapshot("k1", "runner-uid"))
+		plugin := capturePlugin()
+		plugin.kartas = kartaStub{karta: deploymentKarta()}
+		runner := withUnreadableRecord(runnerFor(optedIn()))
+
+		for range 2 {
+			handleRunner(ctx, plugin, runner, c, optedIn())
+			Expect(plugin.Status(ctx, runner, c, runner.Status.Plugins[PluginName], reconcile.New())).To(Succeed())
+		}
+
+		Expect(snapshotJobs(ctx, c)).To(HaveLen(1))
+		Expect(podSnapshots(ctx, c)).To(HaveLen(1))
+	})
+
 	// They are deleted with that runner, which owns them.
 	It("leaves an earlier runner's snapshots", func() {
 		c := captureClient(capturedPodSnapshot("old-key", "earlier-runner-uid"))
