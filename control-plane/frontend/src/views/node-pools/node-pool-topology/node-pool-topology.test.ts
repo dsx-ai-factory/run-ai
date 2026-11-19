@@ -8,6 +8,7 @@ import { createTestingPinia } from "@pinia/testing";
 import { Quasar, Notify } from "quasar";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { usePermissionStore } from "@/stores/permissions.store";
+import { requestToLeave } from "@/services/infra/router.service/router.service";
 import View from "./node-pool-topology.vue";
 import Step from "@/components/node-pools/node-pool-topology-step/node-pool-topology-step.vue";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
@@ -47,6 +48,27 @@ beforeEach(() => {
   vi.mocked(clusterService.getNodepool).mockResolvedValue(pool);
 });
 describe("topology route", () => {
+  it("uses the shared page loader while fetching the pool and keeps Close available", async () => {
+    let resolvePool!: (value: Nodepool) => void;
+    vi.mocked(clusterService.getNodepool).mockImplementationOnce(
+      () =>
+        new Promise<Nodepool>((resolve) => {
+          resolvePool = resolve;
+        }),
+    );
+    const { wrapper } = await render();
+    await flushPromises();
+    expect(wrapper.find(".runai-default-loader").exists()).toBe(true);
+    expect(wrapper.text()).not.toContain("Loading node pool");
+    expect(wrapper.findComponent(Step).exists()).toBe(false);
+    expect(await requestToLeave()).toBe(true);
+    resolvePool(pool);
+    await flushPromises();
+    expect(wrapper.find(".runai-default-loader").exists()).toBe(false);
+    expect(wrapper.findComponent(Step).props("pool").id).toBe("one");
+    wrapper.unmount();
+  });
+
   it("loads a direct URL by saved pool ID and retries failed reads", async () => {
     vi.mocked(clusterService.getNodepool).mockRejectedValueOnce(new Error("Unavailable"));
     const { wrapper } = await render();

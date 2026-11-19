@@ -67,6 +67,27 @@ async function render(realStep = false) {
 }
 beforeEach(() => vi.clearAllMocks());
 describe("scheduling route", () => {
+  it("uses the shared page loader while fetching the pool and keeps Close available", async () => {
+    let resolvePool!: (value: Nodepool) => void;
+    vi.mocked(clusterService.getNodepool).mockImplementationOnce(
+      () =>
+        new Promise<Nodepool>((resolve) => {
+          resolvePool = resolve;
+        }),
+    );
+    const { wrapper } = await render();
+    await flushPromises();
+    expect(wrapper.find(".runai-default-loader").exists()).toBe(true);
+    expect(wrapper.text()).not.toContain("Loading node pool");
+    expect(wrapper.findComponent(Step).exists()).toBe(false);
+    expect(await requestToLeave()).toBe(true);
+    resolvePool(pool);
+    await flushPromises();
+    expect(wrapper.find(".runai-default-loader").exists()).toBe(false);
+    expect(wrapper.findComponent(Step).props("pool").id).toBe("one");
+    wrapper.unmount();
+  });
+
   it.each(["loading", "error"])("allows header Close in the %s state", async (state) => {
     vi.mocked(clusterService.getNodepool).mockImplementation(() =>
       state === "error" ? Promise.reject(new Error("Unavailable")) : new Promise(() => {}),

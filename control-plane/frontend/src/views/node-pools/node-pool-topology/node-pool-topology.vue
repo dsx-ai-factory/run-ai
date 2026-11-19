@@ -5,7 +5,7 @@
 <template>
   <div class="node-pool-topology-view">
     <runai-form-wrapper v-if="!pool" :form-state="{}" full-width>
-      <div v-if="loading" class="q-pa-lg" role="status">Loading node pool…</div>
+      <runai-default-loader v-if="loading" />
       <q-banner v-else-if="loadError" class="bg-red-1 text-negative q-ma-lg" role="alert"
         >{{ loadError
         }}<template #action
@@ -36,6 +36,7 @@ import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import NodePoolTopologyStep from "@/components/node-pools/node-pool-topology-step/node-pool-topology-step.vue";
+import { RunaiDefaultLoader } from "@/components/common/runai-default-loader";
 import RunaiFormWrapper from "@/components/common/runai-form-wrapper/runai-form-wrapper.vue";
 import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
 import { useNodePoolTopologyData } from "@/components/node-pools/node-pool-topology-step/use-node-pool-topology-data.composable";

@@ -4,9 +4,7 @@
 -->
 <template>
   <runai-form-wrapper v-if="!pool" :form-state="{}" full-width>
-    <div v-if="loading" class="q-pa-lg">
-      <q-spinner color="primary" role="progressbar" aria-label="Loading node pool" />
-    </div>
+    <runai-default-loader v-if="loading" />
     <q-banner v-else-if="loadError" class="bg-red-1 text-negative q-ma-lg" role="alert">
       {{ loadError }}
       <template #action
@@ -55,6 +53,7 @@ import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
 import NodePoolSchedulingStep from "@/components/node-pools/node-pool-scheduling-step/node-pool-scheduling-step.vue";
 import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
+import { RunaiDefaultLoader } from "@/components/common/runai-default-loader";
 import RunaiFormWrapper from "@/components/common/runai-form-wrapper/runai-form-wrapper.vue";
 import { useNodePoolSchedulingData } from "@/components/node-pools/node-pool-scheduling-step/use-node-pool-scheduling-data.composable";
 import { loadChildQuotaSum } from "@/components/node-pools/node-pool-scheduling-step/node-pool-scheduling.service";
