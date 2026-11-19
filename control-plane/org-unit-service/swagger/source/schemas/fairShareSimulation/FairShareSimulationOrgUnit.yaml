@@ -1,8 +1,7 @@
 type: object
 description: |
   A requested org unit with its unsaved changes. Each field replaces the stored value on its own; omitted fields keep
-  it. `demand` is the GPUs the org unit asks for (the dragged slider), capped by its limit; without it, half the node
-  pool's capacity.
+  it. `demand` is the GPUs the org unit asks for, capped by its limit; without it, half the node pool's capacity.
 required:
   - id
 properties:
@@ -19,7 +18,7 @@ properties:
     allOf:
       - $ref: "./FairShareSimulationGpuSettings.yaml"
   demand:
-    description: The dragged slider, capped by the limit. Omitted or null asks for half the capacity.
+    description: The GPUs the org unit asks for, capped by its limit. Omitted or null asks for half the capacity.
     nullable: true
     allOf:
       - $ref: "./FairShareSimulationResources.yaml"

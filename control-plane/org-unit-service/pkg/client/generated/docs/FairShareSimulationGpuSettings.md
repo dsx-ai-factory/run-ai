@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Deserved** | Pointer to **NullableFloat64** | The GPU quota; -1 means unlimited. Values between -1 and 0 are rejected. | [optional] 
+**Deserved** | Pointer to **NullableFloat64** | The GPU quota; -1 means unlimited. Values between -1 and 0 are rejected. Ignored while quota is off. | [optional] 
 **Limit** | Pointer to **NullableFloat64** | The maximum GPU allocation; -1 means unlimited. Values between -1 and 0 are rejected. Only while limits is on, and not below the quota.  | [optional] 
 **OverQuotaWeight** | Pointer to **NullableFloat64** | The over-quota weight within the rank. Ignored while adjustableWeights is off, where the weight is the quota. | [optional] 
 

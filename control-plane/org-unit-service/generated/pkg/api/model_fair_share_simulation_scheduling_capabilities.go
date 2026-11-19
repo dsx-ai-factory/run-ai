@@ -20,7 +20,7 @@ var dummyFairShareSimulationSchedulingCapabilities = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// FairShareSimulationSchedulingCapabilities - The node pool's scheduling capabilities as set in the form, saved or not.
+// FairShareSimulationSchedulingCapabilities - The node pool's scheduling capabilities to simulate, saved or not.
 type FairShareSimulationSchedulingCapabilities struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
