@@ -21,6 +21,7 @@ func TransformToAppearanceSettingsResponse(settingsList []setting_pkg.Settinger)
 					Text:            &v.Text,
 					BackgroundColor: &v.BackgroundColor,
 					FontColor:       &v.FontColor,
+					FontSize:        v.FontSize,
 				},
 				DisplayName: v.DisplayName(),
 				Description: v.Description(),
