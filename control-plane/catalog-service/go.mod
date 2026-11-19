@@ -163,7 +163,7 @@ require (
 	go.yaml.in/yaml/v2 v2.4.5 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/crypto v0.59.0 // indirect
-	golang.org/x/exp v0.0.0-20261117202309-7a49493bfd90 // indirect
+	golang.org/x/exp v0.0.0-20261118215729-2791e4028fd4 // indirect
 	golang.org/x/mod v0.43.0 // indirect
 	golang.org/x/net v0.63.0 // indirect
 	golang.org/x/sync v0.25.0 // indirect
@@ -171,8 +171,8 @@ require (
 	golang.org/x/text v0.44.0 // indirect
 	golang.org/x/tools v0.53.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20261116203732-fd2c7689a808 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20261116203732-fd2c7689a808 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20261118221215-c8830f628b3f // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20261118221215-c8830f628b3f // indirect
 	google.golang.org/grpc v1.85.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/validator.v2 v2.0.1 // indirect
