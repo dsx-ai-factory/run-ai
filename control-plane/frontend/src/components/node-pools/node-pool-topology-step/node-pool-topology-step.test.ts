@@ -100,8 +100,13 @@ describe("node pool topology step", () => {
     selector.vm.$emit("select", "fabric");
     wrapper.findAllComponents(Radio)[1].vm.$emit("update:model-value", "spread");
     await flushPromises();
-    expect(wrapper.get(".summary-topology").text()).toContain("Network topology: Training fabric");
-    expect(wrapper.get(".summary-topology").text()).toContain("GPU node placement strategy: Spread");
+    const topologyValues = Object.fromEntries(
+      wrapper.findAll(".summary-topology dl > div").map((row) => [row.get("dt").text(), row.get("dd").text()]),
+    );
+    expect(topologyValues).toMatchObject({
+      "Network topology": "Training fabric",
+      "GPU node placement strategy": "Spread",
+    });
     wrapper.unmount();
   });
   it("keeps the draft after a failed save and prevents duplicate submissions", async () => {

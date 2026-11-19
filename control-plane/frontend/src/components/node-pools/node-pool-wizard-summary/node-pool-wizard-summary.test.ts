@@ -24,14 +24,19 @@ describe("node pool wizard summary", () => {
       global: { plugins: [Quasar] },
     });
   }
+  function summaryValues(wrapper: ReturnType<typeof render>) {
+    return Object.fromEntries(wrapper.findAll("dl > div").map((row) => [row.get("dt").text(), row.get("dd").text()]));
+  }
   it("shows initial configuration and unknown resources without claiming zero capacity", () => {
     const wrapper = render();
     expect(wrapper.text()).toContain("Tokyo");
     expect(wrapper.text()).toContain("Proportional");
-    expect(wrapper.text()).toContain("Nodes: None");
-    expect(wrapper.text()).toContain("MNNVL: Auto detect");
-    expect(wrapper.text()).toContain("NUMA-aware scheduling: Disabled");
-    expect(wrapper.text()).toContain("GPU device placement strategy: Bin-pack");
+    expect(summaryValues(wrapper)).toMatchObject({
+      Nodes: "None",
+      MNNVL: "Auto detect",
+      "NUMA-aware scheduling": "Disabled",
+      "GPU device placement strategy": "Bin-pack",
+    });
     wrapper.unmount();
   });
   it("updates from changed draft or saved configuration including false values", async () => {
@@ -52,10 +57,12 @@ describe("node pool wizard summary", () => {
     });
     expect(wrapper.text()).toContain("Ranked");
     expect(wrapper.text()).not.toContain("Proportional");
-    expect(wrapper.text()).toContain("Network topology: Fabric");
-    expect(wrapper.text()).toContain("MNNVL: Is present");
-    expect(wrapper.text()).toContain("NUMA-aware scheduling: Enabled");
-    expect(wrapper.text()).toContain("GPU device placement strategy: Spread");
+    expect(summaryValues(wrapper)).toMatchObject({
+      "Network topology": "Fabric",
+      MNNVL: "Is present",
+      "NUMA-aware scheduling": "Enabled",
+      "GPU device placement strategy": "Spread",
+    });
     await wrapper.setProps({
       pool: {
         ...createNodePoolDraft(),
@@ -64,29 +71,32 @@ describe("node pool wizard summary", () => {
       },
     });
     expect(wrapper.text()).toContain("Scheduling modeUnknown");
-    expect(wrapper.text()).toContain("MNNVL: Is not present");
-    expect(wrapper.text()).toContain("NUMA-aware scheduling: Disabled");
+    expect(summaryValues(wrapper)).toMatchObject({
+      MNNVL: "Is not present",
+      "NUMA-aware scheduling": "Disabled",
+    });
     wrapper.unmount();
   });
   it("omits configuration unsupported by the selected cluster when opted in", async () => {
     const wrapper = render();
     await wrapper.setProps({ showNuma: false, showGpuDevice: false });
-    expect(wrapper.text()).not.toContain("NUMA-aware scheduling:");
-    expect(wrapper.text()).not.toContain("GPU device placement strategy:");
-    expect(wrapper.text()).toContain("GPU node placement strategy: Bin-pack");
+    const values = summaryValues(wrapper);
+    expect(values).not.toHaveProperty("NUMA-aware scheduling");
+    expect(values).not.toHaveProperty("GPU device placement strategy");
+    expect(values["GPU node placement strategy"]).toBe("Bin-pack");
     wrapper.unmount();
   });
   it("renders measured zero and supplied resource totals distinctly from unknown", async () => {
     const wrapper = render();
     await wrapper.setProps({ resources: { nodes: 0, gpus: 0, gpuMemoryBytes: 0, gpuTypes: [] } });
-    expect(wrapper.text()).toContain("Nodes: 0");
-    expect(wrapper.text()).toContain("GPUs: 0");
-    expect(wrapper.text()).toContain("GPU memory: 0 Bytes");
+    expect(summaryValues(wrapper)).toMatchObject({ Nodes: "0", GPUs: "0", "GPU memory": "0 Bytes" });
     await wrapper.setProps({ resources: { nodes: 2, gpus: 8, gpuTypes: ["A100", "H100"] } });
-    expect(wrapper.text()).toContain("Nodes: 2");
-    expect(wrapper.text()).toContain("GPUs: 8");
-    expect(wrapper.text()).toContain("GPU types: A100, H100");
-    expect(wrapper.text()).toContain("GPU memory: None");
+    expect(summaryValues(wrapper)).toMatchObject({
+      Nodes: "2",
+      GPUs: "8",
+      "GPU types": "A100, H100",
+      "GPU memory": "None",
+    });
     wrapper.unmount();
   });
 });

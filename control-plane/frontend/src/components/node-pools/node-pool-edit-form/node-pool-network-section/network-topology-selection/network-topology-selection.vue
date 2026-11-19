@@ -70,6 +70,7 @@
               ref="topologyFormComponent"
               :bordered="false"
               :show-action-buttons="false"
+              show-distance-guide
               :cluster-id="clusterId"
               :external-submit-trigger="externalSubmitTrigger"
               @close="setModalOpen(false)"

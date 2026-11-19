@@ -38,6 +38,7 @@ function mountComponent(props = {}, attachTo?: HTMLElement, formStub: Component 
     global: {
       plugins: [[Quasar, { plugins: { Notify } }]],
       stubs: { NetworkTopologyForm: formStub },
+      mocks: { $route: { query: {} } },
     },
   });
   return wrapper;
@@ -54,6 +55,21 @@ afterEach(() => {
 });
 
 describe("network topology selection", () => {
+  it("shows the Far to Close guide alongside the numbered topology levels in the creation dialog", async () => {
+    mountComponent({}, document.body, false);
+    await flushPromises();
+    wrapper.getComponent(RunaiSelect).vm.$emit("custom-action");
+    await flushPromises();
+
+    const modal = document.body.querySelector('[aid="network-topologies-modal-body"]');
+    const guide = modal?.querySelector(".topology-distance-guide");
+    expect(Array.from(guide?.querySelectorAll(".topology-distance-label") ?? [], (label) => label.textContent)).toEqual([
+      "Far",
+      "Close",
+    ]);
+    expect(guide?.parentElement?.querySelector(".list-numbers-col")?.textContent?.trim()).toBe("1");
+  });
+
   it("locks all creation fields while saving and retains the draft when the request fails", async () => {
     const pending = deferred<NetworkTopology>();
     vi.mocked(clusterService.createNetworkTopology).mockReturnValueOnce(pending.promise);

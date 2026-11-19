@@ -210,7 +210,6 @@
     ></template>
     <template #right-sidebar
       ><node-pool-wizard-summary
-        scheduling
         :pool="previewPool"
         :resources="resources"
         :show-numa="supports.numa"
@@ -392,7 +391,7 @@ async function save() {
   margin-bottom: 8px;
 }
 .placement-section {
-  margin-top: 26px;
+  margin-top: 4px;
 }
 .placement-group {
   display: flex;
