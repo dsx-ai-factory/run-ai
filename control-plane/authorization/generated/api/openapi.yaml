@@ -4252,6 +4252,12 @@ components:
       - properties:
           predefinedRole:
             $ref: '#/components/schemas/AccessRuleSync_allOf_predefinedRole'
+          clusterRoleOptional:
+            default: false
+            description: Indicates if the access rule's role is a custom role with
+              no predefined role for cluster permissions.
+            example: false
+            type: boolean
           isDeleting:
             default: false
             description: Indicates if the access rule is in 'Deleting' phase and should
@@ -4277,6 +4283,7 @@ components:
         roleName: admin
         tenantId: 1001
         id: 32
+        clusterRoleOptional: false
         updatedAt: 2000-01-23T04:56:07.000+00:00
     AccessRuleById:
       allOf:
@@ -5332,6 +5339,7 @@ components:
           roleName: admin
           tenantId: 1001
           id: 32
+          clusterRoleOptional: false
           updatedAt: 2000-01-23T04:56:07.000+00:00
         - isDeleting: false
           scopeId: a418ed33-9399-48c0-a890-122cadd13bfd
@@ -5350,6 +5358,7 @@ components:
           roleName: admin
           tenantId: 1001
           id: 32
+          clusterRoleOptional: false
           updatedAt: 2000-01-23T04:56:07.000+00:00
       properties:
         next:

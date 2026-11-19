@@ -5070,10 +5070,10 @@ paths:
       x-service: org-unit-service
       description: >
         Computes the GPUs the scheduler would give org units of a node pool for
-        a scenario: the node pool's capacity and
+        a scenario: a node pool capacity and
 
-        scheduling capabilities as set in the form, and the org units to return
-        with their unsaved changes. The calculation
+        scheduling capabilities, saved or not, and the org units to return with
+        their unsaved changes. The calculation
 
         covers every department of the node pool, and for projects every project
         of the parent, including ones the caller
@@ -5085,14 +5085,17 @@ paths:
         scenario gives the same result for every caller.
 
 
-        Only saved org units can be simulated; the department and project create
-        forms are out of scope.
+        Only saved org units can be simulated; an org unit that doesn't exist
+        yet can't be part of the scenario.
 
 
         400 covers, besides the schema: `parent` missing for projects or set for
-        departments; a rank, limit or weight
+        departments; limits on while quota is
 
-        the capabilities turn off; a quota or limit between -1 and 0; a limit
+        off; a rank or limit the capabilities turn off (a quota is ignored while
+        quota is off, and a weight while
+
+        adjustableWeights is off); a quota or limit between -1 and 0; a limit
         below the quota; a duplicate id; and an org
 
         unit that isn't on the node pool, isn't readable by the caller, or (for
@@ -5114,7 +5117,7 @@ paths:
       x-no-authorization: true
       x-test-coverage:
         - >-
-          control-plane/org-unit-service/pkg/services/test/fair_share_simulation_test.go
+          control-plane/org-unit-service/pkg/test/fair_share_simulation_api_test.go
       tags:
         - Org unit
       parameters:
@@ -32872,9 +32875,7 @@ components:
           example: 4
     FairShareSimulationSchedulingCapabilities:
       type: object
-      description: >-
-        The node pool's scheduling capabilities as set in the form, saved or
-        not.
+      description: 'The node pool''s scheduling capabilities to simulate, saved or not.'
       required:
         - quota
         - ranks
@@ -32892,7 +32893,7 @@ components:
           description: Whether GPU limits apply. Only allowed when quota is true.
     FairShareSimulationNodePool:
       type: object
-      description: The node pool as it is in the form.
+      description: 'The node pool to simulate, saved or not.'
       required:
         - capacity
         - schedulingCapabilities
@@ -32953,7 +32954,7 @@ components:
           nullable: true
           description: >-
             The GPU quota; -1 means unlimited. Values between -1 and 0 are
-            rejected.
+            rejected. Ignored while quota is off.
           example: 4
         limit:
           type: number
@@ -32981,10 +32982,8 @@ components:
         A requested org unit with its unsaved changes. Each field replaces the
         stored value on its own; omitted fields keep
 
-        it. `demand` is the GPUs the org unit asks for (the dragged slider),
-        capped by its limit; without it, half the node
-
-        pool's capacity.
+        it. `demand` is the GPUs the org unit asks for, capped by its limit;
+        without it, half the node pool's capacity.
       required:
         - id
       properties:
@@ -33004,25 +33003,24 @@ components:
             - $ref: '#/components/schemas/FairShareSimulationGpuSettings'
         demand:
           description: >-
-            The dragged slider, capped by the limit. Omitted or null asks for
-            half the capacity.
+            The GPUs the org unit asks for, capped by its limit. Omitted or null
+            asks for half the capacity.
           nullable: true
           allOf:
             - $ref: '#/components/schemas/FairShareSimulationResources'
     FairShareSimulationRequest:
       type: object
       description: >
-        A scenario to simulate: the node pool as it is in the form and the org
-        units the form shows, with their unsaved
+        A scenario to simulate: the node pool and the org units to return, with
+        their unsaved changes. Every org unit
 
-        changes. Every org unit without a demand asks for half the node pool's
-        capacity, capped by its limit. For
+        without a demand asks for half the node pool's capacity, capped by its
+        limit. For departments, every department
 
-        departments, every department competes; the node pool and department
-        forms both send departments. For projects, the
+        competes. For projects, the other departments ask for nothing, and the
+        parent asks for the sum of its projects'
 
-        other departments ask for nothing, and the parent asks for the sum of
-        its projects' demand, capped by its limit.
+        demand, capped by its limit.
       required:
         - nodePool
         - orgUnitType
@@ -33049,10 +33047,10 @@ components:
           minItems: 1
           maxItems: 500
           description: >
-            The org units to return, with their unsaved changes. Send the rows
-            the screen shows and every edited row: an edit
+            The org units to return, with their unsaved changes. Every org unit
+            with an unsaved change must be sent: a change
 
-            that isn't sent is lost.
+            that isn't sent isn't simulated.
           items:
             $ref: '#/components/schemas/FairShareSimulationOrgUnit'
     FairShareSimulationResult:
@@ -49156,6 +49154,13 @@ components:
                   type: string
                   description: Name of the predefined role for cluster permissions
                   example: admin
+            clusterRoleOptional:
+              type: boolean
+              default: false
+              description: >-
+                Indicates if the access rule's role is a custom role with no
+                predefined role for cluster permissions.
+              example: false
             isDeleting:
               type: boolean
               default: false

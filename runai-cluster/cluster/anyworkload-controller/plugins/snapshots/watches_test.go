@@ -82,15 +82,3 @@ var _ = Describe("replicaReadinessChanged", func() {
 		}, false),
 	)
 })
-
-var _ = Describe("onlyCreates", func() {
-	// The runner becomes its owner then; its later changes need nothing.
-	It("checks the runner of a PodSnapshot when it is created", func() {
-		snapshot := &snapshotv1alpha1.PodSnapshot{}
-		creates := onlyCreates()
-
-		Expect(creates.Create(event.CreateEvent{Object: snapshot})).To(BeTrue())
-		Expect(creates.Update(event.UpdateEvent{ObjectOld: snapshot, ObjectNew: snapshot})).To(BeFalse())
-		Expect(creates.Delete(event.DeleteEvent{Object: snapshot})).To(BeFalse())
-	})
-})

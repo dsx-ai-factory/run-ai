@@ -20,7 +20,7 @@ var dummyFairShareSimulationOrgUnit = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// FairShareSimulationOrgUnit - A requested org unit with its unsaved changes. Each field replaces the stored value on its own; omitted fields keep it. `demand` is the GPUs the org unit asks for (the dragged slider), capped by its limit; without it, half the node pool's capacity.
+// FairShareSimulationOrgUnit - A requested org unit with its unsaved changes. Each field replaces the stored value on its own; omitted fields keep it. `demand` is the GPUs the org unit asks for, capped by its limit; without it, half the node pool's capacity.
 type FairShareSimulationOrgUnit struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
@@ -39,7 +39,7 @@ type FairShareSimulationOrgUnit struct {
 	Gpu *FairShareSimulationGpuSettings `json:"gpu,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// The dragged slider, capped by the limit. Omitted or null asks for half the capacity.
+	// The GPUs the org unit asks for, capped by its limit. Omitted or null asks for half the capacity.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Demand *FairShareSimulationResources `json:"demand,omitempty"`
 	Demand *FairShareSimulationResources `json:"demand,omitempty" gorm:"serializer:json; type:jsonb;"`
