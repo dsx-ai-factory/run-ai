@@ -99,6 +99,24 @@ This is based on the [SQL Injection Retro](https://runai.atlassian.net/wiki/spac
 - Enforce parameterized queries (`?` placeholders) even in test code
 - Prevents copy-paste of unsafe SQL patterns from tests into production
 
+#### Rules from resolved AIVO findings (2026-11)
+
+These rules come from 72 remediated AIVO (Sourcerer SAST) findings on this repo. Each rule names a pattern that caused more than one finding, or a high-severity one.
+
+| Rule | Paths | Example findings it targets |
+|------|-------|-----------------------------|
+| Cluster-sync identity from the credential, not the request | `control-plane/**/services/**` | Nodepool, project, datavolume, pod, event and network-topology sync endpoints that trusted a body or path `clusterId` (13 findings) |
+| Create/update parity for policy and privilege checks | `control-plane/**/services/**` | `UpdateNimServiceSpec` skipped NIM policy, `AccessRulesMigrateDeprecated` skipped the privilege check |
+| Privilege containment, group permissions, TOCTOU | `control-plane/{authorization,identity-manager}/**` | Empty `GroupIds` in the escalation guard, "global" scope types skipped, role-update race |
+| OAuth redirect and IdP linking | `control-plane/{authorization,identity-manager}/**`, `control-plane/gateway-hub/**` | Wildcard redirect URI, parent-domain suffix match, auto-link by email |
+| `x-authorize` on every operation | `control-plane/**/swagger/source/**` | Registry browse, sync-config PATCH, `/internal/v2/workloads` without authorization |
+| Registry SSRF and credential forwarding | `control-plane/{catalog-service,assets-service}/**` | NGC key sent to a user-supplied registry URL, DNS rebinding after the private-IP check |
+| Fail closed, non-SQL injection, secrets, availability | All control-plane, runai-cluster and runai-installer Go | PromQL, SMTP header and CSV injection, hard-coded Valkey password, UUID-derived key, 0644 config file, unchecked type assertions, concurrent map |
+| Annotation-driven mutation, service-account matching | `runai-cluster/**/admission-controller/**`, `runai-cluster/**/validator/**` | `run.ai/patch-volumes` hostPath injection, prefix match on service-account names |
+| Keycloak theme XSS and CSRF | `control-plane/keycloak-extensions/**` | `error_description` into `innerHTML`, auto-submitting logout form |
+| `window.open` with API data | `control-plane/frontend/**` | Stored XSS through workload URLs |
+| GitHub Actions injection and gating | `.github/workflows/**`, `.github/scripts/**` | Branch name in `github-script`, Renovate auto-merge gated on branch prefix, `verify=False` |
+
 ## Interacting with CodeRabbit
 
 Developers can interact with CodeRabbit by commenting on PRs:
