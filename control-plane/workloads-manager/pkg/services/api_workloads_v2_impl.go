@@ -226,6 +226,11 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 		if bindingErr := applyNetworkingOwnershipBinding(ctx, dryRunRecord, workloadType); bindingErr != nil {
 			validationErrors.Add(NewConfigurationError(fmt.Sprintf("failed to apply networking ownership binding: %v", bindingErr)))
 		}
+		// Validate the same ownership mutations as submission without persisting
+		// an identity or changing the caller's manifest.
+		if _, _, stampErr := stampPodOwnershipLabels(ctx, dryRunRecord.EffectiveManifest, uuid.NewString(), workloadType, manifestResourceInfo); stampErr != nil {
+			validationErrors.Add(NewConfigurationError(fmt.Sprintf("failed to stamp pod ownership labels: %v", stampErr)))
+		}
 		if validationErrors.HasErrors() {
 			return nil, validationErrors.ToSubmissionErrors()
 		}
@@ -357,6 +362,15 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 	enableNetworkingOwnershipContract(&qRecord.Configuration)
 	if bindingErr := applyNetworkingOwnershipBinding(ctx, &qRecord, workloadType); bindingErr != nil {
 		return nil, SingleError(NewConfigurationError(fmt.Sprintf("failed to apply networking ownership binding: %v", bindingErr)))
+	}
+
+	stampedManifest, stamped, stampErr := stampPodOwnershipLabels(ctx, qRecord.EffectiveManifest, workloadId, workloadType, manifestResourceInfo)
+	if stampErr != nil {
+		return nil, SingleError(NewConfigurationError(fmt.Sprintf("failed to stamp pod ownership labels: %v", stampErr)))
+	}
+	qRecord.EffectiveManifest = stampedManifest
+	if stamped {
+		qRecord.Configuration.PodOwnershipLabelsStamped = true
 	}
 
 	notificationCtx := context.WithoutCancel(ctx)
@@ -668,6 +682,7 @@ func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId strin
 		return nil, api.NewError(http.StatusBadRequest, restoreErr.Error(), nil)
 	}
 	preserveNetworkingOwnershipContract := usesNetworkingOwnershipContract(qRecord.Configuration)
+	preservePodOwnershipLabels := qRecord.Configuration != nil && qRecord.Configuration.PodOwnershipLabelsStamped
 
 	// Get request path and body from context
 	requestPath := middleware.GetRequestPath(ctx)
@@ -832,6 +847,21 @@ func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId strin
 		if bindingErr := applyNetworkingOwnershipBinding(ctx, qRecord, workloadType); bindingErr != nil {
 			return nil, SubmissionErrorToApiError(NewConfigurationError(fmt.Sprintf("failed to apply networking ownership binding: %v", bindingErr)))
 		}
+	}
+
+	if preservePodOwnershipLabels {
+		stampedManifest, stamped, stampErr := stampPodOwnershipLabels(ctx, qRecord.EffectiveManifest, qRecord.ID, workloadType, manifestResourceInfo)
+		if stampErr != nil {
+			return nil, SubmissionErrorToApiError(NewConfigurationError(fmt.Sprintf("failed to stamp pod ownership labels: %v", stampErr)))
+		}
+		if !stamped {
+			return nil, SubmissionErrorToApiError(NewConfigurationError("stamped workload no longer has a usable pod ownership mapping"))
+		}
+		qRecord.EffectiveManifest = stampedManifest
+		if qRecord.Configuration == nil {
+			qRecord.Configuration = &models.WorkloadConfiguration{}
+		}
+		qRecord.Configuration.PodOwnershipLabelsStamped = true
 	}
 
 	dbErr = dao.DbUpsertWorkload(ctx, qRecord)

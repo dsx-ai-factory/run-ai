@@ -10,6 +10,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/clusterservice"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/policies"
@@ -22,6 +23,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/clients/org_unit"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/clients/workloads"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/database/dao"
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/database/models"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils"
 	clusterconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
@@ -30,6 +32,7 @@ import (
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	kartav1alpha1 "github.com/run-ai/karta/pkg/api/runai/v1alpha1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
@@ -198,6 +201,126 @@ var _ = Describe("WorkloadsV2Impl", func() {
 
 			annotations := workloadMetadata["annotations"].(map[string]interface{})
 			Expect(annotations[WorkloadIdAnnotation]).To(Equal(result.Metadata.Id))
+		})
+	})
+
+	Context("CP pod ownership stamping", func() {
+		var stampedType workloadsApi.WorkloadTypeConfig
+		BeforeEach(func() {
+			data, err := os.ReadFile("testdata/ownership/krt-v1-kubeflow-org-pytorchjob.json")
+			Expect(err).NotTo(HaveOccurred())
+			var karta kartav1alpha1.Karta
+			Expect(json.Unmarshal(data, &karta)).To(Succeed())
+			stampedType = *createWorkloadTypeWithRi(&karta)
+			stampedType.Name, stampedType.Group = "PyTorchJob", "kubeflow.org"
+			stampedType.CategoryId, stampedType.PriorityId = "default-category", "default-priority"
+			stampedType.ClusterStatuses = []workloadsApi.WorkloadTypeStatus{{ClusterId: convutils.Ref(randoms.ClusterId), Version: convutils.Ref("v1"), Phase: convutils.Ref("Ready")}}
+			workloads.SetMock(workloads.NewSimpleMock().WithWorkloadType(stampedType).WithPrioritiesAndCategories(randoms.ClusterId, defaultPrioritiesAndCategories))
+		})
+		submit := func() *api.WorkloadV2 {
+			result, errs := impl.CreateWorkloadV2(ctx, api.WorkloadV2CreateRequest{
+				Metadata: api.WorkloadV2MetadataCreateParams{Name: "ownership-test", ProjectId: randoms.ProjectIdStr, Category: convutils.Ref("train"), Priority: convutils.Ref("medium")},
+				Manifest: newPyTorchJobManifest(nil),
+			}, false)
+			Expect(errs).To(BeEmpty())
+			return result
+		}
+		checkLabels := func(result *api.WorkloadV2) {
+			labels, found, err := unstructured.NestedStringMap(result.WorkloadManifest, "spec", "pytorchReplicaSpecs", "Worker", "template", "metadata", "labels")
+			Expect(err).NotTo(HaveOccurred())
+			Expect(found).To(BeTrue())
+			Expect(labels).To(HaveKeyWithValue("run.ai/top-owner-uid", result.Metadata.Id))
+			Expect(labels).To(HaveKeyWithValue("run.ai/workload-id", result.Metadata.Id))
+			Expect(labels).NotTo(HaveKey("run.ai/cluster-top-owner-uid"))
+			_, master, _ := unstructured.NestedFieldNoCopy(result.WorkloadManifest, "spec", "pytorchReplicaSpecs", "Master")
+			Expect(master).To(BeFalse())
+		}
+		It("stamps the real PyTorch child template without changing raw input or creating Master", func() {
+			result := submit()
+			checkLabels(result)
+			_, found, _ := unstructured.NestedFieldNoCopy(result.RawManifest, "spec", "pytorchReplicaSpecs", "Worker", "template", "metadata", "labels", "run.ai/top-owner-uid")
+			Expect(found).To(BeFalse())
+		})
+		It("preserves stamping across explicit configuration replacement and original YAML edits", func() {
+			created := submit()
+			updated, err := impl.UpdateWorkloadV2(ctx, created.Metadata.Id, api.WorkloadV2UpdateRequest{Metadata: api.WorkloadV2MetadataUpdateParams{Configuration: &api.WorkloadV2Configuration{}}, Manifest: newPyTorchJobManifest(nil)})
+			Expect(err).To(BeNil())
+			checkLabels(updated)
+			updated, err = impl.UpdateWorkloadV2(ctx, created.Metadata.Id, api.WorkloadV2UpdateRequest{Manifest: newPyTorchJobManifest(nil)})
+			Expect(err).To(BeNil())
+			checkLabels(updated)
+		})
+		It("does not retrofit old records when a mapping becomes available", func() {
+			oldType := stampedType
+			oldType.Kartas = nil
+			workloads.SetMock(workloads.NewSimpleMock().WithWorkloadType(oldType).WithPrioritiesAndCategories(randoms.ClusterId, defaultPrioritiesAndCategories))
+			created := submit()
+			workloads.SetMock(workloads.NewSimpleMock().WithWorkloadType(stampedType).WithPrioritiesAndCategories(randoms.ClusterId, defaultPrioritiesAndCategories))
+			updated, err := impl.UpdateWorkloadV2(ctx, created.Metadata.Id, api.WorkloadV2UpdateRequest{Manifest: newPyTorchJobManifest(nil)})
+			Expect(err).To(BeNil())
+			_, found, _ := unstructured.NestedFieldNoCopy(updated.WorkloadManifest, "spec", "pytorchReplicaSpecs", "Worker", "template", "metadata", "labels", "run.ai/top-owner-uid")
+			Expect(found).To(BeFalse())
+		})
+
+		It("refuses an edit if the stamped workload loses its mapping", func() {
+			created := submit()
+			stampedType.Kartas = nil
+			workloads.SetMock(workloads.NewSimpleMock().WithWorkloadType(stampedType).WithPrioritiesAndCategories(randoms.ClusterId, defaultPrioritiesAndCategories))
+			_, err := impl.UpdateWorkloadV2(ctx, created.Metadata.Id, api.WorkloadV2UpdateRequest{Manifest: newPyTorchJobManifest(nil)})
+			Expect(err).NotTo(BeNil())
+			Expect(err.Error()).To(ContainSubstring("no longer has a usable pod ownership mapping"))
+		})
+
+		DescribeTable("validates ownership selectors during dry run", func(conflicting bool) {
+			data, err := os.ReadFile("testdata/ownership/krt-v1-apps-deployment.json")
+			Expect(err).NotTo(HaveOccurred())
+			var karta kartav1alpha1.Karta
+			Expect(json.Unmarshal(data, &karta)).To(Succeed())
+			deploymentType := *createWorkloadTypeWithRi(&karta)
+			deploymentType.Name, deploymentType.Group = "Deployment", "apps"
+			deploymentType.CategoryId, deploymentType.PriorityId = "default-category", "default-priority"
+			deploymentType.ClusterStatuses = stampedType.ClusterStatuses
+			workloads.SetMock(workloads.NewSimpleMock().WithWorkloadType(deploymentType).WithPrioritiesAndCategories(randoms.ClusterId, defaultPrioritiesAndCategories))
+			var manifest map[string]interface{}
+			Expect(json.Unmarshal([]byte(`{"apiVersion":"apps/v1","kind":"Deployment","metadata":{"name":"dryrun-owner"},"spec":{"replicas":0,"selector":{"matchLabels":{"app":"test"}},"template":{"metadata":{"labels":{"app":"test"}},"spec":{"containers":[{"name":"main","image":"busybox"}]}}}}`), &manifest)).To(Succeed())
+			if conflicting {
+				Expect(unstructured.SetNestedField(manifest, "caller-owner", "spec", "selector", "matchLabels", "run.ai/top-owner-uid")).To(Succeed())
+				Expect(unstructured.SetNestedField(manifest, "caller-owner", "spec", "template", "metadata", "labels", "run.ai/top-owner-uid")).To(Succeed())
+			}
+			original, err := json.Marshal(manifest)
+			Expect(err).NotTo(HaveOccurred())
+			result, errs := impl.CreateWorkloadV2WithDryRun(ctx, api.WorkloadV2CreateRequest{
+				Metadata: api.WorkloadV2MetadataCreateParams{Name: "dryrun-owner", ProjectId: randoms.ProjectIdStr, Category: convutils.Ref("train"), Priority: convutils.Ref("medium")},
+				Manifest: manifest,
+			}, CreateWorkloadV2Options{DryRun: true})
+			if conflicting {
+				Expect(result).To(BeNil())
+				Expect(errs).To(HaveLen(1))
+				Expect(errs[0].Code).To(BeNumerically("==", 400))
+				Expect(errs[0].Message).To(ContainSubstring("spec.selector conflicts"))
+			} else {
+				Expect(errs).To(BeEmpty())
+				Expect(result.Metadata.Id).To(BeEmpty())
+				Expect(result.WorkloadManifest).To(BeNil())
+			}
+			unchanged, err := json.Marshal(manifest)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(unchanged).To(Equal(original))
+		}, Entry("rejects a conflicting reserved selector", true), Entry("allows an ordinary app selector without mutating input", false))
+
+		It("finalizes identity after update record modifiers", func() {
+			created := submit()
+			updated, err := impl.UpdateWorkloadV2(ctx, created.Metadata.Id,
+				api.WorkloadV2UpdateRequest{Manifest: newPyTorchJobManifest(nil)},
+				func(record *models.WorkloadsQueueRecord) {
+					Expect(unstructured.SetNestedStringMap(record.EffectiveManifest, map[string]string{
+						"run.ai/top-owner-uid": "wrong", "run.ai/workload-id": "wrong", "run.ai/cluster-top-owner-uid": "stale-cluster-uid", "user-label": "keep",
+					}, "spec", "pytorchReplicaSpecs", "Worker", "template", "metadata", "labels")).To(Succeed())
+				})
+			Expect(err).To(BeNil())
+			checkLabels(updated)
+			labels, _, _ := unstructured.NestedStringMap(updated.WorkloadManifest, "spec", "pytorchReplicaSpecs", "Worker", "template", "metadata", "labels")
+			Expect(labels).To(HaveKeyWithValue("user-label", "keep"))
 		})
 	})
 
