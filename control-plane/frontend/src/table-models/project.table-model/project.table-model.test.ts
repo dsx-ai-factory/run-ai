@@ -5,7 +5,7 @@
 
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { allProjectColumnsMap, projectIndexColumns, EProjectColumnLabel } from "./project.table-model";
-import { ECustomCell } from "@/models/table.model";
+import { ECustomCell, type ITableColumn } from "@/models/table.model";
 import { tableUtil } from "@/utils/table.util";
 import type { IProjectTable } from "@/models/project.model";
 import { exportFile } from "quasar";
@@ -67,4 +67,54 @@ describe("project.table-model - CSV export flow (projectIndexColumns via tableUt
     const header = getCsvHeader();
     expect(header).toContain(EProjectColumnLabel.ProjectName);
   });
+});
+
+describe("project.table-model - GPU allocation breakdown columns", () => {
+  const getProject = (project: Partial<IProjectTable>): IProjectTable =>
+    ({ name: "project-1", resources: [], ...project }) as IProjectTable;
+  const getCellValue = (column: ITableColumn, project: IProjectTable): string => {
+    const value = (column.field as (row: IProjectTable) => unknown)(project);
+    return column.format ? column.format(value, project) : value;
+  };
+
+  it("shows the non-preemptible part of the GPU allocation", () => {
+    const project = getProject({
+      status: { quotaStatus: { allocated: { gpu: 3 }, allocatedNonPreemptible: { gpu: 1.5 } } },
+    });
+
+    expect(getCellValue(allProjectColumnsMap.allocatedNonPreemptibleGpus, project)).toBe("1.50");
+  });
+
+  it("shows '-' when no non-preemptible GPUs are allocated", () => {
+    const project = getProject({ status: { quotaStatus: { allocated: { gpu: 3 } } } });
+
+    expect(getCellValue(allProjectColumnsMap.allocatedNonPreemptibleGpus, project)).toBe("-");
+  });
+
+  it("shows the GPUs allocated above the node pool quota", () => {
+    const project = getProject({
+      resources: [{ nodePool: { id: "1", name: "default" }, gpu: { deserved: 0 } }],
+      status: { nodePoolQuotaStatuses: [{ nodePoolId: "1", nodePoolName: "default", allocated: { gpu: 0.5 } }] },
+    });
+
+    expect(getCellValue(allProjectColumnsMap.overQuotaGpus, project)).toBe("0.50");
+  });
+
+  it("shows '-' when the allocation is within the quota", () => {
+    const project = getProject({
+      resources: [{ nodePool: { id: "1", name: "default" }, gpu: { deserved: 2 } }],
+      status: { nodePoolQuotaStatuses: [{ nodePoolId: "1", nodePoolName: "default", allocated: { gpu: 2 } }] },
+    });
+
+    expect(getCellValue(allProjectColumnsMap.overQuotaGpus, project)).toBe("-");
+  });
+
+  it.each([allProjectColumnsMap.allocatedNonPreemptibleGpus, allProjectColumnsMap.overQuotaGpus])(
+    "offers the $label column in the projects table, hidden by default",
+    (column: ITableColumn) => {
+      const indexColumn = projectIndexColumns.find((col) => col.name === column.name);
+
+      expect(indexColumn).toMatchObject({ display: false, sortable: false, hideFilter: true });
+    },
+  );
 });
