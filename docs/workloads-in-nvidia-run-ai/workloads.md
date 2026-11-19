@@ -122,7 +122,18 @@ Click a row in the Workloads table and then click the SHOW DETAILS button at the
 
 #### Event History
 
-Displays the workload status over time. It displays events describing the workload lifecycle and alerts on notable events. Use the filter to search through the history for specific events.
+The Event history tab has a **Type** dropdown with two views. **Logs** is selected by default.
+
+* **Logs** - Displays the workload status over time. It displays events describing the workload lifecycle and alerts on notable events. Use the filter to search through the history for specific events.
+* **User actions** - Displays who performed actions on the workload and when. The table has the following columns:
+
+    | Column | Description |
+    |---|---|
+    | Date & time | When the action was accepted |
+    | Event | The action performed. Possible values: Created, Updated, Deleted, Stopped, Resumed |
+    | Subject | The user or application that performed the action |
+
+    Use **Add filter** or the search to narrow the list, and click a column header to sort. The list shows 50 records per page. After a workload is deleted, its Event history, including User actions, remains available under **Workload manager** -> Deleted workloads for 14 days.
 
 #### Metrics
 
