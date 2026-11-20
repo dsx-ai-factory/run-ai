@@ -35,6 +35,7 @@ import (
 	cluster_service_client "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 	"golang.org/x/exp/slices"
 )
 
@@ -1307,6 +1308,55 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 				"a custom role with a predefined role binds to that role's ClusterRole")
 			Expect(clusterRoleOptionalByRoleId).To(HaveKeyWithValue(int32(RolesMap[static_roles.DepartmentAdmin.Name]), false),
 				"a predefined role has its own ClusterRole")
+		})
+	})
+	Context("Get access rules sync - predefined role with no cluster permissions", func() {
+		var noClusterPermissionsRoleId uint
+
+		BeforeEach(func() {
+			SetAncestorsCache(ctx, TestScopeId, api.RESOURCETYPE_PROJECT, &authorization_utils.Ancestors{
+				TenantId: tenantId,
+			})
+
+			// upserted twice: a predefined role is already in the DB when its definition gains the flag
+			initializer := dao.RoleDaoInitializer{}
+			definition := models.Role{
+				Name:        "predefined role with no cluster permissions",
+				Description: "has no kubernetes permissions",
+				ScopeType:   models.ROLE_SCOPE_SYSTEM,
+				Enabled:     true,
+			}
+			var err error
+			noClusterPermissionsRoleId, err = initializer.DbUpsertRole(ctx, definition)
+			Expect(err).ToNot(HaveOccurred())
+			DeferCleanup(func() {
+				_, err := runaidb.DB().Delete(&models.Role{}, noClusterPermissionsRoleId)
+				Expect(err).ToNot(HaveOccurred())
+			})
+
+			definition.NoClusterPermissions = true
+			_, err = initializer.DbUpsertRole(ctx, definition)
+			Expect(err).ToNot(HaveOccurred())
+
+			createTestAccessRule(ctx, accessRulesApiService, api.AccessRuleCreationFields{
+				ScopeId:     TestScopeId,
+				ScopeType:   api.SCOPETYPE_PROJECT,
+				SubjectId:   TestUser2Id,
+				SubjectType: api.SUBJECTTYPE_USER,
+				RoleId:      int32(noClusterPermissionsRoleId),
+			}, &createdAccessRules, false, http.StatusCreated)
+		})
+
+		It("marks the role's access rules", func() {
+			apiResponse, err := accessRulesApiService.GetAccessRulesSync(ctx, 0, 0, "", "")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(apiResponse.Code).To(Equal(http.StatusOK))
+
+			accessRules := httpResponseBodyToAccessRulesSync(apiResponse).AccessRules
+			Expect(accessRules).To(ContainElement(SatisfyAll(
+				HaveField("RoleId", int32(noClusterPermissionsRoleId)),
+				HaveField("ClusterRoleOptional", true),
+			)))
 		})
 	})
 

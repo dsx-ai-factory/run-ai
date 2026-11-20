@@ -197,7 +197,7 @@ func AccessRuleDaoToSyncApi(accessRule *models.AccessRule, predefinedRole *model
 		TenantId:            int32(accessRule.TenantId),
 		ClusterId:           accessRule.ClusterUuid,
 		PredefinedRole:      preDefinedRoleApi,
-		ClusterRoleOptional: accessRule.Role.Custom && predefinedRole == nil,
+		ClusterRoleOptional: accessRule.Role.NoClusterPermissions || (accessRule.Role.Custom && predefinedRole == nil),
 		IsDeleting:          accessRule.Phase == string(api.ACCESSRULEPHASE_DELETING),
 	}
 }
