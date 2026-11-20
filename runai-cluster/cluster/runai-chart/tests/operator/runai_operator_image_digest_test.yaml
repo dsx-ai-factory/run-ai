@@ -1,0 +1,79 @@
+suite: Test runai-operator image digest
+
+templates:
+  - templates/deployment.yaml
+
+# IMG_DEFAULT_VERSION is the default tag of every operand, so the operator's own
+# digest must never reach it: an operand pulled as <operand repo>:<tag>@<operator
+# digest> does not exist.
+tests:
+  - it: should pull the operator by tag alone when no digest is set
+    set:
+      runai-operator.image.registry: nvcr.io/nvidia/runai
+      runai-operator.image.tag: 3.0.20
+    documentSelector:
+      path: kind
+      value: Deployment
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: nvcr.io/nvidia/runai/go-operator:3.0.20
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: IMG_DEFAULT_VERSION
+            value: "3.0.20"
+
+  - it: should pin the operator by digest and keep the default version bare
+    set:
+      runai-operator.image.registry: nvcr.io/nvidia/runai
+      runai-operator.image.tag: 3.0.20
+      runai-operator.image.digest: sha256:0000000000000000000000000000000000000000000000000000000000000001
+    documentSelector:
+      path: kind
+      value: Deployment
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: nvcr.io/nvidia/runai/go-operator:3.0.20@sha256:0000000000000000000000000000000000000000000000000000000000000001
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: IMG_DEFAULT_VERSION
+            value: "3.0.20"
+
+  - it: should honour global.image.registry for a pinned operator
+    set:
+      global.image.registry: registry.example.com/mirror
+      runai-operator.image.registry: nvcr.io/nvidia/runai
+      runai-operator.image.tag: 3.0.20
+      runai-operator.image.digest: sha256:0000000000000000000000000000000000000000000000000000000000000001
+    documentSelector:
+      path: kind
+      value: Deployment
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: registry.example.com/mirror/go-operator:3.0.20@sha256:0000000000000000000000000000000000000000000000000000000000000001
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: IMG_DEFAULT_REGISTRY
+            value: registry.example.com/mirror
+
+  - it: should not leak a digest embedded in the tag onto operands
+    set:
+      runai-operator.image.registry: nvcr.io/nvidia/runai
+      runai-operator.image.tag: 3.0.20@sha256:0000000000000000000000000000000000000000000000000000000000000001
+    documentSelector:
+      path: kind
+      value: Deployment
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: nvcr.io/nvidia/runai/go-operator:3.0.20@sha256:0000000000000000000000000000000000000000000000000000000000000001
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: IMG_DEFAULT_VERSION
+            value: "3.0.20"

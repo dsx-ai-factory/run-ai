@@ -42,9 +42,10 @@ func convertNodePoolController(ctx context.Context, k8sReader client.Reader,
 			Enabled:   config.Enabled,
 			Resources: (*kaicommon.Resources)(config.Resources),
 			Affinity:  config.Affinity,
+			Image:     krmServiceImage(config.Image),
 			// This controller has no client-rate configuration in RunaiConfig.
-			// Image is KRM's own, and PodDisruptionBudget stays at KRM's default
-			// of disabled, matching runai, which creates none.
+			// PodDisruptionBudget stays at KRM's default of disabled, matching
+			// runai, which creates none.
 		},
 		ControllerService: &kaiv1alpha1.NodePoolControllerService{
 			Metrics:         metricsPortMapping(config.Metrics),

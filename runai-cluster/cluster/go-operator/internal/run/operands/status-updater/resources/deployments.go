@@ -88,7 +88,7 @@ func deploymentForRunaiConfig(runaiConfig *runaiv1.RunaiConfig, deployment *apps
 				Name:            "status-updater",
 				SecurityContext: outils.GlobalSecurityContext(runaiConfig),
 				VolumeMounts:    outils.GlobalVolumeMounts(runaiConfig),
-				Image:           fmt.Sprintf("%s/%s:%s", *image.Registry, *image.Name, *image.Tag),
+				Image:           image.Reference(),
 				ImagePullPolicy: image.PullPolicy,
 				Env: []v1.EnvVar{
 					{

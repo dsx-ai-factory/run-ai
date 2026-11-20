@@ -7,10 +7,12 @@ package resources
 
 import (
 	"context"
+	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	kaicommon "github.com/kai-scheduler/KAI-scheduler/pkg/apis/kai/v1/common"
 	kaiv1alpha1 "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -89,6 +91,65 @@ var _ = Describe("KRMConfigForRunaiConfig", func() {
 		Entry("unset", "", nil),
 		Entry("unrecognised", "enabled", nil),
 	)
+
+	// KRM owns the repository, name and default tag of its services, so an image
+	// is passed only to pin one by digest. The tag carries the digest because
+	// KRM's image type has no digest field of its own.
+	Context("image digests", func() {
+		digest := "sha256:" + strings.Repeat("c", 64)
+
+		It("leaves every KRM service image to KRM when no digest is set", func() {
+			spec := krmConfigFor(defaultRunaiConfig()).Spec
+			Expect(spec.NodePoolController.Service.Image).To(BeNil())
+			Expect(spec.PodGroupAssigner.Service.Image).To(BeNil())
+			Expect(spec.ProjectController.Service.Image).To(BeNil())
+		})
+
+		It("pins each service by digest independently", func() {
+			runaiConfig := defaultRunaiConfig()
+			runaiConfig.Spec.NodePoolController.Image.Tag = ptr.To("v1.2.3")
+			runaiConfig.Spec.NodePoolController.Image.Digest = ptr.To(digest)
+			runaiConfig.Spec.ProjectController.Image.Tag = ptr.To("v1.2.3")
+			runaiConfig.Spec.ProjectController.Image.Digest = ptr.To(digest)
+
+			spec := krmConfigFor(runaiConfig).Spec
+			Expect(spec.NodePoolController.Service.Image).
+				To(Equal(&kaicommon.Image{Tag: ptr.To("v1.2.3@" + digest)}))
+			Expect(spec.ProjectController.Service.Image).
+				To(Equal(&kaicommon.Image{Tag: ptr.To("v1.2.3@" + digest)}))
+			Expect(spec.PodGroupAssigner.Service.Image).To(BeNil())
+		})
+
+		It("passes an explicit tag on its own, so each service can run its own version", func() {
+			runaiConfig := defaultRunaiConfig()
+			runaiConfig.Spec.NodePoolController.Image.Tag = ptr.To("v1.2.3")
+			runaiConfig.Spec.ProjectController.Image.Tag = ptr.To("v1.2.4")
+
+			spec := krmConfigFor(runaiConfig).Spec
+			Expect(spec.NodePoolController.Service.Image).To(Equal(&kaicommon.Image{Tag: ptr.To("v1.2.3")}))
+			Expect(spec.ProjectController.Service.Image).To(Equal(&kaicommon.Image{Tag: ptr.To("v1.2.4")}))
+			Expect(spec.PodGroupAssigner.Service.Image).To(BeNil())
+		})
+
+		It("does not send a tag that is just the Run:ai default version", func() {
+			GinkgoT().Setenv("IMG_DEFAULT_VERSION", "3.0.20")
+			runaiConfig := defaultRunaiConfig()
+			Expect(runaiConfig.Spec.NodePoolController.Image.Tag).To(Equal(ptr.To("3.0.20")))
+
+			Expect(krmConfigFor(runaiConfig).Spec.NodePoolController.Service.Image).To(BeNil())
+		})
+
+		It("never sends the registry or name, which are KRM's", func() {
+			runaiConfig := defaultRunaiConfig()
+			runaiConfig.Spec.PodGroupAssigner.Image.Digest = ptr.To(digest)
+
+			image := krmConfigFor(runaiConfig).Spec.PodGroupAssigner.Service.Image
+			Expect(image).NotTo(BeNil())
+			Expect(image.Repository).To(BeNil())
+			Expect(image.Name).To(BeNil())
+			Expect(image.PullPolicy).To(BeNil())
+		})
+	})
 
 	It("leaves leader election to KRM", func() {
 		Expect(krmConfigFor(defaultRunaiConfig()).Spec.Global.LeaderElection).To(BeNil())

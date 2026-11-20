@@ -28,10 +28,18 @@ SPDX-License-Identifier: Apache-2.0
     {{- end -}}
 {{- end -}}
 
+{{- define "operatorImageVersion" -}}
+    {{- index (splitList "@" (index .Values "runai-operator" "image" "tag" | toString)) 0 -}}
+{{- end -}}
+
 {{- define "fullImageName" -}}
     {{- $origContext := . -}}
     {{- with index .Values "runai-operator" "image" -}}
-        {{- printf "%s/%s:%s" (include "imageRegistry" $origContext) .name .tag -}}
+        {{- if .digest -}}
+            {{- printf "%s/%s:%s@%s" (include "imageRegistry" $origContext) .name (include "operatorImageVersion" $origContext) .digest -}}
+        {{- else -}}
+            {{- printf "%s/%s:%s" (include "imageRegistry" $origContext) .name .tag -}}
+        {{- end -}}
     {{- end -}}
 {{- end -}}
 

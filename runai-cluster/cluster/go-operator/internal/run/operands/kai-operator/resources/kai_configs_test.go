@@ -7,6 +7,7 @@ package resources
 
 import (
 	"context"
+	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -179,6 +180,19 @@ var _ = Describe("KAIConfigForRunaiConfig", func() {
 		Expect(image.Name).To(BeNil())
 		Expect(image.Tag).To(Equal(ptr.To("custom-tag")))
 		Expect(image.PullPolicy).To(BeNil())
+	})
+
+	It("carries a digest on the tag, since KAI's image has no digest field", func() {
+		digest := "sha256:" + strings.Repeat("b", 64)
+		runaiConfig := defaultRunaiConfig()
+		runaiConfig.Spec.RunAIScheduler.Image = &runaicommon.Image{
+			Tag: ptr.To("custom-tag"), Digest: ptr.To(digest),
+		}
+		runaiConfig.SetDefaultsWhereNeeded()
+
+		image := buildKAIConfig(runaiConfig).Spec.Scheduler.Service.Image
+		Expect(image).NotTo(BeNil())
+		Expect(image.Tag).To(Equal(ptr.To("custom-tag@" + digest)))
 	})
 
 	It("preserves an explicit image even when it matches the former stock tuple", func() {

@@ -7,6 +7,7 @@
 package common
 
 import (
+	"fmt"
 	"os"
 
 	"k8s.io/utils/pointer"
@@ -47,6 +48,11 @@ type Image struct {
 	// Tag is the tag of the image
 	// +kubebuilder:validation:Optional
 	Tag *string `json:"tag,omitempty"`
+
+	// Digest pins the image by content digest, in the form sha256:<64 hex characters>.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern=`^sha256:[a-f0-9]{64}$`
+	Digest *string `json:"digest,omitempty"`
 
 	// PullPolicy is the pull policy of the image
 	// +kubebuilder:validation:Optional
@@ -91,6 +97,27 @@ func (i *Image) SetDefaultsWhereNeeded(defaultImageValues *Image) {
 			i.PullPolicy = v1.PullAlways
 		}
 	}
+}
+
+// Reference returns the pullable image reference: registry/name:tag, plus @digest when one is set
+// (omitting :tag when the tag is empty and a digest is set).
+func (i *Image) Reference() string {
+	if ptr.Deref(i.Tag, "") == "" && ptr.Deref(i.Digest, "") != "" {
+		return fmt.Sprintf("%s/%s@%s", *i.Registry, *i.Name, *i.Digest)
+	}
+	return fmt.Sprintf("%s/%s:%s", *i.Registry, *i.Name, i.tag())
+}
+
+func (i *Image) TagWithDigest() string {
+	return i.tag()
+}
+
+func (i *Image) tag() string {
+	tag := ptr.Deref(i.Tag, "")
+	if digest := ptr.Deref(i.Digest, ""); digest != "" {
+		return tag + "@" + digest
+	}
+	return tag
 }
 
 type Service struct {

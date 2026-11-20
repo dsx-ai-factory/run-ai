@@ -164,10 +164,10 @@ Full defaults are in [`values.yaml`](values.yaml) and validated by
 | Section | Purpose |
 |---------|---------|
 | `global` | Cross-cutting settings: `fipsMode`, `customCA`, `additionalImagePullSecrets`, `image.registry`, `affinity`/`tolerations`, `metrics.disableInfrastructureMetricsRemoteWrite`, internal `serviceAccountName`. |
-| `clusterConfig` | RFC 7396 JSON Merge Patch applied to `RunaiConfig` (override specific fields; `null` deletes). |
+| `clusterConfig` | RFC 7396 JSON Merge Patch applied to `RunaiConfig` (override specific fields; `null` deletes). Pin an operand image with `<operand>.image.digest`, e.g. `agent.image.digest`; this is the path to use when `controlPlane.url` and `cluster.uid` are set, because the control plane then creates the `RunaiConfig`. |
 | `controlPlane` | `url`, `clientID` (default `runai-internal.installer`), `clientSecret` / `existingSecret` for CP auth. |
 | `cluster` | `uid`, `rbac.escalate`. |
-| `runai-operator` | Operator image/resources/replicas, `networkPolicy`, `metrics.serviceMonitor`, `config`. |
+| `runai-operator` | Operator image (`image.digest` pins the operator alone; `image.tag` stays a bare version because it is also the operands' default tag), resources/replicas, `networkPolicy`, `metrics.serviceMonitor`, `config` (the `RunaiConfig` the chart creates when it is not control-plane managed). |
 | `crdUpgrader` | `runai-crd-upgrader` job: `enabled`, `establishedTimeout`, image, resources. |
 | `helmHooksHandler` | Hook job image, resources. |
 | `kartaMigrate` | Karta migration job: `enabled`, `removeRid`, `activeDeadlineSeconds`, `backoffLimit`, image, resources. |

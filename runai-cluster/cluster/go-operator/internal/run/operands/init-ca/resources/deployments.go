@@ -91,7 +91,7 @@ func DeploymentForRunaiConfig(ctx context.Context, k8sReader client.Reader,
 		Containers: []v1.Container{
 			{
 				Name:            "create-ca",
-				Image:           fmt.Sprintf("%s/%s:%s", *image.Registry, *image.Name, *image.Tag),
+				Image:           image.Reference(),
 				ImagePullPolicy: image.PullPolicy,
 				Args:            handleDeploymentArgs(),
 				Resources:       v1.ResourceRequirements(*config.Resources),
