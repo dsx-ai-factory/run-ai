@@ -603,4 +603,100 @@ describe("runai-log-reader.vue", () => {
       expect(errorEvents).toBeUndefined();
     });
   });
+
+  describe("Final line flush on close", () => {
+    test.each([
+      {
+        name: "renders an unterminated final line after a normal close",
+        messages: ["hello\nfinal"],
+        code: 1000,
+        rows: ["hello", "final"],
+        close: [[true]],
+        error: undefined,
+      },
+      {
+        name: "renders output that never ends in a newline instead of no data",
+        messages: ["FINAL_LINE_WITHOUT_NEWLINE"],
+        code: 1000,
+        rows: ["FINAL_LINE_WITHOUT_NEWLINE"],
+        close: [[true]],
+        error: undefined,
+      },
+      {
+        name: "renders a final line split across messages",
+        messages: ["hel", "lo\nfi", "nal"],
+        code: 1006,
+        rows: ["hello", "final"],
+        close: [[true]],
+        error: undefined,
+      },
+      {
+        name: "adds no empty line when the stream ends with a newline",
+        messages: ["hello\n"],
+        code: 1000,
+        rows: ["hello"],
+        close: [[true]],
+        error: undefined,
+      },
+      {
+        name: "renders the final line of a binary message still decoding at close",
+        messages: [new Blob(["hello\nfinal"])],
+        code: 1000,
+        rows: ["hello", "final"],
+        close: [[true]],
+        error: undefined,
+      },
+      {
+        name: "keeps the error and does not flush on a critical close",
+        messages: ["hello\nfinal"],
+        code: 1008,
+        rows: ["hello"],
+        close: undefined,
+        error: [[true]],
+      },
+      {
+        name: "still reports no data for an empty stream",
+        messages: [],
+        code: 1000,
+        rows: [],
+        close: [[false]],
+        error: undefined,
+      },
+    ])("$name", async ({ messages, code, rows, close, error }) => {
+      const subscription = logReader.vm.wsSubscription as IWebSocketSubscription;
+
+      for (const data of messages) {
+        subscription.onMessage(new MessageEvent("message", { data }));
+      }
+      subscription.onClose(new CloseEvent("close", { code }));
+
+      await vi.waitFor(() => expect(logReader.findAll(".log-row").map((row) => row.text())).toEqual(rows));
+      expect(logReader.emitted("close")).toEqual(close);
+      expect(logReader.emitted("error")).toEqual(error);
+    });
+
+    test.each([
+      { name: "text", data: "new\npartial" },
+      { name: "binary", data: new Blob(["new\npartial"]) },
+    ])("ignores late events from the previous stream after switching pods ($name message)", async ({ data }) => {
+      vi.mocked(webSocketsService.subscribe).mockImplementation(() => ({ ...mockWsSubscription }));
+      const reader = factory();
+      const oldSubscription = reader.vm.wsSubscription as IWebSocketSubscription;
+      oldSubscription.onMessage(new MessageEvent("message", { data: "old partial" }));
+
+      await reader.setProps({ logParams: { ...mockLogParams, podName: "other-pod" } });
+      const newSubscription = reader.vm.wsSubscription as IWebSocketSubscription;
+      expect(newSubscription).not.toBe(oldSubscription);
+      oldSubscription.onMessage(new MessageEvent("message", { data: "stale\n" }));
+      newSubscription.onMessage(new MessageEvent("message", { data }));
+      oldSubscription.onClose(new CloseEvent("close", { code: 1000 }));
+
+      await vi.waitFor(() => expect(reader.findAll(".log-row").map((row) => row.text())).toEqual(["new"]));
+      expect(reader.emitted("close")).toBeUndefined();
+
+      newSubscription.onClose(new CloseEvent("close", { code: 1000 }));
+      await vi.waitFor(() => expect(reader.findAll(".log-row").map((row) => row.text())).toEqual(["new", "partial"]));
+      expect(reader.emitted("close")).toEqual([[true]]);
+    });
+  });
 });
