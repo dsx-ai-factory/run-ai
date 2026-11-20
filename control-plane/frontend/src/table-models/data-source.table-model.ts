@@ -17,9 +17,22 @@ import {
   type DatasourceListResponseEntry,
   type AssetClusterStatusInfo,
 } from "@/swagger-models/assets-service-client";
+import { ScopeType } from "@/swagger-models/org-unit-service-client";
+import { useAuthStore } from "@/stores/auth.store";
 import { assetsUtil } from "@/utils/assets.util/assets.util";
 import { dateUtil } from "@/utils/date.util";
 import { getFieldContent } from "@/utils/table-format.util";
+
+const orgUnitName = (type: ScopeType, id: string | number | null | undefined): string =>
+  (id != null && useAuthStore().getOrgUnitByScopeAndId(type, String(id))?.name) || "";
+
+// A project's department comes from its parent in the loaded org tree; no parent there means no department.
+const departmentName = (row: DatasourceListResponseEntry): string => {
+  if (row.meta.scope === Scope.Department) return orgUnitName(ScopeType.Department, row.meta.departmentId);
+  if (row.meta.scope !== Scope.Project) return "";
+  const project = useAuthStore().getOrgUnitByScopeAndId(ScopeType.Project, String(row.meta.projectId));
+  return project?.parentType === ScopeType.Department ? orgUnitName(ScopeType.Department, project.parentId) : "";
+};
 
 export const allDataSourceColumnsMap: Record<string, ITableColumn> = {
   dataSource: {
@@ -95,6 +108,23 @@ export const allDataSourceColumnsMap: Record<string, ITableColumn> = {
     customCell: ECustomCell.SCOPE_COL,
     hideFilter: true,
   },
+  project: {
+    name: "project",
+    label: "Project",
+    field: (row: DatasourceListResponseEntry): string =>
+      row.meta.scope === Scope.Project ? orgUnitName(ScopeType.Project, row.meta.projectId) : "",
+    sortable: true,
+    align: "left",
+    filter: { type: EColumnFilterType.FreeText },
+  },
+  department: {
+    name: "department",
+    label: "Department",
+    field: departmentName,
+    sortable: true,
+    align: "left",
+    filter: { type: EColumnFilterType.FreeText },
+  },
   clusterResourceName: {
     name: "cluster-resource-name",
     label: "Kubernetes name",
@@ -154,6 +184,8 @@ export const dataSourceIndexColumns: Array<ITableColumn> = [
   { ...allDataSourceColumnsMap.type, display: true },
   { ...allDataSourceColumnsMap.status, display: true },
   { ...allDataSourceColumnsMap.scope, display: true },
+  { ...allDataSourceColumnsMap.project, display: false },
+  { ...allDataSourceColumnsMap.department, display: false },
   { ...allDataSourceColumnsMap.clusterResourceName, display: true },
   { ...allDataSourceColumnsMap.createdBy, display: true },
   { ...allDataSourceColumnsMap.createdAt, display: true },
