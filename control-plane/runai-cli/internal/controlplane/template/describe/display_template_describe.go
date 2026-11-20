@@ -8,16 +8,15 @@ package describe
 import (
 	"encoding/json"
 	"fmt"
-	"slices"
 	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
 	instancecfg "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/config"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/ui/environment"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/ui/field"
 	uitable "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/ui/table"
 	workloads_openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
-	"github.com/samber/lo"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 	"k8s.io/utils/ptr"
@@ -243,7 +242,7 @@ func (td *TemplateDisplayer) DisplayGeneralAndSpec(template *Template) {
 
 		// Add environment variables field
 		if len(spec.EnvironmentVariables) > 0 {
-			fields = append(fields, DisplayField{fieldEnvVars, getEnvironmentVariablesDisplay(&spec.EnvironmentVariables, generalAndRuntimeColumnPadding)})
+			fields = append(fields, DisplayField{fieldEnvVars, environment.Format(spec.EnvironmentVariables, generalAndRuntimeColumnPadding, 0)})
 		}
 	}
 
@@ -426,7 +425,7 @@ func (td *TemplateDisplayer) displayMasterSpec(masterSpec *MasterSpec) {
 	}
 
 	if len(masterSpec.EnvironmentVariables) > 0 {
-		fields = append(fields, DisplayField{fieldEnvVars, getEnvironmentVariablesDisplay(&masterSpec.EnvironmentVariables, generalAndRuntimeColumnPadding)})
+		fields = append(fields, DisplayField{fieldEnvVars, environment.Format(masterSpec.EnvironmentVariables, generalAndRuntimeColumnPadding, 0)})
 	}
 
 	displayFields(fields)
@@ -485,44 +484,4 @@ func formatExposedUrls(urls []ExposedUrl) string {
 	}
 	indent := strings.Repeat(" ", generalAndRuntimeColumnPadding+1)
 	return strings.Join(urlStrs, "\n"+indent)
-}
-
-// TODO(Roee G.): This function is duplicated in workload/describe/displayer/environment.go
-// Remove this duplicate and use the shared implementation from displayer package after refactoring
-func getEnvironmentVariablesDisplay(environmentVariables *map[string]string, columnPadding int) string {
-	if environmentVariables == nil || len(*environmentVariables) == 0 {
-		return "[]"
-	}
-
-	var envVarsBuilder strings.Builder
-	envVarsBuilder.WriteString("[")
-
-	// Compute max key length for alignment
-	maxKeyLength := 0
-	for key := range *environmentVariables {
-		if len(key) > maxKeyLength {
-			maxKeyLength = len(key)
-		}
-	}
-
-	keys := lo.Keys(*environmentVariables)
-	slices.Sort(keys)
-
-	valueColumnIndent := strings.Repeat(" ", columnPadding+1)
-
-	// Iterate through environment variables
-	for i, key := range keys {
-		keyValuePart := fmt.Sprintf("%-*s: %s", maxKeyLength, key, (*environmentVariables)[key])
-		if i == 0 {
-			envVarsBuilder.WriteString(keyValuePart)
-		} else {
-			envVarsBuilder.WriteString(",\n")
-			envVarsBuilder.WriteString(valueColumnIndent)
-			envVarsBuilder.WriteString(keyValuePart)
-		}
-	}
-
-	envVarsBuilder.WriteString("]")
-
-	return envVarsBuilder.String()
 }
