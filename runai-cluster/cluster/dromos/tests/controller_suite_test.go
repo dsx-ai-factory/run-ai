@@ -8,6 +8,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"net"
 	"os"
 	"path/filepath"
@@ -42,13 +43,24 @@ var (
 	mutatingWebhookName   = "workloadrunner-mutating-webhook"
 )
 
-// getFreePort returns a free loopback port
+// getFreePort returns a free port picked from below the kernel's ephemeral
+// range (32768+ on Linux, 49152+ on macOS). The port is unbound between test
+// containers, and an ephemeral port could be handed to any outbound connection
+// (envtest apiserver, test HTTP clients) in that window, making the next bind
+// fail with "address already in use". Probes all interfaces to match the
+// webhook server, which binds ":port".
 func getFreePort() int {
-	listener, err := (&net.ListenConfig{}).Listen(context.Background(), "tcp", "127.0.0.1:0")
-	Expect(err).NotTo(HaveOccurred())
-	port := listener.Addr().(*net.TCPAddr).Port
-	Expect(listener.Close()).To(Succeed())
-	return port
+	for range 100 {
+		port := 20000 + rand.Intn(10000)
+		listener, err := (&net.ListenConfig{}).Listen(context.Background(), "tcp", fmt.Sprintf(":%d", port))
+		if err != nil {
+			continue
+		}
+		Expect(listener.Close()).To(Succeed())
+		return port
+	}
+	Fail("could not find a free webhook port")
+	return 0
 }
 
 func TestController(t *testing.T) {
