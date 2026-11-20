@@ -7,6 +7,7 @@ package controllers
 
 import (
 	"context"
+	goerrors "errors"
 	"fmt"
 	"strings"
 
@@ -45,6 +46,8 @@ type PodReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
+// A failure to calculate the GPU resources of the pod does not stop the pod group and workload update: the
+// error is returned at the end so the pod is requeued with backoff.
 func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
@@ -59,16 +62,20 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 		}
 	}
 
-	err = updatePod(ctx, pod, r.Client)
-	if err != nil {
-		logger.V(0).Error(err,
+	updateErr := updatePod(ctx, pod, r.Client)
+	if updateErr != nil {
+		logger.V(0).Error(updateErr,
 			fmt.Sprintf("Failed to update pod status: <%v/%v>", pod.Namespace, pod.Name))
-		return ctrl.Result{}, err
+		var gpuErr *gpuCalcError
+		if !goerrors.As(updateErr, &gpuErr) {
+			return ctrl.Result{}, updateErr
+		}
 	}
 
 	podGroup, err := clusterrelations.GetPodGroupFromPod(ctx, pod, r.Client)
 	if err != nil {
-		return handleGetPodGroupError(err, logger, pod)
+		result, err := handleGetPodGroupError(err, logger, pod)
+		return result, goerrors.Join(updateErr, err)
 	}
 
 	err = handleWorkload(ctx, r, pod, podGroup)
@@ -76,7 +83,7 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 		logger.V(0).Error(err, "Reconcile pod handlePodGroupAndWorkload error")
 	}
 
-	return ctrl.Result{}, err
+	return ctrl.Result{}, goerrors.Join(updateErr, err)
 }
 
 // handleDeletePodEvent complements the Reconcile function of PodReconciler for "delete pod" events.
