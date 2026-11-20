@@ -13,6 +13,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/config"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/types"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
@@ -68,6 +69,27 @@ var _ = Describe("Completion Factory Tests", func() {
 		},
 		Entry("arg", completion.GetArgCompletionFn),
 		Entry("flag", completion.GetFlagCompletionFn),
+	)
+
+	DescribeTable("returns unique sorted matches without mutating the source",
+		func(resourceType completion.ResourceType, toComplete string, matchCompletions types.GomegaMatcher, expectedDirective cobra.ShellCompDirective) {
+			var listed []string
+			lister := func(_ *cobra.Command) ([]string, error) {
+				listed = []string{"zeta", "alpha", "alpha"}
+				return listed, nil
+			}
+
+			fn := completion.GetFlagCompletionFn(resourceType, initInstance, lister)
+			completions, directive := fn(cmd, args, toComplete)
+			Expect(completions).To(matchCompletions)
+			Expect(directive).To(Equal(expectedDirective))
+			Expect(listed).To(Equal([]string{"zeta", "alpha", "alpha"}))
+			validateNoLogs(logs)
+		},
+		Entry("empty prefix", completion.Project, "", Equal([]string{"alpha", "zeta"}), cobra.ShellCompDirectiveNoFileComp),
+		Entry("prefix with duplicates", completion.Project, "a", Equal([]string{"alpha"}), cobra.ShellCompDirectiveNoFileComp),
+		Entry("existing pvc keeps no-space directive", completion.ExistingPvc, "z", Equal([]string{"zeta"}), cobra.ShellCompDirectiveNoSpace),
+		Entry("no match", completion.Project, "x", BeEmpty(), cobra.ShellCompDirectiveNoFileComp),
 	)
 })
 
