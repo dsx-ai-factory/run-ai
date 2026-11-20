@@ -6,6 +6,7 @@
 package version
 
 import (
+	"context"
 	"os"
 	"regexp"
 	"testing"
@@ -49,11 +50,10 @@ var _ = Describe("Version Test", Ordered, func() {
 
 	Context("Version command validation", Ordered, func() {
 		It("Version", func() {
-			output, err := cli.RunCommand("version", envMap)
+			stdout, stderr, err := cli.RunCommandSeparate(context.Background(), "version", envMap)
 			Expect(err).To(BeNil())
-			match, err := regexp.Match(VersionRegexLookup, []byte(output))
-			Expect(err).To(BeNil())
-			Expect(true).To(Equal(match))
+			Expect(stdout).To(MatchRegexp(VersionRegexLookup))
+			Expect(stderr).To(BeEmpty())
 		})
 
 		It("Version wide", func() {
