@@ -7848,6 +7848,7 @@ components:
       enum:
       - CPU_QUOTAS_TO_DEFAULT
       - LIMITS_TO_DEFAULT
+      - DEPARTMENT_WEIGHTS_TO_DEFAULT
       type: string
     OrgUnitsNodepoolResourcesResetRequest:
       example:

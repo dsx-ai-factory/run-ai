@@ -26,7 +26,8 @@ import (
 const maxBlockingOrgUnitsInMessage = 10
 
 // validateSchedulingCapabilitiesChangeAndResetOrgUnits refuses turning quota or ranks off while org units still use
-// them, and resets the org units' CPU quotas when cpuQuota is turned off and their limits when limits is turned off.
+// them, and resets the org units' CPU quotas when cpuQuota is turned off, their limits when limits is turned off, and
+// the departments' unset weights when weights start to divide the nodepool without quota.
 func (s *NodePoolsApiService) validateSchedulingCapabilitiesChangeAndResetOrgUnits(ctx context.Context,
 	before, after models.Nodepool,
 ) ([]string, *api.Error) {
@@ -78,8 +79,24 @@ func (s *NodePoolsApiService) validateSchedulingCapabilitiesChangeAndResetOrgUni
 		}
 		completedResets = append(completedResets, string(openapi.NODEPOOLRESOURCESRESETACTION_LIMITS_TO_DEFAULT))
 	}
+	if weightsStartDividingWithoutQuota(before, after) {
+		if apiErr := s.resetOrgUnits(ctx, after, openapi.NODEPOOLRESOURCESRESETACTION_DEPARTMENT_WEIGHTS_TO_DEFAULT); apiErr != nil {
+			apiErr.Message += describeCompletedResets(completedResets)
+			return nil, apiErr
+		}
+		completedResets = append(completedResets, string(openapi.NODEPOOLRESOURCESRESETACTION_DEPARTMENT_WEIGHTS_TO_DEFAULT))
+	}
 
 	return completedResets, nil
+}
+
+// weightsStartDividingWithoutQuota is the point where a department's stored weight becomes its whole share of the
+// nodepool: with quota on it only divides what is left above quota, and with weights off it is not sent to the cluster.
+func weightsStartDividingWithoutQuota(before, after models.Nodepool) bool {
+	dividesWithoutQuota := func(nodepool models.Nodepool) bool {
+		return !nodepool.AllowQuota && nodepool.AllowAdjustableWeights
+	}
+	return dividesWithoutQuota(after) && !dividesWithoutQuota(before)
 }
 
 func (s *NodePoolsApiService) resetOrgUnits(ctx context.Context, nodepool models.Nodepool,

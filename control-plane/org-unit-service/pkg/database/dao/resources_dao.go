@@ -49,7 +49,8 @@ const (
 	WeightsToDeserved = ResetResourcesAction(api.RESOURCESRESETACTION_WEIGHTS_TO_DESERVED)
 	LimitsToDefault   = ResetResourcesAction(api.RESOURCESRESETACTION_LIMITS_TO_DEFAULT)
 
-	CpuQuotasToDefault = ResetResourcesAction(api.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT)
+	CpuQuotasToDefault         = ResetResourcesAction(api.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT)
+	DepartmentWeightsToDefault = ResetResourcesAction(api.NODEPOOLRESOURCESRESETACTION_DEPARTMENT_WEIGHTS_TO_DEFAULT)
 )
 
 func getUpdateResourcesQuery(setQuery, conditionQuery string, projects bool) string {
@@ -212,6 +213,11 @@ func getResetResourcesResourcesQuery(projects bool, action ResetResourcesAction,
 	case CpuQuotasToDefault:
 		setQuery = disableCpuQuotaQuerySet
 		conditionQuery = disableCpuQuotaQueryCondition
+	case DepartmentWeightsToDefault:
+		// a department's weight starts as its quota (0, or -1 when unlimited), which gives it no share
+		// once weights alone divide the node pool; weights an admin set are positive and are kept
+		setQuery = fmt.Sprintf(`gpu_over_quota_weight = %f, updated_at=now()`, models.DefaultOverQuotaWeight)
+		conditionQuery = `(gpu_over_quota_weight <= 0)`
 	default:
 		return ""
 	}
@@ -276,6 +282,9 @@ func NodepoolResetResources(ctx context.Context, tenantId, clusterId, nodepoolId
 
 	// preform reset for both projects and departments
 	for _, forProjects := range []bool{true, false} {
+		if forProjects && ResetResourcesAction(action) == DepartmentWeightsToDefault {
+			continue
+		}
 		err := resetResourcesInternal(ctx, tx, tenantId, clusterId, "", []string{nodepoolId}, ResetResourcesAction(action), forProjects)
 		if err != nil {
 			return err
