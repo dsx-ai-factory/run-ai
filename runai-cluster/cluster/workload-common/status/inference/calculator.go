@@ -56,6 +56,9 @@ const (
 	serviceIssueTimeout   serviceIssue = "timeout"
 )
 
+// knativeRevisionLabel is set by Knative on every revision pod; workload-common has no Knative dependency.
+const knativeRevisionLabel = "serving.knative.dev/revision"
+
 func Calculate(input Input) Result {
 	if input.MarkedForDeletion {
 		return Result{Phase: statuscontract.Deleting}
@@ -70,7 +73,7 @@ func Calculate(input Input) Result {
 	allReady := allPodsReady(input.Pods)
 	issue, failed := analyzeConditions(input.Service.Conditions)
 	updating := ready != "" && (ready != created || input.BuildError != nil)
-	failureMessage := failureMessage(input.BuildError, issue, failed, updating)
+	failureMessage := failureMessage(input.BuildError, issue, failed, updating, crashLoopMessage(input.Pods, created))
 
 	phase := statuscontract.Pending
 	switch {
@@ -131,7 +134,7 @@ func analyzeConditions(conditions []ServiceCondition) (serviceIssue, bool) {
 	return issue, failed
 }
 
-func failureMessage(buildError *string, issue serviceIssue, failed, updating bool) string {
+func failureMessage(buildError *string, issue serviceIssue, failed, updating bool, crashMessage string) string {
 	if buildError != nil {
 		message := normalizePrerequisiteError(*buildError)
 		if updating {
@@ -144,6 +147,9 @@ func failureMessage(buildError *string, issue serviceIssue, failed, updating boo
 	}
 
 	message := "Timed out waiting for the workload to become ready."
+	if crashMessage != "" {
+		message = crashMessage
+	}
 	switch issue {
 	case serviceIssueImagePull:
 		message = "Failed to pull container image."
@@ -154,6 +160,28 @@ func failureMessage(buildError *string, issue serviceIssue, failed, updating boo
 		return "Workload is ready. Update failed: " + message
 	}
 	return message
+}
+
+// crashLoopMessage describes the first restarted, non-ready container of a current-revision pod, or returns "".
+func crashLoopMessage(pods []corev1.Pod, revision string) string {
+	for i := range pods {
+		if revision == "" || pods[i].Labels[knativeRevisionLabel] != revision {
+			continue
+		}
+		for _, status := range pods[i].Status.ContainerStatuses {
+			// A crash-looping container is Running or Terminated between back-offs, so restarts on a
+			// non-ready container count as evidence, not only the CrashLoopBackOff waiting reason.
+			if status.RestartCount == 0 || status.Ready {
+				continue
+			}
+			message := fmt.Sprintf("Container %q keeps crashing: restarted %d times", status.Name, status.RestartCount)
+			if terminated := status.LastTerminationState.Terminated; terminated != nil {
+				message += fmt.Sprintf(", last exit code %d (%s)", terminated.ExitCode, terminated.Reason)
+			}
+			return message + "."
+		}
+	}
+	return ""
 }
 
 func normalizePrerequisiteError(message string) string {

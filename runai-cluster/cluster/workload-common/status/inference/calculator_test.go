@@ -204,6 +204,128 @@ func TestCalculateRecognizesAllImagePullReasons(t *testing.T) {
 	}
 }
 
+func TestCalculateReportsCurrentRevisionCrashLoop(t *testing.T) {
+	const timeout = "Timed out waiting for the workload to become ready."
+	exit0 := crashLoopPod("rev-1", &corev1.ContainerStateTerminated{ExitCode: 0, Reason: "Completed"})
+	exit1 := crashLoopPod("rev-1", &corev1.ContainerStateTerminated{ExitCode: 1, Reason: "Error"})
+	slowStart := pod(corev1.PodRunning, false, "", "")
+	slowStart.Labels = map[string]string{"serving.knative.dev/revision": "rev-1"}
+	slowStart.Status.ContainerStatuses = []corev1.ContainerStatus{{
+		Name:  "user-container",
+		State: corev1.ContainerState{Running: &corev1.ContainerStateRunning{}},
+	}}
+	unlabeled := crashLoopPod("rev-1", &corev1.ContainerStateTerminated{ExitCode: 1, Reason: "Error"})
+	unlabeled.Labels = nil
+	restartedRunning := crashLoopPod("rev-1", &corev1.ContainerStateTerminated{ExitCode: 0, Reason: "Completed"})
+	restartedRunning.Status.ContainerStatuses[0].State = corev1.ContainerState{Running: &corev1.ContainerStateRunning{}}
+
+	tests := []struct {
+		name    string
+		input   Input
+		phase   statuscontract.Phase
+		message string
+	}{
+		{
+			name:    "crash loop exiting with code 0 reports the container instead of a timeout",
+			input:   Input{Service: failedService("rev-1", "", "revision failed"), Pods: []corev1.Pod{exit0}},
+			phase:   statuscontract.Failed,
+			message: `Container "user-container" keeps crashing: restarted 4 times, last exit code 0 (Completed).`,
+		},
+		{
+			name:    "crash loop exiting with code 1 on the ready revision is degraded with crash details",
+			input:   Input{Service: failedService("rev-1", "rev-1", "revision failed"), Pods: []corev1.Pod{exit1}},
+			phase:   statuscontract.Degraded,
+			message: `Container "user-container" keeps crashing: restarted 4 times, last exit code 1 (Error).`,
+		},
+		{
+			name:    "crash loop without a recorded termination reports restarts only",
+			input:   Input{Service: failedService("rev-1", "", "revision failed"), Pods: []corev1.Pod{crashLoopPod("rev-1", nil)}},
+			phase:   statuscontract.Failed,
+			message: `Container "user-container" keeps crashing: restarted 4 times.`,
+		},
+		{
+			name: "crash loop in a failed update keeps the update prefix",
+			input: Input{
+				Service: failedService("rev-2", "rev-1", "revision failed"),
+				Pods:    []corev1.Pod{crashLoopPod("rev-2", &corev1.ContainerStateTerminated{ExitCode: 1, Reason: "Error"})},
+			},
+			phase:   statuscontract.Ready,
+			message: `Workload is ready. Update failed: Container "user-container" keeps crashing: restarted 4 times, last exit code 1 (Error).`,
+		},
+		{
+			name:    "crashed container running again between back-offs still reports crash details",
+			input:   Input{Service: failedService("rev-1", "", "revision failed"), Pods: []corev1.Pod{restartedRunning}},
+			phase:   statuscontract.Failed,
+			message: `Container "user-container" keeps crashing: restarted 4 times, last exit code 0 (Completed).`,
+		},
+		{
+			name:    "slow start without restarts still reports a timeout",
+			input:   Input{Service: failedService("rev-1", "", "revision failed"), Pods: []corev1.Pod{slowStart}},
+			phase:   statuscontract.Failed,
+			message: timeout,
+		},
+		{
+			name: "crash loop from an older revision is ignored",
+			input: Input{
+				Service: failedService("rev-2", "", "revision failed"),
+				Pods:    []corev1.Pod{crashLoopPod("rev-1", &corev1.ContainerStateTerminated{ExitCode: 1, Reason: "Error"})},
+			},
+			phase:   statuscontract.Failed,
+			message: timeout,
+		},
+		{
+			name:    "crash loop on a pod without a revision label is ignored",
+			input:   Input{Service: failedService("rev-1", "", "revision failed"), Pods: []corev1.Pod{unlabeled}},
+			phase:   statuscontract.Failed,
+			message: timeout,
+		},
+		{
+			name:    "image pull failure keeps priority over crash details",
+			input:   Input{Service: failedService("rev-1", "", "unable to fetch image"), Pods: []corev1.Pod{exit1}},
+			phase:   statuscontract.Failed,
+			message: "Failed to pull container image.",
+		},
+		{
+			name:    "name length failure keeps priority over crash details",
+			input:   Input{Service: failedService("rev-1", "", "must be no more than 63 characters"), Pods: []corev1.Pod{exit1}},
+			phase:   statuscontract.Failed,
+			message: "The workload name is too long and causes derived resource names to exceed Kubernetes 63 character limit. Please use a shorter workload name.",
+		},
+		{
+			name: "build error keeps priority over crash details",
+			input: Input{
+				Service:    failedService("rev-1", "", "revision failed"),
+				Pods:       []corev1.Pod{exit1},
+				BuildError: stringPointer("admission denied"),
+			},
+			phase:   statuscontract.Failed,
+			message: "Failed to create workload: admission denied",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := Calculate(tt.input)
+			if result.Phase != tt.phase || result.Message != tt.message {
+				t.Fatalf("Calculate() = (%q, %q), want (%q, %q)",
+					result.Phase, result.Message, tt.phase, tt.message)
+			}
+		})
+	}
+}
+
+func crashLoopPod(revision string, lastTermination *corev1.ContainerStateTerminated) corev1.Pod {
+	pod := pod(corev1.PodRunning, false, "", "")
+	pod.Labels = map[string]string{"serving.knative.dev/revision": revision}
+	pod.Status.ContainerStatuses = []corev1.ContainerStatus{{
+		Name:                 "user-container",
+		RestartCount:         4,
+		State:                corev1.ContainerState{Waiting: &corev1.ContainerStateWaiting{Reason: "CrashLoopBackOff"}},
+		LastTerminationState: corev1.ContainerState{Terminated: lastTermination},
+	}}
+	return pod
+}
+
 func failedService(created, ready, message string) *ServiceState {
 	return &ServiceState{
 		LatestCreatedRevision: created,
