@@ -16,9 +16,9 @@ data:
   OTEL_TRACES_EXPORTER: {{ $top.Values.keycloakx.config.otelTracesExporter }}
   OTEL_LOGS_EXPORTER: {{ $top.Values.keycloakx.config.otelLogsExporter }}
   OTEL_METRICS_EXPORTER: {{ $top.Values.keycloakx.config.otelMetricsExporter }}
-  JAVA_OPTS_APPEND: {{ list "-Djgroups.dns.query=keycloak-headless" "-javaagent:/opt/keycloak/agent/opentelemetry-javaagent.jar" $extraJavaOpts | compact | join " " | quote }}
+  JAVA_OPTS_APPEND: {{ list "-Djgroups.dns.query=keycloak-headless" "-Djava.net.preferIPv6Addresses=system" "-javaagent:/opt/keycloak/agent/opentelemetry-javaagent.jar" $extraJavaOpts | compact | join " " | quote }}
   {{- else }}
-  JAVA_OPTS_APPEND: {{ list "-Djgroups.dns.query=keycloak-headless" $extraJavaOpts | compact | join " " | quote }}
+  JAVA_OPTS_APPEND: {{ list "-Djgroups.dns.query=keycloak-headless" "-Djava.net.preferIPv6Addresses=system" $extraJavaOpts | compact | join " " | quote }}
   {{- end }}
   KC_HOSTNAME:  {{ printf "https://%s/auth" ($top.Values.global.domain) }}
   KC_RUNAI_AUTHORIZATION_SERVICE_URL: {{ $top.Values.keycloakx.config.authorizationServiceUrl | default (printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.authorization.name ($top.Values.authorization.service.port | toString)) | quote }}

@@ -3,11 +3,11 @@ templates:
   - templates/keycloakx/configmap.yaml
 
 tests:
-  - it: "keeps only jgroups discovery by default"
+  - it: "keeps jgroups discovery and IPv6 preference by default"
     asserts:
       - equal:
           path: data.JAVA_OPTS_APPEND
-          value: "-Djgroups.dns.query=keycloak-headless"
+          value: "-Djgroups.dns.query=keycloak-headless -Djava.net.preferIPv6Addresses=system"
 
   - it: "keeps the OTel agent when OTel is enabled"
     set:
@@ -15,7 +15,7 @@ tests:
     asserts:
       - equal:
           path: data.JAVA_OPTS_APPEND
-          value: "-Djgroups.dns.query=keycloak-headless -javaagent:/opt/keycloak/agent/opentelemetry-javaagent.jar"
+          value: "-Djgroups.dns.query=keycloak-headless -Djava.net.preferIPv6Addresses=system -javaagent:/opt/keycloak/agent/opentelemetry-javaagent.jar"
 
   - it: "appends extraJavaOpts"
     set:
@@ -23,7 +23,7 @@ tests:
     asserts:
       - equal:
           path: data.JAVA_OPTS_APPEND
-          value: "-Djgroups.dns.query=keycloak-headless -XX:-UseBASE64Intrinsics"
+          value: "-Djgroups.dns.query=keycloak-headless -Djava.net.preferIPv6Addresses=system -XX:-UseBASE64Intrinsics"
 
   - it: "appends extraJavaOpts after the OTel agent"
     set:
@@ -32,7 +32,7 @@ tests:
     asserts:
       - equal:
           path: data.JAVA_OPTS_APPEND
-          value: "-Djgroups.dns.query=keycloak-headless -javaagent:/opt/keycloak/agent/opentelemetry-javaagent.jar -Xss512k"
+          value: "-Djgroups.dns.query=keycloak-headless -Djava.net.preferIPv6Addresses=system -javaagent:/opt/keycloak/agent/opentelemetry-javaagent.jar -Xss512k"
 
   - it: "keeps a value containing a colon and space valid"
     set:
@@ -40,4 +40,4 @@ tests:
     asserts:
       - equal:
           path: data.JAVA_OPTS_APPEND
-          value: '-Djgroups.dns.query=keycloak-headless -Dhttp.agent="RunAI: Keycloak"'
+          value: '-Djgroups.dns.query=keycloak-headless -Djava.net.preferIPv6Addresses=system -Dhttp.agent="RunAI: Keycloak"'
