@@ -517,6 +517,31 @@ export interface ExternalAccess {
      * @memberof ExternalAccess
      */
     'httpRoute'?: object | null;
+    /**
+     * 
+     * @type {ExternalAccessInference}
+     * @memberof ExternalAccess
+     */
+    'inference'?: ExternalAccessInference | null;
+}
+/**
+ * Server-resolved inference routing for this endpoint. Set only by the control plane; rejected in workload submissions. Requires httpRoute and one created Service, or a reference to the NIMService\'s Service, on the same endpoint. The cluster then creates an InferenceEndpoint instead of the HTTPRoute, and derives its workload selector, target port, Gateway and hostnames from that Service and httpRoute.
+ * @export
+ * @interface ExternalAccessInference
+ */
+export interface ExternalAccessInference {
+    /**
+     * InferenceEndpoint spec.epp, for example the EPP profile. Validated against the installed CRD when applied.
+     * @type {{ [key: string]: any; }}
+     * @memberof ExternalAccessInference
+     */
+    'epp': { [key: string]: any; };
+    /**
+     * The path whose requests go through the endpoint picker. Set by the control plane to /v1.
+     * @type {string}
+     * @memberof ExternalAccessInference
+     */
+    'pathPrefix'?: string;
 }
 /**
  * Specifies the Group, Version, and Kind (GVK) of the Kubernetes resource that defines the workload.
@@ -1079,6 +1104,12 @@ export interface NimServiceSpec {
      */
     'labels'?: Array<Label> | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * @type {boolean}
+     * @memberof NimServiceSpec
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
      * 
      * @type {NimServiceSpecAllOfModelStore}
      * @memberof NimServiceSpec
@@ -1205,6 +1236,12 @@ export interface NimServiceSpecAllOf {
      * @memberof NimServiceSpecAllOf
      */
     'labels'?: Array<Label> | null;
+    /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * @type {boolean}
+     * @memberof NimServiceSpecAllOf
+     */
+    'loadAwareRouting'?: boolean | null;
     /**
      * 
      * @type {NimServiceSpecAllOfModelStore}
@@ -2094,6 +2131,25 @@ export interface WorkloadV2Configuration {
      * @memberof WorkloadV2Configuration
      */
     'pvcsConfig'?: WorkloadV2UpdateConfigurationPvcsConfig | null;
+    /**
+     * 
+     * @type {WorkloadV2ConfigurationInferenceRouting}
+     * @memberof WorkloadV2Configuration
+     */
+    'inferenceRouting'?: WorkloadV2ConfigurationInferenceRouting | null;
+}
+/**
+ * Inference routing fields from the policy-validated workload spec. Set only by the workloads service on the internal create API; rejected in public workload submissions. Workloads Manager resolves them into externalAccess.inference on the serving endpoint.
+ * @export
+ * @interface WorkloadV2ConfigurationInferenceRouting
+ */
+export interface WorkloadV2ConfigurationInferenceRouting {
+    /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * @type {boolean}
+     * @memberof WorkloadV2ConfigurationInferenceRouting
+     */
+    'loadAwareRouting'?: boolean | null;
 }
 /**
  * 
@@ -2504,6 +2560,12 @@ export interface WorkloadV2MetadataUpdateParamsConfiguration {
      * @memberof WorkloadV2MetadataUpdateParamsConfiguration
      */
     'pvcsConfig'?: WorkloadV2UpdateConfigurationPvcsConfig | null;
+    /**
+     * 
+     * @type {WorkloadV2ConfigurationInferenceRouting}
+     * @memberof WorkloadV2MetadataUpdateParamsConfiguration
+     */
+    'inferenceRouting'?: WorkloadV2ConfigurationInferenceRouting | null;
 }
 /**
  * 

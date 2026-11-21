@@ -1,0 +1,4 @@
+description: Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+type: boolean
+default: false
+nullable: true

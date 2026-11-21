@@ -4253,6 +4253,11 @@ components:
       type: string
       nullable: true
       pattern: .*
+    LoadAwareRouting:
+      description: Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+      type: boolean
+      default: false
+      nullable: true
     NodePools:
       description: A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
       type: array
@@ -4413,6 +4418,8 @@ components:
           properties:
             category:
               $ref: '#/components/schemas/Category'
+            loadAwareRouting:
+              $ref: '#/components/schemas/LoadAwareRouting'
             nodePools:
               $ref: '#/components/schemas/NodePools'
             preemptibility:
@@ -6275,6 +6282,8 @@ components:
           properties:
             category:
               $ref: '#/components/schemas/StringRules'
+            loadAwareRouting:
+              $ref: '#/components/schemas/BooleanRules'
             nodePools:
               $ref: '#/components/schemas/ArrayRules'
             preemptibility:
@@ -8494,6 +8503,8 @@ components:
               $ref: '#/components/schemas/ImagePullSecretsDefaults'
             labels:
               $ref: '#/components/schemas/LabelsDefaults'
+            loadAwareRouting:
+              $ref: '#/components/schemas/LoadAwareRouting'
             modelStore:
               nullable: true
               properties:
@@ -8706,6 +8717,8 @@ components:
               $ref: '#/components/schemas/ImagePullSecretsRules'
             labels:
               $ref: '#/components/schemas/InstancesRules'
+            loadAwareRouting:
+              $ref: '#/components/schemas/BooleanRules'
             modelStore:
               nullable: true
               properties:

@@ -49,6 +49,7 @@ type workloadsMgrMock struct {
 	getErr         *workloads_mgr_api.Error
 	updateResponse *workloads_mgr_api.WorkloadV2
 	updateErr      *workloads_mgr_api.Error
+	updateRequest  *workloads_mgr_api.WorkloadV2UpdateRequest
 }
 
 func (m *workloadsMgrMock) BatchWorkloads(_ context.Context, batch workloads_mgr_api.WorkloadsV2Batch) (*workloads_mgr_api.BatchResponse, *workloads_mgr_api.Error) {
@@ -77,7 +78,8 @@ func (m *workloadsMgrMock) UpdateWorkloadV2(_ context.Context, _ string, _ workl
 	return nil, nil
 }
 
-func (m *workloadsMgrMock) UpdateWorkloadInternal(_ context.Context, _ string, _ workloads_mgr_api.WorkloadV2UpdateRequest) (*workloads_mgr_api.WorkloadV2, *workloads_mgr_api.Error) {
+func (m *workloadsMgrMock) UpdateWorkloadInternal(_ context.Context, _ string, req workloads_mgr_api.WorkloadV2UpdateRequest) (*workloads_mgr_api.WorkloadV2, *workloads_mgr_api.Error) {
+	m.updateRequest = &req
 	return m.updateResponse, m.updateErr
 }
 
