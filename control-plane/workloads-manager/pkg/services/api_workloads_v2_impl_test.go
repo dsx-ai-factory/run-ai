@@ -21,6 +21,7 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/clusterservice"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/clients/clusters"
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/inferenceendpoint"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/settings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
@@ -546,7 +547,7 @@ var _ = Describe("WorkloadsV2Impl", func() {
 					protectedNetworking := []api.NetworkingEndpoint(*protectedConfiguration.Networking)
 					resp := dryRun(protectedManifest, &protectedNetworking)
 					Expect(resp.Code).To(Equal(http.StatusBadRequest), resp.Body.String())
-					Expect(resp.Body.String()).To(ContainSubstring("must not target the auth proxy port"))
+					Expect(resp.Body.String()).To(ContainSubstring(inferenceendpoint.AuthNotSupportedMessage))
 					Expect(queuedRecords()).To(BeEmpty())
 				})
 			})

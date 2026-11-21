@@ -122,3 +122,21 @@ func TestWorkloadCountPerTypePerPhasePerCluster(t *testing.T) {
 		},
 	})
 }
+
+// is_gpu
+func TestWorkloadInfoEnriched_IsGpuReflectsRequestedGpus(t *testing.T) {
+	newTester(t).Test(TestCase{
+		Interval: "1m",
+		Inputs: []Input{
+			{Series: `runai_workload_info_unique{workload_id="wl-gpu", workload_name="gpu-wl", workload_type="train", project="p1", department="d1", queue_name="q1", nodepool="np1"}`, Values: "1x3"},
+			{Series: `runai_scheduler_requested_gpus_per_pod_unique{pod_uuid="pod-gpu", workload_id="wl-gpu"}`, Values: "2x3"},
+			{Series: `runai_workload_info_unique{workload_id="wl-cpu", workload_name="cpu-wl", workload_type="train", project="p1", department="d1", queue_name="q1", nodepool="np1"}`, Values: "1x3"},
+			{Series: `runai_scheduler_requested_gpus_per_pod_unique{pod_uuid="pod-cpu", workload_id="wl-cpu"}`, Values: "0x3"},
+		},
+		Tests: []Test{
+			{Expr: `count(runai_workload_info_enriched{workload_id="wl-gpu", is_gpu="true"})`, EvalTime: "2m", Samples: []Sample{{Value: 1}}},
+			{Expr: `count(runai_workload_info_enriched{workload_id="wl-gpu", is_gpu="false"})`, EvalTime: "2m", Samples: nil},
+			{Expr: `count(runai_workload_info_enriched{workload_id="wl-cpu", is_gpu="false"})`, EvalTime: "2m", Samples: []Sample{{Value: 1}}},
+		},
+	})
+}

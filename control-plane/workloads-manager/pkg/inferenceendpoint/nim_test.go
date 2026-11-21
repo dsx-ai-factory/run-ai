@@ -76,7 +76,7 @@ var _ = Describe("NIM service endpoint intent", func() {
 		Entry("another Service", func() { (*endpoint.Services)[0].Ref.Name = "other" }, "reference to the serving port of the operator Service"),
 		Entry("protected serving port", func() {
 			(*endpoint.Services)[0].Authorization = &api.Workloadv2Authorization{AuthorizationType: ptr.To(api.AUTHORIZATIONTYPE_AUTHENTICATED_USERS)}
-		}, "protected serving port is not supported yet"),
+		}, AuthNotSupportedMessage),
 		Entry("internal-only endpoint", func() { endpoint.ExternalAccess = nil }, "requires an external Gateway HTTPRoute"),
 		Entry("parallel Ingress", func() { endpoint.ExternalAccess.Ingress = &map[string]interface{}{} }, "without Ingress or OpenShift Route"),
 		Entry("parallel OpenShift Route", func() { endpoint.ExternalAccess.Route = &map[string]interface{}{} }, "without Ingress or OpenShift Route"),

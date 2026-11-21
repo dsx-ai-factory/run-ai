@@ -27767,6 +27767,11 @@ components:
                   type: string
                   description: Name of the predefined role for cluster permissions
                   example: admin
+            clusterRoleOptional:
+              type: boolean
+              default: false
+              description: Indicates if the access rule's role is a custom role with no predefined role for cluster permissions.
+              example: false
             isDeleting:
               type: boolean
               default: false

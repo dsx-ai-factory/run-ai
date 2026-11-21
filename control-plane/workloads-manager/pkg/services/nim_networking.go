@@ -15,6 +15,7 @@ import (
 
 	nimv1alpha1 "github.com/NVIDIA/k8s-nim-operator/api/apps/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/internal/generated/pkg/api"
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/inferenceendpoint"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
@@ -37,7 +38,7 @@ const (
 	backendProtocolGRPCHAProxy        = "grpc"
 	haproxyForwardedUriHeader         = "X-Forwarded-Uri %[req.uri]"
 
-	nimLoadAwareRoutingProtectedMessage  = "load-aware routing is not available yet for NIM services with a protected serving port"
+	nimLoadAwareRoutingProtectedMessage  = "load-aware routing: " + inferenceendpoint.AuthNotSupportedMessage
 	nimLoadAwareRoutingNotExposedMessage = "load-aware routing requires servingPort.exposeExternally to be true"
 	nimLoadAwareRoutingGRPCMessage       = "load-aware routing is not available for NIM services that serve gRPC"
 )

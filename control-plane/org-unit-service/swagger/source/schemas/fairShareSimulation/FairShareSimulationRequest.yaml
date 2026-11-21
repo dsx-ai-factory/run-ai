@@ -1,0 +1,36 @@
+type: object
+description: |
+  A scenario to simulate: the node pool and the org units to return, with their unsaved changes. Every org unit
+  without a demand asks for half the node pool's capacity, capped by its limit. For departments, every department
+  competes. For projects, the other departments ask for nothing, and the parent asks for the sum of its projects'
+  demand, capped by its limit.
+required:
+  - nodePool
+  - orgUnitType
+  - orgUnits
+properties:
+  nodePool:
+    description: Required; null is rejected.
+    nullable: true
+    allOf:
+      - $ref: "./FairShareSimulationNodePool.yaml"
+  orgUnitType:
+    type: string
+    description: The type of the requested org units. One type per request.
+    enum:
+      - department
+      - project
+  parent:
+    description: Required for projects; not allowed for departments.
+    nullable: true
+    allOf:
+      - $ref: "./FairShareSimulationParent.yaml"
+  orgUnits:
+    type: array
+    minItems: 1
+    maxItems: 500
+    description: |
+      The org units to return, with their unsaved changes. Every org unit with an unsaved change must be sent: a change
+      that isn't sent isn't simulated.
+    items:
+      $ref: "./FairShareSimulationOrgUnit.yaml"

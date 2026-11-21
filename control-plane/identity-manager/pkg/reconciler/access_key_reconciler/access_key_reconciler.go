@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package app_reconciler_by_type
+package access_key_reconciler
 
 import (
 	"context"
@@ -21,33 +21,33 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
 
-type AppsReconcilerConfig struct {
+type AccessKeysReconcilerConfig struct {
 	hostTemplate string
 	appHost      string
 }
 
-type AppsReconciler struct {
+type AccessKeysReconciler struct {
 	iamServices           iam.IamServiceContainer
-	config                AppsReconcilerConfig
+	config                AccessKeysReconcilerConfig
 	tenantResolver        reconciler.TenantResolver
 	authClient            authorization_client.IAuthorizationClient
 	version               string
 	reconcilerVersionsDal business.ReconcilerVersionsDal
 }
 
-func NewAppReconcilerByType(ctx context.Context, iamServices *iam.IamServiceContainer, tenantRealm *config.TenantRealm,
+func NewAccessKeysReconciler(ctx context.Context, iamServices *iam.IamServiceContainer, tenantRealm *config.TenantRealm,
 	realmDal business.RealmDal, reconcilerVersionsDal business.ReconcilerVersionsDal, version string,
 ) reconciler.Reconciler {
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Debugf("Init Access Keys Reconciler")
 	tenantResolver := reconciler.NewRealmTenantResolver(ctx, realmDal)
 
-	ar := AppsReconciler{
+	ar := AccessKeysReconciler{
 		iamServices:           *iamServices,
 		tenantResolver:        tenantResolver,
 		reconcilerVersionsDal: reconcilerVersionsDal,
 		authClient:            authorization_client.NewAuthorizationClient(),
 		version:               version,
-		config: AppsReconcilerConfig{
+		config: AccessKeysReconcilerConfig{
 			hostTemplate: tenantRealm.TenantDomainTemplate,
 			appHost:      tenantRealm.AppHost,
 		},
@@ -55,7 +55,7 @@ func NewAppReconcilerByType(ctx context.Context, iamServices *iam.IamServiceCont
 	return &ar
 }
 
-func (a *AppsReconciler) Reconcile(ctx context.Context, realm string, force bool) error {
+func (a *AccessKeysReconciler) Reconcile(ctx context.Context, realm string, force bool) error {
 	start := time.Now()
 	defer reconciler.LogReconcileDuration(ctx, start, realm, fmt.Sprintf("Access keys reconciler. in version %s. force: %t", a.version, force))
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Reconciling Access Keys for realm %s. in version %s. force: %t", realm, a.version, force)
@@ -78,7 +78,7 @@ func (a *AppsReconciler) Reconcile(ctx context.Context, realm string, force bool
 	return nil
 }
 
-func (r *AppsReconciler) shouldReconcileAccessKeys(ctx context.Context, tenantId string, force bool) bool {
+func (r *AccessKeysReconciler) shouldReconcileAccessKeys(ctx context.Context, tenantId string, force bool) bool {
 	if force {
 		return true
 	}
@@ -91,7 +91,7 @@ func (r *AppsReconciler) shouldReconcileAccessKeys(ctx context.Context, tenantId
 	return versions.AccessKeys != r.version
 }
 
-func (cr *AppsReconciler) updateAccessKeysVersionAndLogError(ctx context.Context, tenantId string) {
+func (cr *AccessKeysReconciler) updateAccessKeysVersionAndLogError(ctx context.Context, tenantId string) {
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Updating access keys for tenant id %s to version %s", tenantId, cr.version)
 	err := cr.reconcilerVersionsDal.UpdateAccessKeysReconcilerVersions(ctx, tenantId, cr.version)
 	if err != nil {
@@ -99,7 +99,7 @@ func (cr *AppsReconciler) updateAccessKeysVersionAndLogError(ctx context.Context
 	}
 }
 
-func (cr *AppsReconciler) reconcileAccessKeys(ctx context.Context, realm string, tenantId string) error {
+func (cr *AccessKeysReconciler) reconcileAccessKeys(ctx context.Context, realm string, tenantId string) error {
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Reconciling access keys for realm %s", realm)
 
 	clientType := realm_client.ClientTypeAccessKey
@@ -125,7 +125,7 @@ func (cr *AppsReconciler) reconcileAccessKeys(ctx context.Context, realm string,
 	return nil
 }
 
-func (cr *AppsReconciler) reconcileAccessKey(ctx context.Context, realm string, client realm_client.Client) error {
+func (cr *AccessKeysReconciler) reconcileAccessKey(ctx context.Context, realm string, client realm_client.Client) error {
 	clientID := client.GetClientID()
 	existsClient, err := cr.iamServices.ClientService.GetClientByClientId(ctx, realm, clientID)
 	if err != nil {

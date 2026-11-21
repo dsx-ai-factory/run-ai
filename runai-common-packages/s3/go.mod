@@ -3,8 +3,8 @@ module github.com/dsx-ai-factory/run-ai/runai-common-packages/s3
 go 1.27.4
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.4
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.20
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.5
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.21
 	github.com/minio/minio-go/v7 v7.4.1
 )
 
@@ -42,7 +42,7 @@ require (
 	github.com/zeebo/xxh3 v1.1.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/crypto v0.59.0 // indirect
-	golang.org/x/net v0.62.0 // indirect
+	golang.org/x/net v0.63.0 // indirect
 	golang.org/x/sys v0.50.0 // indirect
 	golang.org/x/text v0.44.0 // indirect
 	gopkg.in/ini.v1 v1.68.0 // indirect
