@@ -120,14 +120,14 @@ var jupyterLabOneGpu = presetEntry{
 	template: api.SupersetTemplate{
 		Meta: api.TemplateMetaFields{
 			Name:         "jupyter-lab-one-gpu",
-			Description:  convutils.Ref("Jupyter Lab / 1 GPU (v4)"),
+			Description:  convutils.Ref("Jupyter Lab / 1 GPU (v5)"),
 			WorkloadType: api.WORKLOADTYPE_WORKSPACE,
 			ScopeType:    api.SCOPETYPE_SYSTEM,
 			CreatedBy:    createdByRunai,
 			UpdatedBy:    convutils.Ref(createdByRunai),
 		},
 		Spec: api.SupersetSpec{
-			Image:           convutils.Ref("jupyter/scipy-notebook"),
+			Image:           convutils.Ref("quay.io/jupyter/scipy-notebook"),
 			ImagePullPolicy: convutils.Ref(api.IMAGEPULLPOLICY_IF_NOT_PRESENT),
 			Command:         convutils.Ref("start-notebook.sh"),
 			Args:            convutils.Ref("--NotebookApp.base_url=/${RUNAI_PROJECT}/${RUNAI_JOB_NAME} --NotebookApp.token=''"),
