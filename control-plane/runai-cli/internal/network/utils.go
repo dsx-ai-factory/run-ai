@@ -7,31 +7,27 @@ package network
 
 import (
 	"fmt"
+	"net"
 	"strconv"
-	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/consts"
 )
 
 const (
-	sep         = ":"
 	lowestPort  = 1
 	highestPort = 65535
-	splitParts  = 2
 )
 
 func ValidAddress(address string) error {
-	// Split the address into ip/host and port
-	parts := strings.Split(address, sep)
-	if len(parts) != splitParts {
+	_, portStr, err := net.SplitHostPort(address)
+	if err != nil {
 		return fmt.Errorf("address %s is not in the format of host:port", address)
 	}
 
-	// Check if the port is a valid number
-	port, err := strconv.Atoi(parts[1])
+	port, err := strconv.Atoi(portStr)
 	if err != nil || port < lowestPort || port > highestPort {
 		return fmt.Errorf("port %s is not a valid"+
-			" port number should be between %d and %d", parts[1], lowestPort, highestPort)
+			" port number should be between %d and %d", portStr, lowestPort, highestPort)
 	}
 
 	return nil

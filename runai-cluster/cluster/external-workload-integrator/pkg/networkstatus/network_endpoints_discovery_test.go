@@ -51,6 +51,24 @@ var _ = Describe("findNodePortEndpoints", func() {
 		Expect(ep.SourceRef).To(Equal(v1alpha1.ExternalEndpointSourceRef{Kind: "Service", Name: "svc-np"}))
 	})
 
+	It("brackets an IPv6 node address in the endpoint url", func() {
+		svc := &corev1.Service{
+			ObjectMeta: metav1.ObjectMeta{Name: "svc-np-v6", Namespace: "ns"},
+			Spec: corev1.ServiceSpec{
+				Type: corev1.ServiceTypeNodePort,
+				Ports: []corev1.ServicePort{
+					{Port: 80, NodePort: 30080, Protocol: corev1.ProtocolTCP},
+					{Port: 8080, NodePort: 30081, Protocol: corev1.ProtocolTCP, AppProtocol: ptr.To("http")},
+				},
+			},
+		}
+		eps := NewNetworkStatusUpdater(nil).findNodePortEndpoints(svc, "2600:1f18::1")
+		Expect(eps).To(HaveLen(2))
+		Expect(eps[0].Host).To(Equal("2600:1f18::1"))
+		Expect(eps[0].Url).To(Equal("[2600:1f18::1]:30080"))
+		Expect(eps[1].Url).To(Equal("http://[2600:1f18::1]:30081/"))
+	})
+
 	It("marks TLS when AppProtocol is https", func() {
 		svc := &corev1.Service{
 			ObjectMeta: metav1.ObjectMeta{Name: "svc-np-tls"},

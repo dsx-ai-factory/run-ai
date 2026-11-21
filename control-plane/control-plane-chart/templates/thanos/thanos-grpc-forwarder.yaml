@@ -55,7 +55,7 @@ spec:
             - port-forward
             - --namespace=openshift-monitoring
             - svc/thanos-querier-grpc
-            - "--address=0.0.0.0"
+            - "--address=0.0.0.0,::"
             - "10901:10901"
           ports:
             - containerPort: 10901

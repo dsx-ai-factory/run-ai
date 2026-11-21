@@ -159,6 +159,23 @@ var _ = Describe("DependencyCheckers", func() {
 			httpmock.Activate()
 		})
 
+		DescribeTable("should reach the exporter service with a bracketed host when needed",
+			func(clusterIP, expectedURL string) {
+				httpmock.RegisterResponder("GET", expectedURL, httpmock.NewStringResponder(200, "DCGM_FI_DEV_GPU_UTIL 1"))
+				svc := &v1.Service{Spec: v1.ServiceSpec{
+					ClusterIP: clusterIP,
+					Ports:     []v1.ServicePort{{Port: 9400}},
+				}}
+
+				body, err := getMetricsFromExporterService(svc)
+
+				Expect(err).ToNot(HaveOccurred())
+				Expect(body).To(ContainSubstring("DCGM_FI_DEV_GPU_UTIL"))
+			},
+			Entry("IPv4", "100.0.0.127", "http://100.0.0.127:9400/metrics"),
+			Entry("IPv6", "fd00:10:96::5", "http://[fd00:10:96::5]:9400/metrics"),
+		)
+
 		It("should return dcgm-exporter's service exist and no missing metrics", func() {
 			Expect(k8s.Create(apiAccessContext, &v1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{

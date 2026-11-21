@@ -8,8 +8,9 @@ package smtp
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"net"
 	"regexp"
+	"strconv"
 
 	"github.com/emersion/go-smtp"
 	"github.com/google/uuid"
@@ -33,7 +34,7 @@ type SmtpListener struct {
 }
 
 func NewSmtpListener(id string, eventCh chan *events.Event, config *SmtpListenerConfig) *SmtpListener {
-	addr := fmt.Sprintf("%s:%d", config.Host, config.Port)
+	addr := net.JoinHostPort(config.Host, strconv.Itoa(int(config.Port)))
 	backend := NewSmtpBackend(nil) // Listener not yet constructed, can be set later if needed
 
 	server := smtp.NewServer(backend)

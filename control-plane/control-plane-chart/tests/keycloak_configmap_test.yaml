@@ -1,0 +1,24 @@
+suite: Test Keycloak configmap
+
+templates:
+  - templates/keycloakx/configmap.yaml
+
+tests:
+  - it: should prefer the reachable IP family for outbound connections
+    asserts:
+      - matchRegex:
+          path: data.JAVA_OPTS_APPEND
+          pattern: "-Djava.net.preferIPv6Addresses=system"
+
+  - it: should keep the IP family option when the OpenTelemetry agent is enabled
+    set:
+      keycloakx:
+        config:
+          otelEnable: true
+    asserts:
+      - matchRegex:
+          path: data.JAVA_OPTS_APPEND
+          pattern: "-Djava.net.preferIPv6Addresses=system"
+      - matchRegex:
+          path: data.JAVA_OPTS_APPEND
+          pattern: "opentelemetry-javaagent.jar"
