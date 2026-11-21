@@ -825,3 +825,10 @@ workloads-v2:
     - *no-integration-tests-dir
     - *no-integration_tests-dir
     - *no-mocks-dir
+
+inference-endpoint-controller:
+- changed-files:
+  - any-glob-to-any-file:
+    - "runai-cluster/cluster/inference-endpoint-controller/**"
+    - "runai-cluster/cluster/sdk/apis/run/v1/inference-endpoint-controller/**"
+    - "runai-cluster/cluster/go-operator/internal/run/operands/inference-endpoint-controller/**"

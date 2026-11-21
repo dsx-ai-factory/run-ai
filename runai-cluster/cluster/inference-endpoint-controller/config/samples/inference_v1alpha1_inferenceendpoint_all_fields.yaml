@@ -1,0 +1,57 @@
+# InferenceEndpoint field reference, including its optional fields.
+# This is a field reference, not a minimal configuration.
+# Prerequisites: the namespace, Gateway, and matching model-serving Pods exist;
+# the Pods serve on port 8000.
+apiVersion: inference.platform.run.ai/v1alpha1
+kind: InferenceEndpoint
+metadata:
+  name: llama3-all-fields
+  namespace: model-serving
+spec:
+  workload: # Required. Selects existing Pods; does not create or modify them.
+    selector:
+      matchLabels: # Required, at least one label; all labels must match.
+        app: vllm-llama3
+    port: 8000 # Required, 1–65535. One serving port is currently supported.
+
+  routing: # Required. Configures the generated HTTPRoute.
+    gatewayRef:
+      name: inference-agw # Required. References an existing Gateway.
+      namespace: model-serving # Optional; defaults to this endpoint's namespace.
+    hostnames: # Required, at least one hostname; entries must be unique.
+    - llama3-all-fields.test
+    - llama3-all-fields-alias.test
+    pathPrefix: /v1 # Optional; default /v1. Requests under it go through the EPP; other paths return 404.
+
+  epp: # Required.
+    profile: gie-v1.5 # Required. Pins the GIE v1.5.0 image, configuration, ports and startup flags.
+    scheduling: # Optional. Config changes replace EPP Pods (Recreate strategy).
+      scorers: # Omitted/empty = defaults below; a nonempty list selects exactly these scorers.
+      - type: queue # Required. Prefers Pods with fewer queued requests.
+        weight: 30 # Required, 0–100. Relative influence, not a traffic percentage.
+      - type: kvCache # Prefers Pods with more free KV cache.
+        weight: 20
+      - type: prefixCache # Prefers Pods already holding the prompt prefix.
+        weight: 10
+      # Each type may occur once. Weight 0 keeps a scorer loaded but ignores its score.
+
+# Controller-written status: illustrative output only, not user configuration.
+# The values below are examples, not an observed cluster state. They show every
+# implemented status field; observedGeneration refers to metadata.generation.
+# status:
+#   observedGeneration: 1
+#   conditions:
+#   - type: RouteAccepted
+#     status: "True" # Schema permits True, False, Unknown; controller writes True/False.
+#     observedGeneration: 1
+#     lastTransitionTime: "2026-09-14T00:00:00Z"
+#     reason: RouteAccepted
+#     message: Gateway inference-agw accepted the route
+#   - type: Ready
+#     status: "True"
+#     observedGeneration: 1
+#     lastTransitionTime: "2026-09-14T00:00:00Z"
+#     reason: RouteAccepted
+#     message: 11 objects applied, route accepted, EPP available
+# Ready requires successful apply, an accepted/resolved route, and a completed
+# current EPP rollout. It does not replace an end-to-end traffic test.

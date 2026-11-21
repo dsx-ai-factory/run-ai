@@ -12,6 +12,7 @@ import (
 	"slices"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/cachedclient"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints"
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
@@ -55,6 +56,15 @@ func AddWorkloadRunnerHandlerToCache(cachedClient cachedclient.CachedClient,
 }
 
 func wlrSyncFieldsChanged(oldWlr, newWlr *dromosv1alpha1.WorkloadRunner) bool {
+	// Inference routing intent lives in the endpoints annotation. Any change to it
+	// while inference is requested on either side can change the reported condition.
+	oldConfigured, newConfigured := endpoints.HasInference(oldWlr), endpoints.HasInference(newWlr)
+	if oldConfigured != newConfigured ||
+		(newConfigured && (oldWlr.Annotations[endpoints.Annotation] != newWlr.Annotations[endpoints.Annotation] ||
+			oldWlr.Generation != newWlr.Generation)) {
+		return true
+	}
+
 	if !bytes.Equal(oldWlr.Spec.Template.Raw, newWlr.Spec.Template.Raw) {
 		return true
 	}
@@ -84,13 +94,25 @@ func wlrSyncFieldsChanged(oldWlr, newWlr *dromosv1alpha1.WorkloadRunner) bool {
 				return true
 			}
 			if name == networkingPluginName &&
-				(externalAccessConditionChanged(oldPlugin, newPlugin) || pluginDetailsChanged(oldPlugin, newPlugin)) {
+				(externalAccessConditionChanged(oldPlugin, newPlugin) || pluginDetailsChanged(oldPlugin, newPlugin) ||
+					inferenceEndpointConditionChanged(oldPlugin, newPlugin)) {
 				return true
 			}
 		}
 	}
 
 	return false
+}
+
+func inferenceEndpointConditionChanged(old, new *dromosv1alpha1.PluginStatus) bool {
+	oldCond := findCondition(old.Conditions, endpoints.InferenceEndpointReadyCondition)
+	newCond := findCondition(new.Conditions, endpoints.InferenceEndpointReadyCondition)
+	if oldCond == nil || newCond == nil {
+		return oldCond != newCond
+	}
+	// Transition timestamps alone do not change the routing state reported to users.
+	return oldCond.Status != newCond.Status || oldCond.Reason != newCond.Reason ||
+		oldCond.Message != newCond.Message || oldCond.ObservedGeneration != newCond.ObservedGeneration
 }
 
 func externalAccessConditionChanged(old, new *dromosv1alpha1.PluginStatus) bool {

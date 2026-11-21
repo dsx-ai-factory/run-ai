@@ -34,6 +34,21 @@ Validation rules largely mirror the legacy validator, applied per Endpoint, plus
 - K8s Service names must be unique across all Endpoints in the payload.
 - Mode (legacy vs annotation) is enforced mutually exclusive (see above).
 
+### Inference routing (annotation mode)
+
+An Endpoint's `externalAccess` may carry an `inference` block next to `httpRoute`. The control plane sets it; workload submissions cannot. When it is present, the plugin creates an `InferenceEndpoint` (`inference.platform.run.ai/v1alpha1`) named `inference-<runner UID>` and controlled by the WorkloadRunner, instead of the HTTPRoute. A created Service is reconciled as usual. Removing the block deletes the `InferenceEndpoint` and creates the HTTPRoute again.
+
+| `InferenceEndpoint` field | Source |
+|---|---|
+| `workload.selector.matchLabels` | created Service: `services[0].create.spec.selector`. Referenced Service: predicted from the NIMService in the runner template with the NIM operator's selector rule (`app: <name>`; multi-node `app: <name>-lws` and `nim-llm-role: leader`), without reading the cluster |
+| `workload.port` | created Service: `services[0].create.spec.ports[0].targetPort` (numeric; defaults to `port`). Referenced Service: `services[0].ref.port` |
+| `routing.gatewayRef` | `httpRoute.spec.parentRefs[0]` (must be the configured Gateway) |
+| `routing.hostnames` | `httpRoute.spec.hostnames` |
+| `routing.pathPrefix` | `inference.pathPrefix` (default `/v1`) |
+| `epp` (required) | the `inference` block |
+
+Rules: at most one Endpoint per runner may set `inference`; it requires `httpRoute` without `ingress` or `route`, no `services[0].auth`, a created Service with a selector or a reference to the runner's NIMService (`services[0].ref` must name it), and exactly one Gateway parentRef. Admission rejects new or changed inference routing when the `InferenceEndpoint` API is not installed. Status reports the `InferenceEndpoint` as an external access resource (kind `InferenceEndpoint`), takes service URLs from the `httpRoute` hostnames, and mirrors its `Ready` condition as `InferenceEndpointReady`.
+
 ### Activation (legacy mode)
 
 The plugin is triggered when `spec.instructions.networking` is present in the WorkloadRunner specification.

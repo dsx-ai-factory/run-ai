@@ -1,0 +1,240 @@
+# Track A step 4 · 🆕 what the controller would create: the EPP stack.
+# Objects and flags copied from `helm template oci://registry.k8s.io/gateway-api-inference-extension/charts/inferencepool --version v1.5.0`,
+# then changed: scorer weights 30/20/10 (the page's numbers), pool name llama3-pool, small resources for Kind.
+#
+# Page claim under test: "EPP serves gRPC ext_proc with TLS (auto-generated self-signed cert, --secure-serving=true default)".
+# We do NOT pass --secure-serving, so it stays at its default. agentgateway dials TLS with skip-verify.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: llama3-epp
+  namespace: model-serving
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: llama3-epp
+  namespace: model-serving
+data:
+  default-plugins.yaml: |
+    apiVersion: inference.networking.x-k8s.io/v1alpha1
+    kind: EndpointPickerConfig
+    plugins:
+    - type: queue-scorer
+    - type: kv-cache-utilization-scorer
+    - type: prefix-cache-scorer
+    - type: metrics-data-source
+      parameters:
+        scheme: "http"
+        path: "/metrics"
+        insecureSkipVerify: true
+    - type: core-metrics-extractor
+    schedulingProfiles:
+    - name: default
+      plugins:
+      - pluginRef: queue-scorer
+        weight: 30                   # page: "How many requests is this pod already handling?"
+      - pluginRef: kv-cache-utilization-scorer
+        weight: 20                   # page: "How full is this pod's GPU memory?"
+      - pluginRef: prefix-cache-scorer
+        weight: 10                   # page: "Does this pod already have this prompt prefix cached?"
+    # 🔜 Phase 1 would add here:  featureGates: ["flowControl"]  + flowControl.priorityBands.
+    # Not enabled, exactly as the page admits: "priority is tracked but not enforced".
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: llama3-epp-non-sa
+  namespace: model-serving
+rules:
+- apiGroups: ["inference.networking.x-k8s.io"]
+  resources: ["inferenceobjectives", "inferencemodelrewrites"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: ["inference.networking.k8s.io"]
+  resources: ["inferencepools"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: llama3-epp-sa
+  namespace: model-serving
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: llama3-epp-non-sa
+  namespace: model-serving
+subjects:
+- kind: ServiceAccount
+  name: llama3-epp
+  namespace: model-serving
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: llama3-epp-non-sa
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: llama3-epp-sa
+  namespace: model-serving
+subjects:
+- kind: ServiceAccount
+  name: llama3-epp
+  namespace: model-serving
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: llama3-epp-sa
+---
+# The EPP metrics endpoint (:9090/metrics) requires a bearer token authorised for GET /metrics.
+# This ClusterRole + binding lets `kubectl create token llama3-epp` produce such a token for the smoke test.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: llama3-epp-metrics-reader
+rules:
+- nonResourceURLs: ["/metrics"]
+  verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: llama3-epp-metrics-reader
+subjects:
+- kind: ServiceAccount
+  name: llama3-epp
+  namespace: model-serving
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: llama3-epp-metrics-reader
+---
+# The EPP itself must be able to validate bearer tokens (TokenReview) and authorise them (SubjectAccessReview)
+# for its metrics endpoint, otherwise every /metrics call returns 500 "Authentication failed". Built-in role.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: llama3-epp-auth-delegator
+subjects:
+- kind: ServiceAccount
+  name: llama3-epp
+  namespace: model-serving
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: llama3-epp
+  namespace: model-serving
+spec:
+  selector:
+    inferencepool: llama3-epp
+  ports:
+  - name: grpc-ext-proc
+    protocol: TCP
+    port: 9002
+  - name: http-metrics
+    protocol: TCP
+    port: 9090
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llama3-epp
+  namespace: model-serving
+  labels:
+    inference.networking.k8s.io/igw-mode: inferencepool
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate                   # single active replica; prefix-cache state is in memory
+  selector:
+    matchLabels:
+      inferencepool: llama3-epp
+  template:
+    metadata:
+      labels:
+        inferencepool: llama3-epp
+        inference.networking.k8s.io/igw-mode: inferencepool
+    spec:
+      serviceAccountName: llama3-epp
+      # EPP watches Pods, InferencePools, and model-routing resources.
+      automountServiceAccountToken: true
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 130
+      containers:
+      - name: epp
+        image: registry.k8s.io/gateway-api-inference-extension/epp:v1.5.0   # GIE reference EPP, the page's default
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
+        args:
+        - --pool-name
+        - llama3-pool
+        - --pool-namespace
+        - model-serving
+        - --pool-group
+        - inference.networking.k8s.io
+        - --zap-encoder
+        - json
+        - --config-file
+        - /config/default-plugins.yaml
+        - --v
+        - "3"                          # verbose enough to see "Scheduling succeeded" and per-pod scores
+        - --tracing=false
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+        ports:
+        - name: grpc
+          containerPort: 9002
+        - name: grpc-health
+          containerPort: 9003
+        - name: metrics
+          containerPort: 9090
+        livenessProbe:
+          grpc:
+            port: 9003
+            service: inference-extension
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          grpc:
+            port: 9003
+            service: inference-extension
+          periodSeconds: 2
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        volumeMounts:
+        - name: plugins-config-volume
+          mountPath: /config
+      volumes:
+      - name: plugins-config-volume
+        configMap:
+          name: llama3-epp
