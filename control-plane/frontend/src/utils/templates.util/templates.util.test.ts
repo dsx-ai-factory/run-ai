@@ -6,7 +6,14 @@
 import { describe, it, expect } from "vitest";
 import { Scope, WorkloadType } from "@/swagger-models/assets-service-client";
 import type { PermittedScopes } from "@/swagger-models/authorization-client";
-import type { TemplateMetaFields } from "@/swagger-models/workloads-client";
+import type { SupersetTemplate, TemplateMetaFields } from "@/swagger-models/workloads-client";
+import { EWorkloadType } from "@/models/workload.model";
+import {
+  LLM_IMAGE_FOR_HUGGING_FACE,
+  LLM_IMAGE_FOR_TGI,
+  TGI_DEPRECATION_MESSAGE_EDIT,
+  TGI_DEPRECATION_MESSAGE_READ,
+} from "@/models/inference.model";
 import { templatesUtil } from "./templates.util";
 
 describe("templates.util", () => {
@@ -209,6 +216,58 @@ describe("templates.util", () => {
 
         expect(templatesUtil.isPermittedTemplate(templateMeta, permissions)).toBe(false);
       });
+    });
+  });
+
+  describe("isTgiTemplate", () => {
+    const createTemplate = (image: string | undefined, workloadType: EWorkloadType): SupersetTemplate =>
+      ({ meta: { name: "t", workloadType }, spec: { image } }) as unknown as SupersetTemplate;
+
+    it.each([
+      {
+        name: "an inference template with the TGI image",
+        image: LLM_IMAGE_FOR_TGI,
+        type: EWorkloadType.Inference,
+        want: true,
+      },
+      {
+        name: "a vLLM inference template",
+        image: LLM_IMAGE_FOR_HUGGING_FACE,
+        type: EWorkloadType.Inference,
+        want: false,
+      },
+      {
+        name: "a training template with the TGI image",
+        image: LLM_IMAGE_FOR_TGI,
+        type: EWorkloadType.Training,
+        want: false,
+      },
+      { name: "a template without an image", image: undefined, type: EWorkloadType.Inference, want: false },
+    ])("should return $want for $name", ({ image, type, want }) => {
+      expect(templatesUtil.isTgiTemplate(createTemplate(image, type))).toBe(want);
+    });
+
+    it("should fall back to the combined spec image", () => {
+      const template = {
+        meta: { name: "t", workloadType: EWorkloadType.Inference },
+        combinedSpec: { image: LLM_IMAGE_FOR_TGI },
+      } as unknown as SupersetTemplate;
+
+      expect(templatesUtil.isTgiTemplate(template)).toBe(true);
+    });
+  });
+
+  describe("getTgiInfoMessage", () => {
+    it.each([
+      { name: "can edit", canEdit: true, want: TGI_DEPRECATION_MESSAGE_EDIT },
+      { name: "cannot edit", canEdit: false, want: TGI_DEPRECATION_MESSAGE_READ },
+    ])("should return the matching message when the user $name", ({ canEdit, want }) => {
+      expect(templatesUtil.getTgiInfoMessage(canEdit)).toBe(want);
+    });
+
+    it("should mention the runtime settings arguments in both messages", () => {
+      expect(TGI_DEPRECATION_MESSAGE_READ).toContain("update the runtime settings arguments");
+      expect(TGI_DEPRECATION_MESSAGE_EDIT).toContain("update the runtime settings arguments");
     });
   });
 });

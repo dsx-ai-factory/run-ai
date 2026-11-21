@@ -13,8 +13,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-// requireNodeSelector ANDs selector into the pod's required node affinity, so
-// the replica can only land where Snapshot's agent runs.
+// RequireNodeSelector ANDs selector into the pod's required node affinity, so
+// the pod can only land where Snapshot's agent runs. Restore and capture pods
+// both need it.
 //
 // Expressions are added to every existing term rather than as a new term: terms
 // are ORed, so a new one would widen placement instead of narrowing it. The
@@ -27,7 +28,7 @@ import (
 //
 // Not admission-controller's patch.AddNodeAffinityToPodSpec: that appends one
 // term per expression, which ORs a multi-key selector against itself.
-func requireNodeSelector(spec *corev1.PodSpec, selector map[string]string) error {
+func RequireNodeSelector(spec *corev1.PodSpec, selector map[string]string) error {
 	// Sorted so an unchanged selector produces an unchanged pod.
 	required := make([]corev1.NodeSelectorRequirement, 0, len(selector))
 	for _, key := range slices.Sorted(maps.Keys(selector)) {
@@ -35,7 +36,7 @@ func requireNodeSelector(spec *corev1.PodSpec, selector map[string]string) error
 		// be narrowed from here, so a conflict there is a conflict outright.
 		if value, set := spec.NodeSelector[key]; set && value != selector[key] {
 			return fmt.Errorf("%w: nodeSelector pins %s=%s, the agent runs on %s=%s",
-				errUnplaceable, key, value, key, selector[key])
+				ErrUnplaceable, key, value, key, selector[key])
 		}
 		required = append(required, corev1.NodeSelectorRequirement{
 			Key: key, Operator: corev1.NodeSelectorOpIn, Values: []string{selector[key]},
@@ -57,7 +58,7 @@ func requireNodeSelector(spec *corev1.PodSpec, selector map[string]string) error
 	for i, term := range nodeSelector.NodeSelectorTerms {
 		if key, conflict := conflictsWith(term, selector); conflict {
 			return fmt.Errorf("%w: node affinity on %s excludes %s=%s",
-				errUnplaceable, key, key, selector[key])
+				ErrUnplaceable, key, key, selector[key])
 		}
 		nodeSelector.NodeSelectorTerms[i].MatchExpressions =
 			append(nodeSelector.NodeSelectorTerms[i].MatchExpressions, required...)

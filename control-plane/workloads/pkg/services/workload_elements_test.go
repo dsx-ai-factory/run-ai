@@ -1619,6 +1619,10 @@ var _ = Describe("Workload element topology constraints", Ordered, func() {
 		upsertWorkloadHelper(ctx, workloadsService, workloadId, w)
 	})
 
+	AfterAll(func() {
+		testing.CleanTables()
+	})
+
 	It("returns the element's requested constraints even though it has no running pods", func() {
 		resp, err := workloadsService.GetWorkloadElement(ctx, workloadId, prefillElemId)
 		Expect(err).To(BeNil())

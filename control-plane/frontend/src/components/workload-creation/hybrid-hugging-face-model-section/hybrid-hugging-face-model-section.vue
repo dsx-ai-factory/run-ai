@@ -174,7 +174,7 @@ export default defineComponent({
   },
   methods: {
     onHfUpdate(payload: IHuggingFaceModelAndAccessModel): void {
-      const args = inferenceWorkloadUtil.getHFArgsForModel(this.workloadSpec.image || "", payload.modelName);
+      const args = inferenceWorkloadUtil.getHFArgsForModel(payload.modelName);
       const environmentVariables = this.applyHfAccessToEnv(this.workloadSpec.environmentVariables ?? [], payload);
       this.emitModelData({ ...this.workloadSpec, args, environmentVariables });
       const hasUiStateUpdate =
