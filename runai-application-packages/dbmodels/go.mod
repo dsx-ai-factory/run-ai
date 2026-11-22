@@ -4,7 +4,7 @@ go 1.27.4
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.12
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.21
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.22
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.12.1
 	gorm.io/gorm v1.31.2
