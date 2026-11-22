@@ -310,12 +310,13 @@ export class InferenceUtils {
 
         const command = `/bin/bash -c '${curlCommand}'`;
         const maxRetries = 4;
+        let delayMs = 1000;
 
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             try {
                 const execAsync = promisify(exec);
 
-                await this.waitUtils.sleep(1000);
+                await this.waitUtils.sleep(delayMs);
                 logger.info(
                     `executing external curl command (attempt ${attempt}/${maxRetries}): ${command}. expected to ${expectSuccess ? 'succeed' : 'fail with 401'}`
                 );
@@ -336,12 +337,17 @@ export class InferenceUtils {
                     `Curl failed with error: ${errorMessage}, extracted HTTP code: ${httpErrorCode}`
                 );
 
+                // The workload can be Running before its auth proxy accepts connections.
+                const waitingForAuthProxy = !expectSuccess && httpErrorCode === 502;
                 // 503 = backend not ready; 404 (when not expected as success) = nginx ingress rule
                 // not yet propagated. Both are transient startup races — retry the same way.
                 if (
                     attempt < maxRetries &&
-                    (httpErrorCode === 503 || (httpErrorCode === 404 && !treat404AsSuccess))
+                    (waitingForAuthProxy ||
+                        httpErrorCode === 503 ||
+                        (httpErrorCode === 404 && !treat404AsSuccess))
                 ) {
+                    delayMs = waitingForAuthProxy ? 5000 : 1000;
                     logger.warn(`Got ${httpErrorCode}, retrying (attempt ${attempt}/${maxRetries})`);
                     continue;
                 }
