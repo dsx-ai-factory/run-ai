@@ -15,6 +15,7 @@ import (
 
 	metricsapi "github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 )
 
 var _ = Describe("vLLM metrics", func() {
@@ -61,6 +62,51 @@ var _ = Describe("vLLM metrics", func() {
 				Expect(string(workloadTypes[i])).To(Equal(string(podTypes[i])))
 				Expect(isVLLMMetric(string(workloadTypes[i]))).To(BeTrue())
 			}
+		})
+	})
+
+	Context("token usage metrics", func() {
+		tokenUsageTypes := []api.WorkloadMetricType{
+			api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_TOTAL,
+			api.WORKLOADMETRICTYPE_VLLM_GENERATION_TOKENS_TOTAL,
+			api.WORKLOADMETRICTYPE_VLLM_CACHED_PROMPT_TOKENS_TOTAL,
+			api.WORKLOADMETRICTYPE_VLLM_FINISHED_ENGINE_REQUEST_COUNT,
+			api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_PER_REQUEST_AVG,
+			api.WORKLOADMETRICTYPE_VLLM_GENERATION_TOKENS_PER_REQUEST_AVG,
+			api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_PER_REQUEST_PERCENTILES,
+			api.WORKLOADMETRICTYPE_VLLM_GENERATION_TOKENS_PER_REQUEST_PERCENTILES,
+		}
+
+		It("are workload-only vLLM metrics that need cluster version 3.1", func() {
+			Expect(vllmTokenUsageMetricNames).To(HaveLen(len(tokenUsageTypes)))
+			for _, metricType := range tokenUsageTypes {
+				Expect(isVLLMMetric(string(metricType))).To(BeTrue())
+				Expect(isVLLMTokenUsageMetric(string(metricType))).To(BeTrue())
+				Expect(vllmMetricNames).NotTo(HaveKey(string(metricType)))
+				Expect(supportedWorkloadsMetricsVersion).To(HaveKeyWithValue(string(metricType), checker.MinVersionVLLMTokenUsageMetrics))
+				Expect(supportedPodMetricsVersion).NotTo(HaveKey(string(metricType)))
+			}
+		})
+
+		It("keep the existing vLLM metrics at their version", func() {
+			Expect(isVLLMTokenUsageMetric(string(api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_PER_SECOND))).To(BeFalse())
+			Expect(supportedWorkloadsMetricsVersion).To(HaveKeyWithValue(string(api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_PER_SECOND), checker.MinVersionVLLMMetrics))
+		})
+
+		It("parse the percentile metrics as a histogram", func() {
+			Expect(getHistogramMetricKind(string(api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_PER_REQUEST_PERCENTILES))).To(Equal(histogramMetricPercentiles))
+			Expect(getHistogramMetricKind(string(api.WORKLOADMETRICTYPE_VLLM_GENERATION_TOKENS_PER_REQUEST_PERCENTILES))).To(Equal(histogramMetricPercentiles))
+			Expect(getHistogramMetricKind(string(api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_TOTAL))).To(Equal(histogramMetricNone))
+		})
+
+		It("validate the period only when token usage metrics are requested", func() {
+			now := time.Now()
+			Expect(validateRequestedVLLMTokenUsagePeriod([]api.WorkloadMetricType{api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_PER_SECOND}, now, now.Add(-time.Hour))).To(BeNil())
+			Expect(validateRequestedVLLMTokenUsagePeriod(tokenUsageTypes, now.Add(-time.Hour), now)).To(BeNil())
+
+			apiErr := validateRequestedVLLMTokenUsagePeriod(tokenUsageTypes, now, now)
+			Expect(apiErr).NotTo(BeNil())
+			Expect(apiErr.Code).To(BeEquivalentTo(http.StatusBadRequest))
 		})
 	})
 

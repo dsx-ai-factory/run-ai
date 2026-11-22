@@ -226,6 +226,7 @@ var _ = Describe("vLLM metrics", func() {
 
 	oldClusterId := testinghelpers.TestUuid5
 	newClusterId := testinghelpers.TestUuid6
+	tokenUsageClusterId := testinghelpers.TestUuid7
 
 	BeforeEach(func() {
 		ctx = testinghelpers.SetContext(testinghelpers.TestTenant, testinghelpers.TestUser, []string{})
@@ -235,7 +236,8 @@ var _ = Describe("vLLM metrics", func() {
 		checkerClusterClient.SetMock(
 			checkerClusterClient.NewSimpleMockClient().
 				WithCluster(oldClusterId, testinghelpers.BuildDisplayedCluster(oldClusterId, "2.99.9", nil)).
-				WithCluster(newClusterId, testinghelpers.BuildDisplayedCluster(newClusterId, "3.0.0", nil)),
+				WithCluster(newClusterId, testinghelpers.BuildDisplayedCluster(newClusterId, "3.0.0", nil)).
+				WithCluster(tokenUsageClusterId, testinghelpers.BuildDisplayedCluster(tokenUsageClusterId, "3.1.0", nil)),
 		)
 		checker.InitClusterCapabilitiesChecker("", testinghelpers.GetDefaultClustersCacheConfig(), "")
 	})
@@ -297,6 +299,17 @@ var _ = Describe("vLLM metrics", func() {
 
 	It("accepts vLLM metrics at the capability boundary", func() {
 		err := validateMetricsClusterVersions(ctx, newClusterId, []string{"VLLM_NUM_REQUESTS_RUNNING"}, supportedWorkloadsMetricsVersion)
+		Expect(err).To(BeNil())
+	})
+
+	It("rejects vLLM token usage metrics on a cluster that has only the 3.0 vLLM metrics", func() {
+		err := validateMetricsClusterVersions(ctx, newClusterId, []string{"VLLM_PROMPT_TOKENS_TOTAL"}, supportedWorkloadsMetricsVersion)
+		Expect(err).NotTo(BeNil())
+		Expect(err.Message).To(ContainSubstring("VLLM_PROMPT_TOKENS_TOTAL metric is not supported"))
+	})
+
+	It("accepts vLLM token usage metrics at their capability boundary", func() {
+		err := validateMetricsClusterVersions(ctx, tokenUsageClusterId, []string{"VLLM_PROMPT_TOKENS_TOTAL", "VLLM_NUM_REQUESTS_RUNNING"}, supportedWorkloadsMetricsVersion)
 		Expect(err).To(BeNil())
 	})
 

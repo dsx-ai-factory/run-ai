@@ -8,7 +8,9 @@ package services
 import (
 	"context"
 	"fmt"
+	"maps"
 	"net/http"
+	"slices"
 	"sort"
 	"strconv"
 	"time"
@@ -67,6 +69,18 @@ var (
 		string(api.WORKLOADMETRICTYPE_VLLM_REQUEST_PREFILL_TIME_SECONDS_PERCENTILES): runaimetrics.VLLMRequestPrefillTimeSecondsPercentile,
 		string(api.WORKLOADMETRICTYPE_VLLM_REQUEST_DECODE_TIME_SECONDS_PERCENTILES):  runaimetrics.VLLMRequestDecodeTimeSecondsPercentile,
 		string(api.WORKLOADMETRICTYPE_VLLM_INTER_TOKEN_LATENCY_SECONDS_PERCENTILES):  runaimetrics.VLLMInterTokenLatencySecondsPercentile,
+	}
+	// vllmTokenUsageMetricNames are workload-only vLLM metrics that return a single value for the
+	// requested period, so they are queried as aggregations and need the 3.1 recording rules.
+	vllmTokenUsageMetricNames = map[api.WorkloadMetricType]runaimetrics.VLLMTokenUsageMetricName{
+		api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_TOTAL:                       runaimetrics.VLLMPromptTokensTotal,
+		api.WORKLOADMETRICTYPE_VLLM_GENERATION_TOKENS_TOTAL:                   runaimetrics.VLLMGenerationTokensTotal,
+		api.WORKLOADMETRICTYPE_VLLM_CACHED_PROMPT_TOKENS_TOTAL:                runaimetrics.VLLMCachedPromptTokensTotal,
+		api.WORKLOADMETRICTYPE_VLLM_FINISHED_ENGINE_REQUEST_COUNT:             runaimetrics.VLLMFinishedEngineRequestCount,
+		api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_PER_REQUEST_AVG:             runaimetrics.VLLMPromptTokensPerRequestAvg,
+		api.WORKLOADMETRICTYPE_VLLM_GENERATION_TOKENS_PER_REQUEST_AVG:         runaimetrics.VLLMGenerationTokensPerRequestAvg,
+		api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_PER_REQUEST_PERCENTILES:     runaimetrics.VLLMPromptTokensPerRequestPercentile,
+		api.WORKLOADMETRICTYPE_VLLM_GENERATION_TOKENS_PER_REQUEST_PERCENTILES: runaimetrics.VLLMGenerationTokensPerRequestPercentile,
 	}
 
 	allowedResponseLabelsForPodMetricTypes = map[string]map[string]bool{
@@ -161,16 +175,29 @@ var nimMetricStrings = newNimMetricStrings()
 
 func isVLLMMetric(metricType string) bool {
 	_, found := vllmMetricNames[metricType]
+	return found || isVLLMTokenUsageMetric(metricType)
+}
+
+func isVLLMTokenUsageMetric(metricType string) bool {
+	_, found := vllmTokenUsageMetricNames[api.WorkloadMetricType(metricType)]
 	return found
 }
 
+func withVLLMTokenUsageMetricsVersion(versions map[string]int) map[string]int {
+	return withMinClusterVersion(versions, vllmTokenUsageMetricNames, checker.MinVersionVLLMTokenUsageMetrics)
+}
+
 func withVLLMMetricsVersion(versions map[string]int) map[string]int {
-	supportedVersions := make(map[string]int, len(versions)+len(vllmMetricNames))
-	for metricType, version := range versions {
-		supportedVersions[metricType] = version
-	}
-	for metricType := range vllmMetricNames {
-		supportedVersions[metricType] = checker.MinVersionVLLMMetrics
+	return withMinClusterVersion(versions, vllmMetricNames, checker.MinVersionVLLMMetrics)
+}
+
+// withMinClusterVersion returns a copy of versions in which every metric type in metricTypes
+// requires minVersion. The input map is not modified.
+func withMinClusterVersion[K ~string, V any](versions map[string]int, metricTypes map[K]V, minVersion int) map[string]int {
+	supportedVersions := make(map[string]int, len(versions)+len(metricTypes))
+	maps.Copy(supportedVersions, versions)
+	for metricType := range metricTypes {
+		supportedVersions[string(metricType)] = minVersion
 	}
 	return supportedVersions
 }
@@ -194,7 +221,9 @@ func getHistogramMetricKind(metricType string) histogramMetricKind {
 		string(api.WORKLOADMETRICTYPE_VLLM_REQUEST_QUEUE_TIME_SECONDS_PERCENTILES),
 		string(api.WORKLOADMETRICTYPE_VLLM_REQUEST_PREFILL_TIME_SECONDS_PERCENTILES),
 		string(api.WORKLOADMETRICTYPE_VLLM_REQUEST_DECODE_TIME_SECONDS_PERCENTILES),
-		string(api.WORKLOADMETRICTYPE_VLLM_INTER_TOKEN_LATENCY_SECONDS_PERCENTILES):
+		string(api.WORKLOADMETRICTYPE_VLLM_INTER_TOKEN_LATENCY_SECONDS_PERCENTILES),
+		string(api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_PER_REQUEST_PERCENTILES),
+		string(api.WORKLOADMETRICTYPE_VLLM_GENERATION_TOKENS_PER_REQUEST_PERCENTILES):
 		return histogramMetricPercentiles
 	case string(api.WORKLOADMETRICTYPE_NIM_TIME_TO_FIRST_TOKEN_SECONDS),
 		string(api.WORKLOADMETRICTYPE_NIM_E2_E_REQUEST_LATENCY_SECONDS),
@@ -753,6 +782,16 @@ func queryWorkloadMetricType(ctx context.Context, workloadId string, clusterId u
 			},
 		}
 	default:
+		if name, found := vllmTokenUsageMetricNames[metricType]; found {
+			metric = runaimetrics.RunaiVLLMTokenUsagePerWorkloadMetric{
+				Name: name,
+				Filters: runaimetrics.RunaiVLLMPerWorkloadFilters{
+					ClusterId:  clusterFilter,
+					WorkloadId: workloadFilter,
+				},
+			}
+			break
+		}
 		if name, found := vllmMetricNames[string(metricType)]; found {
 			metric = runaimetrics.RunaiVLLMPerWorkloadMetric{
 				Name: name,
@@ -1262,6 +1301,26 @@ func validateRequestedVLLMWorkloadMetrics[T ~string](ctx context.Context, metric
 		return err
 	}
 
+	return nil
+}
+
+// validateRequestedVLLMTokenUsagePeriod rejects an empty or reversed period for the token usage
+// metrics, which return a single value for the whole period instead of a time series.
+func validateRequestedVLLMTokenUsagePeriod(metricTypes []api.WorkloadMetricType, start time.Time, end time.Time) *api.Error {
+	requested := slices.ContainsFunc(metricTypes, func(metricType api.WorkloadMetricType) bool {
+		return isVLLMTokenUsageMetric(string(metricType))
+	})
+	if !requested {
+		return nil
+	}
+	if start.IsZero() || end.IsZero() {
+		return api.NewError(http.StatusBadRequest, "start and end are required for vLLM token usage metrics", nil)
+	}
+	// metrics-service passes the period to Prometheus in whole seconds, so a shorter period
+	// would become an empty range.
+	if end.Sub(start) < time.Second {
+		return api.NewError(http.StatusBadRequest, "end must be at least one second later than start for vLLM token usage metrics", nil)
+	}
 	return nil
 }
 

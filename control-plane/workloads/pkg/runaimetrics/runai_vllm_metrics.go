@@ -111,3 +111,50 @@ func (m RunaiVLLMPerPodMetric) IsAggregation() bool {
 func (m RunaiVLLMPerPodMetric) IsQuantile() bool {
 	return false
 }
+
+// VLLMTokenUsageMetricName is the engine-specific part of a runai_vllm_*_per_workload
+// aggregation query key. These metrics return a single value for the requested period,
+// so they are queried as aggregations: metrics-service injects the period as RANGE.
+type VLLMTokenUsageMetricName string
+
+const (
+	VLLMPromptTokensTotal                    VLLMTokenUsageMetricName = "prompt_tokens_total"
+	VLLMGenerationTokensTotal                VLLMTokenUsageMetricName = "generation_tokens_total"
+	VLLMCachedPromptTokensTotal              VLLMTokenUsageMetricName = "prompt_tokens_cached_total"
+	VLLMFinishedEngineRequestCount           VLLMTokenUsageMetricName = "finished_engine_request_count"
+	VLLMPromptTokensPerRequestAvg            VLLMTokenUsageMetricName = "prompt_tokens_per_request_avg"
+	VLLMGenerationTokensPerRequestAvg        VLLMTokenUsageMetricName = "generation_tokens_per_request_avg"
+	VLLMPromptTokensPerRequestPercentile     VLLMTokenUsageMetricName = "prompt_tokens_per_request_percentile"
+	VLLMGenerationTokensPerRequestPercentile VLLMTokenUsageMetricName = "generation_tokens_per_request_percentile"
+)
+
+type RunaiVLLMTokenUsagePerWorkloadMetric struct {
+	Name           VLLMTokenUsageMetricName
+	Filters        RunaiVLLMPerWorkloadFilters
+	ResponseLabels RunaiVLLMResponseLabels
+}
+
+func (m RunaiVLLMTokenUsagePerWorkloadMetric) GetName() string {
+	return "runai_vllm_" + string(m.Name) + "_per_workload"
+}
+
+func (m RunaiVLLMTokenUsagePerWorkloadMetric) GetFilters() interface{} {
+	return m.Filters
+}
+
+func (m RunaiVLLMTokenUsagePerWorkloadMetric) GetResponseLabels() interface{} {
+	return m.ResponseLabels
+}
+
+// GetQuantile returns nil: the percentile query keys compute p50, p95 and p99 in one query.
+func (m RunaiVLLMTokenUsagePerWorkloadMetric) GetQuantile() *float32 {
+	return nil
+}
+
+func (m RunaiVLLMTokenUsagePerWorkloadMetric) IsAggregation() bool {
+	return true
+}
+
+func (m RunaiVLLMTokenUsagePerWorkloadMetric) IsQuantile() bool {
+	return false
+}
