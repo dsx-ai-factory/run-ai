@@ -211,6 +211,15 @@ func inputFor(endpoint *inferencev1alpha1.InferenceEndpoint) (render.Input, erro
 		Hostnames:        endpoint.Spec.Routing.Hostnames,
 		EppImage:         image,
 	}
+	if proxy := endpoint.Spec.Routing.AuthProxy; proxy != nil {
+		in.AuthProxy = &render.AuthProxy{
+			ServiceName: proxy.ServiceRef.Name,
+			ServicePort: proxy.ServiceRef.Port,
+			PodLabels:   proxy.PodSelector.MatchLabels,
+		}
+		// eppImageFor already accepted the profile, and the Envoy image is pinned with it.
+		in.EnvoyImage = inferencev1alpha1.EnvoyImageGIEV15
+	}
 	if endpoint.Spec.Epp.Scheduling != nil {
 		for _, s := range endpoint.Spec.Epp.Scheduling.Scorers {
 			in.Scorers = append(in.Scorers, render.Scorer{Plugin: scorerPlugins[s.Type], Weight: s.Weight})

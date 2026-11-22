@@ -98,6 +98,44 @@ type RoutingSpec struct {
 	// +kubebuilder:validation:items:Pattern=`^(\*\.)?[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`
 	// +listType=set
 	Hostnames []string `json:"hostnames"`
+
+	// authProxy protects the endpoint with an auth proxy. The route sends every
+	// request to the proxy, and the proxy forwards allowed requests to an Envoy
+	// container in the EPP Pod, which asks the EPP for a Pod. Omitted means the
+	// route sends requests to the InferencePool directly.
+	// +optional
+	AuthProxy *AuthProxySpec `json:"authProxy,omitempty"`
+}
+
+// AuthProxySpec names the auth proxy in front of a protected endpoint. The
+// creator of the endpoint runs the proxy and points its upstream at the EPP
+// Service on EnvoyPort.
+type AuthProxySpec struct {
+	// serviceRef is the auth proxy Service, in the endpoint namespace. The
+	// route sends every request to it.
+	// +required
+	ServiceRef ServiceReference `json:"serviceRef"`
+
+	// podSelector selects the auth proxy Pods. Only they may reach the EPP's
+	// Envoy container.
+	// +required
+	PodSelector WorkloadSelector `json:"podSelector"`
+}
+
+// ServiceReference names a Service port in the endpoint namespace.
+type ServiceReference struct {
+	// name of the Service.
+	// +required
+	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:MaxLength=63
+	// +kubebuilder:validation:Pattern=`^[a-z]([-a-z0-9]*[a-z0-9])?$`
+	Name string `json:"name"`
+
+	// port of the Service.
+	// +required
+	// +kubebuilder:validation:Minimum=1
+	// +kubebuilder:validation:Maximum=65535
+	Port int32 `json:"port"`
 }
 
 // ScorerType names one of the endpoint picker's scoring signals.
@@ -145,6 +183,12 @@ const (
 	EppProfileGIEV15 EppProfile = "gie-v1.5"
 	// EppImageGIEV15 is the image pinned by EppProfileGIEV15.
 	EppImageGIEV15 = "registry.k8s.io/gateway-api-inference-extension/epp:v1.5.0"
+	// EnvoyImageGIEV15 is the Envoy image of the GIE v1.5.0 standalone chart. A
+	// protected endpoint runs it next to the EPP.
+	EnvoyImageGIEV15 = "docker.io/envoyproxy/envoy:distroless-v1.33.2"
+	// EnvoyPort is the port of the EPP Service that a protected endpoint's auth
+	// proxy sends allowed requests to.
+	EnvoyPort = 8081
 )
 
 // EppSpec configures the endpoint picker the controller deploys.

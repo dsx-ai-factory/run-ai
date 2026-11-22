@@ -275,6 +275,48 @@ var _ = Describe("InferenceEndpoint Controller", func() {
 		Expect(dep.Spec.Template.Spec.Containers[0].Image).To(Equal(inferencev1alpha1.EppImageGIEV15))
 	})
 
+	It("puts the auth proxy in front of the EPP's Envoy when the endpoint is protected", func() {
+		Expect(k8sClient.Get(ctx, request.NamespacedName, endpoint)).To(Succeed())
+		proxyLabels := map[string]string{testAppLabel: "llama3-auth-proxy"}
+		endpoint.Spec.Routing.AuthProxy = &inferencev1alpha1.AuthProxySpec{
+			ServiceRef:  inferencev1alpha1.ServiceReference{Name: "llama3-auth-proxy", Port: 80},
+			PodSelector: inferencev1alpha1.WorkloadSelector{MatchLabels: proxyLabels},
+		}
+		Expect(k8sClient.Update(ctx, endpoint)).To(Succeed())
+		_, err := reconciler.Reconcile(ctx, request)
+		Expect(err).NotTo(HaveOccurred())
+
+		route := &unstructured.Unstructured{}
+		route.SetGroupVersionKind(routeGVK)
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: routeName, Namespace: ns}, route)).To(Succeed())
+		rules, _, _ := unstructured.NestedSlice(route.Object, "spec", "rules")
+		backends := rules[0].(map[string]any)["backendRefs"].([]any)
+		Expect(backends).To(HaveLen(1))
+		Expect(backends[0]).To(SatisfyAll(
+			HaveKeyWithValue(testNameKey, "llama3-auth-proxy"),
+			HaveKeyWithValue("port", int64(80)),
+			HaveKeyWithValue("kind", "Service"),
+		))
+
+		dep := &appsv1.Deployment{}
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: eppName, Namespace: ns}, dep)).To(Succeed())
+		Expect(dep.Spec.Template.Spec.Containers).To(HaveLen(2))
+		Expect(dep.Spec.Template.Spec.Containers[1].Image).To(Equal(inferencev1alpha1.EnvoyImageGIEV15))
+		Expect(dep.Spec.Template.Spec.Containers[1].Ports).To(ContainElement(HaveField("ContainerPort", int32(inferencev1alpha1.EnvoyPort))))
+
+		svc := &corev1.Service{}
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: eppName, Namespace: ns}, svc)).To(Succeed())
+		Expect(svc.Spec.Ports).To(ContainElement(HaveField("Port", int32(inferencev1alpha1.EnvoyPort))))
+
+		policy := &networkingv1.NetworkPolicy{}
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: eppName, Namespace: ns}, policy)).To(Succeed())
+		Expect(policy.Spec.Ingress).To(ContainElement(SatisfyAll(
+			HaveField("From", ConsistOf(HaveField("PodSelector.MatchLabels", proxyLabels))),
+			HaveField("Ports", ConsistOf(HaveField("Port.IntVal", int32(inferencev1alpha1.EnvoyPort)))),
+		)))
+		Expect(render.EnvoyPort).To(Equal(inferencev1alpha1.EnvoyPort), "the API and the renderer agree on the Envoy port")
+	})
+
 	It("writes scorer weights into the EPP ConfigMap and rolls the Deployment", func() {
 		_, err := reconciler.Reconcile(ctx, request)
 		Expect(err).NotTo(HaveOccurred())

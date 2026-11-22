@@ -345,6 +345,14 @@ var _ = Describe("Render", func() {
 		Entry("metrics namespace that is not a DNS label", func(in *render.Input) { in.MetricsNamespace = "Monitoring_1" }),
 		Entry("zero port", func(in *render.Input) { in.Port = 0 }),
 		Entry("scorer without plugin", func(in *render.Input) { in.Scorers = []render.Scorer{{Plugin: "", Weight: 1}} }),
+		Entry("auth proxy without a Service name", func(in *render.Input) { protect(in); in.AuthProxy.ServiceName = "" }),
+		Entry("auth proxy Service name that is not a DNS label", func(in *render.Input) {
+			protect(in)
+			in.AuthProxy.ServiceName = "Auth_Proxy"
+		}),
+		Entry("auth proxy port 0", func(in *render.Input) { protect(in); in.AuthProxy.ServicePort = 0 }),
+		Entry("auth proxy without Pod labels", func(in *render.Input) { protect(in); in.AuthProxy.PodLabels = nil }),
+		Entry("auth proxy without an Envoy image", func(in *render.Input) { protect(in); in.EnvoyImage = "" }),
 	)
 
 	It("accepts a metrics namespace with consecutive dashes", func() {
@@ -352,6 +360,84 @@ var _ = Describe("Render", func() {
 		in.MetricsNamespace = "monitoring--prod"
 		_, err := render.Render(in)
 		Expect(err).NotTo(HaveOccurred())
+	})
+
+	Context("for a protected endpoint", func() {
+		var rendered map[string]*unstructured.Unstructured
+
+		BeforeEach(func() {
+			in := llama3Input()
+			protect(&in)
+			rendered = byKey(must(render.Render(in)))
+		})
+
+		It("renders the same objects as a public endpoint", func() {
+			public := byKey(must(render.Render(llama3Input())))
+			Expect(rendered).To(HaveLen(len(public)))
+			for key := range public {
+				Expect(rendered).To(HaveKey(key))
+			}
+		})
+
+		It("sends every path to the auth proxy Service instead of the InferencePool", func() {
+			rules, _, _ := unstructured.NestedSlice(rendered["HTTPRoute/llama3-route"].Object, "spec", "rules")
+			Expect(rules).To(HaveLen(1))
+			rule := rules[0].(map[string]any)
+			Expect(rule["matches"]).To(Equal([]any{map[string]any{"path": map[string]any{keyType: "PathPrefix", "value": "/"}}}))
+			Expect(rule["backendRefs"]).To(Equal([]any{map[string]any{keyName: authProxyService, "port": int64(80)}}))
+		})
+
+		It("runs Envoy next to the EPP with the GIE standalone configuration", func() {
+			dep := rendered["Deployment/llama3-epp"]
+			containers, _, _ := unstructured.NestedSlice(dep.Object, "spec", "template", "spec", "containers")
+			Expect(containers).To(HaveLen(2))
+			envoy := containers[1].(map[string]any)
+			Expect(envoy[keyName]).To(Equal("envoy"))
+			Expect(envoy["image"]).To(Equal(envoyImage))
+			Expect(envoy["args"]).To(ContainElements("-c", "/etc/envoy/envoy.yaml"))
+			Expect(envoy["ports"]).To(ContainElement(map[string]any{keyName: "http-envoy", "containerPort": int64(render.EnvoyPort)}))
+			Expect(envoy["readinessProbe"]).To(HaveKeyWithValue("httpGet", map[string]any{"path": "/ready", "port": int64(19001)}))
+			Expect(envoy["volumeMounts"]).To(Equal([]any{map[string]any{keyName: "plugins-config-volume", "mountPath": "/etc/envoy", "readOnly": true}}))
+
+			data, _, _ := unstructured.NestedStringMap(rendered["ConfigMap/llama3-epp"].Object, "data")
+			Expect(data).To(HaveKey(configMapKey))
+			Expect(data["envoy.yaml"]).To(ContainSubstring("port_value: 8081"))
+			Expect(data["envoy.yaml"]).To(ContainSubstring("port_value: 9002"), "ext_proc to the EPP on localhost")
+		})
+
+		It("exposes the Envoy port on the EPP Service", func() {
+			ports, _, _ := unstructured.NestedSlice(rendered["Service/llama3-epp"].Object, "spec", "ports")
+			Expect(ports).To(ContainElement(map[string]any{keyName: "http-envoy", "protocol": "TCP", "port": int64(render.EnvoyPort)}))
+		})
+
+		It("admits the Envoy port only from the auth proxy Pods", func() {
+			rules, _, _ := unstructured.NestedSlice(rendered["NetworkPolicy/llama3-epp"].Object, "spec", "ingress")
+			Expect(rules).To(HaveLen(3))
+			Expect(rules[2]).To(Equal(map[string]any{
+				"from":  []any{map[string]any{"podSelector": map[string]any{"matchLabels": map[string]any{appLabel: authProxyService, "run.ai/workload-runner": "llama3"}}}},
+				"ports": []any{map[string]any{"protocol": "TCP", "port": int64(render.EnvoyPort)}},
+			}))
+		})
+
+		It("changes the EPP config hash, so turning protection on rolls the EPP Pod", func() {
+			hash := func(objs map[string]*unstructured.Unstructured) string {
+				annotations, _, _ := unstructured.NestedStringMap(objs["Deployment/llama3-epp"].Object, "spec", "template", "metadata", "annotations")
+				return annotations[render.ConfigHashAnnotation]
+			}
+			Expect(hash(rendered)).NotTo(Equal(hash(byKey(must(render.Render(llama3Input()))))))
+		})
+	})
+
+	It("gives a public endpoint no Envoy container, port or rule", func() {
+		rendered := byKey(must(render.Render(llama3Input())))
+		containers, _, _ := unstructured.NestedSlice(rendered["Deployment/llama3-epp"].Object, "spec", "template", "spec", "containers")
+		Expect(containers).To(HaveLen(1))
+		data, _, _ := unstructured.NestedStringMap(rendered["ConfigMap/llama3-epp"].Object, "data")
+		Expect(data).NotTo(HaveKey("envoy.yaml"))
+		ports, _, _ := unstructured.NestedSlice(rendered["Service/llama3-epp"].Object, "spec", "ports")
+		Expect(ports).To(HaveLen(2))
+		rules, _, _ := unstructured.NestedSlice(rendered["NetworkPolicy/llama3-epp"].Object, "spec", "ingress")
+		Expect(rules).To(HaveLen(2))
 	})
 
 	It("accepts the longest name whose EPP Service is still a DNS label", func() {
@@ -369,6 +455,21 @@ var _ = Describe("Render", func() {
 		Expect(parents[0].(map[string]any)["namespace"]).To(Equal(llama3Ns))
 	})
 })
+
+const (
+	authProxyService = "llama3-auth-proxy"
+	envoyImage       = "docker.io/envoyproxy/envoy:distroless-v1.33.2"
+)
+
+// protect turns the input into a protected endpoint behind authProxyService.
+func protect(in *render.Input) {
+	in.AuthProxy = &render.AuthProxy{
+		ServiceName: authProxyService,
+		ServicePort: 80,
+		PodLabels:   map[string]string{appLabel: authProxyService, "run.ai/workload-runner": "llama3"},
+	}
+	in.EnvoyImage = envoyImage
+}
 
 // loadGolden reads the namespaced objects out of the given Track A files. The
 // three cluster-scoped RBAC objects in 04-epp.yaml are metrics-auth helpers the
