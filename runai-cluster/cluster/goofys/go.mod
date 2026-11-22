@@ -12,7 +12,7 @@ require (
 	github.com/Azure/go-autorest/autorest/azure/auth v0.5.13
 	github.com/Azure/go-autorest/autorest/azure/cli v0.4.7
 	github.com/aws/aws-sdk-go v1.55.8
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.7
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.8
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/jacobsa/fuse v0.0.0-20260630194014-a124548f6da7
@@ -52,7 +52,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/dimchansky/utfbom v1.2.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.5 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.21 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.22 // indirect
 	github.com/envoyproxy/go-control-plane/envoy v1.40.0 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.3.3 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
@@ -92,7 +92,7 @@ require (
 	github.com/spf13/viper v1.21.0 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.9.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
+	go.opentelemetry.io/auto/sdk v1.2.2 // indirect
 	go.opentelemetry.io/contrib/detectors/gcp v1.47.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.72.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0 // indirect

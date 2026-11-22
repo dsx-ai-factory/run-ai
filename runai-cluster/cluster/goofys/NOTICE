@@ -107,7 +107,7 @@ Dependencies
 | `github.com/spiffe/go-spiffe/v2` | v2.9.0 | Apache-2.0 | https://pkg.go.dev/github.com/spiffe/go-spiffe/v2@v2.9.0?tab=licenses |
 | `github.com/subosito/gotenv` | v1.6.0 | MIT | https://github.com/subosito/gotenv/blob/v1.6.0/LICENSE |
 | `github.com/urfave/cli` | v1.22.17 | MIT | https://github.com/urfave/cli/blob/v1.22.17/LICENSE |
-| `go.opentelemetry.io/auto/sdk` | v1.2.1 | Apache-2.0 | https://pkg.go.dev/go.opentelemetry.io/auto/sdk@v1.2.1?tab=licenses |
+| `go.opentelemetry.io/auto/sdk` | v1.2.2 | Apache-2.0 | https://pkg.go.dev/go.opentelemetry.io/auto/sdk@v1.2.2?tab=licenses |
 | `go.opentelemetry.io/contrib/detectors/gcp` | v1.47.0 | Apache-2.0 | https://pkg.go.dev/go.opentelemetry.io/contrib/detectors/gcp@v1.47.0?tab=licenses |
 | `go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc` | v0.72.0 | Apache-2.0 | https://pkg.go.dev/go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc@v0.72.0?tab=licenses |
 | `go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp` | v0.72.0 | Apache-2.0 | https://pkg.go.dev/go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp@v0.72.0?tab=licenses |
