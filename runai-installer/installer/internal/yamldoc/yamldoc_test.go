@@ -51,3 +51,22 @@ func TestEnsureNoExtraDocuments(t *testing.T) {
 		})
 	}
 }
+
+func TestEnsureNoExtraDocuments_ReportsContentLine(t *testing.T) {
+	cases := map[string]struct {
+		contents string
+		wantLine string
+	}{
+		"mapping right after the marker": {"{}\n---\nunexpectedField: true\n", "line 3"},
+		"scalar":                         {"{}\n---\nhello\n", "line 3"},
+		"after a comment":                {"{}\n---\n# note\nb: 2\n", "line 4"},
+		"after an empty document":        {"{}\n---\n---\nb: 2\n", "line 4"},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			err := EnsureNoExtraDocuments(decodeFirst(t, tc.contents))
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), tc.wantLine)
+		})
+	}
+}
