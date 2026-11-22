@@ -139,5 +139,4 @@ specific version:
   mandatory when there is no prefix).
 - **Docs** — regenerate `docs/` with `make build-docs-markdown`.
 
-[Design Document](https://runai.atlassian.net/wiki/spaces/EN/pages/2750513159/RunAI+CLI+Design)
 </content>
