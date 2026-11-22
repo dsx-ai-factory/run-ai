@@ -4,22 +4,24 @@
 name: Label PR
 
 on:
-  pull_request:
+  # Labels need a write token for fork PRs. This workflow runs only the pinned
+  # labeler action with the base branch's configuration, without checking out PR code.
+  pull_request_target:
     types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
+  issues: write
   pull-requests: write
 
 jobs:
   label:
-    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
         with:
           egress-policy: audit
 
-      - uses: actions/labeler@v6
+      - uses: actions/labeler@b8dd2d9be0f68b860e7dae5dae7d772984eacd6d # v6
         with:
           sync-labels: true
