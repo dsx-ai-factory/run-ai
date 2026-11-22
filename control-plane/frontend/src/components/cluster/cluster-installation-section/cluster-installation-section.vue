@@ -121,15 +121,21 @@ export default defineComponent({
       type: Object as PropType<Record<string, string>>,
       required: true,
     },
+    // Lets the parent load the command before showing this section, so the content does not grow after it renders.
+    preloadedInstructions: {
+      type: String as PropType<string>,
+      required: false,
+    },
   },
   data() {
     return {
       authStore: useAuthStore(),
-      installationInstructions: "" as string | undefined,
+      installationInstructions: this.preloadedInstructions ?? ("" as string | undefined),
       DOCS,
     };
   },
   async created() {
+    if (this.preloadedInstructions !== undefined) return;
     this.installationInstructions = await this.getInstallationInstructions();
   },
   computed: {

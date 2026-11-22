@@ -29,6 +29,7 @@
           :created-cluster="createdCluster"
           :versions-map="operatorVersionsMap"
           :is-higher-cluster-version="isHigherClusterVersion"
+          :preloaded-instructions="installationInstructions"
         ></cluster-installation-step>
       </div>
     </div>
@@ -103,6 +104,7 @@ export default defineComponent({
         },
       } as IClusterInstalltionModel,
       operatorVersionsMap: null as Record<string, string> | null,
+      installationInstructions: undefined as string | undefined,
     };
   },
   async created() {
@@ -211,6 +213,7 @@ export default defineComponent({
         this.loading = true;
         this.createdCluster = await this.clusterStore.create(this.clusterFormModel.name);
         this.createdCluster?.uuid && clusterUtil.addSessionCreatedCluster(this.createdCluster.uuid);
+        await this.loadInstallationInstructions();
         this.currentStep = 2;
         window.scrollTo({ top: 0, behavior: "smooth" });
       } catch (error: unknown) {
@@ -229,10 +232,32 @@ export default defineComponent({
       if (this.isClusterEditMode) {
         const isValid: boolean = await this.validateAndNotify();
         if (!isValid) return;
+        try {
+          this.loading = true;
+          await this.loadInstallationInstructions();
+        } finally {
+          this.loading = false;
+        }
         this.currentStep = 2;
         return;
       }
       await this.createCluster();
+    },
+    // Loaded before moving to step 2 so the step renders complete instead of growing once the command arrives.
+    // On failure the installation section falls back to loading the command itself.
+    async loadInstallationInstructions(): Promise<void> {
+      this.installationInstructions = undefined;
+      if (!this.createdCluster?.uuid || !this.operatorVersionsMap) return;
+      try {
+        const response = await clusterService.getClusterInstallationInfo(
+          this.createdCluster.uuid,
+          String(this.operatorVersionsMap[this.clusterFormModel.version]),
+          this.clusterFormModel.prerequisites.clusterUrl,
+        );
+        this.installationInstructions = response?.data.installationStr;
+      } catch (error: unknown) {
+        console.error("Failed to preload installation instructions:", error);
+      }
     },
     goBack(): void {
       this.currentStep = 1;

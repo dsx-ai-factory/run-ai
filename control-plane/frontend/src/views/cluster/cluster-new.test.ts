@@ -253,6 +253,44 @@ describe("cluster-new.vue", () => {
     expect(clusterNewCmp.vm.currentStep).toBe(1);
   });
 
+  test("loads the installation command before moving to the installation step", async () => {
+    vi.mocked(clusterStore.create).mockResolvedValue({ uuid: "new-id", name: "some-name" } as DisplayedCluster);
+    vi.mocked(clusterService.getClusterInstallationInfo).mockResolvedValue({
+      data: { installationStr: "preloaded-install-command" },
+    } as Awaited<ReturnType<typeof clusterService.getClusterInstallationInfo>>);
+    mountComponent();
+    await setValidFormModel();
+
+    await clickContiuneButton();
+    await flushPromises();
+
+    expect(clusterNewCmp.vm.currentStep).toBe(2);
+    expect(clusterNewCmp.vm.installationInstructions).toBe("preloaded-install-command");
+    expect(clusterNewCmp.text()).toContain("preloaded-install-command");
+    // The installation section must reuse the preloaded command instead of fetching it again.
+    expect(clusterService.getClusterInstallationInfo).toHaveBeenCalledTimes(1);
+    expect(clusterService.getClusterInstallationInfo).toHaveBeenCalledWith("new-id", "2.23.17", "");
+  });
+
+  test("moves to the installation step and lets it load the command itself when preloading fails", async () => {
+    vi.mocked(clusterStore.create).mockResolvedValue({ uuid: "new-id", name: "some-name" } as DisplayedCluster);
+    vi.mocked(clusterService.getClusterInstallationInfo)
+      .mockRejectedValueOnce(new Error("boom"))
+      .mockResolvedValueOnce({ data: { installationStr: "fallback-install-command" } } as Awaited<
+        ReturnType<typeof clusterService.getClusterInstallationInfo>
+      >);
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    mountComponent();
+    await setValidFormModel();
+
+    await clickContiuneButton();
+    await flushPromises();
+
+    expect(clusterNewCmp.vm.currentStep).toBe(2);
+    expect(clusterNewCmp.vm.installationInstructions).toBeUndefined();
+    expect(clusterNewCmp.text()).toContain("fallback-install-command");
+  });
+
   test("calls leave method when leave button is pressed", async () => {
     mountComponent();
     await clusterNewCmp.setData({ currentStep: 2, createdCluster: { uuid: "some-uuid" } });
