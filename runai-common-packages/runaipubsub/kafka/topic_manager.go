@@ -23,6 +23,11 @@ type topicManager struct {
 	topics     sync.Map
 	logger     logger.Loggerer
 	connection *kafka.Conn
+
+	// createTopic creates a single topic on the broker. It is a field so tests
+	// can exercise the creation bookkeeping without a broker; newTopicManager
+	// points it at the broker-backed implementation.
+	createTopic func(topic string) error
 }
 
 func newTopicManager(url string, dialer *kafka.Dialer, logger logger.Loggerer) (*topicManager, error) {
@@ -39,22 +44,37 @@ func newTopicManager(url string, dialer *kafka.Dialer, logger logger.Loggerer) (
 		return nil, fmt.Errorf("failed to connect to Kafka controller: %w", err)
 	}
 
-	return &topicManager{topics: sync.Map{}, logger: logger, connection: controllerCon}, nil
+	manager := &topicManager{topics: sync.Map{}, logger: logger, connection: controllerCon}
+	manager.createTopic = manager.createTopicOnBroker
+	return manager, nil
+}
+
+// topicCreation guards a single topic's creation and remembers its outcome. The
+// error lives next to the Once because a sync.Once cannot report it: only the
+// caller that runs the function would see it, and every concurrent caller would
+// be told the topic exists.
+type topicCreation struct {
+	once sync.Once
+	err  error
 }
 
 func (tc *topicManager) CreateIfNotExist(topic string) error {
-	var err error
-	once, _ := tc.topics.LoadOrStore(topic, &sync.Once{})
-	once.(*sync.Once).Do(func() {
-		if err = tc.createTopic(topic); err != nil {
-			err = fmt.Errorf("failed to create topic %s: %w", topic, err)
+	state, _ := tc.topics.LoadOrStore(topic, &topicCreation{})
+	creation := state.(*topicCreation)
+
+	creation.once.Do(func() {
+		if err := tc.createTopic(topic); err != nil {
+			creation.err = fmt.Errorf("failed to create topic %s: %w", topic, err)
+			// Do not remember a failed creation: callers retry through
+			// retry.RetryStreamErrors and have to attempt the topic again.
+			tc.topics.Delete(topic)
 		}
 	})
 
-	return err
+	return creation.err
 }
 
-func (tc *topicManager) createTopic(topic string) error {
+func (tc *topicManager) createTopicOnBroker(topic string) error {
 	cfg := config.Get[*config_models.Pubsub]()
 	retention := cfg.MaxMessageAgeMinutes * time.Minute.Milliseconds()
 	return tc.connection.CreateTopics(kafka.TopicConfig{
