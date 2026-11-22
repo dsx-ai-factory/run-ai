@@ -39,6 +39,15 @@
         <runai-btn aid="continue-btn" @click="goNext" :loading="loading" color="primary" label="Continue" />
       </div>
       <div v-else class="stepper-controls row justify-end full-width">
+        <runai-btn
+          v-if="isClusterEditMode"
+          flat
+          @click="goBack"
+          aid="back-btn"
+          color="primary"
+          label="Back"
+          class="q-mr-md"
+        />
         <runai-btn aid="leave-btn" @click="leave" color="primary" label="Done" />
       </div>
     </template>
@@ -224,6 +233,10 @@ export default defineComponent({
         return;
       }
       await this.createCluster();
+    },
+    goBack(): void {
+      this.currentStep = 1;
+      window.scrollTo({ top: 0, behavior: "smooth" });
     },
     leave(): void {
       if (!this.isClusterEditMode && this.createdCluster?.name) {

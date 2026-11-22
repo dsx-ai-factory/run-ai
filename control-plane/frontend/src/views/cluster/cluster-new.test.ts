@@ -222,16 +222,35 @@ describe("cluster-new.vue", () => {
     expect(clusterNewCmp.find(".cluster-installation").exists()).toBeTruthy();
   });
 
-  test("does not offer a back button on the installation step", async () => {
+  test("does not offer a back button on the installation step after creating a cluster", async () => {
     mountComponent();
-    await clusterNewCmp.setData({ currentStep: 2, createdCluster: { uuid: "some-id" } });
+    await setValidFormModel();
+    await clickContiuneButton();
+    await flushPromises();
+
+    expect(clusterNewCmp.vm.currentStep).toBe(2);
     expect(clusterNewCmp.find("[aid=back-btn]").exists()).toBe(false);
+    expect(clusterNewCmp.find("[aid=leave-btn]").exists()).toBe(true);
   });
 
-  test("does not offer a back button on the installation step in edit mode", async () => {
+  test("does not offer a way back to the initial step once the cluster is created", async () => {
+    mountComponent();
+    await setValidFormModel();
+    await clickContiuneButton();
+    await flushPromises();
+
+    expect(clusterNewCmp.find(".cluster-creation").exists()).toBe(false);
+    expect(clusterNewCmp.find("[aid=continue-btn]").exists()).toBe(false);
+    expect(clusterStore.create).toHaveBeenCalledTimes(1);
+  });
+
+  test("offers a back button on the installation step in edit mode and returns to the initial step", async () => {
     mountComponent();
     await clusterNewCmp.setData({ currentStep: 2, isClusterEditMode: true });
-    expect(clusterNewCmp.find("[aid=back-btn]").exists()).toBe(false);
+    expect(clusterNewCmp.find("[aid=back-btn]").exists()).toBe(true);
+
+    await clusterNewCmp.find("[aid=back-btn]").trigger("click");
+    expect(clusterNewCmp.vm.currentStep).toBe(1);
   });
 
   test("calls leave method when leave button is pressed", async () => {
