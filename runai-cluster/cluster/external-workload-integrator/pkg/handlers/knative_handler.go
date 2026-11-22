@@ -20,6 +20,7 @@ import (
 	commonconsts "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 	knativeapis "knative.dev/pkg/apis"
@@ -72,7 +73,10 @@ func (h *KNativeTopOwnerHandler) Parse(ctx context.Context, object client.Object
 	commonparsers.FillExternalWorkloadDataFromPodTemplateSpec(ctx, knativeService.ObjectMeta, knativeService.GroupVersionKind().GroupKind(),
 		podTemplate, nil, h.cachedClient, h.draParser, externalWorkload)
 
-	minReplicas := getAnnotationIntOrNil(templateAnnotations, MinScaleAnnotation)
+	minReplicas, err := h.minimumReplicas(ctx, knativeService)
+	if err != nil {
+		return err
+	}
 	if minReplicas == nil {
 		minReplicas = ptr.To(int32(1))
 	}
@@ -87,6 +91,31 @@ func (h *KNativeTopOwnerHandler) Parse(ctx context.Context, object client.Object
 
 	h.parseKNativeStatus(ctx, knativeService, &externalWorkload.Status.ObservedStatus)
 	return nil
+}
+
+// The active Revision can have a lower minimum than its Service template
+// after an in-place scaling update. Use that minimum for requested resources.
+func (h *KNativeTopOwnerHandler) minimumReplicas(ctx context.Context, service *servingv1.Service) (*int32, error) {
+	minimum := getAnnotationIntOrNil(service.Spec.Template.Annotations, MinScaleAnnotation)
+	status := service.Status
+	if service.Labels[commonconsts.ConvertedFromNativeLabel] != "true" ||
+		service.Labels[commonconsts.ControlPlaneWorkloadKindLabelForWorkload] != commonconsts.V2InferenceWorkloadKind ||
+		status.LatestReadyRevisionName == "" || status.LatestReadyRevisionName != status.LatestCreatedRevisionName {
+		return minimum, nil
+	}
+
+	revision := &servingv1.Revision{}
+	key := client.ObjectKey{Namespace: service.Namespace, Name: status.LatestReadyRevisionName}
+	if err := h.cachedClient.Get(ctx, key, revision); err != nil {
+		if apierrors.IsNotFound(err) {
+			return minimum, nil
+		}
+		return nil, fmt.Errorf("get serving Revision %s for requested resources: %w", key, err)
+	}
+	if current := getAnnotationIntOrNil(revision.Annotations, MinScaleAnnotation); current != nil {
+		return current, nil
+	}
+	return minimum, nil
 }
 
 func (h *KNativeTopOwnerHandler) parseKNativeStatus(ctx context.Context, knativeService *servingv1.Service, observedStatus *v1alpha1.ExternalWorkloadObservedStatus) {
@@ -125,11 +154,11 @@ func (h *KNativeTopOwnerHandler) parseKNativeStatus(ctx context.Context, knative
 	}
 }
 
-// ShouldTriggerTopOwnerHandlerAsWell - since we look at pods to calculate status of the knative,
-// in case of a pod event, we need to trigger the knative handler as well
+// ShouldTriggerTopOwnerHandlerAsWell refreshes observed status on pod events
+// and the minimum replica count on Revision events.
 func (h *KNativeTopOwnerHandler) ShouldTriggerTopOwnerHandlerAsWell(triggeredOwnedObject client.Object) bool {
 	switch triggeredOwnedObject.(type) {
-	case *corev1.Pod:
+	case *corev1.Pod, *servingv1.Revision:
 		return true
 	}
 	return false

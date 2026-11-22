@@ -14,13 +14,12 @@ type DistributedFrameworkStatus struct {
 
 // ClusterConfiguration holds the configuration of a cluster
 type ClusterConfiguration struct {
-	KnativeZeroInitialScaleAvailable *bool                                                                // nil when the cluster does not report this capability
-	WorkloadOwnershipProtection      bool                                                                 // the value of the workload ownership protection
-	KnativeAvailable                 bool                                                                 // the value of the knative availability status
-	KnativeScaleToZeroAvailable      bool                                                                 // the value of the knative scale to zero config availability status
-	KnativeNodeTypeAvailable         bool                                                                 // the value of the knative node type config availability status
-	DistributedFrameworksStatus      map[workloadsService.DistributedFramework]DistributedFrameworkStatus // the distributed frameworks status map
-	SubdomainRouting                 bool                                                                 // whether if the cluster is configurated for subdomain routing (A.K.A Host Base Routing)
-	LWSAvailable                     bool                                                                 // the value of the LeaderWorkerSet (LWS) availability status
-	ClusterDomain                    string                                                               // the cluster ingress domain, used to compose auto-generated workload URLs
+	WorkloadOwnershipProtection bool                                                                 // the value of the workload ownership protection
+	KnativeAvailable            bool                                                                 // the value of the knative availability status
+	KnativeScaleToZeroAvailable bool                                                                 // the value of the knative scale to zero config availability status
+	KnativeNodeTypeAvailable    bool                                                                 // the value of the knative node type config availability status
+	DistributedFrameworksStatus map[workloadsService.DistributedFramework]DistributedFrameworkStatus // the distributed frameworks status map
+	SubdomainRouting            bool                                                                 // whether if the cluster is configurated for subdomain routing (A.K.A Host Base Routing)
+	LWSAvailable                bool                                                                 // the value of the LeaderWorkerSet (LWS) availability status
+	ClusterDomain               string                                                               // the cluster ingress domain, used to compose auto-generated workload URLs
 }

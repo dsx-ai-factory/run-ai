@@ -39,6 +39,7 @@ type Framework struct {
 	validatorPlugins           []ValidatorPlugin
 	mutatorPlugins             []MutatorPlugin
 	resourceMutatePlugins      []ResourceMutatePlugin
+	beforeApplyPlugins         []BeforeApplyPlugin
 	additionalResourcesPlugins []AdditionalResourcePlugin
 	statusPlugins              []StatusPlugin
 	postPhasePlugins           []PostPhasePlugin
@@ -81,6 +82,10 @@ func NewFramework(registry Registry, config *Config) *Framework {
 
 		if resourceMutatePlugin, ok := plugin.(ResourceMutatePlugin); ok {
 			f.resourceMutatePlugins = append(f.resourceMutatePlugins, resourceMutatePlugin)
+		}
+
+		if beforeApplyPlugin, ok := plugin.(BeforeApplyPlugin); ok {
+			f.beforeApplyPlugins = append(f.beforeApplyPlugins, beforeApplyPlugin)
 		}
 
 		if additionalResourcesPlugin, ok := plugin.(AdditionalResourcePlugin); ok {
@@ -236,6 +241,15 @@ func (f *Framework) RunMutateResource(
 	err := fmt.Errorf("MutateResource exceeded max rounds (%d) - mutations did not converge", f.config.MaxMutationRounds)
 	state.AddControllerIssue(resource, err, true, "", issue.Internal)
 	return err
+}
+
+func (f *Framework) RunBeforeApply(ctx context.Context, c client.Client, resource *unstructured.Unstructured, preview PreviewApply) error {
+	for _, plugin := range f.beforeApplyPlugins {
+		if err := plugin.BeforeApply(ctx, c, resource, preview); err != nil {
+			return fmt.Errorf("prepare resource for apply in plugin %s: %w", plugin.Name(), err)
+		}
+	}
+	return nil
 }
 
 // RunHandleAdditionalResources runs all the additional resources plugins to handle additional resources.

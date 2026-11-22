@@ -62,6 +62,15 @@ type ResourceMutatePlugin interface {
 	MutateResource(ctx context.Context, runner *dromosv1alpha1.WorkloadRunner, resource *unstructured.Unstructured, karta *kartav1alpha1.Karta, state *reconcile.State) error
 }
 
+// PreviewApply returns the API server's view of a resource after a dry-run apply.
+type PreviewApply = func(context.Context, *unstructured.Unstructured) (*unstructured.Unstructured, error)
+
+// BeforeApplyPlugin runs once after resource mutation has converged.
+type BeforeApplyPlugin interface {
+	Plugin
+	BeforeApply(context.Context, client.Client, *unstructured.Unstructured, PreviewApply) error
+}
+
 // AdditionalResourcePlugin is a plugin interface that lets plugins create additional resources during reconciliation.
 type AdditionalResourcePlugin interface {
 	Plugin
