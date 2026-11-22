@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package nim_service;
+
+// Message for chat messages
+message ChatMessage {
+  string role = 1;
+  string content = 2;
+}
+
+// Request for chat completion
+message ChatCompletionRequest {
+  string model = 1;
+  repeated ChatMessage messages = 2;
+  optional int32 max_tokens = 3;
+  optional float temperature = 4;
+}
+
+// Response for chat completion
+message ChatCompletionResponse {
+  string id = 1;
+  string model = 2;
+  int64 created = 3;
+  string content = 4;
+  int32 prompt_tokens = 5;
+  int32 completion_tokens = 6;
+  int32 total_tokens = 7;
+}
+
+// Request for listing models
+message ListModelsRequest {
+}
+
+// Model information
+message ModelInfo {
+  string id = 1;
+  string name = 2;
+  int64 created = 3;
+  string owned_by = 4;
+}
+
+// Response for listing models
+message ListModelsResponse {
+  repeated ModelInfo models = 1;
+}
+
+// Simple inference request
+message InferenceRequest {
+  string model = 1;
+  string prompt = 2;
+  optional int32 max_tokens = 3;
+}
+
+// Simple inference response
+message InferenceResponse {
+  string id = 1;
+  string model = 2;
+  int64 created = 3;
+  string response_text = 4;
+  int32 tokens_used = 5;
+}
+
+// Health check request
+message HealthRequest {
+}
+
+// Health check response
+message HealthResponse {
+  string status = 1;
+  string model = 2;
+  int64 timestamp = 3;
+}
+
+// NIM gRPC service definition
+service NimService {
+  // List available models
+  rpc ListModels(ListModelsRequest) returns (ListModelsResponse);
+  
+  // Chat completion (similar to OpenAI API)
+  rpc ChatCompletion(ChatCompletionRequest) returns (ChatCompletionResponse);
+  
+  // Simple text inference
+  rpc Inference(InferenceRequest) returns (InferenceResponse);
+  
+  // Health check
+  rpc Health(HealthRequest) returns (HealthResponse);
+}

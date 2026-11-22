@@ -1,0 +1,59 @@
+defaults:
+  command: ubuntu
+  environmentVariables:
+    instances:
+      - name: LOG_DIR
+        value: /home/log
+  annotations:
+    instances:
+      - name: anno-1
+        value: ann1
+      - name: anno-2
+        value: ann2
+  tolerations:
+    attributes:
+      operator: Exists
+      key: key-from-policy
+      effect: NoSchedule
+  storage:
+    pvc:
+      attributes:
+        path: /tmp/path
+rules:
+  command:
+    options:
+      - value: ubuntu
+      - value: alpine
+      - value: redhat
+  args:
+    required: true
+  environmentVariables:
+    instances:
+      locked:
+        - LOG_DIR
+  annotations:
+    instances:
+      locked:
+        - anno-1
+  tolerations:
+    attributes:
+      key:
+        options:
+          - value: key-from-policy
+            displayed: Policy key
+      effect:
+        options:
+          - value: NoSchedule
+          - value: NoExecute
+  security:
+    runAsUid:
+      min: 1
+    runAsGid:
+      min: 500
+      max: 510
+      step: 3
+  storage:
+    pvc:
+      attributes:
+        path:
+          canEdit: false
