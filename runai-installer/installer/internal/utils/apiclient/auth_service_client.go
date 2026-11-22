@@ -127,10 +127,20 @@ func (c *AuthServiceClient) GetUserByEmail(ctx context.Context, email string) (*
 func (c *AuthServiceClient) AccessRuleExists(ctx context.Context, userEmail string, roleID int32, clusterUUID string, projectID string) (bool, error) {
 	logging.Infof("[AuthService] Checking if access rule exists for user %s with role ID %d on project %s", userEmail, roleID, projectID)
 
-	filterString := []string{fmt.Sprintf("subjectId=@%s", userEmail)}
+	// The rule the installer would create grants this role on this project in
+	// this cluster, so that is what "already exists" has to mean. Matching on
+	// the subject alone reports any other rule the user holds as this one and
+	// skips creating the missing rule.
+	filterString := []string{
+		fmt.Sprintf("subjectId==%s", userEmail),
+		fmt.Sprintf("roleId==%d", roleID),
+		fmt.Sprintf("scopeId==%s", projectID),
+		fmt.Sprintf("scopeType==%s", authorization.SCOPETYPE_PROJECT),
+	}
 	accessRulesResp, resp, err := c.client.AccessRulesAPI().GetAccessRules(ctx).
-		FilterBy(filterString).Execute()
-
+		FilterBy(filterString).
+		ClusterId(clusterUUID).
+		Execute()
 	if err != nil {
 		statusCode := 0
 		if resp != nil {
@@ -140,7 +150,33 @@ func (c *AuthServiceClient) AccessRuleExists(ctx context.Context, userEmail stri
 		return false, fmt.Errorf("failed to get access rules: %w", err)
 	}
 
-	exists := len(accessRulesResp.GetAccessRules()) > 0
+	exists := false
+
+	for _, rule := range accessRulesResp.GetAccessRules() {
+		// The filter operators are a request, not a guarantee: "=@" means
+		// contains, so the subject has to be matched again here, and a rule for
+		// another scope type or cluster is not this rule either.
+		if rule.GetSubjectId() != userEmail {
+			continue
+		}
+
+		if rule.GetRoleId() != roleID || rule.GetScopeId() != projectID {
+			continue
+		}
+
+		if rule.GetScopeType() != authorization.SCOPETYPE_PROJECT {
+			continue
+		}
+
+		if rule.GetClusterId() != clusterUUID {
+			continue
+		}
+
+		exists = true
+
+		break
+	}
+
 	if exists {
 		logging.Infof("[AuthService] Access rule already exists for user %s on project %s", userEmail, projectID)
 	} else {

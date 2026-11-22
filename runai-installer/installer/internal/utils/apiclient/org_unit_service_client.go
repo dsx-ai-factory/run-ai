@@ -26,7 +26,16 @@ func NewOrgUnitServiceClientFromRunAI(client *runaiclient.RunAIClient) *OrgUnitS
 
 func (c *OrgUnitServiceClient) GetProjectByName(ctx context.Context, clusterUUID, projectName string) (*orgunit.Project, int, error) {
 	logging.Infof("[ProjectsService] Fetching projects for cluster %s", clusterUUID)
-	projects, resp, err := c.client.ProjectsAPI().GetProjects(ctx).Limit(1).Execute()
+
+	// The lookup must be scoped to the cluster and the project name: callers
+	// treat a returned project as "this project already exists" and skip
+	// creating it, so an unrelated project would both hide the missing one and
+	// be used as the target of the access rule the installer creates next.
+	filterBy := []string{
+		fmt.Sprintf("clusterId==%s", clusterUUID),
+		fmt.Sprintf("name==%s", projectName),
+	}
+	projects, resp, err := c.client.ProjectsAPI().GetProjects(ctx).FilterBy(filterBy).Limit(1).Execute()
 	if err != nil {
 		statusCode := 0
 		if resp != nil {
@@ -35,12 +44,20 @@ func (c *OrgUnitServiceClient) GetProjectByName(ctx context.Context, clusterUUID
 		logging.Errorf("[ProjectsService] Failed to get projects: %v", err)
 		return nil, statusCode, fmt.Errorf("failed to get projects: %w", err)
 	}
-	if len(projects.Projects) == 0 {
-		return nil, resp.StatusCode, fmt.Errorf("project %s not found", projectName)
+
+	for i := range projects.Projects {
+		// Both are rechecked here: a filter is a request, and a project from
+		// another cluster with the same name is not this project.
+		if projects.Projects[i].GetName() != projectName || projects.Projects[i].GetClusterId() != clusterUUID {
+			continue
+		}
+
+		logging.Infof("[ProjectsService] Found project '%s' (ID: %s)", projectName, projects.Projects[i].GetId())
+
+		return &projects.Projects[i], resp.StatusCode, nil
 	}
 
-	logging.Infof("[ProjectsService] Successfully fetched %d projects", len(projects.Projects))
-	return &projects.Projects[0], resp.StatusCode, nil
+	return nil, resp.StatusCode, fmt.Errorf("project %s not found", projectName)
 }
 
 func (c *OrgUnitServiceClient) CreateProject(ctx context.Context, clusterUUID string, req orgunit.ProjectCreationRequest) (*orgunit.Project, int, error) {
