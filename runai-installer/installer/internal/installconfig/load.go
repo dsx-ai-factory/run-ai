@@ -14,9 +14,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/yamldoc"
 )
 
-// Load reads the installer configuration at path. The file must hold exactly one
-// YAML document with no unknown fields; trailing empty or comment-only documents
-// are allowed, while any further content or malformed trailing YAML is rejected.
 func Load(path string) (*Config, error) {
 	f, err := os.Open(path)
 	if err != nil {

@@ -44,6 +44,17 @@ func TestRejectExtraDocuments_ReportsLine(t *testing.T) {
 	assert.Contains(t, err.Error(), "line 3")
 }
 
+func TestRejectExtraDocuments_DecodeErrorReportsDocument(t *testing.T) {
+	err := drainAfterFirst(t, "{}\n---\n*missing\n")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "document 2")
+	assert.Contains(t, err.Error(), "missing")
+
+	err = drainAfterFirst(t, "{}\n---\n---\nfoo: [\n")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "document 3")
+}
+
 func TestRejectExtraDocuments_Accepted(t *testing.T) {
 	cases := map[string]string{
 		"single document":        "a: 1\n",
