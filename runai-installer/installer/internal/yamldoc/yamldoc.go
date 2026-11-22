@@ -30,7 +30,7 @@ func EnsureNoExtraDocuments(dec *yaml.Decoder) error {
 			return err
 		}
 		if !isEmptyDocument(&node) {
-			return fmt.Errorf("unexpected extra YAML document at line %d: only one document is allowed", node.Line)
+			return fmt.Errorf("unexpected extra YAML document at line %d: only one document is allowed", contentLine(&node))
 		}
 	}
 }
@@ -43,4 +43,14 @@ func isEmptyDocument(node *yaml.Node) bool {
 	}
 	value := node.Content[0]
 	return value.Kind == yaml.ScalarNode && value.Tag == "!!null" && value.Value == "" && value.Style == 0
+}
+
+// contentLine returns the line where the document's content starts. The document
+// node itself reports the line of the "---" marker above its content, which would
+// point the reader one line too early.
+func contentLine(node *yaml.Node) int {
+	if node.Kind == yaml.DocumentNode && len(node.Content) == 1 {
+		return node.Content[0].Line
+	}
+	return node.Line
 }
