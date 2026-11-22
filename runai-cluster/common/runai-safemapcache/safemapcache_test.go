@@ -127,3 +127,19 @@ func TestCannotDestroyDestroyedCache(t *testing.T) {
 	smc.Destroy()
 	smc.Destroy()
 }
+
+// Destroy ends the cleanup routine. The ticker used to keep firing after the
+// cache was deactivated, so the routine observed an inactive cache on its next
+// tick and panicked ErrStoreInInactive, which crashed the process.
+func TestDestroyStopsTheCleanupRoutine(t *testing.T) {
+	smc := NewWithPeriods[string, string](time.Millisecond, time.Hour)
+	smc.Store(key, value)
+
+	smc.Destroy()
+
+	// Many cleanup periods pass here; a routine that is still running panics and
+	// takes the test binary down with it.
+	time.Sleep(100 * time.Millisecond)
+
+	assert.False(t, smc.Active(), "expected the cache to be inactive after Destroy")
+}
