@@ -177,6 +177,25 @@ var _ = Describe("Cluster capabilities checker", func() {
 		})
 	})
 
+	DescribeTable("requires reported Knative support for starting a revision at zero",
+		func(components *map[string]openapi.ClusterDependencyStatus, expected bool) {
+			cluster := buildDisplayedClusterWithKnative(testutils.NewRandomValues(), "2.26.0", true, components)
+			Expect(CanStartKnativeRevisionAtZero(&cluster)).To(Equal(expected))
+		},
+		Entry("no subcomponents", nil, false),
+		Entry("old reporter", &map[string]openapi.ClusterDependencyStatus{ScaleToZeroDependency: {Available: true}}, false),
+		Entry("missing scale-to-zero", &map[string]openapi.ClusterDependencyStatus{ZeroInitialScaleDependency: {Available: true}}, false),
+		Entry("both enabled", &map[string]openapi.ClusterDependencyStatus{
+			ScaleToZeroDependency: {Available: true}, ZeroInitialScaleDependency: {Available: true},
+		}, true),
+		Entry("zero initial scale disabled", &map[string]openapi.ClusterDependencyStatus{
+			ScaleToZeroDependency: {Available: true}, ZeroInitialScaleDependency: {Available: false},
+		}, false),
+		Entry("scale-to-zero disabled", &map[string]openapi.ClusterDependencyStatus{
+			ScaleToZeroDependency: {Available: false}, ZeroInitialScaleDependency: {Available: true},
+		}, false),
+	)
+
 	Context("knative availability and scale-to-zero capability", func() {
 		It("should handle missing knative sub components", func() {
 			cluster.SetMock(cluster.NewSimpleMockClient().

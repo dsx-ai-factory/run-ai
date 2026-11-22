@@ -165,12 +165,12 @@ func (s *AnyWorkloadSubmitterInference) Update(ctx context.Context, wc *workload
 		options,
 	)
 
-	clusterStorageConfig, cfgErr := buildClusterStorageConfig(ctx, clusterId)
+	cluster, cfgErr := getClusterForComposition(ctx, clusterId)
 	if cfgErr != nil {
 		return nil, cfgErr
 	}
 	composer.WithStorageClassConfiguration(wc.storageClassConfigs)
-	composer.WithClusterStorageConfig(clusterStorageConfig)
+	composer.WithClusterStorageConfig(workloadsComposer.NewClusterStorageConfigFromCluster(cluster))
 	composer.WithDataVolumeClaimNames(wc.dataVolumeClaimNames)
 
 	target := inference_workloads.NewMinimalKnativeServiceTarget()
@@ -179,6 +179,11 @@ func (s *AnyWorkloadSubmitterInference) Update(ctx context.Context, wc *workload
 		return nil, workloadsApi.NewSubmissionErrorV2(composerErr.Code, composerErr.Message)
 	}
 
+	if onlyInferenceMinimumChanged(wc.previousInferenceSpec, mergedWorkload.Spec) {
+		if err := setInitialScaleOnMinimumUpdate(existingWorkload.Workload.RawManifest, &target.Service, checker.CanStartKnativeRevisionAtZero(cluster)); err != nil {
+			return nil, workloadsApi.NewSubmissionErrorV2(http.StatusInternalServerError, err.Error())
+		}
+	}
 	manifest, err := gojsonq.LoadJson(target.Service)
 	if err != nil {
 		return nil, workloadsApi.NewSubmissionErrorV2(http.StatusInternalServerError, err.Error())

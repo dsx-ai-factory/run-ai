@@ -89,9 +89,19 @@ func NewKnativeOpenShift(p KnativeOpenShiftParams, deps orchestrator2.Deps) []or
 // Without them OpenShift Serverless keeps its defaults (affinity/schedulername
 // disabled) and Run:ai treats Knative as not installed.
 func knativeServingOverride(c *spec.Cluster, userOverride map[string]any) map[string]any {
+	autoscalerKey := "autoscaler"
+	if config, ok := userOverride["config"].(map[string]any); ok {
+		// Knative selects the full ConfigMap name before considering its short alias.
+		if _, exists := config["config-autoscaler"]; exists {
+			autoscalerKey = "config-autoscaler"
+		}
+	}
 	base := map[string]any{
 		"config": map[string]any{
 			"features": knativeServingFeatures(),
+			autoscalerKey: map[string]any{
+				"allow-zero-initial-scale": "true",
+			},
 		},
 	}
 	if servingDomain := strings.TrimPrefix(inferenceWildcardDomain(c), "*."); servingDomain != "" {

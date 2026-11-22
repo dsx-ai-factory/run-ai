@@ -21,10 +21,11 @@ import (
 var ErrClusterVersionEmpty = errors.New("cluster version is empty")
 
 const (
-	KnativeDependency     = "knative"
-	ScaleToZeroDependency = "enable-scale-to-zero"
-	NodeTypeDependency    = "kubernetes.podspec-nodeselector"
-	LWSDependency         = "lws"
+	KnativeDependency          = "knative"
+	ScaleToZeroDependency      = "enable-scale-to-zero"
+	ZeroInitialScaleDependency = "allow-zero-initial-scale"
+	NodeTypeDependency         = "kubernetes.podspec-nodeselector"
+	LWSDependency              = "lws"
 )
 
 // clusterInfo holds the cluster information gathered from the cluster service
@@ -112,6 +113,19 @@ func subdomainRouting(displayedCluster *clusterService.DisplayedCluster) bool {
 		return false
 	}
 	return *protection
+}
+
+// CanStartKnativeRevisionAtZero requires an explicit report for both flags.
+// Older reporters omit allow-zero-initial-scale.
+func CanStartKnativeRevisionAtZero(cluster *clusterService.DisplayedCluster) bool {
+	if cluster == nil || cluster.Status.Get() == nil {
+		return false
+	}
+	knative := cluster.Status.Get().GetDependencies().Optional[KnativeDependency]
+	serving := knative.GetComponents()[KnativeDependency]
+	features := serving.GetComponents()
+	return knative.Available && serving.Available &&
+		features[ScaleToZeroDependency].Available && features[ZeroInitialScaleDependency].Available
 }
 
 // isKnativeAvailable extract the value of the isKnativeAvailable, knativeScaleToZeroAvailable and knativeNodeTypeAvailable from the displayedCluster in safe manner

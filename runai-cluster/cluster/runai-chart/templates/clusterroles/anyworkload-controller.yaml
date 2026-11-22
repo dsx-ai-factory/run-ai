@@ -40,9 +40,6 @@ rules:
       - patch
       - watch
       - update
-  - apiGroups: ["serving.knative.dev"]
-    resources: ["revisions"]
-    verbs: ["patch"]
   # The project controller binds this ClusterRole with a RoleBinding in each
   # managed project namespace. Keep destructive networking permissions here
   # rather than on the cluster-wide controller binding.
@@ -176,10 +173,6 @@ rules:
       - get
       - list
       - watch
-  - apiGroups: ["apiextensions.k8s.io"]
-    resources: ["customresourcedefinitions"]
-    resourceNames: ["revisions.serving.knative.dev"]
-    verbs: ["get"]
   - apiGroups:
       - serving.knative.dev
     resources:

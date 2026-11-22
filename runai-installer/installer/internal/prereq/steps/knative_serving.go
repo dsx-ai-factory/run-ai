@@ -177,7 +177,8 @@ func applyKnativeServing(dynamicClient dynamic.Interface, wildcardFQDN string) e
 			"spec": map[string]interface{}{
 				"config": map[string]interface{}{
 					"config-autoscaler": map[string]interface{}{
-						"enable-scale-to-zero": "true",
+						"enable-scale-to-zero":     "true",
+						"allow-zero-initial-scale": "true",
 					},
 					"config-features": map[string]interface{}{
 						"kubernetes.podspec-affinity":                "enabled",

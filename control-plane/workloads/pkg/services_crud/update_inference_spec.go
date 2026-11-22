@@ -217,6 +217,10 @@ func UpdateInferenceSpec(ctx context.Context, workloadId string, tenantSettingsC
 
 	// V2 / any-workload path: read snapshot, merge partial update, recompose, send, write snapshot back.
 	mergedWorkload := snapshot.ToWorkload()
+	// The merge replaces the full spec. Keep the original snapshot for comparing
+	// update settings that become WorkloadRunner configuration outside the Service.
+	previousSpec := *mergedWorkload.Spec
+	wc.previousInferenceSpec = &previousSpec
 
 	// Ownership / policy / serving-config validation — parity with the native update path.
 	if opErr := services_utils.CheckWorkloadOwnershipProtection(ctx, mergedWorkload.ClusterId, mergedWorkload.DepartmentId, mergedWorkload.CreatedBy); opErr != nil {
@@ -361,6 +365,18 @@ func mergeUpdateSpecIntoFullSpec(ctx context.Context, fullSpec *workloadsApi.Sup
 
 	if err := restoreRedactedSensitiveEnvironmentVariableValues(updateSpecAsMap, fullSpecAsMap); err != nil {
 		return workloadsApi.NewError(http.StatusBadRequest, err.Error())
+	}
+
+	// A request to change just the minimum leaves the existing upper bound,
+	// metric, and explicit startup settings in effect.
+	if scale, ok := updateSpecAsMap["autoscaling"].(map[string]interface{}); ok && len(scale) == 1 && scale["minReplicas"] != nil {
+		if previous, ok := fullSpecAsMap["autoscaling"].(map[string]interface{}); ok {
+			for key, value := range previous {
+				if key != "minReplicas" {
+					scale[key] = value
+				}
+			}
+		}
 	}
 
 	logSpecAsJson(ctx, fullSpecAsMap, "base spec")

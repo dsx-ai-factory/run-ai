@@ -93,6 +93,7 @@ type workloadContext struct {
 	tenantId                 int32
 	spec                     *workloadsApi.SupersetSpec
 	inferenceSpec            *workloadsApi.InferenceSpecSpec
+	previousInferenceSpec    *workloadsApi.SupersetSpec
 	distributedInferenceSpec *workloadsApi.DistributedInferenceSpecSpec
 	options                  composer.FieldsComposerOptions
 	clusterCapabilities      *checker.ClusterCapabilitiesChecker

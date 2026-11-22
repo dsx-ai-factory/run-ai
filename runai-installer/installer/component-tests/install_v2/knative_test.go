@@ -61,7 +61,7 @@ func knativeOperatorDeployment(available bool) *unstructured.Unstructured {
 // operator CRD is established and the operator Deployment is available.
 func seedKnativeReady() map[client.ObjectKey]*unstructured.Unstructured {
 	return map[client.ObjectKey]*unstructured.Unstructured{
-		{Name: "knativeservings.operator.knative.dev"}:           knativeServingCRD(true),
+		{Name: "knativeservings.operator.knative.dev"}:            knativeServingCRD(true),
 		{Namespace: "knative-operator", Name: "knative-operator"}: knativeOperatorDeployment(true),
 	}
 }
@@ -141,6 +141,10 @@ func TestConnectedInstall_Knative(t *testing.T) {
 	assert.Equal(t, "https", scheme)
 	scaleToZero, _, _ := unstructured.NestedString(cu.Object, "spec", "config", "autoscaler", "enable-scale-to-zero")
 	assert.Equal(t, "true", scaleToZero)
+	allowZeroInitialScale, _, _ := unstructured.NestedString(cu.Object, "spec", "config", "autoscaler", "allow-zero-initial-scale")
+	assert.Equal(t, "true", allowZeroInitialScale)
+	_, hasInitialScale, _ := unstructured.NestedString(cu.Object, "spec", "config", "autoscaler", "initial-scale")
+	assert.False(t, hasInitialScale, "the global initial scale keeps Knative's default")
 
 	// The Run:ai-required Serving feature flags must land under spec.config.features
 	// (the operator writes them into the config-features ConfigMap that Run:ai's
@@ -340,7 +344,7 @@ func TestConnectedInstall_Knative_GatesOnOperatorReadiness(t *testing.T) {
 // so the first gate never opens and the apply never happens.
 func TestConnectedInstall_Knative_GatesOnCRDEstablished(t *testing.T) {
 	seed := map[client.ObjectKey]*unstructured.Unstructured{
-		{Name: "knativeservings.operator.knative.dev"}:           knativeServingCRD(false),
+		{Name: "knativeservings.operator.knative.dev"}:            knativeServingCRD(false),
 		{Namespace: "knative-operator", Name: "knative-operator"}: knativeOperatorDeployment(true),
 	}
 	_, k8s, evs, err := runKnativeWithSeed(t, seed, 200*time.Millisecond)
@@ -412,6 +416,7 @@ func TestConnectedInstall_Knative_AlreadyPresent(t *testing.T) {
 	evs := readEvents(t, eventsPath)
 	assert.Empty(t, helm.CallsByRelease("knative-operator"), "present operator is not reinstalled")
 	assert.Empty(t, manifests.CallsByOp("fetch"), "present serving-HPA is not reapplied")
+	assert.Nil(t, applyCallByKind(k8s, "KnativeServing"), "existing serving configuration remains administrator-managed")
 
 	for _, step := range []string{"install-knative-operator", "install-knative-serving", "install-knative-serving-hpa"} {
 		skipped := findEvent(evs, "step_skipped", step)

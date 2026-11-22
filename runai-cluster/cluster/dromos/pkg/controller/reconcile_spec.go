@@ -174,18 +174,7 @@ func (c *WorkloadRunnerController) handleAttachedResource(
 		return nil, err
 	}
 
-	if err := c.pluginFramework.RunBeforeApply(ctx, c.client, template, c.previewAttachedResource); err != nil {
-		return nil, err
-	}
 	return c.applyAttachedResource(ctx, template, state)
-}
-
-func (c *WorkloadRunnerController) previewAttachedResource(ctx context.Context, desired *unstructured.Unstructured) (*unstructured.Unstructured, error) {
-	preview := desired.DeepCopy()
-	if err := c.client.Apply(ctx, client.ApplyConfigurationFromUnstructured(preview), client.DryRunAll, client.ForceOwnership, client.FieldOwner(controllerName)); err != nil {
-		return nil, fmt.Errorf("preview apply for %s: %w", client.ObjectKeyFromObject(desired), err)
-	}
-	return preview, nil
 }
 
 func (c *WorkloadRunnerController) applyAttachedResource(

@@ -104,6 +104,10 @@ func TestOpenShiftInstall_KnativeViaServerless(t *testing.T) {
 
 	stableWindow, _, _ := unstructured.NestedString(ksObj.Object, "spec", "config", "autoscaler", "stable-window")
 	assert.Equal(t, "60s", stableWindow, "the user's customResource override is merged on top")
+	allowZeroInitialScale, _, _ := unstructured.NestedString(ksObj.Object, "spec", "config", "autoscaler", "allow-zero-initial-scale")
+	assert.Equal(t, "true", allowZeroInitialScale)
+	_, hasInitialScale, _ := unstructured.NestedString(ksObj.Object, "spec", "config", "autoscaler", "initial-scale")
+	assert.False(t, hasInitialScale, "the global initial scale keeps Knative's default")
 
 	// Run:ai's cluster operator only marks Knative available (enabling "standard"
 	// inference in the UI) when the required Serving feature flags are enabled, so

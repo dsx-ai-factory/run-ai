@@ -164,7 +164,8 @@ func knativeServingCR(wildcardDomain string) *unstructured.Unstructured {
 	cr.Object["spec"] = map[string]any{
 		"config": map[string]any{
 			"autoscaler": map[string]any{
-				"enable-scale-to-zero": "true",
+				"enable-scale-to-zero":     "true",
+				"allow-zero-initial-scale": "true",
 			},
 			"features": knativeServingFeatures(),
 			"domain": map[string]any{

@@ -6,6 +6,7 @@
 package steps
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -13,14 +14,33 @@ import (
 	configinputs "github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/inputs"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/model"
 	k8smocks "github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/k8sclient/mocks"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	dynamicfake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
+
+func TestApplyKnativeServingAllowsZeroInitialScale(t *testing.T) {
+	dynamicClient := dynamicfake.NewSimpleDynamicClient(runtime.NewScheme())
+	require.NoError(t, applyKnativeServing(dynamicClient, "*.inference.example.com"))
+	resource := schema.GroupVersionResource{Group: "operator.knative.dev", Version: "v1beta1", Resource: "knativeservings"}
+	serving, err := dynamicClient.Resource(resource).Namespace(KnativeServingNamespace).Get(context.Background(), "knative-serving", metav1.GetOptions{})
+	require.NoError(t, err)
+	autoscaler, found, err := unstructured.NestedStringMap(serving.Object, "spec", "config", "config-autoscaler")
+	require.NoError(t, err)
+	require.True(t, found)
+	assert.Equal(t, "true", autoscaler["enable-scale-to-zero"])
+	assert.Equal(t, "true", autoscaler["allow-zero-initial-scale"])
+	assert.NotContains(t, autoscaler, "initial-scale", "the global initial scale keeps Knative's default")
+}
 
 func setupMockK8sClientsForKnative(t *testing.T, objects ...client.Object) *k8smocks.MockK8sClients {
 	scheme := runtime.NewScheme()
