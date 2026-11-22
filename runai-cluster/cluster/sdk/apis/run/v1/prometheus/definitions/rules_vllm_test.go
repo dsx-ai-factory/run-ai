@@ -120,6 +120,28 @@ func TestVLLMTokenTotalsCountDeletedPods(t *testing.T) {
 	})
 }
 
+func TestVLLMTokenTotalsCountEveryRevision(t *testing.T) {
+	newTester(t).Test(TestCase{
+		Interval: "1m",
+		Inputs: []Input{
+			// Rolling update: the revision 1 pod serves until 2m, the revision 2 pod starts at 2m.
+			// Both pods carry the same workload_id, so the workload total counts both revisions.
+			{Series: `vllm:prompt_tokens_total{pod="workload-00001-deployment-1",namespace="project",engine="0"}`, Values: "0 100 200 stale"},
+			{Series: `vllm:prompt_tokens_total{pod="workload-00002-deployment-1",namespace="project",engine="0"}`, Values: "_ _ 0 50 100 150"},
+			{Series: `runai_pod_info_enriched{pod_name="workload-00001-deployment-1",pod_namespace="project",pod_uuid="uuid-1",workload_id="workload"}`, Values: "1 1 1 stale"},
+			{Series: `runai_pod_info_enriched{pod_name="workload-00002-deployment-1",pod_namespace="project",pod_uuid="uuid-2",workload_id="workload"}`, Values: "_ _ 1 1 1 1"},
+		},
+		Tests: []Test{
+			// Both revisions serve at 2m.
+			{Expr: `count(runai_vllm_prompt_tokens_total_per_pod{workload_id="workload"})`, EvalTime: "2m", Samples: []Sample{{Value: 2}}},
+			{Expr: `count(runai_vllm_prompt_tokens_total_per_pod{workload_id="workload"})`, EvalTime: "5m", Samples: []Sample{{Value: 1}}},
+			// 150 (revision 2) + 200 (revision 1) + 50, the increase() extrapolation of half a
+			// scrape interval past the revision 1 pod's last sample.
+			{Expr: `sum(increase(runai_vllm_prompt_tokens_total_per_pod{workload_id="workload"}[6m]))`, EvalTime: "5m", Samples: []Sample{{Value: 400}}},
+		},
+	})
+}
+
 func TestVLLMTokenTotalsCountEveryNodePool(t *testing.T) {
 	newTester(t).Test(TestCase{
 		Interval: "1m",

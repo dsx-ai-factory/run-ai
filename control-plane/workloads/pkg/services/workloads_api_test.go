@@ -3281,6 +3281,35 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 			Expect(response.Data[0]).To(ContainElement("VLLM_REQUEST_QUEUE_TIME_SECONDS_PERCENTILES[p99]"))
 		})
 
+		It("Get workload token usage metrics csv (vLLM)", func() {
+			const valueTimestamp = int64(1708958503653) // the timestamp getMetricResponse uses
+			metrics_client.AddResponsesForMockMetricsServer(map[string]openapi.GetMetrics200Response{
+				(runaimetrics.RunaiVLLMTokenUsagePerWorkloadMetric{Name: runaimetrics.VLLMPromptTokensTotal}).GetName():                getMetricResponse([]string{testing.TestUuid1}, []string{"650"}),
+				(runaimetrics.RunaiVLLMTokenUsagePerWorkloadMetric{Name: runaimetrics.VLLMPromptTokensPerRequestPercentile}).GetName(): getPercentileMetricMock(valueTimestamp, [][2]string{{"50", "40"}, {"95", "180"}, {"99", "250"}}),
+			})
+			requested := []api.WorkloadMetricType{
+				api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_TOTAL,
+				api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_PER_REQUEST_PERCENTILES,
+			}
+			resp, err := workloadsService.GetWorkloadMetrics(ctx, testing.TestUuid1, requested, time.Now().Add(-time.Hour), time.Now(), 10)
+			Expect(err).To(BeNil())
+			Expect(resp.Code).To(Equal(http.StatusOK))
+
+			response, ok := resp.Body.(runaihttp.CsvFile)
+			Expect(ok).To(BeTrue())
+			// The single value for the period becomes one row, with the percentiles in the same row.
+			Expect(response.Data).To(Equal([][]string{
+				{
+					"Timestamp",
+					"VLLM_PROMPT_TOKENS_TOTAL",
+					"VLLM_PROMPT_TOKENS_PER_REQUEST_PERCENTILES[p50]",
+					"VLLM_PROMPT_TOKENS_PER_REQUEST_PERCENTILES[p95]",
+					"VLLM_PROMPT_TOKENS_PER_REQUEST_PERCENTILES[p99]",
+				},
+				{stringTimestamp(valueTimestamp), "650", "40", "180", "250"},
+			}))
+		})
+
 		It("Get workload histogram bucket+percentile metrics csv (NIM) values", func() {
 			resp, err := workloadsService.GetWorkloadMetrics(ctx, testing.TestUuid1,
 				[]api.WorkloadMetricType{api.WORKLOADMETRICTYPE_NIM_TIME_TO_FIRST_TOKEN_SECONDS, api.WORKLOADMETRICTYPE_NIM_TIME_TO_FIRST_TOKEN_SECONDS_PERCENTILES},
