@@ -4,13 +4,40 @@
  */
 
 import type { IFilterBy } from "@/models/filter.model";
+import type { RouteRecordNormalized } from "vue-router";
 
 export const urlService = {
   getFiltersObj,
   toSearchParams,
   getBackendBaseUrl,
   updateQueryParams,
+  isControlPlaneRouteUrl,
 };
+
+function isControlPlaneRouteUrl(
+  value: string,
+  routes: ReadonlyArray<Pick<RouteRecordNormalized, "path">>,
+  controlPlaneUrl = window.location.href,
+): boolean {
+  let url: URL;
+  let path: string;
+  try {
+    url = new URL(value);
+    if (url.hostname !== new URL(controlPlaneUrl).hostname) return false;
+    path = decodeURIComponent(url.pathname);
+  } catch {
+    return false;
+  }
+
+  if (path === "/") return true;
+
+  return routes.some((route) => {
+    const prefix = route.path.split("/").find(Boolean);
+    // Reserve the route subtree because custom ingress paths can shadow its pages.
+    if (!prefix || prefix.startsWith(":")) return false;
+    return path === `/${prefix}` || path.startsWith(`/${prefix}/`);
+  });
+}
 
 function getBackendBaseUrl(): string {
   return `${window.location.origin}/`;

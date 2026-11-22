@@ -42,6 +42,7 @@ export enum errorMessages {
   INVALID_SUB_PATH = "Enter a valid sub path",
   INVALID_CONTAINER_PATH = "Invalid container path",
   INVALID_URL = "Enter a valid URL",
+  URL_RESERVED_FOR_CONTROL_PLANE = "This URL conflicts with a Run:ai application route. Choose a different URL.",
   UNIQUE_LABELS = "This value already exists for this key",
   NAME_ALREADY_EXIST = "This name already exists",
   SERVER_NAME_OR_IP_EMPTY = "Enter a name or IP",
