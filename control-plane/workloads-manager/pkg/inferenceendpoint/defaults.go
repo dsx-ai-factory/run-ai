@@ -14,10 +14,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation"
 )
 
-// PathPrefix is the request path whose requests go through the endpoint picker. The
-// control plane sets it for the supported workload types; users do not choose it.
-const PathPrefix = "/v1"
-
 // EPPProfileGIEv15 is the endpoint picker profile backed by the pinned Gateway API
 // Inference Extension v1.5 image; it is the only profile the control plane accepts.
 const EPPProfileGIEv15 = "gie-v1.5"

@@ -5,7 +5,6 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Epp** | **map[string]interface{}** | InferenceEndpoint spec.epp, for example the EPP profile. Validated against the installed CRD when applied. | 
-**PathPrefix** | Pointer to **string** | The path whose requests go through the endpoint picker. Set by the control plane to /v1. | [optional] 
 
 ## Methods
 
@@ -45,31 +44,6 @@ and a boolean to check if the value has been set.
 
 SetEpp sets Epp field to given value.
 
-
-### GetPathPrefix
-
-`func (o *ExternalAccessInference) GetPathPrefix() string`
-
-GetPathPrefix returns the PathPrefix field if non-nil, zero value otherwise.
-
-### GetPathPrefixOk
-
-`func (o *ExternalAccessInference) GetPathPrefixOk() (*string, bool)`
-
-GetPathPrefixOk returns a tuple with the PathPrefix field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetPathPrefix
-
-`func (o *ExternalAccessInference) SetPathPrefix(v string)`
-
-SetPathPrefix sets PathPrefix field to given value.
-
-### HasPathPrefix
-
-`func (o *ExternalAccessInference) HasPathPrefix() bool`
-
-HasPathPrefix returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

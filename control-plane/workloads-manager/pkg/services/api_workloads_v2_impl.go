@@ -1545,7 +1545,7 @@ func cloneExternalAccessInference(in *api.ExternalAccessInference) *api.External
 	if in == nil {
 		return nil
 	}
-	return &api.ExternalAccessInference{Epp: cloneInterfaceMap(in.Epp), PathPrefix: in.PathPrefix}
+	return &api.ExternalAccessInference{Epp: cloneInterfaceMap(in.Epp)}
 }
 
 func cloneInterfaceMapPtr(in *map[string]interface{}) *map[string]interface{} {

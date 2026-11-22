@@ -585,7 +585,7 @@ var _ = Describe("NimServicesImpl", func() {
 			Expect(endpoint.ExternalAccess.Route).To(BeNil())
 			inference, err := json.Marshal(endpoint.ExternalAccess.Inference)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(inference).To(MatchJSON(`{"epp": {"profile": "gie-v1.5"}, "pathPrefix": "/v1"}`))
+			Expect(inference).To(MatchJSON(`{"epp": {"profile": "gie-v1.5"}}`))
 		})
 
 		It("keeps the networking of a public NIM that did not opt in", func() {
@@ -668,7 +668,7 @@ var _ = Describe("NimServicesImpl", func() {
 			endpoint := servingEndpoint(id)
 			Expect(*endpoint.Services).To(Equal([]api.NetworkingService{{Ref: &api.ServiceRef{Name: "nim-routed-update", Port: 8000}}}))
 			Expect(endpoint.ExternalAccess.Inference).NotTo(BeNil())
-			Expect(endpoint.ExternalAccess.Inference.PathPrefix).To(Equal("/v1"))
+			Expect(endpoint.ExternalAccess.Inference.Epp).To(Equal(map[string]interface{}{"profile": "gie-v1.5"}))
 		})
 
 		DescribeTable("rejects an update that turns the routing on or off",

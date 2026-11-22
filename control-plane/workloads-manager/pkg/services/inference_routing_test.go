@@ -226,7 +226,7 @@ var _ = Describe("inference routing", func() {
 			Expect(access.HttpRoute).NotTo(BeNil())
 			raw, err := json.Marshal(access.Inference)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/v1"}`))
+			Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"}}`))
 		})
 
 		It("rejects the composed protected serving port", func() {
@@ -270,7 +270,7 @@ var _ = Describe("inference routing", func() {
 
 			raw, err := json.Marshal((*configuration.Networking)[0].ExternalAccess.Inference)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/v1"}`))
+			Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"}}`))
 		})
 
 		It("rejects the composed path-based NIM endpoint", func() {

@@ -536,12 +536,6 @@ export interface ExternalAccessInference {
      * @memberof ExternalAccessInference
      */
     'epp': { [key: string]: any; };
-    /**
-     * The path whose requests go through the endpoint picker. Set by the control plane to /v1.
-     * @type {string}
-     * @memberof ExternalAccessInference
-     */
-    'pathPrefix'?: string;
 }
 /**
  * Specifies the Group, Version, and Kind (GVK) of the Kubernetes resource that defines the workload.

@@ -822,10 +822,6 @@ components:
           type: object
           additionalProperties: true
           description: InferenceEndpoint spec.epp, for example the EPP profile. Validated against the installed CRD when applied.
-        pathPrefix:
-          type: string
-          maxLength: 1024
-          description: The path whose requests go through the endpoint picker. Set by the control plane to /v1.
     ExternalAccess:
       type: object
       description: External access configuration. Same shape as the networking plugin. Include ingress (Kubernetes), route (OpenShift), or httpRoute (Gateway API). Omit or leave empty for no external access.
