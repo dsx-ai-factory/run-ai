@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderRelease" .) "true" }}
 {{- if .Values.operands.rbac.base.create }}
 # Run:AI Agent
 # Connects between the Run:AI GPU cluster and the Run:AI Backend. Creates Project CRDs
@@ -516,4 +517,5 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: runai-agent
+{{- end }}
 {{- end }}

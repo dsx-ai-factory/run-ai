@@ -1,0 +1,56 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Runs the pre hooks of the runai-cluster chart (validation, CRD upgrade,
+# pre-install and pre-upgrade handlers) as their own Application, before the
+# cluster Application.
+#
+# Placeholders in angle brackets are filled in by whatever renders these files.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: runai-cluster-pre
+  namespace: argocd
+  annotations:
+    # Runs before runai-cluster (-20). Waves are relative to each other.
+    argocd.argoproj.io/sync-wave: "-30"
+spec:
+  project: <ARGO_PROJECT>
+  sources:
+    - repoURL: <CHART_REPO_URL>
+      chart: runai-cluster
+      targetRevision: <CLUSTER_VERSION>
+      helm:
+        releaseName: runai-cluster
+        skipCrds: true
+        valueFiles:
+          - $values/values/runai-cluster.yaml
+        parameters:
+          # Only this chart's own hooks, and only the pre phase.
+          - name: hooks.render
+            value: only
+          - name: hooks.phase
+            value: pre
+          # The subcharts have no hooks mode. Their own hooks stay with the
+          # runai-cluster Application.
+          - name: kai-resource-management.enabled
+            value: "false"
+          - name: karta.enabled
+            value: "false"
+    # An Application with only hooks never goes OutOfSync, because Argo CD does
+    # not track hook resources. This path holds a ConfigMap that does change,
+    # so changing it is what starts a sync and runs the hooks.
+    - repoURL: <GITOPS_REPO_URL>
+      targetRevision: <GITOPS_BRANCH>
+      path: hooks-run/pre
+    - repoURL: <GITOPS_REPO_URL>
+      targetRevision: <GITOPS_BRANCH>
+      ref: values
+  destination:
+    namespace: runai
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: false
+      # Nothing here drifts, and a self-heal sync would run the hooks again.
+      selfHeal: false

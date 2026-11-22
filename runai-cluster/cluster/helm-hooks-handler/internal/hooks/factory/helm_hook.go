@@ -73,7 +73,7 @@ func getClusterHookParams(opts *util.Options) (*hooks.ClusterHookParams, error) 
 			BootstrapToken: opts.ControlPlaneBootstrapToken.String(),
 		},
 		ClusterDetails: hooks.ClusterDetails{
-			UID:     opts.ClusterUID,
+			UID:     opts.ClusterUID.String(),
 			URL:     opts.ClusterURL,
 			Version: opts.ClusterVersion,
 		},

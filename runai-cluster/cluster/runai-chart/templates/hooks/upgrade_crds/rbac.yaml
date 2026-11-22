@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderHook" (list . (list "pre"))) "true" }}
 {{- if and .Values.crdUpgrader.enabled (not .Values.global.serviceAccountName) }}
 apiVersion: v1
 kind: ServiceAccount
@@ -38,4 +39,5 @@ subjects:
 - kind: ServiceAccount
   name: runai-crd-upgrader
   namespace: {{ .Release.Namespace }}
+{{- end }}
 {{- end }}

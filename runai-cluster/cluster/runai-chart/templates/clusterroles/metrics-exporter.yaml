@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderRelease" .) "true" }}
 {{- if .Values.operands.rbac.base.create }}
 # Run:AI Metrics Exporter
 apiVersion: rbac.authorization.k8s.io/v1
@@ -78,4 +79,5 @@ subjects:
   - kind: ServiceAccount
     name: metrics-exporter
     namespace: runai
+{{- end }}
 {{- end }}

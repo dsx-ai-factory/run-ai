@@ -1,0 +1,49 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Applied by hand (or by Ansible) at uninstall time, not by the root
+# Application. Runs the pre-delete hook of the runai-cluster chart.
+#
+# Delete the runai-cluster Application after this one has succeeded. The
+# post-delete cleanup Jobs are rendered by the kai-resource-management subchart,
+# so they stay with the runai-cluster Application. Whether Argo CD runs them
+# when that Application is deleted depends on its support for delete hooks,
+# which has not been checked.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: runai-cluster-uninstall
+  namespace: argocd
+spec:
+  project: <ARGO_PROJECT>
+  sources:
+    - repoURL: <CHART_REPO_URL>
+      chart: runai-cluster
+      targetRevision: <CLUSTER_VERSION>
+      helm:
+        releaseName: runai-cluster
+        skipCrds: true
+        valueFiles:
+          - $values/values/runai-cluster.yaml
+        parameters:
+          - name: hooks.render
+            value: only
+          - name: hooks.phase
+            value: delete
+          - name: kai-resource-management.enabled
+            value: "false"
+          - name: karta.enabled
+            value: "false"
+    - repoURL: <GITOPS_REPO_URL>
+      targetRevision: <GITOPS_BRANCH>
+      path: hooks-run/uninstall
+    - repoURL: <GITOPS_REPO_URL>
+      targetRevision: <GITOPS_BRANCH>
+      ref: values
+  destination:
+    namespace: runai
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: false

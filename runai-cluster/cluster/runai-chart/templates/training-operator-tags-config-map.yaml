@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderRelease" .) "true" }}
 {{- if index .Values "operands" "trainingOperator" "enabled" -}}
 {{- $tags := index .Values "trainingOperatorImageTags" -}}
 apiVersion: v1
@@ -8,3 +9,4 @@ metadata:
 data:
 {{- $tags | toYaml | nindent 2 -}}
 {{- end -}}
+{{- end }}

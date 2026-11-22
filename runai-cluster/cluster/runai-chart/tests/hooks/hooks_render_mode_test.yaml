@@ -1,0 +1,196 @@
+suite: Test hooks.render and hooks.phase
+
+tests:
+  - it: renders the release and every hook by default
+    templates:
+      - templates/priorityclasses/critical-priority-class.yaml
+      - templates/hooks/pre-install-job.yaml
+      - templates/hooks/pre-upgrade-job.yaml
+      - templates/hooks/post-install-job.yaml
+      - templates/hooks/post-upgrade-job.yaml
+      - templates/hooks/pre-delete-job.yaml
+      - templates/hooks/secret.yaml
+      - templates/hooks/hooks_params_configmap.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: renders the release but no hooks when render is none
+    set:
+      hooks.render: none
+    templates:
+      - templates/hooks/pre-install-job.yaml
+      - templates/hooks/pre-upgrade-job.yaml
+      - templates/hooks/post-install-job.yaml
+      - templates/hooks/post-upgrade-job.yaml
+      - templates/hooks/pre-delete-job.yaml
+      - templates/hooks/secret.yaml
+      - templates/hooks/hooks_params_configmap.yaml
+      - templates/hooks/upgrade_crds/job.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: still renders the release when render is none
+    set:
+      hooks.render: none
+    templates:
+      - templates/priorityclasses/critical-priority-class.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: renders no release resources when render is only
+    set:
+      hooks.render: only
+    templates:
+      - templates/priorityclasses/critical-priority-class.yaml
+      - templates/rbac.yaml
+      - templates/runaiconfig.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders every hook when render is only and phase is all
+    set:
+      hooks.render: only
+    templates:
+      - templates/hooks/pre-install-job.yaml
+      - templates/hooks/pre-upgrade-job.yaml
+      - templates/hooks/post-install-job.yaml
+      - templates/hooks/post-upgrade-job.yaml
+      - templates/hooks/pre-delete-job.yaml
+      - templates/hooks/secret.yaml
+      - templates/hooks/hooks_params_configmap.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: renders only the pre hooks and what they share for phase pre
+    set:
+      hooks.render: only
+      hooks.phase: pre
+    templates:
+      - templates/hooks/pre-install-job.yaml
+      - templates/hooks/pre-upgrade-job.yaml
+      - templates/hooks/pre-crd-upgrade-job.yaml
+      - templates/hooks/upgrade_crds/job.yaml
+      - templates/hooks/secret.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: renders the validate-cluster-config ConfigMap and Job for phase pre
+    set:
+      hooks.render: only
+      hooks.phase: pre
+    templates:
+      - templates/hooks/validate-cluster-config-job.yaml
+    asserts:
+      - hasDocuments:
+          count: 2
+
+  - it: leaves out the post and delete hooks for phase pre
+    set:
+      hooks.render: only
+      hooks.phase: pre
+    templates:
+      - templates/hooks/post-install-job.yaml
+      - templates/hooks/post-upgrade-job.yaml
+      - templates/hooks/pre-delete-job.yaml
+      # Only the post hooks mount it, so the pre app must not also own it.
+      - templates/hooks/hooks_params_configmap.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders only the post hooks and what they share for phase post
+    set:
+      hooks.render: only
+      hooks.phase: post
+    templates:
+      - templates/hooks/post-install-job.yaml
+      - templates/hooks/post-upgrade-job.yaml
+      - templates/hooks/karta-migrate-post-upgrade-job.yaml
+      - templates/hooks/secret.yaml
+      - templates/hooks/hooks_params_configmap.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: leaves out the pre and delete hooks for phase post
+    set:
+      hooks.render: only
+      hooks.phase: post
+    templates:
+      - templates/hooks/pre-install-job.yaml
+      - templates/hooks/pre-upgrade-job.yaml
+      - templates/hooks/pre-delete-job.yaml
+      - templates/hooks/upgrade_crds/job.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders only the delete hook for phase delete
+    set:
+      hooks.render: only
+      hooks.phase: delete
+    templates:
+      - templates/hooks/pre-delete-job.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: leaves out the install, upgrade and shared hooks for phase delete
+    set:
+      hooks.render: only
+      hooks.phase: delete
+    templates:
+      - templates/hooks/pre-install-job.yaml
+      - templates/hooks/post-upgrade-job.yaml
+      - templates/hooks/secret.yaml
+      - templates/hooks/hooks_params_configmap.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: restricts the hooks to the phase even when the release is rendered too
+    set:
+      hooks.phase: pre
+    templates:
+      - templates/hooks/post-install-job.yaml
+      - templates/hooks/pre-delete-job.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: still honours helmHooksHandler.enabled when hooks are rendered
+    set:
+      hooks.render: only
+      helmHooksHandler.enabled: false
+    templates:
+      - templates/hooks/pre-install-job.yaml
+      - templates/hooks/hooks_params_configmap.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # Helm reports a fail against the first template it evaluates, so these name
+  # that template rather than one chosen for the case.
+  - it: rejects an unknown render mode
+    set:
+      hooks.render: sometimes
+    templates:
+      - templates/tests/validate-crds/test-crds.yaml
+    asserts:
+      - failedTemplate:
+          errorMessage: 'hooks.render must be one of all, none or only, got "sometimes"'
+
+  - it: rejects an unknown phase
+    set:
+      hooks.phase: sometimes
+    templates:
+      - templates/hooks/upgrade_crds/rbac.yaml
+    asserts:
+      - failedTemplate:
+          errorMessage: 'hooks.phase must be one of all, pre, post or delete, got "sometimes"'

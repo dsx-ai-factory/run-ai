@@ -168,6 +168,30 @@ func TestClientSecretFromFile(t *testing.T) {
 	assert.Equal(t, clientSecret, opts.ControlPlaneClientSecret.String())
 }
 
+func TestBootstrapTokenAndClusterUIDFromFile(t *testing.T) {
+	tmpDir := t.TempDir()
+	tokenFilePath := path.Join(tmpDir, "bootstrap_token")
+	uidFilePath := path.Join(tmpDir, "cluster_uid")
+	token := "header.payload.signature"
+	uid := "551012a5-6759-4966-ac48-bdbd4491a31f"
+	if err := os.WriteFile(tokenFilePath, []byte(token), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(uidFilePath, []byte(uid), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	os.Args = []string{"BaseParse",
+		"--pre-upgrade",
+		"--control-plane-bootstrap-token=@" + tokenFilePath,
+		"--cluster-uid=@" + uidFilePath,
+		"--cm-file-path=./../test/params_all_set.json"}
+	flagSet := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	opts := parse(flagSet)
+	assert.Equal(t, token, opts.ControlPlaneBootstrapToken.String())
+	assert.Equal(t, uid, opts.ClusterUID.String())
+}
+
 func TestDisableInfrastructureMetricsRemoteWrite(t *testing.T) {
 	flags := []string{"TestDisable",
 		"--pre-install",

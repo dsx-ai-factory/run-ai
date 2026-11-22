@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderHook" (list . (list "pre" "post"))) "true" }}
 {{- /*
 RBAC for the karta migration job.
 
@@ -61,4 +62,5 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: karta-migrate
+{{- end }}
 {{- end }}
