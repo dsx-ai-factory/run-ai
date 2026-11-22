@@ -172,14 +172,9 @@ func AccessRuleDaoToApi(accessRule *models.AccessRule) api.AccessRule {
 	}
 }
 
-// clusterRoleOptional reports whether the cluster may find no ClusterRole for the access rule.
-// The cluster binds the predefined role in place of the rule's own role, so its flag counts too.
 func clusterRoleOptional(role *models.Role, predefinedRole *models.Role) bool {
-	if ptr.Deref(role.NoClusterPermissions, false) {
-		return true
-	}
 	if predefinedRole == nil {
-		return role.Custom
+		return role.Custom || ptr.Deref(role.NoClusterPermissions, false)
 	}
 	return ptr.Deref(predefinedRole.NoClusterPermissions, false)
 }
