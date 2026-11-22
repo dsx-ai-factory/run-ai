@@ -15,7 +15,7 @@ import { FairShareSimulationNodePoolCapacity } from './fairShareSimulationNodePo
 import { FairShareSimulationNodePoolSchedulingCapabilities } from './fairShareSimulationNodePoolSchedulingCapabilities';
 
 /**
-* The node pool as it is in the form.
+* The node pool to simulate, saved or not.
 */
 export class FairShareSimulationNodePool {
     'capacity': FairShareSimulationNodePoolCapacity | null;

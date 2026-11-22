@@ -16,7 +16,7 @@ import { FairShareSimulationRequestNodePool } from './fairShareSimulationRequest
 import { FairShareSimulationRequestParent } from './fairShareSimulationRequestParent';
 
 /**
-* A scenario to simulate: the node pool as it is in the form and the org units the form shows, with their unsaved changes. Every org unit without a demand asks for half the node pool\'s capacity, capped by its limit. For departments, every department competes; the node pool and department forms both send departments. For projects, the other departments ask for nothing, and the parent asks for the sum of its projects\' demand, capped by its limit. 
+* A scenario to simulate: the node pool and the org units to return, with their unsaved changes. Every org unit without a demand asks for half the node pool\'s capacity, capped by its limit. For departments, every department competes. For projects, the other departments ask for nothing, and the parent asks for the sum of its projects\' demand, capped by its limit. 
 */
 export class FairShareSimulationRequest {
     'nodePool': FairShareSimulationRequestNodePool | null;
@@ -26,7 +26,7 @@ export class FairShareSimulationRequest {
     'orgUnitType': FairShareSimulationRequest.OrgUnitTypeEnum;
     'parent'?: FairShareSimulationRequestParent | null;
     /**
-    * The org units to return, with their unsaved changes. Send the rows the screen shows and every edited row: an edit that isn\'t sent is lost. 
+    * The org units to return, with their unsaved changes. Every org unit with an unsaved change must be sent: a change that isn\'t sent isn\'t simulated. 
     */
     'orgUnits': Array<FairShareSimulationOrgUnit>;
 

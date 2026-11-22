@@ -16,6 +16,10 @@ import { AccessRuleSyncAllOfPredefinedRole } from './accessRuleSyncAllOfPredefin
 export class AccessRuleSyncAllOf {
     'predefinedRole'?: AccessRuleSyncAllOfPredefinedRole | null;
     /**
+    * Indicates if the access rule\'s role is a custom role with no predefined role for cluster permissions.
+    */
+    'clusterRoleOptional'?: boolean = false;
+    /**
     * Indicates if the access rule is in \'Deleting\' phase and should be deleted from the cluster
     */
     'isDeleting'?: boolean = false;
@@ -27,6 +31,11 @@ export class AccessRuleSyncAllOf {
             "name": "predefinedRole",
             "baseName": "predefinedRole",
             "type": "AccessRuleSyncAllOfPredefinedRole"
+        },
+        {
+            "name": "clusterRoleOptional",
+            "baseName": "clusterRoleOptional",
+            "type": "boolean"
         },
         {
             "name": "isDeleting",

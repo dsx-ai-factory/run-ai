@@ -13,7 +13,7 @@
 import { RequestFile } from './models';
 
 /**
-* The dragged slider, capped by the limit. Omitted or null asks for half the capacity.
+* The GPUs the org unit asks for, capped by its limit. Omitted or null asks for half the capacity.
 */
 export class FairShareSimulationOrgUnitDemand {
     'gpu': number;

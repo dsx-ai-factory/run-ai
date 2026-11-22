@@ -14,7 +14,7 @@ import { RequestFile } from './models';
 
 export class FairShareSimulationOrgUnitGpu {
     /**
-    * The GPU quota; -1 means unlimited. Values between -1 and 0 are rejected.
+    * The GPU quota; -1 means unlimited. Values between -1 and 0 are rejected. Ignored while quota is off.
     */
     'deserved'?: number | null;
     /**

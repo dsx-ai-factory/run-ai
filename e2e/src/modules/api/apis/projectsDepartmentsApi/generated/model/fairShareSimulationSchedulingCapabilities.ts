@@ -13,7 +13,7 @@
 import { RequestFile } from './models';
 
 /**
-* The node pool\'s scheduling capabilities as set in the form, saved or not.
+* The node pool\'s scheduling capabilities to simulate, saved or not.
 */
 export class FairShareSimulationSchedulingCapabilities {
     'quota': boolean;

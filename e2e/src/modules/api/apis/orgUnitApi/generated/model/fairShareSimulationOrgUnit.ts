@@ -16,7 +16,7 @@ import { FairShareSimulationOrgUnitGpu } from './fairShareSimulationOrgUnitGpu';
 import { FairShareSimulationRank } from './fairShareSimulationRank';
 
 /**
-* A requested org unit with its unsaved changes. Each field replaces the stored value on its own; omitted fields keep it. `demand` is the GPUs the org unit asks for (the dragged slider), capped by its limit; without it, half the node pool\'s capacity. 
+* A requested org unit with its unsaved changes. Each field replaces the stored value on its own; omitted fields keep it. `demand` is the GPUs the org unit asks for, capped by its limit; without it, half the node pool\'s capacity. 
 */
 export class FairShareSimulationOrgUnit {
     'id': string;
