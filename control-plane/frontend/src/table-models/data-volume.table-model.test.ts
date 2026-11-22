@@ -31,7 +31,7 @@ describe("data volume status support link", () => {
     const result = formatStatus(DatavolumePhase.NotReady, "OriginalPvcNotBound");
 
     expect(result.status).toBe("Issues found");
-    expect(result.tooltipText).toBe(`Original PVC not bound.<br/>${SUPPORT_LINK}`);
+    expect(result.tooltipText).toBe(`Original PVC not bound<br/>${SUPPORT_LINK}`);
   });
 
   it("leaves the tooltip unchanged when the support URL is not configured", () => {
