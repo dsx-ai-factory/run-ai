@@ -105,10 +105,12 @@ func (p *DRAParser) fetchPodClaimSpec(ctx context.Context, pod *corev1.Pod, clai
 		if getErr != nil {
 			return "", nil, claimReadError(pod, "ResourceClaim", *claimName, getErr)
 		}
-		if mustCheckOwner {
-			if ownerErr := resourceclaim.IsForPod(pod, claim); ownerErr != nil {
-				return "", nil, ownerErr
-			}
+		// Claim templates create a claim controlled by the individual Pod.
+		// Keep this check consistent across Kubernetes versions with and without
+		// the newer optional PodGroup ownership mode.
+		if mustCheckOwner && (claim.Namespace != pod.Namespace || !metav1.IsControlledBy(claim, pod)) {
+			return "", nil, fmt.Errorf("ResourceClaim %s/%s was not created for pod %s/%s (pod is not owner)",
+				claim.Namespace, claim.Name, pod.Namespace, pod.Name)
 		}
 		return "claim/" + *claimName, &claim.Spec, nil
 	}
