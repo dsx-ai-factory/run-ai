@@ -44,7 +44,6 @@ An Endpoint's `externalAccess` may carry an `inference` block next to `httpRoute
 | `workload.port` | created Service: `services[0].create.spec.ports[0].targetPort` (numeric; defaults to `port`). Referenced Service: `services[0].ref.port` |
 | `routing.gatewayRef` | `httpRoute.spec.parentRefs[0]` (must be the configured Gateway) |
 | `routing.hostnames` | `httpRoute.spec.hostnames` |
-| `routing.pathPrefix` | `inference.pathPrefix` (default `/v1`) |
 | `epp` (required) | the `inference` block |
 
 Rules: at most one Endpoint per runner may set `inference`; it requires `httpRoute` without `ingress` or `route`, no `services[0].auth`, a created Service with a selector or a reference to the runner's NIMService (`services[0].ref` must name it), and exactly one Gateway parentRef. Admission rejects new or changed inference routing when the `InferenceEndpoint` API is not installed. Status reports the `InferenceEndpoint` as an external access resource (kind `InferenceEndpoint`), takes service URLs from the `httpRoute` hostnames, and mirrors its `Ready` condition as `InferenceEndpointReady`.

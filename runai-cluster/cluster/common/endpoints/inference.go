@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -26,18 +25,12 @@ var InferenceEndpointGVK = schema.GroupVersionKind{Group: "inference.platform.ru
 // InferenceEndpoint. It must match EndpointLabel in that controller, which is a separate Go module.
 const InferenceEndpointLabel = "inference.platform.run.ai/endpoint"
 
-// DefaultInferencePathPrefix is the request path whose requests go through the
-// endpoint picker when externalAccess.inference.pathPrefix is not set. It
-// matches the default of the InferenceEndpoint CRD.
-const DefaultInferencePathPrefix = "/v1"
-
 // InferenceConfig is the externalAccess.inference block. It carries only the
 // InferenceEndpoint fields that the networking plugin cannot derive from the
 // endpoint's Service and HTTPRoute. The epp value stays JSON so consumers share
 // the installed CRD contract without importing the controller's API module.
 type InferenceConfig struct {
-	Epp        json.RawMessage `json:"epp"`
-	PathPrefix string          `json:"pathPrefix,omitempty"`
+	Epp json.RawMessage `json:"epp"`
 }
 
 // UnmarshalJSON rejects unknown keys so a field the plugin does not apply is
@@ -63,19 +56,8 @@ func (c *InferenceConfig) Validate() error {
 	if c == nil {
 		return fmt.Errorf("externalAccess.inference is required")
 	}
-	if c.PathPrefix != "" && !strings.HasPrefix(c.PathPrefix, "/") {
-		return fmt.Errorf("externalAccess.inference.pathPrefix %q must start with '/'", c.PathPrefix)
-	}
 	_, err := c.specFields()
 	return err
-}
-
-// EffectivePathPrefix returns the configured prefix, or the default when none is set.
-func (c *InferenceConfig) EffectivePathPrefix() string {
-	if c.PathPrefix == "" {
-		return DefaultInferencePathPrefix
-	}
-	return c.PathPrefix
 }
 
 func (c *InferenceConfig) specFields() (map[string]any, error) {
@@ -180,9 +162,6 @@ func BuildInferenceEndpoint(runner metav1.Object, cfg *InferenceConfig, target I
 		"routing": map[string]any{
 			"gatewayRef": gatewayRef,
 			"hostnames":  hostnames,
-			// Set explicitly so the desired spec equals the live spec, which the
-			// CRD defaults to the same value.
-			"pathPrefix": cfg.EffectivePathPrefix(),
 		},
 	}
 	for key, value := range fields {

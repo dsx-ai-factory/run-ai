@@ -206,8 +206,7 @@ var _ = Describe("Inference routing (endpoints path)", func() {
 		Expect(metav1.IsControlledBy(obj, runner)).To(BeTrue())
 		Expect(specJSON(obj)).To(MatchJSON(`{
 			"workload":{"selector":{"matchLabels":{"leaderworkerset.sigs.k8s.io/name":"llama-chat","leaderworkerset.sigs.k8s.io/worker-index":"0"}},"port":8000},
-			"routing":{"gatewayRef":{"name":"runai-gateway","namespace":"runai"},"hostnames":["` + testInferenceHost + `"],
-				"pathPrefix":"/v1"},
+			"routing":{"gatewayRef":{"name":"runai-gateway","namespace":"runai"},"hostnames":["` + testInferenceHost + `"]},
 			"epp":{"profile":"gie-v1.5"}}`))
 		Expect(httpRoutes()).To(BeEmpty())
 		Expect(k8sClient.Get(ctx, client.ObjectKey{Namespace: testNamespace, Name: "llama-chat-leader"}, &corev1.Service{})).To(Succeed())
@@ -217,23 +216,6 @@ var _ = Describe("Inference routing (endpoints path)", func() {
 		again, err := getInferenceEndpoint()
 		Expect(err).NotTo(HaveOccurred())
 		Expect(again.GetResourceVersion()).To(Equal(rv))
-	})
-
-	It("passes the configured path prefix to the InferenceEndpoint", func() {
-		setRunnerEndpoints(runner, inferenceEndpointConfig(false, 8000, &endpoints.InferenceConfig{
-			Epp:        json.RawMessage(`{"profile":"gie-v1.5"}`),
-			PathPrefix: "/openai/v1",
-		}))
-		Expect(reconcileRunner()).To(Succeed())
-
-		obj, err := getInferenceEndpoint()
-		Expect(err).NotTo(HaveOccurred())
-		prefix, _, err := unstructured.NestedString(obj.Object, "spec", "routing", "pathPrefix")
-		Expect(err).NotTo(HaveOccurred())
-		Expect(prefix).To(Equal("/openai/v1"))
-		Expect(httpRoutes()).To(BeEmpty())
-		_, errs := plugin.WebhookValidate(ctx, nil, runner)
-		Expect(errs).To(BeEmpty())
 	})
 
 	It("does not support service auth with inference routing", func() {
@@ -367,14 +349,14 @@ var _ = Describe("Inference routing (endpoints path)", func() {
 		Expect(status.Phase).To(Equal(dromosv1alpha1.PluginPhaseReady))
 		access := findEndpointsCondition(status, ExternalAccessReadyConditionName)
 		Expect(access.Status).To(Equal(metav1.ConditionTrue))
-		Expect(access.Message).To(HaveSuffix(", url: https://" + testInferenceHost + endpoints.DefaultInferencePathPrefix))
+		Expect(access.Message).To(HaveSuffix(", url: https://" + testInferenceHost + "/"))
 
 		details, err := endpoints.NetworkingStatusFromRawExtension(status.AdditionalInfo)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(details.Endpoints).To(HaveLen(1))
 		Expect(details.Endpoints[0].ExternalAccess.Resources).To(ConsistOf(HaveField("Kind", endpoints.ExternalAccessKindInferenceEndpoint)))
 		Expect(details.Endpoints[0].Services[0].URLs).To(ConsistOf(endpoints.ServiceURLStatus{
-			URL:        "https://" + testInferenceHost + endpoints.DefaultInferencePathPrefix,
+			URL:        "https://" + testInferenceHost + "/",
 			SourceKind: endpoints.ExternalAccessKindInferenceEndpoint,
 			SourceName: testInferenceEndpointID,
 		}))
@@ -382,23 +364,6 @@ var _ = Describe("Inference routing (endpoints path)", func() {
 		setRunnerEndpoints(runner, inferenceEndpointConfig(false, 9000, inferenceTestBlock()))
 		Expect(plugin.Status(ctx, runner, k8sClient, status, state)).To(Succeed())
 		Expect(findEndpointsCondition(status, endpoints.InferenceEndpointReadyCondition).Status).To(Equal(metav1.ConditionFalse))
-	})
-
-	It("reports the URL under the path prefix of the InferenceEndpoint, not the composed route path", func() {
-		block := inferenceTestBlock()
-		block.PathPrefix = "/openai"
-		setRunnerEndpoints(runner, inferenceEndpointConfig(false, 8000, block))
-		Expect(reconcileRunner()).To(Succeed())
-		markReady(metav1.ConditionTrue)
-
-		status := newPluginStatus()
-		Expect(plugin.Status(ctx, runner, k8sClient, status, state)).To(Succeed())
-		Expect(status.Phase).To(Equal(dromosv1alpha1.PluginPhaseReady))
-		Expect(findEndpointsCondition(status, ExternalAccessReadyConditionName).Message).
-			To(HaveSuffix(", url: https://" + testInferenceHost + "/openai"))
-		details, err := endpoints.NetworkingStatusFromRawExtension(status.AdditionalInfo)
-		Expect(err).NotTo(HaveOccurred())
-		Expect(details.Endpoints[0].Services[0].URLs).To(ConsistOf(HaveField("URL", "https://"+testInferenceHost+"/openai")))
 	})
 
 	It("does not trust Ready on an InferenceEndpoint it does not control", func() {
@@ -588,8 +553,7 @@ var _ = Describe("Inference routing (endpoints path)", func() {
 			Expect(metav1.IsControlledBy(obj, runner)).To(BeTrue())
 			Expect(specJSON(obj)).To(MatchJSON(`{
 				"workload":{"selector":{"matchLabels":{"app":"` + testNIMServiceName + `"}},"port":8000},
-				"routing":{"gatewayRef":{"name":"runai-gateway","namespace":"runai"},"hostnames":["` + testInferenceHost + `"],
-					"pathPrefix":"/v1"},
+				"routing":{"gatewayRef":{"name":"runai-gateway","namespace":"runai"},"hostnames":["` + testInferenceHost + `"]},
 				"epp":{"profile":"gie-v1.5"}}`))
 			Expect(httpRoutes()).To(BeEmpty())
 			Expect(k8sClient.Get(ctx, client.ObjectKey{Namespace: testNamespace, Name: testNIMServiceName}, &corev1.Service{})).

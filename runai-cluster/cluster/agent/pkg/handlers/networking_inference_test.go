@@ -37,7 +37,7 @@ var _ = Describe("Networking endpoint inference transport", func() {
 	}
 
 	It("places the inference block next to httpRoute in the run.ai/endpoints annotation", func() {
-		const inference = `{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/openai/v1"}`
+		const inference = `{"epp":{"profile":"gie-v1.5"}}`
 		cfg, err := wrap(inference)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(cfg.InferenceEndpointIndex()).To(Equal(0))
@@ -46,14 +46,6 @@ var _ = Describe("Networking endpoint inference transport", func() {
 		raw, err := json.Marshal(access.Inference)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(raw).To(MatchJSON(inference))
-	})
-
-	It("carries an epp-only inference block without a path prefix", func() {
-		cfg, err := wrap(`{"epp":{"profile":"gie-v1.5"}}`)
-		Expect(err).NotTo(HaveOccurred())
-		raw, err := json.Marshal(cfg.Endpoints[0].ExternalAccess.Inference)
-		Expect(err).NotTo(HaveOccurred())
-		Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"}}`))
 	})
 
 	It("rejects an inference block that cannot be applied before creating a runner", func() {

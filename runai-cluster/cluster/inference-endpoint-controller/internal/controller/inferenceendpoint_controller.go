@@ -209,7 +209,6 @@ func inputFor(endpoint *inferencev1alpha1.InferenceEndpoint) (render.Input, erro
 		GatewayName:      endpoint.Spec.Routing.GatewayRef.Name,
 		GatewayNamespace: endpoint.Spec.Routing.GatewayRef.Namespace,
 		Hostnames:        endpoint.Spec.Routing.Hostnames,
-		PathPrefix:       endpoint.Spec.Routing.PathPrefix,
 		EppImage:         image,
 	}
 	if endpoint.Spec.Epp.Scheduling != nil {

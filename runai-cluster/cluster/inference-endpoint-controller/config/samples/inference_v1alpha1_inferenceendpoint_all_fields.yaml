@@ -21,7 +21,6 @@ spec:
     hostnames: # Required, at least one hostname; entries must be unique.
     - llama3-all-fields.test
     - llama3-all-fields-alias.test
-    pathPrefix: /v1 # Optional; default /v1. Requests under it go through the EPP; other paths return 404.
 
   epp: # Required.
     profile: gie-v1.5 # Required. Pins the GIE v1.5.0 image, configuration, ports and startup flags.

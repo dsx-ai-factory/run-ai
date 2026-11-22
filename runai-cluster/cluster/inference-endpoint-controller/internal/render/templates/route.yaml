@@ -16,7 +16,7 @@ spec:
   - matches:
     - path:
         type: PathPrefix
-        value: {{ .PathPrefix | toJSON }}
+        value: "/"                    # every path, as the composed route it replaces
     backendRefs:
     - group: inference.networking.k8s.io
       kind: InferencePool

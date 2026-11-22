@@ -92,18 +92,10 @@ func validEndpoint() *InferenceEndpoint {
 var _ = Describe("InferenceEndpoint CRD validation", func() {
 	ctx := context.Background()
 
-	It("accepts a minimal endpoint and defaults the path prefix to /v1", func() {
+	It("accepts a minimal endpoint", func() {
 		ie := validEndpoint()
 		Expect(k8sClient.Create(ctx, ie)).To(Succeed())
-		Expect(ie.Spec.Routing.PathPrefix).To(Equal("/v1"))
 		Expect(ie.Spec.Epp.Scheduling).To(BeNil())
-	})
-
-	It("keeps an explicit path prefix", func() {
-		ie := validEndpoint()
-		ie.Spec.Routing.PathPrefix = "/openai/v1"
-		Expect(k8sClient.Create(ctx, ie)).To(Succeed())
-		Expect(ie.Spec.Routing.PathPrefix).To(Equal("/openai/v1"))
 	})
 
 	It("accepts a wildcard hostname", func() {
@@ -163,9 +155,6 @@ var _ = Describe("InferenceEndpoint CRD validation", func() {
 			for i := 0; i < 17; i++ {
 				ie.Spec.Routing.Hostnames = append(ie.Spec.Routing.Hostnames, fmt.Sprintf("h%d.example.com", i))
 			}
-		}),
-		Entry("path prefix without a leading slash", func(ie *InferenceEndpoint) {
-			ie.Spec.Routing.PathPrefix = "v1"
 		}),
 		Entry("no EPP profile", func(ie *InferenceEndpoint) { ie.Spec.Epp.Profile = "" }),
 		Entry("unsupported EPP profile", func(ie *InferenceEndpoint) { ie.Spec.Epp.Profile = "llm-d-v0.10" }),

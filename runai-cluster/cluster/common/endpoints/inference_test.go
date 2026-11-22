@@ -16,8 +16,7 @@ import (
 )
 
 const inferenceBlock = `{
-"epp":{"profile":"gie-v1.5","scheduling":{"scorers":[{"type":"queue","weight":30}]}},
-"pathPrefix":"/openai/v1"}`
+"epp":{"profile":"gie-v1.5","scheduling":{"scorers":[{"type":"queue","weight":30}]}}}`
 
 func inferenceAnnotation(block string) string {
 	return `{"schemaVersion":"v1","endpoints":[{"services":[{"create":{"metadata":{"name":"model"},"spec":{"selector":{"app":"model"},"ports":[{"port":8000}]}}}],` +
@@ -101,12 +100,11 @@ func TestInferenceBlockRejectsUnknownKeys(t *testing.T) {
 
 func TestInferenceBlockValidation(t *testing.T) {
 	for name, block := range map[string]string{
-		"missing epp":                 `{}`,
-		"null epp":                    `{"epp":null}`,
-		"empty epp":                   `{"epp":{}}`,
-		"array epp":                   `{"epp":[]}`,
-		"path prefix without a slash": `{"epp":{"profile":"gie-v1.5"},"pathPrefix":"v1"}`,
-		"nested null":                 `{"epp":{"profile":"gie-v1.5","scheduling":null}}`,
+		"missing epp": `{}`,
+		"null epp":    `{"epp":null}`,
+		"empty epp":   `{"epp":{}}`,
+		"array epp":   `{"epp":[]}`,
+		"nested null": `{"epp":{"profile":"gie-v1.5","scheduling":null}}`,
 	} {
 		t.Run(name, func(t *testing.T) {
 			var cfg InferenceConfig
@@ -142,7 +140,7 @@ func TestBuildInferenceEndpointDerivesSpec(t *testing.T) {
 	}
 	jsonEqual(t, `{
 "workload":{"selector":{"matchLabels":{"app":"model"}},"port":8000},
-"routing":{"gatewayRef":{"name":"gateway","namespace":"infra"},"hostnames":["model.example.test"],"pathPrefix":"/openai/v1"},
+"routing":{"gatewayRef":{"name":"gateway","namespace":"infra"},"hostnames":["model.example.test"]},
 "epp":{"profile":"gie-v1.5","scheduling":{"scorers":[{"type":"queue","weight":30}]}}}`, endpoint.Object["spec"])
 	port, found, err := unstructured.NestedInt64(endpoint.Object, "spec", "workload", "port")
 	if err != nil || !found || port != 8000 {
@@ -152,18 +150,6 @@ func TestBuildInferenceEndpointDerivesSpec(t *testing.T) {
 	again, err := BuildInferenceEndpoint(runner, &cfg, testTarget())
 	if err != nil || again.Object["spec"].(map[string]any)["epp"] == nil {
 		t.Fatal("builder aliased configuration")
-	}
-}
-
-func TestBuildInferenceEndpointDefaultsThePathPrefix(t *testing.T) {
-	runner := &metav1.ObjectMeta{Namespace: "project", UID: "uid"}
-	endpoint, err := BuildInferenceEndpoint(runner, &InferenceConfig{Epp: json.RawMessage(`{"profile":"gie-v1.5"}`)}, testTarget())
-	if err != nil {
-		t.Fatal(err)
-	}
-	prefix, found, err := unstructured.NestedString(endpoint.Object, "spec", "routing", "pathPrefix")
-	if err != nil || !found || prefix != DefaultInferencePathPrefix {
-		t.Fatalf("path prefix = %q (found %v, err %v), want %q", prefix, found, err, DefaultInferencePathPrefix)
 	}
 }
 

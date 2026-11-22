@@ -88,9 +88,6 @@ func convertEndpointInference(apiInference *workloadsManagerApi.ExternalAccessIn
 		return nil, nil
 	}
 	inference := &endpoints.InferenceConfig{}
-	if apiInference.PathPrefix != nil {
-		inference.PathPrefix = *apiInference.PathPrefix
-	}
 	if apiInference.Epp != nil {
 		raw, err := json.Marshal(apiInference.Epp)
 		if err != nil {

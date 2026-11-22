@@ -531,7 +531,6 @@ var _ = Describe("Networking Plugin Endpoints (annotation-driven) Integration Te
 			Expect(inferenceEndpoint.Object["spec"]).To(HaveKeyWithValue("routing", map[string]any{
 				"gatewayRef": map[string]any{"name": "runai-gateway", "namespace": "runai"},
 				"hostnames":  []any{workloadName + ".example.com"},
-				"pathPrefix": "/v1",
 			}))
 			Eventually(func() error {
 				return k8sClient.Get(managerCtx, types.NamespacedName{Name: workloadName + "-leader", Namespace: endpointsNs}, &corev1.Service{})

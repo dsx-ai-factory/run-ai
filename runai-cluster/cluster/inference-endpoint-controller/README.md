@@ -3,8 +3,8 @@
 ## TL;DR
 
 Viper-owned controller that turns an `InferenceEndpoint` into an HTTPRoute,
-InferencePool, endpoint-picker Deployment, and NetworkPolicy. Requests under
-`spec.routing.pathPrefix` (default `/v1`) go through the endpoint picker.
+InferencePool, endpoint-picker Deployment, and NetworkPolicy. Every request to
+the endpoint's hostnames goes through the endpoint picker.
 The Run:ai operator installs it on the workload cluster, with configurable
 image, replicas, resources, affinity, logging, and metrics.
 

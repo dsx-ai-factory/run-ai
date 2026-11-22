@@ -175,28 +175,19 @@ var _ = Describe("InferenceEndpoint Controller", func() {
 		Expect(parents[0].(map[string]any)["namespace"]).To(Equal(ns), "gateway namespace defaults to the endpoint namespace")
 	})
 
-	It("routes the path prefix, /v1 by default, to the pool and follows a change", func() {
-		routePrefix := func() string {
-			_, err := reconciler.Reconcile(ctx, request)
-			ExpectWithOffset(1, err).NotTo(HaveOccurred())
-			route := &unstructured.Unstructured{}
-			route.SetGroupVersionKind(routeGVK)
-			ExpectWithOffset(1, k8sClient.Get(ctx, types.NamespacedName{Name: routeName, Namespace: ns}, route)).To(Succeed())
-			rules, _, err := unstructured.NestedSlice(route.Object, "spec", "rules")
-			ExpectWithOffset(1, err).NotTo(HaveOccurred())
-			ExpectWithOffset(1, rules).To(HaveLen(1))
-			rule := rules[0].(map[string]any)
-			ExpectWithOffset(1, rule["backendRefs"].([]any)[0]).To(HaveKeyWithValue("kind", "InferencePool"))
-			path := rule["matches"].([]any)[0].(map[string]any)["path"].(map[string]any)
-			ExpectWithOffset(1, path).To(HaveKeyWithValue("type", "PathPrefix"))
-			return path["value"].(string)
-		}
-		Expect(routePrefix()).To(Equal("/v1"))
-
-		Expect(k8sClient.Get(ctx, request.NamespacedName, endpoint)).To(Succeed())
-		endpoint.Spec.Routing.PathPrefix = "/openai/v1"
-		Expect(k8sClient.Update(ctx, endpoint)).To(Succeed())
-		Expect(routePrefix()).To(Equal("/openai/v1"))
+	It("routes every path to the pool", func() {
+		_, err := reconciler.Reconcile(ctx, request)
+		Expect(err).NotTo(HaveOccurred())
+		route := &unstructured.Unstructured{}
+		route.SetGroupVersionKind(routeGVK)
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: routeName, Namespace: ns}, route)).To(Succeed())
+		rules, _, err := unstructured.NestedSlice(route.Object, "spec", "rules")
+		Expect(err).NotTo(HaveOccurred())
+		Expect(rules).To(HaveLen(1))
+		rule := rules[0].(map[string]any)
+		Expect(rule["backendRefs"].([]any)[0]).To(HaveKeyWithValue("kind", "InferencePool"))
+		path := rule["matches"].([]any)[0].(map[string]any)["path"].(map[string]any)
+		Expect(path).To(Equal(map[string]any{"type": "PathPrefix", "value": "/"}))
 	})
 
 	It("stays not Ready until the Gateway accepts the route and the EPP is available", func() {

@@ -90,7 +90,7 @@ type RoutingSpec struct {
 	GatewayRef GatewayReference `json:"gatewayRef"`
 
 	// hostnames the HTTPRoute matches. At least one is required so that two
-	// endpoints on the same Gateway never collide on the shared path prefix.
+	// endpoints on the same Gateway never collide: each route matches every path.
 	// +required
 	// +kubebuilder:validation:MinItems=1
 	// +kubebuilder:validation:MaxItems=16
@@ -98,15 +98,6 @@ type RoutingSpec struct {
 	// +kubebuilder:validation:items:Pattern=`^(\*\.)?[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`
 	// +listType=set
 	Hostnames []string `json:"hostnames"`
-
-	// pathPrefix is the request path whose requests go through the EPP.
-	// Requests outside it do not match the route and return 404 at the
-	// Gateway.
-	// +optional
-	// +kubebuilder:default="/v1"
-	// +kubebuilder:validation:MaxLength=1024
-	// +kubebuilder:validation:Pattern=`^/`
-	PathPrefix string `json:"pathPrefix,omitempty"`
 }
 
 // ScorerType names one of the endpoint picker's scoring signals.

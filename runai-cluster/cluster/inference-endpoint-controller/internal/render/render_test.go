@@ -61,7 +61,6 @@ func llama3Input() render.Input {
 		GatewayNamespace: llama3Ns,
 		MetricsNamespace: metricsNs,
 		Hostnames:        []string{"llama3.test"},
-		PathPrefix:       "/v1",
 		EppImage:         "registry.k8s.io/gateway-api-inference-extension/epp:v1.5.0",
 	}
 }
@@ -76,8 +75,6 @@ var _ = Describe("Render", func() {
 			in.Hostnames = []string{payload}
 		case "image":
 			in.EppImage = payload
-		case "path prefix":
-			in.PathPrefix = "/" + payload
 		}
 		objects, err := render.Render(in)
 		Expect(err).NotTo(HaveOccurred())
@@ -86,7 +83,7 @@ var _ = Describe("Render", func() {
 			Expect(object.GetName()).NotTo(Equal("injected"))
 			Expect(object.GetNamespace()).To(Equal(in.Namespace))
 		}
-	}, Entry("hostname", "hostname"), Entry("image", "image"), Entry("path prefix", "path prefix"))
+	}, Entry("hostname", "hostname"), Entry("image", "image"))
 
 	It("preserves scalar-looking strings in routes and images", func() {
 		in := llama3Input()
@@ -197,39 +194,19 @@ var _ = Describe("Render", func() {
 		})
 	})
 
-	Context("path prefix", func() {
-		routeRules := func(in render.Input) []interface{} {
-			objects, err := render.Render(in)
-			Expect(err).NotTo(HaveOccurred())
-			rules, _, err := unstructured.NestedSlice(byKey(objects)["HTTPRoute/llama3-route"].Object, "spec", "rules")
-			Expect(err).NotTo(HaveOccurred())
-			return rules
-		}
-
-		It("renders one rule that sends the prefix to the InferencePool", func() {
-			in := llama3Input()
-			in.PathPrefix = "/openai/v1"
-			rules := routeRules(in)
-			Expect(rules).To(HaveLen(1))
-			rule := rules[0].(map[string]interface{})
-			match := rule["matches"].([]interface{})[0].(map[string]interface{})["path"].(map[string]interface{})
-			Expect(match).To(HaveKeyWithValue("type", "PathPrefix"))
-			Expect(match).To(HaveKeyWithValue("value", "/openai/v1"))
-			backend := rule["backendRefs"].([]interface{})[0].(map[string]interface{})
-			Expect(backend).To(HaveKeyWithValue("kind", "InferencePool"))
-			Expect(backend).To(HaveKeyWithValue("name", "llama3-pool"))
-		})
-
-		DescribeTable("rejects an invalid prefix",
-			func(prefix string) {
-				in := llama3Input()
-				in.PathPrefix = prefix
-				_, err := render.Render(in)
-				Expect(err).To(MatchError(ContainSubstring("pathPrefix")))
-			},
-			Entry("empty", ""),
-			Entry("without a leading slash", "v1"),
-		)
+	It("renders one rule that sends every path to the InferencePool", func() {
+		objects, err := render.Render(llama3Input())
+		Expect(err).NotTo(HaveOccurred())
+		rules, _, err := unstructured.NestedSlice(byKey(objects)["HTTPRoute/llama3-route"].Object, "spec", "rules")
+		Expect(err).NotTo(HaveOccurred())
+		Expect(rules).To(HaveLen(1))
+		rule := rules[0].(map[string]interface{})
+		match := rule["matches"].([]interface{})[0].(map[string]interface{})["path"].(map[string]interface{})
+		Expect(match).To(HaveKeyWithValue("type", "PathPrefix"))
+		Expect(match).To(HaveKeyWithValue("value", "/"))
+		backend := rule["backendRefs"].([]interface{})[0].(map[string]interface{})
+		Expect(backend).To(HaveKeyWithValue("kind", "InferencePool"))
+		Expect(backend).To(HaveKeyWithValue("name", "llama3-pool"))
 	})
 
 	Context("for a different endpoint", func() {
@@ -242,7 +219,6 @@ var _ = Describe("Render", func() {
 			GatewayNamespace: "gateways",
 			MetricsNamespace: "observability",
 			Hostnames:        []string{"chat.example.com", "chat.internal"},
-			PathPrefix:       "/chat/v1",
 			EppImage:         "ghcr.io/llm-d/llm-d-inference-scheduler:v0.10.0",
 		}
 		var rendered map[string]*unstructured.Unstructured
@@ -274,7 +250,7 @@ var _ = Describe("Render", func() {
 			rules, _, _ := unstructured.NestedSlice(route.Object, "spec", "rules")
 			Expect(rules).To(HaveLen(1))
 			path := rules[0].(map[string]any)["matches"].([]any)[0].(map[string]any)["path"].(map[string]any)
-			Expect(path["value"]).To(Equal(in.PathPrefix))
+			Expect(path["value"]).To(Equal("/"))
 			backends := rules[0].(map[string]any)["backendRefs"].([]any)
 			Expect(backends[0].(map[string]any)[keyName]).To(Equal("chat-pool"))
 		})

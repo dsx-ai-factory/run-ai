@@ -117,8 +117,6 @@ type Input struct {
 	MetricsNamespace string
 	// Hostnames the HTTPRoute matches.
 	Hostnames []string
-	// PathPrefix is the request path the HTTPRoute sends to the InferencePool.
-	PathPrefix string
 	// EppImage is the endpoint-picker container image. The controller resolves
 	// epp.profile to its pinned image before rendering.
 	EppImage string
@@ -157,9 +155,6 @@ func (in *Input) validate() error {
 	}
 	if in.EppImage == "" {
 		errs = append(errs, errors.New("epp image is required"))
-	}
-	if !strings.HasPrefix(in.PathPrefix, "/") {
-		errs = append(errs, fmt.Errorf("routing.pathPrefix %q must start with '/'", in.PathPrefix))
 	}
 	// A namespace is a DNS label, so a valid value is unchanged by DNSLabel.
 	if in.MetricsNamespace == "" || DNSLabel(in.MetricsNamespace) != in.MetricsNamespace {
