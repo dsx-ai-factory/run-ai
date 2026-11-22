@@ -1,0 +1,5 @@
+{
+    "service_name": "cluster-common-scheme-init",
+    "artifact_type": "go",
+    "cache_artifacts": false
+  }
