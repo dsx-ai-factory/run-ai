@@ -503,3 +503,40 @@ func TestInputValidationScreen_ValidationItem_Structure(t *testing.T) {
 		t.Error("expected input to be set correctly")
 	}
 }
+
+func TestInputValidationScreen_EmptyInputsValidationDoesNotPanic(t *testing.T) {
+	runaiData := newInputValidationTestData(false)
+	runaiData.Inputs = make(map[configinputs.InstallInputType]string) // Empty inputs
+	screen := NewInputValidationScreen(nil, nil)
+	screen.Init(runaiData)
+
+	// With no results to report on, the screen still starts validation at index
+	// 0; applying the message that comes back must not index the empty result
+	// list.
+	cmd := screen.Update(validationStartMsg{index: 0})
+	if cmd == nil {
+		t.Fatal("expected a command for the first validation")
+	}
+
+	if cmd := screen.Update(cmd()); cmd != nil {
+		t.Error("expected no follow-up command once there is nothing left to validate")
+	}
+}
+
+func TestInputValidationScreen_UnknownIndexDoesNotPanic(t *testing.T) {
+	runaiData := newInputValidationTestData(false)
+	screen := NewInputValidationScreen(nil, nil)
+	screen.Init(runaiData)
+
+	// validateNextItem answers an index that has no result slot with an
+	// "Unknown validation index" result for that same index.
+	outOfRange := len(screen.validationResults)
+	cmd := screen.Update(validationProgressMsg{
+		index:  outOfRange,
+		result: validation.ValidationResult{Name: "Unknown", Status: false},
+	})
+
+	if cmd != nil {
+		t.Error("expected no follow-up command for an index without a result slot")
+	}
+}
