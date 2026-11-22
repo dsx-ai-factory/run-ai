@@ -225,6 +225,7 @@ For more details, see the [NVIDIA Dynamo documentation](https://docs.nvidia.com/
 3. In the YAML submission form, select the **cluster** where the workload will run.
 4. Upload or paste your YAML manifest. To upload a file, click **UPLOAD YAML FILE** and choose your YAML. To paste the YAML, insert it directly into the editor. Before submitting, update the following fields in the manifest:
    * `<pvc-claim-name>` - The claim name associated with the PVC created in [Step 3](aggregated-dynamo.md#step-3-creating-a-pvc-data-source).
+   * `<your-hf-token>` - Required only for gated Hugging Face models. Generate a token from your [Hugging Face account](https://huggingface.co/) and provide it to the workload as an environment variable.
 
 ```yaml
 apiVersion: nvidia.com/v1beta1
@@ -246,6 +247,8 @@ spec:
           env:
           - name: HF_HOME
             value: /opt/models
+          - name: HF_TOKEN
+            value: <your-hf-token>
           volumeMounts:
           - name: model-cache
             mountPath: /opt/models
@@ -285,6 +288,8 @@ spec:
           env:
           - name: HF_HOME
             value: /opt/models
+          - name: HF_TOKEN
+            value: <your-hf-token>
           resources:
             limits:
               nvidia.com/gpu: '4'
@@ -313,6 +318,7 @@ Copy the following command to your terminal. Make sure to update the following p
 * `<TOKEN>` - The API access token obtained in [Step 2](aggregated-dynamo.md#step-2-creating-a-user-access-key).
 * `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](api:main-api:GET/api/v1/org-unit/projects) API.
 * `<pvc-claim-name>` - The claim name associated with the PVC created in [Step 3](aggregated-dynamo.md#step-3-creating-a-pvc-data-source).
+* `<your-hf-token>` - Required only for gated Hugging Face models. Generate a token from your [Hugging Face account](https://huggingface.co/) and provide it to the workload as an environment variable.
 
 ```bash
 curl -L 'https://<COMPANY-URL>/api/v2/workloads' \
@@ -347,6 +353,10 @@ curl -L 'https://<COMPANY-URL>/api/v2/workloads' \
                     {
                       "name": "HF_HOME",
                       "value": "/opt/models"
+                    },
+                    {
+                      "name": "HF_TOKEN",
+                      "value": "<your-hf-token>"
                     }
                   ],
                   "volumeMounts": [
@@ -405,6 +415,10 @@ curl -L 'https://<COMPANY-URL>/api/v2/workloads' \
                     {
                       "name": "HF_HOME",
                       "value": "/opt/models"
+                    },
+                    {
+                      "name": "HF_TOKEN",
+                      "value": "<your-hf-token>"
                     }
                   ],
                   "resources": {
@@ -450,6 +464,7 @@ Copy the following command to your terminal. For more details, see [CLI referenc
 1.  Save the following YAML file. Before submitting, update the following fields in the manifest:
 
     * `<pvc-claim-name>` - The claim name associated with the PVC created in [Step 3](aggregated-dynamo.md#step-3-creating-a-pvc-data-source).
+    * `<your-hf-token>` - Required only for gated Hugging Face models. Generate a token from your [Hugging Face account](https://huggingface.co/) and provide it to the workload as an environment variable.
 
     ```yaml
     apiVersion: nvidia.com/v1beta1
@@ -471,6 +486,8 @@ Copy the following command to your terminal. For more details, see [CLI referenc
               env:
               - name: HF_HOME
                 value: /opt/models
+              - name: HF_TOKEN
+                value: <your-hf-token>
               volumeMounts:
               - name: model-cache
                 mountPath: /opt/models
@@ -510,6 +527,8 @@ Copy the following command to your terminal. For more details, see [CLI referenc
               env:
               - name: HF_HOME
                 value: /opt/models
+              - name: HF_TOKEN
+                value: <your-hf-token>
               resources:
                 limits:
                   nvidia.com/gpu: '4'
