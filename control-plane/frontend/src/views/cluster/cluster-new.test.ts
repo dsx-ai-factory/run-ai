@@ -222,22 +222,16 @@ describe("cluster-new.vue", () => {
     expect(clusterNewCmp.find(".cluster-installation").exists()).toBeTruthy();
   });
 
-  test("component will delete the cluster it created if the continue button is pressed and there is no clusterUuid in the $route.query", async () => {
+  test("does not offer a back button on the installation step", async () => {
     mountComponent();
-    const spyDeleteLastCreatedCluster = vi.spyOn(clusterNewCmp.vm, "deleteLastCreatedCluster");
-    await clusterNewCmp.setData({ createdCluster: { uuid: "some-id" } });
-    await setValidFormModel();
-    await clickContiuneButton();
-    await flushPromises();
-
-    expect(spyDeleteLastCreatedCluster).toHaveBeenCalled();
+    await clusterNewCmp.setData({ currentStep: 2, createdCluster: { uuid: "some-id" } });
+    expect(clusterNewCmp.find("[aid=back-btn]").exists()).toBe(false);
   });
 
-  test("calls goBack method when back button is pressed returning to the initial step", async () => {
+  test("does not offer a back button on the installation step in edit mode", async () => {
     mountComponent();
-    await clusterNewCmp.setData({ currentStep: 2 });
-    await clusterNewCmp.find("[aid=back-btn]").trigger("click");
-    expect(clusterNewCmp.vm.currentStep).toBe(1);
+    await clusterNewCmp.setData({ currentStep: 2, isClusterEditMode: true });
+    expect(clusterNewCmp.find("[aid=back-btn]").exists()).toBe(false);
   });
 
   test("calls leave method when leave button is pressed", async () => {

@@ -39,7 +39,6 @@
         <runai-btn aid="continue-btn" @click="goNext" :loading="loading" color="primary" label="Continue" />
       </div>
       <div v-else class="stepper-controls row justify-end full-width">
-        <runai-btn flat @click="goBack" aid="back-btn" color="primary" label="Back" class="q-mr-md" />
         <runai-btn aid="leave-btn" @click="leave" color="primary" label="Done" />
       </div>
     </template>
@@ -201,7 +200,6 @@ export default defineComponent({
       if (!isValid) return;
       try {
         this.loading = true;
-        if (this.createdCluster?.uuid) await this.deleteLastCreatedCluster();
         this.createdCluster = await this.clusterStore.create(this.clusterFormModel.name);
         this.createdCluster?.uuid && clusterUtil.addSessionCreatedCluster(this.createdCluster.uuid);
         this.currentStep = 2;
@@ -218,24 +216,6 @@ export default defineComponent({
         this.loading = false;
       }
     },
-    async deleteLastCreatedCluster(): Promise<void> {
-      if (!this.createdCluster?.uuid) return;
-      try {
-        this.loading = true;
-        this.createdCluster?.uuid && clusterUtil.removeSessionCreatedCluster(this.createdCluster.uuid);
-        await this.clusterStore.deleteCluster(this.createdCluster.uuid);
-      } catch (error: unknown) {
-        if (error instanceof HttpErrorResponse) {
-          console.error(error.serialize());
-          this.$q.notify(alertUtil.getError(error.message));
-        } else {
-          console.error(error);
-          this.$q.notify(alertUtil.getError("Failed to delete cluster"));
-        }
-      } finally {
-        this.loading = false;
-      }
-    },
     async goNext(): Promise<void> {
       if (this.isClusterEditMode) {
         const isValid: boolean = await this.validateAndNotify();
@@ -244,10 +224,6 @@ export default defineComponent({
         return;
       }
       await this.createCluster();
-    },
-    goBack(): void {
-      this.currentStep = 1;
-      window.scrollTo({ top: 0, behavior: "smooth" });
     },
     leave(): void {
       if (!this.isClusterEditMode && this.createdCluster?.name) {
