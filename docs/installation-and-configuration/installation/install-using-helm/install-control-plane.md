@@ -355,7 +355,8 @@ Use the dry-run flag `--dry-run=client` to gain an understanding of what is bein
 
 **Note**
 
-After installing the NVIDIA Run:ai control plane, it may take a few minutes for the UI to become accessible (up to 15 minutes). Accessing it too early may result in a "server cannot be reached" error.
+* After installing the NVIDIA Run:ai control plane, it may take a few minutes for the UI to become accessible (up to 15 minutes). Accessing it too early may result in a "server cannot be reached" error.
+* The NVIDIA Run:ai UI is supported on Google Chrome. For details, see [Supported Browsers](../../support-matrix.md#supported-browsers).
 
 </Note>
 
