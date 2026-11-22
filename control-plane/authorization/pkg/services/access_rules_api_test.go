@@ -1311,7 +1311,23 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 		})
 	})
 	Context("Get access rules sync - predefined role with no cluster permissions", func() {
+		initializer := dao.RoleDaoInitializer{}
+		var definition models.Role
 		var noClusterPermissionsRoleId uint
+
+		syncedClusterRoleOptional := func() bool {
+			apiResponse, err := accessRulesApiService.GetAccessRulesSync(ctx, 0, 0, "", "")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(apiResponse.Code).To(Equal(http.StatusOK))
+
+			for _, rule := range httpResponseBodyToAccessRulesSync(apiResponse).AccessRules {
+				if rule.RoleId == int32(noClusterPermissionsRoleId) {
+					return rule.ClusterRoleOptional
+				}
+			}
+			Fail("the role's access rule is not in the sync response")
+			return false
+		}
 
 		BeforeEach(func() {
 			SetAncestorsCache(ctx, TestScopeId, api.RESOURCETYPE_PROJECT, &authorization_utils.Ancestors{
@@ -1319,8 +1335,7 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 			})
 
 			// upserted twice: a predefined role is already in the DB when its definition gains the flag
-			initializer := dao.RoleDaoInitializer{}
-			definition := models.Role{
+			definition = models.Role{
 				Name:        "predefined role with no cluster permissions",
 				Description: "has no kubernetes permissions",
 				ScopeType:   models.ROLE_SCOPE_SYSTEM,
@@ -1334,7 +1349,7 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 			})
 
-			definition.NoClusterPermissions = true
+			definition.NoClusterPermissions = ptr.To(true)
 			_, err = initializer.DbUpsertRole(ctx, definition)
 			Expect(err).ToNot(HaveOccurred())
 
@@ -1348,15 +1363,15 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 		})
 
 		It("marks the role's access rules", func() {
-			apiResponse, err := accessRulesApiService.GetAccessRulesSync(ctx, 0, 0, "", "")
-			Expect(err).ToNot(HaveOccurred())
-			Expect(apiResponse.Code).To(Equal(http.StatusOK))
+			Expect(syncedClusterRoleOptional()).To(BeTrue())
+		})
 
-			accessRules := httpResponseBodyToAccessRulesSync(apiResponse).AccessRules
-			Expect(accessRules).To(ContainElement(SatisfyAll(
-				HaveField("RoleId", int32(noClusterPermissionsRoleId)),
-				HaveField("ClusterRoleOptional", true),
-			)))
+		It("stops marking them once the definition drops the flag", func() {
+			definition.NoClusterPermissions = nil
+			_, err := initializer.DbUpsertRole(ctx, definition)
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(syncedClusterRoleOptional()).To(BeFalse())
 		})
 	})
 
