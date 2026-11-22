@@ -19,8 +19,9 @@
         </div>
 
         <div class="q-mb-md">
-          Set node labels representing the network topology and drag to order by their distance from the node (far to
-          close)
+          Set node labels representing the network topology and
+          {{ showLevelOrderControls ? "use the move buttons or drag" : "drag" }} to order by their distance from the node
+          (far to close)
           <runai-tooltip
             tooltip-text="Order levels from farthest (top) to closest (bottom). Use the Kubernetes label key on the nodes for each level."
             width="542px"
@@ -28,7 +29,7 @@
         </div>
 
         <div class="topology-levels q-mb-md">
-          <div v-if="showDistanceGuide" class="topology-distance-guide text-b-body1" aria-hidden="true">
+          <div v-if="showLevelOrderControls" class="topology-distance-guide text-b-body1" aria-hidden="true">
             <span class="topology-distance-label">Far</span>
             <span class="topology-distance-line"></span>
             <span class="topology-distance-label">Close</span>
@@ -44,9 +45,10 @@
             item-size="md"
           >
             <template #list-item="item">
-              <div class="row items-center justify-between">
+              <div class="row items-center justify-between" :class="{ 'no-wrap': showLevelOrderControls }">
                 <policy-string-field
-                  class="col-11 q-mb-md q-mt-sm"
+                  class="q-mb-md q-mt-sm"
+                  :class="showLevelOrderControls ? 'col q-pr-sm' : 'col-11'"
                   aid="network-topology-label-key-input"
                   label="Label key"
                   input-class="placeholder-italic"
@@ -56,6 +58,30 @@
                   :rules="[isValidTopologyKey]"
                   @update:model-value="onUpdateLabel(item.id, $event)"
                 />
+                <div v-if="showLevelOrderControls" class="row items-center no-wrap q-gutter-xs">
+                  <runai-btn
+                    aid="network-topology-move-up"
+                    class="topology-move-button"
+                    icon-button
+                    dense
+                    icon="ph-bold ph-arrow-up"
+                    tooltip="Move up"
+                    :aria-label="`Move up level ${labels.findIndex((label) => label.id === item.id) + 1}`"
+                    :aria-disabled="item.id === labels[0]?.id"
+                    @click="moveLabel(item.id, -1, $event)"
+                  />
+                  <runai-btn
+                    aid="network-topology-move-down"
+                    class="topology-move-button"
+                    icon-button
+                    dense
+                    icon="ph-bold ph-arrow-down"
+                    tooltip="Move down"
+                    :aria-label="`Move down level ${labels.findIndex((label) => label.id === item.id) + 1}`"
+                    :aria-disabled="item.id === labels.at(-1)?.id"
+                    @click="moveLabel(item.id, 1, $event)"
+                  />
+                </div>
                 <runai-tooltip
                   icon="ph-bold ph-x"
                   @click="onRemoveLabel(item.id)"
@@ -67,6 +93,7 @@
             </template>
           </runai-draggable-list-order>
         </div>
+        <p v-if="showLevelOrderControls" role="status" class="topology-order-status">{{ orderAnnouncement }}</p>
         <runai-btn
           flat
           aid="network-topology-add-label-btn"
@@ -141,7 +168,7 @@ export default defineComponent({
       type: Boolean as PropType<boolean>,
       default: true,
     },
-    showDistanceGuide: Boolean,
+    showLevelOrderControls: Boolean,
     externalSubmitTrigger: {
       type: Number as PropType<number>,
       default: 0,
@@ -151,6 +178,7 @@ export default defineComponent({
     return {
       labels: [{ name: "", id: makeId() }] as { name: string; id: string }[],
       name: "" as string,
+      orderAnnouncement: "",
 
       isFormValid: true as boolean,
     };
@@ -185,6 +213,20 @@ export default defineComponent({
     },
     onUpdateLabel(id: string, name: string): void {
       this.labels = this.labels.map((label) => (label.id === id ? { ...label, name } : label));
+    },
+    async moveLabel(id: string, offset: -1 | 1, event: MouseEvent): Promise<void> {
+      const from = this.labels.findIndex((label) => label.id === id);
+      const to = from + offset;
+      if (from < 0 || to < 0 || to >= this.labels.length) return;
+
+      const button = event.currentTarget as HTMLButtonElement;
+      const labels = [...this.labels];
+      const [level] = labels.splice(from, 1);
+      labels.splice(to, 0, level);
+      this.labelsChanged(labels);
+      this.orderAnnouncement = `Moved level from position ${from + 1} to position ${to + 1} of ${labels.length}.`;
+      await this.$nextTick();
+      button.focus();
     },
     labelsChanged(labels: { name: string; id: string }[]): void {
       this.labels = labels;
@@ -256,5 +298,26 @@ export default defineComponent({
   flex: 1;
   width: 1px;
   background-color: var(--border-default);
+}
+
+.topology-move-button {
+  width: 28px;
+  height: 28px;
+
+  &[aria-disabled="true"] {
+    color: var(--text-disabled);
+    cursor: default;
+  }
+}
+
+.topology-order-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 </style>

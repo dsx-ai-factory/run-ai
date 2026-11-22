@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
+import { DOMWrapper, flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { Notify, Quasar } from "quasar";
 import type { Component } from "vue";
 import NetworkTopologySelection from "./network-topology-selection.vue";
@@ -68,6 +68,53 @@ describe("network topology selection", () => {
       "Close",
     ]);
     expect(guide?.parentElement?.querySelector(".list-numbers-col")?.textContent?.trim()).toBe("1");
+  });
+
+  it("moves levels with the row buttons and saves their new order", async () => {
+    vi.spyOn(clusterService, "getNetworkTopologyCount").mockResolvedValue(0);
+    mountComponent({}, document.body, false);
+    await flushPromises();
+    wrapper.getComponent(RunaiSelect).vm.$emit("custom-action");
+    await flushPromises();
+
+    const modal = new DOMWrapper(document.body);
+    const moveUp = '[aid="network-topology-move-up"]';
+    const moveDown = '[aid="network-topology-move-down"]';
+    const add = modal.get('[aid="network-topology-add-label-btn"]');
+    const inputs = () => modal.findAll<HTMLInputElement>('input[aid="network-topology-label-key-input"]');
+    const values = () => inputs().map((input) => input.element.value);
+
+    expect(modal.find(moveUp).attributes("aria-disabled")).toBe("true");
+    expect(modal.get(moveDown).attributes("aria-disabled")).toBe("true");
+    await add.trigger("click");
+    await add.trigger("click");
+    await modal.get<HTMLInputElement>('input[aid="network-topology-name-input"]').setValue("fabric-a");
+    const [far, middle, close] = inputs();
+    await far.setValue("zone");
+    await middle.setValue("rack");
+    await close.setValue("node");
+
+    await modal.findAll(moveUp)[0].trigger("click");
+    expect(values()).toEqual(["zone", "rack", "node"]);
+    const raiseRack = modal.findAll<HTMLButtonElement>(moveUp)[1];
+    raiseRack.element.focus();
+    await raiseRack.trigger("click");
+    expect(values()).toEqual(["rack", "zone", "node"]);
+    expect(document.activeElement).toBe(raiseRack.element);
+    expect(raiseRack.attributes("aria-disabled")).toBe("true");
+    expect(modal.get('[role="status"]').text()).toContain("position 1 of 3");
+
+    await modal.findAll(moveDown)[1].trigger("click");
+    expect(values()).toEqual(["rack", "node", "zone"]);
+    expect(modal.findAll(moveDown)[2].attributes("aria-disabled")).toBe("true");
+    await modal.get('[aid="network-topologies-modal-save-button"]').trigger("click");
+    await flushPromises();
+    expect(clusterService.createNetworkTopology).toHaveBeenCalledOnce();
+    expect(clusterService.createNetworkTopology).toHaveBeenCalledWith({
+      ...request,
+      name: "fabric-a",
+      levels: ["rack", "node", "zone"],
+    });
   });
 
   it("locks all creation fields while saving and retains the draft when the request fails", async () => {
