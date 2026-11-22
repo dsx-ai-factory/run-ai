@@ -138,6 +138,32 @@
       "major": {
         "enabled": false
       }
+    },
+    {
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "matchPackageNames": [
+        "kube-prometheus-stack"
+      ],
+      "automerge": false,
+      "group": {
+        "commitMessageTopic": "kube-prometheus-stack"
+      },
+      "prBodyNotes": [
+        "Before merging, run the installer e2e on this branch: `gh workflow run installer-e2e.yml -R run-ai/runai-e2e-internal -f installer-ref={{{branchName}}} -f k8s-distribution=kind -f ginkgo-label-filter='install-new && single-cluster && connected && ingress' -f test-focus='installs a full environment with all prerequisites and features over ingress'`"
+      ]
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^runai-installer/installer/internal/orchestrator2/compat/matrix\\.go$/"
+      ],
+      "matchStrings": [
+        "// renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?(?: allow=(?<depType>patch|minor|major))?\\s+\\w+\\s*[:=]\\s*\"(?<currentValue>[^\"]+)\""
+      ]
     }
   ]
 }
