@@ -170,13 +170,13 @@ func MapEffectiveFields(parentId uuid.UUID, parent *models.OrgUnitData, data mod
 	if parent == nil {
 		effectiveData = models.EffectiveData{
 			InteractiveJobTimeLimitEffective:           data.InteractiveJobTimeLimit,
-			InteractiveJobMaxIdleDurationEffective:     data.TrainingJobMaxIdleDuration,
+			InteractiveJobMaxIdleDurationEffective:     data.InteractiveJobMaxIdleDuration,
 			InteractiveJobPreemptIdleDurationEffective: data.InteractiveJobPreemptIdleDuration,
 			TrainingJobTimeLimitEffective:              data.TrainingJobTimeLimit,
 			TrainingJobMaxIdleDurationEffective:        data.TrainingJobMaxIdleDuration,
 			DefaultNodePoolListEffective:               data.DefaultNodePoolList,
 			TrainingNodeTypesEffective:                 data.TrainingNodeTypes,
-			WorkspaceNodeTypesEffective:                data.WorkspaceNodeTypesEffective,
+			WorkspaceNodeTypesEffective:                data.WorkspaceNodeTypes,
 		}
 	} else {
 		effectiveData.InteractiveJobTimeLimitEffective, effectiveData.InteractiveJobTimeLimitEffectiveOrigin = mapEffectiveTimeLimits(data.InteractiveJobTimeLimit, parent.InteractiveJobTimeLimit, parentId)
