@@ -103,9 +103,24 @@ func formatDecimalValue(value string) string {
 	return strconv.FormatFloat(rounded, 'f', -1, 64)
 }
 
+// largestExactFloatInt is the largest magnitude a float64 represents exactly as
+// an integer, and therefore the largest magnitude roundToNearestInt can convert
+// without losing or inventing digits.
+const largestExactFloatInt = 1 << 53
+
 func round(num float64, precision int) float64 {
 	pow := math.Pow(10, float64(precision))
-	return float64(roundToNearestInt(num*pow)) / pow
+	scaled := num * pow
+
+	// NaN, the infinities and anything beyond the exactly representable range
+	// have no decimal expansion here. Converting them to an int is undefined and
+	// used to yield an unrelated value, so +Inf was reported as
+	// 922337203685477.6 and 1e300 as the same number.
+	if math.IsNaN(scaled) || math.IsInf(scaled, 0) || math.Abs(scaled) > largestExactFloatInt {
+		return num
+	}
+
+	return float64(roundToNearestInt(scaled)) / pow
 }
 
 func roundToNearestInt(num float64) int {
