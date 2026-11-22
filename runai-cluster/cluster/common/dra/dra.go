@@ -87,6 +87,17 @@ func (p *DRAParser) ResolveDRAGpuCount(ctx context.Context, namespace string, po
 	return totalGpuCount
 }
 
+// claimIsForPod checks that the ResourceClaim was created for the Pod. It replaces
+// resourceclaim.IsForPod, whose signature differs between the dynamic-resource-allocation
+// versions that the services importing this package resolve (v0.36 added a parameter).
+func claimIsForPod(pod *corev1.Pod, claim *resourcev1.ResourceClaim) error {
+	if claim.Namespace != pod.Namespace || !metav1.IsControlledBy(claim, pod) {
+		return fmt.Errorf("ResourceClaim %s/%s was not created for pod %s/%s (pod is not owner)",
+			claim.Namespace, claim.Name, pod.Namespace, pod.Name)
+	}
+	return nil
+}
+
 // fetchPodClaimSpec reads the requested resource specification from a claim
 // or template. It also returns a key used to prevent counting the same request twice.
 func (p *DRAParser) fetchPodClaimSpec(ctx context.Context, pod *corev1.Pod, claimRef corev1.PodResourceClaim) (string, *resourcev1.ResourceClaimSpec, error) {
@@ -106,7 +117,7 @@ func (p *DRAParser) fetchPodClaimSpec(ctx context.Context, pod *corev1.Pod, clai
 			return "", nil, claimReadError(pod, "ResourceClaim", *claimName, getErr)
 		}
 		if mustCheckOwner {
-			if ownerErr := resourceclaim.IsForPod(pod, claim); ownerErr != nil {
+			if ownerErr := claimIsForPod(pod, claim); ownerErr != nil {
 				return "", nil, ownerErr
 			}
 		}

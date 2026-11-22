@@ -58,8 +58,7 @@ func validDefaults(defaults *Defaults) bool {
 
 func newInferenceIntent(defaults *Defaults) *api.ExternalAccessInference {
 	return &api.ExternalAccessInference{
-		Epp:        map[string]interface{}{"profile": defaults.EPPProfile},
-		PathPrefix: PathPrefix,
+		Epp: map[string]interface{}{"profile": defaults.EPPProfile},
 	}
 }
 

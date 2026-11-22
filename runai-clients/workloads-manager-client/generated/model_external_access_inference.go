@@ -26,8 +26,6 @@ var _ MappedNullable = &ExternalAccessInference{}
 type ExternalAccessInference struct {
 	// InferenceEndpoint spec.epp, for example the EPP profile. Validated against the installed CRD when applied.
 	Epp map[string]interface{} `json:"epp"`
-	// The path whose requests go through the endpoint picker. Set by the control plane to /v1.
-	PathPrefix *string `json:"pathPrefix,omitempty"`
 }
 
 type _ExternalAccessInference ExternalAccessInference
@@ -74,38 +72,6 @@ func (o *ExternalAccessInference) SetEpp(v map[string]interface{}) {
 	o.Epp = v
 }
 
-// GetPathPrefix returns the PathPrefix field value if set, zero value otherwise.
-func (o *ExternalAccessInference) GetPathPrefix() string {
-	if o == nil || IsNil(o.PathPrefix) {
-		var ret string
-		return ret
-	}
-	return *o.PathPrefix
-}
-
-// GetPathPrefixOk returns a tuple with the PathPrefix field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *ExternalAccessInference) GetPathPrefixOk() (*string, bool) {
-	if o == nil || IsNil(o.PathPrefix) {
-		return nil, false
-	}
-	return o.PathPrefix, true
-}
-
-// HasPathPrefix returns a boolean if a field has been set.
-func (o *ExternalAccessInference) HasPathPrefix() bool {
-	if o != nil && !IsNil(o.PathPrefix) {
-		return true
-	}
-
-	return false
-}
-
-// SetPathPrefix gets a reference to the given string and assigns it to the PathPrefix field.
-func (o *ExternalAccessInference) SetPathPrefix(v string) {
-	o.PathPrefix = &v
-}
-
 func (o ExternalAccessInference) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -117,9 +83,6 @@ func (o ExternalAccessInference) MarshalJSON() ([]byte, error) {
 func (o ExternalAccessInference) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["epp"] = o.Epp
-	if !IsNil(o.PathPrefix) {
-		toSerialize["pathPrefix"] = o.PathPrefix
-	}
 	return toSerialize, nil
 }
 

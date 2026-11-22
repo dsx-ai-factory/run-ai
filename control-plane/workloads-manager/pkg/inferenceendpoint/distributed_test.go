@@ -72,7 +72,7 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 		endpoint.ExternalAccess = &api.ExternalAccess{HttpRoute: &object}
 	}
 
-	It("returns the inference block for a validated topology with the /v1 path prefix", func() {
+	It("returns the inference block for a validated topology", func() {
 		setRoute()
 		intent, err := BuildDistributedInferenceIntent(lws, endpoint, defaults)
 		Expect(err).NotTo(HaveOccurred())
@@ -80,7 +80,7 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 		raw, err := json.Marshal(intent)
 		Expect(err).NotTo(HaveOccurred())
 		// Selector, port, Gateway and hostnames are derived on the cluster.
-		Expect(string(raw)).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/v1"}`))
+		Expect(string(raw)).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"}}`))
 	})
 
 	composeNative := func(authorizationType *workloadsapi.DistributedInferenceServingPortAccessAuthorizationTypeEnum) (*lwsv1.LeaderWorkerSet, api.NetworkingEndpoint) {

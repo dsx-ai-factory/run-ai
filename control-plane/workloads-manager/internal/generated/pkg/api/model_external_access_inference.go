@@ -28,12 +28,6 @@ type ExternalAccessInference struct {
 	//Epp map[string]interface{} `json:"epp"`
 	Epp map[string]interface{} `json:"epp" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	// The path whose requests go through the endpoint picker. Set by the control plane to /v1.
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//PathPrefix string `json:"pathPrefix,omitempty"`
-	PathPrefix string `json:"pathPrefix,omitempty" gorm:"not null;"`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertExternalAccessInferenceRequired checks if the required fields are not zero-ed
@@ -53,14 +47,6 @@ func AssertExternalAccessInferenceRequired(obj ExternalAccessInference) error {
 // AssertExternalAccessInferenceConstraints checks if the values respects the defined constraints
 func AssertExternalAccessInferenceConstraints(obj ExternalAccessInference) error {
 	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	if maxLengthErr := runaihttp.AssertMaxLength(obj.PathPrefix, "PathPrefix", 1024); maxLengthErr != nil {
-		return &ParsingError{Param: "PathPrefix", Err: maxLengthErr}
-	}
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 

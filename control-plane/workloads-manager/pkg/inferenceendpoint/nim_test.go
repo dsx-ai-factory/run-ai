@@ -57,7 +57,7 @@ var _ = Describe("NIM service endpoint intent", func() {
 		Expect(err).NotTo(HaveOccurred())
 		raw, err := json.Marshal(intent)
 		Expect(err).NotTo(HaveOccurred())
-		Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/v1"}`))
+		Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"}}`))
 	})
 
 	DescribeTable("rejects an endpoint that the InferenceEndpoint cannot serve", func(mutate func(), message string) {

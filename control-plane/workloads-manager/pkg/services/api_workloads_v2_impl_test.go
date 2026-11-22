@@ -504,7 +504,7 @@ var _ = Describe("WorkloadsV2Impl", func() {
 				Expect(*endpoints).To(HaveLen(1))
 				raw, err := json.Marshal((*endpoints)[0].ExternalAccess.Inference)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/v1"}`))
+				Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"}}`))
 			})
 
 			It("rejects an opt-in on a cluster without the integration", func() {
@@ -565,7 +565,7 @@ var _ = Describe("WorkloadsV2Impl", func() {
 			})
 
 			Context("update", func() {
-				const optedInBlock = `{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/v1"}`
+				const optedInBlock = `{"epp":{"profile":"gie-v1.5"}}`
 				var id string
 
 				clusterInferenceBlock := func() *api.ExternalAccessInference {
