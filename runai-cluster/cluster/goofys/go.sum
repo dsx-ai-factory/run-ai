@@ -84,10 +84,10 @@ github.com/dimchansky/utfbom v1.2.0 h1:ikiGYT9Wa8zleQ0xrlAWC9Ar9LNInSWRodJ5MkHB3
 github.com/dimchansky/utfbom v1.2.0/go.mod h1:kJPs9PFVyF/LnFVVGz+XXvouv0KxympBxr0pSwv0KQU=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.5 h1:CKsg/Xl+bn5WdmMEOLwm+2vHlLpWUQzjFNLVsNuKOug=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.5/go.mod h1:zvNHdVPOMnoA4+xYZ8LjX6myhoaR3bBYCk1bVJ7fSpo=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.7 h1:kiXWA1bh8X9AbZSWCryq6rl2KYAFugVhQDFnKsK3/+g=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.7/go.mod h1:6OGPZM8n9LG6CKzVNYUFvNtdFEWwxif5O/YXvN55Ji0=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.21 h1:mzKUfhNGDwEysfkJYWQeupvFRjLiw2YJnEJnfIVPpJ8=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.21/go.mod h1:v6favADKvGk8KD8WqRGeTfef5LdTVwKoB82ztEmwmHw=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.8 h1:1zdrNvJkAfuHwf8KimDHPcnGyJQEnRkJD0gVzC1e8Rc=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.8/go.mod h1:9NizLF/ZJF79OUNiDNlWISuTFtsU+vVmtCnzY3olB78=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.22 h1:LQ/yyG9WBX1eZFtj8TeOx3HCEFbw2/OSjrIKH6hFaC0=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.22/go.mod h1:8geNNnCkmW13Xhx+Xo5SXnLmr8VCcLr3LxpqP+0e7XY=
 github.com/envoyproxy/go-control-plane v0.14.0 h1:hbG2kr4RuFj222B6+7T83thSPqLjwBIfQawTkC++2HA=
 github.com/envoyproxy/go-control-plane v0.14.0/go.mod h1:NcS5X47pLl/hfqxU70yPwL9ZMkUlwlKxtAohpi2wBEU=
 github.com/envoyproxy/go-control-plane/envoy v1.40.0 h1:G4dcl8KE/HVPnZ25BBdvGZWi8JjyeBfQSvm95U5P1Qc=
@@ -232,8 +232,8 @@ github.com/subosito/gotenv v1.6.0/go.mod h1:Dk4QP5c2W3ibzajGcXpNraDfq2IrhjMIvMSW
 github.com/urfave/cli v1.22.17 h1:SYzXoiPfQjHBbkYxbew5prZHS1TOLT3ierW8SYLqtVQ=
 github.com/urfave/cli v1.22.17/go.mod h1:b0ht0aqgH/6pBYzzxURyrM4xXNgsoT/n2ZzwQiEhNVo=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
-go.opentelemetry.io/auto/sdk v1.2.1 h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ64=
-go.opentelemetry.io/auto/sdk v1.2.1/go.mod h1:KRTj+aOaElaLi+wW1kO/DZRXwkF4C5xPbEe3ZiIhN7Y=
+go.opentelemetry.io/auto/sdk v1.2.2 h1:ErNn7NW2t1F9CFBLb9iyPMyLRbcEd07l5m/StCe9AEE=
+go.opentelemetry.io/auto/sdk v1.2.2/go.mod h1:Ca3X8ec6gdTYjAirla//dnp05ECtQPfN4Ut74OJLVsQ=
 go.opentelemetry.io/contrib/detectors/gcp v1.47.0 h1:Ct6+aaiSO6Nk5SOb6PYcR7iWp+83YF/pL1OJcGqOmbg=
 go.opentelemetry.io/contrib/detectors/gcp v1.47.0/go.mod h1:3N259ss0b1AVOs+fYw7lOO0mcUwNqSIpQ+Zitpuqx00=
 go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.72.0 h1:Tq+E65HaNbZTeqcLw6QUhsV+/EIWdkfUH2CQzcrlE5M=

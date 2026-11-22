@@ -15,10 +15,10 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.5 h1:CKsg/Xl+bn5WdmMEOLwm+2vHlLpWUQzjFNLVsNuKOug=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.5/go.mod h1:zvNHdVPOMnoA4+xYZ8LjX6myhoaR3bBYCk1bVJ7fSpo=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.7 h1:kiXWA1bh8X9AbZSWCryq6rl2KYAFugVhQDFnKsK3/+g=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.7/go.mod h1:6OGPZM8n9LG6CKzVNYUFvNtdFEWwxif5O/YXvN55Ji0=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.21 h1:mzKUfhNGDwEysfkJYWQeupvFRjLiw2YJnEJnfIVPpJ8=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.21/go.mod h1:v6favADKvGk8KD8WqRGeTfef5LdTVwKoB82ztEmwmHw=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.8 h1:1zdrNvJkAfuHwf8KimDHPcnGyJQEnRkJD0gVzC1e8Rc=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.8/go.mod h1:9NizLF/ZJF79OUNiDNlWISuTFtsU+vVmtCnzY3olB78=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.22 h1:LQ/yyG9WBX1eZFtj8TeOx3HCEFbw2/OSjrIKH6hFaC0=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.22/go.mod h1:8geNNnCkmW13Xhx+Xo5SXnLmr8VCcLr3LxpqP+0e7XY=
 github.com/dyson/certman v0.2.1 h1:+EJdgffbfwIkBvnyx97mfS3slfn2o4UN/LWGm+mWVrQ=
 github.com/dyson/certman v0.2.1/go.mod h1:Z2ho3wmP4oCGON+c/RF+FJVsMb9zYZVsupp0c1a+SlQ=
 github.com/emicklei/go-restful/v3 v3.14.0 h1:6V6Ba8/5W1Z7amPinklZeCMlHBMwj53thpfxazCLMX4=
@@ -201,8 +201,8 @@ golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACk
 golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
 golang.org/x/crypto v0.59.0 h1:xS2jhqYbzNrpvkWP2YTDf4TJwBy3ykR03i8vFDxEc7c=
 golang.org/x/crypto v0.59.0/go.mod h1:veDyUwATGs3c+vN3VfTbzViMGXeTBk3WyhBOkn+F/4U=
-golang.org/x/exp v0.0.0-20261119141654-b15d094f3610 h1:bT3evuloD7Y8n1TA3NUVVL51/Y4GsLNTHmqiQkViumw=
-golang.org/x/exp v0.0.0-20261119141654-b15d094f3610/go.mod h1:xeYMf2GfgE/gQmBtvdPsBN608YETsXuvoiEhaOxGg/w=
+golang.org/x/exp v0.0.0-20261121134650-e1094eeca1b5 h1:dy60w5SqNxJYBAYs1Fg7h4IIYR23bGbwIjTycad1Fe8=
+golang.org/x/exp v0.0.0-20261121134650-e1094eeca1b5/go.mod h1:xeYMf2GfgE/gQmBtvdPsBN608YETsXuvoiEhaOxGg/w=
 golang.org/x/mod v0.4.2/go.mod h1:s0Qsj1ACt9ePp/hMypM3fl4fZqREWJwdYDEqhRiZZUA=
 golang.org/x/mod v0.43.0 h1:MFuq5J6s35W9D3IjkwyWc9vHh0nENOrt5K8Iof4ofmg=
 golang.org/x/mod v0.43.0/go.mod h1:4ec1JnuyBz5+FIVhg86UsA39YG8BpnrZdJYSNHmGzHY=

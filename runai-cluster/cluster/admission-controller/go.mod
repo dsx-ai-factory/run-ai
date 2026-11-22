@@ -5,14 +5,14 @@ go 1.27.4
 require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20261119205732-a27d5997b7ef
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20261119205732-a27d5997b7ef
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.7
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20261122062042-7504c8aada6b
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20261122062042-7504c8aada6b
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.8
 	github.com/dyson/certman v0.2.1
 	github.com/golang/mock v1.6.0
 	github.com/magiconair/properties v1.18.13
 	github.com/stretchr/testify v1.12.1
-	golang.org/x/exp v0.0.0-20261119141654-b15d094f3610
+	golang.org/x/exp v0.0.0-20261121134650-e1094eeca1b5
 	gomodules.xyz/jsonpatch/v2 v2.5.0
 	k8s.io/api v0.37.2
 	k8s.io/apimachinery v0.37.2
@@ -35,7 +35,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.5 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.21 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.22 // indirect
 	github.com/emicklei/go-restful/v3 v3.14.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
