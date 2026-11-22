@@ -23,6 +23,7 @@ import { shouldRunNativeWorkloadCrdTests } from '../../../../../modules/helpers/
 test.describe(`Network Operator Certification ${tags.teams.pegasus} ${tags.runOn.networkCert}`, () => {
     const NETWORK_OPERATOR_NAMESPACE = 'nvidia-network-operator';
     const OPENSHIFT_NFD_NAMESPACE = 'openshift-nfd';
+    const CONTROLLER_POD = /^(network-operator|nvidia-network-operator-controller-manager)-[a-z0-9]+-[a-z0-9]{5}$/;
     const OPENSHIFT_MULTUS_NAMESPACE = 'openshift-multus';
     const isOpenShift = process.env.CLUSTER_PLATFORM === 'openshift';
     const MACVLAN_NETWORK_NAME = 'macvlan-net';
@@ -158,7 +159,7 @@ test.describe(`Network Operator Certification ${tags.teams.pegasus} ${tags.runOn
     test('network operator controller is available', async () => {
         const pods = (await kubeCli.CoreV1Api.listNamespacedPod({ namespace: NETWORK_OPERATOR_NAMESPACE }))
             .items;
-        const controller = pods.find((pod) => pod.metadata.name.startsWith('network-operator'));
+        const controller = pods.find((pod) => CONTROLLER_POD.test(pod.metadata.name));
         expect(controller, 'network-operator controller pod should exist').to.not.be.undefined;
         expect(controller.status.phase, 'network-operator controller should be Running').to.equal('Running');
     });
