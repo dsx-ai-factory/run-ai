@@ -4419,6 +4419,9 @@
         },
         "cluster-redis": {
           "$ref": "#/$defs/ClusterRedis"
+        },
+        "snapshot": {
+          "$ref": "#/$defs/Snapshot"
         }
       },
       "type": "object"
@@ -4894,6 +4897,17 @@
       "required": [
         "seconds"
       ]
+    },
+    "Snapshot": {
+      "properties": {
+        "namespace": {
+          "type": "string"
+        },
+        "releaseName": {
+          "type": "string"
+        }
+      },
+      "type": "object"
     },
     "Spec": {
       "properties": {

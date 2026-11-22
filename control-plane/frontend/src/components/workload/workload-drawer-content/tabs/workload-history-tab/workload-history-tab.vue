@@ -72,6 +72,7 @@ export default defineComponent({
     return {
       workloadStore: useWorkloadStore(),
       isPageLoading: false as boolean,
+      isDisposed: false,
       isWorkloadHistoryLoading: false as boolean,
     };
   },
@@ -116,6 +117,7 @@ export default defineComponent({
         intervalUtil.stopInterval(EIntervalLabels.WorkloadHistoryTab);
 
         await this.loadWorkloadHistory();
+        if (this.isDisposed) return;
         intervalUtil.startInterval(EIntervalLabels.WorkloadHistoryTab, async () => {
           await this.loadWorkloadHistory();
         });
@@ -133,6 +135,7 @@ export default defineComponent({
         this.isWorkloadHistoryLoading = true;
         await this.workloadStore.loadWorkloadHistory(this.workload.id, this.workload.clusterId);
       } catch (error: unknown) {
+        if (this.isDisposed) return;
         if (error instanceof HttpErrorResponse) {
           console.error(error.serialize());
           this.$q.notify(alertUtil.getError(error.message));
@@ -156,6 +159,7 @@ export default defineComponent({
     },
   },
   unmounted() {
+    this.isDisposed = true;
     intervalUtil.stopInterval(EIntervalLabels.WorkloadHistoryTab);
   },
 });

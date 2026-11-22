@@ -1,0 +1,31 @@
+{
+  "key": "7868014a47f3",
+  "shape": {
+    "initContainers": [
+      {
+        "name": "fetch-model",
+        "image": "busybox:1.37.0",
+        "command": [
+          "sh",
+          "-c",
+          "fetch"
+        ],
+        "resources": {}
+      }
+    ],
+    "containers": [
+      {
+        "name": "trainer",
+        "image": "registry.example.com/trainer@sha256:def",
+        "resources": {
+          "limits": {
+            "nvidia.com/gpu": "1"
+          }
+        }
+      }
+    ],
+    "securityContext": {
+      "runAsUser": 1000
+    }
+  }
+}

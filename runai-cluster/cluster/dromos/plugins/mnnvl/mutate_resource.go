@@ -63,9 +63,17 @@ func (p *Plugin) MutateResource(
 		p.mutateInstance(runner, config.GpuNetworkAccelerationLabelKeys, instance, podAffinity)
 		return nil
 	}
+	originalObject := resource.Object
 	if err := kartautils.MutatePodInstances(ctx, karta, resource, mutate); err != nil {
 		return state.AddPluginIssue(ctx, p, resource, err, true, "", issue.Internal)
 	}
+	// Saving full Dynamo beta templates can add an empty podTemplate where none
+	// existed. Alpha reads individual fields and keeps the existing null cleanup.
+	// Don't remove empty objects from other workloads; selector: {} can be valid.
+	// TODO: Remove this Dynamo-specific cleanup once Karta preserves missing templates.
+	// https://github.com/dsx-ai-factory/workload-map/issues/346
+	removeEmptyObjects := resource.GetAPIVersion() == "nvidia.com/v1beta1" && resource.GetKind() == "DynamoGraphDeployment"
+	removeIntroducedNullFields(originalObject, resource.Object, removeEmptyObjects)
 
 	return nil
 }
@@ -197,11 +205,28 @@ func mutateFragmentedPodSpec(frag *kartaresource.FragmentedPodSpec, runner *drom
 		frag.NodeAffinity = &corev1.NodeAffinity{}
 	}
 
+	container := getContainerWithGPUResources(frag.Containers...)
+	if frag.Container != nil && hasGPUResources(frag.Container.Resources) {
+		container = frag.Container
+	}
+	if kartautils.HasGPUInFragmentedResources(frag.Resources) {
+		addResourceClaimToResources(frag.Resources, getResourceClaimName())
+		// Dynamo mainContainer claims override service claims.
+		if frag.Container != nil && len(frag.Container.Resources.Claims) > 0 {
+			addResourceClaimToResources(&frag.Container.Resources, getResourceClaimName())
+		}
+	}
+
+	if container != nil && container == frag.Container && len(container.Resources.Claims) == 0 && frag.Resources != nil {
+		// Preserve inherited service claims before adding the first mainContainer claim.
+		container.Resources.Claims = append(container.Resources.Claims, frag.Resources.Claims...)
+	}
+
 	mutatePod(&mnnvlPodSpecFields{
 		NodeAffinity:   frag.NodeAffinity,
 		PodAffinity:    frag.PodAffinity,
 		ResourceClaims: &frag.ResourceClaims,
-		Container:      getContainerWithGPUResources(frag.Containers...),
+		Container:      container,
 	}, runner, gpuNetworkAccelerationLabelKeys, podAffinity)
 }
 
@@ -258,4 +283,57 @@ func stampWorkloadName(instance kartaresource.ExtractedInstance, workloadName st
 		}
 		instance.FragmentedPodSpec.Labels[WorkloadNameLabel] = workloadName
 	}
+}
+
+// removeIntroducedNullFields removes null fields added by Karta.
+// With removeEmptyObjects, it also removes new empty objects and restores nulls
+// that became empty objects. Existing nulls and empty objects are kept.
+// Workaround for https://github.com/dsx-ai-factory/workload-map/issues/346.
+// Remove once the pinned Karta version fixes this writeback behavior and the
+// Dynamo regression tests pass without this cleanup.
+func removeIntroducedNullFields(original, updated interface{}, removeEmptyObjects bool) bool {
+	switch updatedValue := updated.(type) {
+	case map[string]interface{}:
+		originalObject, _ := original.(map[string]interface{})
+		removedNulls := false
+		for key, updatedChild := range updatedValue {
+			originalChild, existed := originalObject[key]
+			if updatedChild == nil && !existed {
+				delete(updatedValue, key)
+				removedNulls = true
+				continue
+			}
+
+			removedFromChild := removeIntroducedNullFields(originalChild, updatedChild, removeEmptyObjects)
+			if !removedFromChild && !removeEmptyObjects {
+				continue
+			}
+			removedNulls = removedNulls || removedFromChild
+
+			childObject, isObject := updatedChild.(map[string]interface{})
+			if !isObject || len(childObject) > 0 {
+				continue
+			}
+			switch {
+			case !existed:
+				delete(updatedValue, key)
+				removedNulls = true
+			case originalChild == nil:
+				updatedValue[key] = nil
+				removedNulls = true
+			}
+		}
+		return removedNulls
+
+	case []interface{}:
+		originalItems, _ := original.([]interface{})
+		for index, updatedChild := range updatedValue {
+			var originalChild interface{}
+			if index < len(originalItems) {
+				originalChild = originalItems[index]
+			}
+			removeIntroducedNullFields(originalChild, updatedChild, removeEmptyObjects)
+		}
+	}
+	return false
 }

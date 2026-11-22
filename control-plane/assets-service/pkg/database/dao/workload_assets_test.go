@@ -88,75 +88,6 @@ var _ = Describe("workload assets validation", func() {
 		})
 	})
 
-	Context("[]containmentRecords -> []AssetRef", func() {
-		It("should populate the assets properly", func() {
-			toolTypesEnv1 := []api.ToolType{
-				"tool-1",
-				"tool-2",
-			}
-			toolTypes := EnvironmentToolsMap{
-				"env-1": toolTypesEnv1,
-			}
-			source := []dbmodel.TemplateAssetsCombinedRec{
-				{TemplateAssetId: "1", AssetMeta: dbmodel.AssetMetaRec{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_ENVIRONMENT, Id: "env-1"}}},
-				{TemplateAssetId: "1", AssetMeta: dbmodel.AssetMetaRec{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_COMPUTE, Id: "comp-1"}}},
-				{TemplateAssetId: "1", AssetMeta: dbmodel.AssetMetaRec{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_HOST_PATH, Id: "host-1"}}},
-				{TemplateAssetId: "1", AssetMeta: dbmodel.AssetMetaRec{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_NFS, Id: "nfs-1"}}},
-				{TemplateAssetId: "1", AssetMeta: dbmodel.AssetMetaRec{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_NFS, Id: "nfs-3"}}},
-				{TemplateAssetId: "1", AssetMeta: dbmodel.AssetMetaRec{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_GIT, Id: "git-1"}}},
-				{TemplateAssetId: "1", AssetMeta: dbmodel.AssetMetaRec{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_S3, Id: "s3-1"}}},
-				{TemplateAssetId: "1", AssetMeta: dbmodel.AssetMetaRec{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_S3, Id: "s3-3"}}},
-				{TemplateAssetId: "1", AssetMeta: dbmodel.AssetMetaRec{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_PVC, Id: "pvc-1"}}},
-
-				{TemplateAssetId: "2", AssetMeta: dbmodel.AssetMetaRec{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_ENVIRONMENT, Id: "env-2"}}},
-				{TemplateAssetId: "2", AssetMeta: dbmodel.AssetMetaRec{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_HOST_PATH, Id: "host-2"}}},
-				{TemplateAssetId: "2", AssetMeta: dbmodel.AssetMetaRec{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_HOST_PATH, Id: "host-3"}}},
-				{TemplateAssetId: "2", AssetMeta: dbmodel.AssetMetaRec{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_NFS, Id: "nfs-2"}}},
-				{TemplateAssetId: "2", AssetMeta: dbmodel.AssetMetaRec{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_GIT, Id: "git-2"}}},
-				{TemplateAssetId: "2", AssetMeta: dbmodel.AssetMetaRec{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_GIT, Id: "git-3"}}},
-				{TemplateAssetId: "2", AssetMeta: dbmodel.AssetMetaRec{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_S3, Id: "s3-2"}}},
-				{TemplateAssetId: "2", AssetMeta: dbmodel.AssetMetaRec{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_PVC, Id: "pvc-2"}}},
-				{TemplateAssetId: "2", AssetMeta: dbmodel.AssetMetaRec{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_PVC, Id: "pvc-3"}}},
-			}
-
-			for idx := range source {
-				source[idx].AssetMeta.Name = source[idx].AssetMeta.Id + "-name"
-			}
-			result, err := templateAssetsRecToMap(source, toolTypes)
-			Expect(err).To(BeNil())
-
-			expected := TemplateToAssetsMap{
-				"1": api.AssetsRef{
-					Environment: api.EnvironmentAssetRef{Id: "env-1", Name: "env-1-name", ToolTypes: &toolTypesEnv1},
-					Compute:     &api.AssetsRefCompute{Id: "comp-1", Name: "comp-1-name"},
-					Datasources: []api.DatasourceRef{
-						{Kind: api.ASSETKIND_HOST_PATH, Id: "host-1", Name: "host-1-name"},
-						{Kind: api.ASSETKIND_NFS, Id: "nfs-1", Name: "nfs-1-name"},
-						{Kind: api.ASSETKIND_NFS, Id: "nfs-3", Name: "nfs-3-name"},
-						{Kind: api.ASSETKIND_GIT, Id: "git-1", Name: "git-1-name"},
-						{Kind: api.ASSETKIND_S3, Id: "s3-1", Name: "s3-1-name"},
-						{Kind: api.ASSETKIND_S3, Id: "s3-3", Name: "s3-3-name"},
-						{Kind: api.ASSETKIND_PVC, Id: "pvc-1", Name: "pvc-1-name"},
-					},
-				},
-				"2": api.AssetsRef{
-					Environment: api.EnvironmentAssetRef{Id: "env-2", Name: "env-2-name"},
-					Datasources: []api.DatasourceRef{
-						{Kind: api.ASSETKIND_HOST_PATH, Id: "host-2", Name: "host-2-name"},
-						{Kind: api.ASSETKIND_HOST_PATH, Id: "host-3", Name: "host-3-name"},
-						{Kind: api.ASSETKIND_NFS, Id: "nfs-2", Name: "nfs-2-name"},
-						{Kind: api.ASSETKIND_GIT, Id: "git-2", Name: "git-2-name"},
-						{Kind: api.ASSETKIND_GIT, Id: "git-3", Name: "git-3-name"},
-						{Kind: api.ASSETKIND_S3, Id: "s3-2", Name: "s3-2-name"},
-						{Kind: api.ASSETKIND_PVC, Id: "pvc-2", Name: "pvc-2-name"},
-						{Kind: api.ASSETKIND_PVC, Id: "pvc-3", Name: "pvc-3-name"},
-					},
-				},
-			}
-			Expect(result).To(Equal(expected))
-		})
-	})
-
 	Context("validate contained assets", func() {
 		It("should populate the assets properly", func() {
 			ids := api.AssetsIds{
@@ -230,7 +161,6 @@ var _ = Describe("workload assets validation", func() {
 	Context("validate unsupported assets", func() {
 		It("should fail", func() {
 			wrongKind := dbmodel.AssetMeta{Kind: "xx"}
-			wrongMetaRec := dbmodel.AssetMetaRec{AssetMeta: wrongKind}
 
 			assets := []dbmodel.AssetMetaRec{
 				{
@@ -243,8 +173,6 @@ var _ = Describe("workload assets validation", func() {
 			err := assetRecToAssetRef(&assetsRef, assets, nil)
 			Expect(err).NotTo(BeNil())
 
-			_, err = templateAssetsRecToMap([]dbmodel.TemplateAssetsCombinedRec{{AssetMeta: wrongMetaRec}}, make(EnvironmentToolsMap))
-			Expect(err).NotTo(BeNil())
 		})
 	})
 })

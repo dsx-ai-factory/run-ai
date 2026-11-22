@@ -83,7 +83,7 @@ func expectDataSourceDeleteTail(m dbtesting.Mocker) {
 }
 
 const (
-	sqlUpdMetaSelect = `SELECT * FROM assets_metadata WHERE assets_metadata.id = ? AND (assets_metadata.scope = ? OR assets_metadata.tenant_id = ?) AND assets_metadata.deleted_at IS NULL`
+	sqlUpdMetaSelect = `SELECT * FROM assets_metadata WHERE assets_metadata.id = ? AND assets_metadata.kind <> ? AND (assets_metadata.scope = ? OR assets_metadata.tenant_id = ?) AND assets_metadata.deleted_at IS NULL`
 	sqlUpdMetaSave   = `UPDATE assets_metadata SET name=?,scope=?,cluster_id=?,department_id=?,project_id=?,auto_delete=?,kind=?,tenant_id=?,created_by=?,created_at=?,updated_by=?,updated_at=?,deleted_by=?,deleted_at=?,project_name=?,description=?,update_count=?,prev_name=?,private=? WHERE assets_metadata.deleted_at IS NULL AND id = ?`
 )
 

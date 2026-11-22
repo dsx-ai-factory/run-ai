@@ -4,8 +4,6 @@ properties:
     $ref: './GetEnablePolicies.yaml'
   workloadSubmissionV2Enabled:
     $ref: './GetWorkloadSubmissionV2Enabled.yaml'
-  enableTemplatesV2:
-    $ref: './GetEnableTemplatesV2.yaml'
   enableHybridSubmission:
     $ref: './GetEnableHybridSubmission.yaml'
   gpuOverProvisioning:

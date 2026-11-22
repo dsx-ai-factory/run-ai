@@ -22,9 +22,9 @@ import (
 )
 
 const (
-	realm           = "realm_name"
-	clientId        = "client"
-	clientSecret    = "secret"
+	realm        = "realm_name"
+	clientId     = "client"
+	clientSecret = "secret"
 	// Fake JWTs for testing: synthetic header/payload, no real signature, fake issuer/subject.
 	TokenWithOcpIdp = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjk5OTk5OTk5OTksImlhdCI6MTYwMDAwMDAwMCwiaXNzIjoiaHR0cHM6Ly9mYWtlLWlzc3Vlci5leGFtcGxlLmNvbS9hdXRoL3JlYWxtcy9ydW5haSIsImF1ZCI6WyJydW5haS1hZG1pbi11aSIsInJ1bmFpIl0sInR5cCI6IklEIiwiYXpwIjoicnVuYWktYWRtaW4tdWkiLCJ0ZW5hbnRfaWQiOjEwMDEsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJ0ZXN0QHJ1bi5haSIsImVtYWlsIjoidGVzdEBydW4uYWkiLCJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDEiLCJpZGVudGl0eV9wcm92aWRlciI6Im9wZW5zaGlmdC12NCIsInN1YmplY3RfdXVpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSJ9.mock"
 	TokenWithoutIdp = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjk5OTk5OTk5OTksImlhdCI6MTYwMDAwMDAwMCwiaXNzIjoiaHR0cHM6Ly9mYWtlLWlzc3Vlci5leGFtcGxlLmNvbS9hdXRoL3JlYWxtcy9ydW5haSIsImF1ZCI6WyJydW5haS1hZG1pbi11aSIsInJ1bmFpIl0sInR5cCI6IklEIiwiYXpwIjoicnVuYWktYWRtaW4tdWkiLCJ0ZW5hbnRfaWQiOjEwMDEsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJ0ZXN0QHJ1bi5haSIsImVtYWlsIjoidGVzdEBydW4uYWkiLCJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDIifQ.mock"

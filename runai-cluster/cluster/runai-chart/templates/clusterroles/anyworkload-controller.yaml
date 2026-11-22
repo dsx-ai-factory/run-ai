@@ -291,6 +291,26 @@ rules:
     verbs:
       - create
       - patch
+  - apiGroups:
+      - nvidia.com
+    resources:
+      - podsnapshots
+    verbs:
+      - get
+      - list
+      - watch
+      - patch
+      - delete
+  - apiGroups:
+      - nvidia.com
+    resources:
+      - snapshotjobs
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - delete
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role

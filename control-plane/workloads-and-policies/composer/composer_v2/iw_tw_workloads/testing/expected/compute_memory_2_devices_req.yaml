@@ -22,7 +22,7 @@ BatchJobTarget:
       template:
         metadata:
           annotations:
-            gpu-memory: "2"
+            nvidia.com/container.compute_memory_2_devices_req.gpu-memory.request: 2M
             user: tester
           labels:
             app: job

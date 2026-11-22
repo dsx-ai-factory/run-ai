@@ -27,9 +27,10 @@ paths:
     x-service: workloads
   /api/v1/workloads/{workloadId}/actions:
     get:
-      description: Returns accepted workload actions. History remains available after
-        a workload is deleted and is removed when the workload is permanently removed
-        from the system.
+      description: Returns accepted workload actions. Free-text search matches raw
+        action values and subjects case-insensitively. Use the action filter for exact
+        action selection. History remains available after a workload is deleted and
+        is removed when the workload is permanently removed from the system.
       operationId: get_workload_actions_history
       parameters:
       - description: The  Universally Unique Identifier (UUID) of the workload.
@@ -62,6 +63,53 @@ paths:
           maximum: 500
           minimum: 1
           type: integer
+        style: form
+      - description: Sort direction. Defaults to newest first.
+        explode: true
+        in: query
+        name: sortOrder
+        required: false
+        schema:
+          default: desc
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Field to sort by. Defaults to acceptedAt.
+        explode: true
+        in: query
+        name: sortBy
+        required: false
+        schema:
+          enum:
+          - acceptedAt
+          - action
+          - subject
+          type: string
+        style: form
+      - description: "Filter event, subject or accepted time using the standard field/operator/value\
+          \ syntax. Dates use ISO 8601 timestamps and only support ==, !=, <= and\
+          \ >= operators."
+        explode: false
+        in: query
+        name: filterBy
+        required: false
+        schema:
+          items:
+            pattern: ^((action|subject)(==|!=|<=|>=|=@|!@|=\^|=\$)|acceptedAt(==|!=|<=|>=)).+$
+            type: string
+          maxItems: 10
+          type: array
+        style: form
+      - description: Filter results by a free text search.
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          example: test project
+          type: string
         style: form
       responses:
         "200":
@@ -13945,6 +13993,57 @@ components:
         minimum: 1
         type: integer
       style: form
+    WorkloadActionsSortOrder:
+      description: Sort direction. Defaults to newest first.
+      explode: true
+      in: query
+      name: sortOrder
+      required: false
+      schema:
+        default: desc
+        enum:
+        - asc
+        - desc
+        type: string
+      style: form
+    WorkloadActionsSort:
+      description: Field to sort by. Defaults to acceptedAt.
+      explode: true
+      in: query
+      name: sortBy
+      required: false
+      schema:
+        enum:
+        - acceptedAt
+        - action
+        - subject
+        type: string
+      style: form
+    WorkloadActionsFilter:
+      description: "Filter event, subject or accepted time using the standard field/operator/value\
+        \ syntax. Dates use ISO 8601 timestamps and only support ==, !=, <= and >=\
+        \ operators."
+      explode: false
+      in: query
+      name: filterBy
+      required: false
+      schema:
+        items:
+          pattern: ^((action|subject)(==|!=|<=|>=|=@|!@|=\^|=\$)|acceptedAt(==|!=|<=|>=)).+$
+          type: string
+        maxItems: 10
+        type: array
+      style: form
+    Search:
+      description: Filter results by a free text search.
+      explode: true
+      in: query
+      name: search
+      required: false
+      schema:
+        example: test project
+        type: string
+      style: form
     WorkloadsFilter:
       description: "Filter results by a parameter. Use the format field-name operator\
         \ value. Operators are `==` Equals, `!=` Not equals, `<=` Less than or equal,\
@@ -14054,16 +14153,6 @@ components:
         - guaranteedRuntimeEndsAt
         - aiApplicationId
         - aiApplicationName
-        type: string
-      style: form
-    Search:
-      description: Filter results by a free text search.
-      explode: true
-      in: query
-      name: search
-      required: false
-      schema:
-        example: test project
         type: string
       style: form
     WorkloadsSlimFilter:
@@ -33867,7 +33956,6 @@ components:
       - nfs
       - pvc
       - hostPath
-      - workload-template
       - model
       - config-map
       - secret-volume
@@ -129069,26 +129157,6 @@ components:
           readOnly: true
           type: string
       type: object
-    GetEnableTemplatesV2:
-      example:
-        stage: stage
-        displayName: displayName
-        description: description
-        value:
-          enabled: true
-      properties:
-        value:
-          $ref: '#/components/schemas/GetEnableSettingsValue'
-        displayName:
-          readOnly: true
-          type: string
-        description:
-          readOnly: true
-          type: string
-        stage:
-          readOnly: true
-          type: string
-      type: object
     GetEnableHybridSubmission:
       example:
         stage: stage
@@ -129181,19 +129249,11 @@ components:
           description: description
           value:
             enabled: true
-        enableTemplatesV2:
-          stage: stage
-          displayName: displayName
-          description: description
-          value:
-            enabled: true
       properties:
         enablePolicies:
           $ref: '#/components/schemas/GetEnablePolicies'
         workloadSubmissionV2Enabled:
           $ref: '#/components/schemas/GetWorkloadSubmissionV2Enabled'
-        enableTemplatesV2:
-          $ref: '#/components/schemas/GetEnableTemplatesV2'
         enableHybridSubmission:
           $ref: '#/components/schemas/GetEnableHybridSubmission'
         gpuOverProvisioning:
@@ -129205,7 +129265,6 @@ components:
       enum:
       - enablePolicies
       - workloadSubmissionV2Enabled
-      - enableTemplatesV2
       - enableHybridSubmission
       - gpuOverProvisioning
       - applicationSubmission
@@ -129298,11 +129357,6 @@ components:
           type: boolean
       type: object
     WorkloadSubmissionV2EnabledSetting:
-      properties:
-        enabled:
-          type: boolean
-      type: object
-    EnableTemplatesV2Setting:
       properties:
         enabled:
           type: boolean

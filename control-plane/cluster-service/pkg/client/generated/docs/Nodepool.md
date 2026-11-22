@@ -5,6 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Name** | **string** |  | 
+**Description** | Pointer to **string** | The description of the node pool. | [optional] 
 **LabelKey** | **string** | Label key for associated nodes to the Node Pool (with value as in labelValue) | 
 **LabelValue** | **string** | Label value for associated nodes to the Node Pool (with key as in labelKey) | 
 **ClusterId** | **string** |  | 
@@ -68,6 +69,31 @@ and a boolean to check if the value has been set.
 
 SetName sets Name field to given value.
 
+
+### GetDescription
+
+`func (o *Nodepool) GetDescription() string`
+
+GetDescription returns the Description field if non-nil, zero value otherwise.
+
+### GetDescriptionOk
+
+`func (o *Nodepool) GetDescriptionOk() (*string, bool)`
+
+GetDescriptionOk returns a tuple with the Description field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetDescription
+
+`func (o *Nodepool) SetDescription(v string)`
+
+SetDescription sets Description field to given value.
+
+### HasDescription
+
+`func (o *Nodepool) HasDescription() bool`
+
+HasDescription returns a boolean if a field has been set.
 
 ### GetLabelKey
 

@@ -24,7 +24,7 @@ GO_VERSION_BASE?=$(or $(strip $(if $(wildcard go.mod),$(shell awk '$$1=="go"{pri
 # Use the default tagged version which should be ubuntu-based
 GO_VERSION?=$(GO_VERSION_BASE)
 GO_ALPINE_VERSION?=$(GO_VERSION_BASE)-alpine
-MOCKERY_VERSION=v3.8.1
+MOCKERY_VERSION=v3.9.1
 # Must be new enough to decode the Go release's export data: v2.9.0 fails
 # every package on Go 1.27 with "export data version 4 ... (typecheck)".
 # renovate: datasource=go depName=github.com/golangci/golangci-lint/v2
@@ -124,6 +124,9 @@ GO_ACC_COMMAND=go install github.com/ory/go-acc@v0.2.8 && \
 	grep -v zz_ < /tmp/coverage.out | grep -v "/generated/pkg" > cover.out
 
 GO_LDFLAGS=''
+
+# Build tags for lint-go.
+GO_BUILD_TAGS?=
 
 # Restrict golangci-lint to changes since the PR's base branch
 # (--new-from-rev), so a PR is judged on the code it actually touched.
@@ -272,7 +275,7 @@ lint-go: git-config-command gocache
 	@ echo $(GREEN_CONSOLE) "${CONSOLE_PREFIX} Running golangci linter for ${SERVICE_NAME}" $(BASE_CONSOLE); \
 		if [ -n "$(LINT_NEW_FROM_REV)" ]; then git fetch origin $(LINT_BASE_BRANCH) --depth=1 2>/dev/null || true; fi; \
 		$(DOCKER_GO_LINTER_COMMAND) \
-		golangci-lint run -v -c $(GOLANG_LINTER_CONFIG_PATH) $(if $(LINT_NEW_FROM_REV),--new-from-rev=$(LINT_NEW_FROM_REV),)' || $(FAILURE_MESSAGE_HANDLER)
+		golangci-lint run -v -c $(GOLANG_LINTER_CONFIG_PATH) $(if $(GO_BUILD_TAGS),--build-tags "$(GO_BUILD_TAGS)",) $(if $(LINT_NEW_FROM_REV),--new-from-rev=$(LINT_NEW_FROM_REV),)' || $(FAILURE_MESSAGE_HANDLER)
 .PHONY: lint-go
 
 .PHONY: build-go

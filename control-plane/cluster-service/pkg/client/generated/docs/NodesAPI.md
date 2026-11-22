@@ -9,6 +9,8 @@ Method | HTTP request | Description
 [**DeleteNode**](NodesAPI.md#DeleteNode) | **Delete** /api/v1/clusters/{clusterUuid}/nodes/{nodeName} | Delete a node from a cluster.
 [**GetNode**](NodesAPI.md#GetNode) | **Get** /api/v1/nodes/{nodeId} | Get a node by ID.
 [**GetNodeInternal**](NodesAPI.md#GetNodeInternal) | **Get** /internal/clusters/{clusterUuid}/nodes/{nodeName} | Get node internal data by cluster UUID and name
+[**GetNodeLabelKeys**](NodesAPI.md#GetNodeLabelKeys) | **Get** /api/v1/clusters/{clusterUuid}/nodes/labels/keys | Get node label keys.
+[**GetNodeLabelValues**](NodesAPI.md#GetNodeLabelValues) | **Get** /api/v1/clusters/{clusterUuid}/nodes/labels/values | Get node label values.
 [**GetNodeMetrics**](NodesAPI.md#GetNodeMetrics) | **Get** /api/v1/nodes/{nodeId}/metrics | Get the node metrics data.
 [**GetNodeTelemetry**](NodesAPI.md#GetNodeTelemetry) | **Get** /api/v1/nodes/telemetry | Get node telemetry data.
 [**GetTenantNodes**](NodesAPI.md#GetTenantNodes) | **Get** /api/v1/nodes | Get a list of nodes.
@@ -359,6 +361,160 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**NodeInternal**](NodeInternal.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetNodeLabelKeys
+
+> []string GetNodeLabelKeys(ctx, clusterUuid).Offset(offset).Limit(limit).Search(search).Execute()
+
+Get node label keys.
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client"
+)
+
+func main() {
+	clusterUuid := "9f55255e-11ed-47c7-acef-fc4054768dbc" // string | The Universally Unique Identifier (UUID) of the cluster.
+	offset := int32(100) // int32 | The offset of the first item returned in the collection. (optional)
+	limit := int32(56) // int32 | The maximum number of entries to return. (optional) (default to 50)
+	search := "test project" // string | Filter results by a free text search. (optional)
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.NodesAPI.GetNodeLabelKeys(context.Background(), clusterUuid).Offset(offset).Limit(limit).Search(search).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `NodesAPI.GetNodeLabelKeys``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetNodeLabelKeys`: []string
+	fmt.Fprintf(os.Stdout, "Response from `NodesAPI.GetNodeLabelKeys`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**clusterUuid** | **string** | The Universally Unique Identifier (UUID) of the cluster. | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetNodeLabelKeysRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **offset** | **int32** | The offset of the first item returned in the collection. | 
+ **limit** | **int32** | The maximum number of entries to return. | [default to 50]
+ **search** | **string** | Filter results by a free text search. | 
+
+### Return type
+
+**[]string**
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetNodeLabelValues
+
+> []string GetNodeLabelValues(ctx, clusterUuid).Key(key).Offset(offset).Limit(limit).Search(search).Execute()
+
+Get node label values.
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client"
+)
+
+func main() {
+	clusterUuid := "9f55255e-11ed-47c7-acef-fc4054768dbc" // string | The Universally Unique Identifier (UUID) of the cluster.
+	key := "gpu-type" // string | The exact label key whose values to return.
+	offset := int32(100) // int32 | The offset of the first item returned in the collection. (optional)
+	limit := int32(56) // int32 | The maximum number of entries to return. (optional) (default to 50)
+	search := "test project" // string | Filter results by a free text search. (optional)
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.NodesAPI.GetNodeLabelValues(context.Background(), clusterUuid).Key(key).Offset(offset).Limit(limit).Search(search).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `NodesAPI.GetNodeLabelValues``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetNodeLabelValues`: []string
+	fmt.Fprintf(os.Stdout, "Response from `NodesAPI.GetNodeLabelValues`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**clusterUuid** | **string** | The Universally Unique Identifier (UUID) of the cluster. | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetNodeLabelValuesRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **key** | **string** | The exact label key whose values to return. | 
+ **offset** | **int32** | The offset of the first item returned in the collection. | 
+ **limit** | **int32** | The maximum number of entries to return. | [default to 50]
+ **search** | **string** | Filter results by a free text search. | 
+
+### Return type
+
+**[]string**
 
 ### Authorization
 

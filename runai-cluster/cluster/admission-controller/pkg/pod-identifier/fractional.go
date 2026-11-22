@@ -23,7 +23,7 @@ func IsFractionalPod(podAnnotations map[string]string, containers []v1.Container
 func HasGpuFractionalAnnotation(podAnnotations map[string]string) bool {
 	_, hasGpuFractionAnnotation := podAnnotations[types.RunaiGpuFraction]
 	_, hasGpuMemoryAnnotation := podAnnotations[types.RunaiGpuMemory]
-	return hasGpuFractionAnnotation || hasGpuMemoryAnnotation
+	return hasGpuFractionAnnotation || hasGpuMemoryAnnotation || utils.HasNativeGpuMemoryAnnotation(podAnnotations)
 }
 
 func HasFractionalEnvVar(containers []v1.Container) (bool, string) {

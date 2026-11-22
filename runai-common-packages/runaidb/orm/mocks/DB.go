@@ -643,10 +643,10 @@ func (_e *DB_Expecter) Distinct(args ...any) *DB_Distinct_Call {
 }
 
 func (_c *DB_Distinct_Call) Run(run func(args ...interface{})) *DB_Distinct_Call {
-	_c.Call.Run(func(args mock.Arguments) {
+	_c.Call.Run(func(args1 mock.Arguments) {
 		var arg0 []interface{}
-		variadicArgs := make([]interface{}, len(args)-0)
-		for i, a := range args[0:] {
+		variadicArgs := make([]interface{}, len(args1)-0)
+		for i, a := range args1[0:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
@@ -1110,14 +1110,14 @@ func (_e *DB_Expecter) Having(query any, args ...any) *DB_Having_Call {
 }
 
 func (_c *DB_Having_Call) Run(run func(query interface{}, args ...interface{})) *DB_Having_Call {
-	_c.Call.Run(func(args mock.Arguments) {
+	_c.Call.Run(func(args1 mock.Arguments) {
 		var arg0 interface{}
-		if args[0] != nil {
-			arg0 = args[0].(interface{})
+		if args1[0] != nil {
+			arg0 = args1[0].(interface{})
 		}
 		var arg1 []interface{}
-		variadicArgs := make([]interface{}, len(args)-1)
-		for i, a := range args[1:] {
+		variadicArgs := make([]interface{}, len(args1)-1)
+		for i, a := range args1[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
@@ -1177,14 +1177,14 @@ func (_e *DB_Expecter) InnerJoins(query any, args ...any) *DB_InnerJoins_Call {
 }
 
 func (_c *DB_InnerJoins_Call) Run(run func(query string, args ...interface{})) *DB_InnerJoins_Call {
-	_c.Call.Run(func(args mock.Arguments) {
+	_c.Call.Run(func(args1 mock.Arguments) {
 		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
+		if args1[0] != nil {
+			arg0 = args1[0].(string)
 		}
 		var arg1 []interface{}
-		variadicArgs := make([]interface{}, len(args)-1)
-		for i, a := range args[1:] {
+		variadicArgs := make([]interface{}, len(args1)-1)
+		for i, a := range args1[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
@@ -1244,14 +1244,14 @@ func (_e *DB_Expecter) Joins(query any, args ...any) *DB_Joins_Call {
 }
 
 func (_c *DB_Joins_Call) Run(run func(query string, args ...interface{})) *DB_Joins_Call {
-	_c.Call.Run(func(args mock.Arguments) {
+	_c.Call.Run(func(args1 mock.Arguments) {
 		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
+		if args1[0] != nil {
+			arg0 = args1[0].(string)
 		}
 		var arg1 []interface{}
-		variadicArgs := make([]interface{}, len(args)-1)
-		for i, a := range args[1:] {
+		variadicArgs := make([]interface{}, len(args1)-1)
+		for i, a := range args1[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
@@ -1482,14 +1482,14 @@ func (_e *DB_Expecter) Not(query any, args ...any) *DB_Not_Call {
 }
 
 func (_c *DB_Not_Call) Run(run func(query interface{}, args ...interface{})) *DB_Not_Call {
-	_c.Call.Run(func(args mock.Arguments) {
+	_c.Call.Run(func(args1 mock.Arguments) {
 		var arg0 interface{}
-		if args[0] != nil {
-			arg0 = args[0].(interface{})
+		if args1[0] != nil {
+			arg0 = args1[0].(interface{})
 		}
 		var arg1 []interface{}
-		variadicArgs := make([]interface{}, len(args)-1)
-		for i, a := range args[1:] {
+		variadicArgs := make([]interface{}, len(args1)-1)
+		for i, a := range args1[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
@@ -1667,14 +1667,14 @@ func (_e *DB_Expecter) Or(query any, args ...any) *DB_Or_Call {
 }
 
 func (_c *DB_Or_Call) Run(run func(query interface{}, args ...interface{})) *DB_Or_Call {
-	_c.Call.Run(func(args mock.Arguments) {
+	_c.Call.Run(func(args1 mock.Arguments) {
 		var arg0 interface{}
-		if args[0] != nil {
-			arg0 = args[0].(interface{})
+		if args1[0] != nil {
+			arg0 = args1[0].(interface{})
 		}
 		var arg1 []interface{}
-		variadicArgs := make([]interface{}, len(args)-1)
-		for i, a := range args[1:] {
+		variadicArgs := make([]interface{}, len(args1)-1)
+		for i, a := range args1[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
@@ -1844,14 +1844,14 @@ func (_e *DB_Expecter) Preload(query any, args ...any) *DB_Preload_Call {
 }
 
 func (_c *DB_Preload_Call) Run(run func(query string, args ...interface{})) *DB_Preload_Call {
-	_c.Call.Run(func(args mock.Arguments) {
+	_c.Call.Run(func(args1 mock.Arguments) {
 		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
+		if args1[0] != nil {
+			arg0 = args1[0].(string)
 		}
 		var arg1 []interface{}
-		variadicArgs := make([]interface{}, len(args)-1)
-		for i, a := range args[1:] {
+		variadicArgs := make([]interface{}, len(args1)-1)
+		for i, a := range args1[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
@@ -2349,14 +2349,14 @@ func (_e *DB_Expecter) Select(query any, args ...any) *DB_Select_Call {
 }
 
 func (_c *DB_Select_Call) Run(run func(query interface{}, args ...interface{})) *DB_Select_Call {
-	_c.Call.Run(func(args mock.Arguments) {
+	_c.Call.Run(func(args1 mock.Arguments) {
 		var arg0 interface{}
-		if args[0] != nil {
-			arg0 = args[0].(interface{})
+		if args1[0] != nil {
+			arg0 = args1[0].(interface{})
 		}
 		var arg1 []interface{}
-		variadicArgs := make([]interface{}, len(args)-1)
-		for i, a := range args[1:] {
+		variadicArgs := make([]interface{}, len(args1)-1)
+		for i, a := range args1[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
@@ -2469,14 +2469,14 @@ func (_e *DB_Expecter) Table(name any, args ...any) *DB_Table_Call {
 }
 
 func (_c *DB_Table_Call) Run(run func(name string, args ...interface{})) *DB_Table_Call {
-	_c.Call.Run(func(args mock.Arguments) {
+	_c.Call.Run(func(args1 mock.Arguments) {
 		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
+		if args1[0] != nil {
+			arg0 = args1[0].(string)
 		}
 		var arg1 []interface{}
-		variadicArgs := make([]interface{}, len(args)-1)
-		for i, a := range args[1:] {
+		variadicArgs := make([]interface{}, len(args1)-1)
+		for i, a := range args1[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
@@ -2969,14 +2969,14 @@ func (_e *DB_Expecter) Where(query any, args ...any) *DB_Where_Call {
 }
 
 func (_c *DB_Where_Call) Run(run func(query interface{}, args ...interface{})) *DB_Where_Call {
-	_c.Call.Run(func(args mock.Arguments) {
+	_c.Call.Run(func(args1 mock.Arguments) {
 		var arg0 interface{}
-		if args[0] != nil {
-			arg0 = args[0].(interface{})
+		if args1[0] != nil {
+			arg0 = args1[0].(interface{})
 		}
 		var arg1 []interface{}
-		variadicArgs := make([]interface{}, len(args)-1)
-		for i, a := range args[1:] {
+		variadicArgs := make([]interface{}, len(args1)-1)
+		for i, a := range args1[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}

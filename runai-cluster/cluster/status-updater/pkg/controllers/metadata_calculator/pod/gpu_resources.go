@@ -13,11 +13,13 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/resourceutils/resources"
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	v1 "k8s.io/api/core/v1"
 	resourcehelper "k8s.io/kubectl/pkg/util/resource"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/status-updater/pkg/controllers/metadata"
 )
@@ -105,11 +107,17 @@ func GetGpuRequest(pod *v1.Pod) float64 {
 }
 
 func GetGpuMemoryRequest(pod *v1.Pod) int64 {
-	gpuMemory, err := strconv.ParseInt(pod.Annotations[gpuMemoryAnnotation], 10, 64)
-	if err == nil && gpuMemory > 0 {
-		return gpuMemory
+	return int64(getGpuMemoryRequestInMb(pod))
+}
+
+func getGpuMemoryRequestInMb(pod *v1.Pod) float64 {
+	memory, err := resources.ReadGPUMemoryAnnotations(pod.Annotations)
+	if err != nil {
+		log.Log.Error(err, "Failed to parse GPU request", "namespace", pod.Namespace, "pod", pod.Name)
+		return 0
 	}
-	return 0
+	// Status annotations use decimal MB even when the request uses binary units.
+	return memory.Request.AsApproximateFloat64() / ByteToMb
 }
 
 func GetGpuFractionsCount(pod *v1.Pod) int64 {
@@ -174,7 +182,8 @@ func getAllocatedMigPortion(ctx context.Context, pod *v1.Pod, kubeClient client.
 func matchAllMetrics(ctx context.Context, pod *v1.Pod, podMetrics *metadata.PodMetadata,
 	kubeClient client.Client) error {
 	requestExpressedInGpus := podMetrics.GPUs > 0
-	requestExpressedInGpuMemory := podMetrics.GpuMemory > 0
+	requestedGpuMemory := getGpuMemoryRequestInMb(pod)
+	requestExpressedInGpuMemory := requestedGpuMemory > 0
 
 	if len(pod.Spec.NodeName) == 0 { // Can't match metric if the pod isn't scheduled to a pod
 		return nil
@@ -195,7 +204,7 @@ func matchAllMetrics(ctx context.Context, pod *v1.Pod, podMetrics *metadata.PodM
 	if requestExpressedInGpus {
 		podMetrics.GpuMemory = int64(singleGpuMemory * podMetrics.GPUs)
 	} else if requestExpressedInGpuMemory {
-		podMetrics.GPUs = float64(podMetrics.GpuMemory) / singleGpuMemory
+		podMetrics.GPUs = requestedGpuMemory / singleGpuMemory
 	}
 
 	if podMetrics.FractionsCount > 1 {

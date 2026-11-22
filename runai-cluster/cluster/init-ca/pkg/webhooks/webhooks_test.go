@@ -381,6 +381,10 @@ func TestCertificateChoice(t *testing.T) {
 			webhookName:    "runai-restartrequest-validation",
 			expectedChoice: anyworkloadControllerCert.CaBundle,
 		},
+		{
+			webhookName:    "runai-snapshot-restore",
+			expectedChoice: anyworkloadControllerCert.CaBundle,
+		},
 	}
 
 	for _, curTest := range tests {

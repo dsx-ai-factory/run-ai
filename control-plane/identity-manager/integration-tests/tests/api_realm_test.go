@@ -229,7 +229,7 @@ func TestReconcile_ServiceAccount_HappyFlow_ValidateFields(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, serviceAccountId)
 
-	reconcilerType, err := openapi.NewReconcilerTypeFromValue("apps")
+	reconcilerType, err := openapi.NewReconcilerTypeFromValue("serviceAccounts")
 	require.NoError(t, err)
 	err = TestStepsClient.ReconcileRealm(ctx, realmName, reconcilerType)
 	require.NoError(t, err)
@@ -243,7 +243,7 @@ func TestReconcile_ServiceAccount_HappyFlow_ValidateFields(t *testing.T) {
 	require.NotNil(t, serviceAccount.Attributes.UpdatedAt)
 	require.NotNil(t, serviceAccount.Attributes.CreatedAt)
 	require.Nil(t, serviceAccount.Attributes.LastLogin)
-	require.Equal(t, realm_client.ClientTypeTenantApp, *serviceAccount.Attributes.ClientType)
+	require.Equal(t, realm_client.ClientTypeServiceAccount, *serviceAccount.Attributes.ClientType)
 	require.Equal(t, createdByUser, *serviceAccount.Attributes.CreatedBy)
 }
 
@@ -254,12 +254,12 @@ func TestReconcile_ServiceAccount_NoServiceAccounts(t *testing.T) {
 	defer realmCleanup(t, ctx, realmName, true)
 	require.NoError(t, err)
 
-	reconcilerType, err := openapi.NewReconcilerTypeFromValue("apps")
+	reconcilerType, err := openapi.NewReconcilerTypeFromValue("serviceAccounts")
 	require.NoError(t, err)
 	err = TestStepsClient.ReconcileRealm(ctx, realmName, reconcilerType)
 	require.NoError(t, err)
 
-	serviceAccounts, err := IamServices.ClientService.GetClients(ctx, realmName, &models.ClientFilter{ClientType: ptr.To(realm_client.ClientTypeTenantApp), IsTenantAdmin: true})
+	serviceAccounts, err := IamServices.ClientService.GetClients(ctx, realmName, &models.ClientFilter{ClientType: ptr.To(realm_client.ClientTypeServiceAccount), IsTenantAdmin: true})
 	require.NoError(t, err)
 	require.Empty(t, serviceAccounts)
 }
@@ -286,14 +286,14 @@ func TestReconcile_ServiceAccount_RunReconcileAfterUpdate(t *testing.T) {
 		TenantId: ptr.To(tenantId),
 		Attributes: &models.ClientAttributes{
 			IsExternal: nil,
-			ClientType: ptr.To(realm_client.ClientTypeTenantApp),
+			ClientType: ptr.To(realm_client.ClientTypeServiceAccount),
 			CreatedBy:  ptr.To("test1@run.ai"),
 		},
 	}
 	err = IamServices.ClientService.UpdateClient(ctx, realmName, updatedServiceAccountClient)
 	require.NoError(t, err)
 
-	reconcilerType, err := openapi.NewReconcilerTypeFromValue("apps")
+	reconcilerType, err := openapi.NewReconcilerTypeFromValue("serviceAccounts")
 	require.NoError(t, err)
 	err = TestStepsClient.ReconcileRealm(ctx, realmName, reconcilerType)
 	require.NoError(t, err)
@@ -301,7 +301,7 @@ func TestReconcile_ServiceAccount_RunReconcileAfterUpdate(t *testing.T) {
 	updatedServiceAccount, err := IamServices.ClientService.GetClient(ctx, realmName, serviceAccountId)
 	require.NoError(t, err)
 	require.True(t, *updatedServiceAccount.Attributes.IsExternal)
-	require.Equal(t, realm_client.ClientTypeTenantApp, *updatedServiceAccount.Attributes.ClientType)
+	require.Equal(t, realm_client.ClientTypeServiceAccount, *updatedServiceAccount.Attributes.ClientType)
 	require.Equal(t, "test1@run.ai", *updatedServiceAccount.Attributes.CreatedBy)
 }
 
@@ -321,7 +321,7 @@ func TestReconcile_InternalClients_HappyFlow_ValidateFields(t *testing.T) {
 	require.NotNil(t, internalClients)
 	require.Len(t, internalClients, 1)
 
-	reconcilerType, err := openapi.NewReconcilerTypeFromValue("internalApps")
+	reconcilerType, err := openapi.NewReconcilerTypeFromValue("internalServiceAccounts")
 	require.NoError(t, err)
 	err = TestStepsClient.ReconcileRealm(ctx, realmName, reconcilerType)
 	require.NoError(t, err)

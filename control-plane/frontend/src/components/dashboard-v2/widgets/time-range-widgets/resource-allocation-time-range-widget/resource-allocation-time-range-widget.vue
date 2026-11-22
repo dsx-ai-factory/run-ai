@@ -58,7 +58,7 @@
 </template>
 <script lang="ts">
 import "@/plugins/echarts";
-import { defineComponent, type PropType } from "vue";
+import { defineComponent, markRaw, type PropType } from "vue";
 import VChart from "vue-echarts";
 
 import {
@@ -108,6 +108,7 @@ export enum EEmitName {
 }
 
 const DEPARTMENT_EMPTY_VALUE = "-1";
+const ALLOCATION_GRID_BOTTOM = 84;
 const RESOURCE_ALLOCATION_COLORS = {
   total: CHART_COLOR_PALETTE.BLUE,
   unallocated: CHART_COLOR_PALETTE.ORANGE,
@@ -175,6 +176,7 @@ export default defineComponent({
       measurementMap: {} as Record<string, Array<GroupedMeasurementResponseValuesInner>>,
       error: false as boolean,
       loading: false as boolean,
+      pendingChartData: null as Promise<void> | null,
       isInitialLoader: true as boolean,
       gpuQuotaTitle: "GPU quota (All departments)",
       timeframes: [] as Array<string>,
@@ -188,6 +190,11 @@ export default defineComponent({
     this.startRefreshLoadData();
   },
   computed: {
+    hasGpuQuotaData(): boolean {
+      return !!this.measurementMap[MetricsType.GpuQuota]?.some(
+        (measurement) => measurement.value !== DEPARTMENT_EMPTY_VALUE,
+      );
+    },
     resourceAllocationLegendItems(): Array<IResourceAllocationLegendItem> {
       if (this.orgUnitMetricSource) {
         return [
@@ -200,9 +207,11 @@ export default defineComponent({
         { name: "GPU devices (total)", color: RESOURCE_ALLOCATION_COLORS.total, marker: "dash" },
         { name: "GPU devices (unallocated)", color: RESOURCE_ALLOCATION_COLORS.unallocated, marker: "circle" },
         { name: "GPU devices (allocated)", color: RESOURCE_ALLOCATION_COLORS.allocated, marker: "circle" },
-        { name: this.gpuQuotaTitle, color: RESOURCE_ALLOCATION_COLORS.quota, marker: "dash" },
       ];
-      return items.filter((item) => item.name);
+      if (this.hasGpuQuotaData) {
+        items.push({ name: this.gpuQuotaTitle, color: RESOURCE_ALLOCATION_COLORS.quota, marker: "dash" });
+      }
+      return items;
     },
   },
   methods: {
@@ -253,7 +262,7 @@ export default defineComponent({
           RESOURCE_ALLOCATION_COLORS.allocated,
           RESOURCE_ALLOCATION_COLORS.quota,
         ],
-        grid: { left: 54, right: 20, top: 36, bottom: 84 },
+        grid: { left: 54, right: 20, top: 36, bottom: ALLOCATION_GRID_BOTTOM },
         xAxis: this.getXAxisOptions(),
         yAxis: {
           type: "value",
@@ -269,6 +278,7 @@ export default defineComponent({
         tooltip: {
           trigger: "axis",
           ...STANDARD_TOOLTIP_STYLE,
+          position: chartUtil.getTooltipPositionAboveXAxis(ALLOCATION_GRID_BOTTOM),
           axisPointer: {
             ...chartUtil.getConnectedChartAxisPointer(),
           },
@@ -320,7 +330,11 @@ export default defineComponent({
 
       return differenceArray;
     },
-    async loadChartData(): Promise<void> {
+    loadChartData(): Promise<void> {
+      this.pendingChartData = markRaw(this.fetchChartData());
+      return this.pendingChartData;
+    },
+    async fetchChartData(): Promise<void> {
       if (this.chartOptions === null) return;
 
       try {
@@ -389,17 +403,34 @@ export default defineComponent({
         this.$q.notify(dashboardUtil.getCsvErrorMessage());
         return;
       }
-      const metricType: Array<MetricsType> = [MetricsType.TotalGpu, MetricsType.AllocatedGpu, MetricsType.GpuQuota];
+      await this.pendingChartData;
+      const metricType: Array<MetricsType> = [MetricsType.TotalGpu, MetricsType.AllocatedGpu];
+      if (this.hasGpuQuotaData) {
+        metricType.push(MetricsType.GpuQuota);
+      }
 
       try {
         const samples = this.timeframes.length;
-        await clusterService.getClusterMetricsCsv(
-          this.clusterId,
-          dateUtil.convertDateToISO(this.filterByDates.dateStart),
-          dateUtil.convertDateToISO(this.filterByDates.dateEnd),
-          metricType,
-          samples,
+        const start = dateUtil.convertDateToISO(this.filterByDates.dateStart);
+        const end = dateUtil.convertDateToISO(this.filterByDates.dateEnd);
+        const filename = dashboardUtil.getCsvFileName(
+          this.wrapperOptions.title ?? "",
+          this.clusterStore.clusterNameByUuid(this.clusterId),
+          this.nodePoolName,
         );
+        if (this.nodePoolName) {
+          await clusterService.getNodepoolMetricsCsv(
+            this.clusterId,
+            this.nodePoolName,
+            start,
+            end,
+            metricType,
+            samples,
+            filename,
+          );
+        } else {
+          await clusterService.getClusterMetricsCsv(this.clusterId, start, end, metricType, samples, filename);
+        }
       } catch (error: unknown) {
         this.$q.notify(dashboardUtil.getCsvErrorMessage());
         console.error(error);

@@ -496,7 +496,6 @@ func BuildSettingDefinitions(deps *OnSetDeps) map[string]SettingDefinition {
 				boolVal, _ := value.(bool)
 				if !boolVal && deps.SettingsDao != nil {
 					if err := deps.SettingsDao.Set(ctx, tenantID, map[string]interface{}{
-						SettingKeyEnableTemplatesV2: false,
 						SettingKeyEnableDataVolumes: false,
 					}); err != nil {
 						return nil, fmt.Errorf("failed to update tenant settings: %w", err)
@@ -505,28 +504,6 @@ func BuildSettingDefinitions(deps *OnSetDeps) map[string]SettingDefinition {
 				if deps.WorkloadsUpdater != nil {
 					if err := deps.WorkloadsUpdater.UpdateSetting(ctx, tenantID, SettingKeyEnableHybridSubmission, value); err != nil {
 						return nil, fmt.Errorf("failed to update EnableHybridSubmission in workloads service: %w", err)
-					}
-				}
-				return nil, nil
-			},
-		},
-		{
-			Key:      SettingKeyEnableTemplatesV2,
-			Source:   SourceTenant,
-			Category: CategoryTenant,
-			Description: "Enable to create workload templates via the new flexible form. " +
-				"For more information, see the <a data-doc-key='workloadTemplates' target='_blank'>Workload Templates guide</a>",
-			Label:                       "Flexible workload templates",
-			Type:                        TypeBoolean,
-			Privilege:                   PrivilegeAdmin,
-			DefaultValue:                true,
-			Validate:                    ValidateBoolean,
-			MinimumSingleClusterVersion: "2.22",
-			Migrated:                    true,
-			OnSet: func(ctx context.Context, tenantID int, value interface{}) (*OnSetResult, error) {
-				if deps.WorkloadsUpdater != nil {
-					if err := deps.WorkloadsUpdater.UpdateSetting(ctx, tenantID, SettingKeyEnableTemplatesV2, value); err != nil {
-						return nil, fmt.Errorf("failed to update EnableTemplatesV2 in workloads service: %w", err)
 					}
 				}
 				return nil, nil

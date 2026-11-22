@@ -675,6 +675,127 @@ func (_c *AIApplicationsAPI_GetApplicationExecute_Call) RunAndReturn(run func(r 
 	return _c
 }
 
+// InspectApplicationChart provides a mock function for the type AIApplicationsAPI
+func (_mock *AIApplicationsAPI) InspectApplicationChart(ctx context.Context) openapi.ApiInspectApplicationChartRequest {
+	ret := _mock.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for InspectApplicationChart")
+	}
+
+	var r0 openapi.ApiInspectApplicationChartRequest
+	if returnFunc, ok := ret.Get(0).(func(context.Context) openapi.ApiInspectApplicationChartRequest); ok {
+		r0 = returnFunc(ctx)
+	} else {
+		r0 = ret.Get(0).(openapi.ApiInspectApplicationChartRequest)
+	}
+	return r0
+}
+
+// AIApplicationsAPI_InspectApplicationChart_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InspectApplicationChart'
+type AIApplicationsAPI_InspectApplicationChart_Call struct {
+	*mock.Call
+}
+
+// InspectApplicationChart is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *AIApplicationsAPI_Expecter) InspectApplicationChart(ctx any) *AIApplicationsAPI_InspectApplicationChart_Call {
+	return &AIApplicationsAPI_InspectApplicationChart_Call{Call: _e.mock.On("InspectApplicationChart", ctx)}
+}
+
+func (_c *AIApplicationsAPI_InspectApplicationChart_Call) Run(run func(ctx context.Context)) *AIApplicationsAPI_InspectApplicationChart_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *AIApplicationsAPI_InspectApplicationChart_Call) Return(apiInspectApplicationChartRequest openapi.ApiInspectApplicationChartRequest) *AIApplicationsAPI_InspectApplicationChart_Call {
+	_c.Call.Return(apiInspectApplicationChartRequest)
+	return _c
+}
+
+func (_c *AIApplicationsAPI_InspectApplicationChart_Call) RunAndReturn(run func(ctx context.Context) openapi.ApiInspectApplicationChartRequest) *AIApplicationsAPI_InspectApplicationChart_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// InspectApplicationChartExecute provides a mock function for the type AIApplicationsAPI
+func (_mock *AIApplicationsAPI) InspectApplicationChartExecute(r openapi.ApiInspectApplicationChartRequest) (*openapi.AIApplicationChartInspectionResponse, *http.Response, error) {
+	ret := _mock.Called(r)
+
+	if len(ret) == 0 {
+		panic("no return value specified for InspectApplicationChartExecute")
+	}
+
+	var r0 *openapi.AIApplicationChartInspectionResponse
+	var r1 *http.Response
+	var r2 error
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiInspectApplicationChartRequest) (*openapi.AIApplicationChartInspectionResponse, *http.Response, error)); ok {
+		return returnFunc(r)
+	}
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiInspectApplicationChartRequest) *openapi.AIApplicationChartInspectionResponse); ok {
+		r0 = returnFunc(r)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.AIApplicationChartInspectionResponse)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(openapi.ApiInspectApplicationChartRequest) *http.Response); ok {
+		r1 = returnFunc(r)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*http.Response)
+		}
+	}
+	if returnFunc, ok := ret.Get(2).(func(openapi.ApiInspectApplicationChartRequest) error); ok {
+		r2 = returnFunc(r)
+	} else {
+		r2 = ret.Error(2)
+	}
+	return r0, r1, r2
+}
+
+// AIApplicationsAPI_InspectApplicationChartExecute_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InspectApplicationChartExecute'
+type AIApplicationsAPI_InspectApplicationChartExecute_Call struct {
+	*mock.Call
+}
+
+// InspectApplicationChartExecute is a helper method to define mock.On call
+//   - r openapi.ApiInspectApplicationChartRequest
+func (_e *AIApplicationsAPI_Expecter) InspectApplicationChartExecute(r any) *AIApplicationsAPI_InspectApplicationChartExecute_Call {
+	return &AIApplicationsAPI_InspectApplicationChartExecute_Call{Call: _e.mock.On("InspectApplicationChartExecute", r)}
+}
+
+func (_c *AIApplicationsAPI_InspectApplicationChartExecute_Call) Run(run func(r openapi.ApiInspectApplicationChartRequest)) *AIApplicationsAPI_InspectApplicationChartExecute_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 openapi.ApiInspectApplicationChartRequest
+		if args[0] != nil {
+			arg0 = args[0].(openapi.ApiInspectApplicationChartRequest)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *AIApplicationsAPI_InspectApplicationChartExecute_Call) Return(aIApplicationChartInspectionResponse *openapi.AIApplicationChartInspectionResponse, response *http.Response, err error) *AIApplicationsAPI_InspectApplicationChartExecute_Call {
+	_c.Call.Return(aIApplicationChartInspectionResponse, response, err)
+	return _c
+}
+
+func (_c *AIApplicationsAPI_InspectApplicationChartExecute_Call) RunAndReturn(run func(r openapi.ApiInspectApplicationChartRequest) (*openapi.AIApplicationChartInspectionResponse, *http.Response, error)) *AIApplicationsAPI_InspectApplicationChartExecute_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListApplications provides a mock function for the type AIApplicationsAPI
 func (_mock *AIApplicationsAPI) ListApplications(ctx context.Context) openapi.ApiListApplicationsRequest {
 	ret := _mock.Called(ctx)

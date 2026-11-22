@@ -29,8 +29,14 @@ describe("filter.util", () => {
 
     const result = filterUtil.getFreeTextFilterQuery(name, term, label, operator);
 
-    expect(result).toBe(
-      `{ "name": "${name}", "term": "${term}", "label": "${label}", "value": "${operator}", "type": "${EColumnFilterType.FreeText}" }`,
-    );
+    expect(JSON.parse(result)).toEqual({ name, term, label, value: operator, type: EColumnFilterType.FreeText });
+  });
+
+  test("getFreeTextFilterQuery escapes quotes in the term", () => {
+    const term = 'gpu"batch';
+
+    const result = filterUtil.getFreeTextFilterQuery("nodepool", term, "Node pool", EFilterOperator.Equals);
+
+    expect(JSON.parse(result).term).toBe(term);
   });
 });

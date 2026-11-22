@@ -28,7 +28,7 @@ Dependencies
 
 | Package | Version | License | License source |
 |---------|---------|---------|----------------|
-| `cel.dev/expr` | v0.25.2 | Apache-2.0 | https://pkg.go.dev/cel.dev/expr@v0.25.2?tab=licenses |
+| `cel.dev/expr` | v0.25.3 | Apache-2.0 | https://pkg.go.dev/cel.dev/expr@v0.25.3?tab=licenses |
 | `dario.cat/mergo` | v1.0.1 | BSD-3-Clause | https://pkg.go.dev/dario.cat/mergo@v1.0.1?tab=licenses |
 | `github.com/BurntSushi/toml` | v1.6.0 | MIT | https://github.com/BurntSushi/toml/blob/v1.6.0/COPYING |
 | `github.com/MakeNowJust/heredoc` | v1.0.0 | MIT | https://github.com/MakeNowJust/heredoc/blob/v1.0.0/LICENSE |
@@ -78,7 +78,7 @@ Dependencies
 | `github.com/go-openapi/swag/yamlutils` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/yamlutils/v0.29.2/yamlutils/LICENSE |
 | `github.com/go-playground/locales` | v0.14.2 | MIT | https://github.com/go-playground/locales/blob/v0.14.2/LICENSE |
 | `github.com/go-playground/universal-translator` | v0.18.2 | MIT | https://github.com/go-playground/universal-translator/blob/v0.18.2/LICENSE |
-| `github.com/go-playground/validator/v10` | v10.30.5 | MIT | https://github.com/go-playground/validator/blob/v10.30.5/LICENSE |
+| `github.com/go-playground/validator/v10` | v10.30.6 | MIT | https://github.com/go-playground/validator/blob/v10.30.6/LICENSE |
 | `github.com/go-viper/mapstructure/v2` | v2.5.0 | MIT | https://pkg.go.dev/github.com/go-viper/mapstructure/v2@v2.5.0?tab=licenses |
 | `github.com/gobwas/glob` | v0.2.3 | MIT | https://github.com/gobwas/glob/blob/v0.2.3/LICENSE |
 | `github.com/google/btree` | v1.1.3 | Apache-2.0 | https://github.com/google/btree/blob/v1.1.3/LICENSE |
@@ -101,7 +101,7 @@ Dependencies
 | `github.com/leodido/go-urn` | v1.5.0 | MIT | https://github.com/leodido/go-urn/blob/v1.5.0/LICENSE |
 | `github.com/lib/pq` | v1.12.3 | MIT | https://github.com/lib/pq/blob/v1.12.3/LICENSE |
 | `github.com/liggitt/tabwriter` | v0.0.0-20181228230101-89fcab3d43de | BSD-3-Clause | https://github.com/liggitt/tabwriter/blob/89fcab3d43de/LICENSE |
-| `github.com/mattn/go-colorable` | v0.1.15 | MIT | https://github.com/mattn/go-colorable/blob/v0.1.15/LICENSE |
+| `github.com/mattn/go-colorable` | v0.1.16 | MIT | https://github.com/mattn/go-colorable/blob/v0.1.16/LICENSE |
 | `github.com/mattn/go-isatty` | v0.0.24 | MIT | https://github.com/mattn/go-isatty/blob/v0.0.24/LICENSE |
 | `github.com/mattn/go-runewidth` | v0.0.9 | MIT | https://github.com/mattn/go-runewidth/blob/v0.0.9/LICENSE |
 | `github.com/mitchellh/copystructure` | v1.2.0 | MIT | https://github.com/mitchellh/copystructure/blob/v1.2.0/LICENSE |
@@ -137,11 +137,11 @@ Dependencies
 | `github.com/russross/blackfriday/v2` | v2.1.0 | BSD-2-Clause | https://pkg.go.dev/github.com/russross/blackfriday/v2@v2.1.0?tab=licenses |
 | `github.com/sagikazarmark/locafero` | v0.12.0 | MIT | https://github.com/sagikazarmark/locafero/blob/v0.12.0/LICENSE |
 | `github.com/santhosh-tekuri/jsonschema/v6` | v6.0.2 | Apache-2.0 | https://pkg.go.dev/github.com/santhosh-tekuri/jsonschema/v6@v6.0.2?tab=licenses |
-| `github.com/shopspring/decimal` | v1.5.0 | MIT | https://github.com/shopspring/decimal/blob/v1.5.0/LICENSE |
+| `github.com/shopspring/decimal` | v1.6.0 | MIT | https://github.com/shopspring/decimal/blob/v1.6.0/LICENSE |
 | `github.com/spf13/afero` | v1.15.0 | Apache-2.0 | https://github.com/spf13/afero/blob/v1.15.0/LICENSE.txt |
 | `github.com/spf13/cast` | v1.10.0 | MIT | https://github.com/spf13/cast/blob/v1.10.0/LICENSE |
 | `github.com/spf13/cobra` | v1.10.2 | Apache-2.0 | https://github.com/spf13/cobra/blob/v1.10.2/LICENSE.txt |
-| `github.com/spf13/pflag` | v1.0.10 | BSD-3-Clause | https://github.com/spf13/pflag/blob/v1.0.10/LICENSE |
+| `github.com/spf13/pflag` | v1.1.0 | BSD-3-Clause | https://github.com/spf13/pflag/blob/v1.1.0/LICENSE |
 | `github.com/spf13/viper` | v1.21.0 | MIT | https://github.com/spf13/viper/blob/v1.21.0/LICENSE |
 | `github.com/subosito/gotenv` | v1.6.0 | MIT | https://github.com/subosito/gotenv/blob/v1.6.0/LICENSE |
 | `github.com/x448/float16` | v0.8.4 | MIT | https://github.com/x448/float16/blob/v0.8.4/LICENSE |
@@ -156,7 +156,7 @@ Dependencies
 | `go.uber.org/multierr` | v1.11.0 | MIT | https://pkg.go.dev/go.uber.org/multierr@v1.11.0?tab=licenses |
 | `go.uber.org/zap` | v1.28.0 | MIT | https://pkg.go.dev/go.uber.org/zap@v1.28.0?tab=licenses |
 | `go.yaml.in/yaml/v2` | v2.4.4 | Apache-2.0 | https://pkg.go.dev/go.yaml.in/yaml/v2@v2.4.4?tab=licenses |
-| `go.yaml.in/yaml/v3` | v3.0.5 | MIT | https://pkg.go.dev/go.yaml.in/yaml/v3@v3.0.5?tab=licenses |
+| `go.yaml.in/yaml/v3` | v3.0.6 | MIT | https://pkg.go.dev/go.yaml.in/yaml/v3@v3.0.6?tab=licenses |
 | `golang.org/x/crypto` | v0.58.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/crypto@v0.58.0?tab=licenses |
 | `golang.org/x/exp` | v0.0.0-20261014143641-f0251eb4aa3e | BSD-3-Clause | https://pkg.go.dev/golang.org/x/exp@v0.0.0-20261014143641-f0251eb4aa3e?tab=licenses |
 | `golang.org/x/net` | v0.61.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/net@v0.61.0?tab=licenses |
@@ -167,9 +167,9 @@ Dependencies
 | `golang.org/x/text` | v0.43.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/text@v0.43.0?tab=licenses |
 | `golang.org/x/time/rate` | v0.15.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/time@v0.15.0?tab=licenses |
 | `gomodules.xyz/jsonpatch/v2` | v2.5.0 | Apache-2.0 | https://pkg.go.dev/gomodules.xyz/jsonpatch/v2@v2.5.0?tab=licenses |
-| `google.golang.org/genproto/googleapis/api/expr/v1alpha1` | v0.0.0-20261012220534-4341edf3f941 | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/api@v0.0.0-20261012220534-4341edf3f941?tab=licenses |
-| `google.golang.org/genproto/googleapis/rpc/status` | v0.0.0-20261012220534-4341edf3f941 | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/rpc@v0.0.0-20261012220534-4341edf3f941?tab=licenses |
-| `google.golang.org/grpc` | v1.84.0 | Apache-2.0 | https://pkg.go.dev/google.golang.org/grpc@v1.84.0?tab=licenses |
+| `google.golang.org/genproto/googleapis/api/expr/v1alpha1` | v0.0.0-20261104224025-d1e00e9f33ab | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/api@v0.0.0-20261104224025-d1e00e9f33ab?tab=licenses |
+| `google.golang.org/genproto/googleapis/rpc/status` | v0.0.0-20261104224025-d1e00e9f33ab | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/rpc@v0.0.0-20261104224025-d1e00e9f33ab?tab=licenses |
+| `google.golang.org/grpc` | v1.85.0 | Apache-2.0 | https://pkg.go.dev/google.golang.org/grpc@v1.85.0?tab=licenses |
 | `google.golang.org/protobuf` | v1.36.12 | BSD-3-Clause | https://pkg.go.dev/google.golang.org/protobuf@v1.36.12?tab=licenses |
 | `gopkg.in/evanphx/json-patch.v4` | v4.13.0 | BSD-3-Clause | https://pkg.go.dev/gopkg.in/evanphx/json-patch.v4@v4.13.0?tab=licenses |
 | `gopkg.in/inf.v0` | v0.9.1 | BSD-3-Clause | https://pkg.go.dev/gopkg.in/inf.v0@v0.9.1?tab=licenses |
@@ -208,9 +208,9 @@ Dependencies
 | `k8s.io/kubernetes/third_party/forked/libcontainer/apparmor` | v1.36.2 | Apache-2.0 | https://pkg.go.dev/k8s.io/kubernetes@v1.36.2?tab=licenses |
 | `k8s.io/mount-utils` | v0.36.2 | Apache-2.0 | https://pkg.go.dev/k8s.io/mount-utils@v0.36.2?tab=licenses |
 | `k8s.io/streaming/pkg` | v0.36.2 | Apache-2.0 | https://pkg.go.dev/k8s.io/streaming@v0.36.2?tab=licenses |
-| `k8s.io/utils` | v0.0.0-20260626114624-be93311217bd | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20260626114624-be93311217bd?tab=licenses |
-| `k8s.io/utils/internal/third_party/forked/golang` | v0.0.0-20260626114624-be93311217bd | BSD-3-Clause | https://pkg.go.dev/k8s.io/utils@v0.0.0-20260626114624-be93311217bd?tab=licenses |
-| `k8s.io/utils/third_party/forked/golang/btree` | v0.0.0-20260626114624-be93311217bd | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20260626114624-be93311217bd?tab=licenses |
+| `k8s.io/utils` | v0.0.0-20261023123148-ca04ba58ecab | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20261023123148-ca04ba58ecab?tab=licenses |
+| `k8s.io/utils/internal/third_party/forked/golang` | v0.0.0-20261023123148-ca04ba58ecab | BSD-3-Clause | https://pkg.go.dev/k8s.io/utils@v0.0.0-20261023123148-ca04ba58ecab?tab=licenses |
+| `k8s.io/utils/third_party/forked/golang/btree` | v0.0.0-20261023123148-ca04ba58ecab | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20261023123148-ca04ba58ecab?tab=licenses |
 | `oras.land/oras-go/v2` | v2.6.2 | Apache-2.0 | https://pkg.go.dev/oras.land/oras-go/v2@v2.6.2?tab=licenses |
 | `sigs.k8s.io/controller-runtime` | v0.24.1 | Apache-2.0 | https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.24.1?tab=licenses |
 | `sigs.k8s.io/gateway-api/apis/v1` | v1.5.0 | Apache-2.0 | https://pkg.go.dev/sigs.k8s.io/gateway-api@v1.5.0?tab=licenses |
@@ -16614,7 +16614,7 @@ SoundCloud Ltd. (http://soundcloud.com/).
 --------------------------------------------------------------------------------
 Notice of:
   - `go.yaml.in/yaml/v2` v2.4.4
-  - `go.yaml.in/yaml/v3` v3.0.5
+  - `go.yaml.in/yaml/v3` v3.0.6
   - `gopkg.in/yaml.v3` v3.0.1
 --------------------------------------------------------------------------------
 
@@ -16634,7 +16634,7 @@ limitations under the License.
 
 --------------------------------------------------------------------------------
 Notice of:
-  - `google.golang.org/grpc` v1.84.0
+  - `google.golang.org/grpc` v1.85.0
 --------------------------------------------------------------------------------
 
 Copyright 2014 gRPC authors.

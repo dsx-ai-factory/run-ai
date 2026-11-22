@@ -1216,6 +1216,100 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 			testAccessRulesFilter(ctx, accessRulesApiService, "", "", filters, 5, false, "")
 		})
 	})
+	Context("Get access rules sync - role renamed in place", func() {
+		// migrateDeprecatedRoleNames renames the role in the control plane, but the
+		// ClusterRole shipped in the cluster chart keeps its original name, and the renamed name is
+		// not even a legal Kubernetes name. The sync must therefore keep reporting the un-renamed
+		// role as the cluster-facing predefined role, so the agent generates the same object name as
+		// before the upgrade and the role still resolves on the cluster.
+		BeforeEach(func() {
+			SetAncestorsCache(ctx, TestScopeId, api.RESOURCETYPE_PROJECT, &authorization_utils.Ancestors{
+				TenantId: tenantId,
+			})
+
+			legacyRoleAccessRuleBody := api.AccessRuleCreationFields{
+				ScopeId:     TestScopeId,
+				ScopeType:   api.SCOPETYPE_PROJECT,
+				SubjectId:   TestUser2Id,
+				SubjectType: api.SUBJECTTYPE_USER,
+				RoleId:      int32(RolesMap[static_roles.DepartmentAdminLegacy.Name]),
+			}
+			createTestAccessRule(ctx, accessRulesApiService, legacyRoleAccessRuleBody, &createdAccessRules, false, http.StatusCreated)
+		})
+
+		It("reports the un-renamed role as the predefined role", func() {
+			apiResponse, _ := accessRulesApiService.GetAccessRulesSync(ctx, 0, 0, "", "")
+			Expect(apiResponse.Code).To(Equal(http.StatusOK))
+
+			accessRules := httpResponseBodyToAccessRulesSync(apiResponse).AccessRules
+			legacyRoleId := int32(RolesMap[static_roles.DepartmentAdminLegacy.Name])
+
+			foundLegacyRule := false
+			for _, rule := range accessRules {
+				if rule.RoleId != legacyRoleId {
+					continue
+				}
+				foundLegacyRule = true
+
+				Expect(rule.RoleName).To(Equal(static_roles.DepartmentAdminLegacy.Name),
+					"the display name the UI shows must not change")
+				Expect(rule.PredefinedRole).NotTo(BeNil(),
+					"a renamed role must report a cluster-facing predefined role")
+				Expect((*rule.PredefinedRole).Name).To(Equal(static_roles.DepartmentAdmin.Name),
+					"the cluster-facing name must be the one the cluster chart has a ClusterRole for")
+			}
+			Expect(foundLegacyRule).To(BeTrue(), "the access rule on the renamed role should be in the sync response")
+		})
+	})
+	Context("Get access rules sync - custom role", func() {
+		// A custom role gets its cluster permissions only from a predefined role. Without one it has
+		// no ClusterRole on the cluster, and the sync must say so or the cluster fails the access rule.
+		var controlPlaneOnlyRole *api.Role
+
+		BeforeEach(func() {
+			SetAncestorsCache(ctx, TestScopeId, api.RESOURCETYPE_PROJECT, &authorization_utils.Ancestors{
+				TenantId: tenantId,
+			})
+
+			controlPlaneOnlyRole = createTestRole(ctx, rolesApiService, api.RoleCreationFieldsInternal{
+				Name:        "control plane only role",
+				Description: "has no kubernetes permissions",
+				Permissions: []api.PostPermission{{
+					ResourceType: api.RESOURCETYPE_PROJECT,
+					Actions:      []api.Action{api.ACTION_READ},
+				}},
+			}, &createdRoles, false, http.StatusCreated)
+
+			for _, roleId := range []int32{controlPlaneOnlyRole.Id, int32(RolesMap[static_roles.DepartmentAdmin.Name])} {
+				createTestAccessRule(ctx, accessRulesApiService, api.AccessRuleCreationFields{
+					ScopeId:     TestScopeId,
+					ScopeType:   api.SCOPETYPE_PROJECT,
+					SubjectId:   TestUser2Id,
+					SubjectType: api.SUBJECTTYPE_USER,
+					RoleId:      roleId,
+				}, &createdAccessRules, false, http.StatusCreated)
+			}
+		})
+
+		It("marks only a custom role with no predefined role", func() {
+			apiResponse, err := accessRulesApiService.GetAccessRulesSync(ctx, 0, 0, "", "")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(apiResponse.Code).To(Equal(http.StatusOK))
+
+			clusterRoleOptionalByRoleId := map[int32]bool{}
+			for _, rule := range httpResponseBodyToAccessRulesSync(apiResponse).AccessRules {
+				clusterRoleOptionalByRoleId[rule.RoleId] = rule.ClusterRoleOptional
+			}
+
+			Expect(clusterRoleOptionalByRoleId).To(HaveKeyWithValue(controlPlaneOnlyRole.Id, true),
+				"a custom role with no predefined role has no ClusterRole")
+			Expect(clusterRoleOptionalByRoleId).To(HaveKeyWithValue(createdRoles[0].Id, false),
+				"a custom role with a predefined role binds to that role's ClusterRole")
+			Expect(clusterRoleOptionalByRoleId).To(HaveKeyWithValue(int32(RolesMap[static_roles.DepartmentAdmin.Name]), false),
+				"a predefined role has its own ClusterRole")
+		})
+	})
+
 	Context("Get access rules sync", func() {
 		BeforeEach(func() {
 			accessRule2Body := api.AccessRuleCreationFields{
@@ -1290,6 +1384,10 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 					Expect(rule.PredefinedRole).NotTo(BeNil())
 					Expect((*rule.PredefinedRole).Id).To(Equal(fmt.Sprintf("%d", dao.MapStaticRoleNameToRoleId[static_legacy_roles.ResearcherL1.Name])))
 					Expect((*rule.PredefinedRole).Name).To(Equal(static_legacy_roles.ResearcherL1.Name))
+				} else if clusterFacingRole, renamed := dao.RoleToClusterRoleMap[rule.RoleName]; renamed {
+					Expect(rule.PredefinedRole).NotTo(BeNil())
+					Expect((*rule.PredefinedRole).Name).To(Equal(clusterFacingRole))
+					Expect((*rule.PredefinedRole).Id).To(Equal(fmt.Sprintf("%d", dao.MapStaticRoleNameToRoleId[clusterFacingRole])))
 				} else {
 					Expect(rule.PredefinedRole).To(BeNil())
 				}
@@ -1309,10 +1407,15 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 					Expect((*rule.PredefinedRole).Name).To(Equal(static_legacy_roles.ResearcherL1.Name))
 				} else {
 					mappedRule, found := NewToLegacyRolesMap[rule.RoleName]
+					clusterFacingRole, renamed := dao.RoleToClusterRoleMap[rule.RoleName]
 					if found {
 						Expect(rule.PredefinedRole).NotTo(BeNil())
 						Expect((*rule.PredefinedRole).Name).To(Equal(mappedRule))
 						Expect((*rule.PredefinedRole).Id).To(Equal(fmt.Sprintf("%d", dao.MapStaticRoleNameToRoleId[mappedRule])))
+					} else if renamed {
+						Expect(rule.PredefinedRole).NotTo(BeNil())
+						Expect((*rule.PredefinedRole).Name).To(Equal(clusterFacingRole))
+						Expect((*rule.PredefinedRole).Id).To(Equal(fmt.Sprintf("%d", dao.MapStaticRoleNameToRoleId[clusterFacingRole])))
 					} else {
 						Expect(rule.PredefinedRole).To(BeNil())
 					}

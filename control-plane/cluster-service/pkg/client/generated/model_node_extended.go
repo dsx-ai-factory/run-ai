@@ -24,6 +24,8 @@ var _ MappedNullable = &NodeExtended{}
 
 // NodeExtended struct for NodeExtended
 type NodeExtended struct {
+	// Labels assigned to the node.
+	Labels *map[string]string `json:"labels,omitempty"`
 	// The calculated status of the node.
 	Status     string                       `json:"status"`
 	Conditions []NodeStatusConditionDetails `json:"conditions,omitempty"`
@@ -71,6 +73,38 @@ func NewNodeExtended(status string, nodePool string, createdAt time.Time, name s
 func NewNodeExtendedWithDefaults() *NodeExtended {
 	this := NodeExtended{}
 	return &this
+}
+
+// GetLabels returns the Labels field value if set, zero value otherwise.
+func (o *NodeExtended) GetLabels() map[string]string {
+	if o == nil || IsNil(o.Labels) {
+		var ret map[string]string
+		return ret
+	}
+	return *o.Labels
+}
+
+// GetLabelsOk returns a tuple with the Labels field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *NodeExtended) GetLabelsOk() (*map[string]string, bool) {
+	if o == nil || IsNil(o.Labels) {
+		return nil, false
+	}
+	return o.Labels, true
+}
+
+// HasLabels returns a boolean if a field has been set.
+func (o *NodeExtended) HasLabels() bool {
+	if o != nil && !IsNil(o.Labels) {
+		return true
+	}
+
+	return false
+}
+
+// SetLabels gets a reference to the given map[string]string and assigns it to the Labels field.
+func (o *NodeExtended) SetLabels(v map[string]string) {
+	o.Labels = &v
 }
 
 // GetStatus returns the Status field value
@@ -517,6 +551,9 @@ func (o NodeExtended) MarshalJSON() ([]byte, error) {
 
 func (o NodeExtended) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.Labels) {
+		toSerialize["labels"] = o.Labels
+	}
 	toSerialize["status"] = o.Status
 	if !IsNil(o.Conditions) {
 		toSerialize["conditions"] = o.Conditions

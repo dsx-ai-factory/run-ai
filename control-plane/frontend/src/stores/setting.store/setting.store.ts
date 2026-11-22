@@ -23,7 +23,6 @@ import type {
   IEnableModelCatalogSetting,
   IEnablePoliciesSetting,
   IEnableHybridSubmissionSetting,
-  IEnableTemplatesV2Setting,
   IGpuOverProvisioningSetting,
   IEnableNgcIntegrationSetting,
   IEnableDataVolumesSetting,
@@ -54,7 +53,6 @@ interface SettingStoreState {
   bannerConfig: GetBannerConfigValue | undefined;
   enablePolicies: IEnablePoliciesSetting;
   enableHybridSubmission: IEnableHybridSubmissionSetting;
-  enableTemplatesV2: IEnableTemplatesV2Setting;
   gpuOverProvisioning: IGpuOverProvisioningSetting;
   enableNgcIntegration: IEnableNgcIntegrationSetting;
   enableDataVolumes: IEnableDataVolumesSetting;
@@ -71,7 +69,6 @@ const bffSettingsState: Record<string, keyof SettingStoreState> = {
   [SettingKeys.EnableModelCatalog]: "enableModelCatalog",
   [SettingKeys.EnablePolicies]: "enablePolicies",
   [SettingKeys.EnableHybridSubmission]: "enableHybridSubmission",
-  [SettingKeys.EnableTemplatesV2]: "enableTemplatesV2",
   [SettingKeys.GpuOverProvisioning]: "gpuOverProvisioning",
   [SettingKeys.EnableNgcIntegration]: "enableNgcIntegration",
   [SettingKeys.EnableDataVolumes]: "enableDataVolumes",
@@ -89,7 +86,6 @@ const bffSettingsUpdaters: Record<string, (store: ReturnType<typeof useSettingSt
   [SettingKeys.EnableModelCatalog]: (store) => (value) => store.updateEnableModelCatalog(value),
   [SettingKeys.EnablePolicies]: (store) => (value) => store.updateEnablePolicies(value),
   [SettingKeys.EnableHybridSubmission]: (store) => (value) => store.updateEnableHybridSubmission(value),
-  [SettingKeys.EnableTemplatesV2]: (store) => (value) => store.updateEnableTemplatesV2(value),
   [SettingKeys.GpuOverProvisioning]: (store) => (value) => store.updateGpuOverProvisioning(value),
   [SettingKeys.EnableNgcIntegration]: (store) => (value) => store.updateEnableNgcIntegration(value),
   [SettingKeys.EnableDataVolumes]: (store) => (value) => store.updateEnableDataVolumes(value),
@@ -107,9 +103,6 @@ const migratedSettingsRefreshers: Record<string, MigratedSettingRefresher> = {
   },
   [SettingKeys.EnableHybridSubmission]: async (store) => {
     store.enableHybridSubmission = await workloadsServiceSettingsService.getEnableHybridSubmission();
-  },
-  [SettingKeys.EnableTemplatesV2]: async (store) => {
-    store.enableTemplatesV2 = await workloadsServiceSettingsService.getEnableTemplatesV2();
   },
   [SettingKeys.GpuOverProvisioning]: async (store) => {
     store.gpuOverProvisioning = await workloadsServiceSettingsService.getGpuOverProvisioning();
@@ -148,7 +141,6 @@ export const useSettingStore = defineStore("Setting", {
     bannerConfig: undefined,
     enablePolicies: { value: false },
     enableHybridSubmission: { value: false },
-    enableTemplatesV2: { value: false },
     gpuOverProvisioning: { value: false },
     enableNgcIntegration: { value: false },
     enableDataVolumes: { value: false },
@@ -267,7 +259,6 @@ export const useSettingStore = defineStore("Setting", {
         const settings = await workloadsServiceSettingsService.getAll();
         this.enablePolicies = settings.enablePolicies;
         this.enableHybridSubmission = settings.enableHybridSubmission;
-        this.enableTemplatesV2 = settings.enableTemplatesV2;
         this.gpuOverProvisioning = settings.gpuOverProvisioning;
       } catch (error) {
         console.warn("Failed to load workloads service settings:", error);
@@ -331,16 +322,6 @@ export const useSettingStore = defineStore("Setting", {
         await workloadsServiceSettingsService.updateEnableHybridSubmission(enabled);
       } catch (err) {
         this.enableHybridSubmission = original;
-        throw err;
-      }
-    },
-    async updateEnableTemplatesV2(enabled: boolean): Promise<void> {
-      const original = this.enableTemplatesV2;
-      this.enableTemplatesV2 = { ...this.enableTemplatesV2, value: enabled };
-      try {
-        await workloadsServiceSettingsService.updateEnableTemplatesV2(enabled);
-      } catch (err) {
-        this.enableTemplatesV2 = original;
         throw err;
       }
     },

@@ -325,7 +325,7 @@ const TrainingAssetsEdit = defineComponent({
         this.updateCreatedPvc(createdDataSourceId);
       }
 
-      this.computeSectionOptions.applyPolicyDefaults = !!fromCopyId || !!this.trainingStore.templateId;
+      this.computeSectionOptions.applyPolicyDefaults = !!fromCopyId;
 
       this.cleanupNoneComplianceAssets();
     } catch (error: unknown) {

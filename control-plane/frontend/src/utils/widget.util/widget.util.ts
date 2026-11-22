@@ -15,7 +15,10 @@ import {
   EWorkloadType,
 } from "@/models/workload.model";
 import type { GroupedMeasurementResponseValuesInner, MetricsResponse } from "@/swagger-models/cluster-service-client";
-import { WIDGET_AVERAGE_LINE_LABEL } from "@/models/chart.model";
+import { MIN_IDLE_GPUS_FILTER_VALUE, WIDGET_AVERAGE_LINE_LABEL } from "@/models/chart.model";
+import { EFilterOperator } from "@/models/filter.model";
+import { WorkloadSortFilterFields } from "@/swagger-models/workloads-client";
+import { filterUtil } from "@/utils/filter.util/filter.util";
 
 export interface IEChartsSeriesOption {
   name?: string;
@@ -44,6 +47,7 @@ export const widgetUtil = {
   getWorkloadTelemetryDrilldownOptions,
   combineDistributedTelemetryIntoTraining,
   gpuUtilizationPerNodeParser,
+  getIdleWorkloadsAdvancedFilters,
 };
 
 function aggregateTelemetryGroupedDataForECharts(
@@ -377,4 +381,26 @@ function gpuUtilizationPerNodeParser(
     });
 
   return measurementMap;
+}
+
+function getIdleWorkloadsAdvancedFilters(nodePoolName?: string): string {
+  const filters = [
+    filterUtil.getNumericFilterQuery(
+      WorkloadSortFilterFields.IdleAllocatedGpus,
+      "Idle GPU devices",
+      EFilterOperator.GreaterThanOrEqual,
+      MIN_IDLE_GPUS_FILTER_VALUE,
+    ),
+  ];
+  if (nodePoolName) {
+    filters.push(
+      filterUtil.getFreeTextFilterQuery(
+        WorkloadSortFilterFields.Nodepool,
+        nodePoolName,
+        "Node pool",
+        EFilterOperator.Equals,
+      ),
+    );
+  }
+  return `[${filters.join(",")}]`;
 }

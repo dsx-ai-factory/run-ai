@@ -35,7 +35,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	////////////////////////////// RUNAI ///////////////////////////////
+	// //////////////////////////// RUNAI ///////////////////////////////
 	runaictx "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx/http"
 	tracing "github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing/http"
 	// \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -66,6 +66,8 @@ type APIClient struct {
 
 	RegistriesAPI RegistriesAPI
 
+	RightSizingAPI RightSizingAPI
+
 	SettingsAPI SettingsAPI
 }
 
@@ -90,6 +92,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.ImagesAPI = (*ImagesAPIService)(&c.common)
 	c.InferencesAPI = (*InferencesAPIService)(&c.common)
 	c.RegistriesAPI = (*RegistriesAPIService)(&c.common)
+	c.RightSizingAPI = (*RightSizingAPIService)(&c.common)
 	c.SettingsAPI = (*SettingsAPIService)(&c.common)
 
 	return c
@@ -444,7 +447,7 @@ func (c *APIClient) prepareRequest(
 			localVarRequest.Header.Add("Authorization", "Bearer "+auth)
 		}
 
-		////////////////////////////// RUNAI ///////////////////////////////
+		// //////////////////////////// RUNAI ///////////////////////////////
 		runaictx.SetHeaders(ctx, localVarRequest)
 		tracing.SetHeaders(ctx, localVarRequest)
 		//\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\

@@ -103,6 +103,36 @@ type NodesAPI interface {
 	GetNodeInternalExecute(r ApiGetNodeInternalRequest) (*NodeInternal, *http.Response, error)
 
 	/*
+		GetNodeLabelKeys Get node label keys.
+
+		Return unique, sorted label keys up to 253 characters long from nodes in the selected cluster.
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@return ApiGetNodeLabelKeysRequest
+	*/
+	GetNodeLabelKeys(ctx context.Context, clusterUuid string) ApiGetNodeLabelKeysRequest
+
+	// GetNodeLabelKeysExecute executes the request
+	//  @return []string
+	GetNodeLabelKeysExecute(r ApiGetNodeLabelKeysRequest) ([]string, *http.Response, error)
+
+	/*
+		GetNodeLabelValues Get node label values.
+
+		Return unique, sorted nonempty values for an exact label key up to 253 characters long from nodes in the selected cluster.
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@return ApiGetNodeLabelValuesRequest
+	*/
+	GetNodeLabelValues(ctx context.Context, clusterUuid string) ApiGetNodeLabelValuesRequest
+
+	// GetNodeLabelValuesExecute executes the request
+	//  @return []string
+	GetNodeLabelValuesExecute(r ApiGetNodeLabelValuesRequest) ([]string, *http.Response, error)
+
+	/*
 		GetNodeMetrics Get the node metrics data.
 
 		Retrieve the node metrics data by Universally Unique Identifier (UUID).
@@ -975,6 +1005,410 @@ func (a *NodesAPIService) GetNodeInternalExecute(r ApiGetNodeInternalRequest) (*
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetNodeLabelKeysRequest struct {
+	ctx         context.Context
+	ApiService  NodesAPI
+	clusterUuid string
+	offset      *int32
+	limit       *int32
+	search      *string
+}
+
+// The offset of the first item returned in the collection.
+func (r ApiGetNodeLabelKeysRequest) Offset(offset int32) ApiGetNodeLabelKeysRequest {
+	r.offset = &offset
+	return r
+}
+
+// The maximum number of entries to return.
+func (r ApiGetNodeLabelKeysRequest) Limit(limit int32) ApiGetNodeLabelKeysRequest {
+	r.limit = &limit
+	return r
+}
+
+// Filter results by a free text search.
+func (r ApiGetNodeLabelKeysRequest) Search(search string) ApiGetNodeLabelKeysRequest {
+	r.search = &search
+	return r
+}
+
+func (r ApiGetNodeLabelKeysRequest) Execute() ([]string, *http.Response, error) {
+	return r.ApiService.GetNodeLabelKeysExecute(r)
+}
+
+/*
+GetNodeLabelKeys Get node label keys.
+
+Return unique, sorted label keys up to 253 characters long from nodes in the selected cluster.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@return ApiGetNodeLabelKeysRequest
+*/
+func (a *NodesAPIService) GetNodeLabelKeys(ctx context.Context, clusterUuid string) ApiGetNodeLabelKeysRequest {
+	return ApiGetNodeLabelKeysRequest{
+		ApiService:  a,
+		ctx:         ctx,
+		clusterUuid: clusterUuid,
+	}
+}
+
+// Execute executes the request
+//  @return []string
+///////// RUNAI (remove isResponseFile filter on pointer)//////////
+func (a *NodesAPIService) GetNodeLabelKeysExecute(r ApiGetNodeLabelKeysRequest) ([]string, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []string
+	)
+	///////////////////////////
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NodesAPIService.GetNodeLabelKeys")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/clusters/{clusterUuid}/nodes/labels/keys"
+	localVarPath = strings.Replace(localVarPath, "{"+"clusterUuid"+"}", url.PathEscape(parameterValueToString(r.clusterUuid, "clusterUuid")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if strlen(r.clusterUuid) < 1 {
+		return localVarReturnValue, nil, reportError("clusterUuid must have at least 1 elements")
+	}
+
+	if r.offset != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "offset", r.offset, "form", "")
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	} else {
+		var defaultValue int32 = 50
+		r.limit = &defaultValue
+	}
+	if r.search != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "search", r.search, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetNodeLabelValuesRequest struct {
+	ctx         context.Context
+	ApiService  NodesAPI
+	clusterUuid string
+	key         *string
+	offset      *int32
+	limit       *int32
+	search      *string
+}
+
+// The exact label key whose values to return.
+func (r ApiGetNodeLabelValuesRequest) Key(key string) ApiGetNodeLabelValuesRequest {
+	r.key = &key
+	return r
+}
+
+// The offset of the first item returned in the collection.
+func (r ApiGetNodeLabelValuesRequest) Offset(offset int32) ApiGetNodeLabelValuesRequest {
+	r.offset = &offset
+	return r
+}
+
+// The maximum number of entries to return.
+func (r ApiGetNodeLabelValuesRequest) Limit(limit int32) ApiGetNodeLabelValuesRequest {
+	r.limit = &limit
+	return r
+}
+
+// Filter results by a free text search.
+func (r ApiGetNodeLabelValuesRequest) Search(search string) ApiGetNodeLabelValuesRequest {
+	r.search = &search
+	return r
+}
+
+func (r ApiGetNodeLabelValuesRequest) Execute() ([]string, *http.Response, error) {
+	return r.ApiService.GetNodeLabelValuesExecute(r)
+}
+
+/*
+GetNodeLabelValues Get node label values.
+
+Return unique, sorted nonempty values for an exact label key up to 253 characters long from nodes in the selected cluster.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@return ApiGetNodeLabelValuesRequest
+*/
+func (a *NodesAPIService) GetNodeLabelValues(ctx context.Context, clusterUuid string) ApiGetNodeLabelValuesRequest {
+	return ApiGetNodeLabelValuesRequest{
+		ApiService:  a,
+		ctx:         ctx,
+		clusterUuid: clusterUuid,
+	}
+}
+
+// Execute executes the request
+//  @return []string
+///////// RUNAI (remove isResponseFile filter on pointer)//////////
+func (a *NodesAPIService) GetNodeLabelValuesExecute(r ApiGetNodeLabelValuesRequest) ([]string, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []string
+	)
+	///////////////////////////
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NodesAPIService.GetNodeLabelValues")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/clusters/{clusterUuid}/nodes/labels/values"
+	localVarPath = strings.Replace(localVarPath, "{"+"clusterUuid"+"}", url.PathEscape(parameterValueToString(r.clusterUuid, "clusterUuid")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if strlen(r.clusterUuid) < 1 {
+		return localVarReturnValue, nil, reportError("clusterUuid must have at least 1 elements")
+	}
+	if r.key == nil {
+		return localVarReturnValue, nil, reportError("key is required and must be specified")
+	}
+	if strlen(*r.key) < 1 {
+		return localVarReturnValue, nil, reportError("key must have at least 1 elements")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "key", r.key, "form", "")
+	if r.offset != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "offset", r.offset, "form", "")
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	} else {
+		var defaultValue int32 = 50
+		r.limit = &defaultValue
+	}
+	if r.search != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "search", r.search, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

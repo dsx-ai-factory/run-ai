@@ -8,6 +8,7 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"maps"
 	"net/http"
 	"sort"
 	"sync"
@@ -275,7 +276,8 @@ func (nodeHandler *NodeHandler) NodeChanged(old *corev1.Node, new *corev1.Node) 
 	oldNodeInfo := nodeHandler.nodeParser.ParseNodeToServerScheme(old)
 	newNodeInfo := nodeHandler.nodeParser.ParseNodeToServerScheme(new)
 
-	if oldNodeInfo.NodePool != newNodeInfo.NodePool ||
+	if !maps.Equal(oldNodeInfo.GetLabels(), newNodeInfo.GetLabels()) ||
+		oldNodeInfo.NodePool != newNodeInfo.NodePool ||
 		oldNodeInfo.Status != newNodeInfo.Status ||
 		oldNodeInfo.CreatedAt != newNodeInfo.CreatedAt ||
 		nodeHandler.nullableStringChanged(oldNodeInfo.NvLinkDomainUid, newNodeInfo.NvLinkDomainUid) ||

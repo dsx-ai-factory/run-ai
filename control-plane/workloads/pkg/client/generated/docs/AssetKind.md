@@ -27,8 +27,6 @@
 
 * `HOST_PATH` (value: `"hostPath"`)
 
-* `WORKLOAD_TEMPLATE` (value: `"workload-template"`)
-
 * `MODEL` (value: `"model"`)
 
 * `CONFIG_MAP` (value: `"config-map"`)

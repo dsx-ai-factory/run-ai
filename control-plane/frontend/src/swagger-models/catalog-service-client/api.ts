@@ -509,6 +509,286 @@ export interface ModelError {
 /**
  * 
  * @export
+ * @interface Recommendation
+ */
+export interface Recommendation {
+    /**
+     * Whether the allocation requests GPU memory (`gpu_memory`) or whole GPUs (`gpu_count`).
+     * @type {RecommendationAllocationType}
+     * @memberof Recommendation
+     */
+    'allocationType': RecommendationAllocationType;
+    /**
+     * Number of GPUs used by the allocation. Always 1 for `gpu_memory`; for `gpu_count`, equals the selected profile’s tensor parallel size multiplied by its pipeline parallel size.
+     * @type {number}
+     * @memberof Recommendation
+     */
+    'gpuCount': number;
+    /**
+     * Recommended memory per GPU, in bytes. For `gpu_memory`, this is the published minimum rounded up to whole bytes. For `gpu_count`, this is the reported capacity of each GPU.
+     * @type {number}
+     * @memberof Recommendation
+     */
+    'gpuMemoryPerDeviceBytes'?: number;
+}
+/**
+ * 
+ * @export
+ * @enum {string}
+ */
+
+export const RecommendationAllocationType = {
+    Memory: 'gpu_memory',
+    Count: 'gpu_count'
+} as const;
+
+export type RecommendationAllocationType = typeof RecommendationAllocationType[keyof typeof RecommendationAllocationType];
+
+
+/**
+ * 
+ * @export
+ * @interface RecommendationRequest
+ */
+export interface RecommendationRequest {
+    /**
+     * Cluster whose node-pool hardware metadata is evaluated.
+     * @type {string}
+     * @memberof RecommendationRequest
+     */
+    'clusterId': string;
+    /**
+     * Untagged public nvcr.io/nim/organization/model image reference.
+     * @type {string}
+     * @memberof RecommendationRequest
+     */
+    'image': string;
+    /**
+     * Exact image tag. NGC does not automatically refresh latest metadata.
+     * @type {string}
+     * @memberof RecommendationRequest
+     */
+    'tag': string;
+    /**
+     * Exact inventory GPU type. Omitted or null evaluates all reported types and capacities.
+     * @type {string}
+     * @memberof RecommendationRequest
+     */
+    'gpuType'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface RecommendationResponse
+ */
+export interface RecommendationResponse {
+    /**
+     * Untagged NIM image reference supplied in the request.
+     * @type {string}
+     * @memberof RecommendationResponse
+     */
+    'image': string;
+    /**
+     * Exact NIM image tag supplied in the request.
+     * @type {string}
+     * @memberof RecommendationResponse
+     */
+    'tag': string;
+    /**
+     * One result per evaluated GPU type and per-device memory capacity. Empty when the cluster has no reported GPUs and no GPU type was requested.
+     * @type {Array<RecommendationResponseResultsInner>}
+     * @memberof RecommendationResponse
+     */
+    'results': Array<RecommendationResponseResultsInner>;
+}
+/**
+ * 
+ * @export
+ * @interface RecommendationResponseResultsInner
+ */
+export interface RecommendationResponseResultsInner {
+    /**
+     * Exact GPU type reported by the cluster inventory. Different memory capacities for the same GPU type produce separate results.
+     * @type {string}
+     * @memberof RecommendationResponseResultsInner
+     */
+    'gpuType': string;
+    /**
+     * Reported memory capacity of each GPU, in bytes. Omitted when capacity is unknown. Does not represent free memory or a quota guarantee.
+     * @type {number}
+     * @memberof RecommendationResponseResultsInner
+     */
+    'gpuMemoryCapacityBytes'?: number;
+    /**
+     * Whether an allocation was recommended for this GPU type and memory capacity.
+     * @type {RecommendationStatus}
+     * @memberof RecommendationResponseResultsInner
+     */
+    'status': RecommendationStatus;
+    /**
+     * Published minimum memory per GPU for the selected NGC profile, in decimal GB (1 GB = 1,000,000,000 bytes), before allocation rounding. Omitted when no profile is selected.
+     * @type {number}
+     * @memberof RecommendationResponseResultsInner
+     */
+    'minimumGpuMemoryPerDeviceGb'?: number;
+    /**
+     * Identifier of the selected published NGC execution profile. Omitted when no profile is selected.
+     * @type {string}
+     * @memberof RecommendationResponseResultsInner
+     */
+    'profileId'?: string;
+    /**
+     * Model precision reported by the selected NGC profile. Omitted when no profile is selected or the profile does not report precision.
+     * @type {string}
+     * @memberof RecommendationResponseResultsInner
+     */
+    'precision'?: string;
+    /**
+     * Inference backend reported by the selected NGC profile. Omitted when no profile is selected or the profile does not report a backend.
+     * @type {string}
+     * @memberof RecommendationResponseResultsInner
+     */
+    'inferenceBackend'?: string;
+    /**
+     * Number of GPUs participating in tensor parallelism in the selected NGC profile. Omitted when no profile is selected.
+     * @type {number}
+     * @memberof RecommendationResponseResultsInner
+     */
+    'tensorParallelSize'?: number;
+    /**
+     * Number of pipeline parallel stages in the selected NGC profile. Omitted when no profile is selected.
+     * @type {number}
+     * @memberof RecommendationResponseResultsInner
+     */
+    'pipelineParallelSize'?: number;
+    /**
+     * Explanation of why no allocation could be recommended. Omitted for a recommended allocation.
+     * @type {string}
+     * @memberof RecommendationResponseResultsInner
+     */
+    'reason'?: string;
+    /**
+     * 
+     * @type {RecommendationResultRecommendation}
+     * @memberof RecommendationResponseResultsInner
+     */
+    'recommendation'?: RecommendationResultRecommendation;
+}
+/**
+ * 
+ * @export
+ * @interface RecommendationResult
+ */
+export interface RecommendationResult {
+    /**
+     * Exact GPU type reported by the cluster inventory. Different memory capacities for the same GPU type produce separate results.
+     * @type {string}
+     * @memberof RecommendationResult
+     */
+    'gpuType': string;
+    /**
+     * Reported memory capacity of each GPU, in bytes. Omitted when capacity is unknown. Does not represent free memory or a quota guarantee.
+     * @type {number}
+     * @memberof RecommendationResult
+     */
+    'gpuMemoryCapacityBytes'?: number;
+    /**
+     * Whether an allocation was recommended for this GPU type and memory capacity.
+     * @type {RecommendationStatus}
+     * @memberof RecommendationResult
+     */
+    'status': RecommendationStatus;
+    /**
+     * Published minimum memory per GPU for the selected NGC profile, in decimal GB (1 GB = 1,000,000,000 bytes), before allocation rounding. Omitted when no profile is selected.
+     * @type {number}
+     * @memberof RecommendationResult
+     */
+    'minimumGpuMemoryPerDeviceGb'?: number;
+    /**
+     * Identifier of the selected published NGC execution profile. Omitted when no profile is selected.
+     * @type {string}
+     * @memberof RecommendationResult
+     */
+    'profileId'?: string;
+    /**
+     * Model precision reported by the selected NGC profile. Omitted when no profile is selected or the profile does not report precision.
+     * @type {string}
+     * @memberof RecommendationResult
+     */
+    'precision'?: string;
+    /**
+     * Inference backend reported by the selected NGC profile. Omitted when no profile is selected or the profile does not report a backend.
+     * @type {string}
+     * @memberof RecommendationResult
+     */
+    'inferenceBackend'?: string;
+    /**
+     * Number of GPUs participating in tensor parallelism in the selected NGC profile. Omitted when no profile is selected.
+     * @type {number}
+     * @memberof RecommendationResult
+     */
+    'tensorParallelSize'?: number;
+    /**
+     * Number of pipeline parallel stages in the selected NGC profile. Omitted when no profile is selected.
+     * @type {number}
+     * @memberof RecommendationResult
+     */
+    'pipelineParallelSize'?: number;
+    /**
+     * Explanation of why no allocation could be recommended. Omitted for a recommended allocation.
+     * @type {string}
+     * @memberof RecommendationResult
+     */
+    'reason'?: string;
+    /**
+     * 
+     * @type {RecommendationResultRecommendation}
+     * @memberof RecommendationResult
+     */
+    'recommendation'?: RecommendationResultRecommendation;
+}
+/**
+ * Recommended allocation for this result. Absent or null when no allocation could be recommended.
+ * @export
+ * @interface RecommendationResultRecommendation
+ */
+export interface RecommendationResultRecommendation {
+    /**
+     * Whether the allocation requests GPU memory (`gpu_memory`) or whole GPUs (`gpu_count`).
+     * @type {RecommendationAllocationType}
+     * @memberof RecommendationResultRecommendation
+     */
+    'allocationType': RecommendationAllocationType;
+    /**
+     * Number of GPUs used by the allocation. Always 1 for `gpu_memory`; for `gpu_count`, equals the selected profile’s tensor parallel size multiplied by its pipeline parallel size.
+     * @type {number}
+     * @memberof RecommendationResultRecommendation
+     */
+    'gpuCount': number;
+    /**
+     * Recommended memory per GPU, in bytes. For `gpu_memory`, this is the published minimum rounded up to whole bytes. For `gpu_count`, this is the reported capacity of each GPU.
+     * @type {number}
+     * @memberof RecommendationResultRecommendation
+     */
+    'gpuMemoryPerDeviceBytes'?: number;
+}
+/**
+ * 
+ * @export
+ * @enum {string}
+ */
+
+export const RecommendationStatus = {
+    Recommended: 'recommended',
+    NoRecommendation: 'no_recommendation'
+} as const;
+
+export type RecommendationStatus = typeof RecommendationStatus[keyof typeof RecommendationStatus];
+
+
+/**
+ * 
+ * @export
  * @interface RegistryIntegration
  */
 export interface RegistryIntegration {
@@ -2021,6 +2301,117 @@ export class RegistriesApi extends BaseAPI {
      */
     public updateRegistryIntegration(registryIntegrationId: string, registryIntegrationUpdateRequest?: RegistryIntegrationUpdateRequest, options?: AxiosRequestConfig) {
         return RegistriesApiFp(this.configuration).updateRegistryIntegration(registryIntegrationId, registryIntegrationUpdateRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+/**
+ * RightSizingApi - axios parameter creator
+ * @export
+ */
+export const RightSizingApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Returns recommendations without deploying or reserving resources. Evaluates cluster memory and GPU counts for the exact image tag using GPU-agnostic profiles. GPU model compatibility is not verified. Missing trustworthy sizing data is a no_recommendation result; upstream retrieval failures are errors.
+         * @summary Recommend GPU allocation for a NIM test/dev workload.
+         * @param {RecommendationRequest} recommendationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        recommendInferenceResources: async (recommendationRequest: RecommendationRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'recommendationRequest' is not null or undefined
+            assertParamExists('recommendInferenceResources', 'recommendationRequest', recommendationRequest)
+            const localVarPath = `/api/v1/catalog/right-sizing/recommendation`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(recommendationRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * RightSizingApi - functional programming interface
+ * @export
+ */
+export const RightSizingApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = RightSizingApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Returns recommendations without deploying or reserving resources. Evaluates cluster memory and GPU counts for the exact image tag using GPU-agnostic profiles. GPU model compatibility is not verified. Missing trustworthy sizing data is a no_recommendation result; upstream retrieval failures are errors.
+         * @summary Recommend GPU allocation for a NIM test/dev workload.
+         * @param {RecommendationRequest} recommendationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async recommendInferenceResources(recommendationRequest: RecommendationRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RecommendationResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.recommendInferenceResources(recommendationRequest, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+    }
+};
+
+/**
+ * RightSizingApi - factory interface
+ * @export
+ */
+export const RightSizingApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = RightSizingApiFp(configuration)
+    return {
+        /**
+         * Returns recommendations without deploying or reserving resources. Evaluates cluster memory and GPU counts for the exact image tag using GPU-agnostic profiles. GPU model compatibility is not verified. Missing trustworthy sizing data is a no_recommendation result; upstream retrieval failures are errors.
+         * @summary Recommend GPU allocation for a NIM test/dev workload.
+         * @param {RecommendationRequest} recommendationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        recommendInferenceResources(recommendationRequest: RecommendationRequest, options?: any): AxiosPromise<RecommendationResponse> {
+            return localVarFp.recommendInferenceResources(recommendationRequest, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * RightSizingApi - object-oriented interface
+ * @export
+ * @class RightSizingApi
+ * @extends {BaseAPI}
+ */
+export class RightSizingApi extends BaseAPI {
+    /**
+     * Returns recommendations without deploying or reserving resources. Evaluates cluster memory and GPU counts for the exact image tag using GPU-agnostic profiles. GPU model compatibility is not verified. Missing trustworthy sizing data is a no_recommendation result; upstream retrieval failures are errors.
+     * @summary Recommend GPU allocation for a NIM test/dev workload.
+     * @param {RecommendationRequest} recommendationRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RightSizingApi
+     */
+    public recommendInferenceResources(recommendationRequest: RecommendationRequest, options?: AxiosRequestConfig) {
+        return RightSizingApiFp(this.configuration).recommendInferenceResources(recommendationRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

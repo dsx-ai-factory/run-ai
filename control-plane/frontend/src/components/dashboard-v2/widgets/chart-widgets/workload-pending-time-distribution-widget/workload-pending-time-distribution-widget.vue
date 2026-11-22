@@ -67,7 +67,11 @@ import {
   getDrilldownTransitionPreset,
   DRILLDOWN_UNIVERSAL_TRANSITION,
 } from "@/models/chart.model";
-import type { EWorkloadTelemetryGroupByWithoutBucket, EWorkloadTelemetryPointMeta } from "@/models/workload.model";
+import {
+  type EWorkloadTelemetryGroupByWithoutBucket,
+  type EWorkloadTelemetryPointMeta,
+  workloadPhaseFilterOptions,
+} from "@/models/workload.model";
 // cmps
 import { ChartWidgetWrapper } from "@/components/dashboard-v2/widgets/common/widget-wrapper/chart-widget-wrapper";
 import { ChartDrilldownBreadcrumbs } from "@/components/common/charts/chart-drilldown-breadcrumbs";
@@ -84,7 +88,13 @@ import {
 import { EWorkloadTelemetryGroupBy } from "@/models/workload.model";
 import { workloadIndexColumns } from "@/table-models/workload.table-model";
 import { HttpErrorResponse } from "@/models/http-response.model";
-import { EColumnFilterType, EFilterOperator, type IFilterBy, type IFreeTextFilterModel } from "@/models/filter.model";
+import {
+  EColumnFilterType,
+  EFilterOperator,
+  type IEnumBasedFilterModel,
+  type IFilterBy,
+  type IFreeTextFilterModel,
+} from "@/models/filter.model";
 import { ETableFilters } from "@/models/table.model";
 // util
 import { widgetUtil } from "@/utils/widget.util";
@@ -677,12 +687,12 @@ export default defineComponent({
       }
     },
     setPhaseColumnFilter(workloadsFilterBy: IFilterBy): void {
-      const phaseColumnFilter: IFreeTextFilterModel = {
+      const phaseColumnFilter: IEnumBasedFilterModel = {
         name: WorkloadSortFilterFields.Phase,
-        term: Phase.Pending,
-        value: EFilterOperator.Equals,
-        label: "Phase",
-        type: EColumnFilterType.FreeText,
+        selectedValues: [Phase.Pending],
+        type: EColumnFilterType.EnumBased,
+        label: "Status",
+        selectOptions: workloadPhaseFilterOptions,
       };
       filterService.setColumnAdvancedFilter(workloadsFilterBy, phaseColumnFilter, ETableFilters.WORKLOAD);
     },

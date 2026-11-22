@@ -38,7 +38,6 @@ const (
 	listDeprecatedMsg       = "Command \"list\" is deprecated, please use list in the relevant context: `runai project list`, `runai workload list`, `runai node list`, `runai cluster list`"
 	listDeprecatedHelpMsg   = "[Deprecated] display resource list. By default displays the job list"
 	DepMasterEnvironmentMsg = "Flag --master-environment has been deprecated, use --master-environment-variable instead"
-	DepEnvironmentMsg       = "The --environment flag with key=value format for defining environment variables is deprecated and will be removed in a future release. Use the --environment-variable flag instead."
 )
 
 const (
@@ -274,15 +273,27 @@ var _ = Describe("Deprecated aliases Test", Ordered, func() {
 			Expect(output).To(ContainSubstring("Creating distributed mpi-test"))
 		})
 
-		It("verify training submit with --environment key=value shows deprecation warning", func() {
-			clients.NewWorkloadSubmitMocker(gomock.NewController(GinkgoT()), &clients.Training{}, []string{"training-test"})
-			commandStr := "training submit training-test -i ubuntu -p p301 --environment MY_VAR=my_value"
-			output, err := cli.RunCommand(commandStr, envMap)
-			Expect(err).To(BeNil())
-
-			Expect(output).To(ContainSubstring(DepEnvironmentMsg))
-			Expect(output).To(ContainSubstring("Creating training training-test"))
-		})
+		DescribeTable("rejects environment variables passed through the asset flag",
+			func(command string) {
+				_, err := cli.RunCommand(command+" training-test -i ubuntu -p p301 --environment MY_VAR=my_value", envMap)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("use --environment-variable KEY=VALUE"))
+			},
+			Entry("submit", "submit"),
+			Entry("training submit", "training submit"),
+			Entry("training standard submit", "training standard submit"),
+			Entry("workspace submit", "workspace submit"),
+			Entry("inference submit", "inference submit"),
+			Entry("inference standard submit", "inference standard submit"),
+			Entry("inference distributed submit", "inference distributed submit"),
+			Entry("mpi submit", "mpi submit"),
+			Entry("pytorch submit", "pytorch submit"),
+			Entry("training mpi submit", "training mpi submit"),
+			Entry("training pytorch submit", "training pytorch submit"),
+			Entry("training jax submit", "training jax submit"),
+			Entry("inference update", "inference update"),
+			Entry("inference standard update", "inference standard update"),
+		)
 
 		It("verify training submit with --environment-variable does not show deprecation", func() {
 			clients.NewWorkloadSubmitMocker(gomock.NewController(GinkgoT()), &clients.Training{}, []string{"training-test-2"})
@@ -290,7 +301,7 @@ var _ = Describe("Deprecated aliases Test", Ordered, func() {
 			output, err := cli.RunCommand(commandStr, envMap)
 			Expect(err).To(BeNil())
 
-			Expect(output).ToNot(ContainSubstring(DepEnvironmentMsg))
+			Expect(output).ToNot(ContainSubstring("--environment accepts only"))
 			Expect(output).To(ContainSubstring("Creating training training-test-2"))
 		})
 
@@ -300,7 +311,7 @@ var _ = Describe("Deprecated aliases Test", Ordered, func() {
 			output, err := cli.RunCommand(commandStr, envMap)
 			Expect(err).To(BeNil())
 
-			Expect(output).ToNot(ContainSubstring(DepEnvironmentMsg))
+			Expect(output).ToNot(ContainSubstring("--environment accepts only"))
 			Expect(output).To(ContainSubstring("Creating training training-test-3"))
 		})
 	})

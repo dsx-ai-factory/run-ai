@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, expect, vi } from "vitest";
+import { beforeEach, describe, expect, vi } from "vitest";
 import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { IdleGpuWorkloadWidget } from "@/components/dashboard-v2/widgets/grid-widget/idle-gpu-workload-widget/index";
 import { Quasar } from "quasar";
@@ -11,6 +11,9 @@ import { createTestingPinia, type TestingPinia } from "@pinia/testing";
 import { workloadService } from "@/services/cluster/workload.service/workload.service";
 import { RunaiTableNoData } from "@/components/common/runai-table/runai-table-no-data";
 import type { Workload } from "@/swagger-models/workloads-client";
+import { ChartWidgetWrapper } from "@/components/dashboard-v2/widgets/common/widget-wrapper/chart-widget-wrapper";
+import { RunaiTable } from "@/components/common";
+import { WORKLOAD_ROUTE_NAMES } from "@/router/workloads.routes/workloads.routes.names";
 const pinia: TestingPinia = createTestingPinia({ createSpy: vi.fn });
 vi.mock("@/services/cluster/workload.service/workload.service");
 
@@ -28,10 +31,11 @@ const MOCK_WORKLOADS = [
 const mockRouter = {
   push: vi.fn(),
 };
+const { routerPushMock } = vi.hoisted(() => ({ routerPushMock: vi.fn() }));
 vi.mock("vue-router", () => ({
   useRoute: vi.fn(),
   useRouter: vi.fn(() => ({
-    push: vi.fn(),
+    push: routerPushMock,
   })),
 }));
 let wrapper: VueWrapper<InstanceType<typeof IdleGpuWorkloadWidget>>;
@@ -54,6 +58,10 @@ describe("idle-gpu-workload-widget", () => {
       },
     });
   };
+
+  beforeEach(() => {
+    routerPushMock.mockClear();
+  });
 
   it("renders idle GPU workloads correctly", async () => {
     mountComponent();
@@ -99,7 +107,7 @@ describe("idle-gpu-workload-widget", () => {
     mountComponent("test-node-pool");
     await flushPromises();
     expect(workloadService.getWorkloads).toHaveBeenCalledWith(false, undefined, 5, "desc", "idleAllocatedGpus", [
-      "idleAllocatedGpus>=1",
+      "idleAllocatedGpus>=0.01",
       "clusterId==test-cluster",
       "nodepool==test-node-pool",
     ]);
@@ -121,5 +129,33 @@ describe("idle-gpu-workload-widget", () => {
 
     // Verify widget shows no data message instead of old workloads
     expect(wrapper.findComponent(RunaiTableNoData).exists()).toBe(true);
+  });
+
+  it("links All workloads to idle workloads in the selected node pool", async () => {
+    vi.mocked(workloadService.getWorkloads).mockResolvedValue(MOCK_WORKLOADS as Workload[]);
+    mountComponent("pool-a");
+    await flushPromises();
+
+    wrapper.findComponent(ChartWidgetWrapper).vm.$emit("link-clicked");
+
+    const { name, query } = routerPushMock.mock.calls[0][0];
+    expect(name).toBe(WORKLOAD_ROUTE_NAMES.WORKLOAD_INDEX);
+    expect(JSON.parse(query.advancedFilters)).toEqual([
+      expect.objectContaining({ name: "idleAllocatedGpus", operator: ">=", minValue: "0.01" }),
+      expect.objectContaining({ name: "nodepool", term: "pool-a", value: "==" }),
+    ]);
+  });
+
+  it("links a clicked row to that workload only", async () => {
+    vi.mocked(workloadService.getWorkloads).mockResolvedValue(MOCK_WORKLOADS as Workload[]);
+    mountComponent("pool-a");
+    await flushPromises();
+
+    wrapper.findComponent(RunaiTable).vm.$emit("workload-clicked", MOCK_WORKLOADS[0]);
+
+    const { query } = routerPushMock.mock.calls[0][0];
+    expect(JSON.parse(query.advancedFilters)).toEqual([
+      expect.objectContaining({ name: "name", term: MOCK_WORKLOADS[0].name, value: "==" }),
+    ]);
   });
 });

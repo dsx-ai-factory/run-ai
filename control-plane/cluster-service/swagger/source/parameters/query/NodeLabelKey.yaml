@@ -1,0 +1,8 @@
+name: key
+in: query
+required: true
+description: The exact label key whose values to return.
+schema:
+  type: string
+  minLength: 1
+example: gpu-type

@@ -9,22 +9,22 @@ runai project [flags]
 ### Options
 
 ```
-  -h, --help                    help for project
-      --interactive enable      set interactive mode (enabled|disabled)
-      --max-items int32         set the max number of items to return, default is all of the items
-      --next-token next_token   set the token for requesting the next page
-      --no-pagination           return a single page instead of full list, by default set to false
-      --page-size int32         set the single page size (max 500) (default 100)
+  -h, --help[=true|false]            help for project
+      --interactive enable           set interactive mode (enabled|disabled)
+      --max-items int32              set the max number of items to return, default is all of the items
+      --next-token next_token        set the token for requesting the next page
+      --no-pagination[=true|false]   return a single page instead of full list, by default set to false
+      --page-size int32              set the single page size (max 500) (default 100)
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --config-file string   config file name; can be set by environment variable RUNAI_CLI_CONFIG_FILE (default "config.json")
-      --config-path string   config path; can be set by environment variable RUNAI_CLI_CONFIG_PATH
-  -d, --debug                enable debug mode
-  -q, --quiet                enable quiet mode, suppress all output except error messages
-      --verbose              enable verbose mode
+      --config-file string     config file name; can be set by environment variable RUNAI_CLI_CONFIG_FILE (default "config.json")
+      --config-path string     config path; can be set by environment variable RUNAI_CLI_CONFIG_PATH
+  -d, --debug[=true|false]     enable debug mode
+  -q, --quiet[=true|false]     enable quiet mode, suppress all output except error messages
+      --verbose[=true|false]   enable verbose mode
 ```
 
 ### SEE ALSO

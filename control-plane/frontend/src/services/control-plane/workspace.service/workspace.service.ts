@@ -77,13 +77,9 @@ async function getById(workspaceId: string): Promise<WorkspaceV2> {
   }
 }
 
-async function getWorkspaceMergedWithPolicy(
-  projectId?: string,
-  workloadId?: string,
-  templateId?: string,
-): Promise<WorkspaceV2> {
+async function getWorkspaceMergedWithPolicy(projectId?: string, workloadId?: string): Promise<WorkspaceV2> {
   try {
-    const response = await assetsServiceApi.workspaceApi.getWorkspaceMerged(projectId, workloadId, templateId);
+    const response = await assetsServiceApi.workspaceApi.getWorkspaceMerged(projectId, workloadId);
     return response.data;
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);

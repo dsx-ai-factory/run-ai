@@ -5,6 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Name** | **string** |  | 
+**Description** | Pointer to **NullableString** | The description of the node pool. | [optional] 
 **LabelKey** | **string** | Label key for associated nodes to the Node Pool (with value as in labelValue) | 
 **LabelValue** | **string** | Label value for associated nodes to the Node Pool (with key as in labelKey) | 
 **ClusterId** | **string** |  | 
@@ -53,6 +54,41 @@ and a boolean to check if the value has been set.
 SetName sets Name field to given value.
 
 
+### GetDescription
+
+`func (o *NodepoolCreateFields) GetDescription() string`
+
+GetDescription returns the Description field if non-nil, zero value otherwise.
+
+### GetDescriptionOk
+
+`func (o *NodepoolCreateFields) GetDescriptionOk() (*string, bool)`
+
+GetDescriptionOk returns a tuple with the Description field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetDescription
+
+`func (o *NodepoolCreateFields) SetDescription(v string)`
+
+SetDescription sets Description field to given value.
+
+### HasDescription
+
+`func (o *NodepoolCreateFields) HasDescription() bool`
+
+HasDescription returns a boolean if a field has been set.
+
+### SetDescriptionNil
+
+`func (o *NodepoolCreateFields) SetDescriptionNil(b bool)`
+
+ SetDescriptionNil sets the value for Description to be an explicit nil
+
+### UnsetDescription
+`func (o *NodepoolCreateFields) UnsetDescription()`
+
+UnsetDescription ensures that no value is present for Description, not even an explicit nil
 ### GetLabelKey
 
 `func (o *NodepoolCreateFields) GetLabelKey() string`
