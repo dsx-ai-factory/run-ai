@@ -19,6 +19,9 @@ describe("tool-box Custom URL validation", () => {
   it.each([
     ["registered route", "/workload-templates", false],
     ["registered route child", "/workload-templates/custom", false],
+    ["mixed-case route", "/Workload-Templates/custom", false],
+    ["malformed suffix", "/workload-templates/%FF", false],
+    ["encoded prefix with malformed suffix", "/%77orkload-templates%2F%FF", false],
     ["control-plane root", "/", false],
     ["unrelated workload path", "/project/tool", true],
     ["another host", "https://tools.example.com/workload-templates", true],

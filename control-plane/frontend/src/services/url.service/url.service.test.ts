@@ -31,6 +31,11 @@ describe("url.service", () => {
       ["different scheme and port", "http://runai.example.com:8080/workload-templates"],
       ["case-insensitive hostname", "https://RUNAI.EXAMPLE.COM/workload-templates"],
       ["encoded route", "https://runai.example.com/%77orkload-templates/tool"],
+      ["uppercase route", "https://runai.example.com/WORKLOAD-TEMPLATES"],
+      ["mixed-case route child", "https://runai.example.com/Workload-Templates/tool"],
+      ["malformed suffix", "https://runai.example.com/workload-templates/%FF"],
+      ["encoded prefix with malformed suffix", "https://runai.example.com/%77orkload-templates/%FF"],
+      ["encoded separator with malformed suffix", "https://runai.example.com/%77orkload-templates%2F%FF"],
       ["normalized dot segments", "https://runai.example.com/project/../workload-templates"],
     ])("detects a collision for %s", (_, url) => {
       expect(urlService.isControlPlaneRouteUrl(url, router.getRoutes(), controlPlaneUrl)).toBe(true);
@@ -41,6 +46,8 @@ describe("url.service", () => {
       ["workload hostname", "https://tool.runai.example.com/"],
       ["unrelated path", "https://runai.example.com/project/tool"],
       ["similar prefix", "https://runai.example.com/workload-templates-custom"],
+      ["uppercase similar prefix", "https://runai.example.com/WORKLOAD-TEMPLATES-CUSTOM"],
+      ["unrelated path with malformed suffix", "https://runai.example.com/project/%FF"],
       ["route name only in query", "https://runai.example.com/tool?next=/workload-templates"],
       ["empty value", ""],
       ["invalid URL", "not a URL"],

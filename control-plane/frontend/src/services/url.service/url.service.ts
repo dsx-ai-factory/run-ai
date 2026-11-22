@@ -20,22 +20,24 @@ function isControlPlaneRouteUrl(
   controlPlaneUrl = window.location.href,
 ): boolean {
   let url: URL;
-  let path: string;
+  let pathPrefix: string;
   try {
     url = new URL(value);
     if (url.hostname !== new URL(controlPlaneUrl).hostname) return false;
-    path = decodeURIComponent(url.pathname);
+    // Decode only the prefix so malformed suffixes cannot bypass the route check.
+    const encodedPrefix = url.pathname.split(/\/|%2f/i).find(Boolean) || "";
+    pathPrefix = decodeURIComponent(encodedPrefix).toLowerCase();
   } catch {
     return false;
   }
 
-  if (path === "/") return true;
+  if (!pathPrefix) return true;
 
   return routes.some((route) => {
     const prefix = route.path.split("/").find(Boolean);
     // Reserve the route subtree because custom ingress paths can shadow its pages.
     if (!prefix || prefix.startsWith(":")) return false;
-    return path === `/${prefix}` || path.startsWith(`/${prefix}/`);
+    return pathPrefix === prefix.toLowerCase();
   });
 }
 
