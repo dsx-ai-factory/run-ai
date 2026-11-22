@@ -125,28 +125,7 @@ After the workload is created, it is added to the [Workloads](workloads.md) tabl
 
 NVIDIA Run:ai automatically discovers and displays network endpoints for workloads that include Kubernetes networking resources. For more information, see [Kubernetes Services, Load Balancing, and Networking](https://kubernetes.io/docs/concepts/services-networking/).
 
-To expose endpoints, include the relevant networking configuration in your YAML. For example, the following Dynamo v1beta1 workload uses a separate Ingress that NVIDIA Run:ai will automatically discover:
-
-```yaml
-apiVersion: nvidia.com/v1beta1
-kind: DynamoGraphDeployment
-metadata:
-  name: secure-llm
-spec:
-  components:
-    - name: Frontend
-      type: frontend
-      replicas: 1
-      podTemplate:
-        spec:
-          containers:
-            - name: main
-              image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.6.2
-```
-
-For a complete model-serving example, refer to the [aggregated Dynamo tutorial](../tutorials/inference-tutorials/aggregated-dynamo.md).
-
-Save this Ingress separately as `ingress.yaml`. Replace the Ingress class, hostname, and TLS Secret with values configured by your administrator:
+For example, this Ingress routes traffic to a Dynamo frontend Service named `secure-llm-frontend`:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -172,11 +151,7 @@ spec:
                   number: 8000
 ```
 
-Apply it in the workload namespace. The TLS Secret must exist in that namespace, and the hostname must resolve to the Ingress controller:
-
-```bash
-kubectl apply --namespace <project-namespace> -f ingress.yaml
-```
+For the full workload setup, refer to the [aggregated Dynamo tutorial](../tutorials/inference-tutorials/aggregated-dynamo.md).
 
 Once the workload is running, the **Connections** column shows the endpoint URL directly if there is one, or the number of endpoints if there are multiple. See [Connections associated with the workload](workloads.md#connections-associated-with-the-workload) for more details.
 
