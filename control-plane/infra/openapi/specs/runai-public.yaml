@@ -27770,7 +27770,7 @@ components:
             clusterRoleOptional:
               type: boolean
               default: false
-              description: Indicates if the access rule's role is marked as having no cluster permissions, or is a custom role with no predefined role for cluster permissions.
+              description: Indicates if the access rule's role or its predefined role is marked as having no cluster permissions, or the role is a custom role with no predefined role for cluster permissions.
               example: false
             isDeleting:
               type: boolean

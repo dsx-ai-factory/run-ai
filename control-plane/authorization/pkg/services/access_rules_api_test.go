@@ -1315,13 +1315,13 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 		var definition models.Role
 		var noClusterPermissionsRoleId uint
 
-		syncedClusterRoleOptional := func() bool {
+		syncedClusterRoleOptional := func(roleId int32) bool {
 			apiResponse, err := accessRulesApiService.GetAccessRulesSync(ctx, 0, 0, "", "")
 			Expect(err).ToNot(HaveOccurred())
 			Expect(apiResponse.Code).To(Equal(http.StatusOK))
 
 			for _, rule := range httpResponseBodyToAccessRulesSync(apiResponse).AccessRules {
-				if rule.RoleId == int32(noClusterPermissionsRoleId) {
+				if rule.RoleId == roleId {
 					return rule.ClusterRoleOptional
 				}
 			}
@@ -1363,7 +1363,28 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 		})
 
 		It("marks the role's access rules", func() {
-			Expect(syncedClusterRoleOptional()).To(BeTrue())
+			Expect(syncedClusterRoleOptional(int32(noClusterPermissionsRoleId))).To(BeTrue())
+		})
+
+		It("marks the access rules of a custom role that takes its cluster permissions from it", func() {
+			customRole := createTestRole(ctx, rolesApiService, api.RoleCreationFieldsInternal{
+				Name:        "custom role mapped to a role with no cluster permissions",
+				Description: "takes its kubernetes permissions from the predefined role",
+				Permissions: []api.PostPermission{{
+					ResourceType: api.RESOURCETYPE_PROJECT,
+					Actions:      []api.Action{api.ACTION_READ},
+				}},
+				KubernetesPermissions: api.KubernetesPermissions{PredefinedRole: ptr.To(fmt.Sprint(noClusterPermissionsRoleId))},
+			}, &createdRoles, false, http.StatusCreated)
+			createTestAccessRule(ctx, accessRulesApiService, api.AccessRuleCreationFields{
+				ScopeId:     TestScopeId,
+				ScopeType:   api.SCOPETYPE_PROJECT,
+				SubjectId:   TestUser3Id,
+				SubjectType: api.SUBJECTTYPE_USER,
+				RoleId:      customRole.Id,
+			}, &createdAccessRules, false, http.StatusCreated)
+
+			Expect(syncedClusterRoleOptional(customRole.Id)).To(BeTrue())
 		})
 
 		It("stops marking them once the definition drops the flag", func() {
@@ -1371,7 +1392,7 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 			_, err := initializer.DbUpsertRole(ctx, definition)
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(syncedClusterRoleOptional()).To(BeFalse())
+			Expect(syncedClusterRoleOptional(int32(noClusterPermissionsRoleId))).To(BeFalse())
 		})
 	})
 
