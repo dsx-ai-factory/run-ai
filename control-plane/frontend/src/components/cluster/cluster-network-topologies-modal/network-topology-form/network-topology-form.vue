@@ -300,14 +300,9 @@ export default defineComponent({
   background-color: var(--border-default);
 }
 
-.topology-move-button {
-  width: 28px;
-  height: 28px;
-
-  &[aria-disabled="true"] {
-    color: var(--text-disabled);
-    cursor: default;
-  }
+.topology-levels :deep(.topology-move-button[aria-disabled="true"]) {
+  color: var(--icon-disabled);
+  cursor: default;
 }
 
 .topology-order-status {
