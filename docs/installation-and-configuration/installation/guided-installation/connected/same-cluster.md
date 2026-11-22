@@ -413,7 +413,8 @@ All pods should reach `Running` or `Completed` status.
 
 **Note**
 
-After installation, it may take a few minutes for the UI to become accessible (up to 15 minutes). Accessing it too early may result in a "server cannot be reached" error.
+* After installation, it may take a few minutes for the UI to become accessible (up to 15 minutes). Accessing it too early may result in a "server cannot be reached" error.
+* The NVIDIA Run:ai UI is supported on Google Chrome. For details, see [Supported Browsers](../../../support-matrix.md#supported-browsers).
 
 </Note>
 
