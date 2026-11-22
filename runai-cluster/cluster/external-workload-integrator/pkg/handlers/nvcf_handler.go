@@ -219,7 +219,7 @@ func getPodsOfFunctionVersion(ctx context.Context, functionVersionId, namespace 
 	podList := &corev1.PodList{}
 	err := readerClient.List(ctx, podList, selector)
 	if err != nil {
-		if client.IgnoreNotFound(err) != nil {
+		if client.IgnoreNotFound(err) == nil {
 			return []corev1.Pod{}, nil
 		}
 		return nil, err
