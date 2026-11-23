@@ -25,6 +25,8 @@ type RoleDaoInitializer struct {
 func (r *RoleDaoInitializer) DbUpsertRole(ctx context.Context, roleRequest models.Role) (uint, error) {
 	roleRequest.CreatedBy = RunAiRoleCreator
 	roleRequest.NoPermissionSet = ptr.To(false)
+	// never nil, so Updates also writes false when the definition does not set the flag
+	roleRequest.NoClusterPermissions = ptr.To(ptr.Deref(roleRequest.NoClusterPermissions, false))
 
 	// we don't use on conflict since permission sets needs special handling.
 	existingRole, err := r.getRoleByName(ctx, roleRequest.Name, roleRequest.ScopeId, roleRequest.ScopeType)

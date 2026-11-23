@@ -31,6 +31,7 @@ type Role struct {
 	Enabled                 bool             `gorm:""`
 	EffectiveEnabled        *bool            `gorm:"-"`
 	ClusterRolePredefinedId *int64           `gorm:""`
+	NoClusterPermissions    *bool            `gorm:"default:false"`
 	Deprecated              bool             `gorm:"default:false"`
 	TenantId                *string          `gorm:""`
 	NoPermissionSet         *bool            `gorm:"default:true"`
