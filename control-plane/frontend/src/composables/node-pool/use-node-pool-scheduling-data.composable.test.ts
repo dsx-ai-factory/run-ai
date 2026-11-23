@@ -15,6 +15,7 @@ vi.mock("@/services/control-plane/org-unit.service/org-unit.service", async (ori
     getDepartment: vi.fn(),
     getDepartmentNodePoolResources: vi.fn(),
     countDepartmentNodePoolResources: vi.fn(),
+    countProjectsNodePoolResources: vi.fn(),
     sumDepartmentNodePoolResources: vi.fn(),
     sumProjectNodePoolResources: vi.fn(),
   });
@@ -39,6 +40,7 @@ import { clusterService } from "@/services/control-plane/cluster.service/cluster
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 import {
   loadChildQuotaSum,
+  loadNodePoolGpuLimits,
   loadDepartmentPage,
   loadSchedulingTotals,
   loadSchedulingDepartmentSnapshot,
@@ -626,5 +628,25 @@ describe("scoped scheduling reads", () => {
     expect(data.baselineRows.value).toEqual([]);
     expect(data.resources.value?.gpus).toBeUndefined();
     expect(data.loadError.value).toBe("");
+  });
+});
+
+describe("node pool GPU limit check", () => {
+  it.each([
+    { departments: 0, projects: 0, expected: false },
+    { departments: 1, projects: 0, expected: true },
+    { departments: 0, projects: 1, expected: true },
+  ])("checks all departments and projects: $departments/$projects", async ({ departments, projects, expected }) => {
+    vi.mocked(orgUnitService.countDepartmentNodePoolResources).mockResolvedValue(departments);
+    vi.mocked(orgUnitService.countProjectsNodePoolResources).mockResolvedValue(projects);
+    expect(await loadNodePoolGpuLimits({ poolId: "pool", clusterId: "cluster", rank: "High" })).toBe(expected);
+    const filters = ["nodePoolId==pool", "clusterId==cluster", "gpuLimit!=-1"];
+    expect(orgUnitService.countDepartmentNodePoolResources).toHaveBeenLastCalledWith(filters);
+    expect(orgUnitService.countProjectsNodePoolResources).toHaveBeenLastCalledWith(filters);
+  });
+  it("propagates a failed project check instead of treating it as no limits", async () => {
+    vi.mocked(orgUnitService.countDepartmentNodePoolResources).mockResolvedValue(0);
+    vi.mocked(orgUnitService.countProjectsNodePoolResources).mockRejectedValueOnce(new Error("Unavailable"));
+    await expect(loadNodePoolGpuLimits({ poolId: "pool", clusterId: "cluster" })).rejects.toThrow("Unavailable");
   });
 });

@@ -29,6 +29,7 @@
     :can-edit-departments="permissions.edit"
     :can-save-pool="canSavePool"
     :can-reset-resources="canResetResources"
+    :load-has-gpu-limits="loadHasGpuLimits"
     :totals-complete="totalsComplete"
     :can-edit-department="canEditDepartment"
     :has-more="hasMore"
@@ -91,6 +92,7 @@ const {
   totalsComplete,
   canEditDepartment,
   canResetResources,
+  loadHasGpuLimits,
   quotaPolicy,
   policyError,
   loadError,
