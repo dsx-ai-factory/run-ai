@@ -15,7 +15,7 @@ const draft: SchedulingDraft = {
   automaticWeights: true,
   cpuQuota: false,
   maxAllocation: true,
-  departments: { a: { id: "a", limit: 8, weight: 2, quota: 3, rank: "High" } },
+  departments: {},
 };
 describe("scheduling settings draft interactions", () => {
   it.each([false, true])("checks saved limits before disabling (has limits: %s)", async (hasLimits) => {
@@ -54,8 +54,9 @@ describe("scheduling settings draft interactions", () => {
       (document.querySelector('[aid="confirm-disable-setting"]') as HTMLButtonElement).click();
       await flushPromises();
     }
-    expect(wrapper.emitted("patch")).toEqual([[{ maxAllocation: false }]]);
-    expect(draft.departments.a.limit).toBe(8);
+    expect(wrapper.emitted("patch")).toEqual([
+      [hasLimits ? { maxAllocation: false, departments: {} } : { maxAllocation: false }],
+    ]);
     wrapper.unmount();
   });
   it("keeps allocation enabled after a failed check and allows retry", async () => {
@@ -185,33 +186,36 @@ describe("scheduling settings draft interactions", () => {
     expect(wrapper.emitted("patch")?.at(-1)).toEqual([{ historicalWeight: 1.5 }]);
     wrapper.unmount();
   });
-  it("keeps unsaved limits when disabling the capability; backend resets stored limits", async () => {
+  it.each([
+    [false, false],
+    [true, false],
+    [true, true],
+  ])("handles edited limits with saved capability %s and stored limits %s", async (saved, stored) => {
+    const edits = { a: { id: "a", limit: 0, weight: 2 }, b: { id: "b", limit: 8 } };
     const wrapper = mount(Settings, {
       props: {
-        draft,
-        savedMaxAllocation: true,
-        savedCpuQuota: false,
+        draft: { ...draft, departments: edits },
+        savedMaxAllocation: saved,
         canResetResources: true,
-        loadHasGpuLimits: vi.fn().mockResolvedValue(true),
+        loadHasGpuLimits: vi.fn().mockResolvedValue(stored),
       },
       global: { plugins: [Quasar] },
     });
-    const toggle = wrapper
-      .findAllComponents(RunaiToggle)
-      .find((toggle) => toggle.props("aid") === "max-allocation-toggle");
-    if (!toggle) throw new Error("Maximum allocation toggle is missing");
-    toggle.vm.$emit("update:model-value", false);
+    const toggle = wrapper.get('[aid="max-allocation-toggle"]');
+    const open = async () => {
+      await toggle.trigger("click");
+      await flushPromises();
+    };
+    await open();
+    expect(document.body.textContent).toContain(stored ? "Disabling this will reset" : "You have unsaved changes.");
+    (document.querySelector('[aid="keep-setting-enabled"]') as HTMLButtonElement).click();
     await flushPromises();
     expect(wrapper.emitted("patch")).toBeUndefined();
-    wrapper.findComponent(RunaiBaseDialog).vm.$emit("close");
-    await flushPromises();
-    expect(wrapper.emitted("patch")).toBeUndefined();
-    toggle.vm.$emit("update:model-value", false);
-    await flushPromises();
+    await open();
     (document.querySelector('[aid="confirm-disable-setting"]') as HTMLButtonElement).click();
     await flushPromises();
-    expect(wrapper.emitted("patch")?.[0]).toEqual([{ maxAllocation: false }]);
-    expect(draft.departments.a.limit).toBe(8);
+    expect(wrapper.emitted("patch")).toEqual([[{ maxAllocation: false, departments: { a: { id: "a", weight: 2 } } }]]);
+    expect(edits.b.limit).toBe(8);
     wrapper.unmount();
   });
   it("disables reset-sensitive controls without cluster-wide update scope", () => {

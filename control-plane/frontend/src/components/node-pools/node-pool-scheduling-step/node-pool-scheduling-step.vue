@@ -437,7 +437,13 @@ function selectMode(value: string | number | boolean | null) {
 }
 function applyEdit(edit: IDepartmentSchedulingEdit) {
   if (saving.value || departmentsReadOnly.value) return;
-  draft.value.departments[edit.id] = { ...draft.value.departments[edit.id], ...edit };
+  const next = { ...draft.value.departments[edit.id], ...edit };
+  if (edit.limit !== undefined) {
+    const saved = (props.baselineRows ?? props.rows).find((row) => row.orgUnitId === edit.id);
+    if (saved && (edit.limit ?? -1) === (saved.resources.gpu?.limit ?? -1)) delete next.limit;
+  }
+  if (Object.keys(next).length === 1) delete draft.value.departments[edit.id];
+  else draft.value.departments[edit.id] = next;
 }
 
 const saving = ref(false);

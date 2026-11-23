@@ -246,12 +246,14 @@
       @close="confirmation = undefined"
     >
       <template #header>{{
-        confirmation === "maxAllocation" ? "Disable Max GPU Allocation?" : "Disable CPU Quota?"
+        confirmation === "cpuQuota" ? "Disable CPU Quota?" : "Disable Max GPU Allocation?"
       }}</template>
       <template #body>{{
         confirmation === "maxAllocation"
           ? 'Disabling this will reset the max GPU allocation of all departments in this node pool to "Unlimited"'
-          : "The CPU compute and CPU memory quotas of departments and projects in this node pool will be removed. Their limit will be set to Auto, and workloads can use up to the node pool’s maximum available CPU resources. Running workloads are not affected."
+          : confirmation === "unsavedLimits"
+            ? "You have unsaved changes. If you disable max GPU allocation, they will be lost."
+            : "The CPU compute and CPU memory quotas of departments and projects in this node pool will be removed. Their limit will be set to Auto, and workloads can use up to the node pool’s maximum available CPU resources. Running workloads are not affected."
       }}</template>
       <template #footer
         ><runai-btn
@@ -314,7 +316,7 @@ const windowHelp =
   "This defines the duration of the sliding window used to calculate historical resource usage. At any given moment, the system looks only at usage within this duration from the current time. As time passes, the window slides forward continuously, including new usage and dropping old usage that falls outside the window.";
 const runtimeUnits = ["Days", "Hours", "Minutes", "Seconds"];
 const windowUnits = ["Days", "Hours", "Minutes"];
-const confirmation = ref<"maxAllocation" | "cpuQuota">();
+const confirmation = ref<"maxAllocation" | "unsavedLimits" | "cpuQuota">();
 function patch(value: Partial<SchedulingDraft>) {
   if (!props.readonly) emit("patch", value);
 }
@@ -344,10 +346,15 @@ watch(
   [() => props.draft.mode, () => props.draft.maxAllocation, () => props.readonly, () => props.canResetResources],
   () => {
     invalidateLimitCheck();
-    if (confirmation.value === "maxAllocation") confirmation.value = undefined;
+    if (confirmation.value !== "cpuQuota") confirmation.value = undefined;
   },
 );
 onBeforeUnmount(invalidateLimitCheck);
+function disableWithoutSavedLimits() {
+  if (Object.values(props.draft.departments).some((edit) => edit.limit !== undefined)) {
+    confirmation.value = "unsavedLimits";
+  } else patch({ maxAllocation: false });
+}
 async function setMax(value: boolean) {
   if (
     !isSupportedSchedulingMode(props.draft.mode) ||
@@ -357,8 +364,12 @@ async function setMax(value: boolean) {
   )
     return;
   maxAllocationError.value = "";
-  if (value || !(props.savedMaxAllocation ?? props.draft.maxAllocation)) {
-    patch({ maxAllocation: value });
+  if (value) {
+    patch({ maxAllocation: true });
+    return;
+  }
+  if (!(props.savedMaxAllocation ?? props.draft.maxAllocation)) {
+    disableWithoutSavedLimits();
     return;
   }
   const version = ++limitCheckVersion;
@@ -368,7 +379,7 @@ async function setMax(value: boolean) {
     const hasLimits = await props.loadHasGpuLimits();
     if (version !== limitCheckVersion) return;
     if (hasLimits) confirmation.value = "maxAllocation";
-    else patch({ maxAllocation: false });
+    else disableWithoutSavedLimits();
   } catch (error) {
     if (version === limitCheckVersion) {
       maxAllocationError.value = extractErrorMessages(error, "Failed to check GPU allocation limits. Try again.").join(
@@ -385,11 +396,18 @@ function setCpu(value: boolean) {
   else patch({ cpuQuota: value });
 }
 function confirmDisable() {
-  if (confirmation.value === "maxAllocation") {
-    // The backend resets stored limits on save. Keep inactive draft limits so
-    // switching the toggle back on restores the user's unsaved values.
-    patch({ maxAllocation: false });
-  } else patch({ cpuQuota: false });
+  if (confirmation.value === "cpuQuota") patch({ cpuQuota: false });
+  else {
+    const departments = { ...props.draft.departments };
+    for (const [id, edit] of Object.entries(departments)) {
+      if (edit.limit === undefined) continue;
+      const remaining = { ...edit };
+      delete remaining.limit;
+      if (Object.keys(remaining).length === 1) delete departments[id];
+      else departments[id] = remaining;
+    }
+    patch({ maxAllocation: false, departments });
+  }
   confirmation.value = undefined;
 }
 </script>
