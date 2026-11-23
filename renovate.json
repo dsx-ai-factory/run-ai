@@ -138,6 +138,13 @@
       "major": {
         "enabled": false
       }
+    },
+    {
+      "description": "Disable major updates across the repository.",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
     }
   ]
 }
