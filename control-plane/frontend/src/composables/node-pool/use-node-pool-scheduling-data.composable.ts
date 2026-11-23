@@ -27,6 +27,7 @@ import {
   schedulingFilters,
 } from "@/composables/node-pool/node-pool-scheduling-data.util";
 import { extractErrorMessages } from "@/utils/error-alert.util/index";
+import { ForbiddenError, NotFoundError } from "@/models/http-response.model";
 
 export function useNodePoolSchedulingData(poolId: Ref<string>) {
   const permissionStore = usePermissionStore();
@@ -212,7 +213,11 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
     policyError.value = "";
     poolLoading.value = true;
     try {
-      const pool = await loadSchedulingPool(id);
+      const pool = await loadSchedulingPool(id).catch((error: unknown) => {
+        if (scopeVersion === current && (error instanceof ForbiddenError || error instanceof NotFoundError))
+          snapshot.value = undefined;
+        throw error;
+      });
       if (scopeVersion !== current) return;
       snapshot.value = pool;
       const scope = { poolId: id, clusterId: pool.clusterId };

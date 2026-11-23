@@ -6,6 +6,9 @@ import { mount, flushPromises } from "@vue/test-utils";
 import { createTestingPinia } from "@pinia/testing";
 import { createRouter, createMemoryHistory } from "vue-router";
 import { Quasar } from "quasar";
+import { ForbiddenError, NotFoundError } from "@/models/http-response.model";
+import { useAppStore } from "@/stores/app.store";
+import { requestToLeave } from "@/services/infra/router.service/router.service";
 import { describe, expect, it, vi } from "vitest";
 import NodePoolApp from "../node-pool-app.vue";
 import NodePoolEdit from "./node-pool-edit.vue";
@@ -20,6 +23,40 @@ vi.mock("@/services/control-plane/cluster.service/cluster.service", () => ({
 }));
 
 describe("shared node pool new/edit entry", () => {
+  it.each(["scheduling", "topology"])("shows a retry screen at the direct %s URL for a deleted pool", async (step) => {
+    const poolId = "deleted-pool";
+    const forbidden = new ForbiddenError();
+    const notFound = new NotFoundError("Node pool not found");
+    vi.mocked(clusterService.getNodepool).mockClear().mockRejectedValueOnce(forbidden).mockRejectedValueOnce(notFound);
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: "/node-pools/edit/:id", name: NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT, component: NodePoolEdit }],
+    });
+    await router.push({ name: NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT, params: { id: poolId }, query: { stepName: step } });
+    await router.isReady();
+    const wrapper = mount(NodePoolApp, {
+      global: { plugins: [Quasar, createTestingPinia({ createSpy: vi.fn }), router] },
+    });
+    try {
+      const retry = `[aid="retry-${step}-pool"]`;
+      const save = `[aid="${step}-save-close"]`;
+      await vi.waitFor(() => expect(wrapper.get('[role="alert"]').text()).toContain(forbidden.message));
+      expect(wrapper.find(save).exists()).toBe(false);
+      expect(useAppStore().setPageTitleOverride).toHaveBeenLastCalledWith(null);
+      expect(await requestToLeave()).toBe(true);
+
+      await wrapper.get(retry).trigger("click");
+      await flushPromises();
+      expect(wrapper.get('[role="alert"]').text()).toContain(notFound.message);
+      expect(wrapper.get(retry).isVisible()).toBe(true);
+      expect(wrapper.find(save).exists()).toBe(false);
+      expect(vi.mocked(clusterService.getNodepool).mock.calls).toEqual([[poolId], [poolId]]);
+      expect(router.currentRoute.value.query.stepName).toBe(step);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
   it("loads the saved pool when Create & continue navigates from new to edit", async () => {
     const router = createRouter({
       history: createMemoryHistory(),

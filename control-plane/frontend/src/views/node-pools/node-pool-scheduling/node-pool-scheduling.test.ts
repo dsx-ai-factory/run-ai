@@ -13,6 +13,7 @@ import { clusterService } from "@/services/control-plane/cluster.service/cluster
 import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
 const { createNodePoolDraft } = nodePoolUtil;
 import type { Nodepool } from "@/swagger-models/cluster-service-client";
+import { ForbiddenError, NotFoundError } from "@/models/http-response.model";
 import { requestToLeave } from "@/services/infra/router.service/router.service";
 import { useAppStore } from "@/stores/app.store";
 import { NODE_POOL_ROUTE_NAMES } from "@/router/node-pool.routes/node-pool.routes.names";
@@ -181,6 +182,31 @@ describe("scheduling route", () => {
     expect(wrapper.findComponent(Step).props("pool").id).toBe("one");
     wrapper.unmount();
   });
+
+  it.each([new ForbiddenError(), new NotFoundError()])(
+    "removes the saved editor when refreshing the same pool returns $statusCode",
+    async (error) => {
+      vi.mocked(clusterService.getNodepool).mockResolvedValueOnce(pool).mockRejectedValue(error);
+      const { wrapper } = await render(true);
+      await flushPromises();
+      expect(wrapper.get('[aid="scheduling-save-close"]').isVisible()).toBe(true);
+
+      wrapper.findComponent(Step).vm.$emit("refresh");
+      await flushPromises();
+      expect(wrapper.find('[aid="scheduling-save-close"]').exists()).toBe(false);
+      expect(wrapper.get('[role="alert"]').text()).toContain(error.message);
+      expect(useAppStore().setPageTitleOverride).toHaveBeenLastCalledWith(null);
+
+      await wrapper.get('[aid="retry-scheduling-pool"]').trigger("click");
+      await flushPromises();
+      expect(clusterService.getNodepool).toHaveBeenCalledTimes(3);
+      expect(clusterService.getNodepool).toHaveBeenLastCalledWith(pool.id);
+      expect(wrapper.get('[role="alert"]').text()).toContain(error.message);
+      expect(wrapper.find('[aid="scheduling-save-close"]').exists()).toBe(false);
+      expect(clusterService.updateNodepool).not.toHaveBeenCalled();
+      wrapper.unmount();
+    },
+  );
 
   it("ignores a response for an older route", async () => {
     let resolveFirst!: (value: Nodepool) => void;
