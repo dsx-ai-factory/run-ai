@@ -15,6 +15,7 @@ import (
 	resourcev1 "k8s.io/api/resource/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	kubefake "k8s.io/client-go/kubernetes/fake"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -23,12 +24,21 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/status-updater/pkg/controllers/metadata"
 )
 
+// The node label holds the memory of a single GPU: 16384 MiB, which is 17179.869184 MB.
+// The expected GPU memory values below are written out by hand (GPU count * 17179.869184 MB, rounded down), and are
+// deliberately not computed with the production conversion functions.
 const (
-	draTestNamespace = "dra-ns"
-	draTestNode      = "gpu-node"
-	// The node label holds the memory of a single GPU, in MiB.
+	draTestNamespace        = "dra-ns"
+	draTestNode             = "gpu-node"
+	draTestPodName          = "dra-pod"
+	draTestPodUID           = types.UID("dra-pod-uid")
 	draTestNodeGpuMemoryMiB = "16384"
 	draTestGpuDeviceClass   = "gpu.nvidia.com"
+
+	draTestMemoryOfOneGpuMb    = int64(17179)
+	draTestMemoryOfTwoGpusMb   = int64(34359)
+	draTestMemoryOfThreeGpusMb = int64(51539)
+	draTestMemoryOfFourGpusMb  = int64(68719)
 )
 
 // stubDRAResolver returns a fixed GPU count. The first failures calls return an error.
@@ -62,8 +72,9 @@ func draTestTemplateRef(name string) v1.PodResourceClaim {
 func draTestPod(phase v1.PodPhase, receivedType string, claimRefs ...v1.PodResourceClaim) *v1.Pod {
 	return &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        "dra-pod",
+			Name:        draTestPodName,
 			Namespace:   draTestNamespace,
+			UID:         draTestPodUID,
 			Annotations: map[string]string{receivedResourceAnnotationName: receivedType},
 		},
 		Spec: v1.PodSpec{
@@ -102,11 +113,6 @@ func calcDraTestMetrics(t *testing.T, pod *v1.Pod, kubeClient client.Client, res
 	return podMetrics, err
 }
 
-// expectedGpuMemory is the memory the calculation derives from a GPU count: count * the node's single-GPU memory.
-func expectedGpuMemory(gpus int64) int64 {
-	return int64(convertMibToMb(16384) * float64(gpus))
-}
-
 func TestCalcPodGpuResourcesDRA(t *testing.T) {
 	for _, tc := range []struct {
 		name         string
@@ -117,23 +123,23 @@ func TestCalcPodGpuResourcesDRA(t *testing.T) {
 		wantResolves int
 	}{
 		{
-			name:         "DRA pod with two GPUs reports two GPUs and their memory",
+			name:         "Running pod with a two-GPU claim: reports two GPUs and 34359 MB",
 			pod:          draTestPod(v1.PodRunning, receivedTypeRegular, draTestClaimRef("claim")),
 			draGpus:      2,
 			wantGpus:     2,
-			wantMemory:   expectedGpuMemory(2),
+			wantMemory:   draTestMemoryOfTwoGpusMb,
 			wantResolves: 1,
 		},
 		{
-			name:         "DRA pod that is bound but not yet running is counted",
+			name:         "Bound pod that is not running yet: reports one GPU and 17179 MB",
 			pod:          draTestPod(v1.PodPending, receivedTypeRegular, draTestTemplateRef("template")),
 			draGpus:      1,
 			wantGpus:     1,
-			wantMemory:   expectedGpuMemory(1),
+			wantMemory:   draTestMemoryOfOneGpuMb,
 			wantResolves: 1,
 		},
 		{
-			name: "terminating DRA pod keeps reporting its GPUs",
+			name: "Terminating pod with a four-GPU claim: keeps reporting four GPUs and 68719 MB",
 			pod: func() *v1.Pod {
 				p := draTestPod(v1.PodRunning, receivedTypeRegular, draTestClaimRef("claim"))
 				now := metav1.Now()
@@ -142,11 +148,11 @@ func TestCalcPodGpuResourcesDRA(t *testing.T) {
 			}(),
 			draGpus:      4,
 			wantGpus:     4,
-			wantMemory:   expectedGpuMemory(4),
+			wantMemory:   draTestMemoryOfFourGpusMb,
 			wantResolves: 1,
 		},
 		{
-			name: "DRA GPUs are added to GPUs requested in the pod spec",
+			name: "One GPU in the pod spec and a two-GPU claim: reports three GPUs and 51539 MB",
 			pod: func() *v1.Pod {
 				p := draTestPod(v1.PodRunning, receivedTypeRegular, draTestClaimRef("claim"))
 				gpu := map[v1.ResourceName]resource.Quantity{gpuResourceName: resource.MustParse("1")}
@@ -155,11 +161,11 @@ func TestCalcPodGpuResourcesDRA(t *testing.T) {
 			}(),
 			draGpus:      2,
 			wantGpus:     3,
-			wantMemory:   expectedGpuMemory(3),
+			wantMemory:   draTestMemoryOfThreeGpusMb,
 			wantResolves: 1,
 		},
 		{
-			name:         "claims without NVIDIA GPUs report no GPUs",
+			name:         "Non-GPU claim: reports zero GPUs and zero memory",
 			pod:          draTestPod(v1.PodRunning, receivedTypeRegular, draTestClaimRef("claim")),
 			draGpus:      0,
 			wantGpus:     0,
@@ -167,7 +173,7 @@ func TestCalcPodGpuResourcesDRA(t *testing.T) {
 			wantResolves: 1,
 		},
 		{
-			name: "traditional GPU pod is unaffected and DRA is not consulted",
+			name: "Traditional two-GPU pod without claims: reports two GPUs and does not read DRA",
 			pod: func() *v1.Pod {
 				p := draTestPod(v1.PodRunning, receivedTypeRegular)
 				gpu := map[v1.ResourceName]resource.Quantity{gpuResourceName: resource.MustParse("2")}
@@ -176,11 +182,11 @@ func TestCalcPodGpuResourcesDRA(t *testing.T) {
 			}(),
 			draGpus:      7, // must be ignored
 			wantGpus:     2,
-			wantMemory:   expectedGpuMemory(2),
+			wantMemory:   draTestMemoryOfTwoGpusMb,
 			wantResolves: 0,
 		},
 		{
-			name: "pod that is not scheduled yet is not resolved",
+			name: "Pod that is not scheduled yet: reports zero GPUs and does not read DRA",
 			pod: func() *v1.Pod {
 				p := draTestPod(v1.PodPending, receivedTypeRegular, draTestClaimRef("claim"))
 				p.Spec.NodeName = ""
@@ -192,7 +198,7 @@ func TestCalcPodGpuResourcesDRA(t *testing.T) {
 			wantResolves: 0,
 		},
 		{
-			name:         "finished pod is not resolved",
+			name:         "Succeeded pod: reports zero GPUs and does not read DRA",
 			pod:          draTestPod(v1.PodSucceeded, receivedTypeRegular, draTestClaimRef("claim")),
 			draGpus:      2,
 			wantGpus:     0,
@@ -200,7 +206,7 @@ func TestCalcPodGpuResourcesDRA(t *testing.T) {
 			wantResolves: 0,
 		},
 		{
-			name:         "pod without a received resource type is not resolved",
+			name:         "Pod without a received resource type: reports zero GPUs and does not read DRA",
 			pod:          draTestPod(v1.PodRunning, receivedTypeNone, draTestClaimRef("claim")),
 			draGpus:      2,
 			wantGpus:     0,
@@ -222,7 +228,7 @@ func TestCalcPodGpuResourcesDRA(t *testing.T) {
 	}
 }
 
-func TestCalcPodGpuResourcesDRAFractionIsNotResolved(t *testing.T) {
+func TestCalcPodGpuResourcesDRAFractionPodDoesNotReadDRA(t *testing.T) {
 	pod := draTestPod(v1.PodRunning, receivedTypeFraction, draTestClaimRef("claim"))
 	pod.Annotations[gpuFractionAnnotation] = "0.5"
 	kubeClient := fake.NewClientBuilder().WithObjects(draTestNodeObject(draTestNodeGpuMemoryMiB)).Build()
@@ -250,7 +256,7 @@ func TestCalcPodGpuResourcesDRALookupFailureIsReturnedAndRecovers(t *testing.T) 
 	podMetrics, err = calcDraTestMetrics(t, pod, kubeClient, resolver)
 	require.NoError(t, err)
 	require.Equal(t, float64(2), podMetrics.GPUs)
-	require.Equal(t, expectedGpuMemory(2), podMetrics.GpuMemory)
+	require.Equal(t, draTestMemoryOfTwoGpusMb, podMetrics.GpuMemory)
 }
 
 func TestCalcPodGpuResourcesWithoutResolverIgnoresClaims(t *testing.T) {
@@ -283,50 +289,108 @@ func newRealDRAParser(objs ...client.Object) (*dra.DRAParser, client.Client) {
 	return dra.NewDRAParser(kubeClient, kubefake.NewClientset()), kubeClient
 }
 
-func TestCalcPodGpuResourcesDRAWithClaimsAndTemplates(t *testing.T) {
+func TestCalcPodGpuResourcesDRAWithRealParser(t *testing.T) {
 	existingClaim := &resourcev1.ResourceClaim{
 		ObjectMeta: metav1.ObjectMeta{Name: "existing", Namespace: draTestNamespace},
 		Spec:       draTestClaimSpec(draTestGpuDeviceClass, 2),
 	}
+	// The template (one GPU) and the claim generated from it (three GPUs) deliberately differ, so the tests show
+	// which of them was read.
 	template := &resourcev1.ResourceClaimTemplate{
 		ObjectMeta: metav1.ObjectMeta{Name: "tmpl", Namespace: draTestNamespace},
 		Spec:       resourcev1.ResourceClaimTemplateSpec{Spec: draTestClaimSpec(draTestGpuDeviceClass, 1)},
 	}
-	otherVendorClaim := &resourcev1.ResourceClaim{
-		ObjectMeta: metav1.ObjectMeta{Name: "other-vendor", Namespace: draTestNamespace},
-		Spec:       draTestClaimSpec("other.vendor.com", 8),
+	isController := true
+	generatedClaimOf := func(name string, ownerUID types.UID) *resourcev1.ResourceClaim {
+		return &resourcev1.ResourceClaim{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      name,
+				Namespace: draTestNamespace,
+				OwnerReferences: []metav1.OwnerReference{{
+					APIVersion: "v1", Kind: "Pod", Name: draTestPodName, UID: ownerUID, Controller: &isController,
+				}},
+			},
+			Spec: draTestClaimSpec(draTestGpuDeviceClass, 3),
+		}
 	}
+	otherClassClaim := &resourcev1.ResourceClaim{
+		ObjectMeta: metav1.ObjectMeta{Name: "other-class", Namespace: draTestNamespace},
+		Spec:       draTestClaimSpec("research-gpus.example.com", 8),
+	}
+	generatedClaimName := "dra-pod-tmpl-abcde"
+	foreignClaimName := "dra-pod-tmpl-foreign"
+	generatedStatus := []v1.PodResourceClaimStatus{{Name: "tmpl", ResourceClaimName: &generatedClaimName}}
+	foreignStatus := []v1.PodResourceClaimStatus{{Name: "tmpl", ResourceClaimName: &foreignClaimName}}
 
 	for _, tc := range []struct {
-		name     string
-		claims   []v1.PodResourceClaim
-		wantGpus float64
+		name       string
+		claims     []v1.PodResourceClaim
+		statuses   []v1.PodResourceClaimStatus
+		wantGpus   float64
+		wantMemory int64
+		wantErr    bool
 	}{
-		{"existing claim", []v1.PodResourceClaim{draTestClaimRef("existing")}, 2},
-		{"template reference", []v1.PodResourceClaim{draTestTemplateRef("tmpl")}, 1},
-		{"claim and template", []v1.PodResourceClaim{draTestClaimRef("existing"), draTestTemplateRef("tmpl")}, 3},
-		{"claim of another device class", []v1.PodResourceClaim{draTestClaimRef("other-vendor")}, 0},
+		{
+			name:       "Existing two-GPU claim: reports two GPUs and 34359 MB",
+			claims:     []v1.PodResourceClaim{draTestClaimRef("existing")},
+			wantGpus:   2,
+			wantMemory: draTestMemoryOfTwoGpusMb,
+		},
+		{
+			name:       "One-GPU template without a generated claim yet: reports one GPU and 17179 MB",
+			claims:     []v1.PodResourceClaim{draTestTemplateRef("tmpl")},
+			wantGpus:   1,
+			wantMemory: draTestMemoryOfOneGpuMb,
+		},
+		{
+			name:       "Generated three-GPU claim named in the pod status: reports three GPUs and 51539 MB",
+			claims:     []v1.PodResourceClaim{draTestTemplateRef("tmpl")},
+			statuses:   generatedStatus,
+			wantGpus:   3,
+			wantMemory: draTestMemoryOfThreeGpusMb,
+		},
+		{
+			name:     "Generated claim owned by another pod: returns an error",
+			claims:   []v1.PodResourceClaim{draTestTemplateRef("tmpl")},
+			statuses: foreignStatus,
+			wantErr:  true,
+		},
+		{
+			name:       "Independent two-GPU claim and one-GPU template: reports three GPUs and 51539 MB",
+			claims:     []v1.PodResourceClaim{draTestClaimRef("existing"), draTestTemplateRef("tmpl")},
+			wantGpus:   3,
+			wantMemory: draTestMemoryOfThreeGpusMb,
+		},
+		{
+			name:       "Claim of a device class other than gpu.nvidia.com: reports zero GPUs",
+			claims:     []v1.PodResourceClaim{draTestClaimRef("other-class")},
+			wantGpus:   0,
+			wantMemory: 0,
+		},
+		{
+			name:    "Claim that cannot be found: returns an error",
+			claims:  []v1.PodResourceClaim{draTestClaimRef("missing")},
+			wantErr: true,
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			parser, kubeClient := newRealDRAParser(
-				existingClaim.DeepCopy(), template.DeepCopy(), otherVendorClaim.DeepCopy())
+			parser, kubeClient := newRealDRAParser(existingClaim.DeepCopy(), template.DeepCopy(),
+				otherClassClaim.DeepCopy(), generatedClaimOf(generatedClaimName, draTestPodUID),
+				generatedClaimOf(foreignClaimName, types.UID("another-pod-uid")))
 			pod := draTestPod(v1.PodRunning, receivedTypeRegular, tc.claims...)
+			pod.Status.ResourceClaimStatuses = tc.statuses
 
 			podMetrics, err := calcDraTestMetrics(t, pod, kubeClient, parser)
 
+			if tc.wantErr {
+				require.Error(t, err)
+				require.Zero(t, podMetrics.GPUs)
+				require.Zero(t, podMetrics.GpuMemory)
+				return
+			}
 			require.NoError(t, err)
 			require.Equal(t, tc.wantGpus, podMetrics.GPUs)
-			require.Equal(t, expectedGpuMemory(int64(tc.wantGpus)), podMetrics.GpuMemory)
+			require.Equal(t, tc.wantMemory, podMetrics.GpuMemory)
 		})
 	}
-}
-
-func TestCalcPodGpuResourcesDRAMissingClaimReturnsError(t *testing.T) {
-	parser, kubeClient := newRealDRAParser()
-	pod := draTestPod(v1.PodRunning, receivedTypeRegular, draTestClaimRef("missing"))
-
-	podMetrics, err := calcDraTestMetrics(t, pod, kubeClient, parser)
-
-	require.Error(t, err)
-	require.Zero(t, podMetrics.GPUs)
 }
