@@ -1,0 +1,12 @@
+defaults:
+    environmentVariables:
+        instances:
+            - name: first-name
+              value: first-val
+            - name: second-name
+              value: second-val
+rules:
+    environmentVariables:
+        instances:
+            locked:
+                - first-name

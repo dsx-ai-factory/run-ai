@@ -10,19 +10,19 @@ require (
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.1.1
 	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.3.1
 	github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client v1.0.7
-	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.12
+	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.13
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.8
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.12
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.13
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.5
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.7
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.21
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.11
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.13
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.23
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.14
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.11
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/setting v1.2.9
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.34
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.22
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.12
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.14
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.24
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.15
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.12
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/setting v1.2.10
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.35
 	github.com/go-chi/chi/v5 v5.5.0
 	github.com/go-resty/resty/v2 v2.17.2
 	github.com/golang-jwt/jwt/v5 v5.3.1
@@ -71,7 +71,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jonboulle/clockwork v0.5.0 // indirect
-	github.com/klauspost/compress v1.20.4 // indirect
+	github.com/klauspost/compress v1.20.5 // indirect
 	github.com/leodido/go-urn v1.5.0 // indirect
 	github.com/lib/pq v1.12.3 // indirect
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
@@ -89,7 +89,7 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/paulmach/orb v0.14.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
-	github.com/pierrec/lz4/v4 v4.1.33 // indirect
+	github.com/pierrec/lz4/v4 v4.1.34 // indirect
 	github.com/prometheus/client_golang v1.25.0 // indirect
 	github.com/prometheus/client_model v0.6.3 // indirect
 	github.com/prometheus/common v0.72.1 // indirect
@@ -112,8 +112,8 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/xdg-go/scram v1.4.0 // indirect
-	github.com/xdg-go/stringprep v1.0.4 // indirect
-	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
+	github.com/xdg-go/stringprep v1.0.5 // indirect
+	go.opentelemetry.io/auto/sdk v1.2.2 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0 // indirect
 	go.opentelemetry.io/otel v1.47.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.47.0 // indirect
@@ -126,7 +126,7 @@ require (
 	go.uber.org/atomic v1.12.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/crypto v0.59.0 // indirect
-	golang.org/x/exp v0.0.0-20261118215729-2791e4028fd4 // indirect
+	golang.org/x/exp v0.0.0-20261121134650-e1094eeca1b5 // indirect
 	golang.org/x/net v0.63.0 // indirect
 	golang.org/x/sync v0.25.0 // indirect
 	golang.org/x/sys v0.50.0 // indirect

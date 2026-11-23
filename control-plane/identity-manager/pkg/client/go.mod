@@ -5,9 +5,9 @@ go 1.27.4
 require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.6
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.21
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.13
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.34
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.22
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.14
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.35
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.12.1
 	k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab
@@ -38,7 +38,7 @@ require (
 	github.com/spf13/viper v1.21.0 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
+	go.opentelemetry.io/auto/sdk v1.2.2 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0 // indirect
 	go.opentelemetry.io/otel v1.47.0 // indirect
 	go.opentelemetry.io/otel/log v1.47.0 // indirect

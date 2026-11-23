@@ -118,16 +118,17 @@ type OrgUnitAPI interface {
 	/*
 		SimulateNodePoolFairShare Simulate the fair share of a node pool's org units
 
-		Computes the GPUs the scheduler would give org units of a node pool for a scenario: the node pool's capacity and
-	scheduling capabilities as set in the form, and the org units to return with their unsaved changes. The calculation
+		Computes the GPUs the scheduler would give org units of a node pool for a scenario: a node pool capacity and
+	scheduling capabilities, saved or not, and the org units to return with their unsaved changes. The calculation
 	covers every department of the node pool, and for projects every project of the parent, including ones the caller
 	can't read; the response holds only the requested org units. Org units not in the request keep their stored
 	settings and ask for half the capacity. Nothing is saved. The same scenario gives the same result for every caller.
 
-	Only saved org units can be simulated; the department and project create forms are out of scope.
+	Only saved org units can be simulated; an org unit that doesn't exist yet can't be part of the scenario.
 
-	400 covers, besides the schema: `parent` missing for projects or set for departments; a rank, limit or weight
-	the capabilities turn off; a quota or limit between -1 and 0; a limit below the quota; a duplicate id; and an org
+	400 covers, besides the schema: `parent` missing for projects or set for departments; limits on while quota is
+	off; a rank or limit the capabilities turn off (a quota is ignored while quota is off, and a weight while
+	adjustableWeights is off); a quota or limit between -1 and 0; a limit below the quota; a duplicate id; and an org
 	unit that isn't on the node pool, isn't readable by the caller, or (for projects) isn't the parent's. These all
 	return the same message as an unknown id, so hidden org units aren't revealed: an unreadable org unit is a 400,
 	not a 403.
@@ -1196,16 +1197,17 @@ func (r ApiSimulateNodePoolFairShareRequest) Execute() (*FairShareSimulationResp
 /*
 SimulateNodePoolFairShare Simulate the fair share of a node pool's org units
 
-Computes the GPUs the scheduler would give org units of a node pool for a scenario: the node pool's capacity and
-scheduling capabilities as set in the form, and the org units to return with their unsaved changes. The calculation
+Computes the GPUs the scheduler would give org units of a node pool for a scenario: a node pool capacity and
+scheduling capabilities, saved or not, and the org units to return with their unsaved changes. The calculation
 covers every department of the node pool, and for projects every project of the parent, including ones the caller
 can't read; the response holds only the requested org units. Org units not in the request keep their stored
 settings and ask for half the capacity. Nothing is saved. The same scenario gives the same result for every caller.
 
-Only saved org units can be simulated; the department and project create forms are out of scope.
+Only saved org units can be simulated; an org unit that doesn't exist yet can't be part of the scenario.
 
-400 covers, besides the schema: `parent` missing for projects or set for departments; a rank, limit or weight
-the capabilities turn off; a quota or limit between -1 and 0; a limit below the quota; a duplicate id; and an org
+400 covers, besides the schema: `parent` missing for projects or set for departments; limits on while quota is
+off; a rank or limit the capabilities turn off (a quota is ignored while quota is off, and a weight while
+adjustableWeights is off); a quota or limit between -1 and 0; a limit below the quota; a duplicate id; and an org
 unit that isn't on the node pool, isn't readable by the caller, or (for projects) isn't the parent's. These all
 return the same message as an unknown id, so hidden org units aren't revealed: an unreadable org unit is a 400,
 not a 403.

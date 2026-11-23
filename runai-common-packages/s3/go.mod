@@ -4,7 +4,7 @@ go 1.27.4
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.5
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.21
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.22
 	github.com/minio/minio-go/v7 v7.4.1
 )
 
@@ -18,7 +18,7 @@ require (
 	github.com/go-playground/validator/v10 v10.30.6 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/klauspost/compress v1.20.4 // indirect
+	github.com/klauspost/compress v1.20.5 // indirect
 	github.com/klauspost/cpuid/v2 v2.4.2 // indirect
 	github.com/klauspost/crc32 v1.3.0 // indirect
 	github.com/leodido/go-urn v1.5.0 // indirect
