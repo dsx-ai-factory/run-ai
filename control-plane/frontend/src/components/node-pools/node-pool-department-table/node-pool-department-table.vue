@@ -1018,13 +1018,6 @@ async function quotaContext(row: IDepartmentSchedulingEdit) {
   line-height: 16.8px;
   font-weight: 500;
 }
-.result-bar.simulation-bar {
-  // Reserve label space so crossing the fit threshold never moves the slider.
-  margin-bottom: 29px;
-}
-.result-bar:not(.simulation-bar) {
-  height: 18px;
-}
 .quota-marker {
   border-inline: 1px solid var(--text-inverse);
   background: repeating-linear-gradient(to bottom, var(--b-text-main) 0 3px, var(--text-inverse) 3px 6px);
