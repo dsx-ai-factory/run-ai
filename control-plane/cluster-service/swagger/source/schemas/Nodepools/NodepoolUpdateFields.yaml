@@ -1,4 +1,6 @@
 type: object
+x-go-server-imports:
+  - github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated
 properties:
   description:
     type: string
@@ -30,4 +32,9 @@ properties:
   schedulingConfiguration:
     $ref: "./SchedulingConfiguration.yaml"
   networkTopologyId:
-    $ref: '../NetworkTopologies/NetworkTopologyIdOptional.yaml'
+    type: string
+    format: uuid
+    nullable: true
+    description: For PATCH, omit this field to keep the current network topology, send null to clear it, or send a topology UUID to assign it. For PUT, omitting this field clears the topology.
+    example: "123e4567-e89b-12d3-a456-426614174000"
+    x-go-server-type: openapi.NullableString

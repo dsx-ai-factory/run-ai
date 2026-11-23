@@ -2974,6 +2974,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The specified resource was not found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: A concurrent node pool change prevented the update. Retry the
+            PATCH.
         "500":
           content:
             application/json:
@@ -9146,12 +9153,17 @@ components:
         schedulingConfiguration:
           $ref: '#/components/schemas/SchedulingConfiguration'
         networkTopologyId:
-          description: The unique identifier for the network topology
+          description: "For PATCH, omit this field to keep the current network topology,\
+            \ send null to clear it, or send a topology UUID to assign it. For PUT,\
+            \ omitting this field clears the topology."
           example: 123e4567-e89b-12d3-a456-426614174000
           format: uuid
           nullable: true
           type: string
+          x-go-server-type: openapi.NullableString
       type: object
+      x-go-server-imports:
+      - github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated
     LegacyPlacementStrategy:
       example:
         cpu: spread

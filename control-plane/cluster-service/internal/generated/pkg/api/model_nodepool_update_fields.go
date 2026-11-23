@@ -12,6 +12,8 @@
 
 package api
 
+import "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
+
 ////////////////////////// RUNAI START (18.1) ////////////////////////////
 import runaihttp "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp"
 
@@ -60,10 +62,10 @@ type NodepoolUpdateFields struct {
 	SchedulingConfiguration *SchedulingConfiguration `json:"schedulingConfiguration,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// The unique identifier for the network topology
+	// For PATCH, omit this field to keep the current network topology, send null to clear it, or send a topology UUID to assign it. For PUT, omitting this field clears the topology.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//NetworkTopologyId *string `json:"networkTopologyId,omitempty"`
-	NetworkTopologyId *string `json:"networkTopologyId,omitempty" gorm:""`
+	NetworkTopologyId openapi.NullableString `json:"networkTopologyId,omitempty,omitzero" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 

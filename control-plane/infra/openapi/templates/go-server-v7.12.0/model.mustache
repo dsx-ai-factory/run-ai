@@ -10,6 +10,9 @@ package {{packageName}}
 {{/-first}}	"{{import}}"{{#-last}}
 )
 {{/-last}}{{/imports}}
+{{#model}}{{#vendorExtensions.x-go-server-imports}}
+import "{{{.}}}"
+{{/vendorExtensions.x-go-server-imports}}{{/model}}
 
 ////////////////////////// RUNAI START (18.1) ////////////////////////////
 import runaihttp "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp"
@@ -83,7 +86,7 @@ type {{classname}} struct {
 	{{/deprecated}}
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//{{name}} {{#isNullable}}*{{/isNullable}}{{{dataType}}} `json:"{{baseName}}{{^required}},omitempty{{/required}}"{{#vendorExtensions.x-go-custom-tag}} {{{.}}}{{/vendorExtensions.x-go-custom-tag}}`
-	{{name}} {{#isNullable}}*{{/isNullable}}{{^isNullable}}{{#vendorExtensions.x-go-pointer}}*{{/vendorExtensions.x-go-pointer}}{{/isNullable}}{{{dataType}}} `json:"{{baseName}}{{^required}},omitempty{{/required}}" gorm:"{{#vendorExtensions.x-gorm-ignore}}-{{/vendorExtensions.x-gorm-ignore}}{{^vendorExtensions.x-gorm-ignore}}{{#isModel}}serializer:json; type:jsonb;{{/isModel}}{{#isMap}}serializer:json; type:jsonb;{{/isMap}}{{#isArray}}serializer:json; type:jsonb;{{/isArray}}{{^isNullable}}not null;{{/isNullable}}{{/vendorExtensions.x-gorm-ignore}}"{{#vendorExtensions.x-go-custom-tag}} {{{.}}}{{/vendorExtensions.x-go-custom-tag}}`
+	{{name}} {{#vendorExtensions.x-go-server-type}}{{{.}}}{{/vendorExtensions.x-go-server-type}}{{^vendorExtensions.x-go-server-type}}{{#isNullable}}*{{/isNullable}}{{^isNullable}}{{#vendorExtensions.x-go-pointer}}*{{/vendorExtensions.x-go-pointer}}{{/isNullable}}{{{dataType}}}{{/vendorExtensions.x-go-server-type}} `json:"{{baseName}}{{^required}},omitempty{{#vendorExtensions.x-go-server-type}},omitzero{{/vendorExtensions.x-go-server-type}}{{/required}}" gorm:"{{#vendorExtensions.x-gorm-ignore}}-{{/vendorExtensions.x-gorm-ignore}}{{^vendorExtensions.x-gorm-ignore}}{{#isModel}}serializer:json; type:jsonb;{{/isModel}}{{#isMap}}serializer:json; type:jsonb;{{/isMap}}{{#isArray}}serializer:json; type:jsonb;{{/isArray}}{{^isNullable}}not null;{{/isNullable}}{{/vendorExtensions.x-gorm-ignore}}"{{#vendorExtensions.x-go-custom-tag}} {{{.}}}{{/vendorExtensions.x-go-custom-tag}}`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 {{/vars}}
 }{{/isEnum}}

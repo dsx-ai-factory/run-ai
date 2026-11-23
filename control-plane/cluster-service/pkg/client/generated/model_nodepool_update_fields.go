@@ -32,7 +32,7 @@ type NodepoolUpdateFields struct {
 	GpuNetworkAccelerationLabelKey  NullableString                                  `json:"gpuNetworkAccelerationLabelKey,omitempty"`
 	GpuNetworkAccelerationDetection NullableNodepoolGPUNetworkAccelerationDetection `json:"gpuNetworkAccelerationDetection,omitempty"`
 	SchedulingConfiguration         NullableSchedulingConfiguration                 `json:"schedulingConfiguration,omitempty"`
-	// The unique identifier for the network topology
+	// For PATCH, omit this field to keep the current network topology, send null to clear it, or send a topology UUID to assign it. For PUT, omitting this field clears the topology.
 	NetworkTopologyId NullableString `json:"networkTopologyId,omitempty"`
 }
 
