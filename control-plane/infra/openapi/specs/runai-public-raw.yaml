@@ -27917,6 +27917,7 @@ components:
       type: object
       properties:
         inferenceEndpointSchemaVersion:
+          x-internal: true
           type: string
           nullable: true
           description: >-
@@ -41150,6 +41151,8 @@ components:
       description: >-
         Route requests to the serving port through the endpoint picker, which
         picks a Pod by load. It can be set only when the workload is created.
+        Requires cluster version 3.1.0 or later, with the inference endpoint
+        controller enabled and an administrator-enabled Gateway on the cluster.
       type: boolean
       default: false
       nullable: true
@@ -41328,6 +41331,7 @@ components:
             category:
               $ref: '#/components/schemas/Category'
             loadAwareRouting:
+              x-internal: true
               $ref: '#/components/schemas/LoadAwareRouting'
             nodePools:
               $ref: '#/components/schemas/NodePools'
@@ -42804,6 +42808,7 @@ components:
             category:
               $ref: '#/components/schemas/Category'
             loadAwareRouting:
+              x-internal: true
               $ref: '#/components/schemas/LoadAwareRouting'
             nodePools:
               $ref: '#/components/schemas/NodePools'
@@ -43487,6 +43492,7 @@ components:
             category:
               $ref: '#/components/schemas/StringRules'
             loadAwareRouting:
+              x-internal: true
               $ref: '#/components/schemas/BooleanRules'
             nodePools:
               $ref: '#/components/schemas/ArrayRules'
@@ -45568,6 +45574,7 @@ components:
             labels:
               $ref: '#/components/schemas/LabelsDefaults'
             loadAwareRouting:
+              x-internal: true
               $ref: '#/components/schemas/LoadAwareRouting'
             modelStore:
               nullable: true
@@ -45782,6 +45789,7 @@ components:
             labels:
               $ref: '#/components/schemas/InstancesRules'
             loadAwareRouting:
+              x-internal: true
               $ref: '#/components/schemas/BooleanRules'
             modelStore:
               nullable: true
@@ -59054,6 +59062,7 @@ components:
             labels:
               $ref: '#/components/schemas/Labels'
             loadAwareRouting:
+              x-internal: true
               $ref: '#/components/schemas/LoadAwareRouting'
             modelStore:
               nullable: true

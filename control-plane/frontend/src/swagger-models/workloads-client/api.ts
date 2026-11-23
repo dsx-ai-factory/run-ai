@@ -3163,7 +3163,7 @@ export interface DistributedInferenceCommonDefaultsV2 {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
      * @type {boolean}
      * @memberof DistributedInferenceCommonDefaultsV2
      */
@@ -3346,7 +3346,7 @@ export interface DistributedInferenceCommonSpec {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
      * @type {boolean}
      * @memberof DistributedInferenceCommonSpec
      */
@@ -3413,7 +3413,7 @@ export interface DistributedInferenceCommonSpecAllOf {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
      * @type {boolean}
      * @memberof DistributedInferenceCommonSpecAllOf
      */
@@ -5237,7 +5237,7 @@ export interface DistributedInferenceSpecSpec {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
      * @type {boolean}
      * @memberof DistributedInferenceSpecSpec
      */
@@ -5513,7 +5513,7 @@ export interface DistributedInferenceTemplateSpec {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
      * @type {boolean}
      * @memberof DistributedInferenceTemplateSpec
      */
@@ -16537,7 +16537,7 @@ export interface SupersetDefaults {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
      * @type {boolean}
      * @memberof SupersetDefaults
      */
@@ -18332,7 +18332,7 @@ export interface SupersetSpec {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
      * @type {boolean}
      * @memberof SupersetSpec
      */
@@ -21311,7 +21311,7 @@ export interface UnifiedPolicyInfoPerReplicaTypeDefaults {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
      * @type {boolean}
      * @memberof UnifiedPolicyInfoPerReplicaTypeDefaults
      */
@@ -22168,7 +22168,7 @@ export interface UnifiedSpecWorker {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
      * @type {boolean}
      * @memberof UnifiedSpecWorker
      */

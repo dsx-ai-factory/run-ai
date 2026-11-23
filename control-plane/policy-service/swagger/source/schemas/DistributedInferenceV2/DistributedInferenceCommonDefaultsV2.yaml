@@ -8,6 +8,7 @@ allOf:
     category:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/Category.yaml
     loadAwareRouting:
+      x-internal: true
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/LoadAwareRouting.yaml
     nodePools:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/NodePools.yaml

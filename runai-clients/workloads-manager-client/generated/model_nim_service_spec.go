@@ -37,7 +37,7 @@ type NimServiceSpec struct {
 	ImagePullSecrets []ImagePullSecret `json:"imagePullSecrets,omitempty"`
 	// Set of labels to populate into the container running the workload.
 	Labels []Label `json:"labels,omitempty"`
-	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
 	LoadAwareRouting NullableBool                          `json:"loadAwareRouting,omitempty"`
 	ModelStore       NullableNimServiceSpecAllOfModelStore `json:"modelStore,omitempty"`
 	MultiNode        NullableNimServiceMultiNode           `json:"multiNode,omitempty"`

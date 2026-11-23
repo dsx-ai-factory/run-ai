@@ -1554,7 +1554,7 @@ export interface DistributedInferenceCommonDefaultsV2 {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
      * @type {boolean}
      * @memberof DistributedInferenceCommonDefaultsV2
      */
@@ -1621,7 +1621,7 @@ export interface DistributedInferenceCommonDefaultsV2AllOf {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
      * @type {boolean}
      * @memberof DistributedInferenceCommonDefaultsV2AllOf
      */
@@ -1786,7 +1786,7 @@ export interface DistributedInferenceDefaultsV2 {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
      * @type {boolean}
      * @memberof DistributedInferenceDefaultsV2
      */
@@ -2693,7 +2693,7 @@ export interface DistributedInferencePolicyDefaultsAndRulesV2Defaults {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
      * @type {boolean}
      * @memberof DistributedInferencePolicyDefaultsAndRulesV2Defaults
      */
@@ -5223,7 +5223,7 @@ export interface FallbackPolicyDefaultsAndRulesDefaults {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
      * @type {boolean}
      * @memberof FallbackPolicyDefaultsAndRulesDefaults
      */
@@ -9722,7 +9722,7 @@ export interface NimServiceDefaults {
      */
     'labels'?: LabelsDefaults | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
      * @type {boolean}
      * @memberof NimServiceDefaults
      */
@@ -9855,7 +9855,7 @@ export interface NimServiceDefaultsAllOf {
      */
     'labels'?: LabelsDefaults | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
      * @type {boolean}
      * @memberof NimServiceDefaultsAllOf
      */
@@ -10263,7 +10263,7 @@ export interface NimServicePolicyDefaultsAndRulesDefaults {
      */
     'labels'?: LabelsDefaults | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
      * @type {boolean}
      * @memberof NimServicePolicyDefaultsAndRulesDefaults
      */
@@ -15300,7 +15300,7 @@ export interface SupersetDefaults {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
      * @type {boolean}
      * @memberof SupersetDefaults
      */

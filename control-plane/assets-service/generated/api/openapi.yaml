@@ -55305,7 +55305,9 @@ components:
     LoadAwareRouting:
       default: false
       description: "Route requests to the serving port through the endpoint picker,\
-        \ which picks a Pod by load. It can be set only when the workload is created."
+        \ which picks a Pod by load. It can be set only when the workload is created.\
+        \ Requires cluster version 3.1.0 or later, with the inference endpoint controller\
+        \ enabled and an administrator-enabled Gateway on the cluster."
       nullable: true
       type: boolean
     DistributedInferenceRestartPolicy:

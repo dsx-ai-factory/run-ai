@@ -1098,7 +1098,7 @@ export interface NimServiceSpec {
      */
     'labels'?: Array<Label> | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
      * @type {boolean}
      * @memberof NimServiceSpec
      */
@@ -1231,7 +1231,7 @@ export interface NimServiceSpecAllOf {
      */
     'labels'?: Array<Label> | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
      * @type {boolean}
      * @memberof NimServiceSpecAllOf
      */
@@ -2139,7 +2139,7 @@ export interface WorkloadV2Configuration {
  */
 export interface WorkloadV2ConfigurationInferenceRouting {
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
      * @type {boolean}
      * @memberof WorkloadV2ConfigurationInferenceRouting
      */

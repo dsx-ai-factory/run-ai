@@ -68,6 +68,7 @@ allOf:
     labels:
       $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/InstancesRules.yaml
     loadAwareRouting:
+      x-internal: true
       $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/BooleanRules.yaml
     modelStore:
       nullable: true

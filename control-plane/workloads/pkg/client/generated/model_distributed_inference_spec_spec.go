@@ -24,7 +24,7 @@ var _ MappedNullable = &DistributedInferenceSpecSpec{}
 type DistributedInferenceSpecSpec struct {
 	// Specify the workload category assigned to the workload. Categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform.
 	Category NullableString `json:"category,omitempty" validate:"regexp=.*"`
-	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
 	LoadAwareRouting NullableBool `json:"loadAwareRouting,omitempty"`
 	// A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
 	NodePools      []string               `json:"nodePools,omitempty"`
