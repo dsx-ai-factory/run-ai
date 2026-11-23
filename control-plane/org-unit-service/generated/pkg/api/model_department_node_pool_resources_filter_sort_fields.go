@@ -35,6 +35,7 @@ const (
 	DEPARTMENTNODEPOOLRESOURCESFILTERSORTFIELDS_CLUSTER_ID            DepartmentNodePoolResourcesFilterSortFields = "clusterId"
 	DEPARTMENTNODEPOOLRESOURCESFILTERSORTFIELDS_GPU_DESERVED          DepartmentNodePoolResourcesFilterSortFields = "gpuDeserved"
 	DEPARTMENTNODEPOOLRESOURCESFILTERSORTFIELDS_GPU_OVER_QUOTA_WEIGHT DepartmentNodePoolResourcesFilterSortFields = "gpuOverQuotaWeight"
+	DEPARTMENTNODEPOOLRESOURCESFILTERSORTFIELDS_GPU_LIMIT             DepartmentNodePoolResourcesFilterSortFields = "gpuLimit"
 )
 
 // AllowedDepartmentNodePoolResourcesFilterSortFieldsEnumValues is all the allowed values of DepartmentNodePoolResourcesFilterSortFields enum
@@ -46,6 +47,7 @@ var AllowedDepartmentNodePoolResourcesFilterSortFieldsEnumValues = []DepartmentN
 	"clusterId",
 	"gpuDeserved",
 	"gpuOverQuotaWeight",
+	"gpuLimit",
 }
 
 // validDepartmentNodePoolResourcesFilterSortFieldsEnumValue provides a map of DepartmentNodePoolResourcesFilterSortFieldss for fast verification of use input
@@ -57,6 +59,7 @@ var validDepartmentNodePoolResourcesFilterSortFieldsEnumValues = map[DepartmentN
 	"clusterId":          {},
 	"gpuDeserved":        {},
 	"gpuOverQuotaWeight": {},
+	"gpuLimit":           {},
 }
 
 // IsValid return true if the value is valid for the enum, false otherwise

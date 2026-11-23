@@ -4,8 +4,8 @@ go 1.27.4
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.5
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.21
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.23
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.22
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.24
 	github.com/go-chi/chi/v5 v5.5.0
 	github.com/jackc/pgx/v5 v5.13.0
 	github.com/stretchr/testify v1.12.1

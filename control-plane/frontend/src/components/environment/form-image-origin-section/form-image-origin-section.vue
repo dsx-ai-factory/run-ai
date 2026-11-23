@@ -26,8 +26,6 @@
     </runai-section>
     <form-ngc-catalog-image-section
       v-else-if="imageOriginValue === EImageOrigin.NGC"
-      :support-authenticated-ngc="supportAuthenticatedNgc"
-      :authenticated-only="authenticatedOnly"
       :scope-id="scopeId"
       :scope-type="scopeType"
       :cluster-id="clusterId"
