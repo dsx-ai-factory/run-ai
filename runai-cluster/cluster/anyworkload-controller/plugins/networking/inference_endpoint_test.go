@@ -19,6 +19,7 @@ import (
 	workloadconfig "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/config"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -154,6 +155,7 @@ var _ = Describe("Inference routing (endpoints path)", func() {
 		k8sClient = testutil.WithSSASupport(fake.NewClientBuilder().
 			WithScheme(inferenceTestScheme()).
 			WithRESTMapper(inferenceTestMapper(true)).
+			WithInterceptorFuncs(interceptor.Funcs{Create: createWithUID}).
 			Build())
 		plugin = newOwnershipTestPlugin(k8sClient)
 		state = reconcile.New()
@@ -183,6 +185,33 @@ var _ = Describe("Inference routing (endpoints path)", func() {
 		list := &gatewayv1.HTTPRouteList{}
 		Expect(k8sClient.List(ctx, list)).To(Succeed())
 		return list.Items
+	}
+	// expectInferenceAuthProxy checks that the auth proxy named name sends allowed
+	// requests to the EPP's Envoy, that the InferenceEndpoint routes through it, and
+	// that the InferenceEndpoint owns it, so its Pod is not scheduled with the workload.
+	// The endpoint label keeps it from being reported as a workload of its own.
+	expectInferenceAuthProxy := func(name string) {
+		obj, err := getInferenceEndpoint()
+		ExpectWithOffset(1, err).NotTo(HaveOccurred())
+
+		proxy := &appsv1.Deployment{}
+		ExpectWithOffset(1, k8sClient.Get(ctx, client.ObjectKey{Namespace: testNamespace, Name: name}, proxy)).To(Succeed())
+		ExpectWithOffset(1, proxy.Spec.Template.Spec.Containers[0].Args).To(ContainElements(
+			"--upstream=http://"+testInferenceEndpointID+"-epp."+testNamespace+".svc.cluster.local:8081",
+			"--upstream-timeout=300s",
+		))
+		ExpectWithOffset(1, isOwnedBy(proxy, obj)).To(BeTrue(), "the InferenceEndpoint owns the auth proxy Deployment")
+		ExpectWithOffset(1, proxy.Labels).To(HaveKeyWithValue(endpoints.InferenceEndpointLabel, obj.GetName()))
+		proxyService := &corev1.Service{}
+		ExpectWithOffset(1, k8sClient.Get(ctx, client.ObjectKey{Namespace: testNamespace, Name: name}, proxyService)).To(Succeed())
+		ExpectWithOffset(1, isOwnedBy(proxyService, obj)).To(BeTrue(), "the InferenceEndpoint owns the auth proxy Service")
+
+		authProxy, _, err := unstructured.NestedMap(obj.Object, "spec", "routing", "authProxy")
+		ExpectWithOffset(1, err).NotTo(HaveOccurred())
+		ExpectWithOffset(1, authProxy).To(Equal(map[string]any{
+			"serviceRef":  map[string]any{"name": name, "port": int64(AuthProxyServicePort)},
+			"podSelector": map[string]any{"matchLabels": map[string]any{LabelApp: name, LabelWorkloadRunner: runner.Name}},
+		}))
 	}
 	markReady := func(status metav1.ConditionStatus) {
 		obj, err := getInferenceEndpoint()
@@ -218,10 +247,26 @@ var _ = Describe("Inference routing (endpoints path)", func() {
 		Expect(again.GetResourceVersion()).To(Equal(rv))
 	})
 
-	It("does not support service auth with inference routing", func() {
+	It("puts the auth proxy in front of the EPP's Envoy for a protected endpoint", func() {
 		runner = runnerFromEndpoints(inferenceEndpointConfig(true, 8000, inferenceTestBlock()))
+		runner.Generation = 2
 		_, errs := plugin.WebhookValidate(ctx, nil, runner)
-		Expect(errs.ToAggregate()).To(MatchError(ContainSubstring("does not support services[0].auth")))
+		Expect(errs).To(BeEmpty())
+		Expect(reconcileRunner()).To(Succeed())
+
+		expectInferenceAuthProxy("llama-chat-leader-auth-proxy")
+		Expect(httpRoutes()).To(BeEmpty())
+		Expect(k8sClient.Get(ctx, client.ObjectKey{Namespace: testNamespace, Name: "llama-chat-leader"}, &corev1.Service{})).To(Succeed())
+
+		// The status pass builds the same desired spec, auth proxy included, so a
+		// Ready endpoint makes the workload Ready and reports its URL.
+		markReady(metav1.ConditionTrue)
+		status := newPluginStatus()
+		Expect(plugin.Status(ctx, runner, k8sClient, status, state)).To(Succeed())
+		Expect(findEndpointsCondition(status, endpoints.InferenceEndpointReadyCondition).Status).To(Equal(metav1.ConditionTrue))
+		access := findEndpointsCondition(status, ExternalAccessReadyConditionName)
+		Expect(access.Status).To(Equal(metav1.ConditionTrue))
+		Expect(access.Message).To(HaveSuffix(", url: https://" + testInferenceHost + "/"))
 	})
 
 	It("switches between the composed HTTPRoute and the InferenceEndpoint when inference is added or removed", func() {
@@ -500,7 +545,7 @@ var _ = Describe("Inference routing (endpoints path)", func() {
 
 	authenticatedUsers := &endpoints.AuthConfig{AuthorizationType: endpoints.AuthorizationTypeAuthenticatedUsers}
 
-	DescribeTable("admits a referenced Service with inference routing only when it is public",
+	DescribeTable("admits a referenced Service with inference routing, public or protected",
 		func(cfg *endpoints.Config, expected string) {
 			setRunnerEndpoints(runner, cfg)
 			_, errs := plugin.WebhookValidate(ctx, nil, runner)
@@ -515,7 +560,7 @@ var _ = Describe("Inference routing (endpoints path)", func() {
 		Entry("public referenced Service without inference",
 			nimEndpointConfig(nil, nil), "auth is required when using service reference"),
 		Entry("protected referenced Service with inference",
-			nimEndpointConfig(authenticatedUsers, inferenceTestBlock()), "does not support services[0].auth"),
+			nimEndpointConfig(authenticatedUsers, inferenceTestBlock()), ""),
 	)
 
 	Context("with a referenced NIM Service", func() {
@@ -563,6 +608,17 @@ var _ = Describe("Inference routing (endpoints path)", func() {
 			Expect(plugin.Status(ctx, runner, k8sClient, status, state)).To(Succeed())
 			Expect(findEndpointsCondition(status, endpoints.InferenceEndpointReadyCondition).Message).
 				To(Equal("waiting for current InferenceEndpoint generation"))
+		})
+
+		It("puts the auth proxy in front of the EPP's Envoy for a protected NIMService", func() {
+			setRunnerEndpoints(runner, nimEndpointConfig(
+				&endpoints.AuthConfig{AuthorizationType: endpoints.AuthorizationTypeAuthenticatedUsers}, inferenceTestBlock(),
+			))
+			Expect(reconcileRunner()).To(Succeed())
+			Expect(state.PluginIssues(plugin)).To(BeEmpty())
+
+			expectInferenceAuthProxy(testNIMServiceName + "-auth-proxy")
+			Expect(httpRoutes()).To(BeEmpty())
 		})
 
 		It("selects only the leader Pods of a multi-node NIMService", func() {

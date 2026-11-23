@@ -22,7 +22,8 @@ const InferenceEndpointReadyCondition = "InferenceEndpointReady"
 var InferenceEndpointGVK = schema.GroupVersionKind{Group: "inference.platform.run.ai", Version: "v1alpha1", Kind: "InferenceEndpoint"}
 
 // InferenceEndpointLabel is set by the inference-endpoint-controller on every object it creates for an
-// InferenceEndpoint. It must match EndpointLabel in that controller, which is a separate Go module.
+// InferenceEndpoint, and by the networking plugin on the auth proxy that an InferenceEndpoint owns. It must
+// match EndpointLabel in that controller, which is a separate Go module.
 const InferenceEndpointLabel = "inference.platform.run.ai/endpoint"
 
 // InferenceConfig is the externalAccess.inference block. It carries only the
@@ -111,6 +112,32 @@ type InferenceEndpointTarget struct {
 	GatewayName      string
 	GatewayNamespace string
 	Hostnames        []string
+	// AuthProxy is set for a protected endpoint. The route then sends every
+	// request to the auth proxy, whose upstream is InferenceEndpointUpstreamURL.
+	AuthProxy *InferenceAuthProxy
+}
+
+// InferenceAuthProxy is the auth proxy in front of a protected InferenceEndpoint.
+type InferenceAuthProxy struct {
+	ServiceName string
+	ServicePort int32
+	PodLabels   map[string]string
+}
+
+// inferenceEnvoyPort is the EPP Service port of a protected InferenceEndpoint.
+// It must match EnvoyPort in the inference-endpoint-controller, which is a
+// separate Go module.
+const inferenceEnvoyPort = 8081
+
+// InferenceEndpointUpstreamURL is the auth proxy upstream of a protected
+// InferenceEndpoint: the Envoy container in its EPP Pod, which asks the EPP for a
+// Pod and forwards the request there.
+func InferenceEndpointUpstreamURL(runner metav1.Object) (string, error) {
+	name, err := InferenceEndpointName(runner)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("http://%s-epp.%s.svc.cluster.local:%d", name, runner.GetNamespace(), inferenceEnvoyPort), nil
 }
 
 // InferenceEndpointName binds identity to the immutable runner UID, keeping all
@@ -154,15 +181,29 @@ func BuildInferenceEndpoint(runner metav1.Object, cfg *InferenceConfig, target I
 	if target.GatewayNamespace != "" {
 		gatewayRef["namespace"] = target.GatewayNamespace
 	}
+	routing := map[string]any{
+		"gatewayRef": gatewayRef,
+		"hostnames":  hostnames,
+	}
+	if proxy := target.AuthProxy; proxy != nil {
+		if proxy.ServiceName == "" || proxy.ServicePort < 1 || proxy.ServicePort > 65535 || len(proxy.PodLabels) == 0 {
+			return nil, fmt.Errorf("inference endpoint auth proxy requires a Service name, port and Pod labels")
+		}
+		podLabels := make(map[string]any, len(proxy.PodLabels))
+		for key, value := range proxy.PodLabels {
+			podLabels[key] = value
+		}
+		routing["authProxy"] = map[string]any{
+			"serviceRef":  map[string]any{"name": proxy.ServiceName, "port": int64(proxy.ServicePort)},
+			"podSelector": map[string]any{"matchLabels": podLabels},
+		}
+	}
 	spec := map[string]any{
 		"workload": map[string]any{
 			"selector": map[string]any{"matchLabels": matchLabels},
 			"port":     int64(target.Port),
 		},
-		"routing": map[string]any{
-			"gatewayRef": gatewayRef,
-			"hostnames":  hostnames,
-		},
+		"routing": routing,
 	}
 	for key, value := range fields {
 		spec[key] = value

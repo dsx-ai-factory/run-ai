@@ -29,7 +29,7 @@ func TestStandaloneProxyPreservesErrorPageWithoutUsernameLoader(t *testing.T) {
 			return plugin.buildAuthProxyDeployment(runner, nil, "http://workload:8888", "workload.example.com", "/")
 		},
 		"endpoints": func() (*appsv1.Deployment, error) {
-			return plugin.buildEndpointAuthProxyDeployment(runner, nil, "proxy", "http://workload:8888", "workload.example.com", "/")
+			return plugin.buildEndpointAuthProxyDeployment(runner, nil, "proxy", "http://workload:8888", 0, "workload.example.com", "/")
 		},
 	}
 	for name, build := range builders {

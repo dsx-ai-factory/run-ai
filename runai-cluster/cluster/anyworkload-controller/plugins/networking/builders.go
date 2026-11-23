@@ -124,14 +124,16 @@ func (p *Plugin) buildOAuth2ProxyContainer(
 	}
 	return buildOAuth2ProxyContainerFromAuth(
 		upstreamURL, cookiePrefix, externalHost, externalPath,
-		authorizedUsers, authorizedGroups, forceJsonResponse,
+		authorizedUsers, authorizedGroups, forceJsonResponse, 0,
 	)
 }
 
+// upstreamTimeoutSeconds 0 keeps the oauth2-proxy default (30 s).
 func buildOAuth2ProxyContainerFromAuth(
 	upstreamURL, cookiePrefix, externalHost, externalPath string,
 	authorizedUsers, authorizedGroups *string,
 	forceJsonResponse bool,
+	upstreamTimeoutSeconds int,
 ) (*corev1.Container, error) {
 	cfg := OAuth2ProxyConfig{
 		ContainerName:              OAuth2ProxyContainerName,
@@ -148,6 +150,7 @@ func buildOAuth2ProxyContainerFromAuth(
 		ForceJsonResponse:          forceJsonResponse,
 		EnableSidecarRestartPolicy: false,
 		ReverseProxy:               true,
+		UpstreamTimeoutSeconds:     upstreamTimeoutSeconds,
 	}
 	return BuildOAuth2ProxyContainer(cfg)
 }

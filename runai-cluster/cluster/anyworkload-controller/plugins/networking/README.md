@@ -46,7 +46,7 @@ An Endpoint's `externalAccess` may carry an `inference` block next to `httpRoute
 | `routing.hostnames` | `httpRoute.spec.hostnames` |
 | `epp` (required) | the `inference` block |
 
-Rules: at most one Endpoint per runner may set `inference`; it requires `httpRoute` without `ingress` or `route`, no `services[0].auth`, a created Service with a selector or a reference to the runner's NIMService (`services[0].ref` must name it), and exactly one Gateway parentRef. Admission rejects new or changed inference routing when the `InferenceEndpoint` API is not installed. Status reports the `InferenceEndpoint` as an external access resource (kind `InferenceEndpoint`), takes service URLs from the `httpRoute` hostnames, and mirrors its `Ready` condition as `InferenceEndpointReady`.
+Rules: at most one Endpoint per runner may set `inference`; it requires `httpRoute` without `ingress` or `route`, a created Service with a selector or a reference to the runner's NIMService (`services[0].ref` must name it), and exactly one Gateway parentRef. Admission rejects new or changed inference routing when the `InferenceEndpoint` API is not installed. With `services[0].auth`, the plugin also creates the standalone auth proxy (`<service>-auth-proxy`) with its upstream set to the EPP's Envoy, `http://inference-<runner UID>-epp.<namespace>.svc.cluster.local:8081`, and `--upstream-timeout=300s`, and sets `routing.authProxy` on the `InferenceEndpoint`, so the route sends every request to the proxy first. Status reports the `InferenceEndpoint` as an external access resource (kind `InferenceEndpoint`), takes service URLs from the `httpRoute` hostnames, and mirrors its `Ready` condition as `InferenceEndpointReady`.
 
 ### Activation (legacy mode)
 
