@@ -107,6 +107,11 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 			Return(&authorization_api.PermittedScopesActions{Update: scopes}, http.StatusOK, nil).Once()
 	}
 
+	permitResets := func() {
+		permitUpdate(authorization_api.RESOURCETYPE_DEPARTMENT, authorization_api.PermittedScopes{System: ptr.To(true)})
+		permitUpdate(authorization_api.RESOURCETYPE_PROJECT, authorization_api.PermittedScopes{System: ptr.To(true)})
+	}
+
 	turnOnCpuQuotaAndWeights := func(nodepoolId string) {
 		response := patchCapabilities(nodepoolId, api.SchedulingCapabilitiesNullable{CpuQuota: ptr.To(true), AdjustableWeights: ptr.To(true)})
 		Expect(response.Code).To(Equal(http.StatusOK))
@@ -259,6 +264,7 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		np := createNodepool(clusterId)
 		turnOnCpuQuotaAndWeights(np.Id)
 		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_QUOTA, nil, nil)
+		permitResets()
 		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT, nil)
 		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_DEPARTMENT_WEIGHTS_TO_DEFAULT, nil)
 
@@ -280,11 +286,37 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 	It("resets the departments' unset weights when weights turn on for a nodepool without quota", func() {
 		np := createNodepool(clusterId)
 		turnQuotaOff(np.Id)
+		permitResets()
 		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_DEPARTMENT_WEIGHTS_TO_DEFAULT, nil)
 
 		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{AdjustableWeights: ptr.To(true)})
 		Expect(response.Code).To(Equal(http.StatusOK))
 		Expect(storedCapabilities(np.Id).AdjustableWeights).To(BeTrue())
+	})
+
+	It("refuses to turn weights on for a nodepool without quota when the caller can't update every department in the cluster", func() {
+		np := createNodepool(clusterId)
+		turnQuotaOff(np.Id)
+		permitUpdate(authorization_api.RESOURCETYPE_DEPARTMENT, authorization_api.PermittedScopes{Departments: []string{"4500001"}})
+
+		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{AdjustableWeights: ptr.To(true)})
+		Expect(response.Code).To(Equal(http.StatusForbidden))
+		Expect(response.Body.(api.Error).Message).To(ContainSubstring("department weight of 0 or below"))
+		orgClient.AssertNotCalled(GinkgoT(), "NodePoolResetResources", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+		Expect(storedCapabilities(np.Id).AdjustableWeights).To(BeFalse())
+	})
+
+	It("checks the department weights permission before it resets the CPU quotas", func() {
+		np := createNodepool(clusterId)
+		turnOnCpuQuotaAndWeights(np.Id)
+		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_QUOTA, nil, nil)
+		permitUpdate(authorization_api.RESOURCETYPE_DEPARTMENT, authorization_api.PermittedScopes{System: ptr.To(true)})
+		permitUpdate(authorization_api.RESOURCETYPE_PROJECT, authorization_api.PermittedScopes{Departments: []string{"4500001"}})
+
+		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Quota: ptr.To(false), CpuQuota: ptr.To(false), Limits: ptr.To(false)})
+		Expect(response.Code).To(Equal(http.StatusForbidden))
+		orgClient.AssertNotCalled(GinkgoT(), "NodePoolResetResources", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+		Expect(storedCapabilities(np.Id).Quota).To(BeTrue())
 	})
 
 	It("leaves the departments' weights alone when quota turns off with weights off", func() {
@@ -304,6 +336,7 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 	It("does not save the nodepool when the department weights reset fails", func() {
 		np := createNodepool(clusterId)
 		turnQuotaOff(np.Id)
+		permitResets()
 		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_DEPARTMENT_WEIGHTS_TO_DEFAULT, errors.New("org-unit-service is down"))
 
 		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{AdjustableWeights: ptr.To(true)})
