@@ -1,0 +1,59 @@
+{
+    "root": true,
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "project": ["tsconfig.json"]
+    },
+    "ignorePatterns": ["**/generated/*.ts", "src/**/*.js"],
+    "plugins": ["@typescript-eslint", "no-only-tests", "jest", "playwright"],
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
+    "rules": {
+        "no-console": 0,
+        "quotes": ["error", "single"],
+        "@typescript-eslint/ban-ts-comment": "error",
+        "@typescript-eslint/await-thenable": "error",
+        "@typescript-eslint/consistent-generic-constructors": "error",
+        "semi": [2, "always"],
+        "require-await": "off",
+        "@typescript-eslint/require-await": "error",
+        "@typescript-eslint/explicit-function-return-type": "error",
+        "eqeqeq": ["error", "smart"],
+        "no-var": "error",
+        "no-multiple-empty-lines": "error",
+        "no-empty-pattern": "off",
+        "prefer-const": "error",
+        "no-use-before-define": "error",
+        "@typescript-eslint/no-duplicate-enum-values": "off",
+        "@typescript-eslint/no-unused-vars": [
+            "warn",
+            {
+                "varsIgnorePattern": "(error|e|^Test)",
+                "argsIgnorePattern": "(error|e)"
+            }
+        ],
+        "@typescript-eslint/no-unused-expressions": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "lines-between-class-members": ["error", "always"],
+        "no-only-tests/no-only-tests": "error",
+        "jest/no-disabled-tests": "error",
+        "playwright/require-top-level-describe": "error",
+        "playwright/valid-describe-callback": "error",
+        "playwright/max-nested-describe": "error",
+        "playwright/no-standalone-expect": "warn",
+        "playwright/no-duplicate-hooks": "warn",
+        "playwright/no-conditional-expect": "warn",
+        "playwright/prefer-hooks-on-top": "warn",
+        "playwright/no-commented-out-tests": "warn",
+        "no-restricted-syntax": [
+            "warn",
+            {
+                "selector": "Program > FunctionDeclaration",
+                "message": "Do not define functions at the top level of a test file. Move helpers to a utility module."
+            }
+        ]
+    }
+}

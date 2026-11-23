@@ -6,8 +6,8 @@ require (
 	github.com/aws/smithy-go v1.28.9
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.5
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.11
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.34
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.12
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.35
 	github.com/go-redis/redismock/v9 v9.2.0
 	github.com/lithammer/shortuuid/v4 v4.3.0
 	github.com/maypok86/otter/v2 v2.4.0
@@ -33,7 +33,7 @@ require (
 	github.com/google/go-tpm v0.9.8 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.34.0 // indirect
-	github.com/klauspost/compress v1.20.4 // indirect
+	github.com/klauspost/compress v1.20.5 // indirect
 	github.com/leodido/go-urn v1.5.0 // indirect
 	github.com/minio/highwayhash v1.0.4 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
@@ -54,7 +54,7 @@ require (
 	github.com/spf13/viper v1.21.0 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
+	go.opentelemetry.io/auto/sdk v1.2.2 // indirect
 	go.opentelemetry.io/otel v1.47.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.47.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.47.0 // indirect

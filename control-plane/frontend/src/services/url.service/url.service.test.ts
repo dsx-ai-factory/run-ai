@@ -6,8 +6,66 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { urlService } from "@/services/url.service/url.service";
 import type { IFilterBy } from "@/models/filter.model";
+import { createMemoryHistory, createRouter } from "vue-router";
 
 describe("url.service", () => {
+  describe("isControlPlaneRouteUrl", () => {
+    const controlPlaneUrl = "https://runai.example.com/workloads";
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: "/", component: {} },
+        { path: "/workload-templates/:id?", component: {} },
+        { path: "/login/callback", component: {} },
+        { path: "/:catchAll(.*)", redirect: "/login/callback" },
+      ],
+    });
+
+    it.each([
+      ["control-plane root", "https://runai.example.com/"],
+      ["registered route", "https://runai.example.com/workload-templates"],
+      ["route with a parameter", "https://runai.example.com/workload-templates/template-1"],
+      ["unregistered child path", "https://runai.example.com/workload-templates/custom/tool"],
+      ["parent of a registered route", "https://runai.example.com/login"],
+      ["route with query and fragment", "https://runai.example.com/login/callback?next=/tool#details"],
+      ["different scheme and port", "http://runai.example.com:8080/workload-templates"],
+      ["case-insensitive hostname", "https://RUNAI.EXAMPLE.COM/workload-templates"],
+      ["encoded route", "https://runai.example.com/%77orkload-templates/tool"],
+      ["uppercase route", "https://runai.example.com/WORKLOAD-TEMPLATES"],
+      ["mixed-case route child", "https://runai.example.com/Workload-Templates/tool"],
+      ["malformed suffix", "https://runai.example.com/workload-templates/%FF"],
+      ["encoded prefix with malformed suffix", "https://runai.example.com/%77orkload-templates/%FF"],
+      ["encoded separator with malformed suffix", "https://runai.example.com/%77orkload-templates%2F%FF"],
+      ["normalized dot segments", "https://runai.example.com/project/../workload-templates"],
+    ])("detects a collision for %s", (_, url) => {
+      expect(urlService.isControlPlaneRouteUrl(url, router.getRoutes(), controlPlaneUrl)).toBe(true);
+    });
+
+    it.each([
+      ["another hostname", "https://tools.example.com/workload-templates"],
+      ["workload hostname", "https://tool.runai.example.com/"],
+      ["unrelated path", "https://runai.example.com/project/tool"],
+      ["similar prefix", "https://runai.example.com/workload-templates-custom"],
+      ["uppercase similar prefix", "https://runai.example.com/WORKLOAD-TEMPLATES-CUSTOM"],
+      ["unrelated path with malformed suffix", "https://runai.example.com/project/%FF"],
+      ["route name only in query", "https://runai.example.com/tool?next=/workload-templates"],
+      ["empty value", ""],
+      ["invalid URL", "not a URL"],
+    ])("preserves existing handling for %s", (_, url) => {
+      expect(urlService.isControlPlaneRouteUrl(url, router.getRoutes(), controlPlaneUrl)).toBe(false);
+    });
+
+    it("protects routes added at runtime, including aliases", () => {
+      const removeRoute = router.addRoute({ path: "/new-page", alias: "/new-alias", component: {} });
+      for (const path of ["/new-page/child", "/new-alias/child"]) {
+        expect(
+          urlService.isControlPlaneRouteUrl(`https://runai.example.com${path}`, router.getRoutes(), controlPlaneUrl),
+        ).toBe(true);
+      }
+      removeRoute();
+    });
+  });
+
   function setLocation(url: string): void {
     Object.defineProperty(window, "location", {
       value: {

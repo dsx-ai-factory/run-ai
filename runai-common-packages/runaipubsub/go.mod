@@ -8,9 +8,9 @@ require (
 	github.com/ThreeDotsLabs/watermill-redisstream v1.4.5
 	github.com/aws/smithy-go v1.28.9
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.5
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.21
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.11
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.13
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.22
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.12
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.14
 	github.com/google/uuid v1.6.0
 	github.com/nats-io/nats.go v1.56.0
 	github.com/pkg/errors v0.9.1
@@ -31,7 +31,7 @@ require (
 	github.com/go-playground/validator/v10 v10.30.6 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
-	github.com/klauspost/compress v1.20.4 // indirect
+	github.com/klauspost/compress v1.20.5 // indirect
 	github.com/leodido/go-urn v1.5.0 // indirect
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
 	github.com/mattn/go-colorable v0.1.16 // indirect
@@ -42,7 +42,7 @@ require (
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
-	github.com/pierrec/lz4/v4 v4.1.33 // indirect
+	github.com/pierrec/lz4/v4 v4.1.34 // indirect
 	github.com/prometheus/client_golang v1.25.0 // indirect
 	github.com/prometheus/client_model v0.6.3 // indirect
 	github.com/prometheus/common v0.72.1 // indirect
