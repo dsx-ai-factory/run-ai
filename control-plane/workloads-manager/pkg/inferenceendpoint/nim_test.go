@@ -60,6 +60,16 @@ var _ = Describe("NIM service endpoint intent", func() {
 		Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"}}`))
 	})
 
+	It("returns the same inference block for a protected endpoint", func() {
+		setRoute()
+		(*endpoint.Services)[0].Authorization = &api.Workloadv2Authorization{AuthorizationType: ptr.To(api.AUTHORIZATIONTYPE_AUTHENTICATED_USERS)}
+		intent, err := BuildNIMServiceIntent(endpoint, workloadName, defaults)
+		Expect(err).NotTo(HaveOccurred())
+		raw, err := json.Marshal(intent)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"}}`))
+	})
+
 	DescribeTable("rejects an endpoint that the InferenceEndpoint cannot serve", func(mutate func(), message string) {
 		setRoute()
 		mutate()
@@ -74,9 +84,6 @@ var _ = Describe("NIM service endpoint intent", func() {
 			(*endpoint.Services)[0] = api.NetworkingService{Spec: &api.ServiceSpec{Name: workloadName, Ports: []api.ServicePort{{Port: 8000}}}}
 		}, "reference to the serving port of the operator Service"),
 		Entry("another Service", func() { (*endpoint.Services)[0].Ref.Name = "other" }, "reference to the serving port of the operator Service"),
-		Entry("protected serving port", func() {
-			(*endpoint.Services)[0].Authorization = &api.Workloadv2Authorization{AuthorizationType: ptr.To(api.AUTHORIZATIONTYPE_AUTHENTICATED_USERS)}
-		}, AuthNotSupportedMessage),
 		Entry("internal-only endpoint", func() { endpoint.ExternalAccess = nil }, "requires an external Gateway HTTPRoute"),
 		Entry("parallel Ingress", func() { endpoint.ExternalAccess.Ingress = &map[string]interface{}{} }, "without Ingress or OpenShift Route"),
 		Entry("parallel OpenShift Route", func() { endpoint.ExternalAccess.Route = &map[string]interface{}{} }, "without Ingress or OpenShift Route"),

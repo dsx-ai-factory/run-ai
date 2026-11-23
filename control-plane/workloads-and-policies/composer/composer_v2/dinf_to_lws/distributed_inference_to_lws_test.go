@@ -89,6 +89,8 @@ var ComposerTests = append([]TableEntry{
 	Entry("serving port authorized groups", ComposerTest{input: "dinfw_serving_port_authorized_groups"}),
 	Entry("serving port authorized groups with users", ComposerTest{input: "dinfw_serving_port_authorized_groups_with_users"}),
 	Entry("serving port authorized users", ComposerTest{input: "dinfw_serving_port_authorized_users"}),
+	Entry("serving port authorized users with load-aware routing uses the standalone auth proxy",
+		ComposerTest{input: "dinfw_serving_port_authorized_users_load_aware"}),
 	Entry("serving port authorized users with groups", ComposerTest{input: "dinfw_serving_port_authorized_users_with_groups"}),
 	Entry("serving port basic", ComposerTest{input: "dinfw_serving_port_basic"}),
 	Entry("serving port custom port", ComposerTest{input: "dinfw_serving_port_custom_port"}),

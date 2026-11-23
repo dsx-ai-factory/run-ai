@@ -600,12 +600,21 @@ var _ = Describe("NimServicesImpl", func() {
 			Expect(endpoint.ExternalAccess.Inference).To(BeNil())
 		})
 
-		It("rejects an opt-in on a protected serving port", func() {
+		It("routes an opted-in protected NIM through the inference endpoint and keeps its authorization", func() {
 			setRoutingCluster(convutils.Ref(false))
 			spec := routedSpec()
 			spec.ServingPort.AuthorizationType = convutils.Ref(api.NIMSERVICESERVINGPORTAUTHORIZATIONTYPE_AUTHENTICATED_USERS)
-			err := failToCreateNimServiceForTest(router, randoms, createRequest("nim-protected", spec), http.StatusBadRequest)
-			Expect(err.Message).To(Equal(nimLoadAwareRoutingProtectedMessage))
+			id, _ := createNimServiceForTest(router, randoms, createRequest("nim-protected", spec))
+
+			endpoint := servingEndpoint(id)
+			Expect(*endpoint.Services).To(HaveLen(1))
+			service := (*endpoint.Services)[0]
+			Expect(service.Ref).To(Equal(&api.ServiceRef{Name: "nim-protected", Port: 8000}))
+			Expect(service.Authorization).NotTo(BeNil())
+			Expect(*service.Authorization.AuthorizationType).To(Equal(api.AUTHORIZATIONTYPE_AUTHENTICATED_USERS))
+			inference, err := json.Marshal(endpoint.ExternalAccess.Inference)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(inference).To(MatchJSON(`{"epp": {"profile": "gie-v1.5"}}`))
 		})
 
 		It("rejects an opt-in on a cluster without the integration", func() {

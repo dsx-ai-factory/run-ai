@@ -74,7 +74,7 @@ func distributedServingService(lws *lwsv1.LeaderWorkerSet, endpoint api.Networki
 	networkingService := (*endpoint.Services)[0]
 	service := networkingService.Spec
 	if service == nil || networkingService.Ref != nil || service.Name == "" || len(service.Ports) != 1 {
-		return nil, fmt.Errorf("distributed inference requires one public created Service with one serving port")
+		return nil, fmt.Errorf("distributed inference requires one created Service with one serving port")
 	}
 	if service.Selector == nil || (*service.Selector)[lwsv1.SetNameLabelKey] != lws.Name || (*service.Selector)[lwsv1.WorkerIndexLabelKey] != "0" {
 		return nil, fmt.Errorf("distributed inference serving selector must select only leaders of LWS %s", lws.Name)
@@ -94,7 +94,7 @@ func distributedServingService(lws *lwsv1.LeaderWorkerSet, endpoint api.Networki
 		return nil, fmt.Errorf("distributed inference serving Service requires an explicit TCP container target port")
 	}
 	if *port.TargetPort == composer.Oauth2ContainerDefaultPort {
-		return nil, fmt.Errorf("%s (the serving port targets the auth proxy port %d)", AuthNotSupportedMessage, composer.Oauth2ContainerDefaultPort)
+		return nil, fmt.Errorf("%s (target port %d)", SidecarAuthProxyMessage, composer.Oauth2ContainerDefaultPort)
 	}
 	// Native DINF puts the application in the first leader container. In particular,
 	// do not turn a Service targeting an authorization proxy into direct pod access.

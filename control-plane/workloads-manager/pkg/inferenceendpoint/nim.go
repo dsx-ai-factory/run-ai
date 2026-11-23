@@ -6,7 +6,6 @@
 package inferenceendpoint
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/internal/generated/pkg/api"
@@ -22,8 +21,8 @@ const nimServiceKind = "NIM service"
 // target port from the reference.
 // This function checks that the endpoint references that Service and is exposed
 // only through the administrator Gateway at a root hostname.
-// Only public serving is representable in this version: protected NIM puts the
-// auth proxy in front of the Service, and the endpoint picker would bypass it.
+// A protected NIM keeps services[0].authorization: the networking plugin puts its
+// standalone auth proxy in front of the endpoint picker.
 // It does not establish trusted submission origin or the serving protocol; the
 // caller must establish both, because gRPC serving is not visible in the endpoint.
 func BuildNIMServiceIntent(endpoint api.NetworkingEndpoint, workloadName string, defaults *Defaults) (*api.ExternalAccessInference, error) {
@@ -37,9 +36,6 @@ func BuildNIMServiceIntent(endpoint api.NetworkingEndpoint, workloadName string,
 	if service.Spec != nil || service.Ref == nil || workloadName == "" || service.Ref.Name != workloadName ||
 		!validPort(service.Ref.Port) {
 		return nil, fmt.Errorf("NIM service requires a reference to the serving port of the operator Service %q", workloadName)
-	}
-	if service.Authorization != nil {
-		return nil, errors.New(AuthNotSupportedMessage)
 	}
 	if _, err := servingHostname(nimServiceKind, endpoint.ExternalAccess, service.Ref.Name, service.Ref.Port, defaults); err != nil {
 		return nil, err

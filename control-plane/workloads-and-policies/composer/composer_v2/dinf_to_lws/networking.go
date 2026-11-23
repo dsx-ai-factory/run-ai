@@ -16,8 +16,13 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 )
 
+// loadAwareRouting puts a protected serving port behind the standalone auth proxy
+// that the networking plugin creates, instead of a leader sidecar: the endpoint
+// picker sends requests to the leader's model port directly, so the auth check
+// has to run before it.
 func (dinfComposer *DistributedInferenceToLWSComposer) processNetworkingFields(
 	src *workloadsApi.DistributedInferenceServingPort,
+	loadAwareRouting bool,
 	target *LeaderWorkerSetTarget,
 ) func() *workloadsApi.Error {
 	return func() *workloadsApi.Error {
@@ -36,11 +41,12 @@ func (dinfComposer *DistributedInferenceToLWSComposer) processNetworkingFields(
 		}
 
 		cookie := lwsNetworkingCookie{
-			config:       config,
-			projectName:  dinfComposer.fc.ProjectName,
-			workloadName: dinfComposer.fc.WorkloadName,
-			lwsName:      dinfComposer.leaderWorkerSetName(),
-			serviceName:  fmt.Sprintf("dinfw-%s-sp-0", dinfComposer.fc.WorkloadName),
+			config:              config,
+			projectName:         dinfComposer.fc.ProjectName,
+			workloadName:        dinfComposer.fc.WorkloadName,
+			lwsName:             dinfComposer.leaderWorkerSetName(),
+			serviceName:         fmt.Sprintf("dinfw-%s-sp-0", dinfComposer.fc.WorkloadName),
+			standaloneAuthProxy: loadAwareRouting,
 		}
 
 		runner := &composer.StepRunner{}
@@ -100,7 +106,8 @@ func (dinfComposer *DistributedInferenceToLWSComposer) buildAuthProxySidecar(
 ) func() *workloadsApi.Error {
 	return func() *workloadsApi.Error {
 		if authInfo.AuthorizationType == nil ||
-			*authInfo.AuthorizationType == composer.ConnectionAuthorizationType_PUBLIC {
+			*authInfo.AuthorizationType == composer.ConnectionAuthorizationType_PUBLIC ||
+			cookie.standaloneAuthProxy {
 			return nil
 		}
 		port := src.Port.Get()

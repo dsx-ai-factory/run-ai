@@ -49,6 +49,7 @@ func inferenceIntegrationClusterForTest() *clustersapi.DisplayedCluster {
 // and returns its LWS as a manifest and its networking as the persisted configuration.
 func composeDistributedInferenceForTest(
 	authorizationType *workloadsapi.DistributedInferenceServingPortAccessAuthorizationTypeEnum,
+	loadAwareRouting bool,
 ) (map[string]interface{}, *models.WorkloadConfiguration) {
 	config := &composer.StaticClusterStorageConfig{}
 	config.SetIngressEnabled(false)
@@ -70,6 +71,7 @@ func composeDistributedInferenceForTest(
 		config.SetOauth2ProxyOidcIssuerUrl("https://auth.example.com")
 	}
 	spec.SetServingPort(*port)
+	spec.SetLoadAwareRouting(loadAwareRouting)
 	builder := dinf_to_lws.NewDistributedInferenceToLWSComposer("model", "project", "runai-project", "user", nil, nil, composer.FieldsComposerOptions{}, nil).
 		WithLeaderWorkerSetName("model-1234").WithClusterStorageConfig(config)
 	target := dinf_to_lws.NewMinimalLeaderWorkerSetTarget()
@@ -206,7 +208,7 @@ var _ = Describe("inference routing", func() {
 
 	Context("applying the intent", func() {
 		It("leaves the configuration unchanged when the workload did not opt in", func() {
-			manifest, configuration := composeDistributedInferenceForTest(nil)
+			manifest, configuration := composeDistributedInferenceForTest(nil, true)
 			before, err := json.Marshal(configuration)
 			Expect(err).NotTo(HaveOccurred())
 
@@ -219,7 +221,7 @@ var _ = Describe("inference routing", func() {
 		})
 
 		It("sets the inference block on the serving endpoint", func() {
-			manifest, configuration := composeDistributedInferenceForTest(nil)
+			manifest, configuration := composeDistributedInferenceForTest(nil, true)
 			Expect(applyInferenceRouting(inferenceRoutingDistributedInference, defaults, manifest, configuration, "model")).To(BeNil())
 
 			access := (*configuration.Networking)[0].ExternalAccess
@@ -229,18 +231,29 @@ var _ = Describe("inference routing", func() {
 			Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"}}`))
 		})
 
-		It("rejects the composed protected serving port", func() {
+		It("sets the inference block on a composed protected load-aware serving port", func() {
 			authenticated := workloadsapi.DISTRIBUTEDINFERENCESERVINGPORTACCESSAUTHORIZATIONTYPEENUM_AUTHENTICATED_USERS
-			manifest, configuration := composeDistributedInferenceForTest(&authenticated)
+			manifest, configuration := composeDistributedInferenceForTest(&authenticated, true)
+			Expect((*(*configuration.Networking)[0].Services)[0].Authorization).NotTo(BeNil())
+
+			Expect(applyInferenceRouting(inferenceRoutingDistributedInference, defaults, manifest, configuration, "model")).To(BeNil())
+			raw, err := json.Marshal((*configuration.Networking)[0].ExternalAccess.Inference)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"}}`))
+		})
+
+		It("rejects a composed serving port that targets the auth proxy sidecar", func() {
+			authenticated := workloadsapi.DISTRIBUTEDINFERENCESERVINGPORTACCESSAUTHORIZATIONTYPEENUM_AUTHENTICATED_USERS
+			manifest, configuration := composeDistributedInferenceForTest(&authenticated, false)
 			Expect(*(*(*configuration.Networking)[0].Services)[0].Spec.Ports[0].TargetPort).To(Equal(composer.Oauth2ContainerDefaultPort))
 
 			err := applyInferenceRouting(inferenceRoutingDistributedInference, defaults, manifest, configuration, "model")
 			Expect(err).NotTo(BeNil())
-			Expect(err.Message).To(ContainSubstring(inferenceendpoint.AuthNotSupportedMessage))
+			Expect(err.Message).To(ContainSubstring(inferenceendpoint.SidecarAuthProxyMessage))
 		})
 
 		It("rejects a workload without one serving endpoint", func() {
-			manifest, _ := composeDistributedInferenceForTest(nil)
+			manifest, _ := composeDistributedInferenceForTest(nil, true)
 			err := applyInferenceRouting(inferenceRoutingDistributedInference, defaults, manifest, &models.WorkloadConfiguration{}, "model")
 			Expect(err).NotTo(BeNil())
 			Expect(err.Code).To(BeEquivalentTo(http.StatusBadRequest))

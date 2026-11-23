@@ -479,7 +479,7 @@ var _ = Describe("WorkloadsV2Impl", func() {
 				})
 
 				var configuration *models.WorkloadConfiguration
-				manifest, configuration = composeDistributedInferenceForTest(nil)
+				manifest, configuration = composeDistributedInferenceForTest(nil, true)
 				networking = *configuration.Networking
 			})
 
@@ -542,12 +542,12 @@ var _ = Describe("WorkloadsV2Impl", func() {
 
 				It("rejects a serving topology that submission rejects", func() {
 					authenticated := workloadsApi.DISTRIBUTEDINFERENCESERVINGPORTACCESSAUTHORIZATIONTYPEENUM_AUTHENTICATED_USERS
-					protectedManifest, protectedConfiguration := composeDistributedInferenceForTest(&authenticated)
+					protectedManifest, protectedConfiguration := composeDistributedInferenceForTest(&authenticated, false)
 
 					protectedNetworking := []api.NetworkingEndpoint(*protectedConfiguration.Networking)
 					resp := dryRun(protectedManifest, &protectedNetworking)
 					Expect(resp.Code).To(Equal(http.StatusBadRequest), resp.Body.String())
-					Expect(resp.Body.String()).To(ContainSubstring(inferenceendpoint.AuthNotSupportedMessage))
+					Expect(resp.Body.String()).To(ContainSubstring(inferenceendpoint.SidecarAuthProxyMessage))
 					Expect(queuedRecords()).To(BeEmpty())
 				})
 			})

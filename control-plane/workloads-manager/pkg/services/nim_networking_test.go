@@ -875,7 +875,7 @@ var _ = Describe("NIM load-aware routing", func() {
 			&api.WorkloadV2ConfigurationInferenceRouting{LoadAwareRouting: convutils.Ref(true)}),
 	)
 
-	DescribeTable("accepts a public HTTP serving port that is exposed externally",
+	DescribeTable("accepts an HTTP serving port that is exposed externally, public or protected",
 		func(sp *api.NimServiceServingPort) {
 			Expect(validateNimInferenceRouting(sp)).To(BeNil())
 		},
@@ -884,6 +884,15 @@ var _ = Describe("NIM load-aware routing", func() {
 			Port:              convutils.Ref(int32(8000)),
 			ExposeExternally:  convutils.Ref(true),
 			AuthorizationType: convutils.Ref(api.NIMSERVICESERVINGPORTAUTHORIZATIONTYPE_PUBLIC),
+		}),
+		Entry("authenticated users", &api.NimServiceServingPort{
+			Port:              convutils.Ref(int32(8000)),
+			AuthorizationType: convutils.Ref(api.NIMSERVICESERVINGPORTAUTHORIZATIONTYPE_AUTHENTICATED_USERS),
+		}),
+		Entry("authorized groups", &api.NimServiceServingPort{
+			Port:              convutils.Ref(int32(8000)),
+			AuthorizationType: convutils.Ref(api.NIMSERVICESERVINGPORTAUTHORIZATIONTYPE_AUTHORIZED_GROUPS),
+			AuthorizedGroups:  &[]string{"team"},
 		}),
 		Entry("explicit HTTP protocol", &api.NimServiceServingPort{
 			Port:            convutils.Ref(int32(8000)),
@@ -898,15 +907,6 @@ var _ = Describe("NIM load-aware routing", func() {
 			Expect(err.Code).To(BeEquivalentTo(http.StatusBadRequest))
 			Expect(err.Message).To(Equal(message))
 		},
-		Entry("authenticated users", &api.NimServiceServingPort{
-			Port:              convutils.Ref(int32(8000)),
-			AuthorizationType: convutils.Ref(api.NIMSERVICESERVINGPORTAUTHORIZATIONTYPE_AUTHENTICATED_USERS),
-		}, nimLoadAwareRoutingProtectedMessage),
-		Entry("authorized groups", &api.NimServiceServingPort{
-			Port:              convutils.Ref(int32(8000)),
-			AuthorizationType: convutils.Ref(api.NIMSERVICESERVINGPORTAUTHORIZATIONTYPE_AUTHORIZED_GROUPS),
-			AuthorizedGroups:  &[]string{"team"},
-		}, nimLoadAwareRoutingProtectedMessage),
 		Entry("no serving port", nil, nimLoadAwareRoutingNotExposedMessage),
 		Entry("not exposed externally", &api.NimServiceServingPort{
 			Port:             convutils.Ref(int32(8000)),
