@@ -23,20 +23,11 @@
       full-width
       @leave-page="emit('leave-approved')"
     >
-      <runai-expansion-wrapper role="presentation" no-first-top-padding>
-        <runai-expansion-item
-          :label="canSave ? 'Network & placement' : 'Network & placement View only'"
-          default-opened
-          disable-closing
-          body-no-padding
-        >
-          <template #header
-            ><span>Network &amp; placement</span
-            ><span v-if="!canSave" class="view-only"><q-icon name="ph-fill ph-eye" /> View only</span></template
-          >
+      <runai-expansion-wrapper role="group" no-first-top-padding>
+        <runai-expansion-item label="Network &amp; placement" default-opened disable-closing body-no-padding>
           <fieldset class="topology-fields" :disabled="busy || !canSave">
             <network-topology-selection
-              v-if="supports.networkTopology && (canReadTopologies || topologyCreating)"
+              v-if="canReadTopologies || topologyCreating"
               class="topology-selection"
               tooltip-width="300px"
               :cluster-id="pool.clusterId"
@@ -49,12 +40,7 @@
               @creating="topologyCreating = $event"
             />
             <p v-else class="text-b-subtitle2" role="status">
-              {{
-                canReadTopologies
-                  ? "Network topology selection is not supported by this cluster."
-                  : "You do not have permission to view network topologies."
-              }}
-              The saved topology is preserved.
+              You do not have permission to view network topologies. The saved topology is preserved.
             </p>
             <section class="mnnvl-section">
               <runai-radio-options
@@ -70,35 +56,37 @@
                 @update:model-value="draft.gpuNetworkAccelerationDetection = $event"
               />
               <p v-if="!supports.mnnvl" class="text-b-body1" role="status">
-                MNNVL detection settings require Run:ai cluster version 2.21 or later.
+                MNNVL detection settings require Run:ai cluster version {{ MIN_CLUSTER_VERSION_FOR_MNNVL_DETECTION }} or
+                later.
               </p>
             </section>
             <runai-section
-              v-if="supports.mnnvl && draft.gpuNetworkAccelerationDetection !== Detection.DontUse"
+              v-if="showMnnvlLabel"
               class="mnnvl-label-section"
               title="Set the node’s label used to detect and enable MNNVL acceleration"
             >
-              <runai-name-validation
+              <q-input
                 aid="topology-mnnvl-label"
                 v-model="draft.gpuNetworkAccelerationLabelKey"
                 class="mnnvl-label"
                 label="Label"
                 stack-label
-                :counter="false"
-                :maxlength="317"
+                no-error-icon
+                hide-bottom-space
+                :maxlength="MAX_K8S_LABEL_KEY_CHARACTERS"
                 :placeholder="DEFAULT_GPU_NETWORK_ACCELERATION_LABEL_KEY"
-                :read-only="busy || !canSave || !supports.mnnvl"
-                :rules="[validateTopologyLabelKey]"
-                :aria-invalid="validationError ? 'true' : undefined"
-                :aria-describedby="
-                  validationError
-                    ? 'node-pool-topology-label-help node-pool-topology-save-error'
-                    : 'node-pool-topology-label-help'
-                "
-              />
-              <p id="node-pool-topology-label-help" class="label-help text-b-body1">
-                Use letters, numbers, '-', '_' or '.', with an optional DNS prefix followed by '/'.
-              </p>
+                :readonly="busy || !canSave"
+                :error="invalidMnnvlLabel"
+                :aria-invalid="invalidMnnvlLabel || undefined"
+                :aria-describedby="invalidMnnvlLabel ? 'node-pool-mnnvl-label-error' : undefined"
+              >
+                <template #error>
+                  <span id="node-pool-mnnvl-label-error" role="alert">
+                    Enter a label / Key must fit the following regular expression
+                    (([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?/?([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]
+                  </span>
+                </template>
+              </q-input>
             </runai-section>
             <p class="guide-link text-b-subtitle2">
               For more information, see the
@@ -180,40 +168,21 @@
         </runai-expansion-item>
       </runai-expansion-wrapper>
     </runai-form-wrapper>
-    <template #content-footer
-      ><div class="topology-footer">
-        <p
-          v-if="saveError || validationError"
-          id="node-pool-topology-save-error"
-          class="text-negative"
-          :role="saveError ? 'alert' : undefined"
-        >
-          {{ saveError || validationError }}
-        </p>
-        <div class="row q-gutter-md">
-          <runai-btn
-            aid="topology-cancel"
-            flat
-            label="Cancel"
-            color="primary"
-            :disable="busy"
-            @click="emit('cancel')"
-          /><runai-btn
-            aid="topology-save-close"
-            label="Save & close"
-            color="primary"
-            :loading="saving"
-            :disable="busy || !canSave || !!validationError"
-            @click="save"
-          />
-        </div></div
-    ></template>
+    <template #content-footer>
+      <div class="topology-footer">
+        <p v-if="saveError" id="node-pool-topology-save-error" class="text-negative" role="alert">{{ saveError }}</p>
+        <runai-btn
+          aid="topology-save-close"
+          label="Save & close"
+          color="primary"
+          :loading="saving"
+          :disable="busy || !canSave || invalidMnnvlLabel"
+          @click="save"
+        />
+      </div>
+    </template>
     <template #right-sidebar
-      ><node-pool-wizard-summary
-        :pool="previewPool"
-        :resources="resources"
-        :show-numa="supports.numa"
-        :show-gpu-device="supports.gpuDevice"
+      ><node-pool-wizard-summary :pool="previewPool" :resources="resources" :supports="supports"
     /></template>
   </runai-wizard-layout>
 </template>
@@ -225,7 +194,6 @@ import RunaiExpansionWrapper from "@/components/common/runai-expansion-wrapper/r
 import RunaiExpansionItem from "@/components/common/runai-expansion-item/runai-expansion-item.vue";
 import RunaiSection from "@/components/common/runai-section/runai-section.vue";
 import RunaiRadioOptions from "@/components/common/runai-radio-options/runai-radio-options.vue";
-import RunaiNameValidation from "@/components/common/runai-name-validation/runai-name-validation.vue";
 import RunaiToggle from "@/components/common/runai-toggle/runai-toggle.vue";
 import RunaiTooltip from "@/components/common/runai-tooltip/runai-tooltip.vue";
 import RunaiFoldingSubSection from "@/components/common/runai-folding-sub-section/runai-folding-sub-section.vue";
@@ -234,6 +202,7 @@ import NetworkTopologySelection from "@/components/node-pools/node-pool-edit-for
 import NodePoolWizardSummary from "@/components/node-pools/node-pool-wizard-summary/node-pool-wizard-summary.vue";
 import {
   DEFAULT_GPU_NETWORK_ACCELERATION_LABEL_KEY,
+  getNodePoolWizardSteps,
   NODE_POOL_NETWORK_DISCOVERY_OPTIONS,
   PlacementOptions,
   type INodePoolSummaryResources,
@@ -244,22 +213,37 @@ import {
   type Nodepool,
 } from "@/swagger-models/cluster-service-client";
 import { DOCS } from "@/constants/docs";
+import { isValidKubernetesLabelKey, MAX_K8S_LABEL_KEY_CHARACTERS } from "@/common/form.validators";
+import { MIN_CLUSTER_VERSION_FOR_MNNVL_DETECTION } from "@/common/version.constant";
+import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { extractErrorMessages } from "@/utils/error-alert.util";
-import { topologyDraftFromPool, buildTopologyPatch, validateTopologyLabelKey } from "./node-pool-topology.model";
-import { saveTopologyPool } from "./node-pool-topology.service";
+import {
+  topologyDraftFromPool,
+  buildTopologyPatch,
+  hasMnnvlChanges,
+  type ITopologySupport,
+} from "@/models/node-pool-topology.model";
 const props = defineProps<{
   pool: Nodepool;
   resources?: INodePoolSummaryResources;
-  supports: { mnnvl: boolean; numa: boolean; gpuDevice: boolean; networkTopology: boolean };
+  supports: ITopologySupport;
   canSave: boolean;
   canReadTopologies: boolean;
   canCreateTopology: boolean;
 }>();
-const emit = defineEmits<{ saved: [Nodepool]; saving: [boolean]; "leave-approved": []; cancel: []; back: [] }>();
-const draft = ref(topologyDraftFromPool(props.pool));
+const emit = defineEmits<{ saved: [Nodepool]; saving: [boolean]; "leave-approved": []; back: [] }>();
+const initialDraft = topologyDraftFromPool(props.pool);
+const draft = ref({ ...initialDraft });
 const effectiveDetection = computed(() =>
   props.supports.mnnvl ? draft.value.gpuNetworkAccelerationDetection : Detection.Auto,
 );
+const showMnnvlLabel = computed(() => props.supports.mnnvl && effectiveDetection.value !== Detection.DontUse);
+const invalidMnnvlLabel = computed(() => {
+  const key = draft.value.gpuNetworkAccelerationLabelKey;
+  return (
+    showMnnvlLabel.value && hasMnnvlChanges(initialDraft, draft.value) && !!key.trim() && !isValidKubernetesLabelKey(key)
+  );
+});
 const saving = ref(false);
 const topologyCreating = ref(false);
 const busy = computed(() => saving.value || topologyCreating.value);
@@ -285,19 +269,7 @@ const previewPool = computed(() => ({
     cpuPodsPlacementStrategy: { node: draft.value.cpuNodePlacement },
   },
 }));
-const validationError = computed(() => {
-  try {
-    buildTopologyPatch(draft.value, props.supports);
-    return "";
-  } catch (error) {
-    return extractErrorMessages(error).join("; ");
-  }
-});
-const steps = [
-  { name: "identity", title: "Cluster & name", done: true, disabled: true },
-  { name: "scheduling", title: "Scheduling mode", done: true },
-  { name: "topology", title: "Topology & placement", done: false },
-];
+const steps = getNodePoolWizardSteps("topology");
 const mnnvlTooltip =
   "If this node pool is configured as Multi-Node NVLink (MNNVL) capable, NVIDIA Run:ai leverages its high-bandwidth GPU interconnects to accelerate workloads.";
 const numaTooltip =
@@ -327,12 +299,13 @@ function onStepClick({ name }: { name: string }) {
   if (!busy.value && name === "scheduling") emit("back");
 }
 async function save() {
-  if (busy.value || !props.canSave || validationError.value) return;
+  if (busy.value || !props.canSave || invalidMnnvlLabel.value) return;
   saving.value = true;
   saveError.value = "";
   try {
-    if (!(await form.value?.validate())) return;
-    const saved = await saveTopologyPool(props.pool.id, buildTopologyPatch(draft.value, props.supports));
+    if (!(await form.value?.validate()) || !props.canSave) return;
+    const patch = buildTopologyPatch(initialDraft, draft.value, props.supports, props.canReadTopologies);
+    const saved = Object.keys(patch).length ? await clusterService.patchNodepool(props.pool.id, patch) : props.pool;
     saving.value = false;
     emit("saved", saved);
   } catch (error) {
@@ -367,9 +340,8 @@ async function save() {
   width: 510px;
   max-width: 100%;
 }
-.label-help {
-  margin: -12px 0 0;
-  color: var(--b-text-sub);
+#node-pool-mnnvl-label-error {
+  overflow-wrap: anywhere;
 }
 .guide-link {
   margin: 0;
@@ -422,14 +394,6 @@ async function save() {
 .topology-footer > p {
   flex: 1;
   margin: 0;
-}
-.view-only {
-  font-size: 12px;
-  color: var(--b-text-sub);
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
 }
 .node-pool-topology-wizard :deep(.wizard-step-title) {
   white-space: nowrap;

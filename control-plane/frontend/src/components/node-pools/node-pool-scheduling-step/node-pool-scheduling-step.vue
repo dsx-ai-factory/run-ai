@@ -13,6 +13,7 @@
     left-width="200px"
     right-width="200px"
     hide-right-on-small-screen
+    :disable-navigation="navigationDisabled"
     @step-click="onStepClick"
   >
     <runai-form-wrapper
@@ -32,7 +33,7 @@
           >
             <template #header
               ><span>Scheduling mode</span
-              ><span v-if="!canEditDepartments || !canViewDepartments" class="view-only"
+              ><span v-if="departmentsReadOnly" class="view-only"
                 ><q-icon name="ph-fill ph-eye" /> View only</span
               ></template
             >
@@ -65,7 +66,7 @@
                     class="mode-cards"
                     :class="{ 'mode-cards--expanded': modeHelpExpanded, 'mode-cards--notice': showGuaranteedNotice }"
                     spread
-                    :disable="saving || !canEditDepartments || !canViewDepartments"
+                    :disable="saving || departmentsReadOnly"
                     aria-label="Scheduling mode"
                     aid="scheduling-mode-options"
                     @keydown.esc.stop="modeHelpDismissed = true"
@@ -98,7 +99,7 @@
                         </q-slide-transition>
                       </div>
                       <q-icon
-                        v-if="selected || option.disable || saving || !canEditDepartments || !canViewDepartments"
+                        v-if="selected || option.disable || saving || departmentsReadOnly"
                         name="ph-bold ph-check"
                         size="16px"
                         class="mode-check"
@@ -127,7 +128,7 @@
                   :ranks="ranks"
                   :rank-counts="rankCounts"
                   :capacity="resources?.gpus"
-                  :readonly="saving || !canEditDepartments || !canViewDepartments"
+                  :readonly="saving || departmentsReadOnly"
                   :can-view="canViewDepartments"
                   :settings-open="showSettings"
                   :totals-complete="totalsComplete"
@@ -154,7 +155,7 @@
                     ><node-pool-scheduling-settings
                       v-if="showSettings"
                       :draft="draft"
-                      :readonly="saving || !canEditDepartments"
+                      :readonly="saving || departmentsReadOnly"
                       :can-reset-resources="canResetResources"
                       :load-has-gpu-limits="loadHasGpuLimits"
                       :saved-max-allocation="!!pool.schedulingCapabilities?.limits"
@@ -182,6 +183,7 @@
         <p v-if="saveError || validationError" class="text-negative" role="alert">{{ saveError || validationError }}</p>
         <div class="row justify-end q-gutter-md">
           <runai-btn
+            v-if="!departmentsReadOnly"
             aid="scheduling-save-close"
             label="Save & close"
             flat
@@ -191,6 +193,15 @@
             @click="save('close')"
           />
           <runai-btn
+            v-if="departmentsReadOnly"
+            aid="scheduling-continue"
+            label="Continue"
+            color="primary"
+            :disable="navigationDisabled"
+            @click="openTopology"
+          />
+          <runai-btn
+            v-else
             aid="scheduling-save-continue"
             label="Save & continue"
             color="primary"
@@ -202,13 +213,14 @@
       </div>
     </template>
     <template #right-sidebar>
-      <node-pool-wizard-summary :pool="previewPool" :resources="resources" />
+      <node-pool-wizard-summary :pool="previewPool" :resources="resources" :supports="topologySupport" />
     </template>
   </runai-wizard-layout>
 </template>
 
 <script setup lang="ts">
-import { ENodePoolSchedulingMode as ESchedulingMode } from "@/models/node-pool.model";
+import { useNodePoolTopologySupport } from "@/composables/node-pool/use-node-pool-topology-support.composable";
+import { getNodePoolWizardSteps, ENodePoolSchedulingMode as ESchedulingMode } from "@/models/node-pool.model";
 
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { buildSchedulingSave } from "@/utils/node-pool-scheduling.util/node-pool-scheduling-save.util";
@@ -278,6 +290,7 @@ const emit = defineEmits<{
   "leave-approved": [];
   saved: [pool: Nodepool, destination?: "close" | "continue"];
   "pool-saved": [Nodepool];
+  "open-topology": [];
   saving: [boolean];
   refresh: [];
   search: [string];
@@ -295,18 +308,14 @@ const modeExplanations: Record<string, string> = {
   [ESchedulingMode.Guaranteed]:
     "Each department has a guaranteed GPU quota. Any unused quota is redistributed by rank and weight.",
 };
-const steps = computed(() => [
-  {
-    name: "identity",
-    title: "Cluster & name",
-    done: true,
-    disabled: true,
-  },
-  { name: "scheduling", title: "Scheduling mode", done: false },
-  { name: "topology", title: "Topology & placement", done: false, disabled: saveDisabled.value },
-]);
+const steps = getNodePoolWizardSteps("scheduling");
+const topologySupport = useNodePoolTopologySupport(() => props.pool.clusterId);
+const departmentsReadOnly = computed(() => !props.canViewDepartments || !props.canEditDepartments);
 function onStepClick({ name }: { name: string }) {
-  if (name === "topology") void save("continue");
+  if (name === "topology") openTopology();
+}
+function openTopology() {
+  if (!navigationDisabled.value) emit("open-topology");
 }
 const modePermissionTooltip = computed(() =>
   !props.canViewDepartments
@@ -432,7 +441,7 @@ function selectMode(value: string | number | boolean | null) {
     requestMode(value);
 }
 function applyEdit(edit: IDepartmentSchedulingEdit) {
-  if (saving.value || !props.canEditDepartments) return;
+  if (saving.value || departmentsReadOnly.value) return;
   draft.value.departments[edit.id] = { ...draft.value.departments[edit.id], ...edit };
 }
 
@@ -479,14 +488,9 @@ watch(
   },
   { deep: true },
 );
+const navigationDisabled = computed(() => saving.value || creatingDepartment.value || !props.canSavePool);
 const saveDisabled = computed(
-  () =>
-    saving.value ||
-    creatingDepartment.value ||
-    props.loading ||
-    !props.canSavePool ||
-    !props.canEditDepartments ||
-    !!validationError.value,
+  () => navigationDisabled.value || props.loading || departmentsReadOnly.value || !!validationError.value,
 );
 async function save(destination: "close" | "continue" = "close") {
   if (saveDisabled.value) return;

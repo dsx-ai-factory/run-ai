@@ -457,6 +457,8 @@ describe("scheduling step foundation", () => {
     await flushPromises();
     expect(wrapper.emitted("saved")).toBeUndefined();
     expect(wrapper.get('[aid="scheduling-save-continue"]').attributes("disabled")).toBeDefined();
+    await wrapper.get('[aid="wizard-step-item-topology"]').trigger("click");
+    expect(wrapper.emitted("open-topology")).toBeUndefined();
     finishDepartments({ succeeded: [{ orgUnitId: "a", nodePoolId: "pool-1" }], failed: [], totalFailed: 0 });
     await flushPromises();
     expect(wrapper.emitted("saved")?.[0]?.[1]).toBe("continue");
@@ -500,29 +502,37 @@ describe("scheduling step foundation", () => {
     wrapper.unmount();
   });
 
-  it("saves before entering topology from the step panel and keeps identity unavailable", async () => {
-    const wrapper = render();
-    await wrapper.setProps({ canSavePool: true });
-    saveMocks.patchPool.mockReset().mockImplementation(async (_id, payload) => ({ ...pool, ...payload }));
-    await wrapper.get('[aid="wizard-step-item-identity"]').trigger("click");
-    expect(saveMocks.patchPool).not.toHaveBeenCalled();
-    await wrapper.get('[aid="wizard-step-item-topology"]').trigger("click");
-    await flushPromises();
-    expect(saveMocks.patchPool).toHaveBeenCalledTimes(1);
-    expect(wrapper.emitted("saved")?.[0]?.[1]).toBe("continue");
-    wrapper.unmount();
-  });
+  it.each(["canEditDepartments", "canViewDepartments"] as const)(
+    "lets a pool editor continue without writing when %s is missing",
+    async (permission) => {
+      const wrapper = render();
+      await wrapper.setProps({ canSavePool: true, [permission]: false });
+      saveMocks.patchPool.mockClear();
+      saveMocks.patchDepartments.mockClear();
+      const next = wrapper.get('[aid="scheduling-continue"]');
+      expect(next.text()).toBe("Continue");
+      await next.trigger("click");
+      expect(wrapper.emitted("open-topology")).toHaveLength(1);
+      expect(saveMocks.patchPool).not.toHaveBeenCalled();
+      expect(saveMocks.patchDepartments).not.toHaveBeenCalled();
+      wrapper.unmount();
+    },
+  );
 
-  it("prevents continuing or using the topology step when scheduling validation fails", async () => {
+  it("navigates through the stepper without saving a dirty or invalid draft", async () => {
     const wrapper = render();
     await wrapper.setProps({ canSavePool: true });
-    saveMocks.patchPool.mockReset();
+    saveMocks.patchPool.mockClear();
+    saveMocks.patchDepartments.mockClear();
     wrapper.findComponent(Table).vm.$emit("edit", { id: "a", weight: 1.5 });
     await wrapper.vm.$nextTick();
     expect(wrapper.get('[aid="scheduling-save-continue"]').attributes("disabled")).toBeDefined();
+    await wrapper.get('[aid="wizard-step-item-identity"]').trigger("click");
+    expect(wrapper.emitted("open-topology")).toBeUndefined();
     await wrapper.get('[aid="wizard-step-item-topology"]').trigger("click");
+    expect(wrapper.emitted("open-topology")).toHaveLength(1);
     expect(saveMocks.patchPool).not.toHaveBeenCalled();
-    expect(wrapper.emitted("saved")).toBeUndefined();
+    expect(saveMocks.patchDepartments).not.toHaveBeenCalled();
     wrapper.unmount();
   });
 

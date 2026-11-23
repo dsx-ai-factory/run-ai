@@ -55,7 +55,7 @@
                   stack-label
                   placeholder="e.g., topology.kubernetes.io/zone"
                   :model-value="item.name"
-                  :rules="[isValidTopologyKey]"
+                  :rules="[validateLevelKey]"
                   @update:model-value="onUpdateLabel(item.id, $event)"
                 />
                 <div v-if="showLevelOrderControls" class="row items-center no-wrap q-gutter-xs">
@@ -134,7 +134,7 @@ import { RunaiBtn } from "@/components/common/runai-btn";
 import { ErrorAlert } from "@/utils/error-alert.util";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { filterUtil } from "@/utils/filter.util/filter.util";
-import { isNotEmpty, isValidRunaiEntityNameFormat, isValidTopologyKey } from "@/common/form.validators";
+import { isNotEmpty, isValidRunaiEntityNameFormat, isValidNetworkTopologyLevel } from "@/common/form.validators";
 import { makeId } from "@/utils/common.util";
 
 // constants
@@ -237,8 +237,11 @@ export default defineComponent({
     isValidFormat(val: string): boolean | string {
       return isValidRunaiEntityNameFormat(val) || errorMessages.VALID_FORMAT;
     },
-    isValidTopologyKey(val: string): boolean | string {
-      return isValidTopologyKey(val) || errorMessages.VALID_K8S_KEY;
+    validateLevelKey(val: string): boolean | string {
+      return (
+        isValidNetworkTopologyLevel(val) ||
+        "Enter a Kubernetes label key of up to 63 characters, including its optional lowercase DNS prefix."
+      );
     },
     async isNameUnique(name: string): Promise<boolean | string> {
       try {

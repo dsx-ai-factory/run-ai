@@ -90,7 +90,7 @@ describe("topology route", () => {
     expect(router.currentRoute.value.name).toBe(NODE_POOL_ROUTE_NAMES.NODE_POOL_INDEX);
     wrapper.unmount();
   });
-  it("protects browser back and Cancel with shared dirty-state confirmation", async () => {
+  it("lets the user stay or discard when leaving a dirty topology step", async () => {
     const { wrapper, router } = await render(true);
     const step = wrapper.findComponent(Step);
     const radios = step.findAllComponents({ name: "runai-radio-options" });
@@ -107,7 +107,7 @@ describe("topology route", () => {
     (document.querySelector('[aid="leave-page-modal-stay-btn"]') as HTMLButtonElement).click();
     await flushPromises();
     expect(router.currentRoute.value.params.id).toBe("one");
-    step.vm.$emit("cancel");
+    void router.push("/");
     await flushPromises();
     (document.querySelector('[aid="leave-page-modal-cancel-btn"]') as HTMLButtonElement).click();
     await flushPromises();

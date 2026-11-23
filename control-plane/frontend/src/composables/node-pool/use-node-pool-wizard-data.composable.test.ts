@@ -13,7 +13,7 @@ vi.mock("@/services/control-plane/cluster.service/cluster.service", () => ({
 vi.mock("@/composables/node-pool/node-pool-scheduling-data.util", () => ({ loadSchedulingResources: vi.fn() }));
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { loadSchedulingResources } from "@/composables/node-pool/node-pool-scheduling-data.util";
-import { useNodePoolTopologyData } from "./use-node-pool-topology-data.composable";
+import { useNodePoolWizardData } from "./use-node-pool-wizard-data.composable";
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -30,7 +30,7 @@ function setup(id = "a") {
   const poolId = ref(id);
   const scope = effectScope();
   scopes.push(scope);
-  const data = scope.run(() => useNodePoolTopologyData(poolId));
+  const data = scope.run(() => useNodePoolWizardData(poolId));
   if (!data) throw new Error("Failed to create topology data scope");
   return { poolId, scope, data };
 }
@@ -43,7 +43,7 @@ afterEach(() => {
   scopes = [];
 });
 
-describe("topology pool loading", () => {
+describe("wizard pool loading", () => {
   it("loads a direct pool ID with its own capacity without department data", async () => {
     vi.mocked(clusterService.getNodepool).mockResolvedValue(pool("a"));
     vi.mocked(loadSchedulingResources).mockResolvedValue({ gpus: 8, nodes: 2 });

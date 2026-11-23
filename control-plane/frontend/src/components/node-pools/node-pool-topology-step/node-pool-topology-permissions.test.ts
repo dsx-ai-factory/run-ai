@@ -32,7 +32,7 @@ describe("permissions changing during topology creation", () => {
     const wrapper = mount(Step, {
       props: {
         pool: { ...nodePoolUtil.createNodePoolDraft("cluster"), id: "pool", name: "Training" } as Nodepool,
-        supports: { mnnvl: true, numa: true, gpuDevice: true, networkTopology: true },
+        supports: { mnnvl: true, numa: true, gpuDevice: true },
         canSave: true,
         canReadTopologies: true,
         canCreateTopology: true,
@@ -55,7 +55,7 @@ describe("permissions changing during topology creation", () => {
       expect(wrapper.emitted("saving")?.at(-1)).toEqual([true]);
       await wrapper.setProps({ canReadTopologies: false });
       expect(wrapper.findComponent(Selector).exists()).toBe(true);
-      expect(wrapper.get('[aid="topology-cancel"]').attributes("disabled")).toBeDefined();
+      expect(wrapper.get('[aid="topology-save-close"]').attributes("disabled")).toBeDefined();
       expect(await requestToLeave()).toBe(false);
       finish({
         id: "fabric",

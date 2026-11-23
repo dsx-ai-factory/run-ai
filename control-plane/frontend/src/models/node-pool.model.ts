@@ -14,6 +14,22 @@ import type { ISelectOption } from "@/models/global.model";
 import { docsUtil } from "@/utils/docs.util/docs.util";
 import DOCS from "@/constants/docs";
 
+const NODE_POOL_WIZARD_STEPS = [
+  { name: "identity", title: "Cluster & name" },
+  { name: "scheduling", title: "Scheduling mode" },
+  { name: "topology", title: "Topology & placement" },
+] as const;
+
+export function getNodePoolWizardSteps(active: (typeof NODE_POOL_WIZARD_STEPS)[number]["name"]) {
+  const current = NODE_POOL_WIZARD_STEPS.findIndex((step) => step.name === active);
+  return NODE_POOL_WIZARD_STEPS.map((step, index) => ({
+    ...step,
+    done: index < current,
+    // A saved pool's identity is fixed. Create the pool before opening either edit step.
+    disabled: active === "identity" ? step.name !== "identity" : step.name === "identity",
+  }));
+}
+
 export interface INodePoolFormDraft extends NodepoolCreateFields {
   description: string;
 }

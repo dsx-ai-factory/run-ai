@@ -18,7 +18,7 @@
         :tooltip-text="disableTooltip"
         :toggle-tooltip="innerToolTipShown"
       >
-        <!-- QOptionGroup nests its label slot inside QRadio, so separate help controls need sibling rows. -->
+        <!-- QOptionGroup exposes only a label slot inside QRadio. Independent help needs a sibling button. -->
         <div
           v-if="separateTooltips && optionsWithPolicyApplied.length > 0"
           class="q-option-group q-gutter-x-sm runai-option-group"
@@ -44,26 +44,13 @@
               :aria-label="opt.label"
               :aria-describedby="opt.toolTip ? `${radioDescriptionId}-${index}` : undefined"
               @update:model-value="$emit('update:model-value', $event)"
-              @keydown="onRadioKeydown($event, index)"
+              @keydown="onRadioKeydown($event, opt)"
             >
-              <div
-                class="row items-center no-wrap"
-                :class="{ ellipsis: !!optionMaxWidth }"
-                :style="{ 'max-width': optionMaxWidth, height: '40px' }"
-              >
-                <runai-svg-icon v-if="opt.icon" class="q-mr-sm" :name="opt.icon" size="30" />
-                <span class="ellipsis-label ellipsis text-b-subtitle2" :class="{ 'disabled-label': opt.disable }">
-                  {{ opt.label }} <q-tooltip v-if="isTextOverflow(opt.label)">{{ opt.label }}</q-tooltip>
-                </span>
-                <runai-svg-icon v-if="opt.svg" class="q-ml-xs" :name="opt.svg" size="14" />
-                <q-tooltip
-                  v-if="opt.disable && opt.disabledTooltip"
-                  class="q-pa-sm"
-                  :max-width="opt.disabledTooltipWidth"
-                >
-                  {{ opt.disabledTooltip }}
-                </q-tooltip>
-              </div>
+              <radio-option-row
+                :option="opt"
+                :max-width="optionMaxWidth"
+                :min-chars-to-show-overflow-tooltip="minCharsToShowOverflowTooltip"
+              />
             </q-radio>
             <runai-tooltip
               v-if="opt.toolTip"
@@ -90,31 +77,18 @@
           @update:model-value="$emit('update:model-value', $event)"
           type="radio"
           :inline="horizontal"
-          :disable="disable || policyRules?.canEdit === false"
+          :disable="isGroupDisabled"
           :dense="dense"
           :aria-label="title || 'Options'"
         >
           <template v-slot:label="opt">
             <div :class="{ row: !horizontal, 'items-center': !horizontal }" :aid="getOptionAid(opt)">
-              <div
-                class="row items-center no-wrap"
-                :class="{ 'q-mr-md': !horizontal, ellipsis: !!optionMaxWidth }"
-                :style="{ 'max-width': optionMaxWidth, height: '40px' }"
+              <radio-option-row
+                :option="opt"
+                :class="{ 'q-mr-md': !horizontal }"
+                :max-width="optionMaxWidth"
+                :min-chars-to-show-overflow-tooltip="minCharsToShowOverflowTooltip"
               >
-                <div class="row items-center min-w-0 col-grow">
-                  <runai-svg-icon v-if="opt.icon" class="q-mr-sm" :name="opt.icon" size="30" />
-                  <span class="ellipsis-label ellipsis text-b-subtitle2" :class="{ 'disabled-label': opt.disable }"
-                    >{{ opt.label }} <q-tooltip v-if="isTextOverflow(opt.label)">{{ opt.label }}</q-tooltip></span
-                  >
-                  <runai-svg-icon v-if="opt.svg" class="q-ml-xs" :name="opt.svg" size="14" />
-                  <q-tooltip
-                    v-if="opt.disable && opt.disabledTooltip"
-                    class="q-pa-sm"
-                    :max-width="opt.disabledTooltipWidth"
-                  >
-                    {{ opt.disabledTooltip }}
-                  </q-tooltip>
-                </div>
                 <runai-tooltip
                   v-if="opt.toolTip"
                   @revealed="innerToolTipShown = true"
@@ -123,7 +97,7 @@
                   tooltip-position="right"
                   :width="opt.toolTipWidth ?? tooltipWidth"
                 />
-              </div>
+              </radio-option-row>
             </div>
           </template>
         </q-option-group>
@@ -145,7 +119,7 @@ import type { QRadio } from "quasar";
 import { RunaiSection } from "@/components/common/runai-section";
 import { RunaiTooltip } from "@/components/common/runai-tooltip";
 import { RunaiTooltipWrapper } from "@/components/common/runai-tooltip-wrapper";
-import { RunaiSvgIcon } from "@/components/common/runai-svg-icon";
+import RadioOptionRow from "./radio-option-row.vue";
 
 // Models
 import type { ISelectOption } from "@/models/global.model";
@@ -158,7 +132,7 @@ export default defineComponent({
     RunaiSection,
     RunaiTooltip,
     RunaiTooltipWrapper,
-    RunaiSvgIcon,
+    RadioOptionRow,
   },
   emits: ["update:model-value"],
   props: {
@@ -263,34 +237,26 @@ export default defineComponent({
     },
   },
   methods: {
-    async onRadioKeydown(event: KeyboardEvent, index: number): Promise<void> {
+    onRadioKeydown(event: KeyboardEvent, option: ISelectOption): void {
       const direction = ["ArrowDown", "ArrowRight"].includes(event.key)
         ? 1
         : ["ArrowUp", "ArrowLeft"].includes(event.key)
           ? -1
           : 0;
-      const currentOption = this.optionsWithPolicyApplied.at(index);
-      if (!direction || this.isGroupDisabled || !currentOption || currentOption.disable) return;
+      if (!direction || this.isGroupDisabled || option.disable) return;
 
       event.preventDefault();
       const enabledOptions = this.optionsWithPolicyApplied.filter((option) => !option.disable);
-      const currentIndex = enabledOptions.indexOf(currentOption);
-      const nextOption = enabledOptions.at((currentIndex + direction + enabledOptions.length) % enabledOptions.length);
-      if (!nextOption) return;
-      if (nextOption.value !== this.modelValue) this.$emit("update:model-value", nextOption.value);
-      await this.$nextTick();
+      const currentIndex = enabledOptions.indexOf(option);
+      const nextOption = enabledOptions[(currentIndex + direction + enabledOptions.length) % enabledOptions.length];
       const radios = this.$refs.optionRadios as QRadio[];
-      radios.find((radio) => radio.val === nextOption.value)?.$el.focus();
+      const nextRadio = radios.find((radio) => radio.val === nextOption.value);
+      nextRadio?.$el.focus();
+      nextRadio?.set();
     },
     getOptionAid(opt: ISelectOption): string {
       if (opt.aid) return opt.aid;
       return `radio-option-${opt.label}`;
-    },
-    isTextOverflow(text: string): boolean {
-      if (!this.minCharsToShowOverflowTooltip) {
-        return false;
-      }
-      return text.length > this.minCharsToShowOverflowTooltip;
     },
     isRequiredByPolicy(val: string | null): boolean | string {
       if (!this.policyRules?.required) return true;
@@ -328,10 +294,6 @@ export default defineComponent({
 
   :deep(.q-radio.disabled .q-radio__inner) {
     color: var(--icon-disabled);
-  }
-
-  .disabled-label {
-    color: var(--text-tertiary);
   }
 }
 </style>

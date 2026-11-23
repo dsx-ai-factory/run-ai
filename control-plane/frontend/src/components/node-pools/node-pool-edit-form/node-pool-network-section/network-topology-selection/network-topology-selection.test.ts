@@ -4,7 +4,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DOMWrapper, flushPromises, mount, type VueWrapper } from "@vue/test-utils";
-import { Notify, Quasar } from "quasar";
+import { Notify, QSelect, Quasar } from "quasar";
 import type { Component } from "vue";
 import NetworkTopologySelection from "./network-topology-selection.vue";
 import { RunaiSelect } from "@/components/common/runai-select";
@@ -92,20 +92,20 @@ describe("network topology selection", () => {
     const [far, middle, close] = inputs();
     await far.setValue("zone");
     await middle.setValue("rack");
-    await close.setValue("node");
+    await close.setValue("zone/Node");
 
     await modal.findAll(moveUp)[0].trigger("click");
-    expect(values()).toEqual(["zone", "rack", "node"]);
+    expect(values()).toEqual(["zone", "rack", "zone/Node"]);
     const raiseRack = modal.findAll<HTMLButtonElement>(moveUp)[1];
     raiseRack.element.focus();
     await raiseRack.trigger("click");
-    expect(values()).toEqual(["rack", "zone", "node"]);
+    expect(values()).toEqual(["rack", "zone", "zone/Node"]);
     expect(document.activeElement).toBe(raiseRack.element);
     expect(raiseRack.attributes("aria-disabled")).toBe("true");
     expect(modal.get('[role="status"]').text()).toContain("position 1 of 3");
 
     await modal.findAll(moveDown)[1].trigger("click");
-    expect(values()).toEqual(["rack", "node", "zone"]);
+    expect(values()).toEqual(["rack", "zone/Node", "zone"]);
     expect(modal.findAll(moveDown)[2].attributes("aria-disabled")).toBe("true");
     await modal.get('[aid="network-topologies-modal-save-button"]').trigger("click");
     await flushPromises();
@@ -113,7 +113,7 @@ describe("network topology selection", () => {
     expect(clusterService.createNetworkTopology).toHaveBeenCalledWith({
       ...request,
       name: "fabric-a",
-      levels: ["rack", "node", "zone"],
+      levels: ["rack", "zone/Node", "zone"],
     });
   });
 
@@ -208,13 +208,20 @@ describe("network topology selection", () => {
     expect(wrapper.emitted("loaded")).toEqual([[[topology]]]);
   });
 
-  it("distinguishes an empty topology list from a failed request", async () => {
+  it("shows the empty message and create action inside the dropdown", async () => {
     vi.mocked(clusterService.getNetworkTopologies).mockResolvedValue([]);
-    mountComponent();
+    mountComponent({}, document.body);
     await flushPromises();
-    expect(wrapper.get('[aid="network-topologies-empty"]').text()).toContain("No network topologies found");
+    expect(wrapper.text()).not.toContain("No network topologies found");
     expect(wrapper.find('[role="alert"]').exists()).toBe(false);
     expect(wrapper.emitted("loaded")).toEqual([[[]]]);
+
+    wrapper.getComponent(QSelect).vm.showPopup();
+    await flushPromises();
+    const menu = new DOMWrapper(document.body).get('[role="listbox"]');
+    expect(menu.text()).toContain("No network topologies found");
+    await menu.get(".custom-action-item").trigger("click");
+    expect(wrapper.getComponent(RunaiBaseDialog).props("modelValue")).toBe(true);
   });
 
   it("keeps the saved topology visible after a load failure and retries without changing the selection", async () => {
@@ -226,7 +233,6 @@ describe("network topology selection", () => {
       value: "topology-1",
       label: "Saved Fabric",
     });
-    expect(wrapper.find('[aid="network-topologies-empty"]').exists()).toBe(false);
     await wrapper.get('[aid="network-topologies-retry"]').trigger("click");
     await flushPromises();
     expect(wrapper.find('[role="alert"]').exists()).toBe(false);
@@ -315,6 +321,20 @@ describe("network topology selection", () => {
     expect(wrapper.getComponent(RunaiBaseDialog).props("modelValue")).toBe(false);
   });
 
+  it("explains a stale cluster submission and lets the user retry for the current cluster", async () => {
+    mountComponent();
+    await flushPromises();
+    const notify = vi.spyOn(wrapper.vm.$q, "notify").mockImplementation(() => () => {});
+    wrapper.getComponent(RunaiSelect).vm.$emit("custom-action");
+    await wrapper.vm.createNetworkTopology({ ...request, clusterId: "old-cluster" });
+
+    expect(clusterService.createNetworkTopology).not.toHaveBeenCalled();
+    expect(notify).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringMatching(/cluster.*save/i) }));
+    expect(wrapper.getComponent(RunaiBaseDialog).props("modelValue")).toBe(true);
+    await wrapper.vm.createNetworkTopology(request);
+    expect(wrapper.emitted("select")).toEqual([["topology-1"]]);
+  });
+
   it.each(["resolve", "reject"])("reports pending creation immediately and releases it after %s", async (outcome) => {
     const pending = deferred<NetworkTopology>();
     vi.mocked(clusterService.createNetworkTopology).mockReturnValue(pending.promise);
@@ -374,5 +394,35 @@ describe("network topology selection", () => {
     await flushPromises();
     expect(wrapper.emitted("select")).toBeUndefined();
     expect(wrapper.getComponent(RunaiBaseDialog).props("modelValue")).toBe(false);
+  });
+
+  it("keeps the new creation pending if an earlier visit to the same cluster returns an error", async () => {
+    const previous = deferred<NetworkTopology>();
+    const current = deferred<NetworkTopology>();
+    vi.mocked(clusterService.createNetworkTopology)
+      .mockReturnValueOnce(previous.promise)
+      .mockReturnValueOnce(current.promise);
+    mountComponent();
+    await flushPromises();
+    const notify = vi.spyOn(wrapper.vm.$q, "notify").mockImplementation(() => () => {});
+    const select = wrapper.getComponent(RunaiSelect);
+    select.vm.$emit("custom-action");
+    const previousSave = wrapper.vm.createNetworkTopology(request);
+    await wrapper.setProps({ clusterId: "cluster-2" });
+    await wrapper.setProps({ clusterId: "cluster-1" });
+    await flushPromises();
+    select.vm.$emit("custom-action");
+    const currentSave = wrapper.vm.createNetworkTopology(request);
+
+    previous.reject(new Error("earlier creation failed"));
+    await previousSave;
+    expect(notify).not.toHaveBeenCalled();
+    expect(wrapper.emitted("creating")).toEqual([[true], [false], [true]]);
+    expect(wrapper.getComponent(RunaiBaseDialog).props("isModalPersistent")).toBe(true);
+
+    current.resolve({ ...topology, id: "current-topology" });
+    await currentSave;
+    expect(wrapper.emitted("select")).toEqual([["current-topology"]]);
+    expect(wrapper.emitted("creating")?.at(-1)).toEqual([false]);
   });
 });

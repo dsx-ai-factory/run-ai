@@ -163,7 +163,7 @@
         </div>
       </template>
       <template #right-sidebar>
-        <node-pool-wizard-summary :pool="created ?? draft" :cluster-name="clusterName" />
+        <node-pool-wizard-summary :pool="created ?? draft" :cluster-name="clusterName" :supports="topologySupport" />
       </template>
     </runai-wizard-layout>
     <unsaved-changes-dialog
@@ -196,9 +196,10 @@ import type { Nodepool } from "@/swagger-models/cluster-service-client";
 import { useNodePoolForm } from "@/composables/node-pool/use-node-pool-form.composable";
 import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
 import { errorMessages } from "@/common/error-message.constant";
-import type { INodePoolFormDraft } from "@/models/node-pool.model";
+import { getNodePoolWizardSteps, type INodePoolFormDraft } from "@/models/node-pool.model";
 
 import { ENodePoolFormDestination } from "./node-pool-edit-form-v2.model";
+import { useNodePoolTopologySupport } from "@/composables/node-pool/use-node-pool-topology-support.composable";
 import { useNodeLabelOptions } from "@/composables/node-pool/use-node-label-options.composable";
 import { useWizardLayout } from "@/composables/use-wizard-layout.composable";
 import { provideUnsavedChangesGuard } from "@/composables/org-unit/use-unsaved-changes-guard.composable";
@@ -226,13 +227,10 @@ watch(
   (value) => emit("busy-change", value),
   { flush: "sync" },
 );
+const topologySupport = useNodePoolTopologySupport(() => (created.value ?? draft).clusterId);
 const clusterName = computed(() => clusterStore.clusterList.find((c) => c.uuid === draft.clusterId)?.name);
 const { steps, activeStep, handleStepClick, markStepComplete } = useWizardLayout(
-  [
-    { name: "identity", title: "Cluster & name", done: false },
-    { name: "scheduling", title: "Scheduling mode", done: false, disabled: true },
-    { name: "topology", title: "Topology & placement", done: false, disabled: true },
-  ],
+  getNodePoolWizardSteps("identity"),
   "identity",
 );
 watch(created, (pool) => {

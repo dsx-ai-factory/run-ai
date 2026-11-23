@@ -49,7 +49,6 @@ import { computed } from "vue";
 import { RunaiTooltip } from "@/components/common/runai-tooltip";
 import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
 import { memoryFormat } from "@/utils/format.util";
-import { NODE_POOL_CONFIGURATION_DEFAULTS as defaults } from "@/models/node-pool.model";
 import {
   getSchedulingMode,
   NETWORK_ACCELERATION_LABELS,
@@ -58,16 +57,14 @@ import {
   type INodePoolSummaryResources,
 } from "@/models/node-pool.model";
 
-const props = withDefaults(
-  defineProps<{
-    pool: INodePoolSummaryConfiguration;
-    clusterName?: string;
-    resources?: INodePoolSummaryResources;
-    showNuma?: boolean;
-    showGpuDevice?: boolean;
-  }>(),
-  { showNuma: true, showGpuDevice: true },
-);
+import { topologyDraftFromPool, type ITopologySupport } from "@/models/node-pool-topology.model";
+
+const props = defineProps<{
+  pool: INodePoolSummaryConfiguration;
+  clusterName?: string;
+  resources?: INodePoolSummaryResources;
+  supports: ITopologySupport;
+}>();
 const schedulingMode = computed(() => getSchedulingMode(props.pool.schedulingCapabilities));
 const modeDescription = computed(() => SCHEDULING_MODE_DESCRIPTIONS[schedulingMode.value]);
 const resourceRows = computed(() => [
@@ -81,35 +78,35 @@ const resourceRows = computed(() => [
 ]);
 const configurationRows = computed(() => {
   const pool = props.pool;
-  const config = pool.schedulingConfiguration;
-  return [
-    { label: "Network topology", value: pool.networkTopologyName || pool.networkTopologyId || "None" },
-    {
+  const config = topologyDraftFromPool(pool);
+  const rows = [{ label: "Network topology", value: pool.networkTopologyName || pool.networkTopologyId || "None" }];
+  if (props.supports.mnnvl) {
+    rows.push({
       label: "MNNVL",
-      value:
-        NETWORK_ACCELERATION_LABELS[pool.gpuNetworkAccelerationDetection ?? defaults.gpuNetworkAccelerationDetection],
-    },
-    {
+      value: NETWORK_ACCELERATION_LABELS[config.gpuNetworkAccelerationDetection],
+    });
+  }
+  if (props.supports.numa) {
+    rows.push({
       label: "NUMA-aware scheduling",
-      value: (config?.numaAwareScheduling ?? defaults.numaAwareScheduling) ? "Enabled" : "Disabled",
-    },
-    {
-      label: "GPU node placement strategy",
-      value: nodePoolUtil.placementStrategyText(config?.gpuPodsPlacementStrategy?.node ?? defaults.gpuNodePlacement),
-    },
-    {
+      value: config.numaAwareScheduling ? "Enabled" : "Disabled",
+    });
+  }
+  rows.push({
+    label: "GPU node placement strategy",
+    value: nodePoolUtil.placementStrategyText(config.gpuNodePlacement),
+  });
+  if (props.supports.gpuDevice) {
+    rows.push({
       label: "GPU device placement strategy",
-      value: nodePoolUtil.placementStrategyText(config?.gpuPodsPlacementStrategy?.device ?? defaults.gpuDevicePlacement),
-    },
-    {
-      label: "CPU node placement strategy",
-      value: nodePoolUtil.placementStrategyText(config?.cpuPodsPlacementStrategy?.node ?? defaults.cpuNodePlacement),
-    },
-  ].filter(
-    (row) =>
-      (props.showNuma || row.label !== "NUMA-aware scheduling") &&
-      (props.showGpuDevice || row.label !== "GPU device placement strategy"),
-  );
+      value: nodePoolUtil.placementStrategyText(config.gpuDevicePlacement),
+    });
+  }
+  rows.push({
+    label: "CPU node placement strategy",
+    value: nodePoolUtil.placementStrategyText(config.cpuNodePlacement),
+  });
+  return rows;
 });
 </script>
 <style scoped lang="scss">

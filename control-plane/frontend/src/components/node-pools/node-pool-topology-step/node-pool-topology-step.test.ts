@@ -8,14 +8,13 @@ import { createTestingPinia } from "@pinia/testing";
 import { Quasar } from "quasar";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import Step from "./node-pool-topology-step.vue";
-import { saveTopologyPool } from "./node-pool-topology.service";
+import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
 import {
   NodepoolGPUNetworkAccelerationDetection as Detection,
   type Nodepool,
 } from "@/swagger-models/cluster-service-client";
 import Radio from "@/components/common/runai-radio-options/runai-radio-options.vue";
-vi.mock("./node-pool-topology.service", () => ({ saveTopologyPool: vi.fn() }));
 const pool = {
   ...nodePoolUtil.createNodePoolDraft("cluster"),
   id: "pool",
@@ -23,7 +22,8 @@ const pool = {
   clusterName: "Tokyo",
   gpuNetworkAccelerationLabelKey: "example.com/rack",
 } as Nodepool;
-const supports = { mnnvl: true, numa: true, gpuDevice: true, networkTopology: true };
+const supports = { mnnvl: true, numa: true, gpuDevice: true };
+const patchNodepool = vi.spyOn(clusterService, "patchNodepool");
 async function render(overrides = {}) {
   const router = createRouter({
     history: createMemoryHistory(),
@@ -47,7 +47,7 @@ async function render(overrides = {}) {
   await flushPromises();
   return wrapper;
 }
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => patchNodepool.mockReset().mockResolvedValue(pool));
 describe("node pool topology step", () => {
   it("preserves a saved Auto custom label and its draft when MNNVL is hidden", async () => {
     const wrapper = await render();
@@ -61,34 +61,41 @@ describe("node pool topology step", () => {
     expect(wrapper.get<HTMLInputElement>('[aid="topology-mnnvl-label"]').element.value).toBe("example.com/rack");
     wrapper.unmount();
   });
-  it("rejects an invalid label before issuing a save and explains allowed characters", async () => {
-    const wrapper = await render({ pool: { ...pool, gpuNetworkAccelerationLabelKey: "bad key" } });
-    expect(wrapper.text()).toContain("optional DNS prefix");
-    await wrapper.get('[aid="topology-save-close"]').trigger("click");
-    expect(saveTopologyPool).not.toHaveBeenCalled();
-    wrapper.unmount();
-  });
-  it("associates the invalid label with its help and error for assistive technology", async () => {
-    const wrapper = await render({ pool: { ...pool, gpuNetworkAccelerationLabelKey: "bad key" } });
+  it("shows a single field error for an invalid label and saves the corrected input", async () => {
+    const wrapper = await render();
     try {
       const input = wrapper.get<HTMLInputElement>('[aid="topology-mnnvl-label"]');
+      const save = wrapper.get('[aid="topology-save-close"]');
+      expect(input.attributes("maxlength")).toBe("317");
+      await input.setValue("Upper.example/key");
       expect(input.attributes("aria-invalid")).toBe("true");
-      const descriptions = (input.attributes("aria-describedby") ?? "")
-        .split(" ")
-        .filter(Boolean)
-        .map((id) => wrapper.get(`#${id}`).text())
-        .join(" ");
-      expect(descriptions).toContain("optional DNS prefix");
-      expect(descriptions).toContain("Enter a valid Kubernetes label key");
+      const error = wrapper.get(`#${input.attributes("aria-describedby")}`);
+      expect(error.text()).toBe(
+        "Enter a label / Key must fit the following regular expression (([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?/?([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]",
+      );
+      expect(wrapper.findAll('[role="alert"]')).toHaveLength(1);
+      await save.trigger("click");
+      expect(patchNodepool).not.toHaveBeenCalled();
+      await input.setValue("example.com/GPU_Rack");
+      expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+      expect(input.attributes("aria-invalid")).toBeUndefined();
+      await save.trigger("click");
+      await flushPromises();
+      expect(patchNodepool).toHaveBeenCalledWith(pool.id, { gpuNetworkAccelerationLabelKey: "example.com/GPU_Rack" });
     } finally {
       wrapper.unmount();
     }
   });
-  it("names the view-only card without exposing an invalid list container", async () => {
-    const wrapper = await render({ canSave: false });
+  it("closes an unedited pool without making a patch request", async () => {
+    const wrapper = await render();
     try {
-      expect(wrapper.get(".runai-expansion-header").attributes("aria-label")).toContain("View only");
+      expect(wrapper.find('[aid="topology-cancel"]').exists()).toBe(false);
+      expect(wrapper.find("#node-pool-topology-label-help").exists()).toBe(false);
       expect(wrapper.find('.q-list[role="list"]').exists()).toBe(false);
+      await wrapper.get('[aid="topology-save-close"]').trigger("click");
+      await flushPromises();
+      expect(patchNodepool).not.toHaveBeenCalled();
+      expect(wrapper.emitted("saved")).toEqual([[pool]]);
     } finally {
       wrapper.unmount();
     }
@@ -111,23 +118,24 @@ describe("node pool topology step", () => {
   });
   it("keeps the draft after a failed save and prevents duplicate submissions", async () => {
     let reject!: (reason: Error) => void;
-    vi.mocked(saveTopologyPool).mockImplementationOnce(
+    patchNodepool.mockImplementationOnce(
       () =>
         new Promise((_resolve, fail) => {
           reject = fail;
         }),
     );
     const wrapper = await render();
+    await wrapper.get('[aid="topology-mnnvl-label"]').setValue("example.com/Edited");
     await wrapper.get('[aid="topology-save-close"]').trigger("click");
     await wrapper.get('[aid="topology-save-close"]').trigger("click");
     await flushPromises();
-    expect(saveTopologyPool).toHaveBeenCalledTimes(1);
+    expect(patchNodepool).toHaveBeenCalledTimes(1);
+    expect(patchNodepool).toHaveBeenCalledWith(pool.id, { gpuNetworkAccelerationLabelKey: "example.com/Edited" });
     expect(wrapper.emitted("saved")).toBeUndefined();
     reject(new Error("Service unavailable"));
     await flushPromises();
     expect(wrapper.get('[role="alert"]').text()).toContain("Service unavailable");
-    expect(wrapper.get<HTMLInputElement>('[aid="topology-mnnvl-label"]').element.value).toBe("example.com/rack");
-    vi.mocked(saveTopologyPool).mockResolvedValue(pool);
+    expect(wrapper.get<HTMLInputElement>('[aid="topology-mnnvl-label"]').element.value).toBe("example.com/Edited");
     await wrapper.get('[aid="topology-save-close"]').trigger("click");
     await flushPromises();
     expect(wrapper.emitted("saved")).toEqual([[pool]]);
@@ -142,16 +150,66 @@ describe("node pool topology step", () => {
     wrapper.unmount();
   });
   it("saves other fields when an unsupported cluster has an inactive invalid MNNVL label", async () => {
-    vi.mocked(saveTopologyPool).mockResolvedValue(pool);
     const wrapper = await render({
       pool: { ...pool, gpuNetworkAccelerationDetection: Detection.Use, gpuNetworkAccelerationLabelKey: "invalid key" },
       supports: { ...supports, mnnvl: false },
     });
     expect(wrapper.findAllComponents(Radio)[0].props("modelValue")).toBe(Detection.Auto);
+    wrapper.findAllComponents(Radio)[1].vm.$emit("update:model-value", "spread");
+    await flushPromises();
     await wrapper.get('[aid="topology-save-close"]').trigger("click");
     await flushPromises();
-    expect(saveTopologyPool).toHaveBeenCalledTimes(1);
-    expect(vi.mocked(saveTopologyPool).mock.calls[0][1]).not.toHaveProperty("gpuNetworkAccelerationDetection");
+    expect(patchNodepool).toHaveBeenCalledWith(pool.id, {
+      schedulingConfiguration: { gpuPodsPlacementStrategy: { node: "spread" } },
+    });
+    wrapper.unmount();
+  });
+  it("preserves an untouched legacy invalid label when saving unrelated edits", async () => {
+    const wrapper = await render({ pool: { ...pool, gpuNetworkAccelerationLabelKey: "legacy key" } });
+    try {
+      wrapper.findAllComponents(Radio)[1].vm.$emit("update:model-value", "spread");
+      await wrapper.get('[aid="topology-save-close"]').trigger("click");
+      await flushPromises();
+      expect(patchNodepool).toHaveBeenCalledWith(pool.id, {
+        schedulingConfiguration: { gpuPodsPlacementStrategy: { node: "spread" } },
+      });
+    } finally {
+      wrapper.unmount();
+    }
+  });
+  it("validates a saved label when detection is enabled", async () => {
+    const wrapper = await render({
+      pool: {
+        ...pool,
+        gpuNetworkAccelerationDetection: Detection.DontUse,
+        gpuNetworkAccelerationLabelKey: "legacy key",
+      },
+    });
+    try {
+      wrapper.findAllComponents(Radio)[0].vm.$emit("update:model-value", Detection.Use);
+      await flushPromises();
+      expect(wrapper.get('[aid="topology-mnnvl-label"]').attributes("aria-invalid")).toBe("true");
+      expect(wrapper.get('[aid="topology-save-close"]').attributes("disabled")).toBeDefined();
+      await wrapper.get('[aid="topology-mnnvl-label"]').setValue("");
+      await wrapper.get('[aid="topology-save-close"]').trigger("click");
+      await flushPromises();
+      expect(patchNodepool).toHaveBeenCalledWith(pool.id, {
+        gpuNetworkAccelerationDetection: Detection.Use,
+        gpuNetworkAccelerationLabelKey: "nvidia.com/gpu.clique",
+      });
+    } finally {
+      wrapper.unmount();
+    }
+  });
+  it("skips an edited topology when read permission is revoked before saving", async () => {
+    const wrapper = await render({ pool: { ...pool, networkTopologyId: "original" } });
+    wrapper.getComponent({ name: "NetworkTopologySelection" }).vm.$emit("select", null);
+    await wrapper.setProps({ canReadTopologies: false });
+    expect(wrapper.findComponent({ name: "NetworkTopologySelection" }).exists()).toBe(false);
+    await wrapper.get('[aid="topology-mnnvl-label"]').setValue("");
+    await wrapper.get('[aid="topology-save-close"]').trigger("click");
+    await flushPromises();
+    expect(patchNodepool).toHaveBeenCalledWith(pool.id, { gpuNetworkAccelerationLabelKey: "nvidia.com/gpu.clique" });
     wrapper.unmount();
   });
   it("blocks navigation and pool saving while a topology creation request is pending", async () => {
@@ -161,7 +219,7 @@ describe("node pool topology step", () => {
     await flushPromises();
     expect(wrapper.emitted("saving")?.at(-1)).toEqual([true]);
     await wrapper.get('[aid="topology-save-close"]').trigger("click");
-    expect(saveTopologyPool).not.toHaveBeenCalled();
+    expect(patchNodepool).not.toHaveBeenCalled();
     selector.vm.$emit("creating", false);
     await flushPromises();
     expect(wrapper.emitted("saving")?.at(-1)).toEqual([false]);
@@ -169,9 +227,12 @@ describe("node pool topology step", () => {
   });
   it("blocks writes with no pool update permission", async () => {
     const wrapper = await render({ canSave: false });
+    expect(wrapper.get("fieldset").attributes("disabled")).toBeDefined();
+    expect(wrapper.get('[aid="topology-mnnvl-label"]').attributes("readonly")).toBeDefined();
+    expect(wrapper.get('[aid="topology-save-close"]').attributes("disabled")).toBeDefined();
     await wrapper.get('[aid="topology-save-close"]').trigger("click");
-    expect(saveTopologyPool).not.toHaveBeenCalled();
-    expect(wrapper.text()).toContain("View only");
+    expect(patchNodepool).not.toHaveBeenCalled();
+    expect(wrapper.text()).not.toContain("View only");
     wrapper.unmount();
   });
 });

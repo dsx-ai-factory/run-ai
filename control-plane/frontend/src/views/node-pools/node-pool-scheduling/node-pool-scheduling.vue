@@ -3,15 +3,7 @@
   SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-  <runai-form-wrapper v-if="!pool" :form-state="{}" full-width>
-    <runai-default-loader v-if="loading" />
-    <q-banner v-else-if="loadError" class="bg-red-1 text-negative q-ma-lg" role="alert">
-      {{ loadError }}
-      <template #action
-        ><runai-btn aid="retry-scheduling-pool" label="Retry" flat color="primary" @click="refresh"
-      /></template>
-    </q-banner>
-  </runai-form-wrapper>
+  <node-pool-wizard-load-state v-if="!pool" step="scheduling" :loading="loading" :error="loadError" @retry="refresh" />
   <node-pool-scheduling-step
     v-else
     :key="pool.id"
@@ -45,40 +37,25 @@
     @leave-approved="leaveApproved = true"
     @saving="saving = $event"
     @pool-saved="pool = $event"
-    @saved="onSaved"
+    @open-topology="openStep('topology')"
+    @saved="finish"
   />
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from "vue";
-import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
+import { computed } from "vue";
+import { useRoute } from "vue-router";
 import { NodePoolSchedulingStep } from "@/components/node-pools/node-pool-scheduling-step";
-import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
-import { RunaiDefaultLoader } from "@/components/common/runai-default-loader";
-import RunaiFormWrapper from "@/components/common/runai-form-wrapper/runai-form-wrapper.vue";
+import { NodePoolWizardLoadState } from "@/components/node-pools/node-pool-wizard-load-state";
 import { useNodePoolSchedulingData } from "@/composables/node-pool/use-node-pool-scheduling-data.composable";
+import { useNodePoolWizardNavigation } from "@/composables/node-pool/use-node-pool-wizard-navigation.composable";
 import { ENTITY_PRIORITY_SELECT_OPTIONS } from "@/models/org-unit.model";
-import { useAppStore } from "@/stores/app.store";
-import { requestToLeave } from "@/services/infra/router.service/router.service";
-
 import { usePermissionStore } from "@/stores/permissions.store";
 import { Action, ResourceType } from "@/swagger-models/authorization-client";
-import { NODE_POOL_ROUTE_NAMES } from "@/router/node-pool.routes/node-pool.routes.names";
-import type { Nodepool } from "@/swagger-models/cluster-service-client";
+
 const route = useRoute();
-const router = useRouter();
 const permissionStore = usePermissionStore();
 const canSavePool = computed(() => permissionStore.hasPermission(ResourceType.Nodepools, Action.Update));
-const saving = ref(false);
-async function onSaved(savedPool: Nodepool, destination: "close" | "continue" = "close") {
-  leaveApproved.value = true;
-  await router.push(
-    destination === "continue"
-      ? { name: NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT, params: { id: savedPool.id }, query: { stepName: "topology" } }
-      : { name: NODE_POOL_ROUTE_NAMES.NODE_POOL_INDEX },
-  );
-}
-const appStore = useAppStore();
 const poolId = computed(() => (typeof route.params.id === "string" ? route.params.id : ""));
 const {
   snapshot: pool,
@@ -105,7 +82,7 @@ const {
   loadRank,
   loadChildQuotaSum,
 } = useNodePoolSchedulingData(poolId);
-const leaveApproved = ref(false);
+const { saving, leaveApproved, openStep, finish } = useNodePoolWizardNavigation(pool);
 const ranks = computed(() => ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => option.value).reverse());
 async function loadQuotaContext(id: string) {
   if (!pool.value || quotaPolicy.value === undefined)
@@ -113,24 +90,4 @@ async function loadQuotaContext(id: string) {
   const childQuotaSum = await loadChildQuotaSum(id);
   return { childQuotaSum, enforceChildQuota: quotaPolicy.value };
 }
-watch(
-  pool,
-  (value) => {
-    appStore.setPageLoading(false);
-    appStore.setPageTitleOverride(value ? `Edit node pool: ${value.name}` : null);
-  },
-  { immediate: true },
-);
-watch(poolId, () => {
-  leaveApproved.value = false;
-});
-function canLeave() {
-  if (saving.value) return false;
-  return leaveApproved.value || !pool.value || requestToLeave();
-}
-onBeforeRouteLeave(canLeave);
-onBeforeRouteUpdate(canLeave);
-onBeforeUnmount(() => {
-  appStore.setPageTitleOverride(null);
-});
 </script>

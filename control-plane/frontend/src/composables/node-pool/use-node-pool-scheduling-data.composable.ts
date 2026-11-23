@@ -15,19 +15,16 @@ import type { Nodepool } from "@/swagger-models/cluster-service-client/index";
 import type { DepartmentNodePoolResources } from "@/swagger-models/org-unit-service-client/index";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 import { ENTITY_PRIORITY_SELECT_OPTIONS } from "@/models/org-unit.model";
-import type { INodePoolSummaryResources } from "@/models/node-pool.model";
+import { useNodePoolWizardData } from "./use-node-pool-wizard-data.composable";
 import {
   loadChildQuotaSum,
   loadNodePoolGpuLimits,
   loadSchedulingDepartmentSnapshot,
-  loadSchedulingPool,
   loadDepartmentPage,
   loadSchedulingTotals,
-  loadSchedulingResources,
   schedulingFilters,
 } from "@/composables/node-pool/node-pool-scheduling-data.util";
 import { extractErrorMessages } from "@/utils/error-alert.util/index";
-import { ForbiddenError, NotFoundError } from "@/models/http-response.model";
 
 export function useNodePoolSchedulingData(poolId: Ref<string>) {
   const permissionStore = usePermissionStore();
@@ -54,19 +51,13 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
     view: permissionStore.hasPermission(ResourceType.Department, Action.Read),
     edit: permissionStore.hasPermission(ResourceType.Department, Action.Update),
   }));
-  const snapshot = ref<Nodepool>();
   const pages = ref<DepartmentNodePoolResources[]>([]);
   const baselineRows = ref<DepartmentNodePoolResources[]>([]);
   const aggregates = ref<Record<string, ISchedulingTotals>>({});
   const rankCounts = ref<Record<string, number>>({});
-  const resources = ref<INodePoolSummaryResources>();
   const quotaPolicy = ref<boolean>();
   const policyError = ref("");
-  const loadError = ref("");
-  const telemetryError = ref("");
-  const poolLoading = ref(false);
   const rowsLoading = ref(false);
-  const loading = computed(() => poolLoading.value || rowsLoading.value);
   const search = ref("");
   const rank = ref<string>();
   const count = ref(0);
@@ -162,40 +153,15 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
       if (loadingRanks.get(rankValue) === requestIdentity) loadingRanks.delete(rankValue);
     }
   }
-  let capacityRetry: ReturnType<typeof setTimeout> | undefined;
-  const scoped = !!getCurrentScope();
-  function stopCapacityRetry() {
-    clearTimeout(capacityRetry);
-    capacityRetry = undefined;
-  }
-  async function refreshCapacity(pool: Nodepool, version: number, reloadPool = false) {
-    try {
-      const latest = reloadPool ? await loadSchedulingPool(pool.id) : pool;
-      if (scopeVersion !== version) return;
-      const result = await loadSchedulingResources(latest);
-      if (scopeVersion !== version) return;
-      resources.value = result;
-      telemetryError.value = result.gpus == null ? "Capacity is not available yet. Retrying automatically." : "";
-    } catch (error) {
-      if (scopeVersion !== version) return;
-      telemetryError.value = extractErrorMessages(error, "Capacity is unavailable. Retrying automatically.").join(" ");
-    }
-    // Refresh only inventory, never the saved scheduling snapshot or the user's draft.
-    if (scoped && scopeVersion === version && resources.value?.gpus == null)
-      capacityRetry = setTimeout(() => void refreshCapacity(pool, version, true), 5000);
-  }
-  async function refresh() {
-    stopCapacityRetry();
+  function resetScheduling(poolChanged: boolean) {
     completedQuery.value = undefined;
     rowsLoading.value = false;
-    const current = ++scopeVersion;
+    scopeVersion++;
     rowsVersion++;
     appending = false;
     loadingRanks.clear();
-    const id = poolId.value;
     globalOffset.value = 0;
-    if (snapshot.value?.id !== id) {
-      snapshot.value = undefined;
+    if (poolChanged) {
       search.value = "";
       rank.value = undefined;
     }
@@ -204,124 +170,121 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
     count.value = 0;
     aggregates.value = {};
     rankCounts.value = {};
-    resources.value = undefined;
     quotaPolicy.value = undefined;
     departmentScopes.value = {};
     projectScopes.value = {};
-    loadError.value = "";
-    telemetryError.value = "";
     policyError.value = "";
-    poolLoading.value = true;
-    try {
-      const pool = await loadSchedulingPool(id).catch((error: unknown) => {
-        if (scopeVersion === current && (error instanceof ForbiddenError || error instanceof NotFoundError))
-          snapshot.value = undefined;
-        throw error;
-      });
-      if (scopeVersion !== current) return;
-      snapshot.value = pool;
-      const scope = { poolId: id, clusterId: pool.clusterId };
-      const policy = async () => {
-        try {
-          const result = await orgUnitSettingsService.getLimitQuotaOverSubscription();
-          if (scopeVersion === current) {
-            settingStore.limitQuotaOverSubscription = result;
-            quotaPolicy.value = settingStore.isLimitQuotaOverSubscriptionEnabled;
-          }
-        } catch (error) {
-          if (scopeVersion === current)
-            policyError.value = extractErrorMessages(error, "Quota policy is unavailable.").join(" ");
+  }
+  async function loadScheduling(pool: Nodepool) {
+    const current = scopeVersion;
+    const scope = { poolId: pool.id, clusterId: pool.clusterId };
+    const policy = async () => {
+      try {
+        const result = await orgUnitSettingsService.getLimitQuotaOverSubscription();
+        if (scopeVersion === current) {
+          settingStore.limitQuotaOverSubscription = result;
+          quotaPolicy.value = settingStore.isLimitQuotaOverSubscriptionEnabled;
         }
-      };
-      const departments = async () => {
-        if (!permissions.value.view) return;
-        const [total, totalCount, departmentSnapshot, scopes, projects] = await Promise.all([
-          loadSchedulingTotals(scope),
-          orgUnitService.countDepartmentNodePoolResources(schedulingFilters(scope)),
-          loadSchedulingDepartmentSnapshot(scope, pool.schedulingCapabilities?.adjustableWeights === true),
-          permissionService.getPermittedScopesForAction(ResourceType.Department),
-          permissionService.getPermittedScopesForAction(ResourceType.Project).catch(() => ({})),
-        ]);
-        if (scopeVersion !== current) return;
-        departmentScopes.value = scopes;
-        projectScopes.value = projects;
-        const complete = coversCluster(scopes[Action.Read]);
-        const visibleCounts: Record<string, number> = {};
-        for (const row of departmentSnapshot.rows) visibleCounts[row.rank] = (visibleCounts[row.rank] ?? 0) + 1;
-        // Complete scoped snapshots already contain the rows behind every rank.
-        // Retain authoritative rank reads when visibility is restricted.
-        const [rankTotals, counts] = complete
-          ? ([
-              ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => {
-                const totals = departmentSnapshot.totals[option.value];
-                return {
-                  weightsSum:
-                    pool.schedulingCapabilities?.adjustableWeights === true
-                      ? (totals?.rawWeightsSum ?? 0)
-                      : (totals?.automaticWeightsSum ?? 0),
-                  deservedSum: totals?.deservedSum ?? 0,
-                };
-              }),
-              ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => visibleCounts[option.value] ?? 0),
-            ] as const)
-          : await Promise.all([
-              Promise.all(
-                ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => loadSchedulingTotals({ ...scope, rank: option.value })),
+      } catch (error) {
+        if (scopeVersion === current)
+          policyError.value = extractErrorMessages(error, "Quota policy is unavailable.").join(" ");
+      }
+    };
+    const departments = async () => {
+      if (!permissions.value.view) return;
+      const [total, totalCount, departmentSnapshot, scopes, projects] = await Promise.all([
+        loadSchedulingTotals(scope),
+        orgUnitService.countDepartmentNodePoolResources(schedulingFilters(scope)),
+        loadSchedulingDepartmentSnapshot(scope, pool.schedulingCapabilities?.adjustableWeights === true),
+        permissionService.getPermittedScopesForAction(ResourceType.Department),
+        permissionService.getPermittedScopesForAction(ResourceType.Project).catch(() => ({})),
+      ]);
+      if (scopeVersion !== current) return;
+      departmentScopes.value = scopes;
+      projectScopes.value = projects;
+      const complete = coversCluster(scopes[Action.Read]);
+      const visibleCounts: Record<string, number> = {};
+      for (const row of departmentSnapshot.rows) visibleCounts[row.rank] = (visibleCounts[row.rank] ?? 0) + 1;
+      // Complete scoped snapshots already contain the rows behind every rank.
+      // Retain authoritative rank reads when visibility is restricted.
+      const [rankTotals, counts] = complete
+        ? ([
+            ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => {
+              const totals = departmentSnapshot.totals[option.value];
+              return {
+                weightsSum:
+                  pool.schedulingCapabilities?.adjustableWeights === true
+                    ? (totals?.rawWeightsSum ?? 0)
+                    : (totals?.automaticWeightsSum ?? 0),
+                deservedSum: totals?.deservedSum ?? 0,
+              };
+            }),
+            ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => visibleCounts[option.value] ?? 0),
+          ] as const)
+        : await Promise.all([
+            Promise.all(
+              ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => loadSchedulingTotals({ ...scope, rank: option.value })),
+            ),
+            Promise.all(
+              ENTITY_PRIORITY_SELECT_OPTIONS.map((option) =>
+                orgUnitService.countDepartmentNodePoolResources(schedulingFilters({ ...scope, rank: option.value })),
               ),
-              Promise.all(
-                ENTITY_PRIORITY_SELECT_OPTIONS.map((option) =>
-                  orgUnitService.countDepartmentNodePoolResources(schedulingFilters({ ...scope, rank: option.value })),
-                ),
-              ),
-            ]);
-        if (scopeVersion !== current) return;
-        const weightTotals = departmentSnapshot.totals;
-        baselineRows.value = departmentSnapshot.rows;
-        aggregates.value = Object.fromEntries([
-          ["all", { ...total, ...weightTotals.all }],
-          ...ENTITY_PRIORITY_SELECT_OPTIONS.map((option, i) => [
-            option.value,
-            {
-              ...rankTotals[i],
-              ...(weightTotals[option.value] ?? {
-                rawWeightsSum: pool.schedulingCapabilities?.adjustableWeights === true ? 0 : undefined,
-                automaticWeightsSum: 0,
-                finiteQuotaSum: 0,
-                unlimitedQuotaCount: 0,
-                deservedSum: 0,
-              }),
-            },
-          ]),
-        ]);
-        rankCounts.value = Object.fromEntries(
-          ENTITY_PRIORITY_SELECT_OPTIONS.map((option, i) => [option.value, counts[i]]),
-        );
-        if (!search.value && !rank.value && totalCount === departmentSnapshot.rows.length) {
-          rowsVersion++;
-          appending = false;
-          rowsLoading.value = false;
-          pages.value = departmentSnapshot.rows.slice(0, 50);
-          count.value = totalCount;
-          globalOffset.value = pages.value.length;
-          completedQuery.value = queryKey.value;
-        } else await loadRows();
-      };
-      await Promise.all([refreshCapacity(pool, current), policy(), departments()]);
+            ),
+          ]);
+      if (scopeVersion !== current) return;
+      const weightTotals = departmentSnapshot.totals;
+      baselineRows.value = departmentSnapshot.rows;
+      aggregates.value = Object.fromEntries([
+        ["all", { ...total, ...weightTotals.all }],
+        ...ENTITY_PRIORITY_SELECT_OPTIONS.map((option, i) => [
+          option.value,
+          {
+            ...rankTotals[i],
+            ...(weightTotals[option.value] ?? {
+              rawWeightsSum: pool.schedulingCapabilities?.adjustableWeights === true ? 0 : undefined,
+              automaticWeightsSum: 0,
+              finiteQuotaSum: 0,
+              unlimitedQuotaCount: 0,
+              deservedSum: 0,
+            }),
+          },
+        ]),
+      ]);
+      rankCounts.value = Object.fromEntries(
+        ENTITY_PRIORITY_SELECT_OPTIONS.map((option, i) => [option.value, counts[i]]),
+      );
+      if (!search.value && !rank.value && totalCount === departmentSnapshot.rows.length) {
+        rowsVersion++;
+        appending = false;
+        rowsLoading.value = false;
+        pages.value = departmentSnapshot.rows.slice(0, 50);
+        count.value = totalCount;
+        globalOffset.value = pages.value.length;
+        completedQuery.value = queryKey.value;
+      } else await loadRows();
+    };
+    try {
+      await Promise.all([policy(), departments()]);
     } catch (error) {
       if (scopeVersion === current)
         loadError.value = extractErrorMessages(error, "Failed to load scheduling data.").join(" ");
-    } finally {
-      if (scopeVersion === current) poolLoading.value = false;
     }
   }
-  watch(poolId, refresh, { immediate: true });
+  const {
+    pool: snapshot,
+    resources,
+    loading: poolLoading,
+    loadError,
+    telemetryError,
+    refresh,
+  } = useNodePoolWizardData(poolId, { retryCapacity: true, resetStep: resetScheduling, loadStep: loadScheduling });
+  const loading = computed(() => poolLoading.value || rowsLoading.value);
   watch([search, rank], () => {
     appending = false;
     void loadRows();
   });
   if (getCurrentScope())
     onScopeDispose(() => {
-      stopCapacityRetry();
       scopeVersion++;
       rowsVersion++;
     });

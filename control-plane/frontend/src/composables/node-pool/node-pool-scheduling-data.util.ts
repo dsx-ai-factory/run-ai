@@ -34,7 +34,6 @@ export async function loadNodePoolGpuLimits(scope: ISchedulingScope): Promise<bo
   }
   return counts.some((count) => count > 0);
 }
-export const loadSchedulingPool = (poolId: string) => clusterService.getNodepool(poolId);
 export async function loadDepartmentPage(
   params: ISchedulingScope & { search?: string; offset?: number; limit?: number },
 ) {

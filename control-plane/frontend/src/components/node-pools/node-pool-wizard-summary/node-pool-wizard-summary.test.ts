@@ -20,7 +20,11 @@ describe("node pool wizard summary", () => {
   });
   function render() {
     return mount(NodePoolWizardSummary, {
-      props: { pool: createNodePoolDraft("cluster"), clusterName: "Tokyo" },
+      props: {
+        pool: createNodePoolDraft("cluster"),
+        clusterName: "Tokyo",
+        supports: { mnnvl: true, numa: true, gpuDevice: true },
+      },
       global: { plugins: [Quasar] },
     });
   }
@@ -77,10 +81,25 @@ describe("node pool wizard summary", () => {
     });
     wrapper.unmount();
   });
-  it("omits configuration unsupported by the selected cluster when opted in", async () => {
+  it("shows the saved placement from pools with only legacy strategies", async () => {
     const wrapper = render();
-    await wrapper.setProps({ showNuma: false, showGpuDevice: false });
+    await wrapper.setProps({
+      pool: {
+        ...createNodePoolDraft("cluster"),
+        schedulingConfiguration: { placementStrategy: { gpu: PlacementStrategy.Spread, cpu: PlacementStrategy.Spread } },
+      },
+    });
+    expect(summaryValues(wrapper)).toMatchObject({
+      "GPU node placement strategy": "Spread",
+      "CPU node placement strategy": "Spread",
+    });
+    wrapper.unmount();
+  });
+  it("omits configuration unsupported by the selected cluster on all steps", async () => {
+    const wrapper = render();
+    await wrapper.setProps({ supports: { mnnvl: false, numa: false, gpuDevice: false } });
     const values = summaryValues(wrapper);
+    expect(values).not.toHaveProperty("MNNVL");
     expect(values).not.toHaveProperty("NUMA-aware scheduling");
     expect(values).not.toHaveProperty("GPU device placement strategy");
     expect(values["GPU node placement strategy"]).toBe("Bin-pack");

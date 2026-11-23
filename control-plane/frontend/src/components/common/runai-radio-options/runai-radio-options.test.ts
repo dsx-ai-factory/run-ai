@@ -5,9 +5,10 @@
 
 import type { DOMWrapper, VueWrapper } from "@vue/test-utils";
 import { mount } from "@vue/test-utils";
-import { Quasar } from "quasar";
+import { QTooltip, Quasar } from "quasar";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { RunaiRadioOptions } from ".";
+import { RunaiSvgIcon } from "@/components/common/runai-svg-icon";
 
 const options = [
   { label: "Option 1", value: "option1", toolTip: "tooltip1" },
@@ -240,3 +241,39 @@ describe("separate option tooltips", () => {
     expect(wrapper.emitted("update:model-value")).toEqual([["option2"]]);
   });
 });
+
+test.each([false, true])(
+  "preserves icons, overflow text and disabled help with separateTooltips=%s",
+  async (separateTooltips) => {
+    const option = {
+      label: "Unavailable cluster",
+      value: "unavailable",
+      disable: true,
+      icon: "eks",
+      svg: "gke",
+      disabledTooltip: "Cluster is offline",
+      disabledTooltipWidth: "210px",
+    };
+    const wrapper = mount(RunaiRadioOptions, {
+      attachTo: document.body,
+      global: { plugins: [Quasar], stubs: { RunaiSvgIcon: true } },
+      props: { modelValue: null, options: [option], minCharsToShowOverflowTooltip: 5, separateTooltips },
+    });
+    try {
+      const radio = wrapper.get('[role="radio"]');
+      expect(radio.text()).toContain("Unavailable cluster");
+      expect(radio.attributes("aria-disabled")).toBe("true");
+      expect(wrapper.findAllComponents(RunaiSvgIcon).map((icon) => icon.props("name"))).toEqual(["eks", "gke"]);
+      const [overflow, disabled] = wrapper.findAllComponents(QTooltip);
+      overflow.vm.show();
+      await wrapper.vm.$nextTick();
+      expect(document.body.querySelector('[role="tooltip"]')?.textContent).toContain("Unavailable cluster");
+      disabled.vm.show();
+      await wrapper.vm.$nextTick();
+      expect(disabled.props("maxWidth")).toBe("210px");
+      expect(document.body.querySelectorAll('[role="tooltip"]')[1]?.textContent).toContain("Cluster is offline");
+    } finally {
+      wrapper.unmount();
+    }
+  },
+);
