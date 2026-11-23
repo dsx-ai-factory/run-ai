@@ -50,8 +50,6 @@ type DistributedInferenceDefaultsV2 struct {
 // will change when the set of required properties is changed
 func NewDistributedInferenceDefaultsV2() *DistributedInferenceDefaultsV2 {
 	this := DistributedInferenceDefaultsV2{}
-	var loadAwareRouting bool = false
-	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var restartPolicy DistributedInferenceRestartPolicy = DISTRIBUTEDINFERENCERESTARTPOLICY_RECREATE_GROUP_ON_POD_RESTART
 	this.RestartPolicy = *NewNullableDistributedInferenceRestartPolicy(&restartPolicy)
 	var startupPolicy DistributedInferenceStartupPolicy = DISTRIBUTEDINFERENCESTARTUPPOLICY_LEADER_CREATED
@@ -68,8 +66,6 @@ func NewDistributedInferenceDefaultsV2() *DistributedInferenceDefaultsV2 {
 // but it doesn't guarantee that properties required by API are set
 func NewDistributedInferenceDefaultsV2WithDefaults() *DistributedInferenceDefaultsV2 {
 	this := DistributedInferenceDefaultsV2{}
-	var loadAwareRouting bool = false
-	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var restartPolicy DistributedInferenceRestartPolicy = DISTRIBUTEDINFERENCERESTARTPOLICY_RECREATE_GROUP_ON_POD_RESTART
 	this.RestartPolicy = *NewNullableDistributedInferenceRestartPolicy(&restartPolicy)
 	var startupPolicy DistributedInferenceStartupPolicy = DISTRIBUTEDINFERENCESTARTUPPOLICY_LEADER_CREATED

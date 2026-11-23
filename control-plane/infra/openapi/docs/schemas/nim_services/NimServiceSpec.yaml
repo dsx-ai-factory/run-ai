@@ -64,8 +64,9 @@ allOf:
     labels:
       $ref: ../workloads_spec/advanced/Labels.yaml
     loadAwareRouting:
+      allOf:
+      - $ref: ../workloads_spec/inferences/LoadAwareRouting.yaml
       x-internal: true
-      $ref: ../workloads_spec/inferences/LoadAwareRouting.yaml
     modelStore:
       nullable: true
       properties:

@@ -50,8 +50,6 @@ type DistributedInferenceTemplateSpec struct {
 // will change when the set of required properties is changed
 func NewDistributedInferenceTemplateSpec() *DistributedInferenceTemplateSpec {
 	this := DistributedInferenceTemplateSpec{}
-	var loadAwareRouting bool = false
-	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var restartPolicy DistributedInferenceRestartPolicy = DISTRIBUTEDINFERENCERESTARTPOLICY_RECREATE_GROUP_ON_POD_RESTART
 	this.RestartPolicy = *NewNullableDistributedInferenceRestartPolicy(&restartPolicy)
 	var startupPolicy DistributedInferenceStartupPolicy = DISTRIBUTEDINFERENCESTARTUPPOLICY_LEADER_CREATED
@@ -68,8 +66,6 @@ func NewDistributedInferenceTemplateSpec() *DistributedInferenceTemplateSpec {
 // but it doesn't guarantee that properties required by API are set
 func NewDistributedInferenceTemplateSpecWithDefaults() *DistributedInferenceTemplateSpec {
 	this := DistributedInferenceTemplateSpec{}
-	var loadAwareRouting bool = false
-	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var restartPolicy DistributedInferenceRestartPolicy = DISTRIBUTEDINFERENCERESTARTPOLICY_RECREATE_GROUP_ON_POD_RESTART
 	this.RestartPolicy = *NewNullableDistributedInferenceRestartPolicy(&restartPolicy)
 	var startupPolicy DistributedInferenceStartupPolicy = DISTRIBUTEDINFERENCESTARTUPPOLICY_LEADER_CREATED

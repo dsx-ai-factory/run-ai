@@ -58,8 +58,6 @@ type NimServiceDefaults struct {
 // will change when the set of required properties is changed
 func NewNimServiceDefaults() *NimServiceDefaults {
 	this := NimServiceDefaults{}
-	var loadAwareRouting bool = false
-	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var replicas int32 = 1
 	this.Replicas = *NewNullableInt32(&replicas)
 	return &this
@@ -70,8 +68,6 @@ func NewNimServiceDefaults() *NimServiceDefaults {
 // but it doesn't guarantee that properties required by API are set
 func NewNimServiceDefaultsWithDefaults() *NimServiceDefaults {
 	this := NimServiceDefaults{}
-	var loadAwareRouting bool = false
-	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var replicas int32 = 1
 	this.Replicas = *NewNullableInt32(&replicas)
 	return &this

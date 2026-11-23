@@ -8,8 +8,9 @@ allOf:
     category:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/Category.yaml
     loadAwareRouting:
+      allOf:
+      - $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/LoadAwareRouting.yaml
       x-internal: true
-      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/LoadAwareRouting.yaml
     nodePools:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/NodePools.yaml
     preemptibility:

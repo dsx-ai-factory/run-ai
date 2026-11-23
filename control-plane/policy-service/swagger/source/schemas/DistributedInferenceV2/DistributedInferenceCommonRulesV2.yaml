@@ -8,8 +8,9 @@ allOf:
     category:
       $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
     loadAwareRouting:
+      allOf:
+      - $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/BooleanRules.yaml
       x-internal: true
-      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/BooleanRules.yaml
     nodePools:
       $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/ArrayRules.yaml
     preemptibility:

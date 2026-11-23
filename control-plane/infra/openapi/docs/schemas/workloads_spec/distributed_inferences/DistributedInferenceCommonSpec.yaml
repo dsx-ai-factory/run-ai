@@ -8,8 +8,9 @@ allOf:
     category:
       $ref: ../resources/Category.yaml
     loadAwareRouting:
+      allOf:
+      - $ref: ../inferences/LoadAwareRouting.yaml
       x-internal: true
-      $ref: ../inferences/LoadAwareRouting.yaml
     nodePools:
       $ref: ../resources/NodePools.yaml
     preemptibility:

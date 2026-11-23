@@ -10638,8 +10638,9 @@ components:
             category:
               $ref: '#/components/schemas/Category'
             loadAwareRouting:
+              allOf:
+                - $ref: '#/components/schemas/LoadAwareRouting'
               x-internal: true
-              $ref: '#/components/schemas/LoadAwareRouting'
             nodePools:
               $ref: '#/components/schemas/NodePools'
             preemptibility:

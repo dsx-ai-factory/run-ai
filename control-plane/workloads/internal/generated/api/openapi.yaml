@@ -31289,7 +31289,9 @@ components:
           category:
             $ref: '#/components/schemas/Category'
           loadAwareRouting:
-            $ref: '#/components/schemas/LoadAwareRouting'
+            allOf:
+            - $ref: '#/components/schemas/LoadAwareRouting'
+            x-internal: true
           nodePools:
             $ref: '#/components/schemas/NodePools'
           preemptibility:
@@ -32565,7 +32567,7 @@ components:
             name: storage-instance-a
             readOnly: true
             exclude: false
-        loadAwareRouting: null
+        loadAwareRouting: ""
         ports:
         - container: 8080
           serviceType: LoadBalancer
@@ -35782,7 +35784,7 @@ components:
               name: storage-instance-a
               readOnly: true
               exclude: false
-          loadAwareRouting: null
+          loadAwareRouting: ""
           ports:
           - container: 8080
             serviceType: LoadBalancer
@@ -37743,7 +37745,7 @@ components:
                 name: storage-instance-a
                 readOnly: true
                 exclude: false
-            loadAwareRouting: null
+            loadAwareRouting: ""
             ports:
             - container: 8080
               serviceType: LoadBalancer
@@ -39715,7 +39717,7 @@ components:
                   name: storage-instance-a
                   readOnly: true
                   exclude: false
-              loadAwareRouting: null
+              loadAwareRouting: ""
               ports:
               - container: 8080
                 serviceType: LoadBalancer
@@ -41674,7 +41676,7 @@ components:
                   name: storage-instance-a
                   readOnly: true
                   exclude: false
-              loadAwareRouting: null
+              loadAwareRouting: ""
               ports:
               - container: 8080
                 serviceType: LoadBalancer
@@ -49787,7 +49789,7 @@ components:
         - my-node-pool-a
         - my-node-pool-b
         category: null
-        loadAwareRouting: null
+        loadAwareRouting: ""
         priorityClass: null
         worker: "{}"
         restartPolicy: RecreateGroupOnPodRestart
@@ -49843,7 +49845,7 @@ components:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          loadAwareRouting: null
+          loadAwareRouting: ""
           priorityClass: null
           worker: "{}"
           restartPolicy: RecreateGroupOnPodRestart
@@ -49885,7 +49887,7 @@ components:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          loadAwareRouting: null
+          loadAwareRouting: ""
           priorityClass: null
           worker: "{}"
           restartPolicy: RecreateGroupOnPodRestart
@@ -58100,7 +58102,7 @@ components:
               name: storage-instance-a
               readOnly: true
               exclude: false
-          loadAwareRouting: null
+          loadAwareRouting: ""
           ports:
           - container: 8080
             serviceType: LoadBalancer
@@ -60029,7 +60031,7 @@ components:
               name: storage-instance-a
               readOnly: true
               exclude: false
-          loadAwareRouting: null
+          loadAwareRouting: ""
           ports:
           - container: 8080
             serviceType: LoadBalancer
@@ -62003,7 +62005,7 @@ components:
                 name: storage-instance-a
                 readOnly: true
                 exclude: false
-            loadAwareRouting: null
+            loadAwareRouting: ""
             ports:
             - container: 8080
               serviceType: LoadBalancer
@@ -63932,7 +63934,7 @@ components:
                 name: storage-instance-a
                 readOnly: true
                 exclude: false
-            loadAwareRouting: null
+            loadAwareRouting: ""
             ports:
             - container: 8080
               serviceType: LoadBalancer
@@ -65885,7 +65887,7 @@ components:
                 name: storage-instance-a
                 readOnly: true
                 exclude: false
-            loadAwareRouting: null
+            loadAwareRouting: ""
             ports:
             - container: 8080
               serviceType: LoadBalancer
@@ -67814,7 +67816,7 @@ components:
                 name: storage-instance-a
                 readOnly: true
                 exclude: false
-            loadAwareRouting: null
+            loadAwareRouting: ""
             ports:
             - container: 8080
               serviceType: LoadBalancer
@@ -124490,7 +124492,7 @@ components:
         - my-node-pool-a
         - my-node-pool-b
         category: null
-        loadAwareRouting: null
+        loadAwareRouting: ""
         priorityClass: null
         worker: "{}"
         restartPolicy: RecreateGroupOnPodRestart
@@ -124548,7 +124550,7 @@ components:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          loadAwareRouting: null
+          loadAwareRouting: ""
           priorityClass: null
           worker: "{}"
           restartPolicy: RecreateGroupOnPodRestart
@@ -124574,7 +124576,7 @@ components:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          loadAwareRouting: null
+          loadAwareRouting: ""
           priorityClass: null
           worker: "{}"
           restartPolicy: RecreateGroupOnPodRestart
@@ -124629,7 +124631,7 @@ components:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          loadAwareRouting: null
+          loadAwareRouting: ""
           priorityClass: null
           worker: "{}"
           restartPolicy: RecreateGroupOnPodRestart
@@ -124655,7 +124657,7 @@ components:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          loadAwareRouting: null
+          loadAwareRouting: ""
           priorityClass: null
           worker: "{}"
           restartPolicy: RecreateGroupOnPodRestart
@@ -124708,7 +124710,7 @@ components:
             - my-node-pool-a
             - my-node-pool-b
             category: null
-            loadAwareRouting: null
+            loadAwareRouting: ""
             priorityClass: null
             worker: "{}"
             restartPolicy: RecreateGroupOnPodRestart
@@ -124734,7 +124736,7 @@ components:
             - my-node-pool-a
             - my-node-pool-b
             category: null
-            loadAwareRouting: null
+            loadAwareRouting: ""
             priorityClass: null
             worker: "{}"
             restartPolicy: RecreateGroupOnPodRestart
@@ -124784,7 +124786,7 @@ components:
             - my-node-pool-a
             - my-node-pool-b
             category: null
-            loadAwareRouting: null
+            loadAwareRouting: ""
             priorityClass: null
             worker: "{}"
             restartPolicy: RecreateGroupOnPodRestart
@@ -124810,7 +124812,7 @@ components:
             - my-node-pool-a
             - my-node-pool-b
             category: null
-            loadAwareRouting: null
+            loadAwareRouting: ""
             priorityClass: null
             worker: "{}"
             restartPolicy: RecreateGroupOnPodRestart
@@ -124860,7 +124862,7 @@ components:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          loadAwareRouting: null
+          loadAwareRouting: ""
           priorityClass: null
           worker: "{}"
           restartPolicy: RecreateGroupOnPodRestart
@@ -124897,7 +124899,7 @@ components:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          loadAwareRouting: null
+          loadAwareRouting: ""
           priorityClass: null
           worker: "{}"
           restartPolicy: RecreateGroupOnPodRestart
@@ -124938,7 +124940,7 @@ components:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          loadAwareRouting: null
+          loadAwareRouting: ""
           priorityClass: null
           worker: "{}"
           restartPolicy: RecreateGroupOnPodRestart
@@ -125454,7 +125456,9 @@ components:
           category:
             $ref: '#/components/schemas/Category'
           loadAwareRouting:
-            $ref: '#/components/schemas/LoadAwareRouting'
+            allOf:
+            - $ref: '#/components/schemas/LoadAwareRouting'
+            x-internal: true
           nodePools:
             $ref: '#/components/schemas/NodePools'
           preemptibility:
@@ -126635,7 +126639,9 @@ components:
           category:
             $ref: '#/components/schemas/StringRules'
           loadAwareRouting:
-            $ref: '#/components/schemas/BooleanRules'
+            allOf:
+            - $ref: '#/components/schemas/BooleanRules'
+            x-internal: true
           nodePools:
             $ref: '#/components/schemas/ArrayRules'
           preemptibility:

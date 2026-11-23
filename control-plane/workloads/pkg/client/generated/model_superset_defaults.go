@@ -109,8 +109,6 @@ type SupersetDefaults struct {
 // will change when the set of required properties is changed
 func NewSupersetDefaults() *SupersetDefaults {
 	this := SupersetDefaults{}
-	var loadAwareRouting bool = false
-	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var startupPolicy DistributedInferenceStartupPolicy = DISTRIBUTEDINFERENCESTARTUPPOLICY_LEADER_CREATED
 	this.StartupPolicy = *NewNullableDistributedInferenceStartupPolicy(&startupPolicy)
 	var workers int32 = 0
@@ -129,8 +127,6 @@ func NewSupersetDefaults() *SupersetDefaults {
 // but it doesn't guarantee that properties required by API are set
 func NewSupersetDefaultsWithDefaults() *SupersetDefaults {
 	this := SupersetDefaults{}
-	var loadAwareRouting bool = false
-	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var startupPolicy DistributedInferenceStartupPolicy = DISTRIBUTEDINFERENCESTARTUPPOLICY_LEADER_CREATED
 	this.StartupPolicy = *NewNullableDistributedInferenceStartupPolicy(&startupPolicy)
 	var workers int32 = 0

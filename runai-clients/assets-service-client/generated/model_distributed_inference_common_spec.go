@@ -52,8 +52,6 @@ func NewDistributedInferenceCommonSpec() *DistributedInferenceCommonSpec {
 	this.Workers = *NewNullableInt32(&workers)
 	var replicas int32 = 1
 	this.Replicas = *NewNullableInt32(&replicas)
-	var loadAwareRouting bool = false
-	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var restartPolicy DistributedInferenceRestartPolicy = DISTRIBUTEDINFERENCERESTARTPOLICY_RECREATE_GROUP_ON_POD_RESTART
 	this.RestartPolicy = *NewNullableDistributedInferenceRestartPolicy(&restartPolicy)
 	return &this
@@ -70,8 +68,6 @@ func NewDistributedInferenceCommonSpecWithDefaults() *DistributedInferenceCommon
 	this.Workers = *NewNullableInt32(&workers)
 	var replicas int32 = 1
 	this.Replicas = *NewNullableInt32(&replicas)
-	var loadAwareRouting bool = false
-	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var restartPolicy DistributedInferenceRestartPolicy = DISTRIBUTEDINFERENCERESTARTPOLICY_RECREATE_GROUP_ON_POD_RESTART
 	this.RestartPolicy = *NewNullableDistributedInferenceRestartPolicy(&restartPolicy)
 	return &this

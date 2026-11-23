@@ -55470,7 +55470,9 @@ components:
           category:
             $ref: '#/components/schemas/Category'
           loadAwareRouting:
-            $ref: '#/components/schemas/LoadAwareRouting'
+            allOf:
+            - $ref: '#/components/schemas/LoadAwareRouting'
+            x-internal: true
           nodePools:
             $ref: '#/components/schemas/NodePools'
           preemptibility:
@@ -57067,7 +57069,7 @@ components:
             name: storage-instance-a
             readOnly: true
             exclude: false
-        loadAwareRouting: null
+        loadAwareRouting: ""
         ports:
         - container: 8080
           serviceType: LoadBalancer
@@ -59299,7 +59301,7 @@ components:
               name: storage-instance-a
               readOnly: true
               exclude: false
-          loadAwareRouting: null
+          loadAwareRouting: ""
           ports:
           - container: 8080
             serviceType: LoadBalancer

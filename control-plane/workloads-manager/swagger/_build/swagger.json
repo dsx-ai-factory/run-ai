@@ -3621,8 +3621,12 @@
                 "$ref": "#/components/schemas/Labels"
               },
               "loadAwareRouting": {
-                "x-internal": true,
-                "$ref": "#/components/schemas/LoadAwareRouting"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/LoadAwareRouting"
+                  }
+                ],
+                "x-internal": true
               },
               "modelStore": {
                 "nullable": true,

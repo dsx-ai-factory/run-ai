@@ -2709,8 +2709,9 @@ components:
             labels:
               $ref: '#/components/schemas/Labels'
             loadAwareRouting:
+              allOf:
+                - $ref: '#/components/schemas/LoadAwareRouting'
               x-internal: true
-              $ref: '#/components/schemas/LoadAwareRouting'
             modelStore:
               nullable: true
               properties:

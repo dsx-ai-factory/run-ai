@@ -10286,7 +10286,9 @@ components:
           category:
             $ref: '#/components/schemas/Category'
           loadAwareRouting:
-            $ref: '#/components/schemas/LoadAwareRouting'
+            allOf:
+            - $ref: '#/components/schemas/LoadAwareRouting'
+            x-internal: true
           nodePools:
             $ref: '#/components/schemas/NodePools'
           preemptibility:
@@ -14051,7 +14053,9 @@ components:
           category:
             $ref: '#/components/schemas/StringRules'
           loadAwareRouting:
-            $ref: '#/components/schemas/BooleanRules'
+            allOf:
+            - $ref: '#/components/schemas/BooleanRules'
+            x-internal: true
           nodePools:
             $ref: '#/components/schemas/ArrayRules'
           preemptibility:
@@ -61736,7 +61740,9 @@ components:
           labels:
             $ref: '#/components/schemas/LabelsDefaults'
           loadAwareRouting:
-            $ref: '#/components/schemas/LoadAwareRouting'
+            allOf:
+            - $ref: '#/components/schemas/LoadAwareRouting'
+            x-internal: true
           modelStore:
             $ref: '#/components/schemas/NimServiceDefaults_allOf_modelStore'
           multiNode:
@@ -61867,7 +61873,9 @@ components:
           labels:
             $ref: '#/components/schemas/InstancesRules'
           loadAwareRouting:
-            $ref: '#/components/schemas/BooleanRules'
+            allOf:
+            - $ref: '#/components/schemas/BooleanRules'
+            x-internal: true
           modelStore:
             $ref: '#/components/schemas/NimServiceRules_allOf_modelStore'
           multiNode:

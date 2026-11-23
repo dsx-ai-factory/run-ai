@@ -6574,8 +6574,12 @@
                 "$ref": "#/components/schemas/Category"
               },
               "loadAwareRouting": {
-                "x-internal": true,
-                "$ref": "#/components/schemas/LoadAwareRouting"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/LoadAwareRouting"
+                  }
+                ],
+                "x-internal": true
               },
               "nodePools": {
                 "$ref": "#/components/schemas/NodePools"
@@ -9238,8 +9242,12 @@
                 "$ref": "#/components/schemas/StringRules"
               },
               "loadAwareRouting": {
-                "x-internal": true,
-                "$ref": "#/components/schemas/BooleanRules"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/BooleanRules"
+                  }
+                ],
+                "x-internal": true
               },
               "nodePools": {
                 "$ref": "#/components/schemas/ArrayRules"
@@ -12559,8 +12567,12 @@
                 "$ref": "#/components/schemas/LabelsDefaults"
               },
               "loadAwareRouting": {
-                "x-internal": true,
-                "$ref": "#/components/schemas/LoadAwareRouting"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/LoadAwareRouting"
+                  }
+                ],
+                "x-internal": true
               },
               "modelStore": {
                 "nullable": true,
@@ -12893,8 +12905,12 @@
                 "$ref": "#/components/schemas/InstancesRules"
               },
               "loadAwareRouting": {
-                "x-internal": true,
-                "$ref": "#/components/schemas/BooleanRules"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/BooleanRules"
+                  }
+                ],
+                "x-internal": true
               },
               "modelStore": {
                 "nullable": true,

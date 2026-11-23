@@ -11229,8 +11229,9 @@ components:
             category:
               $ref: '#/components/schemas/Category'
             loadAwareRouting:
+              allOf:
+                - $ref: '#/components/schemas/LoadAwareRouting'
               x-internal: true
-              $ref: '#/components/schemas/LoadAwareRouting'
             nodePools:
               $ref: '#/components/schemas/NodePools'
             preemptibility:
@@ -14630,8 +14631,9 @@ components:
             category:
               $ref: '#/components/schemas/Category'
             loadAwareRouting:
+              allOf:
+                - $ref: '#/components/schemas/LoadAwareRouting'
               x-internal: true
-              $ref: '#/components/schemas/LoadAwareRouting'
             nodePools:
               $ref: '#/components/schemas/NodePools'
             preemptibility:
@@ -15851,8 +15853,9 @@ components:
             category:
               $ref: '#/components/schemas/StringRules'
             loadAwareRouting:
+              allOf:
+                - $ref: '#/components/schemas/BooleanRules'
               x-internal: true
-              $ref: '#/components/schemas/BooleanRules'
             nodePools:
               $ref: '#/components/schemas/ArrayRules'
             preemptibility:

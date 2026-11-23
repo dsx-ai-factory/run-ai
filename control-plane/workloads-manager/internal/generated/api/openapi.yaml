@@ -6478,7 +6478,9 @@ components:
           labels:
             $ref: '#/components/schemas/Labels'
           loadAwareRouting:
-            $ref: '#/components/schemas/LoadAwareRouting'
+            allOf:
+            - $ref: '#/components/schemas/LoadAwareRouting'
+            x-internal: true
           modelStore:
             $ref: '#/components/schemas/NimServiceSpec_allOf_modelStore'
           multiNode:
@@ -6553,7 +6555,7 @@ components:
         - name: billing
           exclude: false
           value: my-billing-unit
-        loadAwareRouting: null
+        loadAwareRouting: ""
         priorityClass: null
         labels:
         - name: stage
@@ -6811,7 +6813,7 @@ components:
           - name: billing
             exclude: false
             value: my-billing-unit
-          loadAwareRouting: null
+          loadAwareRouting: ""
           priorityClass: null
           labels:
           - name: stage
@@ -7417,7 +7419,7 @@ components:
           - name: billing
             exclude: false
             value: my-billing-unit
-          loadAwareRouting: null
+          loadAwareRouting: ""
           priorityClass: null
           labels:
           - name: stage
@@ -7742,7 +7744,7 @@ components:
           - name: billing
             exclude: false
             value: my-billing-unit
-          loadAwareRouting: null
+          loadAwareRouting: ""
           priorityClass: null
           labels:
           - name: stage
