@@ -216,6 +216,13 @@
                         : simulationResults[row.id].allocated
                     "
                   />
+                  <q-skeleton
+                    v-else-if="simulation && simulationStatus === 'loading'"
+                    type="rect"
+                    width="100%"
+                    height="100%"
+                    aria-hidden="true"
+                  />
                   <div v-else-if="percentage(row) !== 'Unknown'" class="simulation-segments">
                     <span
                       class="quota-marker"

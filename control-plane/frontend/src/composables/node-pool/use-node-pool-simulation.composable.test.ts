@@ -351,6 +351,32 @@ describe("simulation contract", () => {
       },
     });
   });
+  it("starts mode switches immediately and restores only matching results while refreshing", async () => {
+    vi.useFakeTimers();
+    const source = ref(scenario());
+    const transport = vi.fn().mockResolvedValue(response);
+    const scope = effectScope();
+    const state = scope.run(() => useNodePoolSimulation(source, transport))!;
+    await vi.advanceTimersByTimeAsync(0);
+    expect(state.results.value?.visible.allocated).toBe(12);
+
+    transport.mockResolvedValue({ orgUnits: [{ ...response.orgUnits[0], fairShare: { gpu: 20 } }] });
+    source.value.draft.mode = ESchedulingMode.Ranked;
+    expect(state.results.value).toBeUndefined();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(state.results.value?.visible.allocated).toBe(20);
+
+    source.value.draft.mode = ESchedulingMode.Proportional;
+    expect(state.status.value).toBe("loading");
+    expect(state.results.value?.visible.allocated).toBe(12);
+    source.value.demand.dragged++;
+    source.value.draft.mode = ESchedulingMode.Ranked;
+    expect(state.results.value).toBeUndefined();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(transport).toHaveBeenCalledTimes(3);
+    scope.stop();
+  });
+
   it("keeps the previous result throughout debounce and request, then replaces it", async () => {
     vi.useFakeTimers();
     let resolveNext!: (value: typeof response) => void;

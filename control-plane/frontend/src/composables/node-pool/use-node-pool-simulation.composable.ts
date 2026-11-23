@@ -22,6 +22,9 @@ export function useNodePoolSimulation(source: Ref<ISimulationScenario | undefine
   const message = ref("");
   const canRetry = ref(false);
   let requestKey: string | undefined;
+  type Mode = ISimulationScenario["draft"]["mode"];
+  const lastResultByMode = new Map<Mode, { key: string; rows: ReturnType<typeof mapSimulationResponse> }>();
+  let activeMode: Mode;
   let resultContext: string | undefined;
   let revision = 0;
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -36,6 +39,9 @@ export function useNodePoolSimulation(source: Ref<ISimulationScenario | undefine
     if (!scenario) {
       cancel();
       requestKey = undefined;
+      resultContext = undefined;
+      activeMode = undefined;
+      lastResultByMode.clear();
       results.value = undefined;
       message.value = "";
       canRetry.value = false;
@@ -48,6 +54,9 @@ export function useNodePoolSimulation(source: Ref<ISimulationScenario | undefine
     } catch (error) {
       cancel();
       requestKey = undefined;
+      resultContext = undefined;
+      activeMode = undefined;
+      lastResultByMode.clear();
       results.value = undefined;
       status.value = ESimulationStatus.Unavailable;
       canRetry.value = false;
@@ -62,7 +71,14 @@ export function useNodePoolSimulation(source: Ref<ISimulationScenario | undefine
     message.value = "";
     canRetry.value = false;
     const context = JSON.stringify([scenario.poolId, scenario.capacity, scenario.draft.mode]);
-    if (context !== resultContext) results.value = undefined;
+    const mode = scenario.draft.mode;
+    const delay = mode === activeMode ? 300 : 0;
+    activeMode = mode;
+    if (context !== resultContext) {
+      const cached = lastResultByMode.get(mode);
+      results.value = cached?.key === key ? cached.rows : undefined;
+      resultContext = context;
+    }
     const current = revision;
     status.value = ESimulationStatus.Loading;
     timer = setTimeout(async () => {
@@ -70,12 +86,14 @@ export function useNodePoolSimulation(source: Ref<ISimulationScenario | undefine
       try {
         const response = await orgUnitService.simulateNodePoolFairShare(scenario.poolId, request, controller.signal);
         if (current !== revision) return;
-        results.value = mapSimulationResponse(response);
-        resultContext = context;
+        const rows = mapSimulationResponse(response);
+        lastResultByMode.set(mode, { key, rows });
+        results.value = rows;
         status.value = ESimulationStatus.Ready;
       } catch (error) {
         if (current !== revision) return;
         results.value = undefined;
+        lastResultByMode.delete(mode);
         const failure = (error ?? {}) as {
           statusCode?: number;
           message?: string;
@@ -98,7 +116,7 @@ export function useNodePoolSimulation(source: Ref<ISimulationScenario | undefine
                 ? "Simulation is unavailable. Your changes are preserved."
                 : "Simulation failed. Your changes are preserved. Try again.";
       }
-    }, 300);
+    }, delay);
   }
   const retry = () => update(true);
   watch(source, () => update(), { deep: true, immediate: true, flush: "sync" });

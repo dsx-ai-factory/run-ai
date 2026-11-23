@@ -175,6 +175,35 @@ describe("simulation capacity", () => {
     expect(vi.mocked(simulateNodePool).mock.lastCall?.[1].nodePool?.capacity?.gpu).toBe(0);
   });
 
+  it("shows a loading track until the selected mode has allocations", async () => {
+    const result = {
+      orgUnits: [
+        {
+          id: "a",
+          fairShare: { gpu: 4 },
+          guaranteed: { gpu: 0 },
+          overQuota: { gpu: 4 },
+          unmet: { gpu: 6 },
+          demand: { gpu: 10 },
+          weightShareInRank: 1,
+        },
+      ],
+    };
+    vi.mocked(simulateNodePool).mockResolvedValue(result);
+    wrapper = renderSimulation(40);
+    await wrapper.get('[role="switch"]').trigger("click");
+    await vi.advanceTimersByTimeAsync(300);
+    expect(wrapper.find(".simulation-values").exists()).toBe(true);
+    await wrapper.setProps({ draft: { ...draft, mode: ESchedulingMode.Ranked } });
+    expect(wrapper.find('.result-bar[aria-busy="true"] .q-skeleton').exists()).toBe(true);
+    expect(wrapper.find(".simulation-values").exists()).toBe(false);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(wrapper.find(".simulation-values").exists()).toBe(true);
+    await wrapper.setProps({ draft });
+    expect(wrapper.find(".q-skeleton").exists()).toBe(false);
+    expect(wrapper.find('.result-bar[aria-busy="true"] .simulation-values').exists()).toBe(true);
+  });
+
   it("shows all 51 matching departments in a rank without a paging action", async () => {
     wrapper = renderSimulation(40);
     const members = Array.from({ length: 51 }, (_, i) => ({
