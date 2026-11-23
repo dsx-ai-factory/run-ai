@@ -129,8 +129,12 @@ json.dump({"apiVersion": "v1", "kind": "List", "items": keep}, sys.stdout)
 GOLDEN_NS_CREATED=0
 cleanup_golden() {
   [[ "$GOLDEN_NS_CREATED" == 1 ]] || return 0
-  kubectl delete namespace "$GOLDEN_NS" --ignore-not-found --wait=false >/dev/null 2>&1 || true
-  GOLDEN_NS_CREATED=0
+  # Ownership is kept when the delete fails, so the EXIT trap tries again.
+  if kubectl delete namespace "$GOLDEN_NS" --ignore-not-found --wait=false >/dev/null 2>&1; then
+    GOLDEN_NS_CREATED=0
+  else
+    echo "could not delete namespace $GOLDEN_NS; delete it before the next run" >&2
+  fi
 }
 trap cleanup_golden EXIT
 
