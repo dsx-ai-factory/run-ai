@@ -74,6 +74,7 @@ import { IdpUtils } from './utils/idpUtils';
 import { AssetUtils } from './utils/AssetUtils';
 import { StorageUtils } from './utils/StorageUtils';
 import { DatavolumeUtils } from './utils/DatavolumeUtils';
+import { AssetsApiV2Utils } from './utils/AssetsApiV2Utils';
 import { OrgUnitUtils } from './utils/OrgUnitUtils';
 import { UnleashClient } from './utils/Unleash/Unleash';
 import { UsersUtils } from './utils/UsersUtils';
@@ -156,6 +157,7 @@ const kubeConfigUtils = new KubeConfigUtils();
 const clusterService = new ClusterService();
 const idpUtils = new IdpUtils();
 const assetUtils = new AssetUtils();
+const assetsApiV2Utils = new AssetsApiV2Utils();
 const orgUnitUtils = new OrgUnitUtils();
 const unleashClient = new UnleashClient();
 const usersUtils = new UsersUtils();
@@ -237,6 +239,7 @@ export {
     storageUtils,
     datavolumeUtils,
     orgUnitUtils,
+    assetsApiV2Utils,
     unleashClient,
     usersUtils,
     reportApiUtils,

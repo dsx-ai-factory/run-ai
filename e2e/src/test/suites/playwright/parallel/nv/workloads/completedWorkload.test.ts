@@ -83,7 +83,7 @@ test.describe(`Workload completed status tests, tags: ${tags.tool.ui} ${tags.res
 
             await test.step('create a pytorch training workload', async () => {
                 await trainingPage.goToPage();
-                await trainingPage.fillFlexTrainingFirstPage(projectName, workloadName);
+                await trainingPage.fillFirstNewTrainingPage(projectName, workloadName);
                 await trainingPage.page.waitForLoadState('load');
                 await hybridForm.fillImageInput('alpine:latest');
                 await hybridForm.clickOnSubSectionByLabel('Runtime settings');

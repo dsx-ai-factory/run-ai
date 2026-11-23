@@ -4,8 +4,7 @@
  */
 
 import { assetsApi } from '../../api';
-import { Training } from '../../api/apis/assetsApi';
-import { TrainingCreationRequest, WorkspaceSpecSpecAllOfCompute } from '../../api/apis/workloadsApi/generated/api';
+import { Training, TrainingCreationRequestV2, TrainingV2 } from '../../api/apis/assetsApi';
 import { Training as TrainingModel } from '../../api/apis/workloadsApi/generated/model/training';
 import { flowRootState } from '../config/config';
 import {
@@ -21,34 +20,40 @@ import {
 import { Project } from '../../api/apis/projectsDepartmentsApi';
 import { MatchExpressionOperator } from '../../api/apis/workloadsApi/generated/model/matchExpressionOperator';
 import http from 'http';
+import { AssetKind } from '../../api/apis/assetsApi';
+import { WorkspaceSpecSpecAllOfCompute } from '../../api/apis/workloadsApi/generated/api';
 
 export class TrainingUtils {
     async createTraining(
-        trainingWorkload: TrainingCreationRequest,
+        trainingWorkload: TrainingCreationRequestV2,
         accessToken?: string
-    ): Promise<TrainingModel> {
+    ): Promise<TrainingV2> {
+        assetsApi.trainingApi.accessToken =
+            accessToken ?? flowRootState.users.system_administrator.accessToken;
         try {
-            const response = await workloadsCrudUtils.submitTraining(trainingWorkload, accessToken);
-            logger.info(`created training ${trainingWorkload.name}`);
+            const response = await assetsApi.trainingApi.createTrainingV2(trainingWorkload);
+            logger.info(`created training ${trainingWorkload.meta.name}`);
             return response.body;
         } catch (e) {
-            logger.error(`failed to create training ${trainingWorkload.name} \n${e}`);
+            logger.error(`failed to create training ${trainingWorkload.meta.name} \n${e}`);
             throw e;
         }
     }
 
-    async createTrainingWorkloads(amount: number, project: Project): Promise<TrainingModel[]> {
-        async function getTrainingWorkloadPayload(name: string): Promise<TrainingCreationRequest> {
+    async createTrainingWorkloads(amount: number, project: Project): Promise<TrainingV2[]> {
+        async function getTrainingWorkloadPayload(name: string): Promise<TrainingCreationRequestV2> {
             const envName = (await environmentUtils.presetNames()).jupyter;
             return {
-                projectId: project.id.toString(),
-                name: name,
-                clusterId: project.clusterUuid,
+                meta: {
+                    projectId: project.id.toString(),
+                    name: name,
+                    clusterId: project.clusterUuid
+                },
                 assets: {
                     environment: await environmentUtils.getId(envName),
                     compute: await computeResourceUtils.getId('cpu-only')
                 },
-                spec: {
+                specificRunParams: {
                     command: 'sleep',
                     args: 'infinity'
                 }
@@ -123,18 +128,25 @@ export class TrainingUtils {
         environment = 'tensorboard',
         compute = 'cpu-only'
     ): Promise<string> {
-        const trainingCreationRequest: TrainingCreationRequest = {
-            projectId: projectId,
-            name: workloadName,
-            clusterId: flowRootState.cluster.uuid,
+        const trainingCreationRequest: TrainingCreationRequestV2 = {
+            meta: {
+                projectId: projectId,
+                name: workloadName,
+                clusterId: flowRootState.cluster.uuid
+            },
             assets: {
                 environment: await environmentUtils.getId(environment),
                 compute: await computeResourceUtils.getId(compute),
-                datasources: [dataSourceId]
+                datasources: [
+                    {
+                        id: dataSourceId,
+                        kind: AssetKind.ConfigMap
+                    }
+                ]
             }
         };
 
         const workload = await this.createTraining(trainingCreationRequest);
-        return workload.workloadId;
+        return workload.meta.workloadId;
     }
 }

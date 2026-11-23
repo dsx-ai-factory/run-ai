@@ -64,7 +64,7 @@ test.describe(`Bulk Suspend & Resume API ${tags.teams.viper} ${tags.tool.api}`, 
             return created;
         });
 
-        const workloadsIds = workloads.map((workload) => workload.workloadId);
+        const workloadsIds = workloads.map((workload) => workload.meta.workloadId);
         const idNonExistWorkload = randomUUID();
 
         await test.step('Wait for workloads to reach "Running" state', async () => {

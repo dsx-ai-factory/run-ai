@@ -164,6 +164,7 @@ model/displayedJob.ts
 model/distMaster.ts
 model/distributed.ts
 model/distributedAllOf.ts
+model/distributedData.ts
 model/distributedFramework.ts
 model/distributedInferenceCommonSpec.ts
 model/distributedInferenceCommonSpecAllOf.ts
@@ -185,6 +186,9 @@ model/distributedInferenceStartupPolicyField.ts
 model/distributedInferenceWorkerSpecFields.ts
 model/distributedInferenceWorkerSpecFieldsWorker.ts
 model/distributedInferenceWorkersField.ts
+model/distributedMaster.ts
+model/distributedMasterData.ts
+model/distributedParams.ts
 model/dockerRegistry.ts
 model/dockerRegistryCreationRequest.ts
 model/dockerRegistryCreationSpec.ts
@@ -270,7 +274,6 @@ model/inferenceCreationRequestV2.ts
 model/inferenceFields.ts
 model/inferenceFieldsRules.ts
 model/inferenceSpecificRunParams.ts
-model/inferenceSpecificRunParamsAllOf.ts
 model/inferenceV2.ts
 model/inferencesMaxReplicasField.ts
 model/inferencesMinReplicasField.ts
@@ -337,6 +340,7 @@ model/nonOverridableSpecFields.ts
 model/nonOverridableSpecFieldsAllOf.ts
 model/nonOverridableSpecFieldsAllOf1.ts
 model/numberRules.ts
+model/optionalAssetIds.ts
 model/overridableSpecFields.ts
 model/pVCAsset.ts
 model/pVCAssetSpec.ts
@@ -481,7 +485,10 @@ model/tolerationRules.ts
 model/tolerationsRules.ts
 model/toolType.ts
 model/training.ts
+model/trainingCreationRequestV2.ts
 model/trainingListResponse.ts
+model/trainingSpecificRunParams.ts
+model/trainingV2.ts
 model/uidGidSource.ts
 model/usageTimesInfo.ts
 model/validateSyncRequest.ts
@@ -497,4 +504,8 @@ model/workloadStatusUpdate.ts
 model/workloadSupportedTypes.ts
 model/workloadType.ts
 model/workspace.ts
+model/workspaceCreationRequestV2.ts
 model/workspaceListResponse.ts
+model/workspaceSpecificRunParams.ts
+model/workspaceSpecificRunParamsAllOf.ts
+model/workspaceV2.ts

@@ -108,6 +108,7 @@ export class WorkspacePage extends WorkloadPage {
         this.runaiGeneralSearch = '.runai-general-search';
 
         // workspace elements
+        this.submissionAssetsOption = '[aid="radio-option-Original"]';
         this.createWorkspaceNameInput = '[aid="workspace-name-input"]';
         this.templateSection = '.template-section';
         this.createWorkspaceBtn = '[aid="submit-btn"]';
@@ -144,6 +145,7 @@ export class WorkspacePage extends WorkloadPage {
         this.complianceModalCloseButton = '[aid=compute-policy-info-modal-close-button]';
         this.complianceInfoModalSubtitle = '[aid="compliance-info-modal-subtitle"]';
         this.overQuotaToggle = '[aid="allow-over-quota-input"]';
+        this.submissionSection = '[aid="workload-submission-type-section"]';
 
         this.ngcImageSelect = '[aid="ngc-image-select"]';
         this.ngcTagSelect = '[aid="ngc-tag-select"]';
@@ -336,6 +338,86 @@ export class WorkspacePage extends WorkloadPage {
         await this.fillInputBySelector(this.terminationGracePeriodSecondsInput, seconds.toString());
     }
 
+    async selectAssetsSubmissionOption(): Promise<void> {
+        try {
+            await this.v2frame.waitForSelector(this.submissionSection, { timeout: 3000 });
+        } catch {
+            logger.info('submission section is not visible');
+            return;
+        }
+        return this.v2frame.locator(this.submissionAssetsOption).click();
+    }
+
+    async createWorkspaceWithDataSource(
+        workspaceName: string,
+        projectName: string,
+        environmentName: string,
+        computeName: string,
+        dataSourceName: string
+    ): Promise<void> {
+        await this.goToPage();
+        await this.openWorkspaceForm();
+        await this.workloadFormSelectProject(projectName);
+        await this.fillWorkspaceName(workspaceName);
+        await this.waitForWorkspaceNameCount(workspaceName);
+        await this.selectAssetsSubmissionOption();
+        await this.clickOnContinue();
+        await this.selectEnvironment(environmentName);
+        await this.selectComputeResource(computeName);
+        await this.openDataSourceSection();
+        await this.selectDataSourceName(dataSourceName);
+        await this.clickOnCreateWorkspaceBtn();
+    }
+
+    async submitWorkspaceWorkloadUI(
+        projectName: string,
+        workspaceName: string,
+        options?: {
+            environment?: string;
+            computeResource?: string;
+            cmd?: string;
+            templateName?: string;
+            backoffLimit?: number;
+        }
+    ): Promise<void> {
+        const {
+            environment = 'tensorboard-tensorflow',
+            computeResource = 'one-gpu',
+            cmd,
+            templateName,
+            backoffLimit
+        } = options || {};
+
+        await this.navigateToWorkloads();
+        await this.openWorkspaceForm();
+        await this.selectClusterFromDropDown(flowRootState.cluster.name);
+        await this.workloadFormSelectProject(projectName);
+
+        if (templateName) {
+            await this.workloadFormSelectTemplate(templateName);
+        } else {
+            await this.workloadFormSelectTemplate();
+        }
+        await this.fillWorkspaceName(workspaceName);
+        await this.waitForWorkspaceNameCount(workspaceName);
+        await this.selectAssetsSubmissionOption();
+        await this.clickOnContinue();
+
+        if (!templateName) {
+            await this.selectEnvironment(environment);
+            await this.selectComputeResource(computeResource);
+        }
+        if (cmd) {
+            await this.clickEnvSectionMoreSettings();
+            await this.fillEnvSectionCommandInput(cmd);
+        }
+        if (backoffLimit) {
+            await this.clickOnGeneralExpansionLabel();
+            await this.fillAttemptsInput(backoffLimit);
+        }
+        await this.clickOnCreateWorkspaceBtn();
+    }
+
     async fillFlexWorkspaceFirstPage(
         projectName: string,
         workspaceName: string,
@@ -406,6 +488,7 @@ export class WorkspacePage extends WorkloadPage {
         }
         await this.fillWorkspaceName(workspaceName);
         await this.waitForWorkspaceNameCount(workspaceName);
+        await this.selectAssetsSubmissionOption();
         await this.clickOnContinue();
 
         const hybridForm = new HybridForm(this.page);

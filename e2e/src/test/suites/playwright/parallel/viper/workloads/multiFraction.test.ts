@@ -4,6 +4,7 @@
  */
 
 import {
+    assetsApiV2Utils,
     config,
     crds,
     flowRootState,
@@ -49,6 +50,7 @@ WorkloadParams.forEach(function (params) {
             jobName = objectGenerator.generateNameByPrefix('w');
             project = await projectResourcesUtils.createProjectAndNamespace('project');
             workloadsCrudUtils.accessToken = flowRootState.users.system_administrator.accessToken;
+            assetsApiV2Utils.accessToken = flowRootState.users.system_administrator.accessToken;
         });
 
         test.afterEach(async () => {

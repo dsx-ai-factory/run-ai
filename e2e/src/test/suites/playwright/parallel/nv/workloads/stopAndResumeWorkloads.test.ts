@@ -213,7 +213,14 @@ test.describe(`Workload suspending and resuming, tags: ${tags.resource.workloads
                     await workloadPage.navigateToWorkloads();
 
                     if (isDistributed) {
-                        await training.fillFlexTrainingFirstPage(projectName, workloadName, true, distributedType, true);
+                        await training.fillFirstNewTrainingPage(
+                            projectName,
+                            workloadName,
+                            true,
+                            distributedType,
+                            true,
+                            true
+                        );
                         if (distributedType === DISTRIBUTED_TOOLS_LABELS.JAX) {
                             await training.fillHybridDistributedTrainingCommonPartSecondPage(image, {
                                 command,
@@ -2004,7 +2011,14 @@ test.describe(`Training UI - sanity, tags: ${tags.resource.workloads} ${tags.tea
                 // skip this test as it is already covered by other tests
                 test.skip('T4142370: L1 researcher can stop and run MPI distributed job', async () => {
                     videoName = 'stop-and-run-mpi-distributed-job';
-                    await training.fillFlexTrainingFirstPage(projectName, trainingName, true, DISTRIBUTED_TOOLS_LABELS.MPI, true);
+                    await training.fillFirstNewTrainingPage(
+                        projectName,
+                        trainingName,
+                        true,
+                        DISTRIBUTED_TOOLS_LABELS.MPI,
+                        true,
+                        true
+                    );
                     await training.fillHybridDistributedTrainingSecondPage(
                         config.quickStartImage.distributedMpi,
                         {
@@ -2070,7 +2084,14 @@ test.describe(`Training UI - sanity, tags: ${tags.resource.workloads} ${tags.tea
                         const currentTrainingName = objectGenerator.generateShortNameByPrefix('training');
 
                         await test.step(`Create ${testData.distributedType} distributed job`, async () => {
-                            await training.fillFlexTrainingFirstPage(projectName, currentTrainingName, true, testData.distributedType, true);
+                            await training.fillFirstNewTrainingPage(
+                                projectName,
+                                currentTrainingName,
+                                true,
+                                testData.distributedType,
+                                true,
+                                true
+                            );
                             await training.fillHybridDistributedTrainingSecondPage(testData.image, {
                                 command: testData.command,
                                 args: testData.args,

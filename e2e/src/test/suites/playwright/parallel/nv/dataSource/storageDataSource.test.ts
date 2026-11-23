@@ -345,12 +345,26 @@ test.describe(`Storage data sources E2E Tests, tags: ${tags.tool.ui} ${tags.reso
                         });
 
                         await test.step('verify not able to see shared data volume out of scope under department 2', async () => {
-                            await trainingPage.fillFlexTrainingFirstPage(projectNameList[2], trainingNames[2]);
+                            await trainingPage.fillFirstNewTrainingPage(
+                                projectNameList[2],
+                                trainingNames[2],
+                                false,
+                                undefined,
+                                undefined,
+                                true
+                            );
                             await checkStorageNotVisible();
                         });
 
                         await test.step('verify not able to see shared data volume out of scope under the default department', async () => {
-                            await trainingPage.fillFlexTrainingFirstPage(projectNameList[4], trainingNames[4]);
+                            await trainingPage.fillFirstNewTrainingPage(
+                                projectNameList[4],
+                                trainingNames[4],
+                                false,
+                                undefined,
+                                undefined,
+                                true
+                            );
                             await checkStorageNotVisible();
                         });
 

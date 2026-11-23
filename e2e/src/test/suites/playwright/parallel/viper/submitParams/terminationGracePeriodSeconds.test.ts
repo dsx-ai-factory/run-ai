@@ -4,10 +4,10 @@
  */
 
 import {
+    assetsApiV2Utils,
     computeResourceUtils,
     environmentUtils,
     flowRootState,
-    workloadsCrudUtils,
     logger,
     objectGenerator,
     operations,
@@ -19,7 +19,7 @@ import {
 import { Project } from '../../../../../../modules/api/apis/projectsDepartmentsApi';
 import { kubeCli } from '../../../../../../modules/cli';
 import { expect } from 'chai';
-import { WorkspaceCreationRequest } from '../../../../../../modules/api/apis/workloadsApi/generated/api';
+import { WorkspaceCreationRequestV2 } from '../../../../../../modules/api/apis/assetsApi';
 import { test } from '@playwright/test';
 import {
     AnyWorkloadSubmissionType,
@@ -44,6 +44,7 @@ test.describe(`Create a workload with terminationGracePeriodSeconds ${tags.teams
             maxAllowedGpus: 1
         });
 
+        assetsApiV2Utils.accessToken = flowRootState.users.system_administrator.accessToken;
         anyWorkloadSubmissionEnabled = await isAnyWorkloadSubmissionEnabled(
             AnyWorkloadSubmissionType.Workspace
         );
@@ -65,20 +66,22 @@ test.describe(`Create a workload with terminationGracePeriodSeconds ${tags.teams
 
         const terminationGracePeriodSeconds = 60;
 
-        const workspaceCreationRequest: WorkspaceCreationRequest = {
-            name: workspaceName,
-            projectId: project.id.toString(),
-            clusterId: flowRootState.cluster.uuid,
+        const workspaceCreationRequest: WorkspaceCreationRequestV2 = {
+            meta: {
+                name: workspaceName,
+                projectId: project.id.toString(),
+                clusterId: flowRootState.cluster.uuid
+            },
             assets: {
                 environment: environmentId,
                 compute: computeId
             },
-            spec: {
+            specificRunParams: {
                 terminationGracePeriodSeconds
             }
         };
 
-        await workloadsCrudUtils.submitWorkspace(workspaceCreationRequest);
+        await assetsApiV2Utils.createWorkspace(workspaceCreationRequest);
 
         if (anyWorkloadSubmissionEnabled) {
             await waitUtils.waitForBatchJobToExist(workspaceName, namespace);

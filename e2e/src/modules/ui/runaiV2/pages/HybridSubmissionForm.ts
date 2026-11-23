@@ -776,9 +776,6 @@ export class HybridForm extends WorkloadPage {
             case EDataSourceOption.Nfs:
                 aid = this.hybridDataSourceSection.drawer.options.nfs;
                 break;
-            case EDataSourceOption.HostPath:
-                aid = this.hybridDataSourceSection.drawer.options.hostPath;
-                break;
             case EDataSourceOption.Git:
                 aid = this.hybridDataSourceSection.drawer.options.git;
                 break;
@@ -1032,15 +1029,15 @@ export class HybridForm extends WorkloadPage {
 
     async clickOnDrawerItemByLabel(label: string, waitForUnifiedRequest = true): Promise<void> {
         try {
-            const unifiedResponse = waitForUnifiedRequest
-                ? this.page.waitForResponse((response) => response.url().includes('/api/v1/workloads/unified'))
-                : undefined;
+            const unifiedResponse = this.page.waitForResponse((response) =>
+                response.url().includes('/api/v1/workloads/unified')
+            );
             await this.page
                 .locator(this.hybridDrawer.drawerItemLabel)
                 .getByText(label, { exact: true })
                 .click();
 
-            if (unifiedResponse) {
+            if (waitForUnifiedRequest) {
                 const finishedResponse = await unifiedResponse;
                 expect(finishedResponse.status()).toEqual(200);
             }
@@ -1303,17 +1300,6 @@ export class HybridForm extends WorkloadPage {
             await this.fillCmdInput('');
             await this.fillArgsInput('');
         }
-    }
-
-    async addWorkloadVolume(ephemeral: boolean): Promise<void> {
-        await this.openDataSourcesSection();
-        await this.addNewDataSource(EDataSourceOption.Volume);
-        const fields = this.hybridDataSourceSection.pvc;
-        await this.selectFirstOption(fields.storageClass);
-        await this.selectOptionByValue(fields.accessMode, 'Read-write by one node');
-        await this.selectOptionByValue(fields.unit, 'MB');
-        await this.locator(ephemeral ? '[aid="radio-option-Ephemeral"]' : '[aid="radio-option-Persistent"]').click();
-        await this.fillInputBySelector(fields.path, '/home');
     }
 
     async fillPvcSection(pvcName: string): Promise<void> {

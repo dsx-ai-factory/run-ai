@@ -15,6 +15,7 @@ import {
     crds,
     computeResourceUtils,
     environmentUtils,
+    assetsApiV2Utils,
     objectGenerator,
     workloadsUtilsV2
 } from '../../../../../../modules/helpers';
@@ -38,7 +39,7 @@ const WorkloadTypeParams = [
     {
         workloadType: 'training',
         workloadName: 'test-training',
-        createFunction: workloadsCrudUtils.submitTraining,
+        createFunction: assetsApiV2Utils.createTraining,
         getFunction: workloadsCrudUtils.getTraining,
         deleteFunction: workloadsCrudUtils.deleteTraining,
         jobKind: crds.runaiTrainingWorkloadCrd.kind
@@ -46,7 +47,7 @@ const WorkloadTypeParams = [
     {
         workloadType: 'interactive',
         workloadName: 'test-interactive',
-        createFunction: workloadsCrudUtils.submitWorkspace,
+        createFunction: assetsApiV2Utils.createWorkspace,
         getFunction: workloadsCrudUtils.getWorkspace,
         deleteFunction: workloadsCrudUtils.deleteWorkspace,
         jobKind: crds.runaiInteractiveWorkloadCrd.kind
@@ -63,7 +64,7 @@ WorkloadTypeParams.forEach(function (params) {
             test.beforeAll('creating project', async function () {
                 project = await projectResourcesUtils.createProjectAndNamespace('project');
                 workloadsCrudUtils.accessToken = flowRootState.users.system_administrator.accessToken;
-
+                assetsApiV2Utils.accessToken = flowRootState.users.system_administrator.accessToken;
                 anyWorkloadSubmissionEnabled = await isAnyWorkloadSubmissionEnabled(
                     params.workloadType === 'interactive'
                         ? AnyWorkloadSubmissionType.Workspace
@@ -103,10 +104,12 @@ WorkloadTypeParams.forEach(function (params) {
 
             async function getWorkloadCreationPayload(envAssetId): Promise<any> {
                 return {
-                    name: params.workloadName,
-                    useGivenNameAsPrefix: true,
-                    projectId: project.id.toString(),
-                    clusterId: flowRootState.cluster.uuid,
+                    meta: {
+                        name: params.workloadName,
+                        useGivenNameAsPrefix: true,
+                        projectId: project.id.toString(),
+                        clusterId: flowRootState.cluster.uuid
+                    },
                     assets: {
                         environment: envAssetId,
                         compute: await computeResourceUtils.getId('cpu-only')
@@ -132,11 +135,11 @@ WorkloadTypeParams.forEach(function (params) {
                     const environmentAsset = await createEnvAsset();
                     const workloadPayload = await getWorkloadCreationPayload(environmentAsset.meta.id);
                     const result = await params.createFunction(workloadPayload);
-                    workloadId = result.body.workloadId;
-                    workloadName = result.body.name;
+                    workloadId = result.body.meta.workloadId;
+                    workloadName = result.body.meta.name;
 
-                    expect(result.response.statusCode).to.equal(StatusCodes.ACCEPTED);
-                    expect(result.body.desiredPhase).to.equal(WorkloadStatus.RUNNING);
+                    expect(result.response.statusCode).to.equal(StatusCodes.OK);
+                    expect(result.body.meta.desiredPhase).to.equal(WorkloadStatus.RUNNING);
                     await waitUtils.waitForPods(
                         params.workloadName,
                         project.namespace,

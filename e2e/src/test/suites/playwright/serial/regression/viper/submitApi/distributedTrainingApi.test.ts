@@ -14,17 +14,19 @@ import {
     waitUtils,
     computeResourceUtils,
     environmentUtils,
+    assetsApiV2Utils,
     dataSourcesUtils,
     workloadsManagerUtils
 } from '../../../../../../../modules/helpers';
 import { Project } from '../../../../../../../modules/api/apis/projectsDepartmentsApi';
 import { StatusCodes } from 'http-status-codes';
-import { assetsApi, workloadsCrudService } from '../../../../../../../modules/api';
+import { AssetKind } from '../../../../../../../modules/api/apis/assetsApi';
+import { DISTRIBUTED_TOOLS_LABELS } from '../../../../../../../modules/ui/runaiV2/pages/TrainingPage';
+import { assetsApi } from '../../../../../../../modules/api';
 import { test } from '@playwright/test';
 import {
     CleanPodPolicy,
     DistributedFramework,
-    DistributedCreationRequest,
     DistributedSpecSpec
 } from '../../../../../../../modules/api/apis/workloadsApi/generated/api';
 import {
@@ -35,13 +37,13 @@ import {
 let project: Project;
 
 test.describe(
-    `Submit distributed training, tags: ${tags.resource.workloads} ${tags.operations.submit} ${tags.teams.viper}`,
+    `Submit distributed training V2, tags: ${tags.resource.workloads} ${tags.operations.submit} ${tags.teams.viper}`,
     { tag: [tags.services.workloads, tags.services.agent, tags.runOn.serialCI] },
     function () {
         test.beforeAll('creating project', async function () {
             project = await projectResourcesUtils.createProjectAndNamespace('project');
             workloadsCrudUtils.accessToken = flowRootState.users.system_administrator.accessToken;
-
+            assetsApiV2Utils.accessToken = flowRootState.users.system_administrator.accessToken;
             environmentUtils.accessToken = flowRootState.users.system_administrator.accessToken;
             dataSourcesUtils.accessToken = flowRootState.users.system_administrator.accessToken;
             computeResourceUtils.accessToken = flowRootState.users.system_administrator.accessToken;
@@ -58,21 +60,27 @@ test.describe(
         async function getDistributedTrainingCreationPayload(
             environmentId: string,
             computeId?: string,
-            datasources?: string[],
-            masterSpecSameAsWorker = false
-        ): Promise<DistributedCreationRequest> {
+            dataSources?: { id: string; kind: AssetKind }[],
+            master?: { sameAsWorker: boolean }
+        ): Promise<any> {
             return {
-                name: 'distributed-training',
-                useGivenNameAsPrefix: true,
-                projectId: project.id.toString(),
-                clusterId: flowRootState.cluster.uuid,
+                meta: {
+                    name: 'distributed-training',
+                    useGivenNameAsPrefix: true,
+                    projectId: project.id.toString(),
+                    clusterId: flowRootState.cluster.uuid
+                },
                 assets: {
                     environment: environmentId,
+                    command: 'sleep infinity',
                     compute: computeId || (await computeResourceUtils.getId('cpu-only')),
-                    datasources
+                    dataSources: dataSources || [] // Add dataSources if provided
                 },
-                masterSpecSameAsWorker,
-                spec: { numWorkers: 1, distributedFramework: DistributedFramework.PyTorch }
+                distributed: {
+                    numWorkers: 1,
+                    framework: DISTRIBUTED_TOOLS_LABELS.PY_TORCH,
+                    master: master || null
+                }
             };
         }
 
@@ -84,14 +92,19 @@ test.describe(
                 await dataSourcesUtils.createHostPathAsset(dataSourcesUtils.createHostPathPayload(project.id))
             ).meta.id;
 
-            const result = await workloadsCrudService.distributedApi.createDistributed(
-                await getDistributedTrainingCreationPayload(environmentId, computeId, [hostPathId])
+            const result = await assetsApiV2Utils.createTraining(
+                await getDistributedTrainingCreationPayload(environmentId, computeId, [
+                    {
+                        id: hostPathId,
+                        kind: AssetKind.HostPath
+                    }
+                ])
             );
-            expect(result.response.statusCode).to.equal(StatusCodes.ACCEPTED);
-            const workloadName = result.body.name;
+            expect(result.response.statusCode).to.equal(StatusCodes.OK);
+            const workloadName = result.body.meta.name;
             await waitUtils.waitForPods(workloadName, project.namespace, 1, 90, ['Running']);
             expect(
-                (await workloadsCrudUtils.deleteDistributed(result.body.workloadId)).response.statusCode
+                (await workloadsCrudUtils.deleteTraining(result.body.meta.workloadId)).response.statusCode
             ).to.equal(StatusCodes.ACCEPTED);
 
             await waitUtils.waitForWorkloadToBeDeleted(workloadName);
@@ -103,16 +116,18 @@ test.describe(
         test('create distributed training with master', async function () {
             const environmentId = (await environmentUtils.createEnvironmentWithArbitraryFields(project.id))
                 .meta.id;
-            const result = await workloadsCrudService.distributedApi.createDistributed(
-                await getDistributedTrainingCreationPayload(environmentId, undefined, undefined, true)
+            const result = await assetsApiV2Utils.createTraining(
+                await getDistributedTrainingCreationPayload(environmentId, undefined, undefined, {
+                    sameAsWorker: true
+                })
             );
-            expect(result.response.statusCode).to.equal(StatusCodes.ACCEPTED);
-            const workloadName = result.body.name;
+            expect(result.response.statusCode).to.equal(StatusCodes.OK);
+            const workloadName = result.body.meta.name;
             await waitUtils.waitForPods(workloadName, project.namespace, 2, 90, ['Running']);
             expect(
-                (await workloadsCrudUtils.deleteDistributed(result.body.workloadId)).response.statusCode
+                (await workloadsCrudUtils.deleteTraining(result.body.meta.workloadId)).response.statusCode
             ).to.equal(StatusCodes.ACCEPTED);
-            await waitUtils.waitForWorkloadToBeDeleted(result.body.name);
+            await waitUtils.waitForWorkloadToBeDeleted(result.body.meta.name);
             await environmentUtils.delete(environmentId);
         });
 

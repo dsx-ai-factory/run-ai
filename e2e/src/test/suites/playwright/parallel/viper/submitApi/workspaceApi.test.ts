@@ -12,6 +12,7 @@ import {
     workloadsCrudUtils,
     computeResourceUtils,
     environmentUtils,
+    assetsApiV2Utils,
     objectGenerator,
     waitUtils
 } from '../../../../../../modules/helpers';
@@ -27,13 +28,13 @@ let project: Project;
 let anyWorkloadSubmissionEnabled: boolean;
 
 test.describe(
-    `Workspace API, tags: ${tags.resource.workloads} ${tags.operations.submit} ${tags.teams.viper}`,
+    `Workspace V2 API, tags: ${tags.resource.workloads} ${tags.operations.submit} ${tags.teams.viper}`,
     { tag: [tags.services.workloads, tags.runOn.parallelCI] },
     () => {
         test.beforeAll(async () => {
             project = await projectResourcesUtils.createProjectAndNamespace('project');
             workloadsCrudUtils.accessToken = flowRootState.users.system_administrator.accessToken;
-
+            assetsApiV2Utils.accessToken = flowRootState.users.system_administrator.accessToken;
             anyWorkloadSubmissionEnabled = await isAnyWorkloadSubmissionEnabled(
                 AnyWorkloadSubmissionType.Workspace
             );
@@ -45,15 +46,17 @@ test.describe(
 
         async function getWorkloadCreationPayload(workloadName: string, environmentId: string): Promise<any> {
             return {
-                name: workloadName,
-                useGivenNameAsPrefix: true,
-                projectId: project.id.toString(),
-                clusterId: flowRootState.cluster.uuid,
+                meta: {
+                    name: workloadName,
+                    useGivenNameAsPrefix: true,
+                    projectId: project.id.toString(),
+                    clusterId: flowRootState.cluster.uuid
+                },
                 assets: {
                     environment: environmentId,
                     compute: await computeResourceUtils.getId('cpu-only')
                 },
-                spec: {
+                specificRunParams: {
                     autoDeletionTimeAfterCompletionSeconds: 1
                 }
             };
@@ -86,12 +89,12 @@ test.describe(
                 'sleep 1'
             );
 
-            const result = await workloadsCrudUtils.submitWorkspace(
+            const result = await assetsApiV2Utils.createWorkspace(
                 await getWorkloadCreationPayload(workloadName, environment.meta.id)
             );
 
             await waitUtils.waitForCondition(
-                () => isWorkspaceNotFound(result.body.workloadId),
+                () => isWorkspaceNotFound(result.body.meta.workloadId),
                 `Waiting for workspace ${workloadName} to be deleted`,
                 true,
                 20

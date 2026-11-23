@@ -15,16 +15,14 @@ import {
     crds,
     computeResourceUtils,
     environmentUtils,
+    assetsApiV2Utils,
     objectGenerator,
     credentialUtils,
     dataSourcesUtils
 } from '../../../../../../../modules/helpers';
 import { Project } from '../../../../../../../modules/api/apis/projectsDepartmentsApi';
 import { StatusCodes } from 'http-status-codes';
-import {
-    TrainingCreationRequest,
-    TrainingSpecSpec
-} from '../../../../../../../modules/api/apis/workloadsApi/generated/api';
+import { AssetKind } from '../../../../../../../modules/api/apis/assetsApi';
 import { kubeCli } from '../../../../../../../modules/cli';
 
 let project: Project;
@@ -33,26 +31,27 @@ const WorkloadTypeParams = [
     {
         workloadType: 'training',
         workloadName: 'test-training',
-        createFunction: workloadsCrudUtils.submitTraining,
+        createFunction: assetsApiV2Utils.createTraining,
         deleteFunction: workloadsCrudUtils.deleteTraining,
         jobKind: crds.runaiTrainingWorkloadCrd
     },
     {
         workloadType: 'interactive',
         workloadName: 'test-interactive',
-        createFunction: workloadsCrudUtils.submitWorkspace,
+        createFunction: assetsApiV2Utils.createWorkspace,
         deleteFunction: workloadsCrudUtils.deleteWorkspace,
         jobKind: crds.runaiInteractiveWorkloadCrd
     }
 ];
 
 test.describe(
-    `Submit workloads with assets, tags: ${tags.operations.submit} ${tags.teams.viper} ${tags.runOn.k8sFlavCertKit} ${tags.runOn.k8sFlavCertKitTemp}`,
+    `Submit V2, tags: ${tags.operations.submit} ${tags.teams.viper} ${tags.runOn.k8sFlavCertKit} ${tags.runOn.k8sFlavCertKitTemp}`,
     { tag: [tags.services.workloads, tags.services.agent, tags.runOn.serialCI] },
     () => {
         test.beforeAll(async () => {
             project = await projectResourcesUtils.createProjectAndNamespace('project');
             workloadsCrudUtils.accessToken = flowRootState.users.system_administrator.accessToken;
+            assetsApiV2Utils.accessToken = flowRootState.users.system_administrator.accessToken;
         });
 
         test.afterAll(async () => {
@@ -67,20 +66,23 @@ test.describe(
             workloadName: string,
             environmentId?: string,
             computeId?: string,
-            spec?: TrainingSpecSpec,
-            dataSources?: string[]
-        ): Promise<TrainingCreationRequest> {
+            specificRunParams?: object,
+            dataSources?: object
+        ): Promise<any> {
             return {
-                name: workloadName,
-                useGivenNameAsPrefix: true,
-                projectId: project.id.toString(),
-                clusterId: flowRootState.cluster.uuid,
+                meta: {
+                    name: workloadName,
+                    useGivenNameAsPrefix: true,
+                    projectId: project.id.toString(),
+                    clusterId: flowRootState.cluster.uuid
+                },
                 assets: {
                     environment: environmentId || (await environmentUtils.getId('tensorboard')),
+                    command: 'sleep infinity',
                     compute: computeId || (await computeResourceUtils.getId('cpu-only')),
                     datasources: dataSources || undefined
                 },
-                spec
+                specificRunParams: specificRunParams || undefined
             };
         }
 
@@ -96,10 +98,10 @@ test.describe(
                     await getWorkloadCreationPayload(params.workloadName, environmentId, computeId)
                 );
 
-                expect(result.response.statusCode).toBe(StatusCodes.ACCEPTED);
+                expect(result.response.statusCode).toBe(StatusCodes.OK);
 
-                const workloadName = result.body.name;
-                const workloadId = result.body.workloadId;
+                const workloadName = result.body.meta.name;
+                const workloadId = result.body.meta.workloadId;
 
                 await waitUtils.waitForPods(workloadName, project.namespace, 1, 90, ['Running']);
                 expect((await params.deleteFunction(workloadId)).response.statusCode).toBe(
@@ -117,23 +119,27 @@ test.describe(
 
             const ak = await credentialUtils.createAccessKeyWithArbitraryFields();
             const workloadName = objectGenerator.generateNameByPrefix('training');
-            const spec: TrainingSpecSpec = {
-                environmentVariables: [
-                    {
+            const specificRunParams = [
+                {
+                    environmentVariables: {
                         name: objectGenerator.generateNameByPrefix('ev'),
-                        secret: { name: ak.clusterInfo.resources[0].name, key: 'AccessKeyId' }
+                        credential: {
+                            key: 'AccessKeyId', // AccessKeyId is one of the keys in Access Key Credential
+                            assetId: ak.meta.id
+                        }
                     }
-                ]
-            };
-            const result = await workloadsCrudUtils.submitTraining(
-                await getWorkloadCreationPayload(workloadName, undefined, undefined, spec)
+                }
+            ];
+
+            const result = await assetsApiV2Utils.createTraining(
+                await getWorkloadCreationPayload(workloadName, undefined, undefined, specificRunParams)
             );
 
-            expect(result.response.statusCode).toBe(StatusCodes.ACCEPTED);
+            expect(result.response.statusCode).toBe(StatusCodes.OK);
 
             await waitUtils.waitForPods(workloadName, project.namespace, 1, 90, ['Running'], true);
             expect(
-                (await workloadsCrudUtils.deleteTraining(result.body.workloadId)).response.statusCode
+                (await workloadsCrudUtils.deleteTraining(result.body.meta.workloadId)).response.statusCode
             ).toBe(StatusCodes.ACCEPTED);
 
             await waitUtils.waitForWorkloadToBeDeleted(workloadName);
@@ -147,15 +153,15 @@ test.describe(
             await dataSourcesUtils.waitForConfigMapToBeVisible(meta.name, 'project', project.id.toString());
             const configMap = await dataSourcesUtils.createConfigMapWithArbitraryFields(meta, project.id);
 
-            const result = await workloadsCrudUtils.submitTraining(
+            const result = await assetsApiV2Utils.createTraining(
                 await getWorkloadCreationPayload(workloadName, undefined, undefined, undefined, [
-                    configMap.meta.id
+                    { id: configMap.meta.id, kind: AssetKind.ConfigMap }
                 ])
             );
 
             await waitUtils.waitForPods(workloadName, project.namespace, 1, 90, ['Running'], true);
             expect(
-                (await workloadsCrudUtils.deleteTraining(result.body.workloadId)).response.statusCode
+                (await workloadsCrudUtils.deleteTraining(result.body.meta.workloadId)).response.statusCode
             ).toBe(StatusCodes.ACCEPTED);
 
             await waitUtils.waitForWorkloadToBeDeleted(workloadName);

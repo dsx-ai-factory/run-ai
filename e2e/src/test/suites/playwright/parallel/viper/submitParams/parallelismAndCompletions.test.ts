@@ -4,10 +4,10 @@
  */
 
 import {
+    assetsApiV2Utils,
     computeResourceUtils,
     environmentUtils,
     flowRootState,
-    workloadsCrudUtils,
     logger,
     objectGenerator,
     operations,
@@ -19,7 +19,7 @@ import {
 import { Project } from '../../../../../../modules/api/apis/projectsDepartmentsApi';
 import { kubeCli } from '../../../../../../modules/cli';
 import { expect } from 'chai';
-import { TrainingCreationRequest } from '../../../../../../modules/api/apis/workloadsApi/generated/api';
+import { TrainingCreationRequestV2 } from '../../../../../../modules/api/apis/assetsApi';
 import { test } from '@playwright/test';
 import {
     AnyWorkloadSubmissionType,
@@ -44,6 +44,7 @@ test.describe(`Create a workload with parallelism and completions ${tags.teams.v
             maxAllowedGpus: 1
         });
 
+        assetsApiV2Utils.accessToken = flowRootState.users.system_administrator.accessToken;
         anyWorkloadSubmissionEnabled = await isAnyWorkloadSubmissionEnabled(
             AnyWorkloadSubmissionType.Training
         );
@@ -66,21 +67,23 @@ test.describe(`Create a workload with parallelism and completions ${tags.teams.v
         const completions = 3;
         const parallelism = 2;
 
-        const trainingCreationRequest: TrainingCreationRequest = {
-            name: trainingName,
-            projectId: project.id.toString(),
-            clusterId: flowRootState.cluster.uuid,
+        const trainingCreationRequest: TrainingCreationRequestV2 = {
+            meta: {
+                name: trainingName,
+                projectId: project.id.toString(),
+                clusterId: flowRootState.cluster.uuid
+            },
             assets: {
                 environment: environmentId,
                 compute: computeId
             },
-            spec: {
+            specificRunParams: {
                 parallelism,
                 completions
             }
         };
 
-        await workloadsCrudUtils.submitTraining(trainingCreationRequest);
+        await assetsApiV2Utils.createTraining(trainingCreationRequest);
 
         if (anyWorkloadSubmissionEnabled) {
             await waitUtils.waitForBatchJobToExist(trainingName, namespace);

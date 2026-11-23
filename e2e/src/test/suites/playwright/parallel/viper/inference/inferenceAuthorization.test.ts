@@ -4,6 +4,7 @@
  */
 
 import {
+    assetsApiV2Utils,
     computeResourceUtils,
     config,
     clusterUtils,
@@ -19,8 +20,11 @@ import {
     workloadsUtilsV2,
     workloadUtils
 } from '../../../../../../modules/helpers';
-import { InferenceCreationRequestV2, ServingPortAccessAuthorizationTypeEnum } from '../../../../../../modules/api/apis/assetsApi';
-import { WorkspaceCreationRequest } from '../../../../../../modules/api/apis/workloadsApi/generated/api';
+import {
+    InferenceCreationRequestV2,
+    ServingPortAccessAuthorizationTypeEnum,
+    WorkspaceCreationRequestV2
+} from '../../../../../../modules/api/apis/assetsApi';
 import { Project } from '../../../../../../modules/api/apis/orgUnitApi';
 import { isKnativeInstalled } from '../../../../../../modules/helpers/utils/IsInstalledUtils';
 import { expect } from 'chai';
@@ -260,7 +264,7 @@ supportedFrom(SupportedVersions.V2_20)(function () {
                 };
 
                 workloadsCrudUtils.accessToken = flowRootState.users.system_administrator.accessToken;
-
+                assetsApiV2Utils.accessToken = flowRootState.users.system_administrator.accessToken;
                 assetsApi.inferenceApi.accessToken = flowRootState.users.system_administrator.accessToken;
             });
 
@@ -456,7 +460,7 @@ supportedFrom(SupportedVersions.V2_20)(function () {
                     `Cluster routing: ${isHostBased ? 'host-based' : 'path-based'}, using env: ${chatUiEnvName}`
                 );
                 const chatUiEnv = await environmentUtils.get(chatUiEnvName);
-                const connection = chatUiEnv.spec.connections[0];
+                const connectionName = chatUiEnv.spec.connections[0]?.name;
                 const environmentId = chatUiEnv.meta.id;
                 const computeId = await computeResourceUtils.getId('cpu-only');
 
@@ -476,22 +480,21 @@ supportedFrom(SupportedVersions.V2_20)(function () {
                 }
 
                 // Step 4: Create a workspace with the chat-ui environment and authorized users on the connection
-                const workspacePayload: WorkspaceCreationRequest = {
-                    name: workloadName,
-                    useGivenNameAsPrefix: false,
-                    projectId: project.id.toString(),
-                    clusterId: project.clusterId,
+                const workspacePayload: WorkspaceCreationRequestV2 = {
+                    meta: {
+                        name: workloadName,
+                        useGivenNameAsPrefix: false,
+                        projectId: project.id.toString(),
+                        clusterId: project.clusterId
+                    },
                     assets: {
                         environment: environmentId,
                         compute: computeId
                     },
-                    spec: {
-                        exposedUrls: [
+                    specificRunParams: {
+                        connections: [
                             {
-                                container: connection.internalToolInfo.containerPort,
-                                toolType: String(connection.internalToolInfo.toolType),
-                                toolName: connection.name,
-                                authorizationType: AuthorizationType.AuthorizedUsers,
+                                name: connectionName,
                                 authorizedUsers: [config.controlPlaneAdminUsername, 'user1', 'user2']
                             }
                         ],
@@ -499,9 +502,9 @@ supportedFrom(SupportedVersions.V2_20)(function () {
                     }
                 };
 
-                const resultWorkload = await workloadsCrudUtils.submitWorkspace(workspacePayload);
-                workloadName = resultWorkload.body.name;
-                workloadId = resultWorkload.body.workloadId;
+                const resultWorkload = await assetsApiV2Utils.createWorkspace(workspacePayload);
+                workloadName = resultWorkload.body.meta.name;
+                workloadId = resultWorkload.body.meta.workloadId;
 
                 await waitUtils.waitForBackendWorkloadByIdAndPhase(workloadId, Phase.Running, 120);
 
@@ -552,27 +555,26 @@ supportedFrom(SupportedVersions.V2_20)(function () {
 
                 // Step 2: Get the openwebui environment
                 const openwebuiEnv = await environmentUtils.get('openwebui');
-                const connection = openwebuiEnv.spec.connections[0];
+                const connectionName = openwebuiEnv.spec.connections[0]?.name;
                 const environmentId = openwebuiEnv.meta.id;
                 const computeId = await computeResourceUtils.getId('cpu-only');
 
                 // Step 3: Create workspace with openwebui env vars
-                const workspacePayload: WorkspaceCreationRequest = {
-                    name: workloadName,
-                    useGivenNameAsPrefix: false,
-                    projectId: project.id.toString(),
-                    clusterId: project.clusterId,
+                const workspacePayload: WorkspaceCreationRequestV2 = {
+                    meta: {
+                        name: workloadName,
+                        useGivenNameAsPrefix: false,
+                        projectId: project.id.toString(),
+                        clusterId: project.clusterId
+                    },
                     assets: {
                         environment: environmentId,
                         compute: computeId
                     },
-                    spec: {
-                        exposedUrls: [
+                    specificRunParams: {
+                        connections: [
                             {
-                                container: connection.internalToolInfo.containerPort,
-                                toolType: String(connection.internalToolInfo.toolType),
-                                toolName: connection.name,
-                                authorizationType: AuthorizationType.AuthorizedUsers,
+                                name: connectionName,
                                 authorizedUsers: [config.controlPlaneAdminUsername, 'user1', 'user2']
                             }
                         ],
@@ -585,9 +587,9 @@ supportedFrom(SupportedVersions.V2_20)(function () {
                     }
                 };
 
-                const resultWorkload = await workloadsCrudUtils.submitWorkspace(workspacePayload);
-                workloadName = resultWorkload.body.name;
-                workloadId = resultWorkload.body.workloadId;
+                const resultWorkload = await assetsApiV2Utils.createWorkspace(workspacePayload);
+                workloadName = resultWorkload.body.meta.name;
+                workloadId = resultWorkload.body.meta.workloadId;
 
                 await waitUtils.waitForBackendWorkloadByIdAndPhase(workloadId, Phase.Running, 120);
 

@@ -138,6 +138,7 @@ export * from './displayedJob';
 export * from './distMaster';
 export * from './distributed';
 export * from './distributedAllOf';
+export * from './distributedData';
 export * from './distributedFramework';
 export * from './distributedInferenceCommonSpec';
 export * from './distributedInferenceCommonSpecAllOf';
@@ -159,6 +160,9 @@ export * from './distributedInferenceStartupPolicyField';
 export * from './distributedInferenceWorkerSpecFields';
 export * from './distributedInferenceWorkerSpecFieldsWorker';
 export * from './distributedInferenceWorkersField';
+export * from './distributedMaster';
+export * from './distributedMasterData';
+export * from './distributedParams';
 export * from './dockerRegistry';
 export * from './dockerRegistryCreationRequest';
 export * from './dockerRegistryCreationSpec';
@@ -244,7 +248,6 @@ export * from './inferenceCreationRequestV2';
 export * from './inferenceFields';
 export * from './inferenceFieldsRules';
 export * from './inferenceSpecificRunParams';
-export * from './inferenceSpecificRunParamsAllOf';
 export * from './inferenceV2';
 export * from './inferencesMaxReplicasField';
 export * from './inferencesMinReplicasField';
@@ -310,6 +313,7 @@ export * from './nonOverridableSpecFields';
 export * from './nonOverridableSpecFieldsAllOf';
 export * from './nonOverridableSpecFieldsAllOf1';
 export * from './numberRules';
+export * from './optionalAssetIds';
 export * from './overridableSpecFields';
 export * from './pVCAsset';
 export * from './pVCAssetSpec';
@@ -454,7 +458,10 @@ export * from './tolerationRules';
 export * from './tolerationsRules';
 export * from './toolType';
 export * from './training';
+export * from './trainingCreationRequestV2';
 export * from './trainingListResponse';
+export * from './trainingSpecificRunParams';
+export * from './trainingV2';
 export * from './uidGidSource';
 export * from './usageTimesInfo';
 export * from './validateSyncRequest';
@@ -470,7 +477,11 @@ export * from './workloadStatusUpdate';
 export * from './workloadSupportedTypes';
 export * from './workloadType';
 export * from './workspace';
+export * from './workspaceCreationRequestV2';
 export * from './workspaceListResponse';
+export * from './workspaceSpecificRunParams';
+export * from './workspaceSpecificRunParamsAllOf';
+export * from './workspaceV2';
 
 import * as fs from 'fs';
 
@@ -623,6 +634,7 @@ import { DisplayedJob } from './displayedJob';
 import { DistMaster } from './distMaster';
 import { Distributed } from './distributed';
 import { DistributedAllOf } from './distributedAllOf';
+import { DistributedData } from './distributedData';
 import { DistributedFramework } from './distributedFramework';
 import { DistributedInferenceCommonSpec } from './distributedInferenceCommonSpec';
 import { DistributedInferenceCommonSpecAllOf } from './distributedInferenceCommonSpecAllOf';
@@ -644,6 +656,9 @@ import { DistributedInferenceStartupPolicyField } from './distributedInferenceSt
 import { DistributedInferenceWorkerSpecFields } from './distributedInferenceWorkerSpecFields';
 import { DistributedInferenceWorkerSpecFieldsWorker } from './distributedInferenceWorkerSpecFieldsWorker';
 import { DistributedInferenceWorkersField } from './distributedInferenceWorkersField';
+import { DistributedMaster } from './distributedMaster';
+import { DistributedMasterData } from './distributedMasterData';
+import { DistributedParams } from './distributedParams';
 import { DockerRegistry } from './dockerRegistry';
 import { DockerRegistryCreationRequest } from './dockerRegistryCreationRequest';
 import { DockerRegistryCreationSpec } from './dockerRegistryCreationSpec';
@@ -729,7 +744,6 @@ import { InferenceCreationRequestV2 } from './inferenceCreationRequestV2';
 import { InferenceFields } from './inferenceFields';
 import { InferenceFieldsRules } from './inferenceFieldsRules';
 import { InferenceSpecificRunParams } from './inferenceSpecificRunParams';
-import { InferenceSpecificRunParamsAllOf } from './inferenceSpecificRunParamsAllOf';
 import { InferenceV2 } from './inferenceV2';
 import { InferencesMaxReplicasField } from './inferencesMaxReplicasField';
 import { InferencesMinReplicasField } from './inferencesMinReplicasField';
@@ -795,6 +809,7 @@ import { NonOverridableSpecFields } from './nonOverridableSpecFields';
 import { NonOverridableSpecFieldsAllOf } from './nonOverridableSpecFieldsAllOf';
 import { NonOverridableSpecFieldsAllOf1 } from './nonOverridableSpecFieldsAllOf1';
 import { NumberRules } from './numberRules';
+import { OptionalAssetIds } from './optionalAssetIds';
 import { OverridableSpecFields } from './overridableSpecFields';
 import { PVCAsset } from './pVCAsset';
 import { PVCAssetSpec } from './pVCAssetSpec';
@@ -939,7 +954,10 @@ import { TolerationRules } from './tolerationRules';
 import { TolerationsRules } from './tolerationsRules';
 import { ToolType } from './toolType';
 import { Training } from './training';
+import { TrainingCreationRequestV2 } from './trainingCreationRequestV2';
 import { TrainingListResponse } from './trainingListResponse';
+import { TrainingSpecificRunParams } from './trainingSpecificRunParams';
+import { TrainingV2 } from './trainingV2';
 import { UidGidSource } from './uidGidSource';
 import { UsageTimesInfo } from './usageTimesInfo';
 import { ValidateSyncRequest } from './validateSyncRequest';
@@ -955,7 +973,11 @@ import { WorkloadStatusUpdate } from './workloadStatusUpdate';
 import { WorkloadSupportedTypes } from './workloadSupportedTypes';
 import { WorkloadType } from './workloadType';
 import { Workspace } from './workspace';
+import { WorkspaceCreationRequestV2 } from './workspaceCreationRequestV2';
 import { WorkspaceListResponse } from './workspaceListResponse';
+import { WorkspaceSpecificRunParams } from './workspaceSpecificRunParams';
+import { WorkspaceSpecificRunParamsAllOf } from './workspaceSpecificRunParamsAllOf';
+import { WorkspaceV2 } from './workspaceV2';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
@@ -1149,6 +1171,7 @@ let typeMap: {[index: string]: any} = {
     "DistMaster": DistMaster,
     "Distributed": Distributed,
     "DistributedAllOf": DistributedAllOf,
+    "DistributedData": DistributedData,
     "DistributedInferenceCommonSpec": DistributedInferenceCommonSpec,
     "DistributedInferenceCommonSpecAllOf": DistributedInferenceCommonSpecAllOf,
     "DistributedInferenceLeaderSpecFields": DistributedInferenceLeaderSpecFields,
@@ -1165,6 +1188,9 @@ let typeMap: {[index: string]: any} = {
     "DistributedInferenceWorkerSpecFields": DistributedInferenceWorkerSpecFields,
     "DistributedInferenceWorkerSpecFieldsWorker": DistributedInferenceWorkerSpecFieldsWorker,
     "DistributedInferenceWorkersField": DistributedInferenceWorkersField,
+    "DistributedMaster": DistributedMaster,
+    "DistributedMasterData": DistributedMasterData,
+    "DistributedParams": DistributedParams,
     "DockerRegistry": DockerRegistry,
     "DockerRegistryCreationRequest": DockerRegistryCreationRequest,
     "DockerRegistryCreationSpec": DockerRegistryCreationSpec,
@@ -1243,7 +1269,6 @@ let typeMap: {[index: string]: any} = {
     "InferenceFields": InferenceFields,
     "InferenceFieldsRules": InferenceFieldsRules,
     "InferenceSpecificRunParams": InferenceSpecificRunParams,
-    "InferenceSpecificRunParamsAllOf": InferenceSpecificRunParamsAllOf,
     "InferenceV2": InferenceV2,
     "InferencesMaxReplicasField": InferencesMaxReplicasField,
     "InferencesMinReplicasField": InferencesMinReplicasField,
@@ -1305,6 +1330,7 @@ let typeMap: {[index: string]: any} = {
     "NonOverridableSpecFieldsAllOf": NonOverridableSpecFieldsAllOf,
     "NonOverridableSpecFieldsAllOf1": NonOverridableSpecFieldsAllOf1,
     "NumberRules": NumberRules,
+    "OptionalAssetIds": OptionalAssetIds,
     "OverridableSpecFields": OverridableSpecFields,
     "PVCAsset": PVCAsset,
     "PVCAssetSpec": PVCAssetSpec,
@@ -1433,7 +1459,10 @@ let typeMap: {[index: string]: any} = {
     "TolerationRules": TolerationRules,
     "TolerationsRules": TolerationsRules,
     "Training": Training,
+    "TrainingCreationRequestV2": TrainingCreationRequestV2,
     "TrainingListResponse": TrainingListResponse,
+    "TrainingSpecificRunParams": TrainingSpecificRunParams,
+    "TrainingV2": TrainingV2,
     "UsageTimesInfo": UsageTimesInfo,
     "ValidateSyncRequest": ValidateSyncRequest,
     "ValidateSyncResponse": ValidateSyncResponse,
@@ -1445,7 +1474,11 @@ let typeMap: {[index: string]: any} = {
     "WorkloadStatusUpdate": WorkloadStatusUpdate,
     "WorkloadSupportedTypes": WorkloadSupportedTypes,
     "Workspace": Workspace,
+    "WorkspaceCreationRequestV2": WorkspaceCreationRequestV2,
     "WorkspaceListResponse": WorkspaceListResponse,
+    "WorkspaceSpecificRunParams": WorkspaceSpecificRunParams,
+    "WorkspaceSpecificRunParamsAllOf": WorkspaceSpecificRunParamsAllOf,
+    "WorkspaceV2": WorkspaceV2,
 }
 
 export class ObjectSerializer {

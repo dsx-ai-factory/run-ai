@@ -22,10 +22,6 @@ export class DistributedInferenceCommonSpec {
     */
     'category'?: string | null;
     /**
-    * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
-    */
-    'loadAwareRouting'?: boolean | null = false;
-    /**
     * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
     */
     'nodePools'?: Array<string> | null;
@@ -53,11 +49,6 @@ export class DistributedInferenceCommonSpec {
             "name": "category",
             "baseName": "category",
             "type": "string"
-        },
-        {
-            "name": "loadAwareRouting",
-            "baseName": "loadAwareRouting",
-            "type": "boolean"
         },
         {
             "name": "nodePools",

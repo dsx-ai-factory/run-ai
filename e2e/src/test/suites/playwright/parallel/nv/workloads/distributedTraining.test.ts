@@ -113,7 +113,14 @@ test.describe(`Training UI - sanity, tags: ${tags.resource.workloads} ${tags.tea
             test('T3738302: L1 researcher can create distributed MPI Training workload', async () => {
                 videoName = 'mpi-distributed-training';
                 await test.step('Create MPI distributed job', async () => {
-                    await training.fillFlexTrainingFirstPage(projectName, trainingName, true, DISTRIBUTED_TOOLS_LABELS.MPI, true);
+                    await training.fillFirstNewTrainingPage(
+                        projectName,
+                        trainingName,
+                        true,
+                        DISTRIBUTED_TOOLS_LABELS.MPI,
+                        true,
+                        true
+                    );
                     await training.fillHybridDistributedTrainingSecondPage(
                         'ubuntu',
                         {
@@ -202,7 +209,14 @@ test.describe(`Training UI - sanity, tags: ${tags.resource.workloads} ${tags.tea
 
                 const trainingJobName = objectGenerator.generateNameByPrefix('secret-test');
                 await test.step('Create distributed training job with secrets', async () => {
-                    await training.fillFlexTrainingFirstPage(projectName, trainingJobName, true, DISTRIBUTED_TOOLS_LABELS.MPI, true);
+                    await training.fillFirstNewTrainingPage(
+                        projectName,
+                        trainingJobName,
+                        true,
+                        DISTRIBUTED_TOOLS_LABELS.MPI,
+                        true,
+                        true
+                    );
                     await training.fillHybridDistributedTrainingSecondPage(
                         config.quickStartImage.sleepInfinity,
                         {
@@ -274,7 +288,14 @@ test.describe(`Training UI - sanity, tags: ${tags.resource.workloads} ${tags.tea
                 const trainingJobName = objectGenerator.generateNameByPrefix('diff-master-worker');
 
                 await test.step('Create training job with different master and worker setup', async () => {
-                    await training.fillFlexTrainingFirstPage(projectName, trainingJobName, true, DISTRIBUTED_TOOLS_LABELS.MPI, true);
+                    await training.fillFirstNewTrainingPage(
+                        projectName,
+                        trainingJobName,
+                        true,
+                        DISTRIBUTED_TOOLS_LABELS.MPI,
+                        true,
+                        true
+                    );
                     await training.fillHybridDistributedTrainingSecondPage(
                         config.quickStartImage.sleepInfinity,
                         {
@@ -330,7 +351,14 @@ test.describe(`Training UI - sanity, tags: ${tags.resource.workloads} ${tags.tea
                 const pytorchDistributedTestImage = config.quickStartImage.sleepInfinity;
 
                 await test.step('Create Pytorch distributed training workload', async () => {
-                    await training.fillFlexTrainingFirstPage(projectName, trainingName, true, DISTRIBUTED_TOOLS_LABELS.PY_TORCH, true);
+                    await training.fillFirstNewTrainingPage(
+                        projectName,
+                        trainingName,
+                        true,
+                        DISTRIBUTED_TOOLS_LABELS.PY_TORCH,
+                        true,
+                        true
+                    );
                     await training.fillHybridDistributedTrainingSecondPage(
                         pytorchDistributedTestImage,
                         {
@@ -417,7 +445,14 @@ test.describe(`Training UI - sanity, tags: ${tags.resource.workloads} ${tags.tea
                 videoName = 'log-of-distributed-job';
                 test.setTimeout(480 * 1000);
                 await test.step('Create MPI distributed job', async () => {
-                    await training.fillFlexTrainingFirstPage(projectName, trainingName, true, DISTRIBUTED_TOOLS_LABELS.MPI, true);
+                    await training.fillFirstNewTrainingPage(
+                        projectName,
+                        trainingName,
+                        true,
+                        DISTRIBUTED_TOOLS_LABELS.MPI,
+                        true,
+                        true
+                    );
                     await training.fillHybridDistributedTrainingSecondPage(
                         config.quickStartImage.distributedMpi,
                         {
@@ -538,7 +573,14 @@ test.describe(`Training UI - sanity, tags: ${tags.resource.workloads} ${tags.tea
                 });
                 await test.step('Create distributed TensorFlow training job', async () => {
                     await training.goToPage();
-                    await training.fillFlexTrainingFirstPage(projectName, trainingJobName, true, DISTRIBUTED_TOOLS_LABELS.TENSOR_FLOW);
+                    await training.fillFirstNewTrainingPage(
+                        projectName,
+                        trainingJobName,
+                        true,
+                        DISTRIBUTED_TOOLS_LABELS.TENSOR_FLOW,
+                        false,
+                        true
+                    );
                     const hybridForm = new HybridForm(browserEngine.currentPage);
                     await hybridForm.openEnvironmentsDrawer();
                     await hybridForm.clickOnDrawerItemByLabel(environmentAsset.meta.name);
@@ -596,7 +638,14 @@ test.describe(`Training UI - sanity, tags: ${tags.resource.workloads} ${tags.tea
 
                 await test.step('Create distributed XGBoost training job', async () => {
                     await training.goToPage();
-                    await training.fillFlexTrainingFirstPage(projectName, trainingJobName, true, DISTRIBUTED_TOOLS_LABELS.XG_BOOST, true);
+                    await training.fillFirstNewTrainingPage(
+                        projectName,
+                        trainingJobName,
+                        true,
+                        DISTRIBUTED_TOOLS_LABELS.XG_BOOST,
+                        true,
+                        true
+                    );
 
                     const hybridForm = new HybridForm(browserEngine.currentPage);
                     await hybridForm.openEnvironmentsDrawer();

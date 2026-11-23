@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TrainingCreationRequest, Training } from '../../../../../../modules/api/apis/workloadsApi/generated/api';
+import { TrainingCreationRequestV2, TrainingV2 } from '../../../../../../modules/api/apis/assetsApi';
 import { Project } from '../../../../../../modules/api/apis/projectsDepartmentsApi';
 import {
     computeResourceUtils,
@@ -44,11 +44,13 @@ test.describe(`Bulk Deletion UI ${tags.teams.loong} ${tags.tool.ui} ${tags.resou
             let environmentId: string;
             let computeResourceId: string;
 
-            function getTrainingWorkloadPayload(name: string): TrainingCreationRequest {
+            function getTrainingWorkloadPayload(name: string): TrainingCreationRequestV2 {
                 return {
-                    projectId: project.id.toString(),
-                    name: name,
-                    clusterId: project.clusterUuid,
+                    meta: {
+                        projectId: project.id.toString(),
+                        name: name,
+                        clusterId: project.clusterUuid
+                    },
                     assets: {
                         environment: environmentId,
                         compute: computeResourceId
@@ -59,13 +61,13 @@ test.describe(`Bulk Deletion UI ${tags.teams.loong} ${tags.tool.ui} ${tags.resou
             async function createTrainingWorkloads(
                 amount: number,
                 accessToken?: string
-            ): Promise<Training[]> {
+            ): Promise<TrainingV2[]> {
                 const trainingWorkloads = [];
                 for (let i = 0; i < amount; i++) {
                     const name = objectGenerator.generateShortNameByPrefix(`training-workload-${i}`);
                     const workloadPayload = getTrainingWorkloadPayload(name);
-                    const workload = await trainingUtils.createTraining(workloadPayload, accessToken);
-                    trainingWorkloads.push(workload);
+                    await trainingUtils.createTraining(workloadPayload, accessToken);
+                    trainingWorkloads.push(workloadPayload);
                 }
                 return trainingWorkloads;
             }
@@ -139,18 +141,18 @@ test.describe(`Bulk Deletion UI ${tags.teams.loong} ${tags.tool.ui} ${tags.resou
 
                         // wait for workloads to appear on UI
                         for (const workload of workloads) {
-                            await workloadPage.waitForWorkloadToAppear(workload.name);
+                            await workloadPage.waitForWorkloadToAppear(workload.meta.name);
                         }
 
                         // The deleteWorkloads function only works when all workloads are visible in the UI,
                         // due to the last change made in the toggleWorkload function in Workload Page
-                        await workloadPage.deleteWorkloads(workloads.map((workload) => workload.name));
+                        await workloadPage.deleteWorkloads(workloads.map((workload) => workload.meta.name));
 
                         await Promise.all(
                             workloads.map(async (workload) => {
                                 await waitUtils.waitForElementToNotExist(
                                     workloadPage,
-                                    `td:has-text("${workload.name}")`,
+                                    `td:has-text("${workload.meta.name}")`,
                                     120
                                 );
                             })

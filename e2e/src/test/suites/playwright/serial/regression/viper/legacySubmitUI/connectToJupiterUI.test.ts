@@ -4,7 +4,7 @@
  */
 
 import { BrowserEngine } from '../../../../../../../modules/ui/runaiV2/pages/BrowserEngine';
-import { HybridForm } from '../../../../../../../modules/ui/runaiV2/pages/HybridSubmissionForm';
+import { WorkspacePage } from '../../../../../../../modules/ui/runaiV2/pages/WorkspacePage';
 import {
     WorkloadPage,
     EWorkloadStatus,
@@ -19,11 +19,18 @@ import {
     projectResourcesUtils,
     Utils,
     operations,
-    environmentUtils
+    waitUtils,
+    unleashClient,
+    apiUtils,
+    environmentUtils,
+    settings
 } from '../../../../../../../modules/helpers';
 import { Project } from '../../../../../../../modules/api/apis/projectsDepartmentsApi';
+import { expect } from 'chai';
 import { severity, Severity } from 'allure-js-commons';
-import { expect, test } from '@playwright/test';
+import { Page } from 'playwright';
+import { test } from '@playwright/test';
+import { EFeatureToggleKeys } from '../../../../../../../modules/helpers/utils/Unleash/featureToggle';
 
 test.describe(
     `Workspaces UI - Sanity checks, tags: ${tags.tool.ui} ${tags.resource.workspace} ${tags.teams.viper} ${tags.runOn.parallelCI}`,
@@ -36,10 +43,14 @@ test.describe(
         let workspaceName: string;
         let browserEngine: BrowserEngine;
         let auth: AuthPage;
-        let workspace: HybridForm;
+        let workspace: WorkspacePage;
         let workload: WorkloadPage;
 
         test.beforeEach('start browser', async function () {
+            if (!settings.isSelfHosted) {
+                await unleashClient.disableFeature(EFeatureToggleKeys.SHOW_HYBRID_SUBMISSION);
+            }
+            await apiUtils.disableHybridSubmission();
             projectName = objectGenerator.generateNameByPrefix('p-workspace');
             workspaceName = objectGenerator.generateNameByPrefix('workspace');
             namespace = Utils.namespaceFromProjectName(projectName);
@@ -52,7 +63,7 @@ test.describe(
             });
 
             auth = new AuthPage(browserEngine.currentPage);
-            workspace = new HybridForm(browserEngine.currentPage);
+            workspace = new WorkspacePage(browserEngine.currentPage);
             workload = new WorkloadPage(browserEngine.currentPage);
             await auth.signIn(
                 flowRootState.users.system_administrator.email,
@@ -75,27 +86,37 @@ test.describe(
             }
         });
 
+        function validateUrl(newTab: Page): void {
+            const isValidUrl = ['/lab', '/tree'].some((validUrl) => newTab.url().includes(validUrl));
+            expect(isValidUrl).to.be.true;
+            logger.debug('The url is valid');
+        }
+
         test('should connect successfully', async function () {
             test.setTimeout(180 * 1000);
             await severity(Severity.CRITICAL);
             videoName = 'workspace-connect';
             await workload.navigateToWorkloads();
-            await workspace.fillWorkloadCreationFirstPage(
-                flowRootState.cluster.name,
-                projectName,
-                workspaceName
-            );
+            await workload.openWorkspaceForm();
+            // fill the workspace form details
+            await workspace.selectClusterFromDropDown(flowRootState.cluster.name);
+            await workspace.workloadFormSelectProject(projectName);
+            await workspace.fillWorkspaceName(workspaceName);
+            await workspace.waitForWorkspaceNameCount(workspaceName);
+            await workspace.clickOnContinue();
             const envName = (await environmentUtils.presetNames()).jupyter;
-            await workspace.openEnvironmentsDrawer();
-            await workspace.clickOnDrawerItemByLabel(envName);
-            await workspace.fillComputeSection('one-gpu');
-            await workspace.clickOnSubmit();
-            await workload.waitForWorkloadUIStatus(workspaceName, EWorkloadStatus.Running);
-            const [newTab] = await Promise.all([
-                browserEngine.currentPage.context().waitForEvent('page'),
-                workload.connectWorkloadToolByName(workspaceName, EToolName.Jupyter)
-            ]);
-            await expect(newTab).toHaveURL(/\/(lab|tree)(?:[/?#]|$)/);
+            await workspace.selectEnvironment(envName);
+            await workspace.selectComputeResource('one-gpu');
+            await workspace.clickOnCreateWorkspaceBtn();
+            logger.debug('workspace created successfully');
+            await workload.waitForWorkloadUIStatus(workspaceName, EWorkloadStatus.Running); //TODO: fix it, not working
+            await waitUtils.sleep(10000); // TODO: remove after the prev line is fixed
+            logger.debug('waiting for to jupyter loading');
+            await workload.connectWorkloadToolByName(workspaceName, EToolName.Jupyter);
+            logger.debug('wait for new tab loading');
+            await browserEngine.page.waitForTimeout(5000);
+            const newTab = browserEngine.context.pages()[1];
+            validateUrl(newTab);
             await workload.openPythonConsole(newTab);
             await workload.deleteWorkload(workspaceName);
         });

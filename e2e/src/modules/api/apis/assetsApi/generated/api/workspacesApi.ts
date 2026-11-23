@@ -17,8 +17,13 @@ import http from 'http';
 
 /* tslint:disable:no-unused-locals */
 import { AssetCountResponse } from '../model/assetCountResponse';
+import { SubmissionErrorV2 } from '../model/submissionErrorV2';
+import { WorkloadCreationRequest } from '../model/workloadCreationRequest';
 import { WorkloadStatusUpdate } from '../model/workloadStatusUpdate';
+import { Workspace } from '../model/workspace';
+import { WorkspaceCreationRequestV2 } from '../model/workspaceCreationRequestV2';
 import { WorkspaceListResponse } from '../model/workspaceListResponse';
+import { WorkspaceV2 } from '../model/workspaceV2';
 
 import { ObjectSerializer, Authentication, VoidAuth, Interceptor } from '../model/models';
 import { HttpBasicAuth, HttpBearerAuth, ApiKeyAuth, OAuth } from '../model/models';
@@ -197,6 +202,150 @@ export class WorkspacesApi {
         });
     }
     /**
+     * Creates a workspace from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.
+     * @summary Create workspace.
+     * @param workloadCreationRequest 
+     */
+    public async createWorkspace (workloadCreationRequest?: WorkloadCreationRequest, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: Workspace;  }> {
+        const localVarPath = this.basePath + '/api/v1/workspace';
+        let localVarQueryParameters: any = {};
+        let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
+        const produces = ['application/json'];
+        // give precedence to 'application/json'
+        if (produces.indexOf('application/json') >= 0) {
+            localVarHeaderParams.Accept = 'application/json';
+        } else {
+            localVarHeaderParams.Accept = produces.join(',');
+        }
+        let localVarFormParams: any = {};
+
+        (<any>Object).assign(localVarHeaderParams, options.headers);
+
+        let localVarUseFormData = false;
+
+        let localVarRequestOptions: localVarRequest.Options = {
+            method: 'POST',
+            qs: localVarQueryParameters,
+            headers: localVarHeaderParams,
+            uri: localVarPath,
+            useQuerystring: this._useQuerystring,
+            /////Start: Modified by @Run.AI /////
+            qsStringifyOptions: { arrayFormat: 'comma' },
+            /////End: Modified by @Run.AI /////
+            json: true,
+            body: ObjectSerializer.serialize(workloadCreationRequest, "WorkloadCreationRequest")
+        };
+
+        let authenticationPromise = Promise.resolve();
+        if (this.authentications.bearerAuth.accessToken) {
+            authenticationPromise = authenticationPromise.then(() => this.authentications.bearerAuth.applyToRequest(localVarRequestOptions));
+        }
+        authenticationPromise = authenticationPromise.then(() => this.authentications.default.applyToRequest(localVarRequestOptions));
+
+        let interceptorPromise = authenticationPromise;
+        for (const interceptor of this.interceptors) {
+            interceptorPromise = interceptorPromise.then(() => interceptor(localVarRequestOptions));
+        }
+
+        return interceptorPromise.then(() => {
+            if (Object.keys(localVarFormParams).length) {
+                if (localVarUseFormData) {
+                    (<any>localVarRequestOptions).formData = localVarFormParams;
+                } else {
+                    localVarRequestOptions.form = localVarFormParams;
+                }
+            }
+            return new Promise<{ response: http.IncomingMessage; body: Workspace;  }>((resolve, reject) => {
+                localVarRequest(localVarRequestOptions, (error, response, body) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
+                            body = ObjectSerializer.deserialize(body, "Workspace");
+                            resolve({ response: response, body: body });
+                        } else {
+                            /////Start: Modified by @Run.AI /////
+                            reject(new HttpError(response, body, response.statusCode, localVarRequestOptions));
+                            /////End: Modified by @Run.AI /////
+                        }
+                    }
+                });
+            });
+        });
+    }
+    /**
+     * Creates a workspace from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.
+     * @summary Create a workspace - assets based [Experimental]
+     * @param workspaceCreationRequestV2 
+     */
+    public async createWorkspaceV2 (workspaceCreationRequestV2?: WorkspaceCreationRequestV2, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: WorkspaceV2;  }> {
+        const localVarPath = this.basePath + '/api/v2/workspace';
+        let localVarQueryParameters: any = {};
+        let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
+        const produces = ['application/json'];
+        // give precedence to 'application/json'
+        if (produces.indexOf('application/json') >= 0) {
+            localVarHeaderParams.Accept = 'application/json';
+        } else {
+            localVarHeaderParams.Accept = produces.join(',');
+        }
+        let localVarFormParams: any = {};
+
+        (<any>Object).assign(localVarHeaderParams, options.headers);
+
+        let localVarUseFormData = false;
+
+        let localVarRequestOptions: localVarRequest.Options = {
+            method: 'POST',
+            qs: localVarQueryParameters,
+            headers: localVarHeaderParams,
+            uri: localVarPath,
+            useQuerystring: this._useQuerystring,
+            /////Start: Modified by @Run.AI /////
+            qsStringifyOptions: { arrayFormat: 'comma' },
+            /////End: Modified by @Run.AI /////
+            json: true,
+            body: ObjectSerializer.serialize(workspaceCreationRequestV2, "WorkspaceCreationRequestV2")
+        };
+
+        let authenticationPromise = Promise.resolve();
+        if (this.authentications.bearerAuth.accessToken) {
+            authenticationPromise = authenticationPromise.then(() => this.authentications.bearerAuth.applyToRequest(localVarRequestOptions));
+        }
+        authenticationPromise = authenticationPromise.then(() => this.authentications.default.applyToRequest(localVarRequestOptions));
+
+        let interceptorPromise = authenticationPromise;
+        for (const interceptor of this.interceptors) {
+            interceptorPromise = interceptorPromise.then(() => interceptor(localVarRequestOptions));
+        }
+
+        return interceptorPromise.then(() => {
+            if (Object.keys(localVarFormParams).length) {
+                if (localVarUseFormData) {
+                    (<any>localVarRequestOptions).formData = localVarFormParams;
+                } else {
+                    localVarRequestOptions.form = localVarFormParams;
+                }
+            }
+            return new Promise<{ response: http.IncomingMessage; body: WorkspaceV2;  }>((resolve, reject) => {
+                localVarRequest(localVarRequestOptions, (error, response, body) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
+                            body = ObjectSerializer.deserialize(body, "WorkspaceV2");
+                            resolve({ response: response, body: body });
+                        } else {
+                            /////Start: Modified by @Run.AI /////
+                            reject(new HttpError(response, body, response.statusCode, localVarRequestOptions));
+                            /////End: Modified by @Run.AI /////
+                        }
+                    }
+                });
+            });
+        });
+    }
+    /**
      * Delete workspace, by id
      * @summary Delete a workspace, per cluster sync update [Obsolete]
      * @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
@@ -268,6 +417,163 @@ export class WorkspacesApi {
                         reject(error);
                     } else {
                         if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
+                            resolve({ response: response, body: body });
+                        } else {
+                            /////Start: Modified by @Run.AI /////
+                            reject(new HttpError(response, body, response.statusCode, localVarRequestOptions));
+                            /////End: Modified by @Run.AI /////
+                        }
+                    }
+                });
+            });
+        });
+    }
+    /**
+     * Retrieves the data of a training, i.e. its set of assets and specific env.
+     * @summary Get workspace data - assets based [Experimental]
+     * @param workloadId The  Universally Unique Identifier (UUID) of the workload.
+     */
+    public async getWorkspaceByIdV2 (workloadId: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: WorkspaceV2;  }> {
+        const localVarPath = this.basePath + '/api/v2/workspace/{workloadId}'
+            .replace('{' + 'workloadId' + '}', encodeURIComponent(String(workloadId)));
+        let localVarQueryParameters: any = {};
+        let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
+        const produces = ['application/json'];
+        // give precedence to 'application/json'
+        if (produces.indexOf('application/json') >= 0) {
+            localVarHeaderParams.Accept = 'application/json';
+        } else {
+            localVarHeaderParams.Accept = produces.join(',');
+        }
+        let localVarFormParams: any = {};
+
+        // verify required parameter 'workloadId' is not null or undefined
+        if (workloadId === null || workloadId === undefined) {
+            throw new Error('Required parameter workloadId was null or undefined when calling getWorkspaceByIdV2.');
+        }
+
+        (<any>Object).assign(localVarHeaderParams, options.headers);
+
+        let localVarUseFormData = false;
+
+        let localVarRequestOptions: localVarRequest.Options = {
+            method: 'GET',
+            qs: localVarQueryParameters,
+            headers: localVarHeaderParams,
+            uri: localVarPath,
+            useQuerystring: this._useQuerystring,
+            /////Start: Modified by @Run.AI /////
+            qsStringifyOptions: { arrayFormat: 'comma' },
+            /////End: Modified by @Run.AI /////
+            json: true,
+        };
+
+        let authenticationPromise = Promise.resolve();
+        if (this.authentications.bearerAuth.accessToken) {
+            authenticationPromise = authenticationPromise.then(() => this.authentications.bearerAuth.applyToRequest(localVarRequestOptions));
+        }
+        authenticationPromise = authenticationPromise.then(() => this.authentications.default.applyToRequest(localVarRequestOptions));
+
+        let interceptorPromise = authenticationPromise;
+        for (const interceptor of this.interceptors) {
+            interceptorPromise = interceptorPromise.then(() => interceptor(localVarRequestOptions));
+        }
+
+        return interceptorPromise.then(() => {
+            if (Object.keys(localVarFormParams).length) {
+                if (localVarUseFormData) {
+                    (<any>localVarRequestOptions).formData = localVarFormParams;
+                } else {
+                    localVarRequestOptions.form = localVarFormParams;
+                }
+            }
+            return new Promise<{ response: http.IncomingMessage; body: WorkspaceV2;  }>((resolve, reject) => {
+                localVarRequest(localVarRequestOptions, (error, response, body) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
+                            body = ObjectSerializer.deserialize(body, "WorkspaceV2");
+                            resolve({ response: response, body: body });
+                        } else {
+                            /////Start: Modified by @Run.AI /////
+                            reject(new HttpError(response, body, response.statusCode, localVarRequestOptions));
+                            /////End: Modified by @Run.AI /////
+                        }
+                    }
+                });
+            });
+        });
+    }
+    /**
+     * Get combined policy and specificRunParams data for workload creation form
+     * @summary Get merged workspace
+     * @param projectId The id of the project
+     * @param workloadId The id of the workload
+     */
+    public async getWorkspaceMerged (projectId?: string, workloadId?: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: WorkspaceV2;  }> {
+        const localVarPath = this.basePath + '/api/v2/workspace/merged';
+        let localVarQueryParameters: any = {};
+        let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
+        const produces = ['application/json'];
+        // give precedence to 'application/json'
+        if (produces.indexOf('application/json') >= 0) {
+            localVarHeaderParams.Accept = 'application/json';
+        } else {
+            localVarHeaderParams.Accept = produces.join(',');
+        }
+        let localVarFormParams: any = {};
+
+        if (projectId !== undefined) {
+            localVarQueryParameters['projectId'] = ObjectSerializer.serialize(projectId, "string");
+        }
+
+        if (workloadId !== undefined) {
+            localVarQueryParameters['workloadId'] = ObjectSerializer.serialize(workloadId, "string");
+        }
+
+        (<any>Object).assign(localVarHeaderParams, options.headers);
+
+        let localVarUseFormData = false;
+
+        let localVarRequestOptions: localVarRequest.Options = {
+            method: 'GET',
+            qs: localVarQueryParameters,
+            headers: localVarHeaderParams,
+            uri: localVarPath,
+            useQuerystring: this._useQuerystring,
+            /////Start: Modified by @Run.AI /////
+            qsStringifyOptions: { arrayFormat: 'comma' },
+            /////End: Modified by @Run.AI /////
+            json: true,
+        };
+
+        let authenticationPromise = Promise.resolve();
+        if (this.authentications.bearerAuth.accessToken) {
+            authenticationPromise = authenticationPromise.then(() => this.authentications.bearerAuth.applyToRequest(localVarRequestOptions));
+        }
+        authenticationPromise = authenticationPromise.then(() => this.authentications.default.applyToRequest(localVarRequestOptions));
+
+        let interceptorPromise = authenticationPromise;
+        for (const interceptor of this.interceptors) {
+            interceptorPromise = interceptorPromise.then(() => interceptor(localVarRequestOptions));
+        }
+
+        return interceptorPromise.then(() => {
+            if (Object.keys(localVarFormParams).length) {
+                if (localVarUseFormData) {
+                    (<any>localVarRequestOptions).formData = localVarFormParams;
+                } else {
+                    localVarRequestOptions.form = localVarFormParams;
+                }
+            }
+            return new Promise<{ response: http.IncomingMessage; body: WorkspaceV2;  }>((resolve, reject) => {
+                localVarRequest(localVarRequestOptions, (error, response, body) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
+                            body = ObjectSerializer.deserialize(body, "WorkspaceV2");
                             resolve({ response: response, body: body });
                         } else {
                             /////Start: Modified by @Run.AI /////

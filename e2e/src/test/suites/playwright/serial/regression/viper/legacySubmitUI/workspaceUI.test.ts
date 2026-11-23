@@ -4,7 +4,7 @@
  */
 
 import { BrowserEngine } from '../../../../../../../modules/ui/runaiV2/pages/BrowserEngine';
-import { HybridForm } from '../../../../../../../modules/ui/runaiV2/pages/HybridSubmissionForm';
+import { WorkspacePage } from '../../../../../../../modules/ui/runaiV2/pages/WorkspacePage';
 import { WorkloadPage, EWorkloadStatus } from '../../../../../../../modules/ui/runaiV2/pages/WorkloadPage';
 import { EnvironmentPage } from '../../../../../../../modules/ui/runaiV2/pages/EnvironmentPage';
 import { ComputeResourcePage } from '../../../../../../../modules/ui/runaiV2/pages/ComputeResourcePage';
@@ -19,11 +19,15 @@ import {
     Utils,
     operations,
     environmentUtils,
+    computeResourceUtils,
     settings,
+    unleashClient,
+    apiUtils,
     versionUtils
 } from '../../../../../../../modules/helpers';
 import { Project } from '../../../../../../../modules/api/apis/projectsDepartmentsApi';
 import { test } from '@playwright/test';
+import { EFeatureToggleKeys } from '../../../../../../../modules/helpers/utils/Unleash/featureToggle';
 import {
     AnyWorkloadSubmissionType,
     isAnyWorkloadSubmissionEnabled
@@ -38,7 +42,7 @@ test.describe(`Workspaces UI, tags: ${tags.tool.ui} ${tags.resource.workspace} $
 
     let browserEngine: BrowserEngine;
     let auth: AuthPage;
-    let workspace: HybridForm;
+    let workspace: WorkspacePage;
     let workload: WorkloadPage;
     let environment: EnvironmentPage;
     let computeResource: ComputeResourcePage;
@@ -57,7 +61,10 @@ test.describe(`Workspaces UI, tags: ${tags.tool.ui} ${tags.resource.workspace} $
             deservedGpus: 1,
             maxAllowedGpus: 1
         });
-
+        if (!settings.isSelfHosted) {
+            await unleashClient.disableFeature(EFeatureToggleKeys.SHOW_HYBRID_SUBMISSION);
+        }
+        await apiUtils.disableHybridSubmission();
         anyWorkloadSubmissionEnabled = await isAnyWorkloadSubmissionEnabled(
             AnyWorkloadSubmissionType.Workspace
         );
@@ -72,7 +79,10 @@ test.describe(`Workspaces UI, tags: ${tags.tool.ui} ${tags.resource.workspace} $
     test.afterAll('deleting project and namespace', async function () {
         try {
             await operations.deleteProjectAndNamespace(project.id);
-
+            if (!settings.isSelfHosted) {
+                await unleashClient.enableFeature(EFeatureToggleKeys.SHOW_HYBRID_SUBMISSION);
+            }
+            await apiUtils.enableHybridSubmission();
             logger.info(`deleted project ${projectName} an namespace ${namespace}`);
         } catch (error) {
             logger.error(`failed to delete project ${projectName} an namespace ${namespace}`);
@@ -83,7 +93,7 @@ test.describe(`Workspaces UI, tags: ${tags.tool.ui} ${tags.resource.workspace} $
     test.beforeEach('start browser', async function () {
         await browserEngine.start();
         auth = new AuthPage(browserEngine.currentPage);
-        workspace = new HybridForm(browserEngine.currentPage);
+        workspace = new WorkspacePage(browserEngine.currentPage);
         workload = new WorkloadPage(browserEngine.currentPage);
         await auth.signIn(
             flowRootState.users.system_administrator.email,
@@ -102,17 +112,24 @@ test.describe(`Workspaces UI, tags: ${tags.tool.ui} ${tags.resource.workspace} $
 
     async function fillFirstNewWorkspacePage(): Promise<void> {
         await workload.navigateToWorkloads();
-        await workspace.fillWorkloadCreationFirstPage(flowRootState.cluster.name, projectName, workspaceName);
+        await workload.openWorkspaceForm();
+
+        await workload.selectClusterFromDropDown(flowRootState.cluster.name);
+        await workload.workloadFormSelectProject(projectName);
+        await workspace.fillWorkspaceName(workspaceName);
+        await workspace.waitForWorkspaceNameCount(workspaceName);
+        await workspace.selectAssetsSubmissionOption();
+        await workspace.clickOnContinue();
     }
 
-    async function createWorkspaceWithWorkloadVolume(isEphemeralVolume: boolean): Promise<void> {
+    async function createWorkspaceWithWorkloadVolume(isEphemeralVolume?: boolean): Promise<void> {
         await fillFirstNewWorkspacePage();
         const envName = (await environmentUtils.presetNames()).tensorboard;
-        await workspace.openEnvironmentsDrawer();
-        await workspace.clickOnDrawerItemByLabel(envName);
-        await workspace.fillComputeSection('cpu-only');
+        await workspace.selectEnvironment(envName);
+        await workspace.selectComputeResource('cpu-only');
+        await workspace.openVolumeSection();
         await workspace.addWorkloadVolume(isEphemeralVolume);
-        await workspace.clickOnSubmit();
+        await workspace.clickOnCreateWorkspaceBtn();
     }
 
     async function waitForPvc(workspaceName: string, namespace: string): Promise<void> {
@@ -144,20 +161,16 @@ test.describe(`Workspaces UI, tags: ${tags.tool.ui} ${tags.resource.workspace} $
             if (settings.isSelfHosted) test.setTimeout(180 * 1000);
             await fillFirstNewWorkspacePage();
 
-            await workspace.openEnvironmentsDrawer();
-            await workspace.clickOnAddNewAssetBtn();
+            await workspace.clickOnNewEnvironmentBtn();
             await environment.createNewEnvironment(environmentName, projectName, {
                 waitForProjectScope: true,
                 command: 'sleep infinity'
             });
 
-            await workspace.clickOnDrawerItemByLabel(environmentName);
-            await workspace.openComputesDrawer();
-            await workspace.clickOnAddNewAssetBtn();
+            await workspace.clickOnNewComputeBtn();
             await computeResource.createNewCompute(computeName, projectName);
-            await workspace.clickOnDrawerItemByLabel(computeName);
 
-            await workspace.clickOnSubmit();
+            await workspace.clickOnCreateWorkspaceBtn();
             await waitForWorkspaceResource();
             await workload.waitForWorkloadUIStatus(workspaceName, EWorkloadStatus.Running);
 
@@ -169,6 +182,28 @@ test.describe(`Workspaces UI, tags: ${tags.tool.ui} ${tags.resource.workspace} $
             await environment.goToPage();
             await environment.removeEnvironment(environmentName);
         });
+
+        test('copy and edit workspace', async function () {
+            videoName = 'copy-and-edit-workspace ';
+            const copiedWorkspace = objectGenerator.generateShortNameByPrefix('copy-workspace');
+            await fillFirstNewWorkspacePage();
+            const envName = (await environmentUtils.presetNames()).tensorboard;
+            await environment.selectEnvironment(envName);
+            await computeResource.selectComputeResource('cpu-only');
+            await workspace.clickOnCreateWorkspaceBtn();
+            await workspace.waitForWorkloadUIStatus(workspaceName, EWorkloadStatus.Running);
+
+            //copy and edit
+            await workspace.toggleWorkload(workspaceName);
+            await workspace.clickOnCopyAndEditWorkload();
+            await workspace.fillWorkspaceName(copiedWorkspace);
+            await workspace.clickOnCreateWorkspaceBtn();
+            await workspace.waitForWorkloadUIStatus(copiedWorkspace, EWorkloadStatus.Running);
+
+            await workspace.deleteWorkload(workspaceName);
+            await workspace.deleteWorkload(copiedWorkspace);
+        });
+
     });
 
     test('should create workspace with Ephemeral workload volumes and make sure it behave as expected', async () => {

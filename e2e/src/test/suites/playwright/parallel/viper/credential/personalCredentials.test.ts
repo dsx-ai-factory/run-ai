@@ -14,6 +14,7 @@ import {
     projectUtils,
     tags,
     unleashClient,
+    assetsApiV2Utils,
     workloadsCrudUtils,
     environmentUtils,
     computeResourceUtils,
@@ -25,6 +26,7 @@ import { AuthPage } from '../../../../../../modules/ui/runaiV2/pages/AuthPage';
 import { BrowserEngine } from '../../../../../../modules/ui/runaiV2/pages/BrowserEngine';
 import { CredentialPage } from '../../../../../../modules/ui/runaiV2/pages/CredentialPage';
 import {
+    AssetKind,
     Scope,
     GenericSecretCreationRequest,
     GenericSecret,
@@ -176,6 +178,7 @@ test.describe(`Personal credentials, tags: ${tags.tool.ui} ${tags.resource.crede
                     async function () {
                         workloadsCrudUtils.accessToken =
                             flowRootState.users.system_administrator.accessToken;
+                        assetsApiV2Utils.accessToken = flowRootState.users.system_administrator.accessToken;
 
                         await initBrowserAndLogin();
 
@@ -293,6 +296,7 @@ test.describe(`Personal credentials, tags: ${tags.tool.ui} ${tags.resource.crede
 
                 test.beforeEach('setup browser and create docker registry credential', async function () {
                     workloadsCrudUtils.accessToken = flowRootState.users.system_administrator.accessToken;
+                    assetsApiV2Utils.accessToken = flowRootState.users.system_administrator.accessToken;
 
                     await initBrowserAndLogin();
 

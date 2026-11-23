@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TrainingCreationRequest, Training } from '../../../../../../modules/api/apis/workloadsApi/generated/api';
+import { TrainingCreationRequestV2, TrainingV2 } from '../../../../../../modules/api/apis/assetsApi';
 import { Project } from '../../../../../../modules/api/apis/projectsDepartmentsApi';
 import {
     computeResourceUtils,
@@ -38,11 +38,13 @@ test.describe(`Bulk Deletion UI ${tags.teams.viper} ${tags.tool.ui}`, function (
         let environmentId: string;
         let computeResourceId: string;
 
-        function getTrainingWorkloadPayload(name: string): TrainingCreationRequest {
+        function getTrainingWorkloadPayload(name: string): TrainingCreationRequestV2 {
             return {
-                projectId: project.id.toString(),
-                name: name,
-                clusterId: project.clusterUuid,
+                meta: {
+                    projectId: project.id.toString(),
+                    name: name,
+                    clusterId: project.clusterUuid
+                },
                 assets: {
                     environment: environmentId,
                     compute: computeResourceId
@@ -53,7 +55,7 @@ test.describe(`Bulk Deletion UI ${tags.teams.viper} ${tags.tool.ui}`, function (
         async function createTrainingWorkloads(
             amount: number,
             workloadNamePrefix: string
-        ): Promise<Training[]> {
+        ): Promise<TrainingV2[]> {
             const trainingWorkloads = [];
             for (let i = 0; i < amount; i++) {
                 const name = `${workloadNamePrefix}-${i}`;
@@ -129,13 +131,13 @@ test.describe(`Bulk Deletion UI ${tags.teams.viper} ${tags.tool.ui}`, function (
 
             // wait for workloads to appear on UI
             for (const workload of workloads) {
-                await workloadPage.waitForWorkloadToAppear(workload.name);
+                await workloadPage.waitForWorkloadToAppear(workload.meta.name);
             }
 
-            await workloadPage.deleteWorkloads(workloads.map((workload) => workload.name));
-            await workloadPage.waitForWorkloadStatus(workloads[0].name, 'deleting');
-            await workloadPage.waitForWorkloadStatus(workloads[1].name, 'deleting');
-            await workloadPage.waitForWorkloadStatus(workloads[2].name, 'deleting');
+            await workloadPage.deleteWorkloads(workloads.map((workload) => workload.meta.name));
+            await workloadPage.waitForWorkloadStatus(workloads[0].meta.name, 'deleting');
+            await workloadPage.waitForWorkloadStatus(workloads[1].meta.name, 'deleting');
+            await workloadPage.waitForWorkloadStatus(workloads[2].meta.name, 'deleting');
         });
     });
 });
