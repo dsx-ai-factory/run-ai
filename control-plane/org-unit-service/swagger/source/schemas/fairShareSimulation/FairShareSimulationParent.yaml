@@ -1,0 +1,10 @@
+type: object
+description: |
+  The department whose projects are simulated, with its stored settings. Required when orgUnitType is project; not
+  allowed for departments. It needn't be readable by the caller.
+required:
+  - id
+properties:
+  id:
+    type: string
+    example: "4500014"
