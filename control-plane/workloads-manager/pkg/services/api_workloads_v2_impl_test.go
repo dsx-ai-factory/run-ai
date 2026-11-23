@@ -2388,6 +2388,36 @@ var _ = Describe("WorkloadsV2Impl", func() {
 			Expect(updateResp.Code).To(Equal(http.StatusAccepted))
 		})
 
+		It("rejects a stale internal workload update without changing the accepted version", func() {
+			id, _ := createInternalWorkloadForTest(router, randoms, &api.WorkloadV2CreateRequest{
+				Metadata: api.WorkloadV2MetadataCreateParams{
+					Name: "conditional-update", ProjectId: randoms.ProjectIdStr,
+					Category: convutils.Ref("train"), Priority: convutils.Ref("low"),
+				},
+				Manifest: sampleManifest,
+			})
+			initial := getWorkloadForTest(router, randoms, id)
+			Expect(initial.UpdateCount).NotTo(BeNil())
+			request := api.WorkloadV2UpdateRequest{
+				ExpectedUpdateCount: initial.UpdateCount,
+				Manifest:            sampleManifest,
+				Metadata:            api.WorkloadV2MetadataUpdateParams{Priority: convutils.Ref("high")},
+			}
+
+			accepted := tryToUpdateInternalWorkloadForTest(router, randoms, id, &request)
+			Expect(accepted.Code).To(Equal(http.StatusAccepted), accepted.Body.String())
+			current := getWorkloadForTest(router, randoms, id)
+			Expect(current.UpdateCount).To(HaveValue(BeNumerically(">", *initial.UpdateCount)))
+			Expect(current.Workload.Metadata.Priority).To(HaveValue(Equal("high")))
+
+			request.Metadata.Priority = convutils.Ref("low")
+			stale := tryToUpdateInternalWorkloadForTest(router, randoms, id, &request)
+			Expect(stale.Code).To(Equal(http.StatusConflict), stale.Body.String())
+			after := getWorkloadForTest(router, randoms, id)
+			Expect(after.UpdateCount).To(Equal(current.UpdateCount))
+			Expect(after.Workload.Metadata.Priority).To(HaveValue(Equal("high")))
+		})
+
 		It("should reject a public update of an internally created workload", func() {
 			toCreate := api.WorkloadV2CreateRequest{
 				Metadata: api.WorkloadV2MetadataCreateParams{

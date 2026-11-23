@@ -6,3 +6,8 @@ properties:
     $ref: "./Manifest.yaml"
   manifestBase64Encoded:
     $ref: "./ManifestEncoded.yaml"
+  expectedUpdateCount:
+    type: integer
+    format: int64
+    x-go-pointer: true
+    description: Apply the update only if the workload still has the version returned by the preceding read.

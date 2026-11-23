@@ -49,6 +49,7 @@ func NewKNativeTopOwnerHandler(cachedClient client.Client, draParser *dra.DRAPar
 func (h *KNativeTopOwnerHandler) Parse(ctx context.Context, object client.Object,
 	externalWorkload *v1alpha1.ExternalWorkload) error {
 	knativeService, ok := object.(*servingv1.Service)
+	h.setServingWorkloadUpdateCounter(ctx, knativeService, externalWorkload)
 	if !ok {
 		return fmt.Errorf("failed converting object to servingv1.Service")
 	}

@@ -202,6 +202,9 @@ func (s *InferencesAPIService) UpdateInferenceSpec(ctx context.Context, workload
 	// TODO: Uncomment the next line to return response Response(404, Error{}) or use other options such as http.Ok ...
 	// return Response(404, Error{}), nil
 
+	// TODO: Uncomment the next line to return response Response(409, SubmissionErrorV2{}) or use other options such as http.Ok ...
+	// return Response(409, SubmissionErrorV2{}), nil
+
 	// TODO: Uncomment the next line to return response Response(500, Error{}) or use other options such as http.Ok ...
 	// return Response(500, Error{}), nil
 

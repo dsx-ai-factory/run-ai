@@ -31,22 +31,17 @@ const deleteAll = "1=1"
 // DbUpdateWorkloadOptimistic updates a workloads_queue record with optimistic concurrency control.
 // Returns 409 if no row is affected (concurrent modification). Uses Updates() so GORM never INSERTs.
 func DbUpdateWorkloadOptimistic(ctx context.Context, record *models.WorkloadsQueueRecord, expectedUpdateCount int64) *api.Error {
-	updates := map[string]interface{}{
-		models.WorkloadsQueueColumnRawManifest:       record.RawManifest,
-		models.WorkloadsQueueColumnEffectiveManifest: record.EffectiveManifest,
-		models.WorkloadsQueueColumnDesiredPhase:      record.DesiredPhase,
-		models.WorkloadsQueueColumnUpdatedAt:         record.UpdatedAt,
-		models.WorkloadsQueueColumnUpdatedBy:         record.UpdatedBy,
-	}
-
+	// Select all fields so zero values and cleared configuration are saved just as in
+	// DbUpsertWorkload. PostgreSQL assigns a new update count on every write.
 	rowsAffected, err := runaidb.DB().WithContext(ctx).
-		Table(models.WorkloadsQueueTableName).
+		Model(&models.WorkloadsQueueRecord{}).
+		Select("*").Omit(models.WorkloadsQueueColumnId, models.WorkloadsQueueColumnUpdateCount).
 		Where(fmt.Sprintf("%s = ? AND %s = ? AND %s = ?",
 			models.WorkloadsQueueColumnId,
 			models.WorkloadsQueueColumnUpdateCount,
 			models.WorkloadsQueueColumnTenantId),
 			record.ID, expectedUpdateCount, record.TenantId).
-		Updates(updates)
+		Updates(record)
 
 	if err != nil {
 		dbErr := api.NewError(http.StatusServiceUnavailable,

@@ -8,6 +8,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/reconcile"
 
@@ -27,6 +28,9 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/reconcile/issue"
 )
+
+// Keep this protocol key local so dromos does not depend on Run:ai-private modules.
+const backendWorkloadCounterAnnotation = "run.ai/workload-update-counter"
 
 func (c *WorkloadRunnerController) reconcileSpec(
 	ctx context.Context,
@@ -219,7 +223,29 @@ func (c *WorkloadRunnerController) applyTemplateModification(
 		return fmt.Errorf("failed to run mutation plugins: %w", err)
 	}
 
+	setKnativeWorkloadCounter(runner, template)
+
 	return nil
+}
+
+func setKnativeWorkloadCounter(runner *dromosv1alpha1.WorkloadRunner, template *unstructured.Unstructured) {
+	gvk := template.GroupVersionKind()
+	if gvk.Group != "serving.knative.dev" || gvk.Kind != "Service" {
+		return
+	}
+
+	annotations := template.GetAnnotations()
+	delete(annotations, backendWorkloadCounterAnnotation)
+	value := runner.Annotations[backendWorkloadCounterAnnotation]
+	counter, err := strconv.ParseInt(value, 10, 64)
+	if err == nil && counter >= 0 && strconv.FormatInt(counter, 10) == value {
+		if annotations == nil {
+			annotations = make(map[string]string)
+		}
+		annotations[backendWorkloadCounterAnnotation] = value
+	}
+	// Publish the applied update with the rendered spec, without changing its revision template.
+	template.SetAnnotations(annotations)
 }
 
 func (c *WorkloadRunnerController) validateAttachedGVK(

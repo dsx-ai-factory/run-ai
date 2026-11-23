@@ -4103,6 +4103,16 @@
           "404": {
             "$ref": "#/components/responses/404NotFound"
           },
+          "409": {
+            "description": "The current inference revision is still rolling out, or another update changed the workload. Retry once the current revision is serving.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionErrorV2"
+                }
+              }
+            }
+          },
           "500": {
             "$ref": "#/components/responses/500InternalServerError"
           },

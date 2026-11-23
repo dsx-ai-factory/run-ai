@@ -88,6 +88,12 @@ patch:
       $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
     404:
       $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    409:
+      description: The current inference revision is still rolling out, or another update changed the workload. Retry once the current revision is serving.
+      content:
+        application/json:
+          schema:
+            $ref: "../../../../infra/openapi/docs/schemas/workloads/SubmissionErrorV2.yaml"
     500:
       $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
     503:

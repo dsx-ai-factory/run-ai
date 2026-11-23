@@ -23,6 +23,7 @@ import (
 	ctrlbuilder "sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -68,13 +69,22 @@ func (c *WorkloadRunnerController) WithName(name string) *WorkloadRunnerControll
 	return c
 }
 
+// A no-op API update advances the workload counter without changing the runner generation.
+func workloadRunnerUpdateChanged(e event.UpdateEvent) bool {
+	if e.ObjectOld == nil || e.ObjectNew == nil {
+		return false
+	}
+	return e.ObjectOld.GetGeneration() != e.ObjectNew.GetGeneration() ||
+		e.ObjectOld.GetAnnotations()[backendWorkloadCounterAnnotation] != e.ObjectNew.GetAnnotations()[backendWorkloadCounterAnnotation]
+}
+
 func (c *WorkloadRunnerController) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
 	c.manager = mgr
 
 	builder := ctrl.NewControllerManagedBy(mgr).
 		Named(c.name).
 		For(&dromosv1alpha1.WorkloadRunner{}, ctrlbuilder.WithPredicates(
-			predicate.GenerationChangedPredicate{},
+			predicate.Funcs{UpdateFunc: workloadRunnerUpdateChanged},
 			dromospredicates.ManagedByPredicate(""),
 		)).
 		Watches(&kartav1alpha1.Karta{},

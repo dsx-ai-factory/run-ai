@@ -2138,6 +2138,12 @@ export interface WorkloadV2GetResponse {
      * @memberof WorkloadV2GetResponse
      */
     'syncInfo'?: WorkloadV2SyncInfo;
+    /**
+     * Version of the workload returned by this read.
+     * @type {number}
+     * @memberof WorkloadV2GetResponse
+     */
+    'updateCount'?: number;
 }
 /**
  * 
@@ -2865,6 +2871,12 @@ export interface WorkloadV2UpdateRequest {
      * @memberof WorkloadV2UpdateRequest
      */
     'manifestBase64Encoded'?: string;
+    /**
+     * Apply the update only if the workload still has the version returned by the preceding read.
+     * @type {number}
+     * @memberof WorkloadV2UpdateRequest
+     */
+    'expectedUpdateCount'?: number;
 }
 /**
  * 

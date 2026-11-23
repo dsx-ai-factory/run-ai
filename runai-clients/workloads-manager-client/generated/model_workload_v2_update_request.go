@@ -27,6 +27,8 @@ type WorkloadV2UpdateRequest struct {
 	Manifest map[string]interface{} `json:"manifest,omitempty"`
 	// Kubernetes YAML manifest encoded in base 64. Mutually exclusive with manifest.
 	ManifestBase64Encoded *string `json:"manifestBase64Encoded,omitempty"`
+	// Apply the update only if the workload still has the version returned by the preceding read.
+	ExpectedUpdateCount *int64 `json:"expectedUpdateCount,omitempty"`
 }
 
 // NewWorkloadV2UpdateRequest instantiates a new WorkloadV2UpdateRequest object
@@ -142,6 +144,38 @@ func (o *WorkloadV2UpdateRequest) SetManifestBase64Encoded(v string) {
 	o.ManifestBase64Encoded = &v
 }
 
+// GetExpectedUpdateCount returns the ExpectedUpdateCount field value if set, zero value otherwise.
+func (o *WorkloadV2UpdateRequest) GetExpectedUpdateCount() int64 {
+	if o == nil || IsNil(o.ExpectedUpdateCount) {
+		var ret int64
+		return ret
+	}
+	return *o.ExpectedUpdateCount
+}
+
+// GetExpectedUpdateCountOk returns a tuple with the ExpectedUpdateCount field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *WorkloadV2UpdateRequest) GetExpectedUpdateCountOk() (*int64, bool) {
+	if o == nil || IsNil(o.ExpectedUpdateCount) {
+		return nil, false
+	}
+	return o.ExpectedUpdateCount, true
+}
+
+// HasExpectedUpdateCount returns a boolean if a field has been set.
+func (o *WorkloadV2UpdateRequest) HasExpectedUpdateCount() bool {
+	if o != nil && !IsNil(o.ExpectedUpdateCount) {
+		return true
+	}
+
+	return false
+}
+
+// SetExpectedUpdateCount gets a reference to the given int64 and assigns it to the ExpectedUpdateCount field.
+func (o *WorkloadV2UpdateRequest) SetExpectedUpdateCount(v int64) {
+	o.ExpectedUpdateCount = &v
+}
+
 func (o WorkloadV2UpdateRequest) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -160,6 +194,9 @@ func (o WorkloadV2UpdateRequest) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.ManifestBase64Encoded) {
 		toSerialize["manifestBase64Encoded"] = o.ManifestBase64Encoded
+	}
+	if !IsNil(o.ExpectedUpdateCount) {
+		toSerialize["expectedUpdateCount"] = o.ExpectedUpdateCount
 	}
 	return toSerialize, nil
 }

@@ -10,11 +10,13 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
 	querydbenrich "github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi/dbenrich"
+	clusterconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 
 	telemetry_utils "github.com/dsx-ai-factory/run-ai/runai-application-packages/telemetry"
 
@@ -313,6 +315,19 @@ func (w *WorkloadsDao) DbUpdateWorkloadConnectionMetadata(
 
 func (w *WorkloadsDao) DbGetWorkload(ctx context.Context, tenantId uint, workloadId uuid.UUID) (*models.WorkloadView, *api.Error) {
 	return dbGetWorkload(ctx, tenantId, workloadId)
+}
+
+// IsInferenceUpdateServing reads the cluster report from the base table so a materialized
+// view refresh cannot delay a serving revision's acknowledgement.
+func IsInferenceUpdateServing(ctx context.Context, tenantID uint, workloadID string, updateCount int64) (bool, error) {
+	var matches int64
+	err := runaidb.DB().WithContext(ctx).Model(&models.Workload{}).
+		Where("tenant_id = ? AND id = ? AND additional_fields ->> ? = ?", tenantID, workloadID, clusterconstants.ServingWorkloadUpdateCounterField, strconv.FormatInt(updateCount, 10)).
+		Count(&matches)
+	if err != nil {
+		return false, fmt.Errorf("read serving inference update: %w", err)
+	}
+	return matches != 0, nil
 }
 
 func (w *WorkloadsDao) DbGetWorkloadAdditionalFields(ctx context.Context, tenantId uint, workloadId uuid.UUID) (models.AdditionalFields, *api.Error) {

@@ -106,6 +106,9 @@ func (s *WorkloadsV2APIService) UpdateWorkloadV2(ctx context.Context, workloadV2
 	// TODO: Uncomment the next line to return response Response(404, Error{}) or use other options such as http.Ok ...
 	// return Response(404, Error{}), nil
 
+	// TODO: Uncomment the next line to return response Response(409, Error{}) or use other options such as http.Ok ...
+	// return Response(409, Error{}), nil
+
 	// TODO: Uncomment the next line to return response Response(500, Error{}) or use other options such as http.Ok ...
 	// return Response(500, Error{}), nil
 
@@ -235,6 +238,9 @@ func (s *WorkloadsV2APIService) UpdateWorkloadInternal(ctx context.Context, work
 
 	// TODO: Uncomment the next line to return response Response(404, Error{}) or use other options such as http.Ok ...
 	// return Response(404, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(409, Error{}) or use other options such as http.Ok ...
+	// return Response(409, Error{}), nil
 
 	// TODO: Uncomment the next line to return response Response(500, Error{}) or use other options such as http.Ok ...
 	// return Response(500, Error{}), nil

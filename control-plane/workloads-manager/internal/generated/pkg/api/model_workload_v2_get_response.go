@@ -31,6 +31,12 @@ type WorkloadV2GetResponse struct {
 	//SyncInfo WorkloadV2SyncInfo `json:"syncInfo,omitempty"`
 	SyncInfo WorkloadV2SyncInfo `json:"syncInfo,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Version of the workload returned by this read.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//UpdateCount int64 `json:"updateCount,omitempty"`
+	UpdateCount *int64 `json:"updateCount,omitempty" gorm:"not null;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertWorkloadV2GetResponseRequired checks if the required fields are not zero-ed
@@ -71,5 +77,10 @@ func AssertWorkloadV2GetResponseConstraints(obj WorkloadV2GetResponse) error {
 	if err := AssertWorkloadV2SyncInfoConstraints(obj.SyncInfo); err != nil {
 		return err
 	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	return nil
 }

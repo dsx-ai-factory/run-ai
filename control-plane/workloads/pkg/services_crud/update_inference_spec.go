@@ -23,6 +23,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	clients "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/backend"
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/dao"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/dao_crud"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/models_crud"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services_utils"
@@ -268,6 +269,14 @@ func UpdateInferenceSpec(ctx context.Context, workloadId string, tenantSettingsC
 		return api.Response(http.StatusInternalServerError, workloadsApi.NewSubmissionErrorV2(http.StatusInternalServerError, "inference update produced no result")), nil
 	}
 
+	if update.RequiresServingRevision {
+		if checkErr := requireServingInferenceUpdate(ctx, tenantId, workloadId, anyWorkload.UpdateCount, dao.IsInferenceUpdateServing); checkErr != nil {
+			return api.Response(int(checkErr.Code), checkErr), nil
+		}
+	}
+	// Bind this write to the manifest read above, including on retries. A concurrent
+	// image update invalidates the serving observation and the recomposed manifest.
+	update.Request.ExpectedUpdateCount = anyWorkload.UpdateCount
 	updatedWorkload, updateErr := sendUpdateToWorkloadMgr(ctx, workloadId, update)
 	if updateErr != nil {
 		updateErr = redactSensitiveValuesFromResponse(updateErr, sensitiveRequestValues)

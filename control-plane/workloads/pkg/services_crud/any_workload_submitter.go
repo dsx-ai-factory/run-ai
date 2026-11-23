@@ -68,8 +68,9 @@ func newWorkloadsServiceConnectionMetadata(creation *workloadsApi.WorkloadCreati
 // Update is the output of an AnyWorkloadSubmitter for update operations.
 // When non-nil, updateWorkload submits via workloads-manager.
 type Update struct {
-	Request      workloadMgrApi.WorkloadV2UpdateRequest
-	Requirements composer.WorkloadRequirements
+	RequiresServingRevision bool
+	Request                 workloadMgrApi.WorkloadV2UpdateRequest
+	Requirements            composer.WorkloadRequirements
 }
 
 // workloadCreateContext contains fields specific to workload creation.

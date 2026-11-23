@@ -769,6 +769,10 @@ func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId strin
 		}
 	}
 
+	if request.ExpectedUpdateCount != nil && *request.ExpectedUpdateCount != qRecord.UpdateCount {
+		return nil, api.NewError(http.StatusConflict, "workload was modified by a concurrent request; retry", nil)
+	}
+
 	// Merge metadata: use new values if provided, otherwise keep existing values
 	mergedMetadata := api.WorkloadV2MetadataCreateParams{
 		Name:     qRecord.Name,
@@ -894,7 +898,11 @@ func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId strin
 		qRecord.Configuration.PodOwnershipLabelsStamped = true
 	}
 
-	dbErr = dao.DbUpsertWorkload(ctx, qRecord)
+	if request.ExpectedUpdateCount != nil {
+		dbErr = dao.DbUpdateWorkloadOptimistic(ctx, qRecord, *request.ExpectedUpdateCount)
+	} else {
+		dbErr = dao.DbUpsertWorkload(ctx, qRecord)
+	}
 	if dbErr != nil {
 		return nil, dbErr
 	}

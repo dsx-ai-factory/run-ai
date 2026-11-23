@@ -93,6 +93,8 @@ put:
       $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
     404:
       $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    409:
+      $ref: '../responses/WorkloadVersionConflict.yaml'
     500:
       $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
     503:

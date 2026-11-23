@@ -188,6 +188,26 @@ var _ = Describe("DbGetWorkload", func() {
 	})
 })
 
+var _ = Describe("IsInferenceUpdateServing", func() {
+	const query = "SELECT count(*) FROM workloads WHERE (tenant_id = ? AND id = ? AND additional_fields ->> ? = ?) AND workloads.deleted_at IS NULL"
+
+	DescribeTable("checks the current tenant and version in the cluster report", func(count int64, want bool) {
+		m := setupDaoMock(GinkgoT())
+		m.ExpectQuery(query).Returns([]countRow{{Count: count}})
+		serving, err := IsInferenceUpdateServing(testCtx(1), 1, uuid.NewString(), 7)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(serving).To(Equal(want))
+	}, Entry("matching version", int64(1), true), Entry("missing or stale version", int64(0), false))
+
+	It("propagates a failed status read", func() {
+		m := setupDaoMock(GinkgoT())
+		m.ExpectQuery(query).ReturnsError(errors.New("unavailable"))
+		serving, err := IsInferenceUpdateServing(testCtx(1), 1, uuid.NewString(), 7)
+		Expect(serving).To(BeFalse())
+		Expect(err).To(MatchError(ContainSubstring("unavailable")))
+	})
+})
+
 var _ = Describe("DbGetWorkloadAdditionalFields", func() {
 	It("returns the additional fields", func() {
 		m := setupDaoMock(GinkgoT())

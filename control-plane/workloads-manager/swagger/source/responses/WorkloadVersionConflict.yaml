@@ -1,0 +1,8 @@
+description: The workload was updated after the supplied version was read.
+content:
+  application/json:
+    schema:
+      $ref: '../../../../infra/openapi/docs/responses/Error.yaml'
+    example:
+      code: 409
+      message: Workload was modified by a concurrent request. Read the workload again and retry.

@@ -26,6 +26,8 @@ var _ MappedNullable = &WorkloadV2GetResponse{}
 type WorkloadV2GetResponse struct {
 	Workload WorkloadV2          `json:"workload"`
 	SyncInfo *WorkloadV2SyncInfo `json:"syncInfo,omitempty"`
+	// Version of the workload returned by this read.
+	UpdateCount *int64 `json:"updateCount,omitempty"`
 }
 
 type _WorkloadV2GetResponse WorkloadV2GetResponse
@@ -104,6 +106,38 @@ func (o *WorkloadV2GetResponse) SetSyncInfo(v WorkloadV2SyncInfo) {
 	o.SyncInfo = &v
 }
 
+// GetUpdateCount returns the UpdateCount field value if set, zero value otherwise.
+func (o *WorkloadV2GetResponse) GetUpdateCount() int64 {
+	if o == nil || IsNil(o.UpdateCount) {
+		var ret int64
+		return ret
+	}
+	return *o.UpdateCount
+}
+
+// GetUpdateCountOk returns a tuple with the UpdateCount field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *WorkloadV2GetResponse) GetUpdateCountOk() (*int64, bool) {
+	if o == nil || IsNil(o.UpdateCount) {
+		return nil, false
+	}
+	return o.UpdateCount, true
+}
+
+// HasUpdateCount returns a boolean if a field has been set.
+func (o *WorkloadV2GetResponse) HasUpdateCount() bool {
+	if o != nil && !IsNil(o.UpdateCount) {
+		return true
+	}
+
+	return false
+}
+
+// SetUpdateCount gets a reference to the given int64 and assigns it to the UpdateCount field.
+func (o *WorkloadV2GetResponse) SetUpdateCount(v int64) {
+	o.UpdateCount = &v
+}
+
 func (o WorkloadV2GetResponse) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -117,6 +151,9 @@ func (o WorkloadV2GetResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize["workload"] = o.Workload
 	if !IsNil(o.SyncInfo) {
 		toSerialize["syncInfo"] = o.SyncInfo
+	}
+	if !IsNil(o.UpdateCount) {
+		toSerialize["updateCount"] = o.UpdateCount
 	}
 	return toSerialize, nil
 }

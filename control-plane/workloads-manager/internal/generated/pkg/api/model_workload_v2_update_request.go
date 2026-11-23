@@ -38,6 +38,12 @@ type WorkloadV2UpdateRequest struct {
 	//ManifestBase64Encoded string `json:"manifestBase64Encoded,omitempty"`
 	ManifestBase64Encoded string `json:"manifestBase64Encoded,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Apply the update only if the workload still has the version returned by the preceding read.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//ExpectedUpdateCount int64 `json:"expectedUpdateCount,omitempty"`
+	ExpectedUpdateCount *int64 `json:"expectedUpdateCount,omitempty" gorm:"not null;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertWorkloadV2UpdateRequestRequired checks if the required fields are not zero-ed
@@ -67,6 +73,11 @@ func AssertWorkloadV2UpdateRequestConstraints(obj WorkloadV2UpdateRequest) error
 	if maxLengthErr := runaihttp.AssertMaxLength(obj.ManifestBase64Encoded, "ManifestBase64Encoded", 2097152); maxLengthErr != nil {
 		return &ParsingError{Param: "ManifestBase64Encoded", Err: maxLengthErr}
 	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 

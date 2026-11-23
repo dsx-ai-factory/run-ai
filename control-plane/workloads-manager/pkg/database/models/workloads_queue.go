@@ -524,7 +524,8 @@ func (q *WorkloadsQueueRecord) ToWorkloadV2() api.WorkloadV2 {
 
 func (q *WorkloadsQueueRecord) ToGetResponse() api.WorkloadV2GetResponse {
 	result := api.WorkloadV2GetResponse{
-		Workload: q.ToWorkloadV2(),
+		Workload:    q.ToWorkloadV2(),
+		UpdateCount: &q.UpdateCount,
 	}
 
 	return result

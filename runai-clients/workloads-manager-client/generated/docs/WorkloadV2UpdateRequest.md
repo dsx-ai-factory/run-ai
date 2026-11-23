@@ -7,6 +7,7 @@ Name | Type | Description | Notes
 **Metadata** | Pointer to [**WorkloadV2MetadataUpdateParams**](WorkloadV2MetadataUpdateParams.md) |  | [optional] 
 **Manifest** | Pointer to **map[string]interface{}** | The full Kubernetes manifest for the workload in JSON form. Mutually exclusive with manifestEncodedBase64. | [optional] 
 **ManifestBase64Encoded** | Pointer to **string** | Kubernetes YAML manifest encoded in base 64. Mutually exclusive with manifest. | [optional] 
+**ExpectedUpdateCount** | Pointer to **int64** | Apply the update only if the workload still has the version returned by the preceding read. | [optional]
 
 ## Methods
 
@@ -101,6 +102,31 @@ SetManifestBase64Encoded sets ManifestBase64Encoded field to given value.
 `func (o *WorkloadV2UpdateRequest) HasManifestBase64Encoded() bool`
 
 HasManifestBase64Encoded returns a boolean if a field has been set.
+
+### GetExpectedUpdateCount
+
+`func (o *WorkloadV2UpdateRequest) GetExpectedUpdateCount() int64`
+
+GetExpectedUpdateCount returns the ExpectedUpdateCount field if non-nil, zero value otherwise.
+
+### GetExpectedUpdateCountOk
+
+`func (o *WorkloadV2UpdateRequest) GetExpectedUpdateCountOk() (*int64, bool)`
+
+GetExpectedUpdateCountOk returns a tuple with the ExpectedUpdateCount field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetExpectedUpdateCount
+
+`func (o *WorkloadV2UpdateRequest) SetExpectedUpdateCount(v int64)`
+
+SetExpectedUpdateCount sets ExpectedUpdateCount field to given value.
+
+### HasExpectedUpdateCount
+
+`func (o *WorkloadV2UpdateRequest) HasExpectedUpdateCount() bool`
+
+HasExpectedUpdateCount returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

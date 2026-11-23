@@ -6,6 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Workload** | [**WorkloadV2**](WorkloadV2.md) |  | 
 **SyncInfo** | Pointer to [**WorkloadV2SyncInfo**](WorkloadV2SyncInfo.md) |  | [optional] 
+**UpdateCount** | Pointer to **int64** | Version of the workload returned by this read. | [optional]
 
 ## Methods
 
@@ -70,6 +71,31 @@ SetSyncInfo sets SyncInfo field to given value.
 `func (o *WorkloadV2GetResponse) HasSyncInfo() bool`
 
 HasSyncInfo returns a boolean if a field has been set.
+
+### GetUpdateCount
+
+`func (o *WorkloadV2GetResponse) GetUpdateCount() int64`
+
+GetUpdateCount returns the UpdateCount field if non-nil, zero value otherwise.
+
+### GetUpdateCountOk
+
+`func (o *WorkloadV2GetResponse) GetUpdateCountOk() (*int64, bool)`
+
+GetUpdateCountOk returns a tuple with the UpdateCount field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetUpdateCount
+
+`func (o *WorkloadV2GetResponse) SetUpdateCount(v int64)`
+
+SetUpdateCount sets UpdateCount field to given value.
+
+### HasUpdateCount
+
+`func (o *WorkloadV2GetResponse) HasUpdateCount() bool`
+
+HasUpdateCount returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

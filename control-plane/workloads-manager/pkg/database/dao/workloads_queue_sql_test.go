@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	sqlUpdateWorkloadOptimistic = `UPDATE workloads_queue SET desired_phase=?,effective_manifest=?,raw_manifest=?,updated_at=?,updated_by=? WHERE id = ? AND update_count = ? AND tenant_id = ?`
+	sqlUpdateWorkloadOptimistic = `UPDATE workloads_queue SET created_at=?,created_by=?,updated_at=?,updated_by=?,deleted_at=?,deleted_by=?,tenant_id=?,cluster_id=?,department_id=?,department_name=?,project_id=?,project_name=?,name=?,category=?,priority_class=?,preemptibility=?,configuration=?,resource_group=?,resource_version=?,resource_kind=?,desired_phase=?,translated_from_v1=?,raw_manifest=?,effective_manifest=?,input_request_path=?,input_request_body=? WHERE (id = ? AND update_count = ? AND tenant_id = ?) AND workloads_queue.deleted_at IS NULL`
 	sqlSaveWorkload             = `UPDATE workloads_queue SET created_at=?,created_by=?,updated_at=?,updated_by=?,deleted_at=?,deleted_by=?,tenant_id=?,cluster_id=?,department_id=?,department_name=?,project_id=?,project_name=?,name=?,category=?,priority_class=?,preemptibility=?,configuration=?,resource_group=?,resource_version=?,resource_kind=?,desired_phase=?,translated_from_v1=?,raw_manifest=?,effective_manifest=?,update_count=?,input_request_path=?,input_request_body=? WHERE workloads_queue.deleted_at IS NULL AND id = ?`
 	sqlInsertWorkload           = `INSERT INTO workloads_queue (id,created_at,created_by,updated_at,updated_by,deleted_at,deleted_by,tenant_id,cluster_id,department_id,department_name,project_id,project_name,name,category,priority_class,preemptibility,configuration,resource_group,resource_version,resource_kind,desired_phase,translated_from_v1,raw_manifest,effective_manifest,update_count,input_request_path,input_request_body) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
 	sqlGetWorkloadByID          = `SELECT * FROM workloads_queue WHERE workloads_queue.id = ? AND tenant_id = ? ORDER BY workloads_queue.id LIMIT ?`
@@ -35,7 +35,11 @@ const (
 
 func expectOptimisticUpdate(mocker dbtesting.Mocker, record *models.WorkloadsQueueRecord) dbtesting.ExecExpectation {
 	return mocker.ExpectExec(sqlUpdateWorkloadOptimistic,
-		record.DesiredPhase, dbtesting.AnyArg(), dbtesting.AnyArg(), dbtesting.AnyTime(), record.UpdatedBy,
+		record.CreatedAt, record.CreatedBy, dbtesting.AnyTime(), record.UpdatedBy, nil, nil,
+		record.TenantId, record.ClusterId, record.DepartmentId, record.DepartmentName, record.ProjectId,
+		record.ProjectName, record.Name, nil, nil, nil, nil, record.ResourceGroup, record.ResourceVersion,
+		record.ResourceKind, record.DesiredPhase, record.TranslatedFromV1, dbtesting.AnyArg(), dbtesting.AnyArg(),
+		record.InputRequestPath, dbtesting.AnyArg(),
 		record.ID, record.UpdateCount, record.TenantId,
 	)
 }

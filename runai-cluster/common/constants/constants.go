@@ -39,6 +39,9 @@ const (
 
 	KnativeRevisionLabel = "serving.knative.dev/revision"
 
+	// ServingWorkloadUpdateCounterField identifies the applied update serving all inference traffic.
+	ServingWorkloadUpdateCounterField = "servingWorkloadUpdateCounter"
+
 	WorkloadRunnerNameLabel = "run.ai/workload-runner-name"
 
 	WorkloadRunnerUidLabel = "run.ai/workload-runner-uid"

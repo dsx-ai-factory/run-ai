@@ -248,6 +248,9 @@
           "404": {
             "$ref": "#/components/responses/404NotFound"
           },
+          "409": {
+            "$ref": "#/components/responses/WorkloadVersionConflict"
+          },
           "500": {
             "$ref": "#/components/responses/500InternalServerError"
           },
@@ -492,6 +495,9 @@
           },
           "404": {
             "$ref": "#/components/responses/404NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkloadVersionConflict"
           },
           "500": {
             "$ref": "#/components/responses/500InternalServerError"
@@ -990,6 +996,20 @@
             "example": {
               "code": 404,
               "message": "Resource id not found."
+            }
+          }
+        }
+      },
+      "WorkloadVersionConflict": {
+        "description": "The workload was updated after the supplied version was read.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 409,
+              "message": "Workload was modified by a concurrent request. Read the workload again and retry."
             }
           }
         }
@@ -2117,6 +2137,12 @@
           },
           "syncInfo": {
             "$ref": "#/components/schemas/WorkloadV2SyncInfo"
+          },
+          "updateCount": {
+            "type": "integer",
+            "format": "int64",
+            "x-go-pointer": true,
+            "description": "Version of the workload returned by this read."
           }
         }
       },
@@ -2151,6 +2177,12 @@
           },
           "manifestBase64Encoded": {
             "$ref": "#/components/schemas/ManifestEncoded"
+          },
+          "expectedUpdateCount": {
+            "type": "integer",
+            "format": "int64",
+            "x-go-pointer": true,
+            "description": "Apply the update only if the workload still has the version returned by the preceding read."
           }
         }
       },

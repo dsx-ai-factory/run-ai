@@ -160,6 +160,8 @@ paths:
           $ref: '#/components/responses/403Forbidden'
         '404':
           $ref: '#/components/responses/404NotFound'
+        '409':
+          $ref: '#/components/responses/WorkloadVersionConflict'
         '500':
           $ref: '#/components/responses/500InternalServerError'
         '503':
@@ -320,6 +322,8 @@ paths:
           $ref: '#/components/responses/403Forbidden'
         '404':
           $ref: '#/components/responses/404NotFound'
+        '409':
+          $ref: '#/components/responses/WorkloadVersionConflict'
         '500':
           $ref: '#/components/responses/500InternalServerError'
         '503':
@@ -639,6 +643,15 @@ components:
           example:
             code: 404
             message: Resource id not found.
+    WorkloadVersionConflict:
+      description: The workload was updated after the supplied version was read.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 409
+            message: Workload was modified by a concurrent request. Read the workload again and retry.
     400SubmissionErrorV2:
       description: Bad submission request.
       content:
@@ -1514,6 +1527,11 @@ components:
           $ref: '#/components/schemas/WorkloadV2'
         syncInfo:
           $ref: '#/components/schemas/WorkloadV2SyncInfo'
+        updateCount:
+          type: integer
+          format: int64
+          x-go-pointer: true
+          description: Version of the workload returned by this read.
     WorkloadV2MetadataUpdateParams:
       type: object
       properties:
@@ -1535,6 +1553,11 @@ components:
           $ref: '#/components/schemas/Manifest'
         manifestBase64Encoded:
           $ref: '#/components/schemas/ManifestEncoded'
+        expectedUpdateCount:
+          type: integer
+          format: int64
+          x-go-pointer: true
+          description: Apply the update only if the workload still has the version returned by the preceding read.
     RunState:
       type: string
       description: The desired run state of the workload.

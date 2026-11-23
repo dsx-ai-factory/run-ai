@@ -6,3 +6,8 @@ properties:
     $ref: "./WorkloadV2.yaml"
   syncInfo:
     $ref: "./WorkloadV2SyncInfo.yaml"
+  updateCount:
+    type: integer
+    format: int64
+    x-go-pointer: true
+    description: Version of the workload returned by this read.

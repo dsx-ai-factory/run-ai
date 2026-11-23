@@ -7,13 +7,17 @@ package services_crud
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"reflect"
 	"strconv"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"knative.dev/serving/pkg/apis/autoscaling"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
@@ -38,36 +42,40 @@ func onlyInferenceMinimumChanged(previous, desired *workloadsApi.SupersetSpec) b
 
 // A new Revision normally starts one pod even when its minimum is zero. If
 // the previous revision holds the project's last GPU, that pod cannot start.
-func setInitialScaleOnMinimumUpdate(previous map[string]any, service *servingv1.Service, canStartAtZero bool) error {
+func setInitialScaleOnMinimumUpdate(previous map[string]any, service *servingv1.Service, canStartAtZero bool) (bool, *workloadsApi.SubmissionErrorV2) {
 	ann := service.Spec.Template.Annotations
 	if ann[autoscaling.MinScaleAnnotationKey] != "0" || ann[autoscaling.ClassAnnotationKey] != autoscaling.KPA || !routesToLatestRevision(service.Spec.Traffic) {
-		return nil
+		return false, nil
 	}
 	if _, explicit := ann[autoscaling.InitialScaleAnnotationKey]; explicit || previous["apiVersion"] != service.APIVersion || previous["kind"] != service.Kind {
-		return nil
+		return false, nil
 	}
 
 	// RawManifest is the submitted Service, before workloads-manager adds its
 	// labels and defaults. Unknown fields must also disqualify a template change.
 	raw, err := json.Marshal(previous["spec"])
 	if err != nil {
-		return fmt.Errorf("read previous inference Service spec: %w", err)
+		return false, workloadsApi.NewSubmissionErrorV2(http.StatusInternalServerError, fmt.Sprintf("read previous inference Service spec: %v", err))
 	}
 	var prior servingv1.ServiceSpec
-	decoder := json.NewDecoder(bytes.NewReader(raw))
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&prior); err != nil {
-		return nil
+	if err := json.Unmarshal(raw, &prior); err != nil {
+		return false, nil
 	}
 	old := prior.Template.Annotations
 	minimum, err := strconv.ParseUint(old[autoscaling.MinScaleAnnotationKey], 10, 32)
-	if err != nil {
-		return nil
+	if err != nil || old[autoscaling.ClassAnnotationKey] != autoscaling.KPA || !routesToLatestRevision(prior.Traffic) {
+		return false, nil
+	}
+	// The native snapshot is written after workloads-manager accepts an update.
+	// A minimum-only PATCH composed from a stale snapshot must not roll the image back.
+	currentContainers, desiredContainers := prior.Template.Spec.Containers, service.Spec.Template.Spec.Containers
+	if minimum > 0 && len(currentContainers) > 0 && len(desiredContainers) > 0 && currentContainers[0].Image != desiredContainers[0].Image {
+		return false, workloadsApi.NewSubmissionErrorV2(http.StatusConflict, "Cannot lower minReplicas to 0 because the inference image differs from the latest accepted update. Retry after the image update synchronizes. If the conflict persists, submit the intended image separately.")
 	}
 	initial, explicit := old[autoscaling.InitialScaleAnnotationKey]
 	retain := minimum == 0 && initial == "0"
 	if !retain && (minimum == 0 || explicit || !canStartAtZero) {
-		return nil
+		return false, nil
 	}
 	old[autoscaling.MinScaleAnnotationKey] = "0"
 	delete(old, autoscaling.InitialScaleAnnotationKey)
@@ -83,10 +91,15 @@ func setInitialScaleOnMinimumUpdate(previous map[string]any, service *servingv1.
 		}
 	}
 	if !equality.Semantic.DeepEqual(&prior, candidate) {
-		return nil
+		return false, nil
+	}
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&servingv1.ServiceSpec{}); err != nil {
+		return false, nil
 	}
 	ann[autoscaling.InitialScaleAnnotationKey] = "0"
-	return nil
+	return !retain, nil
 }
 
 func routesToLatestRevision(targets []servingv1.TrafficTarget) bool {
@@ -95,4 +108,20 @@ func routesToLatestRevision(targets []servingv1.TrafficTarget) bool {
 	}
 	target := targets[0]
 	return len(targets) == 1 && target.LatestRevision != nil && *target.LatestRevision && target.Percent != nil && *target.Percent == 100 && target.RevisionName == "" && target.Tag == "" && target.ConfigurationName == ""
+}
+
+// The reported version must acknowledge the same desired workload we are updating.
+// An unversioned Running/Ready report may still describe the previous image.
+func requireServingInferenceUpdate(ctx context.Context, tenantID uint, workloadID string, count *int64, isServing func(context.Context, uint, string, int64) (bool, error)) *workloadsApi.SubmissionErrorV2 {
+	if count != nil {
+		serving, err := isServing(ctx, tenantID, workloadID, *count)
+		if err != nil {
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Check serving revision of inference %s: %v", workloadID, err)
+			return workloadsApi.NewSubmissionErrorV2(http.StatusServiceUnavailable, "Could not read inference rollout status. Retry the update.")
+		}
+		if serving {
+			return nil
+		}
+	}
+	return workloadsApi.NewSubmissionErrorV2(http.StatusConflict, "Cannot lower minReplicas to 0 until the current inference revision is serving. Wait for the image rollout to finish or roll it back, then retry.")
 }

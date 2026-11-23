@@ -6347,6 +6347,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The specified resource was not found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionErrorV2'
+          description: "The current inference revision is still rolling out, or another\
+            \ update changed the workload. Retry once the current revision is serving."
         "500":
           content:
             application/json:

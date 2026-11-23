@@ -34,6 +34,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-20250907093507-4e419875bd3d
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities v1.0.5
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20251016112722-024bf1e7a8f1
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.8
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
@@ -106,7 +107,6 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/validation v1.0.2 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/personalcreds v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20251016112722-024bf1e7a8f1 // indirect
 	github.com/ebitengine/purego v0.10.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect

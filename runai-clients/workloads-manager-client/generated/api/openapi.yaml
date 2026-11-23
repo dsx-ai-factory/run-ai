@@ -317,6 +317,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The specified resource was not found
+        "409":
+          content:
+            application/json:
+              example:
+                code: 409
+                message: Workload was modified by a concurrent request. Read the workload
+                  again and retry.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The workload was updated after the supplied version was read.
         "500":
           content:
             application/json:
@@ -674,6 +684,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The specified resource was not found
+        "409":
+          content:
+            application/json:
+              example:
+                code: 409
+                message: Workload was modified by a concurrent request. Read the workload
+                  again and retry.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The workload was updated after the supplied version was read.
         "500":
           content:
             application/json:
@@ -1418,6 +1438,16 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
       description: The specified resource was not found
+    WorkloadVersionConflict:
+      content:
+        application/json:
+          example:
+            code: 409
+            message: Workload was modified by a concurrent request. Read the workload
+              again and retry.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The workload was updated after the supplied version was read.
     "400SubmissionErrorV2":
       content:
         application/json:
@@ -4213,6 +4243,7 @@ components:
       type: object
     WorkloadV2GetResponse:
       example:
+        updateCount: 0
         workload:
           workloadManifest:
             apiVersion: apps/v1
@@ -4584,6 +4615,11 @@ components:
           $ref: '#/components/schemas/WorkloadV2'
         syncInfo:
           $ref: '#/components/schemas/WorkloadV2SyncInfo'
+        updateCount:
+          description: Version of the workload returned by this read.
+          format: int64
+          type: integer
+          x-go-pointer: true
       required:
       - workload
       type: object
@@ -4642,6 +4678,7 @@ components:
                 containers:
                 - name: app
                   image: nginx:latest
+        expectedUpdateCount: 0
         manifestBase64Encoded: !!binary |-
           WVhCcFZtVnljMmx2YmpvZ2RqRUthMmx1WkRvZ1VHOWtDbTFsZEdGa1lYUmhPZ29nSUc1aGJXVTZJ
           RzE1TFhCdlpBcHpjR1ZqT2dvZ0lHTnZiblJoYVc1bGNuTTZDaUFnTFNCdVlXMWxPaUJ1WjJsdWVB
@@ -4682,6 +4719,12 @@ components:
           format: byte
           maxLength: 2097152
           type: string
+        expectedUpdateCount:
+          description: Apply the update only if the workload still has the version
+            returned by the preceding read.
+          format: int64
+          type: integer
+          x-go-pointer: true
       type: object
     RunState:
       description: The desired run state of the workload.

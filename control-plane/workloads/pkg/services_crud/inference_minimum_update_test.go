@@ -6,7 +6,10 @@
 package services_crud
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
+	"net/http"
 	"testing"
 
 	clusterAPI "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
@@ -22,6 +25,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 	checkerclient "github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/clients/cluster"
 	"github.com/stretchr/testify/require"
+	corev1 "k8s.io/api/core/v1"
 	"knative.dev/serving/pkg/apis/autoscaling"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
@@ -49,10 +53,12 @@ func TestInferenceMinimumUpdate(t *testing.T) {
 	existing := &workloadMgrApi.WorkloadV2GetResponse{}
 	existing.Workload.Metadata.ProjectName = "project"
 	workload := &models_crud.Workload{Name: "model", CreatedBy: "tester", Namespace: "runai-project", ClusterId: clusterID, Spec: &spec}
+	var requiresServing bool
 	render := func() *servingv1.Service {
 		t.Helper()
 		update, updateErr := (&AnyWorkloadSubmitterInference{}).Update(t.Context(), wc, "id", existing, workload)
 		require.Nil(t, updateErr)
+		requiresServing = update.RequiresServingRevision
 		data, err := json.Marshal(update.Request.Manifest)
 		require.NoError(t, err)
 		var service servingv1.Service
@@ -76,7 +82,32 @@ func TestInferenceMinimumUpdate(t *testing.T) {
 
 	baseline := render()
 	require.NotContains(t, baseline.Spec.Template.Annotations, autoscaling.InitialScaleAnnotationKey)
+	t.Run("minimum-only PATCH cannot roll back an image accepted before the native snapshot was saved", func(t *testing.T) {
+		accepted := baseline.DeepCopy()
+		accepted.Spec.Template.Spec.Containers[0].Image = "example/model:v2"
+		current := *existing
+		var err error
+		current.Workload.RawManifest, err = gojsonq.LoadJson(accepted)
+		require.NoError(t, err)
+		// A newer Service field still allows the known images to be compared.
+		current.Workload.RawManifest["spec"].(map[string]any)["newServiceField"] = true
+
+		stale, desired := spec, spec
+		var request api.InferenceUpdateRequest
+		require.NoError(t, json.Unmarshal([]byte(`{"spec":{"autoscaling":{"minReplicas":0}}}`), &request))
+		require.Nil(t, mergeUpdateSpecIntoFullSpec(t.Context(), &desired, &request.Spec))
+		updateContext := *wc
+		updateContext.previousInferenceSpec = &stale
+		merged := *workload
+		merged.Spec = &desired
+		update, updateErr := (&AnyWorkloadSubmitterInference{}).Update(t.Context(), &updateContext, "id", &current, &merged)
+		require.Nil(t, update)
+		require.NotNil(t, updateErr)
+		require.EqualValues(t, http.StatusConflict, updateErr.Code)
+		require.Contains(t, updateErr.Message, "image differs from the latest accepted update")
+	})
 	lowered := patch(`{"spec":{"autoscaling":{"minReplicas":0}}}`)
+	require.True(t, requiresServing)
 	require.Equal(t, "0", lowered.Spec.Template.Annotations[autoscaling.MinScaleAnnotationKey])
 	require.Equal(t, "0", lowered.Spec.Template.Annotations[autoscaling.InitialScaleAnnotationKey])
 	require.Equal(t, "3", lowered.Spec.Template.Annotations[autoscaling.MaxScaleAnnotationKey])
@@ -86,6 +117,7 @@ func TestInferenceMinimumUpdate(t *testing.T) {
 
 	(*features)[checker.ZeroInitialScaleDependency] = clusterAPI.ClusterDependencyStatus{Available: false}
 	retry := patch(`{"spec":{"autoscaling":{"minReplicas":0}}}`)
+	require.False(t, requiresServing)
 	require.Equal(t, lowered.Spec, retry.Spec)
 	imageUpdate := patch(`{"spec":{"image":"example/model:v2"}}`)
 	require.Equal(t, "0", imageUpdate.Spec.Template.Annotations[autoscaling.MinScaleAnnotationKey])
@@ -113,25 +145,68 @@ func TestInferenceMinimumUpdateEligibility(t *testing.T) {
 		name           string
 		class          string
 		traffic        []servingv1.TrafficTarget
+		imageChanged   bool
 		canStartAtZero bool
 		want           bool
 	}{
 		{name: "supported", class: autoscaling.KPA, traffic: []servingv1.TrafficTarget{latest}, canStartAtZero: true, want: true},
 		{name: "disabled", class: autoscaling.KPA},
-		{name: "HPA", class: autoscaling.HPA, canStartAtZero: true},
-		{name: "pinned traffic", class: autoscaling.KPA, traffic: []servingv1.TrafficTarget{{RevisionName: "existing", Percent: convutils.Ref(int64(100))}}, canStartAtZero: true},
+		{name: "HPA", class: autoscaling.HPA, imageChanged: true, canStartAtZero: true},
+		{name: "pinned traffic", class: autoscaling.KPA, imageChanged: true, traffic: []servingv1.TrafficTarget{{RevisionName: "existing", Percent: convutils.Ref(int64(100))}}, canStartAtZero: true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			service := &servingv1.Service{}
 			service.APIVersion, service.Kind = "serving.knative.dev/v1", "Service"
 			service.Spec.Traffic = tc.traffic
 			service.Spec.Template.Annotations = map[string]string{autoscaling.ClassAnnotationKey: tc.class, autoscaling.MinScaleAnnotationKey: "1"}
+			service.Spec.Template.Spec.Containers = []corev1.Container{{Name: "model", Image: "example/model:v2"}}
 			prior, err := gojsonq.LoadJson(service)
 			require.NoError(t, err)
 			service.Spec.Template.Annotations[autoscaling.MinScaleAnnotationKey] = "0"
-			require.NoError(t, setInitialScaleOnMinimumUpdate(prior, service, tc.canStartAtZero))
+			if tc.imageChanged {
+				service.Spec.Template.Spec.Containers[0].Image = "example/model:v1"
+			}
+			guard, updateErr := setInitialScaleOnMinimumUpdate(prior, service, tc.canStartAtZero)
+			require.Nil(t, updateErr)
+			require.Equal(t, tc.want, guard)
 			_, derived := service.Spec.Template.Annotations[autoscaling.InitialScaleAnnotationKey]
 			require.Equal(t, tc.want, derived)
+		})
+	}
+}
+
+func TestRequireServingInferenceUpdate(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		current  *int64
+		serving  int64
+		readErr  error
+		wantCode int32
+	}{
+		{name: "serving current revision", current: convutils.Ref(int64(7)), serving: 7},
+		{name: "zero is a valid counter", current: convutils.Ref(int64(0)), serving: 0},
+		{name: "old image still serving", current: convutils.Ref(int64(8)), serving: 7, wantCode: http.StatusConflict},
+		{name: "manager missing version", wantCode: http.StatusConflict},
+		{name: "status read failed", current: convutils.Ref(int64(8)), readErr: errors.New("database unavailable"), wantCode: http.StatusServiceUnavailable},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			called := false
+			err := requireServingInferenceUpdate(t.Context(), 4, "workload", tc.current, func(_ context.Context, tenant uint, id string, count int64) (bool, error) {
+				called = true
+				require.Equal(t, uint(4), tenant)
+				require.Equal(t, "workload", id)
+				return count == tc.serving, tc.readErr
+			})
+			require.Equal(t, tc.current != nil, called)
+			if tc.wantCode == 0 {
+				require.Nil(t, err)
+				return
+			}
+			require.NotNil(t, err)
+			require.Equal(t, tc.wantCode, err.Code)
+			if tc.wantCode == http.StatusConflict {
+				require.Contains(t, err.Message, "roll it back")
+			}
 		})
 	}
 }

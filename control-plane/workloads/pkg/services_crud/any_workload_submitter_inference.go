@@ -179,9 +179,12 @@ func (s *AnyWorkloadSubmitterInference) Update(ctx context.Context, wc *workload
 		return nil, workloadsApi.NewSubmissionErrorV2(composerErr.Code, composerErr.Message)
 	}
 
+	requiresServingRevision := false
 	if onlyInferenceMinimumChanged(wc.previousInferenceSpec, mergedWorkload.Spec) {
-		if err := setInitialScaleOnMinimumUpdate(existingWorkload.Workload.RawManifest, &target.Service, checker.CanStartKnativeRevisionAtZero(cluster)); err != nil {
-			return nil, workloadsApi.NewSubmissionErrorV2(http.StatusInternalServerError, err.Error())
+		var updateErr *workloadsApi.SubmissionErrorV2
+		requiresServingRevision, updateErr = setInitialScaleOnMinimumUpdate(existingWorkload.Workload.RawManifest, &target.Service, checker.CanStartKnativeRevisionAtZero(cluster))
+		if updateErr != nil {
+			return nil, updateErr
 		}
 	}
 	manifest, err := gojsonq.LoadJson(target.Service)
@@ -190,6 +193,7 @@ func (s *AnyWorkloadSubmitterInference) Update(ctx context.Context, wc *workload
 	}
 
 	return &Update{
+		RequiresServingRevision: requiresServingRevision,
 		Request: workloadMgrApi.WorkloadV2UpdateRequest{
 			Metadata: &workloadMgrApi.WorkloadV2MetadataUpdateParams{
 				Configuration: *workloadMgrApi.NewNullableWorkloadV2Configuration(&target.Config),
