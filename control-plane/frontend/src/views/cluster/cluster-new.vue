@@ -245,11 +245,12 @@ export default defineComponent({
     },
     async loadInstallationInstructions(): Promise<void> {
       this.installationInstructions = undefined;
-      if (!this.createdCluster?.uuid || !this.operatorVersionsMap) return;
+      const version = this.clusterFormModel.version;
+      if (!this.createdCluster?.uuid || !this.operatorVersionsMap || !version) return;
       try {
         const response = await clusterService.getClusterInstallationInfo(
           this.createdCluster.uuid,
-          String(this.operatorVersionsMap[this.clusterFormModel.version]),
+          String(this.operatorVersionsMap[version]),
           this.clusterFormModel.prerequisites.clusterUrl,
         );
         this.installationInstructions = response?.data.installationStr;
