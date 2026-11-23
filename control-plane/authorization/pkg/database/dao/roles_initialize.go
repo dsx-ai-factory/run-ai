@@ -54,6 +54,7 @@ var (
 		static_roles.CloudOperator,
 		static_roles.ClusterServiceAccount,
 		static_roles.InstallerServiceAccount,
+		static_roles.ClusterInstaller,
 	}
 	// pre-defined roles which will be deployed starting 2.24
 	RolesNew = []models.Role{
