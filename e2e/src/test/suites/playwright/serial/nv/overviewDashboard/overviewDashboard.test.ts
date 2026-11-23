@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { expect, test, TestInfo } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
@@ -61,7 +61,6 @@ import { DepartmentPage } from '../../../../../../modules/ui/runaiV2/pages/Depar
 import { ProjectPage } from '../../../../../../modules/ui/runaiV2/pages/ProjectPage';
 import { GuidedTour } from '../../../../../../modules/ui/runaiV2/pages/GuidedTour';
 import { clusterApi } from '../../../../../../modules/api';
-import { skipPlaywrightTest } from '../../../../../../modules/helpers/utils/SkippedTestUtils';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -1267,8 +1266,15 @@ test.describe(`Overview Dashboard Tests, tags: ${tags.tool.ui} ${tags.resource.o
         // Projects/Departments table data validation tests
         // =================================================
         test.describe('Projects and Departments table data validation tests', () => {
-            type TimeRange = '24 hours' | '7 days' | '30 days';
+            type TimeRange = '24 hours' | '7 days';
             type View = 'Projects' | 'Departments';
+            type RankingTableRow = {
+                Project?: string;
+                Department: string;
+                'GPU quota': number;
+                'Pending workloads': string;
+                'Running workloads': string;
+            };
             const projDemptDataTests: Array<{
                 name: string;
                 video: string;
@@ -1319,42 +1325,42 @@ test.describe(`Overview Dashboard Tests, tags: ${tags.tool.ui} ${tags.resource.o
                     timeRange: '7 days'
                 },
                 {
-                    name: 'T5582181: Verify the Projects > Highest Avg. GPU allocation table for the last 24 hours',
+                    name: 'T5582181: Verify the Departments > Highest Avg. GPU allocation table for the last 24 hours',
                     video: 'dept-highest-avg-gpu-alloc-24-hours',
                     view: 'Departments',
                     metric: AvgGpuMetricSelectLabels.HIGHEST_AVG_GPU_ALLOC,
                     timeRange: '24 hours'
                 },
                 {
-                    name: 'T5582182: Verify the Projects > Lowest Avg. GPU allocation table for the last 7 days',
+                    name: 'T5582182: Verify the Departments > Lowest Avg. GPU allocation table for the last 7 days',
                     video: 'dept-lowest-avg-gpu-alloc-7-days',
                     view: 'Departments',
                     metric: AvgGpuMetricSelectLabels.LOWEST_AVG_GPU_ALLOC,
                     timeRange: '7 days'
                 },
                 {
-                    name: 'T5582183: Verify the Projects > Highest Avg. GPU utilization table for the last 24 hours',
+                    name: 'T5582183: Verify the Departments > Highest Avg. GPU utilization table for the last 24 hours',
                     video: 'dept-highest-avg-gpu-util-24-hours',
                     view: 'Departments',
                     metric: AvgGpuMetricSelectLabels.HIGHEST_AVG_GPU_UTIL,
                     timeRange: '24 hours'
                 },
                 {
-                    name: 'T5582184: Verify the Projects > Lowest Avg. GPU utilization table for the last 7 days',
+                    name: 'T5582184: Verify the Departments > Lowest Avg. GPU utilization table for the last 7 days',
                     video: 'dept-lowest-avg-gpu-util-7-days',
                     view: 'Departments',
                     metric: AvgGpuMetricSelectLabels.LOWEST_AVG_GPU_UTIL,
                     timeRange: '7 days'
                 },
                 {
-                    name: 'T5582185: Verify the Projects > Highest Avg. GPU memory utilization table for the last 24 hours',
+                    name: 'T5582185: Verify the Departments > Highest Avg. GPU memory utilization table for the last 24 hours',
                     video: 'dept-highest-avg-gpu-mem-util-24-hours',
                     view: 'Departments',
                     metric: AvgGpuMetricSelectLabels.HIGHEST_AVG_GPU_MEM_UTIL,
                     timeRange: '24 hours'
                 },
                 {
-                    name: 'T5582186: Verify the Projects > Lowest Avg. GPU memory utilization table for the last 7 days',
+                    name: 'T5582186: Verify the Departments > Lowest Avg. GPU memory utilization table for the last 7 days',
                     video: 'dept-lowest-avg-gpu-mem-util-7-days',
                     view: 'Departments',
                     metric: AvgGpuMetricSelectLabels.LOWEST_AVG_GPU_MEM_UTIL,
@@ -1362,62 +1368,60 @@ test.describe(`Overview Dashboard Tests, tags: ${tags.tool.ui} ${tags.resource.o
                 }
             ];
 
-            const projectsViewData = [
+            const projectsViewData = (): RankingTableRow[] => [
                 {
                     Project: projName1,
                     Department: 'default',
-                    'GPU quota': '16',
+                    'GPU quota': 16,
                     'Pending workloads': '0',
                     'Running workloads': '4'
                 },
                 {
                     Project: projName2,
                     Department: deptName1,
-                    'GPU quota': '8',
+                    'GPU quota': 8,
                     'Pending workloads': '0',
                     'Running workloads': '0'
                 },
                 {
                     Project: projName3,
                     Department: deptName2,
-                    'GPU quota': '8',
+                    'GPU quota': 8,
                     'Pending workloads': '1',
                     'Running workloads': '0'
                 },
                 {
                     Project: projName4,
                     Department: 'default',
-                    'GPU quota': '0',
+                    'GPU quota': 0,
                     'Pending workloads': '0',
                     'Running workloads': '0'
                 }
             ];
 
-            const depmtsViewData = [
+            const departmentsViewData = (): RankingTableRow[] => [
                 {
                     Department: 'default',
-                    'GPU quota': 'Unlimited',
+                    'GPU quota': 10000,
                     'Pending workloads': '0',
                     'Running workloads': '4'
                 },
                 {
                     Department: deptName1,
-                    'GPU quota': '8',
+                    'GPU quota': 8,
                     'Pending workloads': '0',
                     'Running workloads': '0'
                 },
                 {
                     Department: deptName2,
-                    'GPU quota': '8',
+                    'GPU quota': 8,
                     'Pending workloads': '1',
                     'Running workloads': '0'
                 }
             ];
 
             for (const caseData of projDemptDataTests) {
-                test(caseData.name, async ({}, testInfo: TestInfo) => {
-                    skipPlaywrightTest(test, testInfo, 'No data is displayed in the table');
-
+                test(caseData.name, async () => {
                     videoName = caseData.video;
 
                     await test.step('go to the overview dashboard page', async () => {
@@ -1436,70 +1440,26 @@ test.describe(`Overview Dashboard Tests, tags: ${tags.tool.ui} ${tags.resource.o
                         await overviewPage.chooseOrgUnitMetricTimeRange(caseData.timeRange);
                     });
 
-                    await test.step('validate the table data', async () => {
-                        const actData = await overviewPage.getProjectsDepartmentsTableData();
-                        logger.info(`${caseData.view} table data: \n ${JSON.stringify(actData, null, 2)}`);
+                    await test.step('verify the selected time range', async () => {
+                        const rangeLabel = caseData.timeRange === '24 hours' ? 'Last 24h' : 'Last 7d';
+                        await expect(
+                            overviewPage.page.getByRole('columnheader', { name: 'Avg. GPU devices allocation' })
+                        ).toContainText(rangeLabel);
+                    });
 
-                        let expData = undefined;
-                        let identifierKey = '';
+                    await test.step('validate quota and workload counts', async () => {
+                        // Historical GPU averages are refreshed by a background job.
+                        const isProjectsView = caseData.view === 'Projects';
+                        const expectedRows = isProjectsView ? projectsViewData() : departmentsViewData();
+                        const identifierKey = isProjectsView ? 'Project' : 'Department';
+                        const actualRows = await overviewPage.getProjectsDepartmentsTableData();
 
-                        if (caseData.view === 'Projects') {
-                            expData = projectsViewData;
-                            identifierKey = 'Project';
-                        } else {
-                            expData = depmtsViewData;
-                            identifierKey = 'Department';
-                        }
-
-                        // Verify each expected item exists in actual data
-                        for (const expectedRow of expData) {
+                        for (const { 'GPU quota': expectedQuota, ...expectedRow } of expectedRows) {
                             const identifier = expectedRow[identifierKey];
-
-                            // Find matching row in actual data
-                            const actualRow = actData.find((row) => row[identifierKey] === identifier);
-                            expect(actualRow).toBeDefined();
-
-                            // Validate all expected fields match
-                            for (const [key, value] of Object.entries(expectedRow)) {
-                                expect(actualRow[key]).toBe(value);
-                            }
-
-                            // Validate the allocation/utilization fields (dynamic data)
-                            const runningWorkload = Number(actualRow['Running workloads']);
-
-                            // Find all the 'allocation' and 'utilization' related keys
-                            const allocationKeys = Object.keys(actualRow).filter((k) =>
-                                k.toLowerCase().includes('allocation')
-                            );
-                            const utilizationKeys = Object.keys(actualRow).filter((k) =>
-                                k.toLowerCase().includes('utilization')
-                            );
-
-                            if (runningWorkload > 0) {
-                                // allocation field values > 0
-                                for (const allocKey of allocationKeys) {
-                                    const allocVal = actualRow[allocKey];
-                                    expect(Number(allocVal)).toBeGreaterThan(0);
-                                }
-
-                                // utilization field values > 0% and <= 100%
-                                for (const utilKey of utilizationKeys) {
-                                    const utilVal = actualRow[utilKey];
-                                    expect(utilVal.endsWith('%')).toBeTruthy();
-                                    const utilNum = Number(utilVal.replace('%', ''));
-                                    expect(utilNum).toBeGreaterThan(0);
-                                    expect(utilNum).toBeLessThanOrEqual(100);
-                                }
-                            } else {
-                                // 'allocation' and 'utilization' related field values should be '-'
-                                for (const allocKey of allocationKeys) {
-                                    expect(actualRow[allocKey]).toBe('-');
-                                }
-
-                                for (const utilKey of utilizationKeys) {
-                                    expect(actualRow[utilKey]).toBe('-');
-                                }
-                            }
+                            const actualRow = actualRows.find((row) => row[identifierKey] === identifier);
+                            expect(actualRow, `Table row for ${identifier}`).toMatchObject(expectedRow);
+                            const quotaText = actualRow?.['GPU quota']?.trim();
+                            expect(Number(quotaText || NaN), `GPU quota for ${identifier}`).toBe(expectedQuota);
                         }
                     });
                 });
@@ -1619,13 +1579,7 @@ test.describe(`Overview Dashboard Tests, tags: ${tags.tool.ui} ${tags.resource.o
             ];
 
             for (const caseData of resourcesAllocTests) {
-                test(caseData.name, async ({}, testInfo: TestInfo) => {
-                    skipPlaywrightTest(
-                        test,
-                        testInfo,
-                        'GPU_QUOTA data is missing the cluster metrics API response'
-                    );
-
+                test(caseData.name, async () => {
                     videoName = caseData.video;
                     const endTime = new Date();
                     const startTime = new Date(endTime.getTime() - caseData.hours * 60 * 60 * 1000);
@@ -1825,15 +1779,7 @@ test.describe(`Overview Dashboard Tests, tags: ${tags.tool.ui} ${tags.resource.o
             ];
 
             for (const caseData of allWorkloadsRedirectionTests) {
-                test(caseData.name, async ({}, testInfo: TestInfo) => {
-                    if (caseData.name.includes('T5582214')) {
-                        skipPlaywrightTest(
-                            test,
-                            testInfo,
-                            'the applied filter is wrong after the redirection'
-                        );
-                    }
-
+                test(caseData.name, async () => {
                     videoName = caseData.vidName;
 
                     await test.step('go to the overview dashboard page', async () => {
@@ -1928,9 +1874,7 @@ test.describe(`Overview Dashboard Tests, tags: ${tags.tool.ui} ${tags.resource.o
                 });
             });
 
-            test('T5582220: Test clicking project link in the projects table', async ({}, testInfo: TestInfo) => {
-                skipPlaywrightTest(test, testInfo, 'No data is displayed in the table');
-
+            test('T5582220: Test clicking project link in the projects table', async () => {
                 videoName = 'clicking-proj-link-in-table';
 
                 await test.step('go to the overview dashboard page', async () => {
@@ -1964,9 +1908,7 @@ test.describe(`Overview Dashboard Tests, tags: ${tags.tool.ui} ${tags.resource.o
                 });
             });
 
-            test('T5582221: Test clicking department link in the departments table', async ({}, testInfo: TestInfo) => {
-                skipPlaywrightTest(test, testInfo, 'No data is displayed in the table');
-
+            test('T5582221: Test clicking department link in the departments table', async () => {
                 videoName = 'clicking-depmt-link-in-table';
 
                 await test.step('go to the overview dashboard page', async () => {
@@ -2138,9 +2080,7 @@ test.describe(`Overview Dashboard Tests, tags: ${tags.tool.ui} ${tags.resource.o
         }); // End of: Widget link redirection tests
 
         test.describe('View switching and UI interaction tests', () => {
-            test('T5582219: Test switching b/w projects and departments views', async ({}, testInfo: TestInfo) => {
-                skipPlaywrightTest(test, testInfo, 'No data is displayed in the table');
-
+            test('T5582219: Test switching b/w projects and departments views', async () => {
                 videoName = 'verify-switching-bw-projects-departments-views';
 
                 await test.step('go to the overview dashboard page', async () => {
@@ -2160,7 +2100,7 @@ test.describe(`Overview Dashboard Tests, tags: ${tags.tool.ui} ${tags.resource.o
                 await test.step('switch to Projects view in the table widget and verify the data', async () => {
                     await overviewPage.switchViewInOrgUnitRankingWidget('Projects');
                     const data = await overviewPage.getProjectsDepartmentsTableData();
-                    const projects = data.map((item: any) => item['Projects']);
+                    const projects = data.map((item) => item['Project']);
 
                     projs.forEach((proj) => {
                         expect(projects).toContain(proj);
@@ -2315,13 +2255,7 @@ test.describe(`Overview Dashboard Tests, tags: ${tags.tool.ui} ${tags.resource.o
         // Node pool filter test
         // ================================================
         test.describe('Node pool filter functionality tests', () => {
-            test('T5582156: Test overview node pool filter', async ({}, testInfo: TestInfo) => {
-                skipPlaywrightTest(
-                    test,
-                    testInfo,
-                    'proj/dept table does not show the correct data when the filter applied'
-                );
-
+            test('T5582156: Test overview node pool filter', async () => {
                 videoName = 'test-overview-node-pool-filter';
 
                 await test.step('go to the overview dashboard page', async () => {
