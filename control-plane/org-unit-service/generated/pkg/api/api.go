@@ -108,7 +108,6 @@ type OrgUnitAPIRouter interface {
 	GetInternalDeletedOrgUnits(http.ResponseWriter, *http.Request)
 	GetOrgTree(http.ResponseWriter, *http.Request)
 	GetRanks(http.ResponseWriter, *http.Request)
-	SimulateNodePoolFairShare(http.ResponseWriter, *http.Request)
 }
 
 // ProjectsAPIRouter defines the required methods for binding the api requests to a responses for the ProjectsAPI
@@ -266,7 +265,6 @@ type OrgUnitAPIServicer interface {
 	GetInternalDeletedOrgUnits(context.Context, time.Time) (ImplResponse, error)
 	GetOrgTree(context.Context) (ImplResponse, error)
 	GetRanks(context.Context) (ImplResponse, error)
-	SimulateNodePoolFairShare(context.Context, string, FairShareSimulationRequest) (ImplResponse, error)
 }
 
 // ProjectsAPIServicer defines the api actions for the ProjectsAPI service

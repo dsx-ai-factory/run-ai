@@ -1,2 +1,2 @@
 type: string
-enum: [nodePoolName, nodePoolId, parentId, orgUnitId, orgUnitName, clusterId, gpuDeserved, gpuOverQuotaWeight, gpuLimit]
+enum: [nodePoolName, nodePoolId, parentId, orgUnitId, orgUnitName, clusterId, gpuDeserved, gpuOverQuotaWeight]

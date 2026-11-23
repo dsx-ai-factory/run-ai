@@ -46,8 +46,6 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 	nodePoolId1c2 := float32(20)
 	nodePoolName2c2 := "nodepool-b"
 	nodePoolId2c2 := float32(220)
-	cluster3Id := uuid.New().String()
-	nodePoolIdC3 := float32(30)
 
 	var defaultDepartment1 api.Department
 	var defaultDepartment2 api.Department
@@ -102,16 +100,6 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 			{
 				Name:                   nodePoolName2c2,
 				Id:                     fmt.Sprint(nodePoolId2c2),
-				Phase:                  ptr.To(clustersOpenapi.NODEPOOLPHASE_READY),
-				SchedulingCapabilities: NpSchedCapabilitiesDefault(true, false),
-			},
-		},
-	}, nil)
-	clusterServiceClient.On("GetNodePoolsMinimalByCluster", mock.Anything, cluster3Id).Return(&clustersOpenapi.GetNodepoolsMinimal200Response{
-		Nodepools: []clustersOpenapi.NodepoolMinimal{
-			{
-				Name:                   "default",
-				Id:                     fmt.Sprint(nodePoolIdC3),
 				Phase:                  ptr.To(clustersOpenapi.NODEPOOLPHASE_READY),
 				SchedulingCapabilities: NpSchedCapabilitiesDefault(true, false),
 			},
@@ -1262,74 +1250,6 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 			// When AdjustableWeights is false, both DeservedSum and WeightsSum should be calculated from Deserved
 			Expect(sumResponse.DeservedSum).To(Equal(float64(42)))
 			Expect(sumResponse.WeightsSum).To(Equal(float64(42)))
-		})
-	})
-
-	Context("test gpuLimit filter", func() {
-		gpuResources := func(limit *float64) []api.ResourcesNullable {
-			return []api.ResourcesNullable{{
-				NodePool: &api.ResourcesNodePool{Id: fmt.Sprint(nodePoolIdC3), Name: "default"},
-				Gpu: api.ResourcesNullableGpu{
-					Deserved: ptr.To(float64(0)),
-					Limit:    limit,
-				},
-			}}
-		}
-		gpuLimits := []*float64{nil, ptr.To(float64(-1)), ptr.To(float64(4))}
-
-		BeforeAll(func() {
-			var parent api.Department
-			for _, limit := range gpuLimits {
-				response, err := departmentApiService.CreateDepartment(ctx, getDepartmentResourcesCreateRequest(createDepartmentName(), cluster3Id, gpuResources(limit)))
-				Expect(err).To(BeNil())
-				Expect(response.Code).To(Equal(http.StatusCreated))
-				parent = response.Body.(api.Department)
-				departmentIds = append(departmentIds, parent.Id)
-			}
-			for _, limit := range gpuLimits {
-				response, err := projectApiService.CreateProject(ctx, getProjectResourcesCreateRequest(createProjectName(), parent.Id, cluster3Id, gpuResources(limit)))
-				Expect(err).To(BeNil())
-				Expect(response.Code).To(Equal(http.StatusCreated))
-				projectIds = append(projectIds, response.Body.(api.Project).Id)
-			}
-		})
-
-		DescribeTable("counts projects and departments, treating a NULL limit as unlimited",
-			func(gpuLimitFilter string, expected int64) {
-				filterBy := []string{fmt.Sprintf("clusterId==%s", cluster3Id), gpuLimitFilter}
-
-				response, err := projectApiService.CountProjectNodePoolResources(ctx, filterBy, "")
-				Expect(err).To(BeNil())
-				Expect(response.Code).To(Equal(http.StatusOK))
-				Expect(response.Body.(api.CountResponse).Count).To(Equal(expected))
-
-				response, err = departmentApiService.CountDepartmentNodePoolResources(ctx, filterBy, "")
-				Expect(err).To(BeNil())
-				Expect(response.Code).To(Equal(http.StatusOK))
-				Expect(response.Body.(api.CountResponse).Count).To(Equal(expected))
-			},
-			Entry("unlimited includes NULL", "gpuLimit==-1", int64(2)),
-			Entry("limited excludes NULL", "gpuLimit!=-1", int64(1)),
-			Entry("less than or equal", "gpuLimit<=-1", int64(2)),
-			Entry("greater than or equal", "gpuLimit>=4", int64(1)),
-		)
-
-		It("gets only the limited projects and departments", func() {
-			filterBy := []string{fmt.Sprintf("nodePoolId==%v", nodePoolIdC3), "gpuLimit!=-1"}
-
-			projectsResponse, err := projectApiService.GetProjectNodePoolResources(ctx, filterBy, api.PROJECTNODEPOOLRESOURCESFILTERSORTFIELDS_GPU_LIMIT, "ASC", 0, 0, "")
-			Expect(err).To(BeNil())
-			Expect(projectsResponse.Code).To(Equal(http.StatusOK))
-			projectResources := projectsResponse.Body.(api.GetProjectNodePoolResources200Response).NodePoolResources
-			Expect(projectResources).To(HaveLen(1))
-			Expect(projectResources[0].Resources.Gpu.Limit).To(Equal(ptr.To(float64(4))))
-
-			departmentsResponse, err := departmentApiService.GetDepartmentNodePoolResources(ctx, filterBy, api.DEPARTMENTNODEPOOLRESOURCESFILTERSORTFIELDS_GPU_LIMIT, "ASC", 0, 0, "")
-			Expect(err).To(BeNil())
-			Expect(departmentsResponse.Code).To(Equal(http.StatusOK))
-			departmentResources := departmentsResponse.Body.(api.GetDepartmentNodePoolResources200Response).NodePoolResources
-			Expect(departmentResources).To(HaveLen(1))
-			Expect(departmentResources[0].Resources.Gpu.Limit).To(Equal(ptr.To(float64(4))))
 		})
 	})
 

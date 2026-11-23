@@ -24,9 +24,6 @@ const (
 
 	ResourcesNodePoolIdColumn   = "node_pool_id"
 	ResourcesNodePoolNameColumn = "node_pool_name"
-
-	// NULL and -1 both mean unlimited, so filters and sorting treat them as one value.
-	gpuLimitOrUnlimitedColumn = "COALESCE(gpu_limit, -1)"
 )
 
 type Resources struct {

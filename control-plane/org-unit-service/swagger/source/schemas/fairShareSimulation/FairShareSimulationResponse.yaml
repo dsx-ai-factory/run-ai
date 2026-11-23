@@ -1,9 +1,0 @@
-type: object
-required:
-  - orgUnits
-properties:
-  orgUnits:
-    type: array
-    description: One result per requested org unit, in the request's order.
-    items:
-      $ref: "./FairShareSimulationResult.yaml"

@@ -3649,64 +3649,6 @@
         }
       }
     },
-    "/api/v1/org-unit/node-pools/{nodepoolId}/fair-share-simulation": {
-      "x-internal": true,
-      "post": {
-        "summary": "Simulate the fair share of a node pool's org units",
-        "operationId": "simulate_node_pool_fair_share",
-        "x-service": "org-unit-service",
-        "description": "Computes the GPUs the scheduler would give org units of a node pool for a scenario: a node pool capacity and\nscheduling capabilities, saved or not, and the org units to return with their unsaved changes. The calculation\ncovers every department of the node pool, and for projects every project of the parent, including ones the caller\ncan't read; the response holds only the requested org units. Org units not in the request keep their stored\nsettings and ask for half the capacity. Nothing is saved. The same scenario gives the same result for every caller.\n\nOnly saved org units can be simulated; an org unit that doesn't exist yet can't be part of the scenario.\n\n400 covers, besides the schema: `parent` missing for projects or set for departments; limits on while quota is\noff; a rank or limit the capabilities turn off (a quota is ignored while quota is off, and a weight while\nadjustableWeights is off); a quota or limit between -1 and 0; a limit below the quota; a duplicate id; and an org\nunit that isn't on the node pool, isn't readable by the caller, or (for projects) isn't the parent's. These all\nreturn the same message as an unknown id, so hidden org units aren't revealed: an unreadable org unit is a 400,\nnot a 403.\n\nAuthorization: simulating departments requires read on departments, and simulating projects requires read on\nprojects, in some scope; otherwise 403. The handler checks it, since the required permission depends on\n`orgUnitType`.\n",
-        "x-no-authorization": true,
-        "x-test-coverage": [
-          "control-plane/org-unit-service/pkg/test/fair_share_simulation_api_test.go"
-        ],
-        "tags": [
-          "Org unit"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/NodepoolId"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FairShareSimulationRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "The simulated fair share of every requested org unit, in one response with no paging.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FairShareSimulationResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/400BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/401Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/403Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/404NotFound"
-          },
-          "503": {
-            "$ref": "#/components/responses/503ServiceUnavailable"
-          }
-        }
-      }
-    },
     "/api/v1/org-unit/projects/node-pool-resources": {
       "get": {
         "summary": "Get projects node pool resources",
@@ -5079,17 +5021,16 @@
         "name": "filterBy",
         "in": "query",
         "required": false,
-        "description": "Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!=-1 matches only org units with a GPU limit.",
+        "description": "Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=.",
         "schema": {
           "type": "array",
           "maxItems": 10,
           "items": {
             "type": "string",
-            "pattern": "^(nodePoolName|nodePoolId|orgUnitId|orgUnitName|rank|clusterId|gpuLimit)(==|!=|<=|>=|=@|!@|=\\^|=\\$).+$"
+            "pattern": "^(nodePoolName|nodePoolId|orgUnitId|orgUnitName|rank|clusterId)(==|!=|<=|>=|=@|!@|=\\^|=\\$).+$"
           },
           "example": [
-            "nodePoolName!=some-name",
-            "gpuLimit!=-1"
+            "nodePoolName!=some-name"
           ]
         },
         "explode": false
@@ -5135,17 +5076,16 @@
         "name": "filterBy",
         "in": "query",
         "required": false,
-        "description": "Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!=-1 matches only org units with a GPU limit.",
+        "description": "Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=.",
         "schema": {
           "type": "array",
           "maxItems": 10,
           "items": {
             "type": "string",
-            "pattern": "^(nodePoolName|nodePoolId|parentId|orgUnitId|orgUnitName|rank|clusterId|gpuLimit)(==|!=|<=|>=|=@|!@|=\\^|=\\$).+$"
+            "pattern": "^(nodePoolName|nodePoolId|parentId|orgUnitId|orgUnitName|rank|clusterId)(==|!=|<=|>=|=@|!@|=\\^|=\\$).+$"
           },
           "example": [
-            "nodePoolName!=some-name",
-            "gpuLimit!=-1"
+            "nodePoolName!=some-name"
           ]
         },
         "explode": false
@@ -7810,8 +7750,7 @@
           "orgUnitName",
           "clusterId",
           "gpuDeserved",
-          "gpuOverQuotaWeight",
-          "gpuLimit"
+          "gpuOverQuotaWeight"
         ]
       },
       "ResourcesPerNodePool": {
@@ -8141,272 +8080,6 @@
           }
         }
       },
-      "FairShareSimulationResources": {
-        "type": "object",
-        "required": [
-          "gpu"
-        ],
-        "properties": {
-          "gpu": {
-            "type": "number",
-            "format": "double",
-            "minimum": 0,
-            "example": 4
-          }
-        }
-      },
-      "FairShareSimulationSchedulingCapabilities": {
-        "type": "object",
-        "description": "The node pool's scheduling capabilities to simulate, saved or not.",
-        "required": [
-          "quota",
-          "ranks",
-          "adjustableWeights",
-          "limits"
-        ],
-        "properties": {
-          "quota": {
-            "type": "boolean"
-          },
-          "ranks": {
-            "type": "boolean"
-          },
-          "adjustableWeights": {
-            "type": "boolean"
-          },
-          "limits": {
-            "type": "boolean",
-            "description": "Whether GPU limits apply. Only allowed when quota is true."
-          }
-        }
-      },
-      "FairShareSimulationNodePool": {
-        "type": "object",
-        "description": "The node pool to simulate, saved or not.",
-        "required": [
-          "capacity",
-          "schedulingCapabilities"
-        ],
-        "properties": {
-          "capacity": {
-            "description": "GPUs to split. 0 is valid; quotas are still granted, as the scheduler does, and nothing is given above them.\nRequired; null is rejected.\n",
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FairShareSimulationResources"
-              }
-            ]
-          },
-          "schedulingCapabilities": {
-            "description": "Required; null is rejected.",
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FairShareSimulationSchedulingCapabilities"
-              }
-            ]
-          }
-        }
-      },
-      "FairShareSimulationParent": {
-        "type": "object",
-        "description": "The department whose projects are simulated, with its stored settings. Required when orgUnitType is project; not\nallowed for departments. It needn't be readable by the caller.\n",
-        "required": [
-          "id"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "example": "4500014"
-          }
-        }
-      },
-      "FairShareSimulationRank": {
-        "type": "string",
-        "description": "An unsaved rank. Only while ranks is on.",
-        "enum": [
-          "Highest",
-          "VeryHigh",
-          "High",
-          "MediumHigh",
-          "Medium",
-          "MediumLow",
-          "Low",
-          "VeryLow",
-          "Lowest"
-        ],
-        "example": "High"
-      },
-      "FairShareSimulationGpuSettings": {
-        "type": "object",
-        "description": "GPU settings that replace the stored ones. An omitted or null field keeps its stored value; unlike the org unit\nAPIs, null doesn't mean unlimited here: send -1.\n",
-        "properties": {
-          "deserved": {
-            "type": "number",
-            "format": "double",
-            "minimum": -1,
-            "nullable": true,
-            "description": "The GPU quota; -1 means unlimited. Values between -1 and 0 are rejected. Ignored while quota is off.",
-            "example": 4
-          },
-          "limit": {
-            "type": "number",
-            "format": "double",
-            "minimum": -1,
-            "nullable": true,
-            "description": "The maximum GPU allocation; -1 means unlimited. Values between -1 and 0 are rejected. Only while limits is on,\nand not below the quota.\n",
-            "example": -1
-          },
-          "overQuotaWeight": {
-            "type": "number",
-            "format": "double",
-            "minimum": 0,
-            "nullable": true,
-            "description": "The over-quota weight within the rank. Ignored while adjustableWeights is off, where the weight is the quota.",
-            "example": 2
-          }
-        }
-      },
-      "FairShareSimulationOrgUnit": {
-        "type": "object",
-        "description": "A requested org unit with its unsaved changes. Each field replaces the stored value on its own; omitted fields keep\nit. `demand` is the GPUs the org unit asks for, capped by its limit; without it, half the node pool's capacity.\n",
-        "required": [
-          "id"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "example": "4500014"
-          },
-          "rank": {
-            "description": "An unsaved rank. Only while ranks is on. Omitted or null keeps the stored rank.",
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FairShareSimulationRank"
-              }
-            ]
-          },
-          "gpu": {
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FairShareSimulationGpuSettings"
-              }
-            ]
-          },
-          "demand": {
-            "description": "The GPUs the org unit asks for, capped by its limit. Omitted or null asks for half the capacity.",
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FairShareSimulationResources"
-              }
-            ]
-          }
-        }
-      },
-      "FairShareSimulationRequest": {
-        "type": "object",
-        "description": "A scenario to simulate: the node pool and the org units to return, with their unsaved changes. Every org unit\nwithout a demand asks for half the node pool's capacity, capped by its limit. For departments, every department\ncompetes. For projects, the other departments ask for nothing, and the parent asks for the sum of its projects'\ndemand, capped by its limit.\n",
-        "required": [
-          "nodePool",
-          "orgUnitType",
-          "orgUnits"
-        ],
-        "properties": {
-          "nodePool": {
-            "description": "Required; null is rejected.",
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FairShareSimulationNodePool"
-              }
-            ]
-          },
-          "orgUnitType": {
-            "type": "string",
-            "description": "The type of the requested org units. One type per request.",
-            "enum": [
-              "department",
-              "project"
-            ]
-          },
-          "parent": {
-            "description": "Required for projects; not allowed for departments.",
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FairShareSimulationParent"
-              }
-            ]
-          },
-          "orgUnits": {
-            "type": "array",
-            "minItems": 1,
-            "maxItems": 500,
-            "description": "The org units to return, with their unsaved changes. Every org unit with an unsaved change must be sent: a change\nthat isn't sent isn't simulated.\n",
-            "items": {
-              "$ref": "#/components/schemas/FairShareSimulationOrgUnit"
-            }
-          }
-        }
-      },
-      "FairShareSimulationResult": {
-        "type": "object",
-        "description": "The simulated result of one org unit, in GPUs. Values may be fractional, as in the scheduler; the client rounds.\n- `demand`: what the org unit asked for, after the default demand and the limit were applied.\n- `fairShare`: what the scheduler would give it, the sum of `guaranteed` and `overQuota`.\n- `guaranteed`: the part of the fair share within its quota.\n- `overQuota`: the part of the fair share above its quota.\n- `unmet`: `demand` minus `fairShare`, never below 0.\n",
-        "required": [
-          "id",
-          "demand",
-          "fairShare",
-          "guaranteed",
-          "overQuota",
-          "unmet",
-          "weightShareInRank"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "example": "4500014"
-          },
-          "demand": {
-            "$ref": "#/components/schemas/FairShareSimulationResources"
-          },
-          "fairShare": {
-            "$ref": "#/components/schemas/FairShareSimulationResources"
-          },
-          "guaranteed": {
-            "$ref": "#/components/schemas/FairShareSimulationResources"
-          },
-          "overQuota": {
-            "$ref": "#/components/schemas/FairShareSimulationResources"
-          },
-          "unmet": {
-            "$ref": "#/components/schemas/FairShareSimulationResources"
-          },
-          "weightShareInRank": {
-            "type": "number",
-            "format": "double",
-            "description": "The org unit's effective over-quota weight (the quota while adjustableWeights is off) divided by the total of its\nrank among its siblings, including ones the caller can't read. With ranks off, among all siblings.\n",
-            "example": 0.25
-          }
-        }
-      },
-      "FairShareSimulationResponse": {
-        "type": "object",
-        "required": [
-          "orgUnits"
-        ],
-        "properties": {
-          "orgUnits": {
-            "type": "array",
-            "description": "One result per requested org unit, in the request's order.",
-            "items": {
-              "$ref": "#/components/schemas/FairShareSimulationResult"
-            }
-          }
-        }
-      },
       "ProjectNodePoolResourcesFilterSortFields": {
         "type": "string",
         "enum": [
@@ -8417,8 +8090,7 @@
           "orgUnitName",
           "clusterId",
           "gpuDeserved",
-          "gpuOverQuotaWeight",
-          "gpuLimit"
+          "gpuOverQuotaWeight"
         ]
       },
       "ProjectNodePoolResources": {
