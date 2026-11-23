@@ -9,9 +9,14 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	stderrors "errors"
+	"fmt"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
+	"syscall"
 	"time"
 
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
@@ -43,6 +48,9 @@ const (
 	timeout          = time.Second * 10
 	interval         = time.Millisecond * 250
 	cacheSyncTimeout = time.Minute
+	// Manager shutdown stops webhooks last, after all controller workers
+	// drain, so match the webhook server's own 1-minute shutdown budget.
+	shutdownTimeout = time.Minute
 )
 
 // marshalRawExtension creates a runtime.RawExtension from an object
@@ -271,20 +279,24 @@ func deleteAllTestResources(ctx context.Context, k8sClient client.Client) {
 	deleteAllKartas(ctx, k8sClient)
 }
 
+// waitForWebhookToBeClosed blocks until the webhook server no longer accepts
+// connections, so the next container can rebind the shared port. Each probe is
+// a bounded TCP dial, and only a refused connection proves the listener is
+// gone - an accepted connection or a dial timeout means it may still be up.
 func waitForWebhookToBeClosed(webhookUrl string) {
-	httpClient := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
-	}
-	Eventually(func() bool {
-		resp, err := httpClient.Get(webhookUrlValidate)
-		if err != nil || resp.StatusCode != http.StatusServiceUnavailable {
-			return true
+	parsed, err := url.Parse(webhookUrl)
+	Expect(err).NotTo(HaveOccurred())
+	Eventually(func() error {
+		conn, err := net.DialTimeout("tcp", parsed.Host, time.Second)
+		if err == nil {
+			_ = conn.Close()
+			return fmt.Errorf("webhook server still accepting connections on %s", parsed.Host)
 		}
-		defer resp.Body.Close()
-		return false
-	}, timeout, interval).Should(BeTrue())
+		if stderrors.Is(err, syscall.ECONNREFUSED) {
+			return nil
+		}
+		return fmt.Errorf("webhook port %s not refusing connections yet: %w", parsed.Host, err)
+	}, shutdownTimeout, interval).Should(Succeed())
 }
 
 // makeCondition creates a condition map for JobSet status
@@ -346,8 +358,21 @@ func waitForSetupToComplete(k8sClient client.Client, managerCtx context.Context,
 	}, timeout, interval).Should(Succeed())
 }
 
+// updateResourceStatus updates obj's status, refreshing its UID and
+// resourceVersion from the live object on every attempt. The cache-backed
+// client can hand out a just-deleted object, and retrying an update with that
+// stale identity can never succeed.
 func updateResourceStatus[T client.Object](ctx context.Context, k8sClient client.Client, obj T) {
 	Eventually(func() error {
+		fresh, ok := obj.DeepCopyObject().(T)
+		if !ok {
+			return fmt.Errorf("unexpected object type %T", obj)
+		}
+		if err := k8sClient.Get(ctx, client.ObjectKeyFromObject(obj), fresh); err != nil {
+			return err
+		}
+		obj.SetUID(fresh.GetUID())
+		obj.SetResourceVersion(fresh.GetResourceVersion())
 		return k8sClient.Status().Update(ctx, obj)
 	}, timeout, interval).Should(Succeed())
 }
