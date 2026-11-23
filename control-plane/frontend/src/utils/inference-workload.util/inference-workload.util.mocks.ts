@@ -6,7 +6,7 @@
 import { EAccessOptions } from "@/components/environment/connection-access/connection-access-modal/connection-access-modal.model";
 import { EInferenceArchitecture, EInferenceType, EServerType } from "@/models/inference.model";
 import type { IUIInferenceCreation, IUIWorkloadCreation } from "@/models/workload.model";
-import type { TWorkloadsToConvert } from "../workload.util/workload.util";
+import type { InferenceV2 } from "@/swagger-models/assets-service-client";
 import { ClusterState, type ClustersMinimalData } from "@/swagger-models/cluster-service-client";
 
 export const mockInferenceWorkloadUI: IUIInferenceCreation = {
@@ -84,7 +84,7 @@ export const mockBaseInferenceWorkload: IUIWorkloadCreation = {
   },
 };
 
-export const mockInferenceWorkload: TWorkloadsToConvert = {
+export const mockInferenceWorkload: InferenceV2 = {
   meta: {
     name: "hf3",
     requestedName: "hf3",
@@ -112,7 +112,6 @@ export const mockInferenceWorkload: TWorkloadsToConvert = {
         value: "openai-community/gpt2",
       },
     ],
-    autoDeletionTimeAfterCompletionSeconds: null,
     autoScaling: {
       minReplicas: 1,
       maxReplicas: 1,

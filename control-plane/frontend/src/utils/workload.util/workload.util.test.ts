@@ -3,34 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { IUIDistributedUISetup } from "./workload.util";
+import { mockInferenceWorkload } from "@/utils/inference-workload.util/inference-workload.util.mocks";
 import { workloadUtil } from "./workload.util";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { AssetsIds, SpecificRunParams } from "@/swagger-models/assets-service-client";
-import {
-  type AssetIdAndKind,
-  AssetKind,
-  DistributedFramework,
-  InternalConnectionType,
-} from "@/swagger-models/assets-service-client";
+import { type AssetIdAndKind, AssetKind, InternalConnectionType } from "@/swagger-models/assets-service-client";
 import type { Connection, Workload } from "@/swagger-models/workloads-client";
-import type {
-  IUIWorkloadAssets,
-  IUIWorkloadCreation,
-  IUIWorkloadSpecificEnv,
-  IWorkloadMeta,
-} from "@/models/workload.model";
+import type { IUIWorkloadAssets, IUIWorkloadSpecificEnv } from "@/models/workload.model";
 import { EWorkloadType } from "@/models/workload.model";
 import type { SpecificRunParamsKeys } from "./workload.util.models";
 
 import {
-  trainingMultiNodeCustomMasterResponseV2,
   advancedFilterPhaseMockRunning,
   advancedFilterPhaseMockStopped,
   advancedFilterPhaseMockPending,
-  trainingSingleNodeResponseV2,
-  trainingMultiNodeMasterSameAsWorkerResponseV2,
   llmWorkload,
   workspaceWorkload,
   distributedWorkload,
@@ -206,183 +192,18 @@ describe("workload.util", () => {
     });
   });
 
-  describe("convertWorkloadToWorkloadUI", () => {
-    it("should convert a backend single node workload to workload UI model", () => {
-      const expectedResult: IUIWorkloadCreation = {
-        name: "w100",
-        namespace: "",
-        clusterId: "aefb179a-4bee-420f-bb00-1da188a155fd",
-        projectId: 8,
-        assets: {
-          environment: "55c1bdad-b01f-4635-a883-4a20f9c6763",
-          compute: "23d90236-4687-47cc-9d0f-b6cffaa59bfb",
-          datasources: [],
-          uiVolumes: undefined,
-        },
-        specificEnv: {
-          args: undefined,
-          command: undefined,
-          runAsUid: null,
-          runAsGid: null,
-          supplementalGroups: undefined,
-          nodeType: null,
-          allowOverQuota: null,
-          nodePools: null,
-          autoDeletionTimeAfterCompletionSeconds: null,
-          connections: [],
-          environmentVariables: [{ name: "env-key-1", value: "env-value-1" }],
-          annotations: undefined,
-          labels: undefined,
-          backoffLimit: 6,
-          tolerations: undefined,
-          podAffinity: undefined,
-          parallelism: undefined,
-          completions: undefined,
-          terminationGracePeriodSeconds: undefined,
-        },
-      };
-      expect(workloadUtil.convertWorkloadToWorkloadUI(trainingSingleNodeResponseV2)).toStrictEqual(expectedResult);
-    });
+  it("maps an asset-based inference record into its Copy form", () => {
+    const copied = workloadUtil.convertWorkloadToWorkloadUI(mockInferenceWorkload);
 
-    it("should convert a backend multi node workload to workload UI model", () => {
-      const expectedResult: IUIWorkloadCreation = {
-        name: trainingMultiNodeCustomMasterResponseV2.meta.name,
-        namespace: "",
-        clusterId: trainingMultiNodeCustomMasterResponseV2.meta.clusterId,
-        projectId: +trainingMultiNodeCustomMasterResponseV2.meta.projectId,
-        assets: {
-          environment: trainingMultiNodeCustomMasterResponseV2.assets.environment.id,
-          compute: trainingMultiNodeCustomMasterResponseV2.assets.compute?.id || "",
-          datasources: [],
-          uiVolumes: undefined,
-        },
-        specificEnv: {
-          args: undefined,
-          command: undefined,
-          runAsUid: null,
-          runAsGid: null,
-          supplementalGroups: undefined,
-          nodeType: null,
-          allowOverQuota: null,
-          nodePools: ["default"],
-          autoDeletionTimeAfterCompletionSeconds:
-            trainingMultiNodeCustomMasterResponseV2.specificRunParams?.autoDeletionTimeAfterCompletionSeconds,
-          connections: [],
-          environmentVariables: trainingMultiNodeCustomMasterResponseV2.specificRunParams?.environmentVariables || [],
-          annotations: undefined,
-          labels: undefined,
-          backoffLimit: 6,
-          tolerations: undefined,
-          podAffinity: undefined,
-          parallelism: undefined,
-          completions: undefined,
-          terminationGracePeriodSeconds: undefined,
-        },
-        distributed: {
-          noMaster: undefined,
-          numWorkers: trainingMultiNodeCustomMasterResponseV2.distributed?.numWorkers,
-          distFramework: trainingMultiNodeCustomMasterResponseV2.distributed?.framework,
-          master: {
-            assets: {
-              environment: trainingMultiNodeCustomMasterResponseV2.distributed?.master?.assets?.environment.id || "",
-              compute: trainingMultiNodeCustomMasterResponseV2.distributed?.master?.assets?.compute?.id || "",
-              datasources: undefined,
-              uiVolumes: undefined,
-            },
-            specificEnv: {
-              args: undefined,
-              command: undefined,
-              runAsUid: null,
-              runAsGid: null,
-              supplementalGroups: undefined,
-              nodeType: null,
-              allowOverQuota: null,
-              nodePools: ["default"],
-              autoDeletionTimeAfterCompletionSeconds:
-                trainingMultiNodeCustomMasterResponseV2.distributed?.master?.specificRunParams
-                  ?.autoDeletionTimeAfterCompletionSeconds,
-              connections: [],
-              environmentVariables:
-                trainingMultiNodeCustomMasterResponseV2.distributed?.master?.specificRunParams?.environmentVariables ||
-                [],
-              annotations: undefined,
-              labels: undefined,
-              backoffLimit: trainingMultiNodeCustomMasterResponseV2.distributed?.master?.specificRunParams?.backoffLimit,
-              tolerations: undefined,
-              podAffinity: undefined,
-              parallelism: undefined,
-              completions: undefined,
-              terminationGracePeriodSeconds: undefined,
-            },
-          },
-        },
-        enableEditingMaster: true,
-      };
-      expect(workloadUtil.convertWorkloadToWorkloadUI(trainingMultiNodeCustomMasterResponseV2)).toStrictEqual(
-        expectedResult,
-      );
-    });
-
-    it("should convert a backend multi node workload to workload UI model without the master when noMaster sets to true", () => {
-      const expectedResult: IUIWorkloadCreation = {
-        name: trainingMultiNodeMasterSameAsWorkerResponseV2.meta.name,
-        namespace: "",
-        clusterId: trainingMultiNodeMasterSameAsWorkerResponseV2.meta.clusterId,
-        projectId: +trainingMultiNodeMasterSameAsWorkerResponseV2.meta.projectId,
-        assets: {
-          environment: trainingMultiNodeMasterSameAsWorkerResponseV2.assets.environment.id,
-          compute: trainingMultiNodeMasterSameAsWorkerResponseV2.assets.compute?.id || "",
-          datasources: [],
-          uiVolumes: undefined,
-        },
-        specificEnv: {
-          args: undefined,
-          command: undefined,
-          runAsUid: null,
-          runAsGid: null,
-          supplementalGroups: undefined,
-          nodeType: null,
-          allowOverQuota: null,
-          nodePools: ["default"],
-          autoDeletionTimeAfterCompletionSeconds: 2592000,
-          connections: [],
-          environmentVariables: [{ name: "env-key-1", value: "env-value-1" }],
-          annotations: undefined,
-          labels: undefined,
-          backoffLimit: 6,
-          tolerations: undefined,
-          podAffinity: undefined,
-          parallelism: undefined,
-          completions: undefined,
-          terminationGracePeriodSeconds: undefined,
-        },
-        distributed: {
-          numWorkers: 1,
-          distFramework: DistributedFramework.Mpi,
-          noMaster: true,
-          master: null,
-        },
-        enableEditingMaster: undefined,
-      };
-
-      const trainingMultiNodeResponseNoMaster = deepCopy(trainingMultiNodeMasterSameAsWorkerResponseV2);
-      if (trainingMultiNodeResponseNoMaster.distributed) {
-        trainingMultiNodeResponseNoMaster.distributed.master = undefined;
-      }
-
-      expect(workloadUtil.convertWorkloadToWorkloadUI(trainingMultiNodeResponseNoMaster)).toStrictEqual(expectedResult);
-    });
-
-    it("should sets the enableEditingMaster to true when master is NOT equal to workers", () => {
-      const trainingMultiNodeResponseDiffMaster = deepCopy(trainingMultiNodeCustomMasterResponseV2);
-
-      const workloadUI = workloadUtil.convertWorkloadToWorkloadUI(trainingMultiNodeResponseDiffMaster);
-      expect(workloadUI.enableEditingMaster).toBe(true);
-    });
-
-    it("should sets the enableEditingMaster to false when master is equal to workers", () => {
-      const workloadUI = workloadUtil.convertWorkloadToWorkloadUI(trainingMultiNodeMasterSameAsWorkerResponseV2);
-      expect(workloadUI.enableEditingMaster).toBe(false);
+    expect(copied).toMatchObject({
+      name: mockInferenceWorkload.meta.name,
+      projectId: Number(mockInferenceWorkload.meta.projectId),
+      clusterId: mockInferenceWorkload.meta.clusterId,
+      assets: {
+        environment: mockInferenceWorkload.assets.environment.id,
+        compute: mockInferenceWorkload.assets.compute?.id,
+      },
+      specificEnv: { environmentVariables: mockInferenceWorkload.specificRunParams?.environmentVariables },
     });
   });
 
@@ -727,180 +548,6 @@ describe("workload.util", () => {
 
       const result = workloadUtil.getWorkloadIcon(workload);
       expect(result).toBe("custom-tool");
-    });
-  });
-
-  describe("_getWorkloadUI", () => {
-    const meta: IWorkloadMeta = {
-      name: "Test Workload",
-      namespace: "default",
-      clusterId: "cluster123",
-      projectId: 123,
-    };
-
-    const defaultAssets: AssetsIds = {
-      environment: "env-id-1",
-      compute: "compute-id-1",
-      datasources: [
-        {
-          id: "datasource1",
-          kind: AssetKind.Nfs,
-        },
-      ],
-    };
-
-    const defaultSpecificEnv: SpecificRunParams = {
-      args: undefined,
-      command: undefined,
-      runAsUid: null,
-      runAsGid: null,
-      supplementalGroups: undefined,
-      nodeType: null,
-      allowOverQuota: null,
-      nodePools: null,
-      autoDeletionTimeAfterCompletionSeconds: null,
-      connections: undefined,
-      environmentVariables: undefined,
-      annotations: undefined,
-      labels: undefined,
-      backoffLimit: 6,
-      tolerations: undefined,
-      podAffinity: undefined,
-      parallelism: undefined,
-      completions: undefined,
-    };
-
-    const distributedSetup: IUIDistributedUISetup = {
-      distributedData: {
-        numWorkers: 4,
-        master: {
-          assets: {
-            environment: {
-              id: "e123",
-              name: "my-env",
-            },
-          },
-          specificRunParams: {},
-        },
-      },
-      noMaster: false,
-      enableEditingMaster: true,
-    };
-
-    it("should create workload UI without distributed setup", () => {
-      const currSpecificEnv: SpecificRunParams = {
-        command: "start",
-        runAsUid: 1000,
-        runAsGid: 2000,
-      };
-      const result: IUIWorkloadCreation = workloadUtil._getWorkloadUI(meta, defaultAssets, currSpecificEnv);
-
-      expect(result).toEqual({
-        name: meta.name,
-        namespace: meta.namespace,
-        clusterId: meta.clusterId,
-        projectId: meta.projectId,
-        assets: defaultAssets,
-        specificEnv: {
-          ...defaultSpecificEnv,
-          command: currSpecificEnv.command,
-          runAsUid: currSpecificEnv.runAsUid,
-          runAsGid: currSpecificEnv.runAsGid,
-        },
-      });
-    });
-
-    it("should create workload UI with distributed setup", () => {
-      const mockSpecificEnv = { specificEnv: { ...defaultSpecificEnv } };
-      const mockAssets = { assets: defaultAssets };
-
-      const result: IUIWorkloadCreation = workloadUtil._getWorkloadUI(
-        meta,
-        mockAssets.assets,
-        mockSpecificEnv.specificEnv,
-        undefined,
-        distributedSetup,
-      );
-
-      expect(result).toEqual({
-        name: meta.name,
-        namespace: meta.namespace,
-        clusterId: meta.clusterId,
-        projectId: meta.projectId,
-        assets: {
-          ...mockAssets.assets,
-          uiVolumes: undefined,
-        },
-        specificEnv: mockSpecificEnv.specificEnv,
-        distributed: {
-          numWorkers: distributedSetup.distributedData?.numWorkers,
-          distFramework: undefined,
-          master: {
-            assets: {
-              compute: null,
-              datasources: undefined,
-              environment: distributedSetup.distributedData?.master?.assets?.environment.id,
-              uiVolumes: undefined,
-            },
-            specificEnv: defaultSpecificEnv,
-          },
-          noMaster: distributedSetup.noMaster,
-        },
-        enableEditingMaster: distributedSetup.enableEditingMaster,
-      });
-    });
-
-    it("should handle case where distributed setup has no master", () => {
-      const distributedSetupNoMaster: IUIDistributedUISetup = {
-        distributedData: {
-          numWorkers: 4,
-          master: null,
-        },
-        noMaster: true,
-        enableEditingMaster: true,
-      };
-
-      const mockSpecificEnv = { specificEnv: { ...defaultSpecificEnv } };
-      const mockAssets = { assets: defaultAssets };
-
-      const result: IUIWorkloadCreation = workloadUtil._getWorkloadUI(
-        meta,
-        mockAssets.assets,
-        mockSpecificEnv.specificEnv,
-        undefined,
-        distributedSetupNoMaster,
-      );
-
-      expect(result).toEqual({
-        name: meta.name,
-        namespace: meta.namespace,
-        clusterId: meta.clusterId,
-        projectId: meta.projectId,
-        assets: {
-          ...mockAssets.assets,
-          uiVolumes: undefined,
-        },
-        specificEnv: mockSpecificEnv.specificEnv,
-        distributed: {
-          numWorkers: distributedSetup.distributedData?.numWorkers,
-          distFramework: undefined,
-          master: null,
-          noMaster: distributedSetupNoMaster.noMaster,
-        },
-        enableEditingMaster: distributedSetup.enableEditingMaster,
-      });
-    });
-
-    it("should handle case where distributed setup is not provided", () => {
-      const result: IUIWorkloadCreation = workloadUtil._getWorkloadUI(
-        meta,
-        defaultAssets,
-        defaultSpecificEnv,
-        undefined,
-        undefined,
-      );
-
-      expect(result).not.toHaveProperty("distributed");
     });
   });
 

@@ -186,8 +186,7 @@ import {
   InternalConnectionType,
   ToolType,
   type PolicyInfo,
-  type WorkspaceSpecificRunParams,
-  type TrainingSpecificRunParams,
+  type InferenceSpecificRunParams,
   type EnvironmentVariableOfAsset,
   type InternalToolInfo,
 } from "@/swagger-models/assets-service-client";
@@ -269,7 +268,7 @@ export default defineComponent({
       required: false,
     },
     loadedSpecificRunParamsWithDefaults: {
-      type: [Object, null] as PropType<WorkspaceSpecificRunParams | TrainingSpecificRunParams | null>,
+      type: [Object, null] as PropType<InferenceSpecificRunParams | null>,
       required: false,
     },
     supportConfigMapAsEnvVar: {

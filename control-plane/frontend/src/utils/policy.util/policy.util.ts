@@ -24,11 +24,7 @@ import {
   type ComplianceInfoReason,
   type UnifiedPolicyInfoPerReplicaType,
 } from "@/swagger-models/workloads-client";
-import type {
-  InferenceSpecificRunParams,
-  PolicyInfo,
-  WorkspaceSpecificRunParams,
-} from "@/swagger-models/assets-service-client";
+import type { InferenceSpecificRunParams, PolicyInfo } from "@/swagger-models/assets-service-client";
 
 import { makeId } from "../common.util";
 import type { IUISuperWorkloadSpec, IUIWorkloadStorageFields } from "@/models/workload.model";
@@ -345,7 +341,7 @@ function cleanupLockedItems<T>(items: T[], mainKey: keyof T, locked: string[]): 
   return items.filter((item) => !locked.includes(item[mainKey] as string));
 }
 
-function cleanupItemizeBeforeSubmission<T extends WorkspaceSpecificRunParams & InferenceSpecificRunParams>(
+function cleanupItemizeBeforeSubmission<T extends InferenceSpecificRunParams>(
   specificRunParams: T,
   policyRules?: PolicyInfo | null,
 ): T {

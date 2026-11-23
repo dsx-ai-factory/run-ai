@@ -17,13 +17,13 @@ import { TRAINING_ROUTE_NAMES } from "@/router/training.routes/training.routes.n
 import { workloadTemplateService } from "@/services/control-plane/workload-template.service/workload-template.service";
 import { useSettingStore } from "@/stores/setting.store";
 import { useClusterStore } from "@/stores/cluster.store";
+import { createMemoryHistory, createRouter, type RouteRecordRaw } from "vue-router";
+import { trainingRoutes } from "@/router/training.routes/training.routes";
 import { WORKLOAD_ROUTE_NAMES } from "@/router/workloads.routes/workloads.routes.names";
 import { requestToLeave } from "@/services/infra/router.service/router.service";
 import { clusters } from "./training-new.test.mock";
-import { trainingService } from "@/services/control-plane/training.service/training.service";
-import { loadedTrainingMergedWithPolicy, trainingAssetsEditMockedData } from "./training-assets-edit.mock";
+import { projectsMockData } from "@/components/section/project-section/project-section.mock";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
-import type { Project } from "@/swagger-models/org-unit-service-client";
 import { workloadService } from "@/services/cluster/workload.service/workload.service";
 import { setQuasarMock } from "@/utils/unit-test.util/unit-test.util";
 import { ScopeType, WorkloadType } from "@/swagger-models/workloads-client";
@@ -32,7 +32,6 @@ import type { PermittedScopes } from "@/swagger-models/authorization-client";
 import type { OrgUnit } from "@/swagger-models/org-unit-service-client";
 
 vi.mock("@/services/control-plane/asset.service/asset.service");
-vi.mock("@/services/control-plane/training.service/training.service");
 vi.mock("@/services/cluster/workload.service/workload.service");
 vi.mock("@/services/infra/router.service/router.service");
 vi.mock("@/services/control-plane/org-unit.service/org-unit.service");
@@ -53,28 +52,28 @@ vi.mock("@/composables/use-quick-submission.composable", async () => {
 let pinia = createTestingPinia({ createSpy: vi.fn });
 let clusterStore = useClusterStore(pinia);
 
+describe("Training routes", () => {
+  test.each(["/trainings/new/assets", "/trainings/new/assets/distributed"])(
+    "the former editor URL %s opens the New training screen",
+    (url) => {
+      const router = createRouter({ history: createMemoryHistory(), routes: [trainingRoutes] as RouteRecordRaw[] });
+      expect(router.resolve(url).name).toBe(TRAINING_ROUTE_NAMES.TRAINING_NEW);
+    },
+  );
+});
+
 describe("training-new.vue", () => {
   let trainingNewCmp: VueWrapper<InstanceType<typeof TrainingNew>>;
 
   const mockIsExist = assetService.isExist as MockedFunction<typeof assetService.isExist>;
   mockIsExist.mockResolvedValue(false);
 
-  vi.spyOn(orgUnitService, "getProjectsMetadata").mockImplementation(async () => {
-    return trainingAssetsEditMockedData.loadedProjectsMetasV2;
-  });
-
-  vi.spyOn(orgUnitService, "getProject").mockImplementation(async (projectId) => {
-    const found = trainingAssetsEditMockedData.loadedProjectsV2.find((project: Project) => {
-      return project.id === projectId;
-    }) as Project;
-
-    return found;
-  });
+  vi.mocked(orgUnitService.getProjectsMetadata).mockResolvedValue(projectsMockData);
 
   vi.spyOn(orgTreeService, "getExpandedPermittedScopes").mockImplementation(
     (_: PermittedScopes, _2: OrgUnit[]): PermittedScopes => {
       return {
-        projects: trainingAssetsEditMockedData.loadedProjectsMetasV2.map((project) => project.id),
+        projects: projectsMockData.map((project) => project.id),
       } as PermittedScopes;
     },
   );
@@ -97,8 +96,8 @@ describe("training-new.vue", () => {
       pagination: { limit: 5 },
     });
     vi.mocked(workloadTemplateService.templatesCount).mockResolvedValue(0);
-    vi.mocked(trainingService.getTrainingMergedWithPolicy).mockResolvedValue(loadedTrainingMergedWithPolicy);
     vi.mocked(workloadService.canSubmitWorkload).mockReturnValue(null);
+    useSettingStore(pinia).enableHybridSubmission = { value: false };
     setActivePinia(pinia);
 
     trainingNewCmp = mount(TrainingNew, {
@@ -135,11 +134,9 @@ describe("training-new.vue", () => {
   });
 
   test("selecting a project will reveal and template and name section", async () => {
-    useSettingStore(pinia).enableHybridSubmission = { value: true };
-    vi.mocked(clusterStore.isClusterVersionSufficient).mockReturnValue(true);
     await trainingNewCmp.setData({ selectedClusterId: "test-cluster" });
     await flushPromises();
-    const selectedProject = trainingAssetsEditMockedData.loadedProjectsMetasV2[0];
+    const selectedProject = projectsMockData[0];
     await trainingNewCmp.find(`[aid=${selectedProject.name}-card]`).trigger("click"); // selecting a project to reveal the other sections
     await trainingNewCmp.vm.$nextTick();
     expect(trainingNewCmp.find("[aid=template-section-v2]").exists()).toBe(true);
@@ -148,7 +145,7 @@ describe("training-new.vue", () => {
 
   test("updates the training project when a new project id is emitted by project-section component", async () => {
     await flushPromises();
-    const projectId = +trainingAssetsEditMockedData.loadedProjectsMetasV2[0].id;
+    const projectId = +projectsMockData[0].id;
     const nameSectionCmp = trainingNewCmp.findComponent<DefineComponent>("[aid=project-section]");
     nameSectionCmp.vm.$emit("project-changed", projectId);
     await trainingNewCmp.vm.$nextTick();
@@ -157,7 +154,7 @@ describe("training-new.vue", () => {
 
   test("updates the training name when a new name is emitted by training-name-section component", async () => {
     await flushPromises();
-    const selectedProject = trainingAssetsEditMockedData.loadedProjectsMetasV2[0];
+    const selectedProject = projectsMockData[0];
     await trainingNewCmp.find(`[aid=${selectedProject.name}-card]`).trigger("click"); // selecting a project to reveal the other sections
     await flushPromises();
     const newName = "new-training-name";
@@ -168,11 +165,9 @@ describe("training-new.vue", () => {
   });
 
   test("updates the templateId in the component data when a new value is emitted by template-section component", async () => {
-    useSettingStore(pinia).enableHybridSubmission = { value: true };
-    vi.mocked(clusterStore.isClusterVersionSufficient).mockReturnValue(true);
     await trainingNewCmp.setData({ selectedClusterId: "test-cluster" });
     await flushPromises();
-    const selectedProject = trainingAssetsEditMockedData.loadedProjectsMetasV2[0];
+    const selectedProject = projectsMockData[0];
     await trainingNewCmp.find(`[aid=${selectedProject.name}-card]`).trigger("click"); // selecting a project to reveal the other sections
     await flushPromises();
     expect(trainingNewCmp.vm.selectedTemplateId).toBe("-1"); // the id for 'Start from scratch' which is automatically selected if there are no templates
@@ -195,7 +190,7 @@ describe("training-new.vue", () => {
 
   test("component will NOT redirect the user the training edit page when 'Continue' button is clicked and validation fails due unselected project", async () => {
     await flushPromises();
-    expect(trainingNewCmp.vm.training.projectId).toBe(-1);
+    expect(trainingNewCmp.vm.selectedProjectId).toBe(-1);
     await trainingNewCmp.find("[aid=create-training-continue-btn]").trigger("click");
     expect(await trainingNewCmp.vm.validate()).toBe(false);
     await flushPromises();
@@ -204,7 +199,7 @@ describe("training-new.vue", () => {
 
   test("component will NOT redirect the user the training edit page when 'Continue' button is clicked and validation fails due to empty or invalid name", async () => {
     await flushPromises();
-    const selectedProject = trainingAssetsEditMockedData.loadedProjectsMetasV2[0];
+    const selectedProject = projectsMockData[0];
     await trainingNewCmp.find(`[aid=${selectedProject.name}-card]`).trigger("click"); // selecting a project to reveal the other sections
     await flushPromises();
     await trainingNewCmp.find("[aid=create-training-continue-btn]").trigger("click");
@@ -215,64 +210,29 @@ describe("training-new.vue", () => {
     expect(trainingNewCmp.vm.$router).toEqual([]);
   });
 
-  test("component will redirect the user the training edit page when 'Continue' button is clicked and validation is successful", async () => {
+  test("opens the flexible training form from scratch with flexible submission disabled", async () => {
     await flushPromises();
-    const selectedProject = trainingAssetsEditMockedData.loadedProjectsMetasV2[0];
-    await trainingNewCmp.find(`[aid=${selectedProject.name}-card]`).trigger("click"); // selecting a project to reveal the other sections
-    await trainingNewCmp.find("[aid=create-training-continue-btn]").trigger("click");
+    const project = projectsMockData[0];
+    await trainingNewCmp.find(`[aid=${project.name}-card]`).trigger("click");
+    await flushPromises();
+    expect(trainingNewCmp.find("[aid=template-section-v2]").exists()).toBe(true);
     await trainingNewCmp.setData({ trainingName: "valid-name" });
-    const expectedPush = { name: TRAINING_ROUTE_NAMES.TRAINING_ASSETS_EDIT };
-    expect(await trainingNewCmp.vm.validate()).toBe(true);
+    await trainingNewCmp.find("[aid=create-training-continue-btn]").trigger("click");
     await flushPromises();
-    expect(trainingNewCmp.vm.$router).toContainEqual(expectedPush);
-  });
 
-  test.each([
-    { enabled: true, supported: true },
-    { enabled: false, supported: true },
-    { enabled: true, supported: false },
-  ])(
-    "loads flexible templates only when submission is supported ($enabled, $supported)",
-    async ({ enabled, supported }) => {
-      await flushPromises();
-      useSettingStore(pinia).enableHybridSubmission = { value: enabled };
-      vi.mocked(clusterStore.isClusterVersionSufficient).mockReturnValue(supported);
-      await trainingNewCmp.setData({ selectedClusterId: "compatibility-cluster", selectedProjectId: 123 });
-      const list = vi.fn().mockResolvedValue(undefined);
-      trainingNewCmp.vm.list = list;
-
-      await trainingNewCmp.vm.loadTemplates();
-
-      expect(list).toHaveBeenCalledTimes(enabled && supported ? 1 : 0);
-      expect(trainingNewCmp.find("[aid=template-section-v2]").exists()).toBe(enabled && supported);
-    },
-  );
-
-  describe("Flexible templates", () => {
-    beforeEach(() => {
-      Object.defineProperty(trainingNewCmp.vm, "isHybridSupported", {
-        get: () => true,
-        configurable: true,
-      });
-    });
-
-    test("loads flat templates when isHybridSupported is true and project is selected", async () => {
-      await flushPromises();
-      // Mock the flat templates gallery functions
-      const mockList = vi.fn().mockResolvedValue(undefined);
-      trainingNewCmp.vm.list = mockList;
-
-      const projectId = +trainingAssetsEditMockedData.loadedProjectsMetasV2[0].id;
-      await trainingNewCmp.vm.onSelectedProject(projectId);
-
-      // Note: This test verifies the method call structure
-      expect(mockList).toHaveBeenCalled();
+    expect(trainingNewCmp.vm.$router).toContainEqual({
+      name: TRAINING_ROUTE_NAMES.TRAINING_HYBRID,
+      query: {
+        clusterId: clusters[0].uuid,
+        projectId: Number(project.id),
+        trainingName: "valid-name",
+        templateId: undefined,
+      },
     });
   });
 
   describe("Workload Architecture Selection", () => {
     test("setDistributedDetails method sets distributed details correctly for distributed workload", async () => {
-      Object.defineProperty(trainingNewCmp.vm, "isHybridSupported", { get: () => true, configurable: true });
       trainingNewCmp.vm.setDistributedDetails(true);
 
       expect(trainingNewCmp.vm.selectedDistributedDetails).toEqual({
@@ -384,30 +344,46 @@ describe("training-new.vue", () => {
     });
   });
 
-  describe("Hybrid Submission Flow", () => {
-    beforeEach(() => {
-      Object.defineProperty(trainingNewCmp.vm, "isHybridSupported", {
-        get: () => true,
-        configurable: true,
-      });
+  test("passes the selected template to the flexible distributed training form", async () => {
+    await flushPromises();
+    await trainingNewCmp.setData({
+      trainingName: "valid-name",
+      selectedClusterId: clusters[0].uuid,
+      selectedProjectId: 123,
     });
-
-    test("isHybridSupported returns true when cluster version and settings support it", async () => {
-      expect(trainingNewCmp.vm.isHybridSupported).toBe(true);
+    vi.mocked(workloadTemplateService.distributedTemplatesList).mockResolvedValue({
+      entries: [
+        {
+          meta: {
+            id: "template-1",
+            name: "jax-template",
+            workloadType: WorkloadType.Distributed,
+            scopeType: ScopeType.Project,
+            scopeId: "123",
+            createdBy: "user",
+            createdAt: "2026-01-01",
+          },
+          spec: { distributedFramework: DistributedFramework.Jax },
+        },
+      ],
+      pagination: { limit: 5 },
     });
+    trainingNewCmp.vm.setDistributedDetails(true);
+    await flushPromises();
+    trainingNewCmp.vm.onSelectedTemplate("template-1");
 
-    test("onContinue method routing logic", async () => {
-      const mockContinueToHybrid = vi.fn();
-      const mockContinueToEdit = vi.fn();
+    await trainingNewCmp.vm.onContinue();
 
-      trainingNewCmp.vm.continueToHybrid = mockContinueToHybrid;
-      trainingNewCmp.vm.continueToEdit = mockContinueToEdit;
-
-      trainingNewCmp.vm.onContinue();
-
-      // Should call continueToHybrid when hybrid is supported
-      expect(mockContinueToHybrid).toHaveBeenCalled();
-      expect(mockContinueToEdit).not.toHaveBeenCalled();
+    expect(trainingNewCmp.vm.$router).toContainEqual({
+      name: TRAINING_ROUTE_NAMES.DISTRIBUTED_HYBRID,
+      query: {
+        clusterId: clusters[0].uuid,
+        projectId: 123,
+        templateId: "template-1",
+        trainingName: "valid-name",
+        distFramework: DistributedFramework.Jax,
+        noMaster: "true",
+      },
     });
   });
 
@@ -445,11 +421,6 @@ describe("training-new.vue", () => {
           spec: { distributedFramework: mockFramework },
         },
       ]);
-
-      Object.defineProperty(trainingNewCmp.vm, "isHybridSupported", {
-        get: () => true,
-        configurable: true,
-      });
 
       const setDistributedFrameworkSpy = vi.spyOn(trainingNewCmp.vm, "setDistributedFramework");
 

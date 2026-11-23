@@ -510,8 +510,8 @@ export default defineComponent({
       return !this.workload?.environments?.[0]?.id;
     },
     requiresFlexibleSubmissionEnabled(): boolean {
-      if (this.isFlatWorkload && this.workload.type === EWorkloadType.Inference) return false;
       return (
+        this.isDistributedInferenceWorkload &&
         this.isFlatWorkload &&
         !this.settingStore.isHybridSubmissionEnabled &&
         this.workload.source !== Source.Cli &&

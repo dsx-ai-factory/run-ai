@@ -65,6 +65,7 @@ import {
   type DistributedInferenceServingPortProtocol,
   type DistributedInferenceServingPortAccessAuthorizationTypeEnum,
   DistributedInferenceStartupPolicy,
+  type InferenceV2,
 } from "@/swagger-models/assets-service-client";
 import type {
   DistributedInference,
@@ -99,7 +100,7 @@ import type {
 import type { IServingEndpointAccessData } from "@/components/section/inference/serving-endpoint-section/serving-endpoint-access.model";
 import type { IItemizedListItem } from "@/components/common/runai-itemized-list/runai-itemized-list.model";
 import type { IAutoScaleData } from "@/components/section/compute-resource-section/auto-scale-section";
-import { workloadUtil, type TWorkloadsToConvert } from "@/utils/workload.util/workload.util";
+import { workloadUtil } from "@/utils/workload.util/workload.util";
 import type { IUIVolume, TDataSourceKinds } from "@/models/data-source.model";
 import type { ClusterDependencyStatus, ClustersMinimalData } from "@/swagger-models/cluster-service-client";
 
@@ -712,7 +713,7 @@ function normalizeAutoScaleData(
 }
 
 function convertInferenceToWorkloadUI(
-  workload: TWorkloadsToConvert,
+  workload: InferenceV2,
   inferenceType?: EInferenceType,
   supportingServingPortAccess = false,
   uiVolumes?: Array<IUIVolume>,

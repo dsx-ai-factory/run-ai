@@ -34,14 +34,7 @@ import type { EWorkloadType } from "@/models/workload.model";
 import { type IYamlWorkloadFormState } from "@/models/workload.model";
 
 import { workloadLocalPhaseUpdater } from "@/services/cluster/workload.service/local-status-updater";
-import type {
-  Inference,
-  InferenceV2,
-  TrainingV2,
-  WorkspaceV2,
-  ModelInference,
-  ModelInferenceV2,
-} from "@/swagger-models/assets-service-client";
+import type { Inference, InferenceV2, ModelInference, ModelInferenceV2 } from "@/swagger-models/assets-service-client";
 import type { WorkloadV2 } from "@/swagger-models/workloads-manager-client";
 
 const getDefaultFilters = (): IJobFilter => {
@@ -134,8 +127,6 @@ export const useWorkloadStore = defineStore("WorkloadStore", {
         | ITrainingList
         | IInferenceList
         | Workload
-        | WorkspaceV2
-        | TrainingV2
         | Inference
         | InferenceV2
         | ModelInference

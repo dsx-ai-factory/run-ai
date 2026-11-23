@@ -16,7 +16,6 @@ import type {
   SpecificRunConnectionInfo,
   AssetIdAndKind,
   ToolType,
-  DistributedData,
   DistributedFramework,
   Toleration,
   PodAffinity,
@@ -425,14 +424,8 @@ export interface IWorkloadListModal {
   status: IStatusColOptions;
 }
 
-export interface IUIDistributedMaster {
-  assets: IUIWorkloadAssets;
-  specificEnv: IUIWorkloadSpecificEnv;
-}
-
-export interface IUIDistributed extends Omit<DistributedData, "master" | "framework" | "numWorkers"> {
+export interface IUIDistributed {
   numWorkers?: number;
-  master?: IUIDistributedMaster | null;
   distFramework?: DistributedFramework | null;
   noMaster?: boolean;
 }
@@ -445,7 +438,6 @@ export interface IUIWorkloadCreation {
   assets: IUIWorkloadAssets;
   specificEnv: IUIWorkloadSpecificEnv;
   distributed?: IUIDistributed | null;
-  enableEditingMaster?: boolean;
 }
 
 export interface IUIInferenceCreation extends IUIWorkloadCreation {
