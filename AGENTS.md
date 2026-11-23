@@ -12,6 +12,44 @@ branching, and code review), see [Contributing](CONTRIBUTING.md). For coding
 conventions specific to a single service, see [`CLAUDE.md`](CLAUDE.md) at the
 repository root and that service's own `CLAUDE.md`.
 
+## Progress Reporting for Long-Running Work
+
+When a task runs long or has more than one step (builds, test runs, deploys,
+environment setup, multi-file changes), start every progress update with a
+phase-based progress bar, the current step number out of the total, and the
+step name. Follow it with an on-track line and a steps table:
+
+```text
+[█████░░] 5/7 Deploy workers (2 of 3)
+On track: yes. 8 of 8 workers ready, route accepted.
+
+| #   | Step                | Status                         |
+|-----|---------------------|--------------------------------|
+| 1-3 | Build and push      | ✅                             |
+| 4   | Deploy workers      | 🔄 waiting for rollout         |
+| 5   | Run light tests     | ⬜                             |
+| 6   | Full benchmark      | ⬜ only after your approval    |
+```
+
+**Bar and step**
+- Count real steps or phases; never show an invented percentage.
+- Advance the bar only when a step actually completes.
+- Put a sub-step in the step name, for example `(L1 of 3)`.
+
+**On-track line**
+- Write `On track: yes / no / at risk`, then one sentence with the current state
+  and, if not "yes", the reason.
+
+**Steps table**
+- Columns: `#`, `Step`, `Status`. Status marks: ✅ done, 🔄 in progress,
+  ⬜ not started.
+- Exactly one step is 🔄 at a time. When it waits on something, say what in the
+  Status cell, for example `🔄 waiting for you to run L1`.
+- Mark a step that needs the user's approval or action in its own Status cell.
+
+**Commands that cannot report progress**
+- Say how long the command has been running and what it is waiting on.
+
 ## Secrets and Credentials
 
 Never commit secrets, API keys, tokens, or credentials, real or
