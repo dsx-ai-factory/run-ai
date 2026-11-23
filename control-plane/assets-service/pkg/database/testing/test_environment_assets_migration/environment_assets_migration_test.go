@@ -87,9 +87,13 @@ var _ = Describe("Environment Assets Migration", Ordered, func() {
 				customImage      = "example.com/custom/jupyter:1"
 			)
 			db := runaidb.DB().Actual().WithContext(context.Background())
+			Expect(db.Exec(`INSERT INTO assets_environment (asset_id, image) VALUES (?, ?), (?, ?)
+				ON CONFLICT (asset_id) DO NOTHING`, pathID, legacyImage, hostID, legacyImage).Error).To(Succeed())
 			loadImage := func(id string) string {
 				var image string
-				Expect(db.Raw("SELECT image FROM assets_environment WHERE asset_id = ?", id).Scan(&image).Error).To(Succeed())
+				result := db.Raw("SELECT image FROM assets_environment WHERE asset_id = ?", id).Scan(&image)
+				Expect(result.Error).To(Succeed())
+				Expect(result.RowsAffected).To(Equal(int64(1)))
 				return image
 			}
 			for _, id := range []string{pathID, hostID} {
