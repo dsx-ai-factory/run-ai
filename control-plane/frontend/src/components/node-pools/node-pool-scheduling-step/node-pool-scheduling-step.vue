@@ -238,7 +238,7 @@ import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
 import { RunaiSegmentedButton } from "@/components/common/runai-segmented-button";
 import NodePoolWizardSummary from "../node-pool-wizard-summary/node-pool-wizard-summary.vue";
 import { isSupportedSchedulingMode, getSchedulingMode, type INodePoolSummaryResources } from "@/models/node-pool.model";
-import type { Nodepool } from "@/swagger-models/cluster-service-client";
+import type { Nodepool, SchedulingCapabilitiesNullable } from "@/swagger-models/cluster-service-client";
 
 const props = withDefaults(
   defineProps<{
@@ -444,16 +444,20 @@ function onDepartmentSaving(value: boolean) {
 }
 const saveError = ref("");
 const saver = useNodePoolSchedulingSave();
+function usesWeightsWithoutQuota(capabilities?: SchedulingCapabilitiesNullable): boolean {
+  return capabilities?.adjustableWeights === true && capabilities.quota === false;
+}
 const validationError = computed(() => {
   try {
     buildSchedulingSave(props.pool, draft.value);
     const capabilities = toSchedulingCapabilities(draft.value);
-    if (
-      !props.canResetResources &&
-      ((props.pool.schedulingCapabilities?.cpuQuota && !capabilities.cpuQuota) ||
-        (props.pool.schedulingCapabilities?.limits && !capabilities.limits))
-    )
-      return "Turning off CPU quota or Max GPU allocation requires update permission for all departments and projects in this cluster.";
+    if (!props.canResetResources) {
+      const saved = props.pool.schedulingCapabilities;
+      if ((saved?.cpuQuota && !capabilities.cpuQuota) || (saved?.limits && !capabilities.limits))
+        return "Turning off CPU quota or Max GPU allocation requires update permission for all departments and projects in this cluster.";
+      if (usesWeightsWithoutQuota(capabilities) && !usesWeightsWithoutQuota(saved))
+        return "Using adjustable weights without GPU quota requires update permission for all departments and projects in this cluster.";
+    }
     for (const edit of Object.values(draft.value.departments)) {
       if (props.canEditDepartment?.(edit.id) === false)
         return "You do not have permission to update one of the edited departments.";
