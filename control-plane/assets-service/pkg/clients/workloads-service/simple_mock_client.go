@@ -17,69 +17,12 @@ import (
 
 // SimpleMockClient used for testing
 type SimpleMockClient struct {
-	Inferences  []workloadsServiceClient.Inference
-	Workspaces  []workloadsServiceClient.Workspace
-	Trainings   []workloadsServiceClient.Training
-	Distributed []workloadsServiceClient.DistributedWorkload
+	Inferences []workloadsServiceClient.Inference
 
 	// Excluded from serialization: tests snapshot this struct to compare the created workloads.
 	ResourceClaimTemplateWorkloads         *workloadsServiceClient.ResourceClaimTemplateWorkloadsResponse         `json:"-"`
 	ResourceClaimTemplateWorkloadsErr      *workloadsServiceClient.Error                                          `json:"-"`
 	ResourceClaimTemplateWorkloadsRequests []workloadsServiceClient.InternalResourceClaimTemplateWorkloadsRequest `json:"-"`
-}
-
-func (s *SimpleMockClient) CreateWorkspace(ctx context.Context, request *workloadsServiceClient.WorkspaceCreationRequest) (*workloadsServiceClient.Workspace, *workloadsServiceClient.SubmissionErrorV2) {
-	workspace := workloadsServiceClient.Workspace{
-		Name:          request.Name,
-		RequestedName: request.Name,
-		WorkloadId:    uuid.NewString(),
-		ProjectId:     request.ProjectId,
-		ClusterId:     request.ClusterId,
-		DesiredPhase:  workloadsServiceClient.WORKLOADDESIREDPHASE_RUNNING,
-		ActualPhase:   convutils.Ref(workloadsServiceClient.PHASE_CREATING),
-		Spec:          request.Spec,
-	}
-
-	s.Workspaces = append(s.Workspaces, workspace)
-
-	return &workspace, nil
-}
-
-func (s *SimpleMockClient) CreateTraining(ctx context.Context, request *workloadsServiceClient.TrainingCreationRequest) (*workloadsServiceClient.Training, *workloadsServiceClient.SubmissionErrorV2) {
-	training := workloadsServiceClient.Training{
-		Name:          request.Name,
-		RequestedName: request.Name,
-		WorkloadId:    uuid.NewString(),
-		ProjectId:     request.ProjectId,
-		ClusterId:     request.ClusterId,
-		DesiredPhase:  workloadsServiceClient.WORKLOADDESIREDPHASE_RUNNING,
-		ActualPhase:   convutils.Ref(workloadsServiceClient.PHASE_CREATING),
-		Spec:          request.Spec,
-	}
-
-	s.Trainings = append(s.Trainings, training)
-
-	return &training, nil
-}
-
-func (s *SimpleMockClient) CreateDistributed(ctx context.Context, request *workloadsServiceClient.DistributedCreationRequest) (*workloadsServiceClient.DistributedWorkload, *workloadsServiceClient.SubmissionErrorV2) {
-	distributed := workloadsServiceClient.DistributedWorkload{
-		Name:          request.Name,
-		RequestedName: request.Name,
-		WorkloadId:    uuid.NewString(),
-		ProjectId:     request.ProjectId,
-		ClusterId:     request.ClusterId,
-		DesiredPhase:  workloadsServiceClient.WORKLOADDESIREDPHASE_RUNNING,
-		ActualPhase:   convutils.Ref(workloadsServiceClient.PHASE_CREATING),
-		Spec:          request.Spec,
-		MasterSpec:    request.MasterSpec,
-
-		MasterSpecSameAsWorker: request.MasterSpecSameAsWorker,
-	}
-
-	s.Distributed = append(s.Distributed, distributed)
-
-	return &distributed, nil
 }
 
 func (s *SimpleMockClient) CreateInference(ctx context.Context, request *workloadsServiceClient.InferenceCreationRequest) (*workloadsServiceClient.Inference, *workloadsServiceClient.Error) {
@@ -144,53 +87,15 @@ func (f SimpleMockClientFactory) Client() ClientInterface {
 	return f.SimpleMockClient
 }
 
-// SanitizeWorkloads remove from the workloads that were created all fields that have values which
-// changes from test to test otherwise test will be flaky
+// SanitizeWorkloads clears generated values before comparing captured submissions.
 func (s *SimpleMockClient) SanitizeWorkloads() {
-	if s.Inferences != nil {
-		for idx := range s.Inferences {
-			s.Inferences[idx].WorkloadId = ""
-			s.Inferences[idx].ClusterId = ""
-			s.Inferences[idx].ProjectId = ""
-			if s.Inferences[idx].Spec != nil {
-				s.sanitizeAnnotations(s.Inferences[idx].Spec.Annotations)
-			}
-		}
-	}
-
-	if s.Workspaces != nil {
-		for idx := range s.Workspaces {
-			s.Workspaces[idx].WorkloadId = ""
-			s.Workspaces[idx].ClusterId = ""
-			s.Workspaces[idx].ProjectId = ""
-			if s.Workspaces[idx].Spec != nil {
-				s.sanitizeAnnotations(s.Workspaces[idx].Spec.Annotations)
-			}
-		}
-	}
-
-	if s.Trainings != nil {
-		for idx := range s.Trainings {
-			s.Trainings[idx].WorkloadId = ""
-			s.Trainings[idx].ClusterId = ""
-			s.Trainings[idx].ProjectId = ""
-			if s.Trainings[idx].Spec != nil {
-				s.sanitizeAnnotations(s.Trainings[idx].Spec.Annotations)
-			}
-		}
-	}
-
-	if s.Distributed != nil {
-		for idx := range s.Distributed {
-			s.Distributed[idx].WorkloadId = ""
-			s.Distributed[idx].ClusterId = ""
-			s.Distributed[idx].ProjectId = ""
-			if s.Distributed[idx].Spec != nil {
-				s.sanitizeAnnotations(s.Distributed[idx].Spec.Annotations)
-			}
-			if convutils.HasValue(s.Distributed[idx].MasterSpec) {
-				s.sanitizeAnnotations(s.Distributed[idx].MasterSpec.Get().Annotations)
-			}
+	for idx := range s.Inferences {
+		inference := &s.Inferences[idx]
+		inference.WorkloadId = ""
+		inference.ClusterId = ""
+		inference.ProjectId = ""
+		if inference.Spec != nil {
+			s.sanitizeAnnotations(inference.Spec.Annotations)
 		}
 	}
 }
@@ -206,9 +111,6 @@ func (s *SimpleMockClient) sanitizeAnnotations(annotations []workloadsServiceCli
 
 func (s *SimpleMockClient) Clear() {
 	s.Inferences = nil
-	s.Workspaces = nil
-	s.Trainings = nil
-	s.Distributed = nil
 	s.ResourceClaimTemplateWorkloads = nil
 	s.ResourceClaimTemplateWorkloadsErr = nil
 	s.ResourceClaimTemplateWorkloadsRequests = nil

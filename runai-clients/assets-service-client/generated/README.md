@@ -189,12 +189,8 @@ Class | Method | HTTP request | Description
 *SynchronizationAPI* | [**ListAssetsById**](docs/SynchronizationAPI.md#listassetsbyid) | **Get** /api/v1/asset | List assets by their ids
 *SynchronizationAPI* | [**SyncAssetsResourcesIds**](docs/SynchronizationAPI.md#syncassetsresourcesids) | **Post** /api/v1/asset/sync/asset-resources-ids | Sync asset resources ids.
 *SynchronizationAPI* | [**SyncValidate**](docs/SynchronizationAPI.md#syncvalidate) | **Post** /api/v1/asset/sync/validate | Validate assets sync.
-*TrainingsAPI* | [**CreateTraining**](docs/TrainingsAPI.md#createtraining) | **Post** /api/v1/training | Create training workload.
-*TrainingsAPI* | [**CreateTrainingV2**](docs/TrainingsAPI.md#createtrainingv2) | **Post** /api/v2/training | Create a training - assets based [Experimental]
 *TrainingsAPI* | [**DeleteDistributedById**](docs/TrainingsAPI.md#deletedistributedbyid) | **Delete** /v1/k8s/clusters/{clusterUuid}/distributed/{workloadId} | Delete a distributed, per cluster sync update [Obsolete]
 *TrainingsAPI* | [**DeleteTrainingById**](docs/TrainingsAPI.md#deletetrainingbyid) | **Delete** /v1/k8s/clusters/{clusterUuid}/trainings/{workloadId} | Delete a training, per cluster sync update [Obsolete]
-*TrainingsAPI* | [**GetTrainingByIdV2**](docs/TrainingsAPI.md#gettrainingbyidv2) | **Get** /api/v2/training/{workloadId} | Get training data - assets based. [Experimental]
-*TrainingsAPI* | [**GetTrainingMerged**](docs/TrainingsAPI.md#gettrainingmerged) | **Get** /api/v2/training/merged | Get merged training
 *TrainingsAPI* | [**ListTrainings**](docs/TrainingsAPI.md#listtrainings) | **Get** /v1/k8s/clusters/{clusterUuid}/trainings | List training in the cluster
 *TrainingsAPI* | [**SyncDistributedStatus**](docs/TrainingsAPI.md#syncdistributedstatus) | **Post** /v1/k8s/clusters/{clusterUuid}/distributed/status | Sync distributed status [Obsolete]
 *TrainingsAPI* | [**SyncTrainingStatus**](docs/TrainingsAPI.md#synctrainingstatus) | **Post** /v1/k8s/clusters/{clusterUuid}/trainings/status | Sync training status [Obsolete]
@@ -202,11 +198,7 @@ Class | Method | HTTP request | Description
 *TrainingsAPI* | [**UpdateTrainingStatus**](docs/TrainingsAPI.md#updatetrainingstatus) | **Put** /v1/k8s/clusters/{clusterUuid}/trainings/status | Update training status [Obsolete]
 *WorkloadAPI* | [**AssetNameConflictValidation**](docs/WorkloadAPI.md#assetnameconflictvalidation) | **Get** /api/v1/asset/name-availability | Asset name conflict validation
 *WorkspacesAPI* | [**CountAssets**](docs/WorkspacesAPI.md#countassets) | **Get** /api/v1/asset/count | Count assets.
-*WorkspacesAPI* | [**CreateWorkspace**](docs/WorkspacesAPI.md#createworkspace) | **Post** /api/v1/workspace | Create workspace.
-*WorkspacesAPI* | [**CreateWorkspaceV2**](docs/WorkspacesAPI.md#createworkspacev2) | **Post** /api/v2/workspace | Create a workspace - assets based [Experimental]
 *WorkspacesAPI* | [**DeleteWorkspaceById**](docs/WorkspacesAPI.md#deleteworkspacebyid) | **Delete** /v1/k8s/clusters/{clusterUuid}/workspaces/{workloadId} | Delete a workspace, per cluster sync update [Obsolete]
-*WorkspacesAPI* | [**GetWorkspaceByIdV2**](docs/WorkspacesAPI.md#getworkspacebyidv2) | **Get** /api/v2/workspace/{workloadId} | Get workspace data - assets based [Experimental]
-*WorkspacesAPI* | [**GetWorkspaceMerged**](docs/WorkspacesAPI.md#getworkspacemerged) | **Get** /api/v2/workspace/merged | Get merged workspace
 *WorkspacesAPI* | [**ListWorkspaces**](docs/WorkspacesAPI.md#listworkspaces) | **Get** /v1/k8s/clusters/{clusterUuid}/workspaces | List workspaces in the cluster
 *WorkspacesAPI* | [**SyncWorkspaceStatus**](docs/WorkspacesAPI.md#syncworkspacestatus) | **Post** /v1/k8s/clusters/{clusterUuid}/workspaces/status | Sync workspace status [Obsolete]
 *WorkspacesAPI* | [**UpdateWorkspaceStatus**](docs/WorkspacesAPI.md#updateworkspacestatus) | **Put** /v1/k8s/clusters/{clusterUuid}/workspaces/status | Update workspace status [Obsolete]
@@ -326,7 +318,6 @@ Class | Method | HTTP request | Description
  - [DisplayedJob](docs/DisplayedJob.md)
  - [DistMaster](docs/DistMaster.md)
  - [Distributed](docs/Distributed.md)
- - [DistributedData](docs/DistributedData.md)
  - [DistributedFramework](docs/DistributedFramework.md)
  - [DistributedInferenceCommonSpec](docs/DistributedInferenceCommonSpec.md)
  - [DistributedInferenceLeaderSpecFields](docs/DistributedInferenceLeaderSpecFields.md)
@@ -345,9 +336,6 @@ Class | Method | HTTP request | Description
  - [DistributedInferenceStartupPolicyField](docs/DistributedInferenceStartupPolicyField.md)
  - [DistributedInferenceWorkerSpecFields](docs/DistributedInferenceWorkerSpecFields.md)
  - [DistributedInferenceWorkersField](docs/DistributedInferenceWorkersField.md)
- - [DistributedMaster](docs/DistributedMaster.md)
- - [DistributedMasterData](docs/DistributedMasterData.md)
- - [DistributedParams](docs/DistributedParams.md)
  - [DockerRegistry](docs/DockerRegistry.md)
  - [DockerRegistryCreationRequest](docs/DockerRegistryCreationRequest.md)
  - [DockerRegistryCreationSpec](docs/DockerRegistryCreationSpec.md)
@@ -492,7 +480,6 @@ Class | Method | HTTP request | Description
  - [NodeSelectorTerm](docs/NodeSelectorTerm.md)
  - [NonOverridableSpecFields](docs/NonOverridableSpecFields.md)
  - [NumberRules](docs/NumberRules.md)
- - [OptionalAssetIds](docs/OptionalAssetIds.md)
  - [OverridableSpecFields](docs/OverridableSpecFields.md)
  - [PVCAsset](docs/PVCAsset.md)
  - [PVCAssetSpec](docs/PVCAssetSpec.md)
@@ -629,10 +616,7 @@ Class | Method | HTTP request | Description
  - [TolerationsRules](docs/TolerationsRules.md)
  - [ToolType](docs/ToolType.md)
  - [Training](docs/Training.md)
- - [TrainingCreationRequestV2](docs/TrainingCreationRequestV2.md)
  - [TrainingListResponse](docs/TrainingListResponse.md)
- - [TrainingSpecificRunParams](docs/TrainingSpecificRunParams.md)
- - [TrainingV2](docs/TrainingV2.md)
  - [UidGidSource](docs/UidGidSource.md)
  - [UsageTimesInfo](docs/UsageTimesInfo.md)
  - [ValidateSyncRequest](docs/ValidateSyncRequest.md)
@@ -648,10 +632,7 @@ Class | Method | HTTP request | Description
  - [WorkloadSupportedTypes](docs/WorkloadSupportedTypes.md)
  - [WorkloadType](docs/WorkloadType.md)
  - [Workspace](docs/Workspace.md)
- - [WorkspaceCreationRequestV2](docs/WorkspaceCreationRequestV2.md)
  - [WorkspaceListResponse](docs/WorkspaceListResponse.md)
- - [WorkspaceSpecificRunParams](docs/WorkspaceSpecificRunParams.md)
- - [WorkspaceV2](docs/WorkspaceV2.md)
 
 
 ## Documentation For Authorization

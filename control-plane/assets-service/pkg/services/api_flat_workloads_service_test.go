@@ -13,8 +13,6 @@ import (
 	"os"
 	"strings"
 
-	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
-
 	k8sObjectsTracker "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/clients/k8s-objects-tracker"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/clients/org_unit"
 
@@ -63,10 +61,7 @@ var urlByType = map[api.AssetKind]string{
 }
 
 type TestDetails struct {
-	workloadType string
-
 	specFname     string
-	expectedError string
 	expectedFname string
 
 	environmentWorkloadTypes *api.WorkloadSupportedTypes
@@ -88,13 +83,7 @@ type RuntimeTestData struct {
 	credentials map[string]string
 }
 
-var (
-	envForWorkspace  = api.WorkloadSupportedTypes{Workspace: convutils.Ref(true)}
-	envForTraining   = api.WorkloadSupportedTypes{Training: convutils.Ref(true)}
-	envForInference  = api.WorkloadSupportedTypes{Inference: convutils.Ref(true)}
-	envForTensorFlow = api.WorkloadSupportedTypes{Distributed: convutils.Ref(true), DistFramework: convutils.Ref("TF")}
-	envForMpi        = api.WorkloadSupportedTypes{Distributed: convutils.Ref(true), DistFramework: convutils.Ref("MPI")}
-)
+var envForInference = api.WorkloadSupportedTypes{Inference: convutils.Ref(true)}
 
 func createExistingResources(runtimeData RuntimeTestData) {
 	pvcCreReq := api.PvcCreationRequest{
@@ -156,128 +145,6 @@ func createExistingResources(runtimeData RuntimeTestData) {
 		WithGenericSecret(runtimeData.randoms.ClusterId, &genericSecretCreReq, nil))
 }
 
-var ComposerTests = []TableEntry{
-	Entry("gpu portion + specific params", TestDetails{
-		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
-		specFname:                "rich_specific_params",
-		expectedFname:            "rich_specific_params_ws",
-		environmentWorkloadTypes: &envForWorkspace,
-	}),
-
-	Entry("gpu memory + no specific params", TestDetails{
-		workloadType:             string(workloadsApi.WORKLOADTYPE_TRAINING),
-		specFname:                "no_specific_params",
-		expectedFname:            "no_specific_params_train",
-		environmentWorkloadTypes: &envForTraining,
-	}),
-
-	Entry("distributed with master", TestDetails{
-		workloadType:             string(workloadsApi.WORKLOADTYPE_TRAINING),
-		specFname:                "distributed_with_master",
-		expectedFname:            "distributed_with_master",
-		environmentWorkloadTypes: &envForTensorFlow,
-	}),
-
-	Entry("distributed with no master (TF)", TestDetails{
-		workloadType:             string(workloadsApi.WORKLOADTYPE_TRAINING),
-		specFname:                "distributed_no_master",
-		expectedFname:            "distributed_no_master",
-		environmentWorkloadTypes: &envForTensorFlow,
-	}),
-
-	Entry("distributed same as but also assets", TestDetails{
-		workloadType:             string(workloadsApi.WORKLOADTYPE_TRAINING),
-		specFname:                "distributed_same_with_assets",
-		expectedError:            "assets should not be provided when sameAsWorker is requested",
-		environmentWorkloadTypes: &envForMpi,
-	}),
-
-	Entry("distributed master missing", TestDetails{
-		workloadType:             string(workloadsApi.WORKLOADTYPE_TRAINING),
-		specFname:                "distributed_master_missing",
-		expectedError:            "assets should be provided for the master replica",
-		environmentWorkloadTypes: &envForMpi,
-	}),
-
-	Entry("distributed master same as worker", TestDetails{
-		workloadType:             string(workloadsApi.WORKLOADTYPE_TRAINING),
-		specFname:                "distributed_master_same",
-		expectedFname:            "distributed_master_same",
-		environmentWorkloadTypes: &envForTensorFlow,
-	}),
-
-	Entry("inference basic test", TestDetails{
-		workloadType:             string(workloadsApi.WORKLOADTYPE_INFERENCE),
-		specFname:                "inference_basic",
-		expectedFname:            "inference_basic",
-		environmentWorkloadTypes: &envForInference,
-	}),
-
-	/* To open JIRA for this validation, the API does not enforce it
-	   Entry("inference basic test <-> workspace only asset", TestDetails{
-	   	workloadType:             string(workloadsApi.WORKLOADTYPE_INFERENCE),
-	   	specFname:                "inference_basic",
-	   	expectedError:            "bla bla bla",
-	   	environmentWorkloadTypes: &envForTraining,
-	   }),
-	*/
-
-	Entry("jupyter and tensor", TestDetails{
-		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
-		specFname:                "jupyter_tensor",
-		expectedFname:            "jupyter_tensor_ws",
-		environmentWorkloadTypes: &envForWorkspace,
-	}),
-
-	Entry("mixed tools", TestDetails{
-		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
-		specFname:                "mixed_tools",
-		expectedFname:            "mixed_tools_ws",
-		environmentWorkloadTypes: &envForWorkspace,
-	}),
-
-	Entry("private datasources", TestDetails{
-		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
-		specFname:                "private_datasources",
-		expectedFname:            "private_datasources_ws",
-		environmentWorkloadTypes: &envForWorkspace,
-	}),
-
-	Entry("private git with ssh", TestDetails{
-		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
-		specFname:                "private_git_with_ssh",
-		expectedFname:            "private_git_with_ssh_ws",
-		environmentWorkloadTypes: &envForWorkspace,
-	}),
-
-	Entry("environment variable with credentials in the environment asset + specific run params", TestDetails{
-		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
-		specFname:                "env_var_total",
-		expectedFname:            "env_var_total_ws",
-		environmentWorkloadTypes: &envForWorkspace,
-	}),
-
-	Entry("environment variable with credentials in the environment asset", TestDetails{
-		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
-		specFname:                "env_var_without_specific",
-		expectedFname:            "env_var_without_specific_ws",
-		environmentWorkloadTypes: &envForWorkspace,
-	}),
-
-	Entry("environment variable with configmap in the environment asset", TestDetails{
-		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
-		specFname:                "env_var_configmap_no_specific",
-		expectedFname:            "env_var_configmap_no_specific_ws",
-		environmentWorkloadTypes: &envForWorkspace,
-	}),
-	Entry("workspace with compute asset with multiple devices", TestDetails{
-		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
-		specFname:                "multiple_devices",
-		expectedFname:            "multiple_devices",
-		environmentWorkloadTypes: &envForWorkspace,
-	}),
-}
-
 type ActualResults struct {
 	FlatWorkloads *workloadsServiceClient.SimpleMockClient `json:"flatWorkloads,omitempty"`
 }
@@ -306,39 +173,66 @@ var _ = Describe("Workload composer validations", func() {
 		checker.InitClusterCapabilitiesChecker("", DefaultCheckerClusterConfig, "")
 	})
 
-	Context("input VS expected tests", func() {
-		DescribeTable("should create workloads properly", func(testDetails TestDetails) {
-			testDetails.runtimeData.router = router
-			testDetails.runtimeData.randoms = randoms
-			testDetails.runtimeData.basePath = "."
-			testDetails.runtimeData.wsFactory = wsFactory
-			testDetails.runtimeData.credentials = make(map[string]string)
-			testDetails.RunWorkloadsTest()
-		}, ComposerTests)
+	It("submits an inference with resolved assets and specific run parameters", func() {
+		td := TestDetails{
+			specFname:                "inference_basic",
+			expectedFname:            "inference_basic",
+			environmentWorkloadTypes: &envForInference,
+			runtimeData: RuntimeTestData{
+				router: router, randoms: randoms, basePath: ".", wsFactory: wsFactory,
+				credentials: make(map[string]string),
+			},
+		}
+		td.RunWorkloadsTest()
 	})
+
+	DescribeTable("resolves a multi-device compute asset for flexible submission", func(workloadType api.WorkloadType) {
+		td := TestDetails{runtimeData: RuntimeTestData{router: router, randoms: randoms, basePath: "."}}
+		assetID := "three-devices"
+		td.createComputeAsset(&assetID)
+
+		request := api.AssetFlatRequest{
+			AssetId: assetID, WorkloadType: workloadType, ClusterId: randoms.ClusterId, ProjectId: randoms.ProjectIdStr,
+		}
+		req := httptest.NewRequest(http.MethodPost, urlToFlat, makePayload(request))
+		req.Header = *headerForAdmin(randoms)
+		resp := httptest.NewRecorder()
+		router.ServeHTTP(resp, req)
+		Expect(resp.Code).To(Equal(http.StatusOK), resp.Body.String())
+
+		var flat api.AssetFlatResponse
+		Expect(json.Unmarshal(resp.Body.Bytes(), &flat)).To(Succeed())
+		Expect(flat.Worker.Compute).NotTo(BeNil())
+		Expect(flat.Worker.Compute.GpuDevicesRequest).To(HaveValue(Equal(int32(3))))
+		Expect(flat.Worker.Compute.CpuCoreRequest).To(HaveValue(Equal(0.5)))
+		if workloadType == api.WORKLOADTYPE_DISTRIBUTED {
+			Expect(flat.Master).NotTo(BeNil())
+			Expect(flat.Master.Compute).NotTo(BeNil())
+			Expect(flat.Master.Compute.GpuDevicesRequest).To(HaveValue(Equal(int32(3))))
+		}
+	},
+		Entry("workspace", api.WORKLOADTYPE_WORKSPACE),
+		Entry("training", api.WORKLOADTYPE_TRAINING),
+		Entry("distributed training", api.WORKLOADTYPE_DISTRIBUTED),
+	)
 })
 
 func (td *TestDetails) RunWorkloadsTest() {
-	testBrief := fmt.Sprintf("Spec: %s, Type: %s", td.specFname, td.workloadType)
+	testBrief := fmt.Sprintf("Inference spec: %s", td.specFname)
 
 	createExistingResources(td.runtimeData)
 
 	specYaml, err := testutils.LoadInputFile(td.specFname, td.runtimeData.basePath)
 	Expect(err).To(BeNil(), fmt.Sprintf("failed to load of %s.yaml", td.specFname))
 
-	url, payload := td.determineUrlAndPayload(specYaml, testBrief)
+	payload := td.inferenceRequest(specYaml, testBrief)
 
-	createHttpReq, err := http.NewRequest("POST", url, strings.NewReader(string(gojsonq.ToBytes(payload))))
+	createHttpReq, err := http.NewRequest(http.MethodPost, urlInferenceV2, makePayload(payload))
 	Expect(err).To(BeNil())
 	createHttpReq.Header = *headerForAdmin(td.runtimeData.randoms)
 
 	createHttpResp := httptest.NewRecorder()
 	td.runtimeData.router.ServeHTTP(createHttpResp, createHttpReq)
-	if td.expectedError != "" {
-		Expect(createHttpResp.Code).NotTo(Equal(http.StatusOK))
-		Expect(createHttpResp.Body.String()).To(ContainSubstring(td.expectedError))
-		return
-	}
 
 	Expect(createHttpResp.Code).To(Equal(http.StatusOK), createHttpResp.Body.String())
 
@@ -353,79 +247,20 @@ func (td *TestDetails) RunWorkloadsTest() {
 
 func (td *TestDetails) updateWorkloadMetadata(meta *api.WorkloadCreationMeta) {
 	meta.Name = td.expectedFname
-	if meta.Name == "" { // this is only for errors that do not have expected file
-		meta.Name = td.specFname
-	}
 
 	meta.ClusterId = td.runtimeData.randoms.ClusterId
 	meta.ProjectId = td.runtimeData.randoms.ProjectIdStr
 }
 
-func (td *TestDetails) determineUrlAndPayload(specYaml []byte, testBrief string) (string, map[string]interface{}) {
-	var payload map[string]interface{}
-	var url string
-
-	switch td.workloadType {
-	case string(workloadsApi.WORKLOADTYPE_WORKSPACE):
-		if specYaml != nil {
-			var request api.WorkspaceCreationRequestV2
-			err := yaml.Unmarshal(specYaml, &request)
-			Expect(err).To(BeNil(), fmt.Sprintf("failed to parse %s.yaml", td.specFname), testBrief)
-
-			td.updateWorkloadMetadata(&request.Meta)
-			td.createAssets(&request.Assets)
-			if request.SpecificRunParams != nil {
-				td.createCredentialsFromEnvar(request.SpecificRunParams.EnvironmentVariables)
-			}
-
-			payload, err = gojsonq.LoadJson(request)
-			Expect(err).To(BeNil())
-		}
-
-		url = urlWorkspaceV2
-
-	case string(workloadsApi.WORKLOADTYPE_TRAINING):
-		if specYaml != nil {
-			var request api.TrainingCreationRequestV2
-			err := yaml.Unmarshal(specYaml, &request)
-			Expect(err).To(BeNil(), fmt.Sprintf("failed to parse %s.yaml", td.specFname), testBrief)
-
-			td.updateWorkloadMetadata(&request.Meta)
-			td.createAssets(&request.Assets)
-			if request.SpecificRunParams != nil {
-				td.createCredentialsFromEnvar(request.SpecificRunParams.EnvironmentVariables)
-			}
-
-			if request.Distributed != nil && request.Distributed.Master != nil {
-				td.createMasterAssets(request.Distributed.Master.Assets)
-			}
-
-			payload, err = gojsonq.LoadJson(request)
-			Expect(err).To(BeNil())
-		}
-
-		url = urlTrainingV2
-
-	case string(workloadsApi.WORKLOADTYPE_INFERENCE):
-		if specYaml != nil {
-			var request api.InferenceCreationRequestV2
-			err := yaml.Unmarshal(specYaml, &request)
-			Expect(err).To(BeNil(), fmt.Sprintf("failed to parse %s.yaml", td.specFname), testBrief)
-
-			td.updateWorkloadMetadata(&request.Meta)
-			td.createAssets(&request.Assets)
-			if request.SpecificRunParams != nil {
-				td.createCredentialsFromEnvar(request.SpecificRunParams.EnvironmentVariables)
-			}
-
-			payload, err = gojsonq.LoadJson(request)
-			Expect(err).To(BeNil())
-		}
-
-		url = urlInferenceV2
+func (td *TestDetails) inferenceRequest(specYaml []byte, testBrief string) api.InferenceCreationRequestV2 {
+	var request api.InferenceCreationRequestV2
+	Expect(yaml.Unmarshal(specYaml, &request)).To(Succeed(), testBrief)
+	td.updateWorkloadMetadata(&request.Meta)
+	td.createAssets(&request.Assets)
+	if request.SpecificRunParams != nil {
+		td.createCredentialsFromEnvar(request.SpecificRunParams.EnvironmentVariables)
 	}
-
-	return url, payload
+	return request
 }
 
 func (td *TestDetails) createAssets(assets *api.AssetsIds) {
@@ -445,17 +280,6 @@ func (td *TestDetails) createCredentialsFromEnvar(environmentVariables *[]api.En
 			continue
 		}
 		envVar.Credential.AssetId = convutils.Ref(td.createCredentialsAsset(api.ASSETKIND_GENERIC_SECRET, *envVar.Credential.AssetId))
-	}
-}
-
-func (td *TestDetails) createMasterAssets(assets *api.OptionalAssetIds) {
-	if assets == nil {
-		return
-	}
-	td.createEnvironmentAsset(&assets.Environment)
-	td.createComputeAsset(assets.Compute)
-	for idx := range assets.Datasources {
-		td.createDatasourceAsset(&assets.Datasources[idx])
 	}
 }
 

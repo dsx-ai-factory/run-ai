@@ -1,5 +1,4 @@
 flatWorkloads:
-  Distributed: null
   Inferences:
   - actualPhase: Creating
     clusterId: ""
@@ -69,5 +68,3 @@ flatWorkloads:
           readOnly: true
       workingDir: /my/home
     workloadId: ""
-  Trainings: null
-  Workspaces: null

@@ -164,7 +164,6 @@ pkg/api/model_default_from_rule.go
 pkg/api/model_displayed_job.go
 pkg/api/model_dist_master.go
 pkg/api/model_distributed.go
-pkg/api/model_distributed_data.go
 pkg/api/model_distributed_framework.go
 pkg/api/model_distributed_inference_common_spec.go
 pkg/api/model_distributed_inference_leader_spec_fields.go
@@ -183,9 +182,6 @@ pkg/api/model_distributed_inference_startup_policy.go
 pkg/api/model_distributed_inference_startup_policy_field.go
 pkg/api/model_distributed_inference_worker_spec_fields.go
 pkg/api/model_distributed_inference_workers_field.go
-pkg/api/model_distributed_master.go
-pkg/api/model_distributed_master_data.go
-pkg/api/model_distributed_params.go
 pkg/api/model_docker_registry.go
 pkg/api/model_docker_registry_creation_request.go
 pkg/api/model_docker_registry_creation_spec.go
@@ -330,7 +326,6 @@ pkg/api/model_node_port_info.go
 pkg/api/model_node_selector_term.go
 pkg/api/model_non_overridable_spec_fields.go
 pkg/api/model_number_rules.go
-pkg/api/model_optional_asset_ids.go
 pkg/api/model_overridable_spec_fields.go
 pkg/api/model_password.go
 pkg/api/model_password_creation_request.go
@@ -467,10 +462,7 @@ pkg/api/model_toleration_rules.go
 pkg/api/model_tolerations_rules.go
 pkg/api/model_tool_type.go
 pkg/api/model_training.go
-pkg/api/model_training_creation_request_v2.go
 pkg/api/model_training_list_response.go
-pkg/api/model_training_specific_run_params.go
-pkg/api/model_training_v2.go
 pkg/api/model_uid_gid_source.go
 pkg/api/model_usage_times_info.go
 pkg/api/model_validate_sync_request.go
@@ -486,8 +478,5 @@ pkg/api/model_workload_status_update.go
 pkg/api/model_workload_supported_types.go
 pkg/api/model_workload_type.go
 pkg/api/model_workspace.go
-pkg/api/model_workspace_creation_request_v2.go
 pkg/api/model_workspace_list_response.go
-pkg/api/model_workspace_specific_run_params.go
-pkg/api/model_workspace_v2.go
 pkg/api/routers.go

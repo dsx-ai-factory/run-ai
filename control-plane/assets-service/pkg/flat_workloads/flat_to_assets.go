@@ -17,13 +17,13 @@ import (
 )
 
 var (
-	assetsWorkloadCracker    = jsonutils.NewJsonCracker(api.TrainingV2{})
+	assetsWorkloadCracker    = jsonutils.NewJsonCracker(api.InferenceV2{})
 	fldNamePolicyInfo        = assetsWorkloadCracker.NameOf(&assetsWorkloadCracker.Struct().PolicyInfo)        // policyInfo
 	fldNameSpecificRunParams = assetsWorkloadCracker.NameOf(&assetsWorkloadCracker.Struct().SpecificRunParams) // specificRunParams
 )
 
 var (
-	specificRunJsonCracker = jsonutils.NewJsonCracker(api.TrainingSpecificRunParams{})
+	specificRunJsonCracker = jsonutils.NewJsonCracker(api.SpecificRunParams{})
 	fldNameAllowOverQuota  = specificRunJsonCracker.NameOf(&specificRunJsonCracker.Struct().AllowOverQuota) // specificRunParams.allowOverQuota
 )
 

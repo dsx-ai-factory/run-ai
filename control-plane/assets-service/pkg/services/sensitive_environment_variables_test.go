@@ -50,12 +50,8 @@ var _ = Describe("sensitive environment variable response sanitization", func() 
 		source := []api.EnvironmentVariableOfAsset{{Name: &name, Value: &value}}
 
 		inference := redactInferenceSpecificRunParamsSensitiveValues(&api.InferenceSpecificRunParams{EnvironmentVariables: &source})
-		workspace := redactWorkspaceSpecificRunParamsSensitiveValues(&api.WorkspaceSpecificRunParams{EnvironmentVariables: &source})
-		training := redactTrainingSpecificRunParamsSensitiveValues(&api.TrainingSpecificRunParams{EnvironmentVariables: &source})
 
 		Expect((*inference.EnvironmentVariables)[0].Value).To(BeNil())
-		Expect((*workspace.EnvironmentVariables)[0].Value).To(BeNil())
-		Expect((*training.EnvironmentVariables)[0].Value).To(BeNil())
 		Expect(source[0].Value).To(Equal(&value))
 	})
 

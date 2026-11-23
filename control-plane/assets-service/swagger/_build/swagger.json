@@ -5496,399 +5496,6 @@
         }
       }
     },
-    "/api/v1/workspace": {
-      "post": {
-        "summary": "Create workspace.",
-        "description": "Creates a workspace from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.",
-        "operationId": "create_workspace",
-        "x-service": "assets-service",
-        "x-no-authorization": true,
-        "x-internal": true,
-        "x-test-coverage": [
-          "control-plane/assets-service/pkg/services/api_workspaces_service_test.go"
-        ],
-        "tags": [
-          "Workspaces"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WorkloadCreationRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Request completed successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Workspace"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/400SubmissionErrorV2"
-          },
-          "401": {
-            "$ref": "#/components/responses/401Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/403Forbidden"
-          },
-          "503": {
-            "$ref": "#/components/responses/503ServiceUnavailable"
-          }
-        }
-      }
-    },
-    "/api/v2/workspace/merged": {
-      "get": {
-        "summary": "Get merged workspace",
-        "description": "Get combined policy and specificRunParams data for workload creation form",
-        "operationId": "get_workspace_merged",
-        "x-service": "assets-service",
-        "x-internal": true,
-        "x-test-coverage": [
-          "control-plane/assets-service/pkg/services/api_workloads_merge_test.go",
-          "e2e/src/test/suites/parallel/submitUI/connectToJupiterUI.test.ts"
-        ],
-        "x-no-authorization": true,
-        "tags": [
-          "Workspaces"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/ProjectIdOptional"
-          },
-          {
-            "$ref": "#/components/parameters/WorkloadIdOptional"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Request completed successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/WorkspaceV2"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/401Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/403Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/404NotFound"
-          },
-          "503": {
-            "$ref": "#/components/responses/503ServiceUnavailable"
-          }
-        }
-      }
-    },
-    "/api/v2/workspace": {
-      "post": {
-        "summary": "Create a workspace - assets based [Experimental]",
-        "description": "Creates a workspace from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.",
-        "operationId": "create_workspace_v2",
-        "x-service": "assets-service",
-        "x-internal": true,
-        "x-no-authorization": true,
-        "x-test-coverage": [
-          "control-plane/assets-service/pkg/services/api_workspaces_service_test.go",
-          "e2e/src/test/suites/parallel/submitUI/connectToJupiterUI.test.ts"
-        ],
-        "tags": [
-          "Workspaces"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WorkspaceCreationRequestV2"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Request completed successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/WorkspaceV2"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/400SubmissionErrorV2"
-          },
-          "401": {
-            "$ref": "#/components/responses/401Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/403Forbidden"
-          },
-          "503": {
-            "$ref": "#/components/responses/503ServiceUnavailable"
-          }
-        }
-      }
-    },
-    "/api/v2/workspace/{workloadId}": {
-      "get": {
-        "summary": "Get workspace data - assets based [Experimental]",
-        "description": "Retrieves the data of a training, i.e. its set of assets and specific env.",
-        "operationId": "get_workspace_by_id_v2",
-        "x-service": "assets-service",
-        "x-internal": true,
-        "x-test-coverage": [
-          "control-plane/assets-service/pkg/services/api_workspaces_service_test.go",
-          "e2e/src/test/suites/parallel/submitUI/connectToJupiterUI.test.ts"
-        ],
-        "x-no-authorization": true,
-        "tags": [
-          "Workspaces"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/WorkloadId"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Request completed successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/WorkspaceV2"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/401Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/403Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/404NotFound"
-          },
-          "503": {
-            "$ref": "#/components/responses/503ServiceUnavailable"
-          }
-        }
-      }
-    },
-    "/api/v1/training": {
-      "post": {
-        "summary": "Create training workload.",
-        "description": "Creates a training workload from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.",
-        "operationId": "create_training",
-        "x-service": "assets-service",
-        "x-no-authorization": true,
-        "x-internal": true,
-        "x-test-coverage": [
-          "control-plane/assets-service/pkg/services/api_workspaces_service_test.go",
-          "e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts"
-        ],
-        "tags": [
-          "Trainings"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WorkloadCreationRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Request completed successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Training"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/400SubmissionErrorV2"
-          },
-          "401": {
-            "$ref": "#/components/responses/401Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/403Forbidden"
-          },
-          "503": {
-            "$ref": "#/components/responses/503ServiceUnavailable"
-          }
-        }
-      }
-    },
-    "/api/v2/training/merged": {
-      "get": {
-        "summary": "Get merged training",
-        "description": "Get combined policy and workload data for training creation form",
-        "operationId": "get_training_merged",
-        "x-service": "assets-service",
-        "x-internal": true,
-        "x-test-coverage": [
-          "control-plane/assets-service/pkg/services/api_workloads_merge_test.go",
-          "e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts"
-        ],
-        "x-no-authorization": true,
-        "tags": [
-          "Trainings"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/ProjectIdOptional"
-          },
-          {
-            "$ref": "#/components/parameters/WorkloadIdOptional"
-          },
-          {
-            "$ref": "#/components/parameters/IsDistributedQuery"
-          },
-          {
-            "$ref": "#/components/parameters/IsDistributedInferenceQuery"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Request completed successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TrainingV2"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/401Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/403Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/404NotFound"
-          },
-          "503": {
-            "$ref": "#/components/responses/503ServiceUnavailable"
-          }
-        }
-      }
-    },
-    "/api/v2/training": {
-      "post": {
-        "summary": "Create a training - assets based [Experimental]",
-        "description": "Creates a training from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.",
-        "operationId": "create_training_v2",
-        "x-service": "assets-service",
-        "x-internal": true,
-        "x-test-coverage": [
-          "e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts"
-        ],
-        "x-no-authorization": true,
-        "tags": [
-          "Trainings"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TrainingCreationRequestV2"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Request completed successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TrainingV2"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/400SubmissionErrorV2"
-          },
-          "401": {
-            "$ref": "#/components/responses/401Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/403Forbidden"
-          },
-          "503": {
-            "$ref": "#/components/responses/503ServiceUnavailable"
-          }
-        }
-      }
-    },
-    "/api/v2/training/{workloadId}": {
-      "get": {
-        "summary": "Get training data - assets based. [Experimental]",
-        "description": "Retrieves the content of the training, i.e. its set of assets and specific env.",
-        "operationId": "get_training_by_id_v2",
-        "x-service": "assets-service",
-        "x-internal": true,
-        "x-test-coverage": [
-          "e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts"
-        ],
-        "x-no-authorization": true,
-        "tags": [
-          "Trainings"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/WorkloadId"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Request completed successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TrainingV2"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/401Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/403Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/404NotFound"
-          },
-          "503": {
-            "$ref": "#/components/responses/503ServiceUnavailable"
-          }
-        }
-      }
-    },
     "/api/v1/inference": {
       "post": {
         "summary": "Create inference workload.",
@@ -12848,44 +12455,158 @@
           }
         }
       },
-      "ComplianceIssuesV2": {
+      "InferenceWorkload": {
+        "description": "An inference workload ready for submission at the cluster. Further details at https://github.com/dsx-ai-factory/run-ai/runai-cluster/tree/master/workload-controller/config/crd\"",
+        "type": "object"
+      },
+      "Inference": {
+        "required": [
+          "meta",
+          "spec"
+        ],
         "properties": {
-          "complianceIssues": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": [
-                "details",
-                "field"
-              ],
-              "properties": {
-                "field": {
-                  "type": "string",
-                  "example": "compute.gpuDevicesRequest"
-                },
-                "details": {
-                  "type": "string",
-                  "example": "value must be no less than 3"
-                },
-                "rule": {
-                  "$ref": "#/components/schemas/PolicyRuleEnum"
-                }
-              }
-            }
+          "meta": {
+            "$ref": "#/components/schemas/WorkloadMetaV1"
+          },
+          "spec": {
+            "$ref": "#/components/schemas/SpecificRunInfoFields"
+          },
+          "workload": {
+            "$ref": "#/components/schemas/InferenceWorkload"
+          },
+          "job": {
+            "$ref": "#/components/schemas/DisplayedJob"
           }
-        },
+        }
+      },
+      "WorkloadCreationMeta": {
+        "required": [
+          "name",
+          "projectId",
+          "clusterId"
+        ],
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/WorkloadName"
+          },
+          "useGivenNameAsPrefix": {
+            "description": "When true, the requested name will be treated as a prefix. The final name of the workload will be composed of the name followed by a random set of characters.",
+            "type": "boolean",
+            "example": true,
+            "default": false
+          },
+          "projectId": {
+            "$ref": "#/components/schemas/ProjectId"
+          },
+          "clusterId": {
+            "$ref": "#/components/schemas/ClusterId"
+          }
+        }
+      },
+      "InferenceSpecificRunParams": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SpecificRunConnections"
+          },
+          {
+            "$ref": "#/components/schemas/SpecificRunAutoScaling"
+          },
+          {
+            "$ref": "#/components/schemas/SpecificRunServingPortAccess"
+          },
+          {
+            "nullable": true,
+            "properties": {
+              "annotations": {
+                "$ref": "#/components/schemas/Annotations"
+              },
+              "args": {
+                "$ref": "#/components/schemas/Args"
+              },
+              "autoDeletionTimeAfterCompletionSeconds": {
+                "$ref": "#/components/schemas/AutoDeletionTimeAfterPreemption"
+              },
+              "backoffLimit": {
+                "$ref": "#/components/schemas/BackoffLimit"
+              },
+              "category": {
+                "$ref": "#/components/schemas/Category"
+              },
+              "command": {
+                "$ref": "#/components/schemas/Command"
+              },
+              "environmentVariables": {
+                "$ref": "#/components/schemas/EnvironmentVariablesOfAsset"
+              },
+              "imagePullSecrets": {
+                "$ref": "#/components/schemas/ImagePullSecrets"
+              },
+              "labels": {
+                "$ref": "#/components/schemas/Labels"
+              },
+              "nodeAffinityRequired": {
+                "$ref": "#/components/schemas/NodeAffinityRequired"
+              },
+              "nodePools": {
+                "$ref": "#/components/schemas/NodePools"
+              },
+              "nodeType": {
+                "$ref": "#/components/schemas/NodeType"
+              },
+              "podAffinity": {
+                "$ref": "#/components/schemas/PodAffinity"
+              },
+              "preemptibility": {
+                "$ref": "#/components/schemas/Preemptibility"
+              },
+              "priorityClass": {
+                "$ref": "#/components/schemas/PriorityClass"
+              },
+              "restartPolicy": {
+                "$ref": "#/components/schemas/RestartPolicy"
+              },
+              "runAsGid": {
+                "$ref": "#/components/schemas/RunAsGid"
+              },
+              "runAsUid": {
+                "$ref": "#/components/schemas/RunAsUid"
+              },
+              "supplementalGroups": {
+                "$ref": "#/components/schemas/SupplementalGroups"
+              },
+              "terminateAfterPreemption": {
+                "$ref": "#/components/schemas/TerminateAfterPreemption"
+              },
+              "terminationGracePeriodSeconds": {
+                "$ref": "#/components/schemas/TerminationGracePeriod"
+              },
+              "tolerations": {
+                "$ref": "#/components/schemas/Tolerations"
+              }
+            },
+            "type": "object"
+          }
+        ],
         "nullable": true,
         "type": "object"
       },
-      "SubmissionErrorV2": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Error"
+      "InferenceCreationRequestV2": {
+        "description": "Request to submit an inference from a set of assets and an optional set of specific env parameters.",
+        "required": [
+          "meta",
+          "assets"
+        ],
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/WorkloadCreationMeta"
           },
-          {
-            "$ref": "#/components/schemas/ComplianceIssuesV2"
+          "assets": {
+            "$ref": "#/components/schemas/AssetsIds"
+          },
+          "specificRunParams": {
+            "$ref": "#/components/schemas/InferenceSpecificRunParams"
           }
-        ]
+        }
       },
       "DepartmentId": {
         "description": "The id of the department.",
@@ -12978,90 +12699,6 @@
             "$ref": "#/components/schemas/Phase"
           }
         }
-      },
-      "WorkspaceSpecificRunParams": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/SpecificRunConnections"
-          },
-          {
-            "$ref": "#/components/schemas/AllowOverQuota"
-          },
-          {
-            "nullable": true,
-            "properties": {
-              "annotations": {
-                "$ref": "#/components/schemas/Annotations"
-              },
-              "args": {
-                "$ref": "#/components/schemas/Args"
-              },
-              "autoDeletionTimeAfterCompletionSeconds": {
-                "$ref": "#/components/schemas/AutoDeletionTimeAfterPreemption"
-              },
-              "backoffLimit": {
-                "$ref": "#/components/schemas/BackoffLimit"
-              },
-              "category": {
-                "$ref": "#/components/schemas/Category"
-              },
-              "command": {
-                "$ref": "#/components/schemas/Command"
-              },
-              "environmentVariables": {
-                "$ref": "#/components/schemas/EnvironmentVariablesOfAsset"
-              },
-              "imagePullSecrets": {
-                "$ref": "#/components/schemas/ImagePullSecrets"
-              },
-              "labels": {
-                "$ref": "#/components/schemas/Labels"
-              },
-              "nodeAffinityRequired": {
-                "$ref": "#/components/schemas/NodeAffinityRequired"
-              },
-              "nodePools": {
-                "$ref": "#/components/schemas/NodePools"
-              },
-              "nodeType": {
-                "$ref": "#/components/schemas/NodeType"
-              },
-              "podAffinity": {
-                "$ref": "#/components/schemas/PodAffinity"
-              },
-              "preemptibility": {
-                "$ref": "#/components/schemas/Preemptibility"
-              },
-              "priorityClass": {
-                "$ref": "#/components/schemas/PriorityClass"
-              },
-              "restartPolicy": {
-                "$ref": "#/components/schemas/RestartPolicy"
-              },
-              "runAsGid": {
-                "$ref": "#/components/schemas/RunAsGid"
-              },
-              "runAsUid": {
-                "$ref": "#/components/schemas/RunAsUid"
-              },
-              "supplementalGroups": {
-                "$ref": "#/components/schemas/SupplementalGroups"
-              },
-              "terminateAfterPreemption": {
-                "$ref": "#/components/schemas/TerminateAfterPreemption"
-              },
-              "terminationGracePeriodSeconds": {
-                "$ref": "#/components/schemas/TerminationGracePeriod"
-              },
-              "tolerations": {
-                "$ref": "#/components/schemas/Tolerations"
-              }
-            },
-            "type": "object"
-          }
-        ],
-        "nullable": true,
-        "type": "object"
       },
       "DataVolume": {
         "properties": {
@@ -14388,419 +14025,6 @@
         "nullable": true,
         "type": "object"
       },
-      "WorkspaceV2": {
-        "description": "information about a workspace created based on assets.",
-        "required": [
-          "meta",
-          "assets"
-        ],
-        "properties": {
-          "meta": {
-            "$ref": "#/components/schemas/WorkloadMeta"
-          },
-          "assets": {
-            "$ref": "#/components/schemas/AssetsRef"
-          },
-          "specificRunParams": {
-            "$ref": "#/components/schemas/WorkspaceSpecificRunParams"
-          },
-          "policyInfo": {
-            "$ref": "#/components/schemas/PolicyInfo"
-          }
-        }
-      },
-      "WorkloadCreationMeta": {
-        "required": [
-          "name",
-          "projectId",
-          "clusterId"
-        ],
-        "properties": {
-          "name": {
-            "$ref": "#/components/schemas/WorkloadName"
-          },
-          "useGivenNameAsPrefix": {
-            "description": "When true, the requested name will be treated as a prefix. The final name of the workload will be composed of the name followed by a random set of characters.",
-            "type": "boolean",
-            "example": true,
-            "default": false
-          },
-          "projectId": {
-            "$ref": "#/components/schemas/ProjectId"
-          },
-          "clusterId": {
-            "$ref": "#/components/schemas/ClusterId"
-          }
-        }
-      },
-      "WorkspaceCreationRequestV2": {
-        "description": "Request to submit a workspace from a set of assets and an optional set of specific run parameters.",
-        "required": [
-          "meta",
-          "assets"
-        ],
-        "properties": {
-          "meta": {
-            "$ref": "#/components/schemas/WorkloadCreationMeta"
-          },
-          "assets": {
-            "$ref": "#/components/schemas/AssetsIds"
-          },
-          "specificRunParams": {
-            "$ref": "#/components/schemas/WorkspaceSpecificRunParams"
-          }
-        }
-      },
-      "TrainingSpecificRunParams": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/SpecificRunConnections"
-          },
-          {
-            "$ref": "#/components/schemas/AllowOverQuota"
-          },
-          {
-            "nullable": true,
-            "properties": {
-              "annotations": {
-                "$ref": "#/components/schemas/Annotations"
-              },
-              "args": {
-                "$ref": "#/components/schemas/Args"
-              },
-              "autoDeletionTimeAfterCompletionSeconds": {
-                "$ref": "#/components/schemas/AutoDeletionTimeAfterPreemption"
-              },
-              "backoffLimit": {
-                "$ref": "#/components/schemas/BackoffLimit"
-              },
-              "category": {
-                "$ref": "#/components/schemas/Category"
-              },
-              "command": {
-                "$ref": "#/components/schemas/Command"
-              },
-              "completions": {
-                "$ref": "#/components/schemas/Completions"
-              },
-              "environmentVariables": {
-                "$ref": "#/components/schemas/EnvironmentVariablesOfAsset"
-              },
-              "imagePullSecrets": {
-                "$ref": "#/components/schemas/ImagePullSecrets"
-              },
-              "labels": {
-                "$ref": "#/components/schemas/Labels"
-              },
-              "nodeAffinityRequired": {
-                "$ref": "#/components/schemas/NodeAffinityRequired"
-              },
-              "nodePools": {
-                "$ref": "#/components/schemas/NodePools"
-              },
-              "nodeType": {
-                "$ref": "#/components/schemas/NodeType"
-              },
-              "parallelism": {
-                "$ref": "#/components/schemas/Parallelism"
-              },
-              "podAffinity": {
-                "$ref": "#/components/schemas/PodAffinity"
-              },
-              "preemptibility": {
-                "$ref": "#/components/schemas/Preemptibility"
-              },
-              "priorityClass": {
-                "$ref": "#/components/schemas/PriorityClass"
-              },
-              "restartPolicy": {
-                "$ref": "#/components/schemas/RestartPolicy"
-              },
-              "runAsGid": {
-                "$ref": "#/components/schemas/RunAsGid"
-              },
-              "runAsUid": {
-                "$ref": "#/components/schemas/RunAsUid"
-              },
-              "supplementalGroups": {
-                "$ref": "#/components/schemas/SupplementalGroups"
-              },
-              "terminateAfterPreemption": {
-                "$ref": "#/components/schemas/TerminateAfterPreemption"
-              },
-              "terminationGracePeriodSeconds": {
-                "$ref": "#/components/schemas/TerminationGracePeriod"
-              },
-              "tolerations": {
-                "$ref": "#/components/schemas/Tolerations"
-              }
-            },
-            "type": "object"
-          }
-        ],
-        "nullable": true,
-        "type": "object"
-      },
-      "DistributedNumWorkers": {
-        "description": "number of worker replicas to process the workload.",
-        "type": "integer",
-        "minimum": 1,
-        "example": 3
-      },
-      "DistributedMasterData": {
-        "properties": {
-          "sameAsWorker": {
-            "description": "if true, indicates that the master should be identical to the worker. In this case assets and specificRunParams should not be provided.",
-            "type": "boolean",
-            "example": true
-          },
-          "assets": {
-            "$ref": "#/components/schemas/AssetsRefOptional"
-          },
-          "specificRunParams": {
-            "$ref": "#/components/schemas/TrainingSpecificRunParams"
-          },
-          "policyInfo": {
-            "$ref": "#/components/schemas/PolicyInfo"
-          }
-        },
-        "nullable": true,
-        "type": "object"
-      },
-      "DistributedData": {
-        "required": [
-          "numWorkers",
-          "distFramework"
-        ],
-        "properties": {
-          "numWorkers": {
-            "$ref": "#/components/schemas/DistributedNumWorkers"
-          },
-          "framework": {
-            "$ref": "#/components/schemas/DistributedFramework"
-          },
-          "master": {
-            "$ref": "#/components/schemas/DistributedMasterData"
-          }
-        },
-        "nullable": true,
-        "type": "object"
-      },
-      "TrainingV2": {
-        "description": "information about a training created based on assets.",
-        "required": [
-          "meta",
-          "assets"
-        ],
-        "properties": {
-          "meta": {
-            "$ref": "#/components/schemas/WorkloadMeta"
-          },
-          "assets": {
-            "$ref": "#/components/schemas/AssetsRef"
-          },
-          "specificRunParams": {
-            "$ref": "#/components/schemas/TrainingSpecificRunParams"
-          },
-          "policyInfo": {
-            "$ref": "#/components/schemas/PolicyInfo"
-          },
-          "distributed": {
-            "$ref": "#/components/schemas/DistributedData"
-          }
-        }
-      },
-      "OptionalAssetIds": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssetsIds"
-          }
-        ],
-        "nullable": true,
-        "type": "object"
-      },
-      "DistributedMaster": {
-        "properties": {
-          "sameAsWorker": {
-            "description": "if true, indicates that the master should be identical to the worker. In this case assets and specificRunParams should not be provided.",
-            "type": "boolean",
-            "example": true
-          },
-          "assets": {
-            "$ref": "#/components/schemas/OptionalAssetIds"
-          },
-          "specificRunParams": {
-            "$ref": "#/components/schemas/TrainingSpecificRunParams"
-          }
-        },
-        "nullable": true,
-        "type": "object"
-      },
-      "DistributedParams": {
-        "required": [
-          "numWorkers",
-          "distFramework"
-        ],
-        "properties": {
-          "numWorkers": {
-            "$ref": "#/components/schemas/DistributedNumWorkers"
-          },
-          "framework": {
-            "$ref": "#/components/schemas/DistributedFramework"
-          },
-          "master": {
-            "$ref": "#/components/schemas/DistributedMaster"
-          }
-        },
-        "nullable": true,
-        "type": "object"
-      },
-      "TrainingCreationRequestV2": {
-        "description": "Request to submit a training from a set of assets and an optional set of specific run parameters.",
-        "properties": {
-          "meta": {
-            "$ref": "#/components/schemas/WorkloadCreationMeta"
-          },
-          "assets": {
-            "$ref": "#/components/schemas/AssetsIds"
-          },
-          "specificRunParams": {
-            "$ref": "#/components/schemas/TrainingSpecificRunParams"
-          },
-          "distributed": {
-            "$ref": "#/components/schemas/DistributedParams"
-          }
-        }
-      },
-      "InferenceWorkload": {
-        "description": "An inference workload ready for submission at the cluster. Further details at https://github.com/dsx-ai-factory/run-ai/runai-cluster/tree/master/workload-controller/config/crd\"",
-        "type": "object"
-      },
-      "Inference": {
-        "required": [
-          "meta",
-          "spec"
-        ],
-        "properties": {
-          "meta": {
-            "$ref": "#/components/schemas/WorkloadMetaV1"
-          },
-          "spec": {
-            "$ref": "#/components/schemas/SpecificRunInfoFields"
-          },
-          "workload": {
-            "$ref": "#/components/schemas/InferenceWorkload"
-          },
-          "job": {
-            "$ref": "#/components/schemas/DisplayedJob"
-          }
-        }
-      },
-      "InferenceSpecificRunParams": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/SpecificRunConnections"
-          },
-          {
-            "$ref": "#/components/schemas/SpecificRunAutoScaling"
-          },
-          {
-            "$ref": "#/components/schemas/SpecificRunServingPortAccess"
-          },
-          {
-            "nullable": true,
-            "properties": {
-              "annotations": {
-                "$ref": "#/components/schemas/Annotations"
-              },
-              "args": {
-                "$ref": "#/components/schemas/Args"
-              },
-              "autoDeletionTimeAfterCompletionSeconds": {
-                "$ref": "#/components/schemas/AutoDeletionTimeAfterPreemption"
-              },
-              "backoffLimit": {
-                "$ref": "#/components/schemas/BackoffLimit"
-              },
-              "category": {
-                "$ref": "#/components/schemas/Category"
-              },
-              "command": {
-                "$ref": "#/components/schemas/Command"
-              },
-              "environmentVariables": {
-                "$ref": "#/components/schemas/EnvironmentVariablesOfAsset"
-              },
-              "imagePullSecrets": {
-                "$ref": "#/components/schemas/ImagePullSecrets"
-              },
-              "labels": {
-                "$ref": "#/components/schemas/Labels"
-              },
-              "nodeAffinityRequired": {
-                "$ref": "#/components/schemas/NodeAffinityRequired"
-              },
-              "nodePools": {
-                "$ref": "#/components/schemas/NodePools"
-              },
-              "nodeType": {
-                "$ref": "#/components/schemas/NodeType"
-              },
-              "podAffinity": {
-                "$ref": "#/components/schemas/PodAffinity"
-              },
-              "preemptibility": {
-                "$ref": "#/components/schemas/Preemptibility"
-              },
-              "priorityClass": {
-                "$ref": "#/components/schemas/PriorityClass"
-              },
-              "restartPolicy": {
-                "$ref": "#/components/schemas/RestartPolicy"
-              },
-              "runAsGid": {
-                "$ref": "#/components/schemas/RunAsGid"
-              },
-              "runAsUid": {
-                "$ref": "#/components/schemas/RunAsUid"
-              },
-              "supplementalGroups": {
-                "$ref": "#/components/schemas/SupplementalGroups"
-              },
-              "terminateAfterPreemption": {
-                "$ref": "#/components/schemas/TerminateAfterPreemption"
-              },
-              "terminationGracePeriodSeconds": {
-                "$ref": "#/components/schemas/TerminationGracePeriod"
-              },
-              "tolerations": {
-                "$ref": "#/components/schemas/Tolerations"
-              }
-            },
-            "type": "object"
-          }
-        ],
-        "nullable": true,
-        "type": "object"
-      },
-      "InferenceCreationRequestV2": {
-        "description": "Request to submit an inference from a set of assets and an optional set of specific env parameters.",
-        "required": [
-          "meta",
-          "assets"
-        ],
-        "properties": {
-          "meta": {
-            "$ref": "#/components/schemas/WorkloadCreationMeta"
-          },
-          "assets": {
-            "$ref": "#/components/schemas/AssetsIds"
-          },
-          "specificRunParams": {
-            "$ref": "#/components/schemas/InferenceSpecificRunParams"
-          }
-        }
-      },
       "InferenceV2": {
         "description": "information about an inference created based on assets.",
         "required": [
@@ -14821,6 +14045,45 @@
             "$ref": "#/components/schemas/PolicyInfo"
           }
         }
+      },
+      "ComplianceIssuesV2": {
+        "properties": {
+          "complianceIssues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "details",
+                "field"
+              ],
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "example": "compute.gpuDevicesRequest"
+                },
+                "details": {
+                  "type": "string",
+                  "example": "value must be no less than 3"
+                },
+                "rule": {
+                  "$ref": "#/components/schemas/PolicyRuleEnum"
+                }
+              }
+            }
+          }
+        },
+        "nullable": true,
+        "type": "object"
+      },
+      "SubmissionErrorV2": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "$ref": "#/components/schemas/ComplianceIssuesV2"
+          }
+        ]
       },
       "ModelInferenceCreationRequest": {
         "required": [

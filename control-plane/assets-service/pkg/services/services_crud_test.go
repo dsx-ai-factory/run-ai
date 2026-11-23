@@ -797,9 +797,9 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 					WithCluster(randoms.ClusterId, testing.BuildDisplayedCluster(randoms, testing.OldClustersPreK8sObjectsTracker, false)))
 
 				//  now the environment will be used by two workspaces and one training
-				expectedUsage.Add(createTestWorkload(router, auth.WorkloadTypeWorkspace, randoms, envAsset, testAsset))
-				expectedUsage.Add(createTestWorkload(router, auth.WorkloadTypeWorkspace, randoms, envAsset, testAsset))
-				expectedUsage.Add(createTestWorkload(router, auth.WorkloadTypeTraining, randoms, envAsset, testAsset))
+				expectedUsage.Add(seedLegacyWorkload(randoms, auth.WorkloadTypeWorkspace, testutils.RandString(8), testAsset))
+				expectedUsage.Add(seedLegacyWorkload(randoms, auth.WorkloadTypeWorkspace, testutils.RandString(8), testAsset))
+				expectedUsage.Add(seedLegacyWorkload(randoms, auth.WorkloadTypeTraining, testutils.RandString(8), testAsset))
 
 				//  list with usage, now used by the three workloads
 				listAllHttpReq, err = http.NewRequest("GET", fmt.Sprintf("%s?usageInfo=true", testData.url), nil)
@@ -855,9 +855,9 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 			testData.factory.validateListContent(listAllHttpReq, expectedUsage, testSpec)
 
 			//  now the environment will be used by two workspaces and one training
-			expectedUsage.Add(createTestWorkload(router, auth.WorkloadTypeWorkspace, randoms, envAsset, testAsset))
-			expectedUsage.Add(createTestWorkload(router, auth.WorkloadTypeWorkspace, randoms, envAsset, testAsset))
-			expectedUsage.Add(createTestWorkload(router, auth.WorkloadTypeTraining, randoms, envAsset, testAsset))
+			expectedUsage.Add(seedLegacyWorkload(randoms, auth.WorkloadTypeWorkspace, testutils.RandString(8), testAsset))
+			expectedUsage.Add(seedLegacyWorkload(randoms, auth.WorkloadTypeWorkspace, testutils.RandString(8), testAsset))
+			expectedUsage.Add(seedLegacyWorkload(randoms, auth.WorkloadTypeTraining, testutils.RandString(8), testAsset))
 
 			//  list with usage, now used by the three workloads
 			listAllHttpReq, err = http.NewRequest("GET", fmt.Sprintf("%s?usageInfo=true", testData.url), nil)
@@ -1076,14 +1076,6 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 
 		DescribeTable("should be removed when workspace is gone", func(testData AssetTest) {
 			if testData.supportsAutoDeletion {
-				// for this test we prefer old clusters, because we do not want workloads to be rejected for pvcs
-				// or secrets missing in the cluster (with new clusters we have to set k8s objects tracker mock to
-				// hold those assets, otherwise workload creation will fail
-				checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
-					WithCluster(randoms.ClusterId, testing.BuildDisplayedCluster(randoms, testing.OldClustersPreK8sObjectsTracker, false)))
-
-				envAsset, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-
 				assetCreationRequest := api.AssetCreationRequest{
 					Name:       "whatever",
 					Scope:      api.SCOPE_CLUSTER,
@@ -1092,30 +1084,20 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 				}
 				autoDeleteMeta, _ := createAutoDeleteAsset(testData, router, randoms, &assetCreationRequest)
 
-				reqPayload := randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
-				reqPayload.Assets.WorkloadVolumes = []string{autoDeleteMeta.Id}
+				workloadID := seedLegacyWorkload(randoms, auth.WorkloadTypeWorkspace, "uses-volume", *autoDeleteMeta)
+				ctx := adminContextForClusterSync(randoms)
+				Expect(dao.AutoDeletePvcAssets(ctx, dao.HardDelete)).To(BeNil())
+				getURL := fmt.Sprintf("%s/%s", testData.url, autoDeleteMeta.Id)
+				protectedReq := httptest.NewRequest(http.MethodGet, getURL, nil)
+				protectedReq.Header = *headerForAdmin(randoms)
+				protectedResp := httptest.NewRecorder()
+				router.ServeHTTP(protectedResp, protectedReq)
+				Expect(protectedResp.Code).To(Equal(http.StatusOK))
 
-				createHttpReq, err := http.NewRequest("POST", urlTraining, makePayload(reqPayload))
-				Expect(err).To(BeNil())
-				createHttpReq.Header = *headerForAdmin(randoms)
-
-				createHttpResp := httptest.NewRecorder()
-				router.ServeHTTP(createHttpResp, createHttpReq)
-				Expect(createHttpResp.Code).To(Equal(http.StatusOK))
-
-				// we have to manually remove the workload...
-				dbTesting.CleanWorkloadRelatedTables()
-
-				// create another workload not using the workload volume
-				reqPayload2 := randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
-
-				createHttpReq2, err := http.NewRequest("POST", urlTraining, makePayload(reqPayload2))
-				Expect(err).To(BeNil())
-				createHttpReq2.Header = *headerForAdmin(randoms)
-
-				createHttpResp2 := httptest.NewRecorder()
-				router.ServeHTTP(createHttpResp2, createHttpReq2)
-				Expect(createHttpResp2.Code).To(Equal(http.StatusOK))
+				resp, err := deleteWorkload(ctx, randoms.ClusterId, workloadID)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(resp.Code).To(Equal(http.StatusNoContent))
+				Expect(dao.AutoDeletePvcAssets(ctx, dao.HardDelete)).To(BeNil())
 
 				// now it should be gone
 				getByIdHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", testData.url, autoDeleteMeta.Id), nil)
@@ -1876,17 +1858,7 @@ func cannotDeleteAssetBeingUsed(testData AssetTest, workloadType string, randoms
 	addedToWorkload := testData.factory.addToWorkloadCreationReq(&createRequest, &meta1)
 
 	if addedToWorkload {
-		createWsPayload, err := json.Marshal(createRequest)
-		Expect(err).To(BeNil())
-
-		// create the workload
-		createWsHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], strings.NewReader(string(createWsPayload)))
-		Expect(err).To(BeNil())
-		createWsHttpReq.Header = *headerForAdmin(randoms)
-
-		createWsHttpResp := httptest.NewRecorder()
-		router.ServeHTTP(createWsHttpResp, createWsHttpReq)
-		Expect(createWsHttpResp.Code).To(Or(Equal(http.StatusOK), Equal(http.StatusAccepted)))
+		seedLegacyWorkload(randoms, workloadType, createRequest.Name, meta1)
 
 		//   delete the asset
 		delByIdHttpReq, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", testData.url, meta1.Id), nil)
@@ -1897,45 +1869,6 @@ func cannotDeleteAssetBeingUsed(testData AssetTest, workloadType string, randoms
 		router.ServeHTTP(delByIdHttpResp, delByIdHttpReq)
 		Expect(delByIdHttpResp.Code).To(Equal(http.StatusAccepted))
 	}
-}
-
-func createTestWorkload(router chi.Router, workloadType string, randoms *testutils.RandomValues, envAsset api.EnvironmentAsset, assets ...api.AssetMeta) string {
-	reqPayload := randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
-	reqPayload.Assets.Datasources = []api.AssetIdAndKind{}
-
-	for _, asset := range assets {
-		if asset.Kind == api.ASSETKIND_ENVIRONMENT {
-			reqPayload.Assets.Environment = asset.Id
-		} else if asset.Kind == api.ASSETKIND_COMPUTE {
-			reqPayload.Assets.Compute = convutils.Ref(asset.Id)
-		} else {
-			reqPayload.Assets.Datasources = append(reqPayload.Assets.Datasources, api.AssetIdAndKind{
-				Kind: asset.Kind,
-				Id:   asset.Id,
-			})
-		}
-	}
-
-	if !IsUidGidFromTheImage(envAsset.Spec.UidGidSource) {
-		reqPayload.SpecificEnv = &api.SpecificRunParams{
-			RunAsUid: convutils.Ref(int64(500)),
-			RunAsGid: convutils.Ref(int64(30)),
-		}
-	}
-
-	createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
-	Expect(err).To(BeNil())
-	createHttpReq.Header = *headerForAdmin(randoms)
-
-	createHttpResp := httptest.NewRecorder()
-	router.ServeHTTP(createHttpResp, createHttpReq)
-	Expect(createHttpResp.Code).To(Equal(http.StatusOK))
-
-	var workload dbmodel.GenericWorkload
-	parseErr := json.Unmarshal(createHttpResp.Body.Bytes(), &workload)
-	Expect(parseErr).To(BeNil())
-
-	return workload.Meta.Id
 }
 
 func createAutoDeleteAsset(testData AssetTest, router chi.Router, randoms *testutils.RandomValues, request *api.AssetCreationRequest) (*api.AssetMeta, []byte) {

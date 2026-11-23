@@ -20505,30 +20505,77 @@ components:
               $ref: '#/components/schemas/DistMaster'
       nullable: true
       type: object
-    ComplianceIssuesV2:
+    WorkloadCreationMeta:
+      required:
+        - name
+        - projectId
+        - clusterId
       properties:
-        complianceIssues:
-          type: array
-          items:
-            type: object
-            required:
-              - details
-              - field
-            properties:
-              field:
-                type: string
-                example: compute.gpuDevicesRequest
-              details:
-                type: string
-                example: value must be no less than 3
-              rule:
-                $ref: '#/components/schemas/PolicyRuleEnum'
+        name:
+          $ref: '#/components/schemas/WorkloadName'
+        useGivenNameAsPrefix:
+          description: When true, the requested name will be treated as a prefix. The final name of the workload will be composed of the name followed by a random set of characters.
+          type: boolean
+          example: true
+          default: false
+        projectId:
+          $ref: '#/components/schemas/ProjectId'
+        clusterId:
+          $ref: '#/components/schemas/ClusterId'
+    InferenceSpecificRunParams:
+      allOf:
+        - $ref: '#/components/schemas/SpecificRunConnections'
+        - $ref: '#/components/schemas/SpecificRunAutoScaling'
+        - $ref: '#/components/schemas/SpecificRunServingPortAccess'
+        - nullable: true
+          properties:
+            annotations:
+              $ref: '#/components/schemas/Annotations'
+            args:
+              $ref: '#/components/schemas/Args'
+            autoDeletionTimeAfterCompletionSeconds:
+              $ref: '#/components/schemas/AutoDeletionTimeAfterPreemption'
+            backoffLimit:
+              $ref: '#/components/schemas/BackoffLimit'
+            category:
+              $ref: '#/components/schemas/Category'
+            command:
+              $ref: '#/components/schemas/Command'
+            environmentVariables:
+              $ref: '#/components/schemas/EnvironmentVariablesOfAsset'
+            imagePullSecrets:
+              $ref: '#/components/schemas/ImagePullSecrets'
+            labels:
+              $ref: '#/components/schemas/Labels'
+            nodeAffinityRequired:
+              $ref: '#/components/schemas/NodeAffinityRequired'
+            nodePools:
+              $ref: '#/components/schemas/NodePools'
+            nodeType:
+              $ref: '#/components/schemas/NodeType1'
+            podAffinity:
+              $ref: '#/components/schemas/PodAffinity'
+            preemptibility:
+              $ref: '#/components/schemas/Preemptibility'
+            priorityClass:
+              $ref: '#/components/schemas/PriorityClass'
+            restartPolicy:
+              $ref: '#/components/schemas/RestartPolicy'
+            runAsGid:
+              $ref: '#/components/schemas/RunAsGid'
+            runAsUid:
+              $ref: '#/components/schemas/RunAsUid'
+            supplementalGroups:
+              $ref: '#/components/schemas/SupplementalGroups'
+            terminateAfterPreemption:
+              $ref: '#/components/schemas/TerminateAfterPreemption'
+            terminationGracePeriodSeconds:
+              $ref: '#/components/schemas/TerminationGracePeriod'
+            tolerations:
+              $ref: '#/components/schemas/Tolerations'
+          type: object
       nullable: true
       type: object
-    SubmissionErrorV2:
-      allOf:
-        - $ref: '#/components/schemas/Error'
-        - $ref: '#/components/schemas/ComplianceIssuesV2'
     DepartmentId:
       description: The id of the department.
       type: string
@@ -20602,59 +20649,6 @@ components:
           $ref: '#/components/schemas/WorkloadDesiredPhase'
         actualPhase:
           $ref: '#/components/schemas/Phase'
-    WorkspaceSpecificRunParams:
-      allOf:
-        - $ref: '#/components/schemas/SpecificRunConnections'
-        - $ref: '#/components/schemas/AllowOverQuota'
-        - nullable: true
-          properties:
-            annotations:
-              $ref: '#/components/schemas/Annotations'
-            args:
-              $ref: '#/components/schemas/Args'
-            autoDeletionTimeAfterCompletionSeconds:
-              $ref: '#/components/schemas/AutoDeletionTimeAfterPreemption'
-            backoffLimit:
-              $ref: '#/components/schemas/BackoffLimit'
-            category:
-              $ref: '#/components/schemas/Category'
-            command:
-              $ref: '#/components/schemas/Command'
-            environmentVariables:
-              $ref: '#/components/schemas/EnvironmentVariablesOfAsset'
-            imagePullSecrets:
-              $ref: '#/components/schemas/ImagePullSecrets'
-            labels:
-              $ref: '#/components/schemas/Labels'
-            nodeAffinityRequired:
-              $ref: '#/components/schemas/NodeAffinityRequired'
-            nodePools:
-              $ref: '#/components/schemas/NodePools'
-            nodeType:
-              $ref: '#/components/schemas/NodeType1'
-            podAffinity:
-              $ref: '#/components/schemas/PodAffinity'
-            preemptibility:
-              $ref: '#/components/schemas/Preemptibility'
-            priorityClass:
-              $ref: '#/components/schemas/PriorityClass'
-            restartPolicy:
-              $ref: '#/components/schemas/RestartPolicy'
-            runAsGid:
-              $ref: '#/components/schemas/RunAsGid'
-            runAsUid:
-              $ref: '#/components/schemas/RunAsUid'
-            supplementalGroups:
-              $ref: '#/components/schemas/SupplementalGroups'
-            terminateAfterPreemption:
-              $ref: '#/components/schemas/TerminateAfterPreemption'
-            terminationGracePeriodSeconds:
-              $ref: '#/components/schemas/TerminationGracePeriod'
-            tolerations:
-              $ref: '#/components/schemas/Tolerations'
-          type: object
-      nullable: true
-      type: object
     DataVolume:
       properties:
         id:
@@ -21457,139 +21451,30 @@ components:
       description: Rules which apply to specific workload.
       nullable: true
       type: object
-    WorkloadCreationMeta:
-      required:
-        - name
-        - projectId
-        - clusterId
+    ComplianceIssuesV2:
       properties:
-        name:
-          $ref: '#/components/schemas/WorkloadName'
-        useGivenNameAsPrefix:
-          description: When true, the requested name will be treated as a prefix. The final name of the workload will be composed of the name followed by a random set of characters.
-          type: boolean
-          example: true
-          default: false
-        projectId:
-          $ref: '#/components/schemas/ProjectId'
-        clusterId:
-          $ref: '#/components/schemas/ClusterId'
-    TrainingSpecificRunParams:
-      allOf:
-        - $ref: '#/components/schemas/SpecificRunConnections'
-        - $ref: '#/components/schemas/AllowOverQuota'
-        - nullable: true
-          properties:
-            annotations:
-              $ref: '#/components/schemas/Annotations'
-            args:
-              $ref: '#/components/schemas/Args'
-            autoDeletionTimeAfterCompletionSeconds:
-              $ref: '#/components/schemas/AutoDeletionTimeAfterPreemption'
-            backoffLimit:
-              $ref: '#/components/schemas/BackoffLimit'
-            category:
-              $ref: '#/components/schemas/Category'
-            command:
-              $ref: '#/components/schemas/Command'
-            completions:
-              $ref: '#/components/schemas/Completions'
-            environmentVariables:
-              $ref: '#/components/schemas/EnvironmentVariablesOfAsset'
-            imagePullSecrets:
-              $ref: '#/components/schemas/ImagePullSecrets'
-            labels:
-              $ref: '#/components/schemas/Labels'
-            nodeAffinityRequired:
-              $ref: '#/components/schemas/NodeAffinityRequired'
-            nodePools:
-              $ref: '#/components/schemas/NodePools'
-            nodeType:
-              $ref: '#/components/schemas/NodeType1'
-            parallelism:
-              $ref: '#/components/schemas/Parallelism'
-            podAffinity:
-              $ref: '#/components/schemas/PodAffinity'
-            preemptibility:
-              $ref: '#/components/schemas/Preemptibility'
-            priorityClass:
-              $ref: '#/components/schemas/PriorityClass'
-            restartPolicy:
-              $ref: '#/components/schemas/RestartPolicy'
-            runAsGid:
-              $ref: '#/components/schemas/RunAsGid'
-            runAsUid:
-              $ref: '#/components/schemas/RunAsUid'
-            supplementalGroups:
-              $ref: '#/components/schemas/SupplementalGroups'
-            terminateAfterPreemption:
-              $ref: '#/components/schemas/TerminateAfterPreemption'
-            terminationGracePeriodSeconds:
-              $ref: '#/components/schemas/TerminationGracePeriod'
-            tolerations:
-              $ref: '#/components/schemas/Tolerations'
-          type: object
+        complianceIssues:
+          type: array
+          items:
+            type: object
+            required:
+              - details
+              - field
+            properties:
+              field:
+                type: string
+                example: compute.gpuDevicesRequest
+              details:
+                type: string
+                example: value must be no less than 3
+              rule:
+                $ref: '#/components/schemas/PolicyRuleEnum'
       nullable: true
       type: object
-    OptionalAssetIds:
+    SubmissionErrorV2:
       allOf:
-        - $ref: '#/components/schemas/AssetsIds'
-      nullable: true
-      type: object
-    InferenceSpecificRunParams:
-      allOf:
-        - $ref: '#/components/schemas/SpecificRunConnections'
-        - $ref: '#/components/schemas/SpecificRunAutoScaling'
-        - $ref: '#/components/schemas/SpecificRunServingPortAccess'
-        - nullable: true
-          properties:
-            annotations:
-              $ref: '#/components/schemas/Annotations'
-            args:
-              $ref: '#/components/schemas/Args'
-            autoDeletionTimeAfterCompletionSeconds:
-              $ref: '#/components/schemas/AutoDeletionTimeAfterPreemption'
-            backoffLimit:
-              $ref: '#/components/schemas/BackoffLimit'
-            category:
-              $ref: '#/components/schemas/Category'
-            command:
-              $ref: '#/components/schemas/Command'
-            environmentVariables:
-              $ref: '#/components/schemas/EnvironmentVariablesOfAsset'
-            imagePullSecrets:
-              $ref: '#/components/schemas/ImagePullSecrets'
-            labels:
-              $ref: '#/components/schemas/Labels'
-            nodeAffinityRequired:
-              $ref: '#/components/schemas/NodeAffinityRequired'
-            nodePools:
-              $ref: '#/components/schemas/NodePools'
-            nodeType:
-              $ref: '#/components/schemas/NodeType1'
-            podAffinity:
-              $ref: '#/components/schemas/PodAffinity'
-            preemptibility:
-              $ref: '#/components/schemas/Preemptibility'
-            priorityClass:
-              $ref: '#/components/schemas/PriorityClass'
-            restartPolicy:
-              $ref: '#/components/schemas/RestartPolicy'
-            runAsGid:
-              $ref: '#/components/schemas/RunAsGid'
-            runAsUid:
-              $ref: '#/components/schemas/RunAsUid'
-            supplementalGroups:
-              $ref: '#/components/schemas/SupplementalGroups'
-            terminateAfterPreemption:
-              $ref: '#/components/schemas/TerminateAfterPreemption'
-            terminationGracePeriodSeconds:
-              $ref: '#/components/schemas/TerminationGracePeriod'
-            tolerations:
-              $ref: '#/components/schemas/Tolerations'
-          type: object
-      nullable: true
-      type: object
+        - $ref: '#/components/schemas/Error'
+        - $ref: '#/components/schemas/ComplianceIssuesV2'
     ConfigMapAsset:
       required:
         - meta

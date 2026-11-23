@@ -68,9 +68,7 @@ func CreateFlatWorkload(ctx context.Context,
 	meta *api.WorkloadCreationMeta,
 	assets *api.AssetsIds,
 	specificRunParams *api.SpecificRunParams,
-	distributed *api.DistributedParams,
 	dataSourceOverridesById map[string]*api.DataSourceOverrides,
-	masterDataSourceOverridesById map[string]*api.DataSourceOverrides,
 ) (*CreatedWorkloadInfo, *workloadsApi.SubmissionErrorV2) {
 	//
 	//   check permission to create workload
@@ -110,37 +108,7 @@ func CreateFlatWorkload(ctx context.Context,
 		dataSourceOverridesById: dataSourceOverridesById,
 	}
 
-	var masterReplicaInfo *CreateFlatWorkloadReplicaInfo
-
-	if distributed != nil && distributed.Master != nil {
-		masterReplicaInfo = &CreateFlatWorkloadReplicaInfo{
-			dataSourceOverridesById: masterDataSourceOverridesById,
-		}
-
-		if distributed.Master.SameAsWorker {
-			if distributed.Master.Assets != nil {
-				return nil, workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, "assets should not be provided when sameAsWorker is requested for the master replica")
-			}
-			if distributed.Master.SpecificRunParams != nil {
-				return nil, workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, "specificRunParams should not be provided when sameAsWorker is requested for the master replica")
-			}
-		} else {
-			if distributed.Master.Assets == nil {
-				return nil, workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, "assets should be provided for the master replica")
-			}
-
-			masterSpecificRunParams, convErr := trainingToGenericRunParams(distributed.Master.SpecificRunParams)
-			if convErr != nil {
-				return nil, toSubmissionError(convErr)
-			}
-
-			masterReplicaInfo.specificRunParams = masterSpecificRunParams
-
-			masterReplicaInfo.containedAssetIds = NewContainedIdsFromOptionalAssets(distributed.Master.Assets)
-		}
-	}
-
-	return composeFlatWorkload(ctx, workloadType, meta.ClusterId, &workerReplicaInfo, masterReplicaInfo, nil)
+	return composeFlatWorkload(ctx, workloadType, meta.ClusterId, &workerReplicaInfo, nil, nil)
 }
 
 func composeFlatWorkload(ctx context.Context,
@@ -246,8 +214,7 @@ func translateFlatWorkload(ctx context.Context, workloadType string,
 // we mainly need it for usage info and for copy&edit.
 func FlatWorkloadUpdateDb(ctx context.Context, workloadType string, meta *api.WorkloadMeta, specificRunParams *api.SpecificRunParams,
 	workerAssets []dbmodel.AssetsContainedInWorkload,
-	masterAssets []dbmodel.AssetsContainedInWorkload,
-	distributed *api.DistributedData, dataSourceOverridesById map[string]*api.DataSourceOverrides, masterDataSourceOverridesById map[string]*api.DataSourceOverrides,
+	dataSourceOverridesById map[string]*api.DataSourceOverrides,
 ) *api.Error {
 	projectIdAsNum, convErr := strconv.Atoi(meta.ProjectId)
 	if convErr != nil {
@@ -260,26 +227,7 @@ func FlatWorkloadUpdateDb(ctx context.Context, workloadType string, meta *api.Wo
 		ProjectId:   int32(projectIdAsNum),
 		SpecificEnv: specificRunParams,
 	}
-	if distributed != nil {
-		v1CreationRequest.Distributed = &api.Distributed{
-			NumWorkers:    distributed.NumWorkers,
-			NoMaster:      convutils.Ref(distributed.Master == nil),
-			DistFramework: distributed.Framework,
-		}
-		if distributed.Master != nil {
-			v1CreationRequest.Distributed.Master = &api.DistMaster{
-				SpecificEnv: &api.SpecificRunParams{},
-			}
-			if distributed.Master.SpecificRunParams != nil {
-				copyErr := convutils.CopySpecs(&v1CreationRequest.Distributed.Master.SpecificEnv, distributed.Master.SpecificRunParams)
-				if copyErr != nil {
-					return api.NewError(http.StatusBadRequest, fmt.Sprintf("failed to copy master specific env: %v", copyErr), copyErr)
-				}
-			}
-		}
-	}
-
-	_, dbError := workloadsdb.CreateWorkload(ctx, workloadType, &v1CreationRequest, meta.WorkloadId, workerAssets, masterAssets, nil, dataSourceOverridesById, masterDataSourceOverridesById)
+	_, dbError := workloadsdb.CreateWorkload(ctx, workloadType, &v1CreationRequest, meta.WorkloadId, workerAssets, nil, nil, dataSourceOverridesById, nil)
 	if dbError != nil {
 		return dbError
 	}
@@ -590,10 +538,6 @@ func fixPortionForNonFractionalIssue(assets []dbmodel.AssetsContainedInWorkload)
 			assets[idx].AssetsCompute.GpuPortionRequest = nil
 		}
 	}
-}
-
-func NewContainedIdsFromOptionalAssets(src *api.OptionalAssetIds) []string {
-	return NewContainedIds(src.Environment, src.Compute, src.Datasources)
 }
 
 func NewContainedIdsFromAssets(src *api.AssetsIds) []string {

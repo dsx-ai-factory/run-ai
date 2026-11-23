@@ -319,6 +319,12 @@ openapi-generate-public-spec:
 	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Generating public spec for runai control-plane to ${OPENAPI_PUBLIC_SPEC_PATH}" ${BASE_CONSOLE}
 	${DOCKER_NODEJS_COMMAND} /bin/sh -c 'cd ${OPENAPI_BUILD_PATH}/scripts/cli && npm --cache /tmp/.npm install \
 	&& ./node_modules/.bin/openapi-merge-cli --config ../../config/merge-config.json' || ${FAILURE_MESSAGE_HANDLER}
+	@# Keep the operation IDs published when the legacy Assets POSTs shared their names.
+	${DOCKER_LINUX_COMMAND} sed -i \
+		-e '\|^  /api/v1/workloads/workspaces:$$|,/^  [^ ]/s/^      operationId: create_workspace$$/      operationId: create_workspace1/' \
+		-e '\|^  /api/v1/workloads/trainings:$$|,/^  [^ ]/s/^      operationId: create_training$$/      operationId: create_training1/' \
+		${OPENAPI_PUBLIC_SPEC_BUILD_PATH} || ${FAILURE_MESSAGE_HANDLER}
+	${DOCKER_YQ_COMMAND} e -e '(.paths."/api/v1/workloads/workspaces".post.operationId == "create_workspace1") and (.paths."/api/v1/workloads/trainings".post.operationId == "create_training1")' ${OPENAPI_PUBLIC_SPEC_BUILD_PATH} > /dev/null || { echo "Public workspace or training submission operation ID changed"; ${FAILURE_MESSAGE_HANDLER}; }
 	${SUCCESS_MESSAGE_HANDLER}
 
 	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Store raw swagger for runai control-plane to ${OPENAPI_PUBLIC_SPEC_PATH}" ${BASE_CONSOLE}

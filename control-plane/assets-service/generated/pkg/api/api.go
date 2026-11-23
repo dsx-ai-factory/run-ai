@@ -270,10 +270,6 @@ type TrainingsAPIRouter interface {
 	UpdateDistributedStatus(http.ResponseWriter, *http.Request)
 	SyncDistributedStatus(http.ResponseWriter, *http.Request)
 	DeleteDistributedById(http.ResponseWriter, *http.Request)
-	CreateTraining(http.ResponseWriter, *http.Request)
-	GetTrainingMerged(http.ResponseWriter, *http.Request)
-	CreateTrainingV2(http.ResponseWriter, *http.Request)
-	GetTrainingByIdV2(http.ResponseWriter, *http.Request)
 }
 
 // WorkloadAPIRouter defines the required methods for binding the api requests to a responses for the WorkloadAPI
@@ -293,10 +289,6 @@ type WorkspacesAPIRouter interface {
 	UpdateWorkspaceStatus(http.ResponseWriter, *http.Request)
 	SyncWorkspaceStatus(http.ResponseWriter, *http.Request)
 	DeleteWorkspaceById(http.ResponseWriter, *http.Request)
-	CreateWorkspace(http.ResponseWriter, *http.Request)
-	GetWorkspaceMerged(http.ResponseWriter, *http.Request)
-	CreateWorkspaceV2(http.ResponseWriter, *http.Request)
-	GetWorkspaceByIdV2(http.ResponseWriter, *http.Request)
 	// Deprecated
 	CountAssets(http.ResponseWriter, *http.Request)
 }
@@ -566,10 +558,6 @@ type TrainingsAPIServicer interface {
 	UpdateDistributedStatus(context.Context, string, WorkloadStatusUpdate) (ImplResponse, error)
 	SyncDistributedStatus(context.Context, string, []WorkloadStatusUpdate) (ImplResponse, error)
 	DeleteDistributedById(context.Context, string, string) (ImplResponse, error)
-	CreateTraining(context.Context, WorkloadCreationRequest) (ImplResponse, error)
-	GetTrainingMerged(context.Context, string, string, bool, bool) (ImplResponse, error)
-	CreateTrainingV2(context.Context, TrainingCreationRequestV2) (ImplResponse, error)
-	GetTrainingByIdV2(context.Context, string) (ImplResponse, error)
 }
 
 // WorkloadAPIServicer defines the api actions for the WorkloadAPI service
@@ -591,10 +579,6 @@ type WorkspacesAPIServicer interface {
 	UpdateWorkspaceStatus(context.Context, string, WorkloadStatusUpdate) (ImplResponse, error)
 	SyncWorkspaceStatus(context.Context, string, []WorkloadStatusUpdate) (ImplResponse, error)
 	DeleteWorkspaceById(context.Context, string, string) (ImplResponse, error)
-	CreateWorkspace(context.Context, WorkloadCreationRequest) (ImplResponse, error)
-	GetWorkspaceMerged(context.Context, string, string) (ImplResponse, error)
-	CreateWorkspaceV2(context.Context, WorkspaceCreationRequestV2) (ImplResponse, error)
-	GetWorkspaceByIdV2(context.Context, string) (ImplResponse, error)
 	// Deprecated
 	CountAssets(context.Context, string, string, string, int32, string, string) (ImplResponse, error)
 }

@@ -19,15 +19,9 @@ import { NodeAffinityRequired } from './nodeAffinityRequired';
 import { PodAffinity } from './podAffinity';
 import { Preemptibility } from './preemptibility';
 import { RestartPolicy } from './restartPolicy';
-import { SpecificRunConnectionInfo } from './specificRunConnectionInfo';
 import { Toleration } from './toleration';
 
-export class TrainingSpecificRunParams {
-    'connections'?: Array<SpecificRunConnectionInfo> | null;
-    /**
-    * Whether to allow the workload to exceed the quota of the project.
-    */
-    'allowOverQuota'?: boolean | null;
+export class InferenceSpecificRunParamsAllOf {
     /**
     * Set of annotations to populate into the container running the workload.
     */
@@ -53,10 +47,6 @@ export class TrainingSpecificRunParams {
     */
     'command'?: string | null;
     /**
-    * Used with Hyperparameter Optimization. Specifies the number of successful pods the job should reach to be completed. The Job will be marked as successful once the specified amount of pods has been reached (applicable to standard training only).
-    */
-    'completions'?: number | null;
-    /**
     * Set of environment variables to populate into the container running the workspace.
     */
     'environmentVariables'?: Array<EnvironmentVariableOfAsset> | null;
@@ -77,10 +67,6 @@ export class TrainingSpecificRunParams {
     * Deprecated: use a workload policy node selector to target node types instead. Nodes (machines), or a group of nodes on which the workload will run. To use this feature, your Administrator will need to label nodes. For more information, see [Group Nodes](https://docs.run.ai/latest/admin/researcher-setup/limit-to-node-group). When using this flag with with Project-based affinity, it refines the list of allowable node groups set in the Project. For more information, see [Projects](https://docshub.run.ai/guides/platform-management/aiinitiatives/organization/projects).
     */
     'nodeType'?: string | null;
-    /**
-    * Used with Hyperparameter Optimization. Specifies the maximum number of pods the workload should run at any given time (applicable to standard training only).
-    */
-    'parallelism'?: number | null;
     'podAffinity'?: PodAffinity | null;
     'preemptibility'?: Preemptibility | null;
     /**
@@ -117,16 +103,6 @@ export class TrainingSpecificRunParams {
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "connections",
-            "baseName": "connections",
-            "type": "Array<SpecificRunConnectionInfo>"
-        },
-        {
-            "name": "allowOverQuota",
-            "baseName": "allowOverQuota",
-            "type": "boolean"
-        },
-        {
             "name": "annotations",
             "baseName": "annotations",
             "type": "Array<Annotation>"
@@ -157,11 +133,6 @@ export class TrainingSpecificRunParams {
             "type": "string"
         },
         {
-            "name": "completions",
-            "baseName": "completions",
-            "type": "number"
-        },
-        {
             "name": "environmentVariables",
             "baseName": "environmentVariables",
             "type": "Array<EnvironmentVariableOfAsset>"
@@ -190,11 +161,6 @@ export class TrainingSpecificRunParams {
             "name": "nodeType",
             "baseName": "nodeType",
             "type": "string"
-        },
-        {
-            "name": "parallelism",
-            "baseName": "parallelism",
-            "type": "number"
         },
         {
             "name": "podAffinity",
@@ -248,7 +214,7 @@ export class TrainingSpecificRunParams {
         }    ];
 
     static getAttributeTypeMap() {
-        return TrainingSpecificRunParams.attributeTypeMap;
+        return InferenceSpecificRunParamsAllOf.attributeTypeMap;
     }
 }
 

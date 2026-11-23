@@ -12,7 +12,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"sort"
-	"strconv"
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/clients/org_unit"
@@ -42,10 +41,6 @@ import (
 )
 
 const (
-	urlWorkspace        = "/api/v1/workspace"
-	urlWorkspaceV2      = "/api/v2/workspace"
-	urlTraining         = "/api/v1/training"
-	urlTrainingV2       = "/api/v2/training"
 	urlInference        = "/api/v1/inference"
 	urlInferenceV2      = "/api/v2/inference"
 	urlModelInference   = "/api/v1/model-inference"
@@ -56,31 +51,14 @@ const (
 	urlModelHuggingFaceInfo = "/api/v2/huggingface-model/info-request"
 )
 
-var urlForCreatingWorkload = map[string]string{
-	auth.WorkloadTypeWorkspace:   urlWorkspace,
-	auth.WorkloadTypeTraining:    urlTraining,
-	auth.WorkloadTypeDistributed: urlTraining,
-	auth.WorkloadTypeInference:   urlInference,
-}
-
-var urlV1toV2 = map[string]string{
-	urlWorkspace: urlWorkspaceV2,
-	urlTraining:  urlTrainingV2,
-	urlInference: urlInferenceV2,
-}
-
 var (
-	forWorkspaces  = Entry(auth.WorkloadTypeWorkspace, auth.WorkloadTypeWorkspace)
-	forTrainings   = Entry(auth.WorkloadTypeTraining, auth.WorkloadTypeTraining)
-	forDistributed = Entry(auth.WorkloadTypeDistributed, auth.WorkloadTypeDistributed)
+	forWorkspaces = Entry(auth.WorkloadTypeWorkspace, auth.WorkloadTypeWorkspace)
+	forTrainings  = Entry(auth.WorkloadTypeTraining, auth.WorkloadTypeTraining)
 )
 
-var forInference = Entry(auth.WorkloadTypeInference, auth.WorkloadTypeInference)
-
-// createWorkload creates a workload in a project and returns its ID.
-func createWorkload(r *testutils.RandomValues, router chi.Router, envAsset api.EnvironmentAsset, wlType string) string {
+func createInference(r *testutils.RandomValues, router chi.Router, envAsset api.EnvironmentAsset) string {
 	reqPayload := randomWorkloadCreationRequest(r, envAsset.Meta.Id)
-	createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[wlType], makePayload(reqPayload))
+	createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 	Expect(err).To(BeNil())
 	createHttpReq.Header = *headerForAdmin(r)
 
@@ -95,9 +73,9 @@ func createWorkload(r *testutils.RandomValues, router chi.Router, envAsset api.E
 	return inference.Meta.Id
 }
 
-// expectWorkloadStatus checks the status of a workload
-func expectWorkloadStatus(r *testutils.RandomValues, wlType string, router chi.Router, targetId string, expectedStatus int) {
-	getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", urlForCreatingWorkload[wlType], targetId), nil)
+// expectInferenceStatus checks whether the inference is available.
+func expectInferenceStatus(r *testutils.RandomValues, router chi.Router, targetId string, expectedStatus int) {
+	getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", urlInference, targetId), nil)
 	Expect(err).To(BeNil())
 	getHttpReq.Header = *headerForAdmin(r)
 
@@ -106,7 +84,34 @@ func expectWorkloadStatus(r *testutils.RandomValues, wlType string, router chi.R
 	Expect(getHttpResp.Code).To(Equal(expectedStatus))
 }
 
-var _ = Describe("Test Workspace, Training and Inference Services", func() {
+// seedLegacyWorkload supplies historical rows to the readers that outlive the asset submission API.
+func seedLegacyWorkload(r *testutils.RandomValues, workloadType, name string, assets ...api.AssetMeta) string {
+	GinkgoHelper()
+	rec := dbmodel.WorkloadRec{
+		WorkloadType: workloadType,
+		WorkloadMetaV1: api.WorkloadMetaV1{
+			Id:        uuid.NewString(),
+			Name:      name,
+			TenantId:  int32(r.TenantId),
+			ProjectId: int32(r.ProjectId),
+			ClusterId: r.ClusterId,
+		},
+	}
+	db := runaidb.DB().Actual()
+	Expect(db.Create(&rec).Error).To(Succeed())
+	for _, asset := range assets {
+		link := dbmodel.WorkloadsAssetsRec{
+			WorkloadId: rec.Id,
+			AssetId:    asset.Id,
+			AssetKind:  asset.Kind,
+			AutoDelete: convutils.Deref(asset.AutoDelete, false),
+		}
+		Expect(db.Create(&link).Error).To(Succeed())
+	}
+	return rec.Id
+}
+
+var _ = Describe("Inference submission and historical workload records", func() {
 	var randoms *testutils.RandomValues
 	var differentProject *testutils.RandomValues
 	var differentDepartment *testutils.RandomValues
@@ -154,23 +159,23 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 	})
 
 	Context("trying to create workload with no permission", func() {
-		DescribeTable("should return forbidden error", func(workloadType string) {
-			reqPayload := randomWorkloadCreationRequest(randoms, getEnvAssetIdByType(workloadType, &envAsset, &envAssetInference))
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
+		It("should return forbidden error", func() {
+			reqPayload := randomWorkloadCreationRequest(randoms, envAssetInference.Meta.Id)
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerWithMissingInfo(randoms)
 
 			createHttpResp := httptest.NewRecorder()
 			router.ServeHTTP(createHttpResp, createHttpReq)
 			Expect(createHttpResp.Code).To(Equal(http.StatusForbidden))
-		}, forWorkspaces, forTrainings, forInference)
+		})
 	})
 
 	Context("Workload contains asset from different project", func() {
-		DescribeTable("should fail with asset not found in project error", func(workloadType string) {
+		It("should fail with asset not found in project error", func() {
 			nfsAsset, _, _ := createNFSAsset(buildRandomProjectNFSAsset(differentProject), router, headerForAdmin(randoms))
 
-			reqPayload := randomWorkloadCreationRequest(randoms, getEnvAssetIdByType(workloadType, &envAsset, &envAssetInference))
+			reqPayload := randomWorkloadCreationRequest(randoms, envAssetInference.Meta.Id)
 			reqPayload.Assets.Datasources = []api.AssetIdAndKind{
 				{
 					Kind: api.ASSETKIND_NFS,
@@ -178,7 +183,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				},
 			}
 
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerForAdmin(randoms)
 
@@ -186,14 +191,14 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			router.ServeHTTP(createHttpResp, createHttpReq)
 			Expect(createHttpResp.Code).To(Equal(http.StatusNotFound))
 			Expect(createHttpResp.Body).To(ContainSubstring("not associated with the requested project"))
-		}, forWorkspaces, forTrainings, forInference)
+		})
 	})
 
 	Context("Workload contains asset from different department", func() {
-		DescribeTable("should fail with asset not found in project error", func(workloadType string) {
+		It("should fail with asset not found in project error", func() {
 			nfsAsset, _, _ := createNFSAsset(buildRandomDepartmentNFSAsset(differentDepartment), router, headerForAdmin(randoms))
 
-			reqPayload := randomWorkloadCreationRequest(randoms, getEnvAssetIdByType(workloadType, &envAsset, &envAssetInference))
+			reqPayload := randomWorkloadCreationRequest(randoms, envAssetInference.Meta.Id)
 			reqPayload.Assets.Datasources = []api.AssetIdAndKind{
 				{
 					Kind: api.ASSETKIND_NFS,
@@ -201,7 +206,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				},
 			}
 
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerForAdmin(randoms)
 
@@ -209,13 +214,13 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			router.ServeHTTP(createHttpResp, createHttpReq)
 			Expect(createHttpResp.Code).To(Equal(http.StatusNotFound))
 			Expect(createHttpResp.Body).To(ContainSubstring("not associated with the requested project"))
-		}, forWorkspaces, forTrainings, forInference)
+		})
 	})
 
 	Context("incorrect asset type", func() {
-		DescribeTable("should fail validation", func(workloadType string) {
+		It("should fail validation", func() {
 			nfsAsset, _, _ := createNFSAsset(buildRandomProjectNFSAsset(randoms), router, headerForAdmin(randoms))
-			reqPayload := randomWorkloadCreationRequest(randoms, getEnvAssetIdByType(workloadType, &envAsset, &envAssetInference))
+			reqPayload := randomWorkloadCreationRequest(randoms, envAssetInference.Meta.Id)
 			reqPayload.Assets.Datasources = []api.AssetIdAndKind{
 				{
 					Kind: api.ASSETKIND_GIT,
@@ -223,7 +228,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				},
 			}
 
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerForAdmin(randoms)
 
@@ -231,7 +236,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			router.ServeHTTP(createHttpResp, createHttpReq)
 			Expect(createHttpResp.Code).To(Equal(http.StatusBadRequest))
 			Expect(createHttpResp.Body.String()).To(ContainSubstring("nfs rather than git"))
-		}, forWorkspaces, forTrainings, forInference)
+		})
 	})
 
 	Context("workloadVolume asset in inference workload (old cluster)", func() {
@@ -249,7 +254,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				pvcAsset.Meta.Id,
 			}
 
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[auth.WorkloadTypeInference], makePayload(reqPayload))
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerForAdmin(randoms)
 
@@ -271,7 +276,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				pvcAsset.Meta.Id,
 			}
 
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[auth.WorkloadTypeInference], makePayload(reqPayload))
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerForAdmin(randoms)
 
@@ -292,7 +297,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				pvcAsset.Meta.Id,
 			}
 
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[auth.WorkloadTypeInference], makePayload(reqPayload))
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerForAdmin(randoms)
 
@@ -312,12 +317,12 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 
 	Context("Handle project deletion", func() {
 		It("basic flow", func() {
-			nonTargetId := createWorkload(randoms, router, envAssetInference, auth.WorkloadTypeInference)
-			targetId := createWorkload(differentProject, router, envAssetInference, auth.WorkloadTypeInference)
+			nonTargetId := createInference(randoms, router, envAssetInference)
+			targetId := createInference(differentProject, router, envAssetInference)
 
 			// verify that workloads were created
-			expectWorkloadStatus(randoms, auth.WorkloadTypeInference, router, nonTargetId, http.StatusOK)
-			expectWorkloadStatus(differentProject, auth.WorkloadTypeInference, router, targetId, http.StatusOK)
+			expectInferenceStatus(randoms, router, nonTargetId, http.StatusOK)
+			expectInferenceStatus(differentProject, router, targetId, http.StatusOK)
 
 			ctx := context.WithValue(context.Background(), runaictx.CfTenantId, differentProject.TenantIdStr)
 			err := HandleProjectDeleteRequest(ctx, &events.ProjectDeleteRequest{
@@ -326,17 +331,17 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			Expect(err).To(BeNil())
 
 			// verify that only the target was deleted
-			expectWorkloadStatus(randoms, auth.WorkloadTypeInference, router, nonTargetId, http.StatusOK)
-			expectWorkloadStatus(differentProject, auth.WorkloadTypeInference, router, targetId, http.StatusNotFound)
+			expectInferenceStatus(randoms, router, nonTargetId, http.StatusOK)
+			expectInferenceStatus(differentProject, router, targetId, http.StatusNotFound)
 		})
 	})
 
 	Context("Handle cluster deletion", func() {
 		It("basic flow", func() {
-			workloadId := createWorkload(randoms, router, envAssetInference, auth.WorkloadTypeInference)
+			workloadId := createInference(randoms, router, envAssetInference)
 
 			// verify that workloads were created
-			expectWorkloadStatus(randoms, auth.WorkloadTypeInference, router, workloadId, http.StatusOK)
+			expectInferenceStatus(randoms, router, workloadId, http.StatusOK)
 
 			ctx := context.WithValue(context.Background(), runaictx.CfTenantId, randoms.TenantIdStr)
 			err := HandleClusterDeleteEvent(ctx, &events.ClusterDelete{
@@ -345,16 +350,16 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			Expect(err).To(BeNil())
 
 			// verify that thw workload was deleted
-			expectWorkloadStatus(randoms, auth.WorkloadTypeInference, router, workloadId, http.StatusNotFound)
+			expectInferenceStatus(randoms, router, workloadId, http.StatusNotFound)
 		})
 	})
 
 	Context("Handle tenant deletion", func() {
 		It("basic flow", func() {
-			workloadId := createWorkload(randoms, router, envAssetInference, auth.WorkloadTypeInference)
+			workloadId := createInference(randoms, router, envAssetInference)
 
 			// verify that workloads were created
-			expectWorkloadStatus(randoms, auth.WorkloadTypeInference, router, workloadId, http.StatusOK)
+			expectInferenceStatus(randoms, router, workloadId, http.StatusOK)
 
 			ctx := context.WithValue(context.Background(), runaictx.CfTenantId, randoms.TenantIdStr)
 			err := HandleTenantDeleteEvent(ctx, &events.TenantDelete{
@@ -363,7 +368,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			Expect(err).To(BeNil())
 
 			// verify that the workload was deleted
-			expectWorkloadStatus(randoms, auth.WorkloadTypeInference, router, workloadId, http.StatusNotFound)
+			expectInferenceStatus(randoms, router, workloadId, http.StatusNotFound)
 		})
 	})
 
@@ -380,7 +385,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				},
 			}
 
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[auth.WorkloadTypeInference], makePayload(reqPayload))
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerForAdmin(randoms)
 
@@ -392,10 +397,9 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 	})
 
 	Context("specific env connection not found", func() {
-		DescribeTable("must have names that appear in env asset", func(workloadType string) {
-			envAsset, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
+		It("must have names that appear in env asset", func() {
 			envAssetInference, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-			reqPayload := randomWorkloadCreationRequest(randoms, getEnvAssetIdByType(workloadType, &envAsset, &envAssetInference))
+			reqPayload := randomWorkloadCreationRequest(randoms, envAssetInference.Meta.Id)
 
 			reqPayload.SpecificEnv = &api.SpecificRunParams{
 				Command: convutils.Ref("echo"),
@@ -407,7 +411,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				},
 			}
 
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerForAdmin(randoms)
 
@@ -415,11 +419,11 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			router.ServeHTTP(createHttpResp, createHttpReq)
 			Expect(createHttpResp.Code).To(Equal(http.StatusBadRequest))
 			Expect(createHttpResp.Body.String()).To(ContainSubstring("connection named 'not_to_be_found' is not defined in the environment"))
-		}, forWorkspaces, forTrainings, forInference)
+		})
 	})
 
 	Context("specific env connections", func() {
-		DescribeTable("private connection - tensorflow (ok)", func(workloadType string) {
+		It("private connection - tensorflow (ok)", func() {
 			envAssetPayload := buildRandomTenantEnvironmentAsset(randoms)
 			envAssetPayload.Spec.Connections = []api.Connection{
 				{
@@ -437,7 +441,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				},
 			}
 
-			envAsset := createEnvironmentAssetAnyWorkloadType(workloadType, envAssetPayload, router, headerForAdmin(randoms))
+			envAsset := createEnvironmentAssetAnyWorkloadType(auth.WorkloadTypeInference, envAssetPayload, router, headerForAdmin(randoms))
 			reqPayload := randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
 
 			reqPayload.SpecificEnv = &api.SpecificRunParams{
@@ -455,18 +459,18 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				},
 			}
 
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerForAdmin(randoms)
 
 			createHttpResp := httptest.NewRecorder()
 			router.ServeHTTP(createHttpResp, createHttpReq)
 			Expect(createHttpResp.Code).To(Equal(http.StatusOK), createHttpResp.Body.String())
-		}, forWorkspaces, forTrainings, forInference)
+		})
 	})
 
 	Context("specific env connections", func() {
-		DescribeTable("private connection - jupyter (ok)", func(workloadType string) {
+		It("private connection - jupyter (ok)", func() {
 			envAssetPayload := buildRandomTenantEnvironmentAsset(randoms)
 			envAssetPayload.Spec.Connections = []api.Connection{
 				{
@@ -484,7 +488,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				},
 			}
 
-			envAsset := createEnvironmentAssetAnyWorkloadType(workloadType, envAssetPayload, router, headerForAdmin(randoms))
+			envAsset := createEnvironmentAssetAnyWorkloadType(auth.WorkloadTypeInference, envAssetPayload, router, headerForAdmin(randoms))
 			reqPayload := randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
 
 			reqPayload.SpecificEnv = &api.SpecificRunParams{
@@ -502,18 +506,18 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				},
 			}
 
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerForAdmin(randoms)
 
 			createHttpResp := httptest.NewRecorder()
 			router.ServeHTTP(createHttpResp, createHttpReq)
 			Expect(createHttpResp.Code).To(Equal(http.StatusOK), createHttpResp.Body.String())
-		}, forWorkspaces, forTrainings, forInference)
+		})
 	})
 
 	Context("specific env connections", func() {
-		DescribeTable("private connection - jupyter - non url", func(workloadType string) {
+		It("private connection - jupyter - non url", func() {
 			envAssetPayload := buildRandomTenantEnvironmentAsset(randoms)
 			envAssetPayload.Spec.Connections = []api.Connection{
 				{
@@ -530,7 +534,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				},
 			}
 
-			envAsset := createEnvironmentAssetAnyWorkloadType(workloadType, envAssetPayload, router, headerForAdmin(randoms))
+			envAsset := createEnvironmentAssetAnyWorkloadType(auth.WorkloadTypeInference, envAssetPayload, router, headerForAdmin(randoms))
 			reqPayload := randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
 
 			reqPayload.SpecificEnv = &api.SpecificRunParams{
@@ -547,19 +551,19 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				},
 			}
 
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerForAdmin(randoms)
 
 			createHttpResp := httptest.NewRecorder()
 			router.ServeHTTP(createHttpResp, createHttpReq)
 			Expect(createHttpResp.Code).To(Equal(http.StatusBadRequest))
-		}, forWorkspaces, forTrainings, forInference)
+		})
 	})
 
 	Context("specific env autoscaling", func() {
-		DescribeTable("must be nil for non-inference workloads", func(workloadType string) {
-			envAsset := createEnvironmentAssetAnyWorkloadType(workloadType, buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
+		It("must be not nil value for inference workloads that was created with value", func() {
+			envAsset := createEnvironmentAssetAnyWorkloadType(auth.WorkloadTypeInference, buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
 			reqPayload := randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
 
 			reqPayload.SpecificEnv = &api.SpecificRunParams{
@@ -571,32 +575,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				},
 			}
 
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
-			Expect(err).To(BeNil())
-			createHttpReq.Header = *headerForAdmin(randoms)
-
-			createHttpResp := httptest.NewRecorder()
-			router.ServeHTTP(createHttpResp, createHttpReq)
-			Expect(createHttpResp.Code).To(Equal(http.StatusBadRequest))
-			Expect(createHttpResp.Body.String()).To(ContainSubstring("it is not permitted to specify autoScaling values for workload type other than Inference"))
-		}, forWorkspaces, forTrainings)
-	})
-
-	Context("specific env autoscaling", func() {
-		DescribeTable("must be not nil value for inference workloads that was created with value", func(workloadType string) {
-			envAsset := createEnvironmentAssetAnyWorkloadType(workloadType, buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-			reqPayload := randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
-
-			reqPayload.SpecificEnv = &api.SpecificRunParams{
-				Command: convutils.Ref("echo"),
-				Args:    convutils.Ref("123"),
-				AutoScaling: &api.SpecificRunAutoScalingAutoScaling{
-					MinReplicas: convutils.Ref(int32(1)),
-					MaxReplicas: convutils.Ref(int32(1)),
-				},
-			}
-
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerForAdmin(randoms)
 
@@ -612,7 +591,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			///////////////////////////////////////////////////////////////////////////////////////
 			// get the inference content
 			///////////////////////////////////////////////////////////////////////////////////////
-			getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", urlForCreatingWorkload[workloadType], inferenceId), nil)
+			getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", urlInference, inferenceId), nil)
 			Expect(err).To(BeNil())
 			getHttpReq.Header = *headerForAdmin(randoms)
 
@@ -624,43 +603,31 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			jsonErr = json.Unmarshal(getHttpResp.Body.Bytes(), &actualInference)
 			Expect(jsonErr).To(BeNil())
 			Expect(actualInference.Spec.SpecificEnv.AutoScaling).To(Equal(reqPayload.SpecificEnv.AutoScaling))
-		}, forInference)
+		})
 	})
 
 	Context("valid create request", func() {
-		DescribeTable("should succeed with status ok", func(workloadType string) {
+		It("should succeed with status ok", func() {
 			///////////////////////////////////////////////////////////////////////////////////////
-			//  Part 1: create the workspace
+			//  Part 1: create the inference
 			//          assets are taken from all valid scopes: system, tenant, dept, project
 			///////////////////////////////////////////////////////////////////////////////////////
-			environmentAsset := createEnvironmentAssetAnyWorkloadType(workloadType, buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
+			environmentAsset := createEnvironmentAssetAnyWorkloadType(auth.WorkloadTypeInference, buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
 			computeAsset, _, _ := createComputeAsset(buildRandomDepartmentCompute(randoms), router, headerForAdmin(randoms))
 
-			pvc1CreReq := testing.BuildRandomProjectPVCAsset(randoms)
 			pvc2CreReq := testing.BuildRandomProjectPVCAsset(randoms)
 			pvc2CreReq.Spec.ExistingPvc = convutils.Ref(true)
 			pvc2CreReq.Spec.ClaimInfo = nil
 			passwordCreReq := buildRandomProjectPassword(randoms)
-			accessKeyCreReq := buildRandomProjectAccessKey(randoms)
 
 			k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient().
 				WithPassword(randoms.ClusterId, &passwordCreReq, nil).
-				WithAccessKey(randoms.ClusterId, &accessKeyCreReq, nil).
 				WithPvc(randoms.ClusterId, &pvc2CreReq, nil))
 
-			pvcAsset, _, _ := createPVCAsset(pvc1CreReq, router, headerForAdmin(randoms))
 			pvcAssetInference, _, _ := createPVCAsset(pvc2CreReq, router, headerForAdmin(randoms))
-			k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient().
-				WithPassword(randoms.ClusterId, &passwordCreReq, nil).
-				WithAccessKey(randoms.ClusterId, &accessKeyCreReq, nil).
-				WithPvc(randoms.ClusterId, &pvc1CreReq, nil).
-				WithPvc(randoms.ClusterId, &pvc2CreReq, nil))
 
 			passwordAsset, _, _ := createPassword(&randoms.ClusterId, passwordCreReq, router, headerForAdmin(randoms))
 			gitAsset, _, _ := createGitAsset(buildRandomProjectGit(randoms, &passwordAsset.Meta.Id), router, headerForAdmin(randoms))
-
-			accessKeyAsset, _, _ := createAccessKey(&randoms.ClusterId, accessKeyCreReq, router, headerForAdmin(randoms))
-			s3Asset, _, _ := createS3Asset(buildRandomProjectS3(randoms, &accessKeyAsset.Meta.Id), router, headerForAdmin(randoms))
 
 			checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
 				WithCluster(randoms.ClusterId, testing.BuildDisplayedCluster(randoms, testing.UnitTestDefaultClusterVersion, false)))
@@ -668,10 +635,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			reqPayload := randomWorkloadCreationRequest(randoms, environmentAsset.Meta.Id)
 			reqPayload.Assets.Environment = environmentAsset.Meta.Id
 
-			pvcAssetMeta := pvcAsset.Meta
-			if workloadType == auth.WorkloadTypeInference {
-				pvcAssetMeta = pvcAssetInference.Meta
-			}
+			pvcAssetMeta := pvcAssetInference.Meta
 			reqPayload.Assets.Datasources = []api.AssetIdAndKind{
 				{
 					Kind: api.ASSETKIND_GIT,
@@ -683,31 +647,6 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				},
 			}
 
-			// s3 is not supported in inference
-			if workloadType != auth.WorkloadTypeInference {
-				reqPayload.Assets.Datasources = append(reqPayload.Assets.Datasources, api.AssetIdAndKind{
-					Kind: api.ASSETKIND_S3,
-					Id:   s3Asset.Meta.Id,
-				})
-			}
-
-			if workloadType == auth.WorkloadTypeDistributed {
-				reqPayload.Distributed = &api.Distributed{
-					NumWorkers:    1,
-					DistFramework: convutils.Ref(api.DISTRIBUTEDFRAMEWORK_MPI),
-					Master: &api.DistMaster{
-						Assets: api.AssetsIds{
-							Environment: environmentAsset.Meta.Id,
-							Datasources: []api.AssetIdAndKind{
-								{
-									Kind: api.ASSETKIND_S3,
-									Id:   s3Asset.Meta.Id,
-								},
-							},
-						},
-					},
-				}
-			}
 			sort.Slice(reqPayload.Assets.Datasources, func(i, j int) bool {
 				return reqPayload.Assets.Datasources[i].Id < reqPayload.Assets.Datasources[j].Id
 			})
@@ -717,7 +656,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				Args:    convutils.Ref("123"),
 			}
 
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerForAdmin(randoms)
 
@@ -725,18 +664,16 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			router.ServeHTTP(createHttpResp, createHttpReq)
 			Expect(createHttpResp.Code).To(Equal(http.StatusOK), createHttpResp.Body.String())
 
-			var workspace api.Workspace
-			jsonErr := json.Unmarshal(createHttpResp.Body.Bytes(), &workspace)
+			var inference api.Inference
+			jsonErr := json.Unmarshal(createHttpResp.Body.Bytes(), &inference)
 			Expect(jsonErr).To(BeNil())
-			workspaceId := workspace.Meta.Id
+			inferenceId := inference.Meta.Id
 
 			///////////////////////////////////////////////////////////////////////////////////////
-			//  Part 3: get the workspace content -> V2 APIs
+			//  Part 3: get the inference content -> V2 APIs
 			///////////////////////////////////////////////////////////////////////////////////////
-			urlGetV1 := urlForCreatingWorkload[workloadType]
-			urlGetV2 := urlV1toV2[urlGetV1]
 
-			getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", urlGetV2, workspaceId), nil)
+			getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", urlInferenceV2, inferenceId), nil)
 			Expect(err).To(BeNil())
 			getHttpReq.Header = *headerForAdmin(randoms)
 
@@ -744,15 +681,15 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			router.ServeHTTP(getHttpResp, getHttpReq)
 			Expect(getHttpResp.Code).To(Equal(http.StatusOK))
 
-			var actualWorkloadV2 api.TrainingV2
+			var actualWorkloadV2 api.InferenceV2
 			jsonErr = json.Unmarshal(getHttpResp.Body.Bytes(), &actualWorkloadV2)
 			Expect(jsonErr).To(BeNil())
 
-			expectedWorkloadV2 := api.TrainingV2{
+			expectedWorkloadV2 := api.InferenceV2{
 				Meta: api.WorkloadMeta{
 					Name:          reqPayload.Name,
 					RequestedName: reqPayload.Name,
-					WorkloadId:    workspaceId,
+					WorkloadId:    inferenceId,
 					ClusterId:     randoms.ClusterId,
 					ProjectId:     fmt.Sprintf("%d", randoms.ProjectId),
 					CreatedBy:     actualWorkloadV2.Meta.CreatedBy,
@@ -775,521 +712,34 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			}
 
 			var convErr *api.Error
-			expectedWorkloadV2.SpecificRunParams, convErr = genericToTrainingRunParams(reqPayload.SpecificEnv)
+			expectedWorkloadV2.SpecificRunParams, convErr = genericToInferenceRunParams(reqPayload.SpecificEnv)
 			Expect(convErr).To(BeNil())
 
-			// s3 is not supported in inference
-			if workloadType != auth.WorkloadTypeInference {
-				expectedWorkloadV2.Assets.Datasources = append(expectedWorkloadV2.Assets.Datasources, metaToDatasourceRef(s3Asset.Meta))
-			}
-
-			if workloadType == auth.WorkloadTypeDistributed {
-				expectedWorkloadV2.Distributed = &api.DistributedData{
-					NumWorkers: 1,
-					Framework:  convutils.Ref(api.DISTRIBUTEDFRAMEWORK_MPI),
-					Master: &api.DistributedMasterData{
-						Assets: &api.AssetsRefOptional{
-							Environment: api.EnvironmentAssetRef{
-								Id:   environmentAsset.Meta.Id,
-								Name: environmentAsset.Meta.Name,
-							},
-							Datasources: []api.DatasourceRef{
-								metaToDatasourceRef(s3Asset.Meta),
-							},
-						},
-					},
-				}
-			}
 			sort.Slice(expectedWorkloadV2.Assets.Datasources, func(i, j int) bool {
 				return expectedWorkloadV2.Assets.Datasources[i].Id < expectedWorkloadV2.Assets.Datasources[j].Id
 			})
 			Expect(actualWorkloadV2).To(Equal(expectedWorkloadV2))
-		}, forWorkspaces, forTrainings, forInference, forDistributed)
-	})
-
-	Context("Distributed create request", func() {
-		DescribeTable("valid request", func(workloadType string) {
-			if workloadType != auth.WorkloadTypeDistributed {
-				return
-			}
-
-			environmentAsset, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-			computeAsset, _, _ := createComputeAsset(buildRandomDepartmentCompute(randoms), router, headerForAdmin(randoms))
-
-			passwordCreReq := buildRandomProjectPassword(randoms)
-			accessKeyCreReq := buildRandomProjectAccessKey(randoms)
-
-			k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient().
-				WithPassword(randoms.ClusterId, &passwordCreReq, nil).
-				WithAccessKey(randoms.ClusterId, &accessKeyCreReq, nil))
-
-			passwordAsset, _, _ := createPassword(&randoms.ClusterId, passwordCreReq, router, headerForAdmin(randoms))
-			gitAsset, _, _ := createGitAsset(buildRandomProjectGit(randoms, &passwordAsset.Meta.Id), router, headerForAdmin(randoms))
-
-			accessKeyAsset, _, _ := createAccessKey(&randoms.ClusterId, accessKeyCreReq, router, headerForAdmin(randoms))
-			s3Asset, _, _ := createS3Asset(buildRandomProjectS3(randoms, &accessKeyAsset.Meta.Id), router, headerForAdmin(randoms))
-
-			reqPayload := randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
-			reqPayload.Assets.Environment = environmentAsset.Meta.Id
-			reqPayload.Assets.Datasources = []api.AssetIdAndKind{
-				{
-					Kind: api.ASSETKIND_GIT,
-					Id:   gitAsset.Meta.Id,
-				},
-				{
-					Kind: api.ASSETKIND_S3,
-					Id:   s3Asset.Meta.Id,
-				},
-			}
-			reqPayload.Distributed = &api.Distributed{
-				NumWorkers:    2,
-				DistFramework: convutils.Ref(api.DISTRIBUTEDFRAMEWORK_MPI),
-				Master: &api.DistMaster{
-					Assets: api.AssetsIds{
-						Environment: environmentAsset.Meta.Id,
-						Datasources: []api.AssetIdAndKind{
-							{
-								Kind: api.ASSETKIND_S3,
-								Id:   s3Asset.Meta.Id,
-							},
-						},
-						Compute: &computeAsset.Meta.Id,
-					},
-				},
-			}
-			sort.Slice(reqPayload.Assets.Datasources, func(i, j int) bool {
-				return reqPayload.Assets.Datasources[i].Id < reqPayload.Assets.Datasources[j].Id
-			})
-			reqPayload.Assets.Compute = convutils.Ref(computeAsset.Meta.Id)
-			reqPayload.SpecificEnv = &api.SpecificRunParams{
-				Command: convutils.Ref("echo"),
-				Args:    convutils.Ref("123"),
-			}
-
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
-			Expect(err).To(BeNil())
-			createHttpReq.Header = *headerForNonAdmin(randoms)
-
-			createHttpResp := httptest.NewRecorder()
-			router.ServeHTTP(createHttpResp, createHttpReq)
-			Expect(createHttpResp.Code).To(Equal(http.StatusOK), createHttpResp.Body.String())
-
-			var workspace api.Workspace
-			jsonErr := json.Unmarshal(createHttpResp.Body.Bytes(), &workspace)
-			Expect(jsonErr).To(BeNil())
-			workspaceId := workspace.Meta.Id
-
-			///////////////////////////////////////////////////////////////////////////////////////
-			//  Part 2: get the workspace content (V2)
-			///////////////////////////////////////////////////////////////////////////////////////
-			urlGetV1 := urlForCreatingWorkload[workloadType]
-			urlGetV2 := urlV1toV2[urlGetV1]
-
-			getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", urlGetV2, workspaceId), nil)
-			Expect(err).To(BeNil())
-			getHttpReq.Header = *headerForNonAdmin(randoms)
-
-			getHttpResp := httptest.NewRecorder()
-			router.ServeHTTP(getHttpResp, getHttpReq)
-			Expect(getHttpResp.Code).To(Equal(http.StatusOK))
-
-			var actualTraining api.TrainingV2
-			jsonErr = json.Unmarshal(getHttpResp.Body.Bytes(), &actualTraining)
-			Expect(jsonErr).To(BeNil())
-
-			currentTime := time.Now()
-			actualTraining.Meta.CreatedAt = currentTime
-
-			expectedTraining := api.TrainingV2{
-				Meta: api.WorkloadMeta{
-					WorkloadId:    workspaceId,
-					ClusterId:     randoms.ClusterId,
-					ProjectId:     strconv.Itoa(int(randoms.ProjectId)),
-					Name:          reqPayload.Name,
-					RequestedName: reqPayload.Name,
-					CreatedBy:     actualTraining.Meta.CreatedBy,
-					CreatedAt:     currentTime,
-				},
-				SpecificRunParams: &api.TrainingSpecificRunParams{
-					Command: convutils.Ref("echo"),
-					Args:    convutils.Ref("123"),
-				},
-				Assets: api.AssetsRef{
-					Environment: api.EnvironmentAssetRef{
-						Id:   environmentAsset.Meta.Id,
-						Name: environmentAsset.Meta.Name,
-					},
-					Compute: &api.AssetsRefCompute{
-						Id:   computeAsset.Meta.Id,
-						Name: computeAsset.Meta.Name,
-					},
-					Datasources: []api.DatasourceRef{
-						metaToDatasourceRef(gitAsset.Meta),
-						metaToDatasourceRef(s3Asset.Meta),
-					},
-				},
-				Distributed: &api.DistributedData{
-					NumWorkers: 2,
-					Framework:  convutils.Ref(api.DISTRIBUTEDFRAMEWORK_MPI),
-					Master: &api.DistributedMasterData{
-						Assets: &api.AssetsRefOptional{
-							Environment: api.EnvironmentAssetRef{
-								Id:   environmentAsset.Meta.Id,
-								Name: environmentAsset.Meta.Name,
-							},
-							Datasources: []api.DatasourceRef{
-								metaToDatasourceRef(s3Asset.Meta),
-							},
-							Compute: &api.AssetsRefCompute{
-								Id:   computeAsset.Meta.Id,
-								Name: computeAsset.Meta.Name,
-							},
-						},
-					},
-				},
-			}
-
-			sort.Slice(expectedTraining.Assets.Datasources, func(i, j int) bool {
-				return expectedTraining.Assets.Datasources[i].Id < expectedTraining.Assets.Datasources[j].Id
-			})
-
-			testutils.Expect(actualTraining).ToEqual(expectedTraining)
-		}, forDistributed)
-
-		DescribeTable("valid request with master==nil when NoMaster=True", func(workloadType string) {
-			if workloadType != auth.WorkloadTypeDistributed {
-				return
-			}
-
-			environmentAsset, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-			computeAsset, _, _ := createComputeAsset(buildRandomDepartmentCompute(randoms), router, headerForAdmin(randoms))
-
-			passwordCreReq := buildRandomProjectPassword(randoms)
-			accessKeyCreReq := buildRandomProjectAccessKey(randoms)
-
-			k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient().
-				WithPassword(randoms.ClusterId, &passwordCreReq, nil).
-				WithAccessKey(randoms.ClusterId, &accessKeyCreReq, nil))
-
-			passwordAsset, _, _ := createPassword(&randoms.ClusterId, passwordCreReq, router, headerForAdmin(randoms))
-			gitAsset, _, _ := createGitAsset(buildRandomProjectGit(randoms, &passwordAsset.Meta.Id), router, headerForAdmin(randoms))
-
-			accessKeyAsset, _, _ := createAccessKey(&randoms.ClusterId, accessKeyCreReq, router, headerForAdmin(randoms))
-			s3Asset, _, _ := createS3Asset(buildRandomProjectS3(randoms, &accessKeyAsset.Meta.Id), router, headerForAdmin(randoms))
-
-			checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
-				WithCluster(randoms.ClusterId, testing.BuildDisplayedCluster(randoms, testing.UnitTestDefaultClusterVersion, false)))
-
-			reqPayload := randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
-			reqPayload.Assets.Environment = environmentAsset.Meta.Id
-			reqPayload.Assets.Datasources = []api.AssetIdAndKind{
-				{
-					Kind: api.ASSETKIND_GIT,
-					Id:   gitAsset.Meta.Id,
-				},
-				{
-					Kind: api.ASSETKIND_S3,
-					Id:   s3Asset.Meta.Id,
-				},
-			}
-			reqPayload.Distributed = &api.Distributed{
-				NumWorkers:    1,
-				DistFramework: convutils.Ref(api.DISTRIBUTEDFRAMEWORK_PY_TORCH),
-				NoMaster:      convutils.Ref(true),
-			}
-			sort.Slice(reqPayload.Assets.Datasources, func(i, j int) bool {
-				return reqPayload.Assets.Datasources[i].Id < reqPayload.Assets.Datasources[j].Id
-			})
-			reqPayload.Assets.Compute = convutils.Ref(computeAsset.Meta.Id)
-			reqPayload.SpecificEnv = &api.SpecificRunParams{
-				Command: convutils.Ref("echo"),
-				Args:    convutils.Ref("123"),
-			}
-
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
-			Expect(err).To(BeNil())
-			createHttpReq.Header = *headerForNonAdmin(randoms)
-
-			createHttpResp := httptest.NewRecorder()
-			router.ServeHTTP(createHttpResp, createHttpReq)
-			Expect(createHttpResp.Code).To(Equal(http.StatusOK), createHttpResp.Body.String())
-
-			var workspace api.Workspace
-			jsonErr := json.Unmarshal(createHttpResp.Body.Bytes(), &workspace)
-			Expect(jsonErr).To(BeNil())
-			workspaceId := workspace.Meta.Id
-
-			///////////////////////////////////////////////////////////////////////////////////////
-			//  Part 2: get the workspace content (v2)
-			///////////////////////////////////////////////////////////////////////////////////////
-			urlGetV1 := urlForCreatingWorkload[workloadType]
-			urlGetV2 := urlV1toV2[urlGetV1]
-
-			getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", urlGetV2, workspaceId), nil)
-			Expect(err).To(BeNil())
-			getHttpReq.Header = *headerForNonAdmin(randoms)
-
-			getHttpResp := httptest.NewRecorder()
-			router.ServeHTTP(getHttpResp, getHttpReq)
-			Expect(getHttpResp.Code).To(Equal(http.StatusOK))
-
-			var actualWorkload api.TrainingV2
-			jsonErr = json.Unmarshal(getHttpResp.Body.Bytes(), &actualWorkload)
-			Expect(jsonErr).To(BeNil())
-
-			currentTime := time.Now()
-			actualWorkload.Meta.CreatedAt = currentTime
-
-			expectedWorkload := api.TrainingV2{
-				Meta: api.WorkloadMeta{
-					WorkloadId:    workspaceId,
-					ClusterId:     randoms.ClusterId,
-					ProjectId:     strconv.Itoa(int(randoms.ProjectId)),
-					Name:          reqPayload.Name,
-					RequestedName: reqPayload.Name,
-					CreatedBy:     actualWorkload.Meta.CreatedBy,
-					CreatedAt:     currentTime,
-				},
-				SpecificRunParams: &api.TrainingSpecificRunParams{
-					Command: actualWorkload.SpecificRunParams.Command,
-					Args:    actualWorkload.SpecificRunParams.Args,
-				},
-				Assets: api.AssetsRef{
-					Environment: api.EnvironmentAssetRef{
-						Id:   environmentAsset.Meta.Id,
-						Name: environmentAsset.Meta.Name,
-					},
-					Compute: &api.AssetsRefCompute{
-						Id:   computeAsset.Meta.Id,
-						Name: computeAsset.Meta.Name,
-					},
-					Datasources: []api.DatasourceRef{
-						metaToDatasourceRef(gitAsset.Meta),
-						metaToDatasourceRef(s3Asset.Meta),
-					},
-				},
-				Distributed: &api.DistributedData{
-					NumWorkers: 1,
-					Framework:  convutils.Ref(api.DISTRIBUTEDFRAMEWORK_PY_TORCH),
-				},
-			}
-
-			sort.Slice(expectedWorkload.Assets.Datasources, func(i, j int) bool {
-				return expectedWorkload.Assets.Datasources[i].Id < expectedWorkload.Assets.Datasources[j].Id
-			})
-			testutils.Expect(actualWorkload).ToEqual(expectedWorkload)
-		}, forDistributed)
-
-		DescribeTable("should fail with master!=nil when NoMaster=True", func(workloadType string) {
-			if workloadType != auth.WorkloadTypeDistributed {
-				return
-			}
-
-			environmentAsset, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-			computeAsset, _, _ := createComputeAsset(buildRandomDepartmentCompute(randoms), router, headerForAdmin(randoms))
-
-			reqPayload := randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
-			reqPayload.Assets.Environment = environmentAsset.Meta.Id
-			reqPayload.Distributed = &api.Distributed{
-				NumWorkers:    2,
-				NoMaster:      convutils.Ref(true),
-				DistFramework: convutils.Ref(api.DISTRIBUTEDFRAMEWORK_MPI),
-				Master: &api.DistMaster{
-					Assets: api.AssetsIds{
-						Environment: environmentAsset.Meta.Id,
-						Compute:     &computeAsset.Meta.Id,
-					},
-				},
-			}
-			sort.Slice(reqPayload.Assets.Datasources, func(i, j int) bool {
-				return reqPayload.Assets.Datasources[i].Id < reqPayload.Assets.Datasources[j].Id
-			})
-			reqPayload.Assets.Compute = convutils.Ref(computeAsset.Meta.Id)
-			reqPayload.SpecificEnv = &api.SpecificRunParams{
-				Command: convutils.Ref("echo"),
-				Args:    convutils.Ref("123"),
-			}
-
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
-			Expect(err).To(BeNil())
-			createHttpReq.Header = *headerForNonAdmin(randoms)
-
-			createHttpResp := httptest.NewRecorder()
-			router.ServeHTTP(createHttpResp, createHttpReq)
-			Expect(createHttpResp.Code).To(Equal(http.StatusBadRequest))
-			Expect(createHttpResp.Body.String()).To(ContainSubstring("NoMaster is not available for the chosen framework"))
-		}, forDistributed)
-
-		DescribeTable("valid request when Master==nil will use worker spec", func(workloadType string) {
-			if workloadType != auth.WorkloadTypeDistributed {
-				return
-			}
-
-			environmentAsset, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-			computeAsset, _, _ := createComputeAsset(buildRandomDepartmentCompute(randoms), router, headerForAdmin(randoms))
-
-			passwordCreReq := buildRandomProjectPassword(randoms)
-			accessKeyCreReq := buildRandomProjectAccessKey(randoms)
-
-			k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient().
-				WithAccessKey(randoms.ClusterId, &accessKeyCreReq, nil).
-				WithPassword(randoms.ClusterId, &passwordCreReq, nil))
-
-			passwordAsset, _, _ := createPassword(&randoms.ClusterId, passwordCreReq, router, headerForAdmin(randoms))
-			gitAsset, _, _ := createGitAsset(buildRandomProjectGit(randoms, &passwordAsset.Meta.Id), router, headerForAdmin(randoms))
-
-			accessKeyAsset, _, _ := createAccessKey(&randoms.ClusterId, accessKeyCreReq, router, headerForAdmin(randoms))
-			s3Asset, _, _ := createS3Asset(buildRandomProjectS3(randoms, &accessKeyAsset.Meta.Id), router, headerForAdmin(randoms))
-
-			checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
-				WithCluster(randoms.ClusterId, testing.BuildDisplayedCluster(randoms, testing.UnitTestDefaultClusterVersion, false)))
-
-			reqPayload := randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
-			reqPayload.Assets.Environment = environmentAsset.Meta.Id
-			reqPayload.Assets.Datasources = []api.AssetIdAndKind{
-				{
-					Kind: api.ASSETKIND_GIT,
-					Id:   gitAsset.Meta.Id,
-				},
-				{
-					Kind: api.ASSETKIND_S3,
-					Id:   s3Asset.Meta.Id,
-				},
-			}
-			reqPayload.Distributed = &api.Distributed{
-				NumWorkers:    2,
-				DistFramework: convutils.Ref(api.DISTRIBUTEDFRAMEWORK_MPI),
-				Master: &api.DistMaster{
-					Assets: api.AssetsIds{
-						Environment: environmentAsset.Meta.Id,
-						Datasources: []api.AssetIdAndKind{
-							{
-								Kind: api.ASSETKIND_S3,
-								Id:   s3Asset.Meta.Id,
-							},
-						},
-						Compute: &computeAsset.Meta.Id,
-					},
-				},
-			}
-			sort.Slice(reqPayload.Assets.Datasources, func(i, j int) bool {
-				return reqPayload.Assets.Datasources[i].Id < reqPayload.Assets.Datasources[j].Id
-			})
-			reqPayload.Assets.Compute = convutils.Ref(computeAsset.Meta.Id)
-			reqPayload.SpecificEnv = &api.SpecificRunParams{
-				Command: convutils.Ref("echo"),
-				Args:    convutils.Ref("123"),
-			}
-
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
-			Expect(err).To(BeNil())
-			createHttpReq.Header = *headerForNonAdmin(randoms)
-
-			createHttpResp := httptest.NewRecorder()
-			router.ServeHTTP(createHttpResp, createHttpReq)
-			Expect(createHttpResp.Code).To(Equal(http.StatusOK), createHttpResp.Body.String())
-
-			var workspace api.Workspace
-			jsonErr := json.Unmarshal(createHttpResp.Body.Bytes(), &workspace)
-			Expect(jsonErr).To(BeNil())
-			workspaceId := workspace.Meta.Id
-
-			///////////////////////////////////////////////////////////////////////////////////////
-			//  Part 2: get the workspace content (V2)
-			///////////////////////////////////////////////////////////////////////////////////////
-			urlGetV1 := urlForCreatingWorkload[workloadType]
-			urlGetV2 := urlV1toV2[urlGetV1]
-
-			getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", urlGetV2, workspaceId), nil)
-			Expect(err).To(BeNil())
-			getHttpReq.Header = *headerForNonAdmin(randoms)
-
-			getHttpResp := httptest.NewRecorder()
-			router.ServeHTTP(getHttpResp, getHttpReq)
-			Expect(getHttpResp.Code).To(Equal(http.StatusOK))
-
-			var actualTraining api.TrainingV2
-			jsonErr = json.Unmarshal(getHttpResp.Body.Bytes(), &actualTraining)
-			Expect(jsonErr).To(BeNil())
-
-			currentTime := time.Now()
-			actualTraining.Meta.CreatedAt = currentTime
-
-			expectedWorkload := api.TrainingV2{
-				Meta: api.WorkloadMeta{
-					WorkloadId:    workspaceId,
-					ClusterId:     randoms.ClusterId,
-					ProjectId:     strconv.Itoa(int(randoms.ProjectId)),
-					Name:          reqPayload.Name,
-					RequestedName: reqPayload.Name,
-					CreatedBy:     actualTraining.Meta.CreatedBy,
-					CreatedAt:     currentTime,
-				},
-				SpecificRunParams: &api.TrainingSpecificRunParams{
-					Command: reqPayload.SpecificEnv.Command,
-					Args:    reqPayload.SpecificEnv.Args,
-				},
-				Assets: api.AssetsRef{
-					Environment: api.EnvironmentAssetRef{
-						Id:   environmentAsset.Meta.Id,
-						Name: environmentAsset.Meta.Name,
-					},
-					Compute: &api.AssetsRefCompute{
-						Id:   computeAsset.Meta.Id,
-						Name: computeAsset.Meta.Name,
-					},
-					Datasources: []api.DatasourceRef{
-						metaToDatasourceRef(gitAsset.Meta),
-						metaToDatasourceRef(s3Asset.Meta),
-					},
-				},
-				Distributed: &api.DistributedData{
-					NumWorkers: 2,
-					Framework:  convutils.Ref(api.DISTRIBUTEDFRAMEWORK_MPI),
-					Master: &api.DistributedMasterData{
-						Assets: &api.AssetsRefOptional{
-							Environment: api.EnvironmentAssetRef{
-								Id:   environmentAsset.Meta.Id,
-								Name: environmentAsset.Meta.Name,
-							},
-							Datasources: []api.DatasourceRef{
-								metaToDatasourceRef(s3Asset.Meta),
-							},
-							Compute: &api.AssetsRefCompute{
-								Id:   computeAsset.Meta.Id,
-								Name: computeAsset.Meta.Name,
-							},
-						},
-					},
-				},
-			}
-
-			sort.Slice(expectedWorkload.Assets.Datasources, func(i, j int) bool {
-				return expectedWorkload.Assets.Datasources[i].Id < expectedWorkload.Assets.Datasources[j].Id
-			})
-
-			testutils.Expect(actualTraining).ToEqual(expectedWorkload)
-		}, forDistributed)
+		})
 	})
 
 	Context("get non existent workload", func() {
-		DescribeTable("should fail with not found error", func(workloadType string) {
-			getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", urlForCreatingWorkload[workloadType], notExist), nil)
+		It("should fail with not found error", func() {
+			getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", urlInference, notExist), nil)
 			Expect(err).To(BeNil())
 			getHttpReq.Header = *headerForAdmin(randoms)
 
 			getHttpResp := httptest.NewRecorder()
 			router.ServeHTTP(getHttpResp, getHttpReq)
 			Expect(getHttpResp.Code).To(Equal(http.StatusNotFound))
-		}, forWorkspaces, forTrainings, forInference)
+		})
 	})
 
 	Context("create workload in project the researcher has no access", func() {
-		DescribeTable("should fail with not found error", func(workloadType string) {
-			environmentAsset := createEnvironmentAssetAnyWorkloadType(workloadType, buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
+		It("should fail with not found error", func() {
+			environmentAsset := createEnvironmentAssetAnyWorkloadType(auth.WorkloadTypeInference, buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
 			reqPayload := randomWorkloadCreationRequest(randoms, environmentAsset.Meta.Id)
 
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerForAdmin(randoms)
 
@@ -1297,18 +747,18 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			router.ServeHTTP(createHttpResp, createHttpReq)
 			Expect(createHttpResp.Code).To(Equal(http.StatusOK), createHttpResp.Body.String())
 
-			getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", urlForCreatingWorkload[workloadType], notExist), nil)
+			getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", urlInference, notExist), nil)
 			Expect(err).To(BeNil())
 			getHttpReq.Header = *headerForAdmin(randoms)
 
 			getHttpResp := httptest.NewRecorder()
 			router.ServeHTTP(getHttpResp, getHttpReq)
 			Expect(getHttpResp.Code).To(Equal(http.StatusNotFound))
-		}, forWorkspaces, forTrainings, forInference)
+		})
 	})
 
 	Context("multiple environment variables in specific env - assets", func() {
-		DescribeTable("should fail validation", func(workloadType string) {
+		It("should fail validation", func() {
 			reqPayload := randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
 			reqPayload.SpecificEnv = &api.SpecificRunParams{
 				EnvironmentVariables: &[]api.EnvironmentVariableOfAsset{
@@ -1318,7 +768,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				},
 			}
 
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerForAdmin(randoms)
 
@@ -1326,11 +776,11 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			router.ServeHTTP(createHttpResp, createHttpReq)
 			Expect(createHttpResp.Code).To(Equal(http.StatusBadRequest))
 			Expect(createHttpResp.Body.String()).To(ContainSubstring("duplicate variable name 'HOME'"))
-		}, forWorkspaces, forTrainings, forInference)
+		})
 	})
 
 	Context("uidGidSource VS runAsUid and runAsGid", func() {
-		DescribeTable("uigGid=from image -> uid should not be provided", func(workloadType string) {
+		It("uigGid=from image -> uid should not be provided", func() {
 			userFromContainer := buildRandomTenantEnvironmentAsset(randoms)
 			userFromContainer.Spec.UidGidSource = convutils.Ref(flat_workloads.UidGidFromTheImage)
 
@@ -1343,7 +793,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				RunAsUid: convutils.Ref(int64(0)),
 			}
 
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqCreationPayload))
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqCreationPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerForAdmin(randoms)
 
@@ -1351,9 +801,9 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			router.ServeHTTP(createHttpResp, createHttpReq)
 			Expect(createHttpResp.Code).To(Equal(http.StatusBadRequest))
 			Expect(createHttpResp.Body.String()).To(ContainSubstring("it is not permitted to override the runAsUid from the environment asset"))
-		}, forWorkspaces, forTrainings, forInference)
+		})
 
-		DescribeTable("uidGidSource = image -> gid should not be provided", func(workloadType string) {
+		It("uidGidSource = image -> gid should not be provided", func() {
 			userFromContainer := buildRandomTenantEnvironmentAsset(randoms)
 			userFromContainer.Spec.UidGidSource = convutils.Ref(flat_workloads.UidGidFromTheImage)
 
@@ -1364,7 +814,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				RunAsGid: convutils.Ref(int64(3)),
 			}
 
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqCreationPayload))
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqCreationPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerForAdmin(randoms)
 
@@ -1372,47 +822,15 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			router.ServeHTTP(createHttpResp, createHttpReq)
 			Expect(createHttpResp.Code).To(Equal(http.StatusBadRequest))
 			Expect(createHttpResp.Body.String()).To(ContainSubstring("it is not permitted to override the runAsGid from the environment asset"))
-		}, forWorkspaces, forTrainings, forInference)
+		})
 	})
 
 	Context("created workload -> response", func() {
-		DescribeTable("workload-composer should ignore serving port for non-inference workloads", func(workloadType string) {
-			envAssetb := buildRandomTenantEnvironmentAsset(randoms)
-			envAssetb.Spec.Connections = []api.Connection{
-				{
-					Name: "serving-port",
-					InternalToolInfo: &api.InternalToolInfo{
-						ToolType:       api.INTERNALTOOLTYPE_CUSTOM,
-						ConnectionType: api.INTERNALCONNECTIONTYPE_SERVING_PORT,
-						ContainerPort:  8080,
-						ServingPortInfo: &api.ServingPortInfo{
-							Protocol: convutils.Ref("http"),
-						},
-					},
-				},
-			}
-			envAsset := createEnvironmentAssetAnyWorkloadType(workloadType, envAssetb, router, headerForAdmin(randoms))
-
+		It("workload should contain the workload and cluster ID annotations", func() {
+			envAsset := createEnvironmentAssetAnyWorkloadType(auth.WorkloadTypeInference, buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
 			reqPayload := randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
 
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
-			Expect(err).To(BeNil())
-			createHttpReq.Header = *headerForAdmin(randoms)
-
-			createHttpResp := httptest.NewRecorder()
-			router.ServeHTTP(createHttpResp, createHttpReq)
-			Expect(createHttpResp.Code).To(Equal(http.StatusOK), createHttpResp.Body.String())
-			///
-			Expect(createHttpResp.Body.String()).NotTo(ContainSubstring("ServingPort"))
-		}, forWorkspaces, forTrainings)
-	})
-
-	Context("created workload -> response", func() {
-		DescribeTable("workload should contain the workspace/training and cluster id annotation", func(workloadType string) {
-			envAsset := createEnvironmentAssetAnyWorkloadType(workloadType, buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-			reqPayload := randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
-
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerForAdmin(randoms)
 
@@ -1439,18 +857,15 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			annotations := metadata["annotations"].(map[string]interface{})
 			Expect(annotations["clusterId"]).To(Equal(workload.Meta.ClusterId))
 			Expect(annotations["workloadId"]).To(Equal(workload.Meta.Id))
-			if workloadType == auth.WorkloadTypeWorkspace {
-				Expect(annotations["workspaceId"]).To(Equal(workload.Meta.Id))
-			}
-		}, forWorkspaces, forTrainings, forInference)
+		})
 	})
 
 	Context("created workload then delete by id", func() {
-		DescribeTable("should delete workload by id successfully", func(workloadType string) {
-			envAsset := createEnvironmentAssetAnyWorkloadType(workloadType, buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
+		It("should delete workload by id successfully", func() {
+			envAsset := createEnvironmentAssetAnyWorkloadType(auth.WorkloadTypeInference, buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
 			reqPayload := randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
 
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerForAdmin(randoms)
 
@@ -1477,20 +892,20 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 
 			// delete by id
 			reqPayload = randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
-			deleteHttpReq, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", urlForCreatingWorkload[workloadType], workloadId), makePayload(reqPayload))
+			deleteHttpReq, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", urlInference, workloadId), makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			deleteHttpReq.Header = *headerForAdmin(randoms)
 
 			deleteHttpResp := httptest.NewRecorder()
 			router.ServeHTTP(deleteHttpResp, deleteHttpReq)
 			Expect(deleteHttpResp.Code).To(Equal(http.StatusAccepted))
-		}, forInference)
+		})
 
-		DescribeTable("should delete fail when try to delete non-existing id", func(workloadType string) {
-			envAsset := createEnvironmentAssetAnyWorkloadType(workloadType, buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
+		It("should delete fail when try to delete non-existing id", func() {
+			envAsset := createEnvironmentAssetAnyWorkloadType(auth.WorkloadTypeInference, buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
 			reqPayload := randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
 
-			deleteHttpReq, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", urlForCreatingWorkload[workloadType], notExist), makePayload(reqPayload))
+			deleteHttpReq, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", urlInference, notExist), makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			deleteHttpReq.Header = *headerForAdmin(randoms)
 
@@ -1498,21 +913,21 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			router.ServeHTTP(deleteHttpResp, deleteHttpReq)
 			Expect(deleteHttpResp.Code).To(Equal(http.StatusNotFound))
 			Expect(deleteHttpResp.Body.String()).To(ContainSubstring("cannot find Inference"))
-		}, forInference)
+		})
 	})
 
 	Context("creating workload with assets -> updates assets UsageTimes", func() {
-		DescribeTable("by workload type", func(workloadType string) {
+		It("by workload type", func() {
 			///////////////////////////////////////////////////////////////////////////////////////
 			// STEP 1: Creating compute and environment assets
 
-			environmentAsset := createEnvironmentAssetAnyWorkloadType(workloadType, buildRandomProjectEnvironmentAsset(randoms), router, headerForAdmin(randoms))
+			environmentAsset := createEnvironmentAssetAnyWorkloadType(auth.WorkloadTypeInference, buildRandomProjectEnvironmentAsset(randoms), router, headerForAdmin(randoms))
 			computeAsset, _, _ := createComputeAsset(buildRandomProjectCompute(randoms), router, headerForAdmin(randoms))
 
 			///////////////////////////////////////////////////////////////////////////////////////
 			// STEP 2: Checking the list for the missing usage info (no workload is currently using these assets)
 
-			environmentsHttpReq, errEnvironmentList := http.NewRequest("GET", fmt.Sprintf("%s?projectId=%d&complyToProject=%d&complyToWorkloadType=%s&clusterId=%s", urlEnvironment, *environmentAsset.Meta.ProjectId, *environmentAsset.Meta.ProjectId, workloadType, *environmentAsset.Meta.ClusterId), nil)
+			environmentsHttpReq, errEnvironmentList := http.NewRequest("GET", fmt.Sprintf("%s?projectId=%d&complyToProject=%d&complyToWorkloadType=%s&clusterId=%s", urlEnvironment, *environmentAsset.Meta.ProjectId, *environmentAsset.Meta.ProjectId, auth.WorkloadTypeInference, *environmentAsset.Meta.ClusterId), nil)
 			Expect(errEnvironmentList).To(BeNil())
 
 			environmentList, envJsonErr := getEnvironmentsEntriesFromList(router, randoms, environmentsHttpReq)
@@ -1527,7 +942,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				}
 			}
 
-			computesHttpReq, errComputeList := http.NewRequest("GET", fmt.Sprintf("%s?projectId=%d&complyToProject=%d&complyToWorkloadType=%s&clusterId=%s", urlCompute, *computeAsset.Meta.ProjectId, *computeAsset.Meta.ProjectId, workloadType, *computeAsset.Meta.ClusterId), nil)
+			computesHttpReq, errComputeList := http.NewRequest("GET", fmt.Sprintf("%s?projectId=%d&complyToProject=%d&complyToWorkloadType=%s&clusterId=%s", urlCompute, *computeAsset.Meta.ProjectId, *computeAsset.Meta.ProjectId, auth.WorkloadTypeInference, *computeAsset.Meta.ClusterId), nil)
 			Expect(errComputeList).To(BeNil())
 
 			computeList, computeJsonErr := getComputesEntriesFromList(router, randoms, computesHttpReq)
@@ -1550,14 +965,14 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 
 			workloadPreCreationTimestamp := time.Now().UnixNano()
 
-			workloadCreateHttpResp := getWorkloadCreationResponse(router, randoms, workloadType, workloadReqPayload)
+			workloadCreateHttpResp := getInferenceCreationResponse(router, randoms, workloadReqPayload)
 			Expect(workloadCreateHttpResp.Code).To(Equal(http.StatusOK), workloadCreateHttpResp.Body.String())
 
-			var workspace api.Workspace
-			jsonErr := json.Unmarshal(workloadCreateHttpResp.Body.Bytes(), &workspace)
+			var inference api.Inference
+			jsonErr := json.Unmarshal(workloadCreateHttpResp.Body.Bytes(), &inference)
 			Expect(jsonErr).To(BeNil())
-			Expect(workspace.Spec.Assets.Compute.Id).To(Equal(computeAsset.Meta.Id))
-			Expect(workspace.Spec.Assets.Environment.Id).To(Equal(environmentAsset.Meta.Id))
+			Expect(inference.Spec.Assets.Compute.Id).To(Equal(computeAsset.Meta.Id))
+			Expect(inference.Spec.Assets.Environment.Id).To(Equal(environmentAsset.Meta.Id))
 
 			///////////////////////////////////////////////////////////////////////////////////////
 			//STEP 4: checking the list for the existing usage info
@@ -1600,10 +1015,10 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				Args:    convutils.Ref("x=4"),
 			}
 
-			secondWorkloadCreateHttpResp := getWorkloadCreationResponse(router, randoms, workloadType, workloadReqPayload)
-			Expect(workloadCreateHttpResp.Code).To(Equal(http.StatusOK))
+			secondWorkloadCreateHttpResp := getInferenceCreationResponse(router, randoms, secondWorkloadReqPayload)
+			Expect(secondWorkloadCreateHttpResp.Code).To(Equal(http.StatusOK))
 
-			var secondWorkload api.Workspace
+			var secondWorkload api.Inference
 			secondWorkloadJsonErr := json.Unmarshal(secondWorkloadCreateHttpResp.Body.Bytes(), &secondWorkload)
 			Expect(secondWorkloadJsonErr).To(BeNil())
 			Expect(secondWorkload.Spec.Assets.Environment.Id).To(Equal(environmentAsset.Meta.Id))
@@ -1622,15 +1037,15 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 					Expect(env.UsageTimes.LastUsedByWorkload.UnixNano() > environmentUsageTimePostFirstWokloadUsage.UnixNano()).To(BeTrue())
 				}
 			}
-		}, forWorkspaces, forTrainings, forInference)
+		})
 	})
 
 	Context("creating workload with cluster scope assets -> updates assets UsageTimes", func() {
-		DescribeTable("by workload type", func(workloadType string) {
+		It("by workload type", func() {
 			///////////////////////////////////////////////////////////////////////////////////////
 			// STEP 1: Creating compute and environment assets - system scope
 
-			environmentAsset := createEnvironmentAssetAnyWorkloadType(workloadType, buildRandomClusterEnvironmentAsset(randoms), router, headerForAdmin(randoms))
+			environmentAsset := createEnvironmentAssetAnyWorkloadType(auth.WorkloadTypeInference, buildRandomClusterEnvironmentAsset(randoms), router, headerForAdmin(randoms))
 			computeAsset, _, _ := createComputeAsset(buildRandomClusterCompute(randoms), router, headerForAdmin(randoms))
 
 			///////////////////////////////////////////////////////////////////////////////////////
@@ -1638,7 +1053,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			// (checking only compute asset, as previous tests already checked the environment asset, here we're
 			//  focused on system scope difference)
 
-			computesHttpReq, errComputeList := http.NewRequest("GET", fmt.Sprintf("%s?complyToWorkloadType=%s", urlCompute, workloadType), nil)
+			computesHttpReq, errComputeList := http.NewRequest("GET", fmt.Sprintf("%s?complyToWorkloadType=%s", urlCompute, auth.WorkloadTypeInference), nil)
 			Expect(errComputeList).To(BeNil())
 
 			computeList, computeJsonErr := getComputesEntriesFromList(router, randoms, computesHttpReq)
@@ -1661,20 +1076,20 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 
 			workloadPreCreationTimestamp := time.Now().UnixNano()
 
-			workloadCreateHttpResp := getWorkloadCreationResponse(router, randoms, workloadType, workloadReqPayload)
+			workloadCreateHttpResp := getInferenceCreationResponse(router, randoms, workloadReqPayload)
 			Expect(workloadCreateHttpResp.Code).To(Equal(http.StatusOK), workloadCreateHttpResp.Body.String())
 
-			var workspace api.Workspace
-			jsonErr := json.Unmarshal(workloadCreateHttpResp.Body.Bytes(), &workspace)
+			var inference api.Inference
+			jsonErr := json.Unmarshal(workloadCreateHttpResp.Body.Bytes(), &inference)
 			Expect(jsonErr).To(BeNil())
-			Expect(workspace.Spec.Assets.Compute.Id).To(Equal(computeAsset.Meta.Id))
-			Expect(workspace.Spec.Assets.Environment.Id).To(Equal(environmentAsset.Meta.Id))
+			Expect(inference.Spec.Assets.Compute.Id).To(Equal(computeAsset.Meta.Id))
+			Expect(inference.Spec.Assets.Environment.Id).To(Equal(environmentAsset.Meta.Id))
 
 			///////////////////////////////////////////////////////////////////////////////////////
 			//STEP 4: checking the list for the existing usage info
 
 			// checking computes list response
-			computesHttpReq, errComputeList = http.NewRequest("GET", fmt.Sprintf("%s?projectId=%d&complyToProject=%d&complyToWorkloadType=%s&clusterId=%s", urlCompute, workspace.Meta.ProjectId, workspace.Meta.ProjectId, workloadType, workspace.Meta.ClusterId), nil)
+			computesHttpReq, errComputeList = http.NewRequest("GET", fmt.Sprintf("%s?projectId=%d&complyToProject=%d&complyToWorkloadType=%s&clusterId=%s", urlCompute, inference.Meta.ProjectId, inference.Meta.ProjectId, auth.WorkloadTypeInference, inference.Meta.ClusterId), nil)
 			computes, jsonComputesErr := getComputesEntriesFromList(router, randoms, computesHttpReq)
 			Expect(jsonComputesErr).To(BeNil())
 
@@ -1683,15 +1098,15 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			Expect(computes[0].UsageTimes).NotTo(BeNil())
 			Expect(computes[0].UsageTimes.LastUsedByWorkload).NotTo(BeNil())
 			Expect(computes[0].UsageTimes.LastUsedByWorkload.UnixNano() >= workloadPreCreationTimestamp).To(BeTrue())
-		}, forWorkspaces, forTrainings, forInference)
+		})
 	})
 
 	Context("creating workload with system scope assets -> updates assets UsageTimes", func() {
-		DescribeTable("by workload type", func(workloadType string) {
+		It("by workload type", func() {
 			///////////////////////////////////////////////////////////////////////////////////////
 			// STEP 1: Creating compute and environment assets - system scope
 
-			environmentAsset := createEnvironmentAssetAnyWorkloadType(workloadType, buildRandomClusterEnvironmentAsset(randoms), router, headerForAdmin(randoms))
+			environmentAsset := createEnvironmentAssetAnyWorkloadType(auth.WorkloadTypeInference, buildRandomClusterEnvironmentAsset(randoms), router, headerForAdmin(randoms))
 			computeAsset, _, _ := createComputeAsset(buildRandomSystemCompute(), router, headerForAdmin(randoms))
 
 			///////////////////////////////////////////////////////////////////////////////////////
@@ -1699,7 +1114,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			// (checking only compute asset, as previous tests already checked the environment asset, here we're
 			//  focused on system scope difference)
 
-			computesHttpReq, errComputeList := http.NewRequest("GET", fmt.Sprintf("%s?complyToWorkloadType=%s", urlCompute, workloadType), nil)
+			computesHttpReq, errComputeList := http.NewRequest("GET", fmt.Sprintf("%s?complyToWorkloadType=%s", urlCompute, auth.WorkloadTypeInference), nil)
 			Expect(errComputeList).To(BeNil())
 
 			computeList, computeJsonErr := getComputesEntriesFromList(router, randoms, computesHttpReq)
@@ -1722,20 +1137,20 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 
 			workloadPreCreationTimestamp := time.Now().UnixNano()
 
-			workloadCreateHttpResp := getWorkloadCreationResponse(router, randoms, workloadType, workloadReqPayload)
+			workloadCreateHttpResp := getInferenceCreationResponse(router, randoms, workloadReqPayload)
 			Expect(workloadCreateHttpResp.Code).To(Equal(http.StatusOK), workloadCreateHttpResp.Body.String())
 
-			var workspace api.Workspace
-			jsonErr := json.Unmarshal(workloadCreateHttpResp.Body.Bytes(), &workspace)
+			var inference api.Inference
+			jsonErr := json.Unmarshal(workloadCreateHttpResp.Body.Bytes(), &inference)
 			Expect(jsonErr).To(BeNil())
-			Expect(workspace.Spec.Assets.Compute.Id).To(Equal(computeAsset.Meta.Id))
-			Expect(workspace.Spec.Assets.Environment.Id).To(Equal(environmentAsset.Meta.Id))
+			Expect(inference.Spec.Assets.Compute.Id).To(Equal(computeAsset.Meta.Id))
+			Expect(inference.Spec.Assets.Environment.Id).To(Equal(environmentAsset.Meta.Id))
 
 			///////////////////////////////////////////////////////////////////////////////////////
 			//STEP 4: checking the list for the existing usage info
 
 			// checking computes list response
-			computesHttpReq, errComputeList = http.NewRequest("GET", fmt.Sprintf("%s?projectId=%d&complyToProject=%d&complyToWorkloadType=%s&clusterId=%s", urlCompute, workspace.Meta.ProjectId, workspace.Meta.ProjectId, workloadType, workspace.Meta.ClusterId), nil)
+			computesHttpReq, errComputeList = http.NewRequest("GET", fmt.Sprintf("%s?projectId=%d&complyToProject=%d&complyToWorkloadType=%s&clusterId=%s", urlCompute, inference.Meta.ProjectId, inference.Meta.ProjectId, auth.WorkloadTypeInference, inference.Meta.ClusterId), nil)
 			computes, jsonComputesErr := getComputesEntriesFromList(router, randoms, computesHttpReq)
 			Expect(jsonComputesErr).To(BeNil())
 
@@ -1744,7 +1159,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			Expect(computes[0].UsageTimes).NotTo(BeNil())
 			Expect(computes[0].UsageTimes.LastUsedByWorkload).NotTo(BeNil())
 			Expect(computes[0].UsageTimes.LastUsedByWorkload.UnixNano() >= workloadPreCreationTimestamp).To(BeTrue())
-		}, forWorkspaces, forTrainings, forInference)
+		})
 	})
 
 	Context("name validation - mandatory parameters", func() {
@@ -1930,41 +1345,27 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 
 	Context("assets override", func() {
 		Context("valid create workload request", func() {
-			DescribeTable("should override the container path value of specified data source", func(workloadType string) {
+			It("should override the container path value of specified data source", func() {
 				///////////////////////////////////////////////////////////////////////////////////////
 				//  Part 1: create the workload and assets
 				///////////////////////////////////////////////////////////////////////////////////////
-				environmentAsset := createEnvironmentAssetAnyWorkloadType(workloadType, buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
+				environmentAsset := createEnvironmentAssetAnyWorkloadType(auth.WorkloadTypeInference, buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
 				computeAsset, _, _ := createComputeAsset(buildRandomDepartmentCompute(randoms), router, headerForAdmin(randoms))
 
 				passwordCreReq := buildRandomProjectPassword(randoms)
-				accessKeyCreReq := buildRandomProjectAccessKey(randoms)
-				pvcCreReq := testing.BuildRandomProjectPVCAsset(randoms)
+
 				pvcCreReqInf := testing.BuildRandomProjectPVCAsset(randoms)
 				pvcCreReqInf.Spec.ExistingPvc = convutils.Ref(true)
 				pvcCreReqInf.Spec.ClaimInfo = nil
 
-				// At first, the k8s tracker isn't aware of the pvcCreReq claim
 				k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient().
 					WithPassword(randoms.ClusterId, &passwordCreReq, nil).
-					WithAccessKey(randoms.ClusterId, &accessKeyCreReq, nil).
 					WithPvc(randoms.ClusterId, &pvcCreReqInf, nil))
-
-				pvcAsset, _, _ := createPVCAsset(pvcCreReq, router, headerForAdmin(randoms))
-				// after creating the asset, it should be aware pvcCreReq claim so let's add it
-				k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient().
-					WithPassword(randoms.ClusterId, &passwordCreReq, nil).
-					WithAccessKey(randoms.ClusterId, &accessKeyCreReq, nil).
-					WithPvc(randoms.ClusterId, &pvcCreReqInf, nil).
-					WithPvc(randoms.ClusterId, &pvcCreReq, nil))
 
 				pvcAssetInference, _, _ := createPVCAsset(pvcCreReqInf, router, headerForAdmin(randoms))
 
 				passwordAsset, _, _ := createPassword(&randoms.ClusterId, passwordCreReq, router, headerForAdmin(randoms))
 				gitAsset, _, _ := createGitAsset(buildRandomProjectGit(randoms, &passwordAsset.Meta.Id), router, headerForAdmin(randoms))
-
-				accessKeyAsset, _, _ := createAccessKey(&randoms.ClusterId, accessKeyCreReq, router, headerForAdmin(randoms))
-				s3Asset, _, _ := createS3Asset(buildRandomProjectS3(randoms, &accessKeyAsset.Meta.Id), router, headerForAdmin(randoms))
 
 				nfsAsset, _, _ := createNFSAsset(buildRandomProjectNFSAsset(randoms), router, headerForAdmin(randoms))
 
@@ -1980,10 +1381,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 					ContainerPath: convutils.Ref("/path/to/override"),
 				}
 
-				pvcAssetMeta := pvcAsset.Meta
-				if workloadType == auth.WorkloadTypeInference {
-					pvcAssetMeta = pvcAssetInference.Meta
-				}
+				pvcAssetMeta := pvcAssetInference.Meta
 				reqPayload.Assets.Datasources = []api.AssetIdAndKind{
 					{
 						Kind:      api.ASSETKIND_GIT,
@@ -2007,33 +1405,6 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 					},
 				}
 
-				// s3 is not supported in inference
-				if workloadType != auth.WorkloadTypeInference {
-					reqPayload.Assets.Datasources = append(reqPayload.Assets.Datasources, api.AssetIdAndKind{
-						Kind:      api.ASSETKIND_S3,
-						Id:        s3Asset.Meta.Id,
-						Overrides: overrides,
-					})
-				}
-
-				if workloadType == auth.WorkloadTypeDistributed {
-					reqPayload.Distributed = &api.Distributed{
-						NumWorkers:    1,
-						DistFramework: convutils.Ref(api.DISTRIBUTEDFRAMEWORK_MPI),
-						Master: &api.DistMaster{
-							Assets: api.AssetsIds{
-								Environment: environmentAsset.Meta.Id,
-								Datasources: []api.AssetIdAndKind{
-									{
-										Kind:      api.ASSETKIND_S3,
-										Id:        s3Asset.Meta.Id,
-										Overrides: overrides,
-									},
-								},
-							},
-						},
-					}
-				}
 				sort.Slice(reqPayload.Assets.Datasources, func(i, j int) bool {
 					return reqPayload.Assets.Datasources[i].Id < reqPayload.Assets.Datasources[j].Id
 				})
@@ -2043,7 +1414,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 					Args:    convutils.Ref("123"),
 				}
 
-				createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
+				createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 				Expect(err).To(BeNil())
 				createHttpReq.Header = *headerForAdmin(randoms)
 
@@ -2051,18 +1422,16 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				router.ServeHTTP(createHttpResp, createHttpReq)
 				Expect(createHttpResp.Code).To(Equal(http.StatusOK), createHttpResp.Body.String())
 
-				var workspace api.Workspace
-				jsonErr := json.Unmarshal(createHttpResp.Body.Bytes(), &workspace)
+				var inference api.Inference
+				jsonErr := json.Unmarshal(createHttpResp.Body.Bytes(), &inference)
 				Expect(jsonErr).To(BeNil())
-				workspaceId := workspace.Meta.Id
+				inferenceId := inference.Meta.Id
 
 				///////////////////////////////////////////////////////////////////////////////////////
-				//  Part 3: get the workspace content -> V2 APIs
+				//  Part 3: get the inference content -> V2 APIs
 				///////////////////////////////////////////////////////////////////////////////////////
-				urlGetV1 := urlForCreatingWorkload[workloadType]
-				urlGetV2 := urlV1toV2[urlGetV1]
 
-				getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", urlGetV2, workspaceId), nil)
+				getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", urlInferenceV2, inferenceId), nil)
 				Expect(err).To(BeNil())
 				getHttpReq.Header = *headerForAdmin(randoms)
 
@@ -2070,15 +1439,15 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				router.ServeHTTP(getHttpResp, getHttpReq)
 				Expect(getHttpResp.Code).To(Equal(http.StatusOK))
 
-				var actualWorkloadV2 api.TrainingV2
+				var actualWorkloadV2 api.InferenceV2
 				jsonErr = json.Unmarshal(getHttpResp.Body.Bytes(), &actualWorkloadV2)
 				Expect(jsonErr).To(BeNil())
 
-				expectedWorkloadV2 := api.TrainingV2{
+				expectedWorkloadV2 := api.InferenceV2{
 					Meta: api.WorkloadMeta{
 						Name:          reqPayload.Name,
 						RequestedName: reqPayload.Name,
-						WorkloadId:    workspaceId,
+						WorkloadId:    inferenceId,
 						ClusterId:     randoms.ClusterId,
 						ProjectId:     fmt.Sprintf("%d", randoms.ProjectId),
 						CreatedBy:     actualWorkloadV2.Meta.CreatedBy,
@@ -2103,41 +1472,19 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				}
 
 				var convErr *api.Error
-				expectedWorkloadV2.SpecificRunParams, convErr = genericToTrainingRunParams(reqPayload.SpecificEnv)
+				expectedWorkloadV2.SpecificRunParams, convErr = genericToInferenceRunParams(reqPayload.SpecificEnv)
 				Expect(convErr).To(BeNil())
 
-				// nfs, s3 and hostPath are not supported in inference
-				if workloadType != auth.WorkloadTypeInference {
-					expectedWorkloadV2.Assets.Datasources = append(expectedWorkloadV2.Assets.Datasources, getDatasourceRefWithOverrides(s3Asset.Meta, *overrides))
-				}
-
-				if workloadType == auth.WorkloadTypeDistributed {
-					expectedWorkloadV2.Distributed = &api.DistributedData{
-						NumWorkers: 1,
-						Framework:  convutils.Ref(api.DISTRIBUTEDFRAMEWORK_MPI),
-						Master: &api.DistributedMasterData{
-							Assets: &api.AssetsRefOptional{
-								Environment: api.EnvironmentAssetRef{
-									Id:   environmentAsset.Meta.Id,
-									Name: environmentAsset.Meta.Name,
-								},
-								Datasources: []api.DatasourceRef{
-									getDatasourceRefWithOverrides(s3Asset.Meta, *overrides),
-								},
-							},
-						},
-					}
-				}
 				sort.Slice(expectedWorkloadV2.Assets.Datasources, func(i, j int) bool {
 					return expectedWorkloadV2.Assets.Datasources[i].Id < expectedWorkloadV2.Assets.Datasources[j].Id
 				})
 				Expect(actualWorkloadV2).To(Equal(expectedWorkloadV2))
-			}, forWorkspaces, forTrainings, forInference, forDistributed)
+			})
 		})
 	})
 
 	Context("parallelism and completions", func() {
-		DescribeTable("should fail validation if parallelism is used and workload type is not training", func(workloadType string) {
+		It("should fail validation if parallelism is used and workload type is not training", func() {
 			createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
 
 			reqPayload := randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
@@ -2145,27 +1492,18 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				Parallelism: convutils.Ref(int32(2)),
 			}
 
-			if workloadType == auth.WorkloadTypeDistributed {
-				reqPayload.Distributed = &api.Distributed{
-					NumWorkers: 1,
-				}
-			}
-
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerForAdmin(randoms)
 
 			createHttpResp := httptest.NewRecorder()
 			router.ServeHTTP(createHttpResp, createHttpReq)
-			if workloadType != auth.WorkloadTypeTraining {
-				Expect(createHttpResp.Code).To(Equal(http.StatusBadRequest))
-				Expect(createHttpResp.Body.String()).To(ContainSubstring("parallelism is only supported for standard training workloads"))
-			} else {
-				Expect(createHttpResp.Code).To(Equal(http.StatusOK))
-			}
-		}, forWorkspaces, forTrainings, forInference, forDistributed)
+			Expect(createHttpResp.Code).To(Equal(http.StatusBadRequest))
+			Expect(createHttpResp.Body.String()).To(ContainSubstring("parallelism is only supported for standard training workloads"))
 
-		DescribeTable("should fail validation if completions is used and workload type is not training", func(workloadType string) {
+		})
+
+		It("should fail validation if completions is used and workload type is not training", func() {
 			createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
 
 			reqPayload := randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
@@ -2173,30 +1511,21 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 				Completions: convutils.Ref(int32(5)),
 			}
 
-			if workloadType == auth.WorkloadTypeDistributed {
-				reqPayload.Distributed = &api.Distributed{
-					NumWorkers: 1,
-				}
-			}
-
-			createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(reqPayload))
+			createHttpReq, err := http.NewRequest("POST", urlInference, makePayload(reqPayload))
 			Expect(err).To(BeNil())
 			createHttpReq.Header = *headerForAdmin(randoms)
 
 			createHttpResp := httptest.NewRecorder()
 			router.ServeHTTP(createHttpResp, createHttpReq)
-			if workloadType != auth.WorkloadTypeTraining {
-				Expect(createHttpResp.Code).To(Equal(http.StatusBadRequest))
-				Expect(createHttpResp.Body.String()).To(ContainSubstring("completions is only supported for standard training workloads"))
-			} else {
-				Expect(createHttpResp.Code).To(Equal(http.StatusOK))
-			}
-		}, forWorkspaces, forTrainings, forInference, forDistributed)
+			Expect(createHttpResp.Code).To(Equal(http.StatusBadRequest))
+			Expect(createHttpResp.Body.String()).To(ContainSubstring("completions is only supported for standard training workloads"))
+
+		})
 	})
 
 	Context("cluster sync helpers (updateWorkloadStatus, syncWorkloadStatus, deleteWorkload)", func() {
 		It("updateWorkloadStatus sets workloads.current_state", func() {
-			workloadID := createWorkload(randoms, router, envAsset, auth.WorkloadTypeWorkspace)
+			workloadID := seedLegacyWorkload(randoms, auth.WorkloadTypeWorkspace, testutils.RandString(8), envAsset.Meta)
 			ctx := adminContextForClusterSync(randoms)
 			resp, err := updateWorkloadStatus(ctx, randoms.ClusterId, api.WorkloadStatusUpdate{
 				Id:     workloadID,
@@ -2218,8 +1547,8 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			Expect(resp.Code).To(Equal(http.StatusNotFound))
 		})
 		It("syncWorkloadStatus updates multiple workspaces", func() {
-			id1 := createWorkload(randoms, router, envAsset, auth.WorkloadTypeWorkspace)
-			id2 := createWorkload(randoms, router, envAsset, auth.WorkloadTypeWorkspace)
+			id1 := seedLegacyWorkload(randoms, auth.WorkloadTypeWorkspace, testutils.RandString(8), envAsset.Meta)
+			id2 := seedLegacyWorkload(randoms, auth.WorkloadTypeWorkspace, testutils.RandString(8), envAsset.Meta)
 			ctx := adminContextForClusterSync(randoms)
 			resp, err := syncWorkloadStatus(ctx, randoms.ClusterId, []api.WorkloadStatusUpdate{
 				{Id: id1, Status: string(api.WORKLOADSTATE_SUBMITTED)},
@@ -2234,7 +1563,7 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 			Expect(string(r2.CurrentState)).To(Equal(string(api.WORKLOADSTATE_FAILED)))
 		})
 		It("deleteWorkload removes row and second delete is 404", func() {
-			workloadID := createWorkload(randoms, router, envAsset, auth.WorkloadTypeWorkspace)
+			workloadID := seedLegacyWorkload(randoms, auth.WorkloadTypeWorkspace, testutils.RandString(8), envAsset.Meta)
 			ctx := adminContextForClusterSync(randoms)
 			resp, err := deleteWorkload(ctx, randoms.ClusterId, workloadID)
 			Expect(err).To(BeNil())
@@ -2254,14 +1583,6 @@ func assetNameValidation(router chi.Router, randoms *testutils.RandomValues, fil
 	validateHttpResp := httptest.NewRecorder()
 	router.ServeHTTP(validateHttpResp, validateHttpReq)
 	return validateHttpResp.Code
-}
-
-func getEnvAssetIdByType(workloadType string, envAsset *api.EnvironmentAsset, envAssetInference *api.EnvironmentAsset) string {
-	if workloadType == auth.WorkloadTypeInference {
-		return envAssetInference.Meta.Id
-	}
-
-	return envAsset.Meta.Id
 }
 
 func randomWorkloadCreationRequest(randoms *testutils.RandomValues, envAssetId string) *api.WorkloadCreationRequest {
@@ -2317,8 +1638,8 @@ func getComputesEntriesFromList(router chi.Router, randoms *testutils.RandomValu
 	return list.Entries, jsonErr
 }
 
-func getWorkloadCreationResponse(router chi.Router, randoms *testutils.RandomValues, workloadType string, workloadReqPayload *api.WorkloadCreationRequest) *httptest.ResponseRecorder {
-	workloadCreateHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(workloadReqPayload))
+func getInferenceCreationResponse(router chi.Router, randoms *testutils.RandomValues, workloadReqPayload *api.WorkloadCreationRequest) *httptest.ResponseRecorder {
+	workloadCreateHttpReq, err := http.NewRequest("POST", urlInference, makePayload(workloadReqPayload))
 	Expect(err).To(BeNil())
 	workloadCreateHttpReq.Header = *headerForAdmin(randoms)
 
@@ -2331,257 +1652,3 @@ func adminContextForClusterSync(r *testutils.RandomValues) context.Context {
 	ctx := context.WithValue(context.Background(), runaictx.CfTenantId, r.TenantIdStr)
 	return context.WithValue(ctx, runaictx.CfSubjectID, "admin")
 }
-
-/* WAIT_FOR_THESE_TESTS_TO_MOVE_TO_E2E
-
-/////////////////////////////////////////////////////////////////////////////////////
-//  The following tests need to move to e2e because policy validation is no longer
-//  done in assets service but in workloads service, so it will not be effective
-//  to implement those tests internally in asset service
-/////////////////////////////////////////////////////////////////////////////////////
-
-type PayloadAndGoodFor struct {
-	Payload interface{}
-	GoodFor string
-}
-
-Context("attempt to create workload with non compliant asset", func() {
-    It("should fail with conflict error", func() {
-        environmentAsset, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-
-        effectivePolicy := policyService.WorkspacePolicyDefaultsAndRulesV2{
-            Rules: *policyService.NewNullableWorkspacePolicyRulesV2(&policyService.WorkspacePolicyRulesV2{
-                Image: *policyService.NewNullableStringRules(&policyService.StringRules{
-                    Options: []policyService.StringOption{
-                        {
-                            Value: "image-with-long-name",
-                        },
-                    },
-                }),
-            }),
-        }
-
-        policies.SetMock(policies.SimpleMockClientFactory{
-            SimpleMockClient: policies.SimpleMockClient{
-                EffectiveUpdatedAt:         policyMockUpdateTime,
-                EffectiveWorkspacePolicyV2: &effectivePolicy,
-            },
-        })
-
-        reqPayload := randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
-        reqPayload.Assets.Environment = environmentAsset.Meta.Id
-
-        createHttpReq, err := http.NewRequest("POST", urlWorkspace, makePayload(reqPayload))
-        Expect(err).To(BeNil())
-        createHttpReq.Header = *headerForAdmin(randoms)
-
-        createHttpResp := httptest.NewRecorder()
-        router.ServeHTTP(createHttpResp, createHttpReq)
-        Expect(createHttpResp.Code).To(Equal(http.StatusConflict))
-        Expect(createHttpResp.Body.String()).To(ContainSubstring("does not comply with the policy: environment"))
-    })
-})
-
-Context("attempt to create workload with non compliant specific run params", func() {
-    It("should fail with conflict error", func() {
-        workspacePolicy := policyApi.WorkspacePolicyDefaultsAndRulesV2{
-            Rules: &policyApi.WorkspacePolicyRulesV2{
-                Security: &policyApi.SecurityFieldsRules{
-                    RunAsUid: &policyApi.IntegerRulesOptional{
-                        Max: convutils.Ref(int32(40)),
-                    },
-                    RunAsGid: &policyApi.IntegerRulesOptional{
-                        Min: convutils.Ref(int32(50)),
-                    },
-                },
-            },
-        }
-
-        trainingPolicy := policyApi.TrainingPolicyDefaultsAndRulesV2{
-            Rules: &policyApi.TrainingPolicyRulesV2{
-                Security: &policyApi.SecurityFieldsRules{
-                    RunAsUid: &policyApi.IntegerRulesOptional{
-                        Min: convutils.Ref(int32(40)),
-                    },
-                    RunAsGid: &policyApi.IntegerRulesOptional{
-                        Max: convutils.Ref(int32(50)),
-                    },
-                },
-            },
-        }
-
-        policies.SetMock(policies.SimpleMockClientFactory{
-            SimpleMockClient: policies.SimpleMockClient{
-                EffectiveUpdatedAt:         policyMockUpdateTime,
-                EffectiveWorkspacePolicyV2: workloads_v2.ConvertToWorkspacePolicy(&workspacePolicy),
-                EffectiveTrainingPolicyV2:  workloads_v2.ConvertToTrainingPolicy(&trainingPolicy),
-            },
-        })
-
-        goodForWorkspaceBadForTraining := buildRandomTenantEnvironmentAsset(randoms)
-        goodForWorkspaceBadForTraining.Spec.UidGidSource = convutils.Ref(workloads_v2.CustomUidGid)
-        goodForWorkspaceBadForTraining.Spec.RunAsUid = convutils.Ref(int32(39))
-        goodForWorkspace, _, _ := createEnvironmentAsset(goodForWorkspaceBadForTraining, router, headerForAdmin(randoms))
-
-        goodForTrainingBadForWorkspace := buildRandomTenantEnvironmentAsset(randoms)
-        goodForTrainingBadForWorkspace.Spec.UidGidSource = convutils.Ref(workloads_v2.CustomUidGid)
-        goodForTrainingBadForWorkspace.Spec.RunAsUid = convutils.Ref(int64(51))
-        goodForTraining, _, _ := createEnvironmentAsset(goodForTrainingBadForWorkspace, router, headerForAdmin(randoms))
-
-        payloadgoodForWorkspace := randomWorkloadCreationRequest(randoms, goodForWorkspace.Meta.Id)
-        payloadGoodForTraining := randomWorkloadCreationRequest(randoms, goodForTraining.Meta.Id)
-
-        req1 := PayloadAndGoodFor{Payload: payloadgoodForWorkspace, GoodFor: auth.WorkloadTypeWorkspace}
-        req2 := PayloadAndGoodFor{Payload: payloadGoodForTraining, GoodFor: auth.WorkloadTypeTraining}
-
-        for _, workloadType := range []string{auth.WorkloadTypeTraining, auth.WorkloadTypeWorkspace} {
-            for _, req := range []PayloadAndGoodFor{req1, req2} {
-                createHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], makePayload(req.Payload))
-                Expect(err).To(BeNil())
-                createHttpReq.Header = *headerForAdmin(randoms)
-
-                createHttpResp := httptest.NewRecorder()
-                router.ServeHTTP(createHttpResp, createHttpReq)
-
-                if workloadType == req.GoodFor {
-                    Expect(createHttpResp.Code).To(Equal(http.StatusOK), createHttpResp.Body.String())
-                } else {
-                    Expect(createHttpResp.Code).To(Equal(http.StatusConflict))
-                    Expect(createHttpResp.Body.String()).To(ContainSubstring("does not comply with the policy: environment"))
-                }
-            }
-        }
-
-    })
-})
-
-Context("validate imposed assets when creating workload", func() {
-    It("if canAdd = false we cannot add assets of the same kind", func() {
-        s3Asset1, _, _ := createS3Asset(buildRandomTenantS3(nil), router, headerForAdmin(randoms))
-        s3Asset2, _, _ := createS3Asset(buildRandomTenantS3(nil), router, headerForAdmin(randoms))
-        gitAsset1, _, _ := createGitAsset(buildRandomTenantGit(nil), router, headerForAdmin(randoms))
-        gitAsset2, _, _ := createGitAsset(buildRandomTenantGit(nil), router, headerForAdmin(randoms))
-
-        workspacePolicy := policyApi.WorkspacePolicyDefaultsAndRulesV2{
-            Defaults: &policyApi.WorkspacePolicyDefaultsAndRulesV2Defaults{
-                ImposedAssets: &policyApi.ImposedAssets{
-                    Datasources: &[]string{
-                        s3Asset1.Meta.Id,
-                        gitAsset1.Meta.Id,
-                    },
-                },
-            },
-            Rules: &policyApi.WorkspacePolicyRulesV2{
-                Storage: &policyApi.StorageFieldsRules{
-                    S3: &policyApi.StorageFieldsRulesS3{
-                        Blocked: convutils.Ref(true),
-                    },
-                },
-            },
-        }
-
-        policies.SetMock(policies.SimpleMockClientFactory{
-            SimpleMockClient: policies.SimpleMockClient{
-                EffectiveUpdatedAt:         policyMockUpdateTime,
-                EffectiveWorkspacePolicyV2: workloads_v2.ConvertToWorkspacePolicy(&workspacePolicy),
-            },
-        })
-
-        reqPayload := randomWorkloadCreationRequest(randoms, envAsset.Meta.Id)
-        reqPayload.Assets.Datasources = []api.AssetIdAndKind{
-            {
-                Kind: api.ASSETKIND_S3,
-                Id:   s3Asset1.Meta.Id,
-            },
-            {
-                Kind: api.ASSETKIND_S3,
-                Id:   s3Asset2.Meta.Id,
-            },
-            {
-                Kind: api.ASSETKIND_GIT,
-                Id:   gitAsset1.Meta.Id,
-            },
-            {
-                Kind: api.ASSETKIND_GIT,
-                Id:   gitAsset2.Meta.Id,
-            },
-        }
-
-        createHttpReq, err := http.NewRequest("POST", urlWorkspace, makePayload(reqPayload))
-        Expect(err).To(BeNil())
-        createHttpReq.Header = *headerForAdmin(randoms)
-
-        createHttpResp := httptest.NewRecorder()
-        router.ServeHTTP(createHttpResp, createHttpReq)
-        Expect(createHttpResp.Code).To(Equal(http.StatusConflict))
-        Expect(createHttpResp.Body.String()).To(ContainSubstring("workload does not comply with the policy: s3 (1 errors)"))
-    })
-})
-
-Context("Compliance info checking - workspace", func() {
-    It("should be validated", func() {
-        workspacePolicy := policyApi.WorkspacePolicyDefaultsAndRulesV2{
-            Rules: &policyApi.WorkspacePolicyRulesV2{
-                NodeType: &policyApi.StringRules{
-                    Required: convutils.Ref(true),
-                },
-                NodePools: &policyApi.ArrayRules{
-                    CanEdit: convutils.Ref(false),
-                },
-            },
-            Defaults: &policyApi.WorkspacePolicyDefaultsAndRulesV2Defaults{
-                NodePools: &[]string{
-                    "a",
-                    "b",
-                },
-            },
-        }
-
-        policyMockClient := policies.SimpleMockClientFactory{
-            SimpleMockClient: policies.SimpleMockClient{
-                EffectiveUpdatedAt:         policyMockUpdateTime,
-                EffectiveWorkspacePolicyV2: ConvertToWorkspacePolicy(&workspacePolicy),
-            },
-        }
-
-        policies.SetMock(&policyMockClient)
-
-        effectivePolicy, err := GetEffectivePolicyOfProject(context.Background(), &policyMockClient, 1, auth.WorkloadTypeWorkspace)
-        Expect(err).To(BeNil())
-
-        goodRunParams := api.SpecificRunParams{
-            Command:  convutils.Ref("ls -la"),
-            RunAsUid: convutils.Ref(int64(-1)),
-            NodeType: convutils.Ref("aaa"),
-            NodePools: &[]string{
-                "a",
-                "b",
-            },
-        }
-
-        badRunParams := api.SpecificRunParams{
-            Command:  convutils.Ref("ls -la"),
-            RunAsUid: convutils.Ref(int32(-1)),
-            NodePools: &[]string{
-                "b",
-                "a",
-            },
-        }
-
-        err = ValidateSpecific(&goodRunParams, effectivePolicy, auth.WorkloadTypeWorkspace)
-        Expect(err).To(BeNil())
-
-        err = ValidateSpecificRun(&badRunParams, effectivePolicy, auth.WorkloadTypeWorkspace)
-        Expect(err).NotTo(BeNil())
-
-        actualErrors := datastructs.NewSet[string](strings.Split(err.Message, "\n")...)
-
-        expectedErrors := datastructs.NewSet[string](
-            "workspace.nodePools: the administrator prohibited changing the value of this field",
-            "workspace.nodeType: value must be provided for required fields",
-        )
-
-        Expect(actualErrors).To(Equal(expectedErrors))
-    })
-})
-*/

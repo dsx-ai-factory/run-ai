@@ -4277,31 +4277,6 @@ export interface DistributedAllOf {
     'master'?: DistMaster | null;
 }
 /**
- * 
- * @export
- * @interface DistributedData
- */
-export interface DistributedData {
-    /**
-     * number of worker replicas to process the workload.
-     * @type {number}
-     * @memberof DistributedData
-     */
-    'numWorkers': number;
-    /**
-     * 
-     * @type {DistributedFramework}
-     * @memberof DistributedData
-     */
-    'framework'?: DistributedFramework | null;
-    /**
-     * 
-     * @type {DistributedMasterData}
-     * @memberof DistributedData
-     */
-    'master'?: DistributedMasterData | null;
-}
-/**
  * The distributed training framework used in the workload. Note: The TF, XGBoost and JAX frameworks are deprecated and will be removed in a future release. 
  * @export
  * @enum {string}
@@ -5211,87 +5186,6 @@ export interface DistributedInferenceWorkersField {
      * @memberof DistributedInferenceWorkersField
      */
     'workers'?: number | null;
-}
-/**
- * 
- * @export
- * @interface DistributedMaster
- */
-export interface DistributedMaster {
-    /**
-     * if true, indicates that the master should be identical to the worker. In this case assets and specificRunParams should not be provided.
-     * @type {boolean}
-     * @memberof DistributedMaster
-     */
-    'sameAsWorker'?: boolean;
-    /**
-     * 
-     * @type {OptionalAssetIds}
-     * @memberof DistributedMaster
-     */
-    'assets'?: OptionalAssetIds | null;
-    /**
-     * 
-     * @type {TrainingSpecificRunParams}
-     * @memberof DistributedMaster
-     */
-    'specificRunParams'?: TrainingSpecificRunParams | null;
-}
-/**
- * 
- * @export
- * @interface DistributedMasterData
- */
-export interface DistributedMasterData {
-    /**
-     * if true, indicates that the master should be identical to the worker. In this case assets and specificRunParams should not be provided.
-     * @type {boolean}
-     * @memberof DistributedMasterData
-     */
-    'sameAsWorker'?: boolean;
-    /**
-     * 
-     * @type {AssetsRefOptional}
-     * @memberof DistributedMasterData
-     */
-    'assets'?: AssetsRefOptional | null;
-    /**
-     * 
-     * @type {TrainingSpecificRunParams}
-     * @memberof DistributedMasterData
-     */
-    'specificRunParams'?: TrainingSpecificRunParams | null;
-    /**
-     * 
-     * @type {PolicyInfo}
-     * @memberof DistributedMasterData
-     */
-    'policyInfo'?: PolicyInfo | null;
-}
-/**
- * 
- * @export
- * @interface DistributedParams
- */
-export interface DistributedParams {
-    /**
-     * number of worker replicas to process the workload.
-     * @type {number}
-     * @memberof DistributedParams
-     */
-    'numWorkers': number;
-    /**
-     * 
-     * @type {DistributedFramework}
-     * @memberof DistributedParams
-     */
-    'framework'?: DistributedFramework | null;
-    /**
-     * 
-     * @type {DistributedMaster}
-     * @memberof DistributedParams
-     */
-    'master'?: DistributedMaster | null;
 }
 /**
  * 
@@ -7656,6 +7550,146 @@ export interface InferenceSpecificRunParams {
     'tolerations'?: Array<Toleration> | null;
 }
 /**
+ * 
+ * @export
+ * @interface InferenceSpecificRunParamsAllOf
+ */
+export interface InferenceSpecificRunParamsAllOf {
+    /**
+     * Set of annotations to populate into the container running the workload.
+     * @type {Array<Annotation>}
+     * @memberof InferenceSpecificRunParamsAllOf
+     */
+    'annotations'?: Array<Annotation> | null;
+    /**
+     * Arguments to the command that the container running the workload executes.
+     * @type {string}
+     * @memberof InferenceSpecificRunParamsAllOf
+     */
+    'args'?: string | null;
+    /**
+     * Specifies the duration after which a finished workload (completed or failed) will be automatically deleted. The default is 30 days. Log retention is managed separately.
+     * @type {number}
+     * @memberof InferenceSpecificRunParamsAllOf
+     */
+    'autoDeletionTimeAfterCompletionSeconds'?: number | null;
+    /**
+     * Specifies the number of retries before marking a workload as failed (not applicable to Inference workloads). The default value is 6.
+     * @type {number}
+     * @memberof InferenceSpecificRunParamsAllOf
+     */
+    'backoffLimit'?: number | null;
+    /**
+     * Specify the workload category assigned to the workload. Categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform.
+     * @type {string}
+     * @memberof InferenceSpecificRunParamsAllOf
+     */
+    'category'?: string | null;
+    /**
+     * A command to the server as the entry point of the container running the workload.
+     * @type {string}
+     * @memberof InferenceSpecificRunParamsAllOf
+     */
+    'command'?: string | null;
+    /**
+     * Set of environment variables to populate into the container running the workspace.
+     * @type {Array<EnvironmentVariableOfAsset>}
+     * @memberof InferenceSpecificRunParamsAllOf
+     */
+    'environmentVariables'?: Array<EnvironmentVariableOfAsset> | null;
+    /**
+     * A list of references to Kubernetes secrets in the same namespace used for pulling container images.
+     * @type {Array<ImagePullSecret>}
+     * @memberof InferenceSpecificRunParamsAllOf
+     */
+    'imagePullSecrets'?: Array<ImagePullSecret> | null;
+    /**
+     * Set of labels to populate into the container running the workload.
+     * @type {Array<Label>}
+     * @memberof InferenceSpecificRunParamsAllOf
+     */
+    'labels'?: Array<Label> | null;
+    /**
+     * 
+     * @type {NodeAffinityRequired}
+     * @memberof InferenceSpecificRunParamsAllOf
+     */
+    'nodeAffinityRequired'?: NodeAffinityRequired | null;
+    /**
+     * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
+     * @type {Array<string>}
+     * @memberof InferenceSpecificRunParamsAllOf
+     */
+    'nodePools'?: Array<string> | null;
+    /**
+     * Deprecated: use a workload policy node selector to target node types instead. Nodes (machines), or a group of nodes on which the workload will run. To use this feature, your Administrator will need to label nodes. For more information, see [Group Nodes](https://docs.run.ai/latest/admin/researcher-setup/limit-to-node-group). When using this flag with with Project-based affinity, it refines the list of allowable node groups set in the Project. For more information, see [Projects](https://docshub.run.ai/guides/platform-management/aiinitiatives/organization/projects).
+     * @type {string}
+     * @memberof InferenceSpecificRunParamsAllOf
+     * @deprecated
+     */
+    'nodeType'?: string | null;
+    /**
+     * 
+     * @type {PodAffinity}
+     * @memberof InferenceSpecificRunParamsAllOf
+     */
+    'podAffinity'?: PodAffinity | null;
+    /**
+     * 
+     * @type {Preemptibility}
+     * @memberof InferenceSpecificRunParamsAllOf
+     */
+    'preemptibility'?: Preemptibility | null;
+    /**
+     * Specifies the priority class for the workload, which determines its scheduling behavior. Valid values are: very-low, low, medium-low, medium, medium-high, high, and very-high. Each workload type has a default priority. To view the default priority for each workload type, use the GET /workload-types endpoint. Once you change the priority from the default value defined for that workload type, the preemptibility field is not automatically updated. Make sure to set the desired preemptibility value.
+     * @type {string}
+     * @memberof InferenceSpecificRunParamsAllOf
+     */
+    'priorityClass'?: string | null;
+    /**
+     * 
+     * @type {RestartPolicy}
+     * @memberof InferenceSpecificRunParamsAllOf
+     */
+    'restartPolicy'?: RestartPolicy | null;
+    /**
+     * The group id to run the entrypoint of the container which executes the workspace. Default to the value specified in the environment asset `runAsGid` field (optional). Use only when the source uid/gid of the environment asset is not `fromTheImage`, and `overrideUidGidInWorkspace` is enabled.
+     * @type {number}
+     * @memberof InferenceSpecificRunParamsAllOf
+     */
+    'runAsGid'?: number | null;
+    /**
+     * The user id to run the entrypoint of the container which executes the workspace. Default to the value specified in the environment asset `runAsUid` field (optional). Use only when the source uid/gid of the environment asset is not `fromTheImage`, and `overrideUidGidInWorkspace` is enabled.
+     * @type {number}
+     * @memberof InferenceSpecificRunParamsAllOf
+     */
+    'runAsUid'?: number | null;
+    /**
+     * Comma separated list of groups that the user running the container belongs to, in addition to the group indicated by runAsGid. Use only when the source uid/gid of the environment asset is not `fromTheImage`, and `overrideUidGidInWorkspace` is enabled. Using an empty string implies reverting the supplementary groups of the image.
+     * @type {string}
+     * @memberof InferenceSpecificRunParamsAllOf
+     */
+    'supplementalGroups'?: string | null;
+    /**
+     * Indicates if the job should be terminated by the system after it has been preempted.
+     * @type {boolean}
+     * @memberof InferenceSpecificRunParamsAllOf
+     */
+    'terminateAfterPreemption'?: boolean | null;
+    /**
+     * Duration in seconds the pod needs to terminate gracefully upon probe failure. The grace period is the duration in seconds after the processes running in the pod are sent a termination signal and the time when the processes are forcibly halted with a kill signal. Set this value longer than the expected cleanup time for your process. Value must be non-negative integer. The value zero indicates stop immediately via the kill signal (no opportunity to shut down).
+     * @type {number}
+     * @memberof InferenceSpecificRunParamsAllOf
+     */
+    'terminationGracePeriodSeconds'?: number | null;
+    /**
+     * Set of tolerations to apply to the workload.
+     * @type {Array<Toleration>}
+     * @memberof InferenceSpecificRunParamsAllOf
+     */
+    'tolerations'?: Array<Toleration> | null;
+}
+/**
  * information about an inference created based on assets.
  * @export
  * @interface InferenceV2
@@ -9510,37 +9544,6 @@ export interface NumberRules {
      * @memberof NumberRules
      */
     'defaultFrom'?: DefaultFromRule | null;
-}
-/**
- * 
- * @export
- * @interface OptionalAssetIds
- */
-export interface OptionalAssetIds {
-    /**
-     * Unique identifier of the asset.
-     * @type {string}
-     * @memberof OptionalAssetIds
-     */
-    'environment': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof OptionalAssetIds
-     */
-    'compute'?: string | null;
-    /**
-     * 
-     * @type {Array<AssetIdAndKind>}
-     * @memberof OptionalAssetIds
-     */
-    'datasources'?: Array<AssetIdAndKind>;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof OptionalAssetIds
-     */
-    'workloadVolumes'?: Array<string>;
 }
 /**
  * 
@@ -14150,37 +14153,6 @@ export interface Training {
     'job'?: DisplayedJob;
 }
 /**
- * Request to submit a training from a set of assets and an optional set of specific run parameters.
- * @export
- * @interface TrainingCreationRequestV2
- */
-export interface TrainingCreationRequestV2 {
-    /**
-     * 
-     * @type {WorkloadCreationMeta}
-     * @memberof TrainingCreationRequestV2
-     */
-    'meta'?: WorkloadCreationMeta;
-    /**
-     * 
-     * @type {AssetsIds}
-     * @memberof TrainingCreationRequestV2
-     */
-    'assets'?: AssetsIds;
-    /**
-     * 
-     * @type {TrainingSpecificRunParams}
-     * @memberof TrainingCreationRequestV2
-     */
-    'specificRunParams'?: TrainingSpecificRunParams | null;
-    /**
-     * 
-     * @type {DistributedParams}
-     * @memberof TrainingCreationRequestV2
-     */
-    'distributed'?: DistributedParams | null;
-}
-/**
  * 
  * @export
  * @interface TrainingListResponse
@@ -14192,207 +14164,6 @@ export interface TrainingListResponse {
      * @memberof TrainingListResponse
      */
     'entries': Array<Training>;
-}
-/**
- * 
- * @export
- * @interface TrainingSpecificRunParams
- */
-export interface TrainingSpecificRunParams {
-    /**
-     * 
-     * @type {Array<SpecificRunConnectionInfo>}
-     * @memberof TrainingSpecificRunParams
-     */
-    'connections'?: Array<SpecificRunConnectionInfo> | null;
-    /**
-     * Whether to allow the workload to exceed the quota of the project.
-     * @type {boolean}
-     * @memberof TrainingSpecificRunParams
-     */
-    'allowOverQuota'?: boolean | null;
-    /**
-     * Set of annotations to populate into the container running the workload.
-     * @type {Array<Annotation>}
-     * @memberof TrainingSpecificRunParams
-     */
-    'annotations'?: Array<Annotation> | null;
-    /**
-     * Arguments to the command that the container running the workload executes.
-     * @type {string}
-     * @memberof TrainingSpecificRunParams
-     */
-    'args'?: string | null;
-    /**
-     * Specifies the duration after which a finished workload (completed or failed) will be automatically deleted. The default is 30 days. Log retention is managed separately.
-     * @type {number}
-     * @memberof TrainingSpecificRunParams
-     */
-    'autoDeletionTimeAfterCompletionSeconds'?: number | null;
-    /**
-     * Specifies the number of retries before marking a workload as failed (not applicable to Inference workloads). The default value is 6.
-     * @type {number}
-     * @memberof TrainingSpecificRunParams
-     */
-    'backoffLimit'?: number | null;
-    /**
-     * Specify the workload category assigned to the workload. Categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform.
-     * @type {string}
-     * @memberof TrainingSpecificRunParams
-     */
-    'category'?: string | null;
-    /**
-     * A command to the server as the entry point of the container running the workload.
-     * @type {string}
-     * @memberof TrainingSpecificRunParams
-     */
-    'command'?: string | null;
-    /**
-     * Used with Hyperparameter Optimization. Specifies the number of successful pods the job should reach to be completed. The Job will be marked as successful once the specified amount of pods has been reached (applicable to standard training only).
-     * @type {number}
-     * @memberof TrainingSpecificRunParams
-     */
-    'completions'?: number | null;
-    /**
-     * Set of environment variables to populate into the container running the workspace.
-     * @type {Array<EnvironmentVariableOfAsset>}
-     * @memberof TrainingSpecificRunParams
-     */
-    'environmentVariables'?: Array<EnvironmentVariableOfAsset> | null;
-    /**
-     * A list of references to Kubernetes secrets in the same namespace used for pulling container images.
-     * @type {Array<ImagePullSecret>}
-     * @memberof TrainingSpecificRunParams
-     */
-    'imagePullSecrets'?: Array<ImagePullSecret> | null;
-    /**
-     * Set of labels to populate into the container running the workload.
-     * @type {Array<Label>}
-     * @memberof TrainingSpecificRunParams
-     */
-    'labels'?: Array<Label> | null;
-    /**
-     * 
-     * @type {NodeAffinityRequired}
-     * @memberof TrainingSpecificRunParams
-     */
-    'nodeAffinityRequired'?: NodeAffinityRequired | null;
-    /**
-     * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
-     * @type {Array<string>}
-     * @memberof TrainingSpecificRunParams
-     */
-    'nodePools'?: Array<string> | null;
-    /**
-     * Deprecated: use a workload policy node selector to target node types instead. Nodes (machines), or a group of nodes on which the workload will run. To use this feature, your Administrator will need to label nodes. For more information, see [Group Nodes](https://docs.run.ai/latest/admin/researcher-setup/limit-to-node-group). When using this flag with with Project-based affinity, it refines the list of allowable node groups set in the Project. For more information, see [Projects](https://docshub.run.ai/guides/platform-management/aiinitiatives/organization/projects).
-     * @type {string}
-     * @memberof TrainingSpecificRunParams
-     * @deprecated
-     */
-    'nodeType'?: string | null;
-    /**
-     * Used with Hyperparameter Optimization. Specifies the maximum number of pods the workload should run at any given time (applicable to standard training only).
-     * @type {number}
-     * @memberof TrainingSpecificRunParams
-     */
-    'parallelism'?: number | null;
-    /**
-     * 
-     * @type {PodAffinity}
-     * @memberof TrainingSpecificRunParams
-     */
-    'podAffinity'?: PodAffinity | null;
-    /**
-     * 
-     * @type {Preemptibility}
-     * @memberof TrainingSpecificRunParams
-     */
-    'preemptibility'?: Preemptibility | null;
-    /**
-     * Specifies the priority class for the workload, which determines its scheduling behavior. Valid values are: very-low, low, medium-low, medium, medium-high, high, and very-high. Each workload type has a default priority. To view the default priority for each workload type, use the GET /workload-types endpoint. Once you change the priority from the default value defined for that workload type, the preemptibility field is not automatically updated. Make sure to set the desired preemptibility value.
-     * @type {string}
-     * @memberof TrainingSpecificRunParams
-     */
-    'priorityClass'?: string | null;
-    /**
-     * 
-     * @type {RestartPolicy}
-     * @memberof TrainingSpecificRunParams
-     */
-    'restartPolicy'?: RestartPolicy | null;
-    /**
-     * The group id to run the entrypoint of the container which executes the workspace. Default to the value specified in the environment asset `runAsGid` field (optional). Use only when the source uid/gid of the environment asset is not `fromTheImage`, and `overrideUidGidInWorkspace` is enabled.
-     * @type {number}
-     * @memberof TrainingSpecificRunParams
-     */
-    'runAsGid'?: number | null;
-    /**
-     * The user id to run the entrypoint of the container which executes the workspace. Default to the value specified in the environment asset `runAsUid` field (optional). Use only when the source uid/gid of the environment asset is not `fromTheImage`, and `overrideUidGidInWorkspace` is enabled.
-     * @type {number}
-     * @memberof TrainingSpecificRunParams
-     */
-    'runAsUid'?: number | null;
-    /**
-     * Comma separated list of groups that the user running the container belongs to, in addition to the group indicated by runAsGid. Use only when the source uid/gid of the environment asset is not `fromTheImage`, and `overrideUidGidInWorkspace` is enabled. Using an empty string implies reverting the supplementary groups of the image.
-     * @type {string}
-     * @memberof TrainingSpecificRunParams
-     */
-    'supplementalGroups'?: string | null;
-    /**
-     * Indicates if the job should be terminated by the system after it has been preempted.
-     * @type {boolean}
-     * @memberof TrainingSpecificRunParams
-     */
-    'terminateAfterPreemption'?: boolean | null;
-    /**
-     * Duration in seconds the pod needs to terminate gracefully upon probe failure. The grace period is the duration in seconds after the processes running in the pod are sent a termination signal and the time when the processes are forcibly halted with a kill signal. Set this value longer than the expected cleanup time for your process. Value must be non-negative integer. The value zero indicates stop immediately via the kill signal (no opportunity to shut down).
-     * @type {number}
-     * @memberof TrainingSpecificRunParams
-     */
-    'terminationGracePeriodSeconds'?: number | null;
-    /**
-     * Set of tolerations to apply to the workload.
-     * @type {Array<Toleration>}
-     * @memberof TrainingSpecificRunParams
-     */
-    'tolerations'?: Array<Toleration> | null;
-}
-/**
- * information about a training created based on assets.
- * @export
- * @interface TrainingV2
- */
-export interface TrainingV2 {
-    /**
-     * 
-     * @type {WorkloadMeta}
-     * @memberof TrainingV2
-     */
-    'meta': WorkloadMeta;
-    /**
-     * 
-     * @type {AssetsRef}
-     * @memberof TrainingV2
-     */
-    'assets': AssetsRef;
-    /**
-     * 
-     * @type {TrainingSpecificRunParams}
-     * @memberof TrainingV2
-     */
-    'specificRunParams'?: TrainingSpecificRunParams | null;
-    /**
-     * 
-     * @type {PolicyInfo}
-     * @memberof TrainingV2
-     */
-    'policyInfo'?: PolicyInfo | null;
-    /**
-     * 
-     * @type {DistributedData}
-     * @memberof TrainingV2
-     */
-    'distributed'?: DistributedData | null;
 }
 /**
  * Indicate the way to determine the user and group ids of the container. The options are a. `fromTheImage` - user and group ids are determined by the docker image that the container runs. this is the default option. b. `custom` - user and group ids can be specified in the environment asset and/or the workload creation request. c. `idpToken` - user and group IDs are automatically taken from the identity provider (IdP) token (available only in SSO-enabled installations). For more information, see [User Identity](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers).
@@ -14851,31 +14622,6 @@ export interface Workspace {
     'job'?: DisplayedJob;
 }
 /**
- * Request to submit a workspace from a set of assets and an optional set of specific run parameters.
- * @export
- * @interface WorkspaceCreationRequestV2
- */
-export interface WorkspaceCreationRequestV2 {
-    /**
-     * 
-     * @type {WorkloadCreationMeta}
-     * @memberof WorkspaceCreationRequestV2
-     */
-    'meta': WorkloadCreationMeta;
-    /**
-     * 
-     * @type {AssetsIds}
-     * @memberof WorkspaceCreationRequestV2
-     */
-    'assets': AssetsIds;
-    /**
-     * 
-     * @type {WorkspaceSpecificRunParams}
-     * @memberof WorkspaceCreationRequestV2
-     */
-    'specificRunParams'?: WorkspaceSpecificRunParams | null;
-}
-/**
  * 
  * @export
  * @interface WorkspaceListResponse
@@ -14887,329 +14633,6 @@ export interface WorkspaceListResponse {
      * @memberof WorkspaceListResponse
      */
     'entries': Array<Workspace>;
-}
-/**
- * 
- * @export
- * @interface WorkspaceSpecificRunParams
- */
-export interface WorkspaceSpecificRunParams {
-    /**
-     * 
-     * @type {Array<SpecificRunConnectionInfo>}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'connections'?: Array<SpecificRunConnectionInfo> | null;
-    /**
-     * Whether to allow the workload to exceed the quota of the project.
-     * @type {boolean}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'allowOverQuota'?: boolean | null;
-    /**
-     * Set of annotations to populate into the container running the workload.
-     * @type {Array<Annotation>}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'annotations'?: Array<Annotation> | null;
-    /**
-     * Arguments to the command that the container running the workload executes.
-     * @type {string}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'args'?: string | null;
-    /**
-     * Specifies the duration after which a finished workload (completed or failed) will be automatically deleted. The default is 30 days. Log retention is managed separately.
-     * @type {number}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'autoDeletionTimeAfterCompletionSeconds'?: number | null;
-    /**
-     * Specifies the number of retries before marking a workload as failed (not applicable to Inference workloads). The default value is 6.
-     * @type {number}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'backoffLimit'?: number | null;
-    /**
-     * Specify the workload category assigned to the workload. Categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform.
-     * @type {string}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'category'?: string | null;
-    /**
-     * A command to the server as the entry point of the container running the workload.
-     * @type {string}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'command'?: string | null;
-    /**
-     * Set of environment variables to populate into the container running the workspace.
-     * @type {Array<EnvironmentVariableOfAsset>}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'environmentVariables'?: Array<EnvironmentVariableOfAsset> | null;
-    /**
-     * A list of references to Kubernetes secrets in the same namespace used for pulling container images.
-     * @type {Array<ImagePullSecret>}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'imagePullSecrets'?: Array<ImagePullSecret> | null;
-    /**
-     * Set of labels to populate into the container running the workload.
-     * @type {Array<Label>}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'labels'?: Array<Label> | null;
-    /**
-     * 
-     * @type {NodeAffinityRequired}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'nodeAffinityRequired'?: NodeAffinityRequired | null;
-    /**
-     * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
-     * @type {Array<string>}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'nodePools'?: Array<string> | null;
-    /**
-     * Deprecated: use a workload policy node selector to target node types instead. Nodes (machines), or a group of nodes on which the workload will run. To use this feature, your Administrator will need to label nodes. For more information, see [Group Nodes](https://docs.run.ai/latest/admin/researcher-setup/limit-to-node-group). When using this flag with with Project-based affinity, it refines the list of allowable node groups set in the Project. For more information, see [Projects](https://docshub.run.ai/guides/platform-management/aiinitiatives/organization/projects).
-     * @type {string}
-     * @memberof WorkspaceSpecificRunParams
-     * @deprecated
-     */
-    'nodeType'?: string | null;
-    /**
-     * 
-     * @type {PodAffinity}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'podAffinity'?: PodAffinity | null;
-    /**
-     * 
-     * @type {Preemptibility}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'preemptibility'?: Preemptibility | null;
-    /**
-     * Specifies the priority class for the workload, which determines its scheduling behavior. Valid values are: very-low, low, medium-low, medium, medium-high, high, and very-high. Each workload type has a default priority. To view the default priority for each workload type, use the GET /workload-types endpoint. Once you change the priority from the default value defined for that workload type, the preemptibility field is not automatically updated. Make sure to set the desired preemptibility value.
-     * @type {string}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'priorityClass'?: string | null;
-    /**
-     * 
-     * @type {RestartPolicy}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'restartPolicy'?: RestartPolicy | null;
-    /**
-     * The group id to run the entrypoint of the container which executes the workspace. Default to the value specified in the environment asset `runAsGid` field (optional). Use only when the source uid/gid of the environment asset is not `fromTheImage`, and `overrideUidGidInWorkspace` is enabled.
-     * @type {number}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'runAsGid'?: number | null;
-    /**
-     * The user id to run the entrypoint of the container which executes the workspace. Default to the value specified in the environment asset `runAsUid` field (optional). Use only when the source uid/gid of the environment asset is not `fromTheImage`, and `overrideUidGidInWorkspace` is enabled.
-     * @type {number}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'runAsUid'?: number | null;
-    /**
-     * Comma separated list of groups that the user running the container belongs to, in addition to the group indicated by runAsGid. Use only when the source uid/gid of the environment asset is not `fromTheImage`, and `overrideUidGidInWorkspace` is enabled. Using an empty string implies reverting the supplementary groups of the image.
-     * @type {string}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'supplementalGroups'?: string | null;
-    /**
-     * Indicates if the job should be terminated by the system after it has been preempted.
-     * @type {boolean}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'terminateAfterPreemption'?: boolean | null;
-    /**
-     * Duration in seconds the pod needs to terminate gracefully upon probe failure. The grace period is the duration in seconds after the processes running in the pod are sent a termination signal and the time when the processes are forcibly halted with a kill signal. Set this value longer than the expected cleanup time for your process. Value must be non-negative integer. The value zero indicates stop immediately via the kill signal (no opportunity to shut down).
-     * @type {number}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'terminationGracePeriodSeconds'?: number | null;
-    /**
-     * Set of tolerations to apply to the workload.
-     * @type {Array<Toleration>}
-     * @memberof WorkspaceSpecificRunParams
-     */
-    'tolerations'?: Array<Toleration> | null;
-}
-/**
- * 
- * @export
- * @interface WorkspaceSpecificRunParamsAllOf
- */
-export interface WorkspaceSpecificRunParamsAllOf {
-    /**
-     * Set of annotations to populate into the container running the workload.
-     * @type {Array<Annotation>}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     */
-    'annotations'?: Array<Annotation> | null;
-    /**
-     * Arguments to the command that the container running the workload executes.
-     * @type {string}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     */
-    'args'?: string | null;
-    /**
-     * Specifies the duration after which a finished workload (completed or failed) will be automatically deleted. The default is 30 days. Log retention is managed separately.
-     * @type {number}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     */
-    'autoDeletionTimeAfterCompletionSeconds'?: number | null;
-    /**
-     * Specifies the number of retries before marking a workload as failed (not applicable to Inference workloads). The default value is 6.
-     * @type {number}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     */
-    'backoffLimit'?: number | null;
-    /**
-     * Specify the workload category assigned to the workload. Categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform.
-     * @type {string}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     */
-    'category'?: string | null;
-    /**
-     * A command to the server as the entry point of the container running the workload.
-     * @type {string}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     */
-    'command'?: string | null;
-    /**
-     * Set of environment variables to populate into the container running the workspace.
-     * @type {Array<EnvironmentVariableOfAsset>}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     */
-    'environmentVariables'?: Array<EnvironmentVariableOfAsset> | null;
-    /**
-     * A list of references to Kubernetes secrets in the same namespace used for pulling container images.
-     * @type {Array<ImagePullSecret>}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     */
-    'imagePullSecrets'?: Array<ImagePullSecret> | null;
-    /**
-     * Set of labels to populate into the container running the workload.
-     * @type {Array<Label>}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     */
-    'labels'?: Array<Label> | null;
-    /**
-     * 
-     * @type {NodeAffinityRequired}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     */
-    'nodeAffinityRequired'?: NodeAffinityRequired | null;
-    /**
-     * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
-     * @type {Array<string>}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     */
-    'nodePools'?: Array<string> | null;
-    /**
-     * Deprecated: use a workload policy node selector to target node types instead. Nodes (machines), or a group of nodes on which the workload will run. To use this feature, your Administrator will need to label nodes. For more information, see [Group Nodes](https://docs.run.ai/latest/admin/researcher-setup/limit-to-node-group). When using this flag with with Project-based affinity, it refines the list of allowable node groups set in the Project. For more information, see [Projects](https://docshub.run.ai/guides/platform-management/aiinitiatives/organization/projects).
-     * @type {string}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     * @deprecated
-     */
-    'nodeType'?: string | null;
-    /**
-     * 
-     * @type {PodAffinity}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     */
-    'podAffinity'?: PodAffinity | null;
-    /**
-     * 
-     * @type {Preemptibility}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     */
-    'preemptibility'?: Preemptibility | null;
-    /**
-     * Specifies the priority class for the workload, which determines its scheduling behavior. Valid values are: very-low, low, medium-low, medium, medium-high, high, and very-high. Each workload type has a default priority. To view the default priority for each workload type, use the GET /workload-types endpoint. Once you change the priority from the default value defined for that workload type, the preemptibility field is not automatically updated. Make sure to set the desired preemptibility value.
-     * @type {string}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     */
-    'priorityClass'?: string | null;
-    /**
-     * 
-     * @type {RestartPolicy}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     */
-    'restartPolicy'?: RestartPolicy | null;
-    /**
-     * The group id to run the entrypoint of the container which executes the workspace. Default to the value specified in the environment asset `runAsGid` field (optional). Use only when the source uid/gid of the environment asset is not `fromTheImage`, and `overrideUidGidInWorkspace` is enabled.
-     * @type {number}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     */
-    'runAsGid'?: number | null;
-    /**
-     * The user id to run the entrypoint of the container which executes the workspace. Default to the value specified in the environment asset `runAsUid` field (optional). Use only when the source uid/gid of the environment asset is not `fromTheImage`, and `overrideUidGidInWorkspace` is enabled.
-     * @type {number}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     */
-    'runAsUid'?: number | null;
-    /**
-     * Comma separated list of groups that the user running the container belongs to, in addition to the group indicated by runAsGid. Use only when the source uid/gid of the environment asset is not `fromTheImage`, and `overrideUidGidInWorkspace` is enabled. Using an empty string implies reverting the supplementary groups of the image.
-     * @type {string}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     */
-    'supplementalGroups'?: string | null;
-    /**
-     * Indicates if the job should be terminated by the system after it has been preempted.
-     * @type {boolean}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     */
-    'terminateAfterPreemption'?: boolean | null;
-    /**
-     * Duration in seconds the pod needs to terminate gracefully upon probe failure. The grace period is the duration in seconds after the processes running in the pod are sent a termination signal and the time when the processes are forcibly halted with a kill signal. Set this value longer than the expected cleanup time for your process. Value must be non-negative integer. The value zero indicates stop immediately via the kill signal (no opportunity to shut down).
-     * @type {number}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     */
-    'terminationGracePeriodSeconds'?: number | null;
-    /**
-     * Set of tolerations to apply to the workload.
-     * @type {Array<Toleration>}
-     * @memberof WorkspaceSpecificRunParamsAllOf
-     */
-    'tolerations'?: Array<Toleration> | null;
-}
-/**
- * information about a workspace created based on assets.
- * @export
- * @interface WorkspaceV2
- */
-export interface WorkspaceV2 {
-    /**
-     * 
-     * @type {WorkloadMeta}
-     * @memberof WorkspaceV2
-     */
-    'meta': WorkloadMeta;
-    /**
-     * 
-     * @type {AssetsRef}
-     * @memberof WorkspaceV2
-     */
-    'assets': AssetsRef;
-    /**
-     * 
-     * @type {WorkspaceSpecificRunParams}
-     * @memberof WorkspaceV2
-     */
-    'specificRunParams'?: WorkspaceSpecificRunParams | null;
-    /**
-     * 
-     * @type {PolicyInfo}
-     * @memberof WorkspaceV2
-     */
-    'policyInfo'?: PolicyInfo | null;
 }
 
 /**
@@ -25959,82 +25382,6 @@ export class SynchronizationApi extends BaseAPI {
 export const TrainingsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Creates a training workload from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.
-         * @summary Create training workload.
-         * @param {WorkloadCreationRequest} [workloadCreationRequest] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createTraining: async (workloadCreationRequest?: WorkloadCreationRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/training`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(workloadCreationRequest, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Creates a training from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.
-         * @summary Create a training - assets based [Experimental]
-         * @param {TrainingCreationRequestV2} [trainingCreationRequestV2] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createTrainingV2: async (trainingCreationRequestV2?: TrainingCreationRequestV2, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v2/training`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(trainingCreationRequestV2, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
          * Delete distributed, by id
          * @summary Delete a distributed, per cluster sync update [Obsolete]
          * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
@@ -26106,98 +25453,6 @@ export const TrainingsApiAxiosParamCreator = function (configuration?: Configura
             // authentication bearerAuth required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Retrieves the content of the training, i.e. its set of assets and specific env.
-         * @summary Get training data - assets based. [Experimental]
-         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getTrainingByIdV2: async (workloadId: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'workloadId' is not null or undefined
-            assertParamExists('getTrainingByIdV2', 'workloadId', workloadId)
-            const localVarPath = `/api/v2/training/{workloadId}`
-                .replace(`{${"workloadId"}}`, encodeURIComponent(String(workloadId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Get combined policy and workload data for training creation form
-         * @summary Get merged training
-         * @param {string} [projectId] The id of the project
-         * @param {string} [workloadId] The id of the workload
-         * @param {boolean} [isDistributed] Filter results to workload of type distributed.
-         * @param {boolean} [isDistributedInference] Filter results to workload of type distributed inference.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getTrainingMerged: async (projectId?: string, workloadId?: string, isDistributed?: boolean, isDistributedInference?: boolean, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v2/training/merged`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-            if (projectId !== undefined) {
-                localVarQueryParameter['projectId'] = projectId;
-            }
-
-            if (workloadId !== undefined) {
-                localVarQueryParameter['workloadId'] = workloadId;
-            }
-
-            if (isDistributed !== undefined) {
-                localVarQueryParameter['isDistributed'] = isDistributed;
-            }
-
-            if (isDistributedInference !== undefined) {
-                localVarQueryParameter['isDistributedInference'] = isDistributedInference;
-            }
 
 
     
@@ -26458,28 +25713,6 @@ export const TrainingsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = TrainingsApiAxiosParamCreator(configuration)
     return {
         /**
-         * Creates a training workload from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.
-         * @summary Create training workload.
-         * @param {WorkloadCreationRequest} [workloadCreationRequest] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async createTraining(workloadCreationRequest?: WorkloadCreationRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Training>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.createTraining(workloadCreationRequest, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * Creates a training from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.
-         * @summary Create a training - assets based [Experimental]
-         * @param {TrainingCreationRequestV2} [trainingCreationRequestV2] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async createTrainingV2(trainingCreationRequestV2?: TrainingCreationRequestV2, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TrainingV2>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.createTrainingV2(trainingCreationRequestV2, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
          * Delete distributed, by id
          * @summary Delete a distributed, per cluster sync update [Obsolete]
          * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
@@ -26501,31 +25734,6 @@ export const TrainingsApiFp = function(configuration?: Configuration) {
          */
         async deleteTrainingById(clusterUuid: string, workloadId: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteTrainingById(clusterUuid, workloadId, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * Retrieves the content of the training, i.e. its set of assets and specific env.
-         * @summary Get training data - assets based. [Experimental]
-         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getTrainingByIdV2(workloadId: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TrainingV2>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getTrainingByIdV2(workloadId, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * Get combined policy and workload data for training creation form
-         * @summary Get merged training
-         * @param {string} [projectId] The id of the project
-         * @param {string} [workloadId] The id of the workload
-         * @param {boolean} [isDistributed] Filter results to workload of type distributed.
-         * @param {boolean} [isDistributedInference] Filter results to workload of type distributed inference.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getTrainingMerged(projectId?: string, workloadId?: string, isDistributed?: boolean, isDistributedInference?: boolean, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TrainingV2>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getTrainingMerged(projectId, workloadId, isDistributed, isDistributedInference, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -26605,26 +25813,6 @@ export const TrainingsApiFactory = function (configuration?: Configuration, base
     const localVarFp = TrainingsApiFp(configuration)
     return {
         /**
-         * Creates a training workload from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.
-         * @summary Create training workload.
-         * @param {WorkloadCreationRequest} [workloadCreationRequest] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createTraining(workloadCreationRequest?: WorkloadCreationRequest, options?: any): AxiosPromise<Training> {
-            return localVarFp.createTraining(workloadCreationRequest, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Creates a training from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.
-         * @summary Create a training - assets based [Experimental]
-         * @param {TrainingCreationRequestV2} [trainingCreationRequestV2] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createTrainingV2(trainingCreationRequestV2?: TrainingCreationRequestV2, options?: any): AxiosPromise<TrainingV2> {
-            return localVarFp.createTrainingV2(trainingCreationRequestV2, options).then((request) => request(axios, basePath));
-        },
-        /**
          * Delete distributed, by id
          * @summary Delete a distributed, per cluster sync update [Obsolete]
          * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
@@ -26645,29 +25833,6 @@ export const TrainingsApiFactory = function (configuration?: Configuration, base
          */
         deleteTrainingById(clusterUuid: string, workloadId: string, options?: any): AxiosPromise<void> {
             return localVarFp.deleteTrainingById(clusterUuid, workloadId, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Retrieves the content of the training, i.e. its set of assets and specific env.
-         * @summary Get training data - assets based. [Experimental]
-         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getTrainingByIdV2(workloadId: string, options?: any): AxiosPromise<TrainingV2> {
-            return localVarFp.getTrainingByIdV2(workloadId, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Get combined policy and workload data for training creation form
-         * @summary Get merged training
-         * @param {string} [projectId] The id of the project
-         * @param {string} [workloadId] The id of the workload
-         * @param {boolean} [isDistributed] Filter results to workload of type distributed.
-         * @param {boolean} [isDistributedInference] Filter results to workload of type distributed inference.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getTrainingMerged(projectId?: string, workloadId?: string, isDistributed?: boolean, isDistributedInference?: boolean, options?: any): AxiosPromise<TrainingV2> {
-            return localVarFp.getTrainingMerged(projectId, workloadId, isDistributed, isDistributedInference, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -26741,30 +25906,6 @@ export const TrainingsApiFactory = function (configuration?: Configuration, base
  */
 export class TrainingsApi extends BaseAPI {
     /**
-     * Creates a training workload from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.
-     * @summary Create training workload.
-     * @param {WorkloadCreationRequest} [workloadCreationRequest] 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof TrainingsApi
-     */
-    public createTraining(workloadCreationRequest?: WorkloadCreationRequest, options?: AxiosRequestConfig) {
-        return TrainingsApiFp(this.configuration).createTraining(workloadCreationRequest, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Creates a training from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.
-     * @summary Create a training - assets based [Experimental]
-     * @param {TrainingCreationRequestV2} [trainingCreationRequestV2] 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof TrainingsApi
-     */
-    public createTrainingV2(trainingCreationRequestV2?: TrainingCreationRequestV2, options?: AxiosRequestConfig) {
-        return TrainingsApiFp(this.configuration).createTrainingV2(trainingCreationRequestV2, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
      * Delete distributed, by id
      * @summary Delete a distributed, per cluster sync update [Obsolete]
      * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
@@ -26788,33 +25929,6 @@ export class TrainingsApi extends BaseAPI {
      */
     public deleteTrainingById(clusterUuid: string, workloadId: string, options?: AxiosRequestConfig) {
         return TrainingsApiFp(this.configuration).deleteTrainingById(clusterUuid, workloadId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Retrieves the content of the training, i.e. its set of assets and specific env.
-     * @summary Get training data - assets based. [Experimental]
-     * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof TrainingsApi
-     */
-    public getTrainingByIdV2(workloadId: string, options?: AxiosRequestConfig) {
-        return TrainingsApiFp(this.configuration).getTrainingByIdV2(workloadId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Get combined policy and workload data for training creation form
-     * @summary Get merged training
-     * @param {string} [projectId] The id of the project
-     * @param {string} [workloadId] The id of the workload
-     * @param {boolean} [isDistributed] Filter results to workload of type distributed.
-     * @param {boolean} [isDistributedInference] Filter results to workload of type distributed inference.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof TrainingsApi
-     */
-    public getTrainingMerged(projectId?: string, workloadId?: string, isDistributed?: boolean, isDistributedInference?: boolean, options?: AxiosRequestConfig) {
-        return TrainingsApiFp(this.configuration).getTrainingMerged(projectId, workloadId, isDistributed, isDistributedInference, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -27106,82 +26220,6 @@ export const WorkspacesApiAxiosParamCreator = function (configuration?: Configur
             };
         },
         /**
-         * Creates a workspace from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.
-         * @summary Create workspace.
-         * @param {WorkloadCreationRequest} [workloadCreationRequest] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createWorkspace: async (workloadCreationRequest?: WorkloadCreationRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/workspace`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(workloadCreationRequest, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Creates a workspace from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.
-         * @summary Create a workspace - assets based [Experimental]
-         * @param {WorkspaceCreationRequestV2} [workspaceCreationRequestV2] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createWorkspaceV2: async (workspaceCreationRequestV2?: WorkspaceCreationRequestV2, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v2/workspace`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(workspaceCreationRequestV2, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
          * Delete workspace, by id
          * @summary Delete a workspace, per cluster sync update [Obsolete]
          * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
@@ -27211,88 +26249,6 @@ export const WorkspacesApiAxiosParamCreator = function (configuration?: Configur
             // authentication bearerAuth required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Retrieves the data of a training, i.e. its set of assets and specific env.
-         * @summary Get workspace data - assets based [Experimental]
-         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getWorkspaceByIdV2: async (workloadId: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'workloadId' is not null or undefined
-            assertParamExists('getWorkspaceByIdV2', 'workloadId', workloadId)
-            const localVarPath = `/api/v2/workspace/{workloadId}`
-                .replace(`{${"workloadId"}}`, encodeURIComponent(String(workloadId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Get combined policy and specificRunParams data for workload creation form
-         * @summary Get merged workspace
-         * @param {string} [projectId] The id of the project
-         * @param {string} [workloadId] The id of the workload
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getWorkspaceMerged: async (projectId?: string, workloadId?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v2/workspace/merged`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-            if (projectId !== undefined) {
-                localVarQueryParameter['projectId'] = projectId;
-            }
-
-            if (workloadId !== undefined) {
-                localVarQueryParameter['workloadId'] = workloadId;
-            }
 
 
     
@@ -27486,28 +26442,6 @@ export const WorkspacesApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Creates a workspace from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.
-         * @summary Create workspace.
-         * @param {WorkloadCreationRequest} [workloadCreationRequest] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async createWorkspace(workloadCreationRequest?: WorkloadCreationRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Workspace>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.createWorkspace(workloadCreationRequest, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * Creates a workspace from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.
-         * @summary Create a workspace - assets based [Experimental]
-         * @param {WorkspaceCreationRequestV2} [workspaceCreationRequestV2] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async createWorkspaceV2(workspaceCreationRequestV2?: WorkspaceCreationRequestV2, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WorkspaceV2>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.createWorkspaceV2(workspaceCreationRequestV2, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
          * Delete workspace, by id
          * @summary Delete a workspace, per cluster sync update [Obsolete]
          * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
@@ -27517,29 +26451,6 @@ export const WorkspacesApiFp = function(configuration?: Configuration) {
          */
         async deleteWorkspaceById(clusterUuid: string, workloadId: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteWorkspaceById(clusterUuid, workloadId, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * Retrieves the data of a training, i.e. its set of assets and specific env.
-         * @summary Get workspace data - assets based [Experimental]
-         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getWorkspaceByIdV2(workloadId: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WorkspaceV2>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkspaceByIdV2(workloadId, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * Get combined policy and specificRunParams data for workload creation form
-         * @summary Get merged workspace
-         * @param {string} [projectId] The id of the project
-         * @param {string} [workloadId] The id of the workload
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getWorkspaceMerged(projectId?: string, workloadId?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WorkspaceV2>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkspaceMerged(projectId, workloadId, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -27611,26 +26522,6 @@ export const WorkspacesApiFactory = function (configuration?: Configuration, bas
             return localVarFp.countAssets(kind, name, scope, projectId, departmentId, clusterId, options).then((request) => request(axios, basePath));
         },
         /**
-         * Creates a workspace from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.
-         * @summary Create workspace.
-         * @param {WorkloadCreationRequest} [workloadCreationRequest] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createWorkspace(workloadCreationRequest?: WorkloadCreationRequest, options?: any): AxiosPromise<Workspace> {
-            return localVarFp.createWorkspace(workloadCreationRequest, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Creates a workspace from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.
-         * @summary Create a workspace - assets based [Experimental]
-         * @param {WorkspaceCreationRequestV2} [workspaceCreationRequestV2] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createWorkspaceV2(workspaceCreationRequestV2?: WorkspaceCreationRequestV2, options?: any): AxiosPromise<WorkspaceV2> {
-            return localVarFp.createWorkspaceV2(workspaceCreationRequestV2, options).then((request) => request(axios, basePath));
-        },
-        /**
          * Delete workspace, by id
          * @summary Delete a workspace, per cluster sync update [Obsolete]
          * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
@@ -27640,27 +26531,6 @@ export const WorkspacesApiFactory = function (configuration?: Configuration, bas
          */
         deleteWorkspaceById(clusterUuid: string, workloadId: string, options?: any): AxiosPromise<void> {
             return localVarFp.deleteWorkspaceById(clusterUuid, workloadId, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Retrieves the data of a training, i.e. its set of assets and specific env.
-         * @summary Get workspace data - assets based [Experimental]
-         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getWorkspaceByIdV2(workloadId: string, options?: any): AxiosPromise<WorkspaceV2> {
-            return localVarFp.getWorkspaceByIdV2(workloadId, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Get combined policy and specificRunParams data for workload creation form
-         * @summary Get merged workspace
-         * @param {string} [projectId] The id of the project
-         * @param {string} [workloadId] The id of the workload
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getWorkspaceMerged(projectId?: string, workloadId?: string, options?: any): AxiosPromise<WorkspaceV2> {
-            return localVarFp.getWorkspaceMerged(projectId, workloadId, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -27730,30 +26600,6 @@ export class WorkspacesApi extends BaseAPI {
     }
 
     /**
-     * Creates a workspace from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.
-     * @summary Create workspace.
-     * @param {WorkloadCreationRequest} [workloadCreationRequest] 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WorkspacesApi
-     */
-    public createWorkspace(workloadCreationRequest?: WorkloadCreationRequest, options?: AxiosRequestConfig) {
-        return WorkspacesApiFp(this.configuration).createWorkspace(workloadCreationRequest, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Creates a workspace from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.
-     * @summary Create a workspace - assets based [Experimental]
-     * @param {WorkspaceCreationRequestV2} [workspaceCreationRequestV2] 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WorkspacesApi
-     */
-    public createWorkspaceV2(workspaceCreationRequestV2?: WorkspaceCreationRequestV2, options?: AxiosRequestConfig) {
-        return WorkspacesApiFp(this.configuration).createWorkspaceV2(workspaceCreationRequestV2, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
      * Delete workspace, by id
      * @summary Delete a workspace, per cluster sync update [Obsolete]
      * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
@@ -27764,31 +26610,6 @@ export class WorkspacesApi extends BaseAPI {
      */
     public deleteWorkspaceById(clusterUuid: string, workloadId: string, options?: AxiosRequestConfig) {
         return WorkspacesApiFp(this.configuration).deleteWorkspaceById(clusterUuid, workloadId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Retrieves the data of a training, i.e. its set of assets and specific env.
-     * @summary Get workspace data - assets based [Experimental]
-     * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WorkspacesApi
-     */
-    public getWorkspaceByIdV2(workloadId: string, options?: AxiosRequestConfig) {
-        return WorkspacesApiFp(this.configuration).getWorkspaceByIdV2(workloadId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Get combined policy and specificRunParams data for workload creation form
-     * @summary Get merged workspace
-     * @param {string} [projectId] The id of the project
-     * @param {string} [workloadId] The id of the workload
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WorkspacesApi
-     */
-    public getWorkspaceMerged(projectId?: string, workloadId?: string, options?: AxiosRequestConfig) {
-        return WorkspacesApiFp(this.configuration).getWorkspaceMerged(projectId, workloadId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

@@ -31,55 +31,6 @@ const (
 	ngcAPIKeyEnvironmentVariable        = "NGC_API_KEY"
 )
 
-func (c Client) CreateWorkspace(ctx context.Context, workspace *workloadsServiceClient.WorkspaceCreationRequest) (*workloadsServiceClient.Workspace, *workloadsServiceClient.SubmissionErrorV2) {
-	resp, r, err := c.apiClient.WorkspacesAPI.CreateWorkspace(ctx).
-		WorkspaceCreationRequest(*workspace).Execute()
-
-	if r != nil {
-		if r.StatusCode == http.StatusAccepted {
-			return resp, nil
-		}
-		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to create workspace: downstream status %d", r.StatusCode)
-		return nil, submissionErrorFromDownstreamResponse(r.StatusCode, r.Body, workspace, "workspace")
-	}
-
-	logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed requesting workload service to create workspace (%T)", err)
-	return nil, workloadsServiceClient.NewSubmissionErrorV2(http.StatusServiceUnavailable, "failed to request workspace creation")
-}
-
-func (c Client) CreateTraining(ctx context.Context, training *workloadsServiceClient.TrainingCreationRequest) (*workloadsServiceClient.Training, *workloadsServiceClient.SubmissionErrorV2) {
-	resp, r, err := c.apiClient.TrainingsAPI.CreateTraining(ctx).
-		TrainingCreationRequest(*training).Execute()
-
-	if r != nil {
-		if r.StatusCode == http.StatusAccepted {
-			return resp, nil
-		}
-		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to create training: downstream status %d", r.StatusCode)
-		return nil, submissionErrorFromDownstreamResponse(r.StatusCode, r.Body, training, "training")
-	}
-
-	logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed requesting workload service to create training (%T)", err)
-	return nil, workloadsServiceClient.NewSubmissionErrorV2(http.StatusServiceUnavailable, "failed to request training creation")
-}
-
-func (c Client) CreateDistributed(ctx context.Context, distributed *workloadsServiceClient.DistributedCreationRequest) (*workloadsServiceClient.DistributedWorkload, *workloadsServiceClient.SubmissionErrorV2) {
-	resp, r, err := c.apiClient.DistributedAPI.CreateDistributed(ctx).
-		DistributedCreationRequest(*distributed).Execute()
-
-	if r != nil {
-		if r.StatusCode == http.StatusAccepted {
-			return resp, nil
-		}
-
-		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to create distributed workload: downstream status %d", r.StatusCode)
-		return nil, submissionErrorFromDownstreamResponse(r.StatusCode, r.Body, distributed, "distributed workload")
-	}
-
-	logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed requesting workload service to create distributed workload (%T)", err)
-	return nil, workloadsServiceClient.NewSubmissionErrorV2(http.StatusServiceUnavailable, "failed to request distributed workload creation")
-}
-
 func (c Client) CreateInference(ctx context.Context, inference *workloadsServiceClient.InferenceCreationRequest) (*workloadsServiceClient.Inference, *workloadsServiceClient.Error) {
 	resp, r, err := c.apiClient.InferencesAPI.CreateInference(ctx).
 		InferenceCreationRequest(*inference).Execute()
@@ -108,36 +59,6 @@ func (c Client) CreateInference(ctx context.Context, inference *workloadsService
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed requesting workload service to create inference (%T)", err)
 	return nil, workloadsServiceClient.NewError(http.StatusServiceUnavailable, "failed to request inference creation")
 }
-
-func submissionErrorFromDownstreamResponse(
-	statusCode int,
-	body io.Reader,
-	request interface{},
-	operation string,
-) *workloadsServiceClient.SubmissionErrorV2 {
-	data, readErr := readAndRedactSensitiveDownstreamBody(body, request)
-	if readErr != nil {
-		return workloadsServiceClient.NewSubmissionErrorV2(int32(statusCode), downstreamErrorResponseUnavailable)
-	}
-
-	var responseError *workloadsServiceClient.SubmissionErrorV2
-	if unmarshalErr := json.Unmarshal(data, &responseError); unmarshalErr != nil {
-		return workloadsServiceClient.NewSubmissionErrorV2(
-			int32(statusCode),
-			fmt.Sprintf("failed to create %s: %s", operation, string(data)),
-		)
-	}
-	if responseError == nil {
-		return workloadsServiceClient.NewSubmissionErrorV2(
-			int32(statusCode),
-			fmt.Sprintf("failed to create %s: invalid downstream error response", operation),
-		)
-	}
-	return responseError
-}
-
-// Factory -> the "real" client factory. during testing, it is replaced with factory which
-// generated mock clients
 
 // readAndRedactSensitiveDownstreamBody fails closed instead of processing a partial error body.
 func readAndRedactSensitiveDownstreamBody(body io.Reader, request interface{}) ([]byte, error) {

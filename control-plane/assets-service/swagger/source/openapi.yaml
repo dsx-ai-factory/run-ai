@@ -146,24 +146,6 @@ paths:
   /v1/k8s/clusters/{clusterUuid}/distributed/{workloadId}:
     $ref: './resources/V1/DistributedById.yaml'
 
-  /api/v1/workspace:
-    $ref: './resources/V1/Workspace.yaml'
-  /api/v2/workspace/merged:
-    $ref: './resources/WorkspaceMerged.yaml'
-  /api/v2/workspace:
-    $ref: './resources/WorkspaceV2.yaml'
-  /api/v2/workspace/{workloadId}:
-    $ref: './resources/WorkspaceByIdV2.yaml'
-
-  /api/v1/training:
-    $ref: './resources/V1/Training.yaml'
-  /api/v2/training/merged:
-    $ref: './resources/TrainingMerged.yaml'
-  /api/v2/training:
-    $ref: './resources/TrainingV2.yaml'
-  /api/v2/training/{workloadId}:
-    $ref: './resources/TrainingByIdV2.yaml'
-
   /api/v1/inference:
     $ref: './resources/V1/Inference.yaml'
   /api/v1/inference/{workloadId}:

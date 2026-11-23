@@ -155,7 +155,7 @@ func (s *InferencesApiService) CreateInferenceV2(ctx context.Context, request ap
 
 	dataSourceOverridesById := CreateDatasourceOverrideMapById(request.Assets.Datasources)
 
-	createdWorkloadInfo, err := CreateFlatWorkload(ctx, auth.WorkloadTypeInference, &request.Meta, &request.Assets, specificParams, nil, dataSourceOverridesById, nil)
+	createdWorkloadInfo, err := CreateFlatWorkload(ctx, auth.WorkloadTypeInference, &request.Meta, &request.Assets, specificParams, dataSourceOverridesById)
 	if err != nil {
 		return NewSubmissionErrorResponse(err), nil
 	}
@@ -189,7 +189,7 @@ func (s *InferencesApiService) CreateInferenceV2(ctx context.Context, request ap
 	}
 
 	dbErr := FlatWorkloadUpdateDb(ctx, auth.WorkloadTypeInference, &result.Meta, specificParams,
-		createdWorkloadInfo.WorkerAssets, nil, nil, dataSourceOverridesById, nil)
+		createdWorkloadInfo.WorkerAssets, dataSourceOverridesById)
 	if dbErr != nil {
 		return api.Response(http.StatusInternalServerError, dbErr), nil
 	}
@@ -267,9 +267,11 @@ func (s *InferencesApiService) GetHuggingFaceModelInfo(ctx context.Context, hugg
 }
 
 func (s *InferencesApiService) GetInferenceMerged(ctx context.Context, projectId string, workloadId string) (api.ImplResponse, error) {
-	err := validateMergeParams(projectId, workloadId, false)
-	if err != nil {
-		return api.Response(int(err.Code), err), nil
+	if projectId == "" && workloadId == "" {
+		return NewErrorResponse(api.NewValidationError("either workloadId or projectId must be provided")), nil
+	}
+	if projectId != "" && workloadId != "" {
+		return NewErrorResponse(api.NewValidationError("workloadId and projectId are mutually exclusive")), nil
 	}
 
 	//
@@ -301,7 +303,7 @@ func (s *InferencesApiService) GetInferenceMerged(ctx context.Context, projectId
 
 	inferenceAsMap, jsonErr := gojsonq.LoadJson(inference)
 	if jsonErr != nil {
-		return api.Response(int(err.Code), err), nil
+		return NewErrorResponse(api.NewError(http.StatusInternalServerError, "failed to convert inference", jsonErr)), nil
 	}
 
 	result, err := flat_workloads.FlatToAssetsBased(inferenceAsMap, effectivePolicy.DefaultsV2, effectivePolicy.RulesV2)
@@ -312,7 +314,7 @@ func (s *InferencesApiService) GetInferenceMerged(ctx context.Context, projectId
 	var resultInference api.InferenceV2
 	jsonErr = json.Unmarshal(gojsonq.ToBytes(result), &resultInference)
 	if jsonErr != nil {
-		return api.Response(int(err.Code), err), nil
+		return NewErrorResponse(api.NewError(http.StatusInternalServerError, "failed to convert inference", jsonErr)), nil
 	}
 
 	return api.Response(http.StatusOK, resultInference), nil

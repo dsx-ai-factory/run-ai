@@ -10,8 +10,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"sort"
-	"strings"
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/clients/org_unit"
@@ -200,71 +198,10 @@ var _ = Describe("datasources specific tests", func() {
 			s3Asset, _, _ := createS3Asset(buildRandomProjectS3(randoms, nil), router, headerForAdmin(randoms))
 			secretVolumeAsset, _, _ := createSecretVolumeAsset(&randoms.ClusterId, testing.BuildRandomProjectSecretVolumeAsset(randoms, nil), router, headerForAdmin(randoms))
 
-			checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
-				WithCluster(randoms.ClusterId, testing.BuildDisplayedCluster(randoms, testing.UnitTestDefaultClusterVersion, false)))
+			seedLegacyWorkload(randoms, workloadType, "pvc-nfs-s3", envAsset.Meta, pvcAsset.Meta, nfsAsset.Meta, s3Asset.Meta)
+			seedLegacyWorkload(randoms, workloadType, "volume-nfs-git", envAsset.Meta, volumeAsset.Meta, nfsAsset.Meta, gitAsset.Meta)
+			seedLegacyWorkload(randoms, workloadType, "configmap-secret-volume", envAsset.Meta, secretVolumeAsset.Meta, configMapAsset.Meta)
 
-			createWorkloadRequest := []api.WorkloadCreationRequest{
-				{
-					Name:      "pvc-nfs-s3",
-					ClusterId: randoms.ClusterId,
-					ProjectId: int32(randoms.ProjectId),
-					Namespace: fmt.Sprintf("runai-proj-%d", randoms.ProjectId),
-					Assets: api.AssetsIds{
-						Environment: envAsset.Meta.Id,
-						Datasources: []api.AssetIdAndKind{
-							{Id: pvcAsset.Meta.Id, Kind: pvcAsset.Meta.Kind},
-							{Id: nfsAsset.Meta.Id, Kind: nfsAsset.Meta.Kind},
-							{Id: s3Asset.Meta.Id, Kind: s3Asset.Meta.Kind},
-						},
-					},
-				},
-				{
-					Name:      "volume-nfs-git",
-					ClusterId: randoms.ClusterId,
-					ProjectId: int32(randoms.ProjectId),
-					Namespace: fmt.Sprintf("runai-proj-%d", randoms.ProjectId),
-					Assets: api.AssetsIds{
-						Environment: envAsset.Meta.Id,
-						Datasources: []api.AssetIdAndKind{
-							{Id: volumeAsset.Meta.Id, Kind: volumeAsset.Meta.Kind},
-							{Id: nfsAsset.Meta.Id, Kind: nfsAsset.Meta.Kind},
-							{Id: gitAsset.Meta.Id, Kind: gitAsset.Meta.Kind},
-						},
-					},
-				},
-				{
-					Name:      "configmap-secret-volume",
-					ClusterId: randoms.ClusterId,
-					ProjectId: int32(randoms.ProjectId),
-					Namespace: fmt.Sprintf("runai-proj-%d", randoms.ProjectId),
-					Assets: api.AssetsIds{
-						Environment: envAsset.Meta.Id,
-						Datasources: []api.AssetIdAndKind{
-							{Id: secretVolumeAsset.Meta.Id, Kind: secretVolumeAsset.Meta.Kind},
-							{Id: configMapAsset.Meta.Id, Kind: configMapAsset.Meta.Kind},
-						},
-					},
-				},
-			}
-
-			for _, req := range createWorkloadRequest {
-				sort.Slice(req.Assets.Datasources, func(i, j int) bool {
-					return req.Assets.Datasources[i].Id < req.Assets.Datasources[j].Id
-				})
-
-				createWsPayload, err := json.Marshal(req)
-				Expect(err).To(BeNil())
-
-				createWsHttpReq, err := http.NewRequest("POST", urlForCreatingWorkload[workloadType], strings.NewReader(string(createWsPayload)))
-				Expect(err).To(BeNil())
-				createWsHttpReq.Header = *headerForAdmin(randoms)
-
-				getHttpResp := httptest.NewRecorder()
-				router.ServeHTTP(getHttpResp, createWsHttpReq)
-				Expect(getHttpResp.Code).To(Equal(http.StatusOK))
-			}
-
-			//  list with usage, currently not used by any workload/template
 			listDsHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s?usageInfo=true", urlDatasource), nil)
 			Expect(err).To(BeNil())
 			listDsHttpReq.Header = *headerForAdmin(randoms)

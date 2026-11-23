@@ -8,7 +8,6 @@ package workloads_service
 import (
 	"encoding/json"
 	"errors"
-	"net/http"
 	"strings"
 	"testing"
 )
@@ -109,24 +108,5 @@ func TestReadAndRedactSensitiveDownstreamBodyRejectsPartialReads(t *testing.T) {
 	}
 	if body != nil {
 		t.Fatalf("partial downstream body must be discarded, got: %q", body)
-	}
-}
-
-func TestSubmissionErrorFromDownstreamResponseRejectsNull(t *testing.T) {
-	responseError := submissionErrorFromDownstreamResponse(
-		http.StatusBadRequest,
-		strings.NewReader("null"),
-		map[string]interface{}{},
-		"workspace",
-	)
-
-	if responseError == nil {
-		t.Fatal("expected a non-nil error for a null downstream response")
-	}
-	if responseError.Code != http.StatusBadRequest {
-		t.Fatalf("expected status %d, got %d", http.StatusBadRequest, responseError.Code)
-	}
-	if !strings.Contains(responseError.Message, "invalid downstream error response") {
-		t.Fatalf("unexpected error message: %q", responseError.Message)
 	}
 }

@@ -48,24 +48,6 @@ func redactInferenceSpecificRunParamsSensitiveValues(specificRunParams *api.Infe
 	return &redacted
 }
 
-func redactWorkspaceSpecificRunParamsSensitiveValues(specificRunParams *api.WorkspaceSpecificRunParams) *api.WorkspaceSpecificRunParams {
-	if specificRunParams == nil {
-		return nil
-	}
-	redacted := *specificRunParams
-	redacted.EnvironmentVariables = redactSensitiveEnvironmentVariables(specificRunParams.EnvironmentVariables)
-	return &redacted
-}
-
-func redactTrainingSpecificRunParamsSensitiveValues(specificRunParams *api.TrainingSpecificRunParams) *api.TrainingSpecificRunParams {
-	if specificRunParams == nil {
-		return nil
-	}
-	redacted := *specificRunParams
-	redacted.EnvironmentVariables = redactSensitiveEnvironmentVariables(specificRunParams.EnvironmentVariables)
-	return &redacted
-}
-
 func redactGenericWorkloadSensitiveValues(workload *dbmodel.GenericWorkload) {
 	if workload == nil {
 		return

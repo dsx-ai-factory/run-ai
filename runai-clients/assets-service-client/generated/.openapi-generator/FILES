@@ -145,7 +145,6 @@ docs/DefaultFromRule.md
 docs/DisplayedJob.md
 docs/DistMaster.md
 docs/Distributed.md
-docs/DistributedData.md
 docs/DistributedFramework.md
 docs/DistributedInferenceCommonSpec.md
 docs/DistributedInferenceLeaderSpecFields.md
@@ -164,9 +163,6 @@ docs/DistributedInferenceStartupPolicy.md
 docs/DistributedInferenceStartupPolicyField.md
 docs/DistributedInferenceWorkerSpecFields.md
 docs/DistributedInferenceWorkersField.md
-docs/DistributedMaster.md
-docs/DistributedMasterData.md
-docs/DistributedParams.md
 docs/DockerRegistry.md
 docs/DockerRegistryCreationRequest.md
 docs/DockerRegistryCreationSpec.md
@@ -320,7 +316,6 @@ docs/NodePortInfo.md
 docs/NodeSelectorTerm.md
 docs/NonOverridableSpecFields.md
 docs/NumberRules.md
-docs/OptionalAssetIds.md
 docs/OverridableSpecFields.md
 docs/PVCAPI.md
 docs/PVCAsset.md
@@ -463,10 +458,7 @@ docs/TolerationRules.md
 docs/TolerationsRules.md
 docs/ToolType.md
 docs/Training.md
-docs/TrainingCreationRequestV2.md
 docs/TrainingListResponse.md
-docs/TrainingSpecificRunParams.md
-docs/TrainingV2.md
 docs/TrainingsAPI.md
 docs/UidGidSource.md
 docs/UsageTimesInfo.md
@@ -484,10 +476,7 @@ docs/WorkloadStatusUpdate.md
 docs/WorkloadSupportedTypes.md
 docs/WorkloadType.md
 docs/Workspace.md
-docs/WorkspaceCreationRequestV2.md
 docs/WorkspaceListResponse.md
-docs/WorkspaceSpecificRunParams.md
-docs/WorkspaceV2.md
 docs/WorkspacesAPI.md
 git_push.sh
 go.mod
@@ -604,7 +593,6 @@ model_default_from_rule.go
 model_displayed_job.go
 model_dist_master.go
 model_distributed.go
-model_distributed_data.go
 model_distributed_framework.go
 model_distributed_inference_common_spec.go
 model_distributed_inference_leader_spec_fields.go
@@ -623,9 +611,6 @@ model_distributed_inference_startup_policy.go
 model_distributed_inference_startup_policy_field.go
 model_distributed_inference_worker_spec_fields.go
 model_distributed_inference_workers_field.go
-model_distributed_master.go
-model_distributed_master_data.go
-model_distributed_params.go
 model_docker_registry.go
 model_docker_registry_creation_request.go
 model_docker_registry_creation_spec.go
@@ -770,7 +755,6 @@ model_node_port_info.go
 model_node_selector_term.go
 model_non_overridable_spec_fields.go
 model_number_rules.go
-model_optional_asset_ids.go
 model_overridable_spec_fields.go
 model_password.go
 model_password_creation_request.go
@@ -907,10 +891,7 @@ model_toleration_rules.go
 model_tolerations_rules.go
 model_tool_type.go
 model_training.go
-model_training_creation_request_v2.go
 model_training_list_response.go
-model_training_specific_run_params.go
-model_training_v2.go
 model_uid_gid_source.go
 model_usage_times_info.go
 model_validate_sync_request.go
@@ -926,10 +907,7 @@ model_workload_status_update.go
 model_workload_supported_types.go
 model_workload_type.go
 model_workspace.go
-model_workspace_creation_request_v2.go
 model_workspace_list_response.go
-model_workspace_specific_run_params.go
-model_workspace_v2.go
 response.go
 test/api_assets_test.go
 test/api_compute_test.go
