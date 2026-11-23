@@ -251,6 +251,14 @@ export enum ENodePoolSchedulingMode {
   Custom = "Custom",
 }
 
+export function isSupportedSchedulingMode(mode: ENodePoolSchedulingMode | undefined) {
+  return (
+    mode === ENodePoolSchedulingMode.Proportional ||
+    mode === ENodePoolSchedulingMode.Ranked ||
+    mode === ENodePoolSchedulingMode.Guaranteed
+  );
+}
+
 export function getSchedulingMode(capabilities?: SchedulingCapabilitiesNullable): ENodePoolSchedulingMode {
   if (!capabilities) return ENodePoolSchedulingMode.Unknown;
   if (capabilities.quota) return ENodePoolSchedulingMode.Guaranteed;
@@ -260,6 +268,10 @@ export function getSchedulingMode(capabilities?: SchedulingCapabilitiesNullable)
 }
 
 export const SCHEDULING_MODE_DESCRIPTIONS: Partial<Record<ENodePoolSchedulingMode, string>> = {
+  Ranked:
+    "Higher-ranked departments and projects receive GPU resources first. Remaining capacity goes to lower-ranked ones, in rank order.",
+  "Guaranteed quota":
+    "Each department has a guaranteed GPU quota. Any unused quota is redistributed by rank and weight.",
   Proportional: "GPU resources are distributed proportionally according to each department's and project's weight.",
 };
 

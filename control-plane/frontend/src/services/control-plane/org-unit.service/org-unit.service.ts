@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { isCancel } from "axios";
+import type { FairShareSimulationRequest, FairShareSimulationResponse } from "@/swagger-models/org-unit-service-client";
 import type { IDepartmentTable, IDepartmentTableFilterBy } from "@/models/department.model";
 import { DEFAULT_DEPARTMENT_NAME } from "@/models/department.model";
 import type { IFilterBy, IPaginationFilter } from "@/models/filter.model";
@@ -94,6 +96,8 @@ export const orgUnitService = {
   countDepartmentNodePoolResources,
   getDepartmentMetrics,
   getProjectMetrics,
+  simulateNodePoolFairShare,
+  getDepartmentSubordinateGpuQuota,
 };
 
 //******** ProjectsApi ************
@@ -779,4 +783,38 @@ async function getProjectMetrics(
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
   }
+}
+
+async function simulateNodePoolFairShare(
+  poolId: string,
+  request: FairShareSimulationRequest,
+  signal?: AbortSignal,
+): Promise<FairShareSimulationResponse> {
+  try {
+    return (await orgUnitServiceApi.orgUnitApi.simulateNodePoolFairShare(poolId, request, { signal })).data;
+  } catch (error) {
+    if (isCancel(error)) throw error;
+    throw httpService.handleHttpError(error);
+  }
+}
+
+async function getDepartmentSubordinateGpuQuota(
+  departmentId: string,
+  scope: { nodePoolId?: string; nodePoolName?: string; clusterId?: string; emptyChildrenAsZero?: boolean },
+): Promise<number | null | undefined> {
+  const department = await orgUnitService.getDepartment(departmentId);
+  if (scope.clusterId && department.clusterId !== scope.clusterId)
+    throw new Error("Department does not belong to this cluster.");
+  const aggregate = department.projectsAggregatedResources?.find((resource) =>
+    scope.nodePoolId ? resource.nodePool?.id === scope.nodePoolId : resource.nodePool?.name === scope.nodePoolName,
+  );
+  const quota = aggregate ? (aggregate.gpu?.deserved ?? null) : undefined;
+  if (
+    quota == null &&
+    scope.emptyChildrenAsZero &&
+    Array.isArray(department.children) &&
+    department.children.length === 0
+  )
+    return 0;
+  return quota;
 }

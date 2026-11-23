@@ -45,6 +45,7 @@ describe("shared node pool new/edit entry", () => {
             emits: ["created", "leave-approved"],
             template: "<p>New node pool</p>",
           },
+          NodePoolScheduling: { template: "<p>Scheduling saved-pool</p>" },
           NodePoolEditForm: { props: ["nodePool"], template: "<p>Edit {{nodePool.name}}</p>" },
         },
       },
@@ -55,6 +56,9 @@ describe("shared node pool new/edit entry", () => {
     form.vm.$emit("created", { id: "saved", name: "saved-pool", clusterId: "cluster" }, {}, "continue");
     await flushPromises();
     expect(router.currentRoute.value.query.stepName).toBe("scheduling");
+    expect(wrapper.text()).toContain("Scheduling saved-pool");
+    await router.push("/node-pools/edit/saved");
+    await flushPromises();
     expect(clusterService.getNodepool).toHaveBeenCalledWith("saved");
     expect(wrapper.text()).toContain("Edit saved-pool");
     await router.push("/node-pools/new");

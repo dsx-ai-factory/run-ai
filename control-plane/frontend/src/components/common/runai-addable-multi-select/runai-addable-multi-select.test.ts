@@ -6,7 +6,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ISelectOption } from "@/models/global.model";
 import type { VueWrapper } from "@vue/test-utils";
-import { mount } from "@vue/test-utils";
+import { flushPromises, mount } from "@vue/test-utils";
 import { RunaiAddableMultiSelect } from "@/components/common/runai-addable-multi-select/index";
 import { Quasar, type QSelect } from "quasar";
 import { errorMessages } from "@/common/error-message.constant";
@@ -73,6 +73,64 @@ describe("RunaiAddableMultiSelect", () => {
     wrapper.vm.createNewValue("option3");
     expect(wrapper.emitted("add-option")).toBeTruthy();
   });
+  it("shows field feedback for a typed value at the limit and allows adding after removal", async () => {
+    const selectedOptions = [
+      { label: "first", value: "first" },
+      { label: "second", value: "second" },
+    ];
+    factory({ ...DEFAULT_PROPS, selectedOptions });
+    await wrapper.setProps({ maxValues: 2 });
+    const input = wrapper.get("input");
+
+    await input.setValue("third");
+    await input.trigger("keydown", { key: "Enter", keyCode: 13 });
+    await flushPromises();
+    expect(wrapper.emitted("add-option")).toBeUndefined();
+    expect(wrapper.find(".q-field--error").exists()).toBe(true);
+    expect(wrapper.get(".q-field__messages").text()).toContain("Select up to 2 values");
+    expect(getMultiSelectValues()).toEqual(["first", "second"]);
+
+    await wrapper.findAllComponents({ name: "QChip" })[1].find(".q-chip__icon--remove").trigger("click");
+    expect(wrapper.emitted("options-select")?.[0][0]).toEqual([selectedOptions[0]]);
+    await wrapper.setProps({ selectedOptions: [selectedOptions[0]] });
+    expect(wrapper.find(".q-field--error").exists()).toBe(false);
+    await input.setValue("replacement");
+    await input.trigger("keydown", { key: "Enter", keyCode: 13 });
+    expect(wrapper.emitted("add-option")?.[0][0]).toBe("replacement");
+    expect(wrapper.find(".q-field--error").exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it("clears limit feedback when the typed value is edited", async () => {
+    factory({ ...DEFAULT_PROPS, selectedOptions: [{ label: "first", value: "first" }] });
+    await wrapper.setProps({ maxValues: 1 });
+    const input = wrapper.get("input");
+    await input.setValue("second");
+    await input.trigger("keydown", { key: "Enter", keyCode: 13 });
+    expect(wrapper.find(".q-field--error").exists()).toBe(true);
+
+    await input.setValue("edited");
+    await flushPromises();
+    expect(wrapper.find(".q-field--error").exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it("retains required-field validation after clearing selection-limit feedback", async () => {
+    factory({ ...DEFAULT_PROPS, required: true, selectedOptions: [{ label: "first", value: "first" }] });
+    await wrapper.setProps({ maxValues: 1 });
+    const input = wrapper.get("input");
+    await input.setValue("second");
+    await input.trigger("keydown", { key: "Enter", keyCode: 13 });
+    expect(wrapper.get(".q-field__messages").text()).toContain("Select up to 1 value");
+
+    await wrapper.setProps({ selectedOptions: [] });
+    await (wrapper.findComponent({ name: "QSelect" }).vm as unknown as QSelect).validate();
+    await flushPromises();
+    expect(wrapper.find(".q-field--error").exists()).toBe(true);
+    expect(wrapper.get(".q-field__messages").text()).toBe(errorMessages.SELECT_A_VALUE);
+    wrapper.unmount();
+  });
+
   it("clears selected options when clear button is clicked", async () => {
     const options: ISelectOption[] = [
       { label: "option1", value: "option1" },

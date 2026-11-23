@@ -3,27 +3,41 @@
   SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-  <div class="creation-summary">
-    <div class="summary-heading">Cluster</div>
-    <div>{{ pool.clusterName || clusterName || "None" }}</div>
+  <div class="creation-summary" :class="{ 'creation-summary--scheduling': scheduling }">
+    <section class="summary-section">
+      <div class="summary-heading">Cluster</div>
+      <div>{{ pool.clusterName || clusterName || "None" }}</div>
+    </section>
     <q-separator class="q-my-md" />
-    <div class="summary-heading resources-heading">
-      Resources
-      <runai-tooltip
-        class="resources-help"
-        size="xs"
-        tooltip-text="All the resources available for matching labeled nodes within the node pool"
-        aria-label="Node pool resources"
-      />
-    </div>
-    <div v-for="row in resourceRows" :key="row.label">{{ row.label }}: {{ row.value }}</div>
+    <section class="summary-section">
+      <div class="summary-heading resources-heading">
+        Resources
+        <runai-tooltip
+          size="xs"
+          class="resources-help"
+          tooltip-text="All the resources available for matching labeled nodes within the node pool"
+          aria-label="Node pool resources"
+        />
+      </div>
+      <div>
+        <div v-for="row in resourceRows" :key="row.label">{{ row.label }}: {{ row.value }}</div>
+      </div>
+    </section>
     <q-separator class="q-my-md" />
-    <div class="summary-heading">Scheduling mode</div>
-    <div class="text-weight-bold q-mb-xs">{{ schedulingMode }}</div>
-    <div v-if="modeDescription">{{ modeDescription }}</div>
+    <section class="summary-section summary-mode">
+      <div class="summary-heading">Scheduling mode</div>
+      <div>
+        <div class="summary-mode-name text-weight-bold q-mb-xs">{{ schedulingMode }}</div>
+        <div v-if="modeDescription">{{ modeDescription }}</div>
+      </div>
+    </section>
     <q-separator class="q-my-md" />
-    <div class="summary-heading">Topology & placement</div>
-    <div v-for="row in configurationRows" :key="row.label">{{ row.label }}: {{ row.value }}</div>
+    <section class="summary-section summary-topology">
+      <div class="summary-heading">Topology &amp; placement</div>
+      <div>
+        <div v-for="row in configurationRows" :key="row.label">{{ row.label }}: {{ row.value }}</div>
+      </div>
+    </section>
   </div>
 </template>
 <script setup lang="ts">
@@ -31,8 +45,8 @@ import { computed } from "vue";
 import { RunaiTooltip } from "@/components/common/runai-tooltip";
 import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
 import { memoryFormat } from "@/utils/format.util";
+import { NODE_POOL_CONFIGURATION_DEFAULTS as defaults } from "@/models/node-pool.model";
 import {
-  NODE_POOL_CONFIGURATION_DEFAULTS as defaults,
   getSchedulingMode,
   NETWORK_ACCELERATION_LABELS,
   SCHEDULING_MODE_DESCRIPTIONS,
@@ -42,6 +56,7 @@ import {
 
 const props = defineProps<{
   pool: INodePoolSummaryConfiguration;
+  scheduling?: boolean;
   clusterName?: string;
   resources?: INodePoolSummaryResources;
 }>();
@@ -95,7 +110,7 @@ const configurationRows = computed(() => {
 .resources-heading {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 10px;
 }
 .resources-help {
   width: 20px;
@@ -109,5 +124,42 @@ const configurationRows = computed(() => {
 .summary-heading {
   color: var(--b-text-sub);
   margin-bottom: 10px;
+}
+.creation-summary--scheduling {
+  padding: 7px 16px 16px;
+}
+.creation-summary--scheduling .summary-section {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.creation-summary--scheduling .summary-heading {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  margin: 0;
+  font-weight: 500;
+}
+.creation-summary--scheduling .summary-mode,
+.creation-summary--scheduling .summary-topology {
+  gap: 5px;
+}
+.creation-summary--scheduling .summary-mode-name {
+  margin-bottom: 5px;
+  font-weight: 800;
+}
+.creation-summary--scheduling > .q-separator {
+  margin: 20px 0;
+}
+.creation-summary--scheduling .resources-heading {
+  gap: 7px;
+}
+.creation-summary--scheduling .resources-help {
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+}
+.creation-summary--scheduling .resources-help :deep(.q-icon) {
+  font-size: 20px;
 }
 </style>

@@ -14,7 +14,13 @@
     />
     <runai-advanced-filter-summary :filters="filtersExcludingCluster" @remove="removeFilter" @select="selectFilter" />
     <q-btn class="add-filter-btn q-ml-xs" ref="add-filter-btn" flat no-caps label="Add filter">
-      <q-menu fit transition-show="scale" transition-hide="scale" transition-duration="500">
+      <q-menu
+        :fit="!menuWidth"
+        :style="menuWidth ? { width: menuWidth } : undefined"
+        transition-show="scale"
+        transition-hide="scale"
+        transition-duration="500"
+      >
         <q-list>
           <q-item
             v-for="option in availableFilterOptions"
@@ -29,13 +35,20 @@
           </q-item>
         </q-list>
       </q-menu>
-      <component
+      <slot
         v-if="selectedFilter"
-        @close="selectFilter(null)"
-        @save="saveFilter"
+        name="editor"
         :filter="selectedFilter"
-        :is="filterComponent(selectedFilter.name)"
-      />
+        :save="saveFilter"
+        :close="() => selectFilter(null)"
+      >
+        <component
+          @close="selectFilter(null)"
+          @save="saveFilter"
+          :filter="selectedFilter"
+          :is="filterComponent(selectedFilter.name)"
+        />
+      </slot>
     </q-btn>
   </section>
 </template>
@@ -86,6 +99,10 @@ export default defineComponent({
   },
   emits: ["update-filter-by"],
   props: {
+    menuWidth: {
+      type: String,
+      required: false,
+    },
     initialFiltersModel: {
       type: Array as PropType<Array<IAdvancedFilterModel>>,
       default: () => [],
@@ -216,7 +233,7 @@ export default defineComponent({
     },
     initialFiltersModel: {
       handler(newVal) {
-        this.filtersModel = newVal;
+        this.filtersModel = deepCopy(newVal);
       },
     },
   },

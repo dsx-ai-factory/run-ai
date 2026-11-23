@@ -160,6 +160,7 @@ import NodeListModal from "@/components/node/node-list-modal/node-list-modal.vue
 import RunaiTable from "@/components/common/runai-table/runai-table.vue";
 import { RunaiTableNoData } from "@/components/common/runai-table/runai-table-no-data";
 import { Action, ResourceType } from "@/swagger-models/authorization-client";
+import { ENABLE_NODE_POOL_CREATE_FLOW } from "@/constants/node-pool.constants";
 import { NODE_POOL_ROUTE_NAMES } from "@/router/node-pool.routes/node-pool.routes.names";
 import { RunaiTooltipWrapper } from "@/components/common/runai-tooltip-wrapper";
 import { usePermissionStore } from "@/stores/permissions.store";
@@ -464,7 +465,11 @@ const NodePoolIndex = defineComponent({
       this.$router.push({ name: NODE_POOL_ROUTE_NAMES.NODE_POOL_NEW, query: { clusterId } });
     },
     editNodePool(): void {
-      this.$router.push({ name: NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT, params: { id: this.selectedNodePool?.id } });
+      this.$router.push({
+        name: NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT,
+        params: { id: this.selectedNodePool?.id },
+        ...(ENABLE_NODE_POOL_CREATE_FLOW ? { query: { stepName: "scheduling" } } : {}),
+      });
     },
     async deleteNodepool(): Promise<void> {
       if (!this.selectedNodePool) return;
