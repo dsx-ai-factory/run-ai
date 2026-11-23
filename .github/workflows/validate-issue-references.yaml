@@ -114,6 +114,9 @@ on:
       GH_TOKEN:
         description: "Optional fine-grained PAT (Issues: read, Pull requests: read on the external tracker and this repository)."
         required: false
+      GIT_HUB_OSS:
+        description: "Optional fine-grained PAT for a second external tracker owned by another organization (Issues: read, Pull requests: read)."
+        required: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || format('issue-{0}', github.event.issue.number || github.event.client_payload.issue_number) }}
@@ -144,7 +147,10 @@ jobs:
       - name: Validate issue reference
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
+          # One fine-grained PAT cannot span trackers owned by different
+          # organizations, so each tracker is read with the token that sees it.
           GH_TOKEN: ${{ secrets.GIT_HUB_OSS }}
+          GH_TOKEN_INTERNAL: ${{ secrets.GH_TOKEN }}
         with:
           script: |
             const { owner, repo } = context.repo;
@@ -152,7 +158,8 @@ jobs:
             const approvedLabel = process.env.APPROVED_LABEL;
             const exemptUpdates = (process.env.EXEMPT_UPDATES || '').split(/\s+/).filter(Boolean)
               .map(pair => { const [prefix, login] = pair.split('='); return { prefix, login }; });
-            const privateToken = process.env.GH_TOKEN || '';
+            const privateTokens = [...new Set(
+              [process.env.GH_TOKEN, process.env.GH_TOKEN_INTERNAL].filter(Boolean))];
 
             if (pr.user && pr.user.type === 'Bot') {
               core.info(`Pull request was opened by ${pr.user.login} (bot) - skipping the issue requirement.`);
@@ -171,15 +178,15 @@ jobs:
               return;
             }
 
-            // Headers for the GraphQL call made with the external token.
+            // Headers for the GraphQL calls made with the external tokens.
             // actions/github-script bundles its dependencies, so a second Octokit
             // client cannot be created with require('@actions/github').
-            const externalHeaders = {
-              Authorization: `Bearer ${privateToken}`,
+            const externalHeaders = (token) => ({
+              Authorization: `Bearer ${token}`,
               Accept: 'application/vnd.github+json',
               'X-GitHub-Api-Version': '2022-11-28',
               'User-Agent': 'validate-issue-references',
-            };
+            });
 
             // References are { owner, repo, number }, keyed by "owner/repo#number" to dedupe.
             const references = new Map();
@@ -197,9 +204,9 @@ jobs:
 
             // Issues linked through the pull request's "Development" panel. The
             // workflow token only sees issues of this repository; when the external
-            // token is configured, the same query is repeated with it so issues of the
-            // external tracker are found too. GitHub hides those links from viewers
-            // without access to the issue.
+            // tokens are configured, the same query is repeated with each so issues of
+            // the external trackers are found too. GitHub hides those links from viewers
+            // without access to the issue, so the results are merged across tokens.
             const linkedQuery = `
               query($owner: String!, $repo: String!, $number: Int!) {
                 repository(owner: $owner, name: $repo) {
@@ -221,11 +228,11 @@ jobs:
             } catch (error) {
               core.warning(`Could not read the Development panel: ${error.message}`);
             }
-            if (privateToken) {
+            for (const [index, token] of privateTokens.entries()) {
               try {
                 const response = await fetch('https://api.github.com/graphql', {
                   method: 'POST',
-                  headers: { ...externalHeaders, 'Content-Type': 'application/json' },
+                  headers: { ...externalHeaders(token), 'Content-Type': 'application/json' },
                   body: JSON.stringify({ query: linkedQuery, variables }),
                 });
                 const payload = await response.json();
@@ -234,7 +241,7 @@ jobs:
                 }
                 addLinkedNodes(payload.data);
               } catch (error) {
-                core.warning(`Could not read the Development panel with GH_TOKEN: ${error.message}`);
+                core.warning(`Could not read the Development panel with external token ${index + 1} of ${privateTokens.length}: ${error.message}`);
               }
             }
 
@@ -325,10 +332,12 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN_OSS: ${{ secrets.GIT_HUB_OSS }}
         with:
           script: |
             const { owner, repo } = context.repo;
-            const privateToken = process.env.GH_TOKEN || '';
+            const privateTokens = [...new Set(
+              [process.env.GH_TOKEN, process.env.GH_TOKEN_OSS].filter(Boolean))];
 
             // The changed issue: local for `issues` events, external for `repository_dispatch`.
             let target;
@@ -375,24 +384,26 @@ jobs:
               } catch (error) {
                 core.warning(`PR #${prNumber}: could not read the Development panel: ${error.message}`);
               }
-              if (!isPublic && privateToken) {
-                try {
-                  const response = await fetch('https://api.github.com/graphql', {
-                    method: 'POST',
-                    headers: {
-                      Authorization: `Bearer ${privateToken}`,
-                      'Content-Type': 'application/json',
-                      'User-Agent': 'validate-issue-references',
-                    },
-                    body: JSON.stringify({ query: linkedQuery, variables }),
-                  });
-                  const payload = await response.json();
-                  if (!response.ok || payload.errors) {
-                    throw new Error(payload.errors ? payload.errors.map(e => e.message).join('; ') : `HTTP ${response.status}`);
+              if (!isPublic) {
+                for (const [index, token] of privateTokens.entries()) {
+                  try {
+                    const response = await fetch('https://api.github.com/graphql', {
+                      method: 'POST',
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'User-Agent': 'validate-issue-references',
+                      },
+                      body: JSON.stringify({ query: linkedQuery, variables }),
+                    });
+                    const payload = await response.json();
+                    if (!response.ok || payload.errors) {
+                      throw new Error(payload.errors ? payload.errors.map(e => e.message).join('; ') : `HTTP ${response.status}`);
+                    }
+                    for (const key of linkedKeys(payload.data)) keys.add(key);
+                  } catch (error) {
+                    core.warning(`PR #${prNumber}: could not read the Development panel with external token ${index + 1} of ${privateTokens.length}: ${error.message}`);
                   }
-                  for (const key of linkedKeys(payload.data)) keys.add(key);
-                } catch (error) {
-                  core.warning(`PR #${prNumber}: could not read the Development panel with GH_TOKEN: ${error.message}`);
                 }
               }
               return keys.has(targetKey);
