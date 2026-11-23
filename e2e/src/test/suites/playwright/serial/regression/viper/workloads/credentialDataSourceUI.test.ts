@@ -14,8 +14,6 @@ import {
     projectResourcesUtils,
     projectUtils,
     tags,
-    unleashClient,
-    apiUtils,
     Utils
 } from '../../../../../../../modules/helpers';
 import { AllureUtils } from '../../../../../../../modules/helpers/utils/AllureUtils';
@@ -24,6 +22,7 @@ import { BrowserEngine } from '../../../../../../../modules/ui/runaiV2/pages/Bro
 import { CredentialPage } from '../../../../../../../modules/ui/runaiV2/pages/CredentialPage';
 import { DataSourcePage } from '../../../../../../../modules/ui/runaiV2/pages/DataSourcePage';
 import { WorkspacePage } from '../../../../../../../modules/ui/runaiV2/pages/WorkspacePage';
+import { HybridForm } from '../../../../../../../modules/ui/runaiV2/pages/HybridSubmissionForm';
 import {
     EnvironmentAsset,
     EnvironmentCreationRequest,
@@ -31,7 +30,6 @@ import {
 } from '../../../../../../../modules/api/apis/assetsApi';
 import { EWorkloadStatus, WorkloadPage } from '../../../../../../../modules/ui/runaiV2/pages/WorkloadPage';
 import { test } from '@playwright/test';
-import { EFeatureToggleKeys } from '../../../../../../../modules/helpers/utils/Unleash/featureToggle';
 
 test.describe(`Secret as a Datasource UI, tags: ${tags.tool.ui} ${tags.resource.credential} ${tags.teams.viper}`, function () {
     let browserEngine: BrowserEngine;
@@ -126,8 +124,6 @@ test.describe(`Secret as a Datasource UI, tags: ${tags.tool.ui} ${tags.resource.
             throw error;
         }
 
-        await unleashClient.disableFeature(EFeatureToggleKeys.SHOW_HYBRID_SUBMISSION);
-        await apiUtils.disableHybridSubmission();
         try {
             await projectUtils.waitForRoleBindingForUserInProject(
                 namespace,
@@ -143,8 +139,6 @@ test.describe(`Secret as a Datasource UI, tags: ${tags.tool.ui} ${tags.resource.
     test.afterAll('deleting project and namespace', async function () {
         try {
             await operations.deleteProjectAndNamespace(project.id);
-            await unleashClient.enableFeature(EFeatureToggleKeys.SHOW_HYBRID_SUBMISSION);
-            await apiUtils.enableHybridSubmission();
         } catch (error) {
             logger.error(
                 `failed to delete project ${projectName} and namespace ${namespace}: ${error.message}`
@@ -197,18 +191,10 @@ test.describe(`Secret as a Datasource UI, tags: ${tags.tool.ui} ${tags.resource.
         computeName: string,
         dataSourceName: string
     ): Promise<void> {
-        await workload.navigateToWorkloads();
-        await workload.openWorkspaceForm();
-        await workload.workloadFormSelectProject(projectName);
-        await workspace.fillWorkspaceName(workspaceName);
-        await workspace.waitForWorkspaceNameCount(workspaceName);
-        await workspace.selectAssetsSubmissionOption();
-        await workspace.clickOnContinue();
-        await workspace.selectEnvironment(environmentName);
-        await workspace.selectComputeResource(computeName);
-        await workspace.openDataSourceSection();
-        await workspace.selectDataSourceName(dataSourceName);
-        await workspace.clickOnCreateWorkspaceBtn();
+        await workspace.fillFlexWorkspaceFirstPage(projectName, workspaceName);
+        const hybridForm = new HybridForm(browserEngine.currentPage);
+        await hybridForm.fillHybridFormByLoadingExistingConfig(environmentName, computeName, { dsName: dataSourceName });
+        await hybridForm.clickOnSubmit();
     }
 
     //async function deleteDataSourceByName(name: string): Promise<void> {

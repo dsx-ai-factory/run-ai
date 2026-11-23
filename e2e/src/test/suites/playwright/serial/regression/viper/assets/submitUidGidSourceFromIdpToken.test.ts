@@ -14,9 +14,7 @@ import {
     projectResourcesUtils,
     settings,
     tags,
-    unleashClient,
     Utils,
-    apiUtils,
     idpUtils,
     waitUtils
 } from '../../../../../../../modules/helpers';
@@ -31,12 +29,12 @@ import { BrowserEngine } from '../../../../../../../modules/ui/runaiV2/pages/Bro
 import { shouldRunTests } from '../../../../../../../modules/helpers/utils/SupporetedEnvsUtils';
 import { expect, test } from '@playwright/test';
 import { WorkspacePage } from '../../../../../../../modules/ui/runaiV2/pages/WorkspacePage';
-import { EWorkloadStatus, WorkloadPage } from '../../../../../../../modules/ui/runaiV2/pages/WorkloadPage';
+import { HybridForm } from '../../../../../../../modules/ui/runaiV2/pages/HybridSubmissionForm';
+import { EWorkloadStatus } from '../../../../../../../modules/ui/runaiV2/pages/WorkloadPage';
 import { EnvironmentAsset, Scope, UidGidSource } from '../../../../../../../modules/api/apis/assetsApi';
 import { EnvironmentCreationRequest } from '../../../../../../../modules/api/apis/assetsApi';
 import { Project } from '../../../../../../../modules/api/apis/projectsDepartmentsApi';
 import { kubeCli } from '../../../../../../../modules/cli';
-import { EFeatureToggleKeys } from '../../../../../../../modules/helpers/utils/Unleash/featureToggle';
 import { isOCP } from '../../../../../../../modules/helpers/utils/EnvironmentUtils';
 import {
     AnyWorkloadSubmissionType,
@@ -53,7 +51,6 @@ shouldRunTests(settings.isSelfHosted && !isOCP() && process.env.INIT_SSO_USERS_A
             let project: Project;
             let environmentAsset: EnvironmentAsset;
             let workspace: WorkspacePage;
-            let workload: WorkloadPage;
 
             async function createEnvironmentWithUidGidSource(
                 environmentName: string,
@@ -137,10 +134,6 @@ shouldRunTests(settings.isSelfHosted && !isOCP() && process.env.INIT_SSO_USERS_A
                     maxAllowedGpus: 1
                 });
 
-                if (!settings.isSelfHosted) {
-                    await unleashClient.disableFeature(EFeatureToggleKeys.SHOW_HYBRID_SUBMISSION);
-                }
-                await apiUtils.disableHybridSubmission();
 
                 logger.info(`created project ${projectName}`);
 
@@ -152,10 +145,6 @@ shouldRunTests(settings.isSelfHosted && !isOCP() && process.env.INIT_SSO_USERS_A
             });
 
             test.afterAll(async ({}, testInfo) => {
-                if (!settings.isSelfHosted) {
-                    await unleashClient.enableFeature(EFeatureToggleKeys.SHOW_HYBRID_SUBMISSION);
-                }
-                await apiUtils.enableHybridSubmission();
 
                 try {
                     !!environmentAsset?.meta?.id && (await environmentUtils.delete(environmentAsset.meta.id));
@@ -180,7 +169,6 @@ shouldRunTests(settings.isSelfHosted && !isOCP() && process.env.INIT_SSO_USERS_A
                 browserEngine = new BrowserEngine();
                 await browserEngine.start();
                 auth = new AuthPage(browserEngine.currentPage);
-                workload = new WorkloadPage(browserEngine.currentPage);
                 workspace = new WorkspacePage(browserEngine.currentPage);
             });
 
@@ -191,17 +179,10 @@ shouldRunTests(settings.isSelfHosted && !isOCP() && process.env.INIT_SSO_USERS_A
             test('workspace submit', async function () {
                 const workspaceName = objectGenerator.generateShortNameByPrefix('w-from-idp-token');
                 await auth.loginSSO(`${ssoUser}@example.com`, config.controlPlaneAdminPassword);
-                await workload.navigateToWorkloads();
-                await workload.openWorkspaceForm();
-                await workload.selectClusterFromDropDown(flowRootState.cluster.name);
-                await workload.workloadFormSelectProject(projectName);
-                await workspace.fillWorkspaceName(workspaceName);
-                await workspace.waitForWorkspaceNameCount(workspaceName);
-                await workspace.selectAssetsSubmissionOption();
-                await workspace.clickOnContinue();
-                await workspace.selectEnvironment(environmentAsset.meta.name);
-                await workspace.selectComputeResource('cpu-only');
-                await workspace.clickOnCreateWorkspaceBtn();
+                await workspace.fillFlexWorkspaceFirstPage(projectName, workspaceName);
+                const hybridForm = new HybridForm(browserEngine.currentPage);
+                await hybridForm.fillHybridFormByLoadingExistingConfig(environmentAsset.meta.name, 'cpu-only');
+                await hybridForm.clickOnSubmit();
                 await workspace.waitForWorkloadUIStatus(workspaceName, EWorkloadStatus.Running);
                 if (await isAnyWorkloadSubmissionEnabled(AnyWorkloadSubmissionType.Workspace)) {
                     await waitUtils.waitForBatchJobToExist(workspaceName, namespace);
@@ -217,7 +198,7 @@ shouldRunTests(settings.isSelfHosted && !isOCP() && process.env.INIT_SSO_USERS_A
                     expect(interactiveWorkload.spec.runAsGid.value).toBe(testParams.gid);
                     expect(interactiveWorkload.spec.runAsUid.value).toBe(testParams.uid);
                 }
-                await workload.deleteWorkload(workspaceName);
+                await workspace.deleteWorkload(workspaceName);
             });
         });
     }

@@ -12,8 +12,6 @@ import {
     projectResourcesUtils,
     flowRootState,
     operations,
-    apiUtils,
-    unleashClient,
     credentialUtils
 } from '../../../../../../modules/helpers';
 import { AuthPage } from '../../../../../../modules/ui/runaiV2/pages/AuthPage';
@@ -32,7 +30,6 @@ import {
 import { WorkloadType, Scope } from '../../../../../../modules/api/apis/assetsApi';
 import { runaiCliV2 } from '../../../../../../modules/cli';
 import { cliV2WorkloadType, execFlags } from '../../../../../../modules/cli/tools/RunaiCliV2.constants';
-import { EFeatureToggleKeys } from '../../../../../../modules/helpers/utils/Unleash/featureToggle';
 import { kubeCli } from '../../../../../../modules/cli';
 
 test.describe(`Create single node workloads (Training & Workspace), tags: ${tags.tool.ui} ${tags.resource.workloads} ${tags.teams.loong}`, () => {
@@ -347,10 +344,6 @@ test.describe(`L1 Researcher can submit single node workload on Run:ai with hybr
         let credentialsPage: CredentialPage;
         let videoName: string;
         test.beforeAll(async () => {
-            logger.info('Enabling hybrid submission feature');
-            await unleashClient.enableFeature(EFeatureToggleKeys.SHOW_HYBRID_SUBMISSION);
-            await apiUtils.enableHybridSubmission();
-
             projectName = objectGenerator.generateNameByPrefix('e2e-project');
             namespace = Utils.namespaceFromProjectName(projectName);
             project = await projectResourcesUtils.createProject(namespace, {

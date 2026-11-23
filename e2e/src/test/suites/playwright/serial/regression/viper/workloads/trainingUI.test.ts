@@ -12,22 +12,16 @@ import {
     operations,
     projectResourcesUtils,
     tags,
-    waitUtils,
     projectUtils,
-    settings,
-    unleashClient,
-    apiUtils
+    settings
 } from '../../../../../../../modules/helpers';
 import { AuthPage } from '../../../../../../../modules/ui/runaiV2/pages/AuthPage';
 import { BrowserEngine } from '../../../../../../../modules/ui/runaiV2/pages/BrowserEngine';
-import {
-    DISTRIBUTED_TOOLS_LABELS,
-    TrainingPage
-} from '../../../../../../../modules/ui/runaiV2/pages/TrainingPage';
+import { HybridForm } from '../../../../../../../modules/ui/runaiV2/pages/HybridSubmissionForm';
+import { WorkloadType } from '../../../../../../../modules/api/apis/assetsApi';
 import { WorkloadPage, EWorkloadStatus } from '../../../../../../../modules/ui/runaiV2/pages/WorkloadPage';
 import { EnvironmentPage } from '../../../../../../../modules/ui/runaiV2/pages/EnvironmentPage';
 import { test } from '@playwright/test';
-import { EFeatureToggleKeys } from '../../../../../../../modules/helpers/utils/Unleash/featureToggle';
 
 test.describe(
     `Training UI - sanity, tags: ${tags.tool.ui} ${tags.resource.jobs} ${tags.teams.viper} `,
@@ -35,7 +29,7 @@ test.describe(
     () => {
         let browserEngine: BrowserEngine;
         let auth: AuthPage;
-        let training: TrainingPage;
+        let training: HybridForm;
         let environment: EnvironmentPage;
         let workloads: WorkloadPage;
         let videoName: string;
@@ -45,33 +39,7 @@ test.describe(
         let trainingName: string;
         let environmentName: string;
 
-        async function fillFirstNewTrainingPage(
-            projectName: string,
-            isMultiNode = false,
-            toolName?: DISTRIBUTED_TOOLS_LABELS,
-            configureMaster?: boolean
-        ): Promise<void> {
-            await workloads.navigateToWorkloads();
-            await workloads.openTrainingForm();
-            await workloads.selectClusterFromDropDown(flowRootState.cluster.name);
-            await workloads.workloadFormSelectProject(projectName);
-            if (isMultiNode) {
-                await waitUtils.sleep(1000);
-                await training.selectedMultiNodeOption();
-                await training.selectedDistributedTool(toolName);
-                if (!configureMaster) await training.selectedWorkersOnlyOption();
-            }
-            await workloads.workloadFormSelectTemplate();
-            await training.fillTrainingName(trainingName);
-            await training.waitForTrainingNameCount(trainingName);
-            await training.clickOnContinueBtn();
-        }
-
         test.beforeAll(async function () {
-            if (!settings.isSelfHosted) {
-                await unleashClient.disableFeature(EFeatureToggleKeys.SHOW_HYBRID_SUBMISSION);
-            }
-            await apiUtils.disableHybridSubmission();
             browserEngine = new BrowserEngine();
             projectName = objectGenerator.generateShortNameByPrefix('project-e2e-for-training');
             namespace = Utils.namespaceFromProjectName(projectName);
@@ -103,7 +71,7 @@ test.describe(
         test.beforeEach(async function () {
             await browserEngine.start();
             auth = new AuthPage(browserEngine.currentPage);
-            training = new TrainingPage(browserEngine.currentPage);
+            training = new HybridForm(browserEngine.currentPage);
             workloads = new WorkloadPage(browserEngine.currentPage);
             environment = new EnvironmentPage(browserEngine.currentPage);
             trainingName = objectGenerator.generateShortNameByPrefix('training');
@@ -123,18 +91,26 @@ test.describe(
             videoName = 'copy-and-edit-training';
             if (settings.isSelfHosted) test.setTimeout(180 * 1000);
             const copiedTrainingName = objectGenerator.generateShortNameByPrefix('copy-training');
-            await fillFirstNewTrainingPage(projectName);
-            await training.clickOnNewEnvironmentBtn();
+            await workloads.navigateToWorkloads();
+            await training.fillWorkloadCreationFirstPage(
+                flowRootState.cluster.name,
+                projectName,
+                trainingName,
+                WorkloadType.Training
+            );
+            await training.openEnvironmentsDrawer();
+            await training.clickOnAddNewAssetBtn();
             await environment.createNewEnvironment(environmentName, projectName, {
                 command: 'sleep infinity'
             });
-            await training.selectComputeResource('cpu-only');
-            await training.clickOnSubmitBtn();
+            await training.clickOnDrawerItemByLabel(environmentName);
+            await training.fillComputeSection('cpu-only');
+            await training.clickOnSubmit();
             await workloads.waitForWorkloadUIStatus(trainingName, EWorkloadStatus.Running);
             await workloads.toggleWorkload(trainingName);
             await workloads.clickOnCopyAndEditWorkload();
             await training.fillTrainingName(copiedTrainingName);
-            await training.clickOnSubmitBtn();
+            await training.clickOnSubmit();
             await workloads.waitForWorkloadUIStatus(copiedTrainingName, EWorkloadStatus.Running);
             await workloads.deleteWorkload(trainingName);
             await workloads.deleteWorkload(copiedTrainingName);

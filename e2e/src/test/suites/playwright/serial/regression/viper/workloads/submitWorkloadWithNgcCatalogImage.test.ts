@@ -10,8 +10,8 @@ import {
 } from '../../../../../../../modules/helpers/utils/SupporetedEnvsUtils';
 import { BrowserEngine } from '../../../../../../../modules/ui/runaiV2/pages/BrowserEngine';
 import { AuthPage } from '../../../../../../../modules/ui/runaiV2/pages/AuthPage';
-import { WorkloadPage } from '../../../../../../../modules/ui/runaiV2/pages/WorkloadPage';
 import { WorkspacePage } from '../../../../../../../modules/ui/runaiV2/pages/WorkspacePage';
+import { HybridForm } from '../../../../../../../modules/ui/runaiV2/pages/HybridSubmissionForm';
 import { Project } from '../../../../../../../modules/api/apis/orgUnitApi';
 import { Utils } from '../../../../../../../modules/helpers/utils/utils';
 import {
@@ -35,7 +35,6 @@ test.describe('Workload submission with NGC catalog image', () => {
         let browserEngine: BrowserEngine;
         let auth: AuthPage;
 
-        let workloads: WorkloadPage;
         let workspace: WorkspacePage;
 
         let projectName: string;
@@ -48,7 +47,6 @@ test.describe('Workload submission with NGC catalog image', () => {
             await browserEngine.start();
             auth = new AuthPage(browserEngine.currentPage);
             workspace = new WorkspacePage(browserEngine.currentPage);
-            workloads = new WorkloadPage(browserEngine.currentPage);
 
             await auth.signIn(
                 flowRootState.users.system_administrator.email,
@@ -90,23 +88,15 @@ test.describe('Workload submission with NGC catalog image', () => {
         });
 
         test('should submit a workload with NGC catalog image', async () => {
-            await workloads.goToPage();
-            await workloads.openWorkspaceForm();
-
-            // First Page
             const workspaceName = objectGenerator.generateShortNameByPrefix('workspace');
-            await workloads.workloadFormSelectProject(projectName);
-            await workloads.workloadFormSelectTemplate();
-            await workspace.fillWorkspaceName(workspaceName);
-            await workspace.waitForWorkspaceNameCount(workspaceName);
-            await workspace.selectAssetsSubmissionOption();
-            await workspace.clickOnContinue();
+            await workspace.fillFlexWorkspaceFirstPage(projectName, workspaceName);
+            const hybridForm = new HybridForm(browserEngine.currentPage);
 
             await workspace.clickOnElementByAidName('radio-option-Select from the NGC catalog');
             await workspace.selectNgcImage(ngcImage);
             await workspace.waitForImageTagsToLoad();
             await workspace.selectNgcTag();
-            await workspace.clickOnCreateWorkspaceBtn();
+            await hybridForm.clickOnSubmit();
             await workspace.waitForWorkloadToAppear(workspaceName);
             let workload = await workloadsUtilsV2.waitForBackendWorkloadByNameAndProjectName(
                 workspaceName,

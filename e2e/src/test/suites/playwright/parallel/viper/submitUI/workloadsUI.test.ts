@@ -102,7 +102,6 @@ test.describe(`Workloads UI, tags: ${tags.tool.ui} ${tags.resource.workloads} ${
                 await trainingPage.workloadFormSelectTemplate();
                 await trainingPage.fillTrainingName(options.workloadName);
                 await trainingPage.waitForTrainingNameCount(options.workloadName);
-                await trainingPage.selectAssetsSubmissionOption();
                 await trainingPage.clickOnContinueBtn();
 
                 // choose env
@@ -114,7 +113,7 @@ test.describe(`Workloads UI, tags: ${tags.tool.ui} ${tags.resource.workloads} ${
                 await hybridForm.clickOnDrawerItemByLabel(options.computeResourceData.name);
 
                 //submit form
-                await trainingPage.clickOnSubmitBtn();
+                await hybridForm.clickOnSubmit();
 
                 //validate return to workloads
                 await workloadTable.validateCurrentPageIsWorkload();
@@ -130,7 +129,6 @@ test.describe(`Workloads UI, tags: ${tags.tool.ui} ${tags.resource.workloads} ${
                 await workspacePage.workloadFormSelectTemplate();
                 await workspacePage.fillWorkspaceName(options.workloadName);
                 await workspacePage.waitForWorkspaceNameCount(options.workloadName);
-                await workspacePage.selectAssetsSubmissionOption();
                 await workspacePage.clickOnContinue();
 
                 // choose env
@@ -142,7 +140,7 @@ test.describe(`Workloads UI, tags: ${tags.tool.ui} ${tags.resource.workloads} ${
                 await hybridForm.clickOnDrawerItemByLabel(options.computeResourceData.name);
 
                 // create workspace
-                await workspacePage.clickOnCreateWorkspaceBtn();
+                await hybridForm.clickOnSubmit();
                 logger.debug('workspace created successfully');
                 await workloadsUtilsV2.waitForStatusInWorkload(options.workloadName, Phase.Running, 180, options.projectId);
 
@@ -221,7 +219,7 @@ test.describe(`Workloads UI, tags: ${tags.tool.ui} ${tags.resource.workloads} ${
                     await trainingPage.fillTrainingName(copiedTrainingName);
 
                     //submit form
-                    await trainingPage.clickOnSubmitBtn();
+                    await hybridForm.clickOnSubmit();
                     await workloadsUtilsV2.waitForStatusInWorkload(
                         createWorkloadOptions.workloadName,
                         Phase.Running,

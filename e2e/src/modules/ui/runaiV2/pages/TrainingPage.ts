@@ -116,11 +116,9 @@ export class TrainingPage extends WorkloadPage {
 
     private readonly envVarCredentialKeyInput: string;
 
-    private readonly submissionAssetsOption: string;
 
     jupyterTensorboardCard: string;
 
-    private readonly submissionSection: string;
 
     private readonly hybridForm: HybridForm;
 
@@ -136,7 +134,6 @@ export class TrainingPage extends WorkloadPage {
         this.createTrainingContinueBtn = '[aid="create-training-continue-btn"]';
         this.submitButton = '[aid="submit-btn"]';
         this.templateSection = '.template-section';
-        this.submissionAssetsOption = '[aid="radio-option-Original"]';
 
         // multi node elements
         this.multiNodeOption = '[aid=radio-option-Distributed]';
@@ -184,7 +181,6 @@ export class TrainingPage extends WorkloadPage {
         this.generalSection = '[aid="general-section"]';
         this.annotationsBtn = 'button:has-text("+ annotation")';
         this.labelBtn = 'button:has-text("+ label")';
-        this.submissionSection = '[aid="workload-submission-type-section"]';
 
         this.hybridForm = new HybridForm(page);
         this.qTable = new QTable(page);
@@ -415,51 +411,6 @@ export class TrainingPage extends WorkloadPage {
         return this.v2frame.locator(this.containerPathOverrideInput).isVisible();
     }
 
-    async selectAssetsSubmissionOption(): Promise<void> {
-        try {
-            await this.v2frame.waitForSelector(this.submissionSection, { timeout: 3000 });
-        } catch {
-            logger.info('submission section is not visible');
-            return;
-        }
-        return this.v2frame.locator(this.submissionAssetsOption).click();
-    }
-
-    async fillFirstNewTrainingPage(
-        projectName: string,
-        trainingName: string,
-        isMultiNode = false,
-        toolName?: DISTRIBUTED_TOOLS_LABELS,
-        configureMaster?: boolean,
-        flexisbleSubmission?: boolean,
-        templateName?: string
-    ): Promise<void> {
-        await this.navigateToWorkloads();
-        await this.openTrainingForm();
-        await this.selectClusterFromDropDown(flowRootState.cluster.name);
-        await this.workloadFormSelectProject(projectName);
-        if (isMultiNode) {
-            await waitUtils.sleep(1000);
-            await this.selectedMultiNodeOption();
-        }
-        if (templateName) {
-            await this.workloadFormSelectTemplate(templateName);
-        } else {
-            await this.workloadFormSelectTemplate();
-        }
-        if (isMultiNode) {
-            await this.selectedDistributedTool(toolName);
-            if (!configureMaster) await this.selectedWorkersOnlyOption();
-        }
-        await this.fillTrainingName(trainingName);
-        await this.waitForTrainingNameCount(trainingName);
-
-        if (!flexisbleSubmission) {
-            await this.selectAssetsSubmissionOption();
-        }
-        await this.clickOnContinueBtn();
-    }
-
     async fillFlexTrainingFirstPage(
         projectName: string,
         trainingName: string,
@@ -550,7 +501,7 @@ export class TrainingPage extends WorkloadPage {
         environment?: string,
         computeResource?: string
     ): Promise<void> {
-        await this.fillFirstNewTrainingPage(projectName, workloadName, false, undefined, undefined, true);
+        await this.fillFlexTrainingFirstPage(projectName, workloadName);
         await this.hybridForm.fillHybridFormByLoadingExistingConfig(
             environment || 'tensorboard-tensorflow',
             computeResource || 'cpu-only',
@@ -609,55 +560,6 @@ export class TrainingPage extends WorkloadPage {
             await this.waitForSubmitButton();
             await this.hybridForm.clickOnSubmit(); // setup step
         }
-    }
-
-    async submitTrainingWorkloadUI(
-        projectName: string,
-        trainingName: string,
-        options?: {
-            environment?: string;
-            computeResource?: string;
-            templateName?: string;
-            dataSource?: {
-                dsName: string;
-                containerPath: string;
-            };
-        }
-    ): Promise<void> {
-        const {
-            environment = 'tensorboard-tensorflow',
-            computeResource = 'one-gpu',
-            templateName,
-            dataSource
-        } = options || {};
-
-        await this.navigateToWorkloads();
-        await this.openTrainingForm();
-        await this.selectClusterFromDropDown(flowRootState.cluster.name);
-        await this.workloadFormSelectProject(projectName);
-
-        if (templateName) {
-            await this.workloadFormSelectTemplate(templateName);
-        } else {
-            await this.workloadFormSelectTemplate();
-        }
-
-        await this.fillTrainingName(trainingName);
-        await this.selectAssetsSubmissionOption();
-        await this.clickOnContinueBtn();
-
-        if (!templateName) {
-            await this.selectEnvironment(environment);
-            await this.selectComputeResource(computeResource);
-        }
-        if (dataSource) {
-            await this.openDataSourceSection();
-            await this.selectDataSource(dataSource.dsName);
-            if (dataSource.containerPath) {
-                await this.fillContainerPathOverrideInput(dataSource.containerPath);
-            }
-        }
-        await this.clickOnSubmitBtn();
     }
 
     /**

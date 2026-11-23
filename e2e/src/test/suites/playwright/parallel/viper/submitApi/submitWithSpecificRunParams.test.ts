@@ -15,7 +15,6 @@ import {
     crds,
     computeResourceUtils,
     environmentUtils,
-    assetsApiV2Utils,
     objectGenerator,
     workloadUtils
 } from '../../../../../../modules/helpers';
@@ -41,32 +40,32 @@ let environmentName: string;
 let environmentId: string;
 
 const ENV_VAR_FOR_ENVIRONMENT = { name: 'env1', value: 'val1' };
-const ENV_VAR_SPECIFIC_RUN_PARAMS = { name: 'env2', value: 'val2' };
+const WORKLOAD_ENV_VAR = { name: 'env2', value: 'val2' };
 
 const WorkloadTypeParams = [
     {
         workloadType: 'training',
         workloadName: 'test-training',
-        createFunction: assetsApiV2Utils.createTraining,
+        createFunction: workloadsCrudUtils.submitTraining,
         deleteFunction: workloadsCrudUtils.deleteTraining,
         jobKind: crds.runaiTrainingWorkloadCrd
     },
     {
         workloadType: 'interactive',
         workloadName: 'test-interactive',
-        createFunction: assetsApiV2Utils.createWorkspace,
+        createFunction: workloadsCrudUtils.submitWorkspace,
         deleteFunction: workloadsCrudUtils.deleteWorkspace,
         jobKind: crds.runaiInteractiveWorkloadCrd
     }
 ];
 
 WorkloadTypeParams.forEach(function (params) {
-    test.describe(`Submit ${params.workloadType} V2 - specificRunParams, tags: ${tags.operations.submit} ${tags.teams.viper} ${tags.runOn.k8sFlavCertKit}`, function () {
+    test.describe(`Submit ${params.workloadType} with environment variable overrides, tags: ${tags.operations.submit} ${tags.teams.viper} ${tags.runOn.k8sFlavCertKit}`, function () {
         test.beforeAll('creating project', async function () {
             project = await projectResourcesUtils.createProjectAndNamespace('project');
             environmentName = objectGenerator.generateNameByPrefix('environment');
             workloadsCrudUtils.accessToken = flowRootState.users.system_administrator.accessToken;
-            assetsApiV2Utils.accessToken = flowRootState.users.system_administrator.accessToken;
+
         });
 
         test.afterAll('Cleanup', async function () {
@@ -79,19 +78,16 @@ WorkloadTypeParams.forEach(function (params) {
 
         async function getWorkloadCreationPayload(environmentId: string): Promise<any> {
             return {
-                meta: {
-                    name: params.workloadName,
-                    useGivenNameAsPrefix: true,
-                    projectId: project.id.toString(),
-                    clusterId: flowRootState.cluster.uuid
-                },
+                name: params.workloadName,
+                useGivenNameAsPrefix: true,
+                projectId: project.id.toString(),
+                clusterId: flowRootState.cluster.uuid,
                 assets: {
                     environment: environmentId,
-                    command: 'sleep infinity',
                     compute: await computeResourceUtils.getId('cpu-only')
                 },
-                specificRunParams: {
-                    environmentVariables: [ENV_VAR_SPECIFIC_RUN_PARAMS]
+                spec: {
+                    environmentVariables: [WORKLOAD_ENV_VAR]
                 }
             };
         }
@@ -124,15 +120,15 @@ WorkloadTypeParams.forEach(function (params) {
 
             await test.step(`Create ${params.workloadType} workload`, async function () {
                 const result = await params.createFunction(await getWorkloadCreationPayload(environmentId));
-                workloadId = result.body.meta.workloadId;
-                workloadName = result.body.meta.name;
+                workloadId = result.body.workloadId;
+                workloadName = result.body.name;
 
-                expect(result.response.statusCode).to.equal(StatusCodes.OK);
-                expect(result.body.meta.desiredPhase).to.equal(WorkloadStatus.RUNNING);
+                expect(result.response.statusCode).to.equal(StatusCodes.ACCEPTED);
+                expect(result.body.desiredPhase).to.equal(WorkloadStatus.RUNNING);
                 await waitUtils.waitForPods(workloadName, project.namespace, 1, 120, ['Running']);
             });
 
-            await test.step(`Validate  ${params.workloadType} workload specificRunParams env var override the environment env var`, async function () {
+            await test.step(`Validate that the ${params.workloadType} environment variable overrides the environment asset`, async function () {
                 if (
                     await isAnyWorkloadSubmissionEnabled(
                         params.workloadType === 'interactive'
@@ -143,8 +139,8 @@ WorkloadTypeParams.forEach(function (params) {
                     const job = await kubeCli.getBatchJob(workloadName, project.namespace);
                     const envVars = job.spec?.template.spec?.containers[0].env ?? [];
                     expect(
-                        envVars.find((entry) => entry.name === ENV_VAR_SPECIFIC_RUN_PARAMS.name)?.value
-                    ).to.equal(ENV_VAR_SPECIFIC_RUN_PARAMS.value);
+                        envVars.find((entry) => entry.name === WORKLOAD_ENV_VAR.name)?.value
+                    ).to.equal(WORKLOAD_ENV_VAR.value);
                     expect(envVars.find((entry) => entry.name === ENV_VAR_FOR_ENVIRONMENT.name)).to.be
                         .undefined;
                 } else {
@@ -153,8 +149,8 @@ WorkloadTypeParams.forEach(function (params) {
                         project.namespace,
                         params.jobKind
                     );
-                    expect(envVars[ENV_VAR_SPECIFIC_RUN_PARAMS.name].value).to.equal(
-                        ENV_VAR_SPECIFIC_RUN_PARAMS.value
+                    expect(envVars[WORKLOAD_ENV_VAR.name].value).to.equal(
+                        WORKLOAD_ENV_VAR.value
                     );
                     expect(envVars?.[ENV_VAR_FOR_ENVIRONMENT.name]).to.undefined;
                 }

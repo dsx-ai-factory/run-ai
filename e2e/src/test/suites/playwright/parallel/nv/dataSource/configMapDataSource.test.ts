@@ -150,14 +150,7 @@ supportedFrom(SupportedVersions.V2_18)(function () {
                     await projectResourcesUtils.createProjectAndNamespace(anotherProjectName);
                 const anotherWorkloadName = objectGenerator.generateNameByPrefix('e2e-wl-cm-other');
                 await browserEngine.currentPage.reload();
-                await trainingPage.fillFirstNewTrainingPage(
-                    anotherProject.name,
-                    anotherWorkloadName,
-                    false,
-                    undefined,
-                    undefined,
-                    true
-                );
+                await trainingPage.fillFlexTrainingFirstPage(anotherProject.name, anotherWorkloadName);
 
                 const hybridForm = new HybridForm(browserEngine.currentPage);
                 await hybridForm.openDataSourcesSection();

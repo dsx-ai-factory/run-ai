@@ -20,9 +20,6 @@ export abstract class WorkloadCreateFormPage extends BaseV2Page {
 
     runaiGeneralSearch: string;
 
-    private readonly submissionSection: string;
-
-    private readonly submissionAssetsOption: string;
 
     modelSection: string;
 
@@ -60,8 +57,6 @@ export abstract class WorkloadCreateFormPage extends BaseV2Page {
         // first step
         this.projectSection = '.project-section';
         this.templateSection = '.template-section';
-        this.submissionSection = '[aid="workload-submission-type-section"]';
-        this.submissionAssetsOption = '[aid="radio-option-Original"]';
         this.distributedOption = '[aid="radio-option-Distributed"]';
 
         // second step
@@ -162,11 +157,6 @@ export abstract class WorkloadCreateFormPage extends BaseV2Page {
 
     async clickOnNewDataSourceBtn(): Promise<void> {
         await this.locator(this.dataSourceNewBtn).click();
-    }
-
-    async selectAssetsSubmissionOption(): Promise<void> {
-        await this.page.waitForSelector(this.submissionSection, { timeout: 3000 });
-        await this.page.locator(this.submissionAssetsOption).click();
     }
 
     async openGeneralSection(): Promise<void> {
