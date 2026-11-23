@@ -54,10 +54,25 @@ describe("scheduling persistence", () => {
     expect(result.pool.schedulingConfiguration).not.toHaveProperty("gpuPodsPlacementStrategy");
     expect(result.pool).not.toHaveProperty("labelKey");
   });
-  it("omits inactive limits and rejects downgrade or invalid durations before any writes", () => {
-    const inactive = buildSchedulingSave(pool, { ...draft(), maxAllocation: true });
-    expect(inactive.pool.schedulingCapabilities?.limits).toBe(false);
-    expect(inactive.departments[0].resources?.gpu).not.toHaveProperty("limit");
+  it.each([ESchedulingMode.Proportional, ESchedulingMode.Ranked])(
+    "saves active limits independently of quota in %s",
+    (mode) => {
+      const input = {
+        ...draft(),
+        mode,
+        cpuQuota: true,
+        maxAllocation: true,
+        departments: { a: { id: "a", quota: 8, limit: 2 }, b: { id: "b", limit: null } },
+      };
+      const active = buildSchedulingSave(pool, input);
+      expect(active.pool.schedulingCapabilities).toMatchObject({ limits: true, quota: false, cpuQuota: false });
+      expect(active.departments.map((department) => department.resources?.gpu)).toEqual([{ limit: 2 }, { limit: -1 }]);
+      const inactive = buildSchedulingSave(pool, { ...input, maxAllocation: false });
+      expect(inactive.pool.schedulingCapabilities?.limits).toBe(false);
+      expect(inactive.departments).toEqual([]);
+    },
+  );
+  it("rejects downgrade or invalid durations before any writes", () => {
     expect(() =>
       buildSchedulingSave(
         {

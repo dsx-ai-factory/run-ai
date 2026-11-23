@@ -305,7 +305,7 @@
 </template>
 <script setup lang="ts">
 import { EResourceEditorKind } from "@/models/node-pool-scheduling.model";
-import { ENodePoolSchedulingMode as ESchedulingMode } from "@/models/node-pool.model";
+import { ENodePoolSchedulingMode as ESchedulingMode, isSupportedSchedulingMode } from "@/models/node-pool.model";
 
 import { NotificationAlertBar, ENotificationBarVariant } from "@/components/common/notification-alert-bar/index";
 import { SimulationResultBar } from "@/components/node-pools/simulation-result-bar";
@@ -411,7 +411,7 @@ watch(
 const selected = ref(new Set<string>());
 const expanded = ref(new Set<string>([ENTITY_PRIORITY_DEFAULT_VALUE]));
 const showMove = ref(false);
-const maxAllocation = computed(() => props.draft.mode === ESchedulingMode.Guaranteed && !!props.draft.maxAllocation);
+const maxAllocation = computed(() => isSupportedSchedulingMode(props.draft.mode) && !!props.draft.maxAllocation);
 const ranked = computed(
   () => props.draft.mode === ESchedulingMode.Ranked || props.draft.mode === ESchedulingMode.Guaranteed,
 );
@@ -485,7 +485,9 @@ const headerTooltips = computed<Record<string, string>>(() => ({
       ? "The weight determines each department’s proportional share of the over-quota resources within its rank. Unused capacity flows down to the next rank, where it is distributed by weight."
       : "The weight determines each department’s proportional share of the resources.",
   limit:
-    "This is the upper limit of GPUs a department can consume from a node pool, combining assigned quota and over-quota.",
+    props.draft.mode === ESchedulingMode.Guaranteed
+      ? "This is the upper limit of GPUs a department can consume from a node pool, combining assigned quota and over-quota."
+      : "The maximum number of GPUs a department can use from this node pool.",
   result:
     "View a visual summary of each department’s resource settings. Turn on Simulate workload demand to see how GPUs would be allocated based on real-time demand.",
 }));

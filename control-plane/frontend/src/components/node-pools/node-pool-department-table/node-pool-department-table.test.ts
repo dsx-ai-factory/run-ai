@@ -544,12 +544,12 @@ describe("scheduling department table", () => {
     emits: ["apply", "reset", "before-show"],
   };
   it.each([ESchedulingMode.Proportional, ESchedulingMode.Ranked] as const)(
-    "never shows maximum-allocation columns or editors in %s with stale draft limits",
+    "hides maximum-allocation columns and editors in %s while the setting is off",
     (mode) => {
       const wrapper = mount(Table, {
         props: {
           rows,
-          draft: { ...draft, mode, maxAllocation: true, departments: { a: { id: "a", limit: 7 } } },
+          draft: { ...draft, mode, maxAllocation: false, departments: { a: { id: "a", limit: 7 } } },
           aggregates: {},
           ranks: ["MediumLow"],
           readonly: false,
@@ -760,7 +760,7 @@ describe("scheduling department table", () => {
     wrapper.unmount();
   });
   it.each([ESchedulingMode.Proportional, ESchedulingMode.Ranked] as const)(
-    "enforces maximum allocation only while Guaranteed quota is active, starting from %s",
+    "validates an active maximum against quota only in Guaranteed mode, starting from %s",
     async (mode) => {
       const resourcePopup = { template: '<td><slot name="input" /></td>', emits: ["apply", "reset", "before-show"] };
       const currentDraft: SchedulingDraft = {
@@ -784,9 +784,14 @@ describe("scheduling department table", () => {
           stubs: { EditableCellPopup: resourcePopup },
         },
       });
-      expect(
-        wrapper.findAllComponents(DepartmentResourceEditor).some((editor) => editor.props("kind") === "limit"),
-      ).toBe(false);
+      expect(wrapper.get("thead").text()).toContain("Max GPU allocation");
+      const initial = wrapper
+        .findAllComponents(DepartmentResourceEditor)
+        .find((editor) => editor.props("kind") === "limit");
+      if (!initial) throw new Error("Maximum allocation editor is unavailable.");
+      await initial.get("input").setValue("10");
+      initial.findComponent(resourcePopup).vm.$emit("apply");
+      expect(wrapper.emitted("edit")).toEqual([[{ id: "a", limit: 10 }]]);
       await wrapper.setProps({ draft: { ...currentDraft, mode: ESchedulingMode.Guaranteed } });
       const maximum = wrapper
         .findAllComponents(DepartmentResourceEditor)
@@ -794,14 +799,14 @@ describe("scheduling department table", () => {
       if (!maximum) throw new Error("Maximum allocation editor is unavailable.");
       await maximum.get("input").setValue("10");
       maximum.findComponent(resourcePopup).vm.$emit("apply");
-      expect(wrapper.emitted("edit")).toBeUndefined();
+      expect(wrapper.emitted("edit")).toHaveLength(1);
       await maximum.get("input").setValue("25");
       maximum.findComponent(resourcePopup).vm.$emit("apply");
-      expect(wrapper.emitted("edit")).toEqual([[{ id: "a", limit: 25 }]]);
+      expect(wrapper.emitted("edit")).toEqual([[{ id: "a", limit: 10 }], [{ id: "a", limit: 25 }]]);
       await wrapper.setProps({ draft: currentDraft });
       expect(
         wrapper.findAllComponents(DepartmentResourceEditor).some((editor) => editor.props("kind") === "limit"),
-      ).toBe(false);
+      ).toBe(true);
       expect(wrapper.props("draft").departments.a.quota).toBe(20);
       wrapper.unmount();
     },

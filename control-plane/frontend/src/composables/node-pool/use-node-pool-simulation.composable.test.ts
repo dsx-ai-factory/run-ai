@@ -81,7 +81,7 @@ describe("simulation contract", () => {
     });
     expect(JSON.stringify(input)).toBe(before);
   });
-  it("maps Guaranteed limits and omits inactive limits in other modes", () => {
+  it("maps Guaranteed limits with quota and rank", () => {
     const input = scenario();
     input.draft.mode = ESchedulingMode.Guaranteed;
     input.draft.maxAllocation = true;
@@ -91,11 +91,23 @@ describe("simulation contract", () => {
       rank: "High",
       gpu: { deserved: 4, limit: 12, overQuotaWeight: 9 },
     });
-    input.draft.mode = ESchedulingMode.Ranked;
-    expect(buildSimulationRequest(input).nodePool?.schedulingCapabilities?.limits).toBe(false);
-    expect(buildSimulationRequest(input).orgUnits[1].gpu).not.toHaveProperty("limit");
-    expect(input.draft.departments.hidden.limit).toBe(12);
   });
+  it.each([ESchedulingMode.Proportional, ESchedulingMode.Ranked])(
+    "sends only active limits and omits quota in %s",
+    (mode) => {
+      const input = scenario();
+      input.draft.mode = mode;
+      input.draft.maxAllocation = true;
+      input.draft.departments.hidden.quota = 15;
+      const active = buildSimulationRequest(input);
+      expect(active.nodePool?.schedulingCapabilities).toMatchObject({ quota: false, limits: true });
+      expect(active.orgUnits[1].gpu).toEqual({ overQuotaWeight: 9, limit: 12 });
+      input.draft.maxAllocation = false;
+      expect(buildSimulationRequest(input).nodePool?.schedulingCapabilities?.limits).toBe(false);
+      expect(buildSimulationRequest(input).orgUnits[1].gpu).not.toHaveProperty("limit");
+      expect(input.draft.departments.hidden.limit).toBe(12);
+    },
+  );
   it("debounces rapid edits, aborts outstanding work, and reports ordinary errors", async () => {
     vi.useFakeTimers();
     const source = ref(scenario());

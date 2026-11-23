@@ -2,11 +2,10 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { ENodePoolSchedulingMode as ESchedulingMode } from "@/models/node-pool.model";
+import { ENodePoolSchedulingMode as ESchedulingMode, isSupportedSchedulingMode } from "@/models/node-pool.model";
 import { effectiveDepartmentEdit } from "@/utils/node-pool-scheduling.util/node-pool-scheduling-totals.util";
 import type { SchedulingCapabilitiesNullable } from "@/swagger-models/cluster-service-client/index";
 
-import { PROPORTIONAL_CAPABILITIES, isSupportedSchedulingMode } from "@/models/node-pool.model";
 export interface IDepartmentSchedulingEdit {
   id: string;
   weight?: number;
@@ -32,12 +31,11 @@ export function createSchedulingDraft(snapshot: ISchedulingSnapshot): Scheduling
 }
 export function toSchedulingCapabilities(draft: SchedulingDraft): SchedulingCapabilitiesNullable {
   if (!isSupportedSchedulingMode(draft.mode)) return { ...draft.capabilities };
-  if (draft.mode === ESchedulingMode.Proportional) return { ...PROPORTIONAL_CAPABILITIES };
   return {
     adjustableWeights: draft.mode !== ESchedulingMode.Guaranteed || !draft.automaticWeights,
     quota: draft.mode === ESchedulingMode.Guaranteed,
-    ranks: true,
-    limits: draft.mode === ESchedulingMode.Guaranteed && !!draft.maxAllocation,
+    ranks: draft.mode !== ESchedulingMode.Proportional,
+    limits: !!draft.maxAllocation,
     cpuQuota: draft.mode === ESchedulingMode.Guaranteed && draft.cpuQuota,
   };
 }

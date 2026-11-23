@@ -119,15 +119,20 @@ describe("scheduling settings draft interactions", () => {
     wrapper.unmount();
   });
   it.each([ESchedulingMode.Proportional, ESchedulingMode.Ranked] as const)(
-    "hides quota-only advanced settings in %s even with stale enabled values",
+    "exposes maximum allocation and keeps CPU quota hidden in %s",
     (mode) => {
       const wrapper = mount(Settings, {
-        props: { draft: { ...draft, mode, cpuQuota: true } },
+        props: { draft: { ...draft, mode, maxAllocation: false, cpuQuota: true } },
         global: { plugins: [Quasar] },
       });
-      expect(wrapper.find('[aid="max-allocation-toggle"]').exists()).toBe(false);
+      const toggle = wrapper
+        .findAllComponents(RunaiToggle)
+        .find((item) => item.props("aid") === "max-allocation-toggle");
+      expect(toggle?.props("modelValue")).toBe(false);
+      toggle?.vm.$emit("update:model-value", true);
+      expect(wrapper.emitted("patch")).toEqual([[{ maxAllocation: true }]]);
       expect(wrapper.find('[aid="cpu-quota-toggle"]').exists()).toBe(false);
-      expect(wrapper.text()).not.toContain("Max GPU allocation");
+      expect(wrapper.text()).toContain("Max GPU allocation");
       expect(wrapper.text()).not.toContain("Preview only");
       expect(wrapper.find('[aid="time-fairshare-toggle"]').exists()).toBe(true);
       expect(wrapper.find(".runtime-section").exists()).toBe(true);

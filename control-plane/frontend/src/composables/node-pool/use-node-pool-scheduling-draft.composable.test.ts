@@ -35,32 +35,15 @@ describe("scheduling draft", () => {
       limits: false,
     });
   });
-  it("preserves non-limit entered values when switching modes", () => {
-    const state = useNodePoolSchedulingDraft(snapshot());
-    state.draft.value.departments.a = { id: "a", weight: 5, quota: 8, limit: 10, rank: "High" };
-    state.requestMode(ESchedulingMode.Ranked);
-    state.requestMode(ESchedulingMode.Guaranteed);
-    state.requestMode(ESchedulingMode.Proportional);
-    expect(state.draft.value.departments.a).toEqual({ id: "a", weight: 5, quota: 8, rank: "High" });
-  });
-  it.each([ESchedulingMode.Proportional, ESchedulingMode.Ranked] as const)(
-    "clears maximum allocation and every draft limit on leaving Guaranteed for %s",
-    (mode) => {
-      const state = useNodePoolSchedulingDraft({
-        ...snapshot(),
-        mode: ESchedulingMode.Guaranteed,
-        maxAllocation: true,
-        departments: { a: { id: "a", limit: 10, weight: 5, quota: 8, rank: "High" }, b: { id: "b", limit: -1 } },
-      });
+  it("preserves the maximum allocation setting and all department edits across mode changes", () => {
+    const departments = { a: { id: "a", limit: 10, weight: 5, quota: 8, rank: "High" }, b: { id: "b", limit: -1 } };
+    const state = useNodePoolSchedulingDraft({ ...snapshot(), maxAllocation: true, departments });
+    for (const mode of [ESchedulingMode.Guaranteed, ESchedulingMode.Ranked, ESchedulingMode.Proportional]) {
       state.requestMode(mode);
-      expect(state.draft.value.maxAllocation).toBe(false);
-      expect(state.draft.value.departments.a).toEqual({ id: "a", weight: 5, quota: 8, rank: "High" });
-      expect(state.draft.value.departments.b).toEqual({ id: "b" });
-      state.requestMode(ESchedulingMode.Guaranteed);
-      expect(state.draft.value.maxAllocation).toBe(false);
-      expect(state.draft.value.departments.a).not.toHaveProperty("limit");
-    },
-  );
+      expect(state.draft.value).toMatchObject({ mode, maxAllocation: true, departments });
+      expect(toSchedulingCapabilities(state.draft.value).limits).toBe(true);
+    }
+  });
   it("switches repeatedly without a dialog when only modes changed", () => {
     const state = useNodePoolSchedulingDraft(snapshot());
     state.requestMode(ESchedulingMode.Guaranteed);

@@ -236,8 +236,7 @@ export function isProportional(capabilities?: SchedulingCapabilitiesNullable): b
     capabilities?.adjustableWeights === true &&
     capabilities.quota === false &&
     capabilities.ranks === false &&
-    capabilities.cpuQuota === false &&
-    capabilities.limits !== true
+    capabilities.cpuQuota === false
   );
 }
 export interface INodePoolSummaryConfiguration extends NodepoolCreateFields {

@@ -53,7 +53,7 @@
           </template>
         </q-option-group>
       </section>
-      <section v-if="draft.mode === ESchedulingMode.Guaranteed" class="toggle-section">
+      <section v-if="isSupportedSchedulingMode(draft.mode)" class="toggle-section">
         <scheduling-section-title title="Max GPU allocation" tooltip-icon="ph-bold ph-info" :tooltip-text="maxHelp">
           <template #tooltip-content>
             <span class="node-pool-settings-help node-pool-settings-help--standard">{{ maxHelp }}</span>
@@ -269,10 +269,10 @@
   </aside>
 </template>
 <script setup lang="ts">
-import { ENodePoolSchedulingMode as ESchedulingMode } from "@/models/node-pool.model";
+import { ENodePoolSchedulingMode as ESchedulingMode, isSupportedSchedulingMode } from "@/models/node-pool.model";
 
 import { numericKeydown, numericPaste, numericBeforeInput } from "@/utils/numeric-input.util/numeric-input.util";
-import { onBeforeUnmount, ref, watch } from "vue";
+import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { extractErrorMessages } from "@/utils/error-alert.util";
 import { DOCS } from "@/constants/docs/index";
 import { SchedulingSectionTitle } from "@/components/node-pools/scheduling-section-title";
@@ -303,8 +303,11 @@ const weightOptions = [
     toolTip: "Set the proportion of unused resources a project or department can get on top of its quota.",
   },
 ];
-const maxHelp =
-  'When enabled, the maximum GPU device allocation each department and project can get from this node pool, representing the maximum sum of assigned quota and over-quota GPUs, can be set. When disabled, the maximum is "unlimited."';
+const maxHelp = computed(() =>
+  props.draft.mode === ESchedulingMode.Guaranteed
+    ? 'When enabled, the maximum GPU device allocation each department and project can get from this node pool, representing the maximum sum of assigned quota and over-quota GPUs, can be set. When disabled, the maximum is "unlimited."'
+    : "Set the maximum number of GPUs each department and project can use from this node pool. When disabled, the maximum is unlimited.",
+);
 const runtimeHelp =
   "This defines the minimum time a preemptible workload is guaranteed to run once it is scheduled in this node pool, before it can be preempted and its resources reallocated to other workloads.";
 const windowHelp =
@@ -347,7 +350,7 @@ watch(
 onBeforeUnmount(invalidateLimitCheck);
 async function setMax(value: boolean) {
   if (
-    props.draft.mode !== ESchedulingMode.Guaranteed ||
+    !isSupportedSchedulingMode(props.draft.mode) ||
     props.readonly ||
     checkingLimits.value ||
     (!value && (props.savedMaxAllocation ?? props.draft.maxAllocation) && !props.canResetResources)

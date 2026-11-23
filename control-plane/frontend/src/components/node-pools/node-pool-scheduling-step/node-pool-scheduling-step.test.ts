@@ -141,14 +141,21 @@ describe("scheduling step foundation", () => {
     },
   );
 
-  it("allows Ranked to Proportional when the pool already uses adjustable weights without quota", async () => {
+  it("keeps saved GPU limits when switching from Ranked to Proportional without reset permission", async () => {
     const wrapper = render({
       ...pool,
-      schedulingCapabilities: { quota: false, ranks: true, adjustableWeights: true, cpuQuota: false, limits: false },
+      schedulingCapabilities: { quota: false, ranks: true, adjustableWeights: true, cpuQuota: false, limits: true },
     });
     try {
       await wrapper.setProps({ canSavePool: true, canResetResources: false });
+      const table = wrapper.findComponent(Table);
+      const summary = wrapper.findComponent(NodePoolWizardSummary);
+      expect(table.props("draft").maxAllocation).toBe(true);
+      expect(summary.text()).toContain("Ranked");
       await wrapper.get('[aid="mode-proportional"]').trigger("click");
+      expect(table.props("draft").maxAllocation).toBe(true);
+      expect(summary.text()).toContain("Proportional");
+      expect(summary.props("pool").schedulingCapabilities?.limits).toBe(true);
       expect(wrapper.get('[aid="scheduling-save-close"]').attributes("disabled")).toBeUndefined();
     } finally {
       wrapper.unmount();
