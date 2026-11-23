@@ -11,6 +11,8 @@ The versions listed on this page are the versions published in [NGC](https://cat
 </Note>
 
 <table><thead><tr><th width="113">Version</th><th width="130">Date (MM/DD/YYYY)</th><th width="100">Issue #</th><th>Description</th></tr></thead><tbody>
+<tr><td>3.0.26</td><td>11/17/2026</td><td>#2683</td><td>Fixed an issue where the guided installer installed <code>kube-prometheus-stack</code> 76.2.0 by default, which is below the minimum supported version for 3.0 (88.6.5). The default is now 92.7.0.</td></tr>
+<tr><td>3.0.26</td><td>11/17/2026</td><td>#5205</td><td>Fixed an issue where images from the NGC catalog could be selected without an NGC API key credential.</td></tr>
 <tr><td>3.0.24</td><td>11/15/2026</td><td>#3239</td><td>Fixed an issue where the Prerequisites guide link did not appear in the Missing prerequisites and GPU fractions tooltips.</td></tr>
 <tr><td>3.0.24</td><td>11/15/2026</td><td>#3444</td><td>Fixed an issue where distributed workload submission failed with a Bad Gateway error when the policy set defaults for only the worker or only the master.</td></tr>
 <tr><td>3.0.24</td><td>11/15/2026</td><td>#3230</td><td>Fixed an issue where custom labels were not applied to the pod templates of Workspace and Training workloads.</td></tr>
