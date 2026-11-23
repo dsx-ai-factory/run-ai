@@ -19,7 +19,6 @@ var InstallerServiceAccount = models.Role{
 	Enabled:                 true,
 	ClusterRolePredefinedId: nil,
 	PermissionSets: &[]models.PermissionSet{
-		{Name: static_permission_sets.InstallerServiceAccountPS.Name},
-		{Name: static_permission_sets.UsersMinimalRead.Name},
+		{Name: static_permission_sets.ClusterConfigRead.Name},
 	},
 }
