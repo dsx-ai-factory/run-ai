@@ -1200,14 +1200,17 @@ const WorkloadIndex = defineComponent({
     },
     cloneControlPlaneSourceWorkload(workload: Workload): void {
       const isFlatWorkload = !workload?.environments?.[0]?.id;
+      const isAssetBasedWorkspaceOrTraining =
+        !isFlatWorkload &&
+        [EWorkloadType.Workspace, EWorkloadType.Training, EWorkloadType.Distributed].includes(
+          workload.type as EWorkloadType,
+        );
       const isHybridSubmission = isFlatWorkload && this.settingStore.isHybridSubmissionEnabled;
-      const isFlatInference =
-        (isFlatWorkload && workload.type === EWorkloadType.Inference) ||
-        workload.type === EWorkloadType.DistributedInference;
+      const isFlatInference = isFlatWorkload && workload.type === EWorkloadType.Inference;
 
-      if (isHybridSubmission || isFlatInference) {
+      if (isAssetBasedWorkspaceOrTraining || isHybridSubmission || isFlatInference) {
         this.cloneHybridWorkload(workload);
-      } else {
+      } else if (workload.type !== EWorkloadType.DistributedInference) {
         this.cloneAssetBasedWorkload(workload);
       }
     },
@@ -1258,11 +1261,6 @@ const WorkloadIndex = defineComponent({
       });
     },
     cloneHybridWorkload(workload: Workload): void {
-      const isFlatWorkload = !workload?.environments?.[0]?.id;
-      const isHybridSubmission = isFlatWorkload && this.settingStore.isHybridSubmissionEnabled;
-      const isFlatInference = isFlatWorkload && workload.type === EWorkloadType.Inference;
-      if (!isHybridSubmission && !isFlatInference) return;
-
       let routeName = "";
       switch (workload.type) {
         case EWorkloadType.Training:
