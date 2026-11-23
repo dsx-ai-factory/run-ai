@@ -452,6 +452,22 @@ describe("scheduling department table", () => {
         "Unmet GPU demand 2",
         "Simulated real-time GPU demand 3",
       ]);
+      const allocationMarkers = () =>
+        wrapper
+          .findAll(".result-tooltip-entry")
+          .filter((entry) => entry.text().includes("GPU allocation") && !entry.text().startsWith("Max"));
+      for (const entry of allocationMarkers()) {
+        expect(entry.get(".result-tooltip-swatch").classes()).toContain(
+          entry.text().includes("over-quota") ? "swatch-over-quota" : "swatch-guaranteed",
+        );
+      }
+      for (const mode of [ESchedulingMode.Proportional, ESchedulingMode.Ranked]) {
+        await wrapper.setProps({ draft: { ...draft, mode } });
+        await vi.advanceTimersByTimeAsync(300);
+        const [expected] = allocationMarkers();
+        expect(expected.text()).toContain("Expected GPU allocation");
+        expect(expected.get(".result-tooltip-swatch").classes()).toContain("swatch-guaranteed");
+      }
     } finally {
       wrapper.unmount();
       vi.useRealTimers();

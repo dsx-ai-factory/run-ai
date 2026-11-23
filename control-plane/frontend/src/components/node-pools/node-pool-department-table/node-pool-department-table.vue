@@ -569,13 +569,14 @@ const {
   retry: retrySimulation,
   canRetry: canRetrySimulation,
 } = useNodePoolSimulation(scenario);
+type LegendMarker = "guaranteed" | "over-quota" | "weight" | "maximum" | "unmet" | "demand";
 function resultLegend(row: IDepartmentSchedulingEdit) {
-  const entries: { label: string; value: string | number; kind: string }[] = [];
+  const entries: { label: string; value: string | number; kind: LegendMarker }[] = [];
   if (props.draft.mode === ESchedulingMode.Guaranteed)
     entries.push({
       label: "Guaranteed GPU allocation",
       value: row.quota === -1 ? "Unlimited" : (row.quota ?? "Unknown"),
-      kind: ESchedulingMode.Guaranteed,
+      kind: "guaranteed",
     });
   const weightShare = rowWeightPercentage(row);
   entries.push({
@@ -600,12 +601,12 @@ function resultLegend(row: IDepartmentSchedulingEdit) {
       entries.push({
         label: "Expected guaranteed GPU allocation",
         value: display.guaranteed,
-        kind: ESchedulingMode.Guaranteed,
+        kind: "guaranteed",
       });
     entries.push({
       label: guaranteed ? "Expected over-quota GPU allocation" : "Expected GPU allocation",
       value: guaranteed ? display.overQuota : display.allocated,
-      kind: guaranteed ? "over-quota" : ESchedulingMode.Guaranteed,
+      kind: guaranteed ? "over-quota" : "guaranteed",
     });
     entries.push({ label: "Unmet GPU demand", value: display.unmet, kind: "unmet" });
     entries.push({
