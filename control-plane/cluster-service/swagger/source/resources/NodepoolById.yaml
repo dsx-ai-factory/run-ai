@@ -111,12 +111,6 @@ patch:
       $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
     404:
       $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
-    409:
-      description: A concurrent node pool change prevented the update. Retry the PATCH.
-      content:
-        application/json:
-          schema:
-            $ref: '../../../../infra/openapi/docs/responses/Error.yaml'
     500:
       $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
     503:

@@ -7,12 +7,9 @@ package services_test
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"regexp"
-	"strings"
 	"time"
 
 	"github.com/xhit/go-str2duration/v2"
@@ -28,7 +25,6 @@ import (
 	org_unit_service_client_mock "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/mocks"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
-	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -3043,10 +3039,10 @@ var _ = Describe("Nodepools tests", Ordered, func() {
 
 			// Update with NetworkTopologyId
 			updateRequest := api.NodepoolUpdateFields{
-				LabelKey:   &labelKey,
-				LabelValue: &labelValue,
+				NetworkTopologyId: &testNetworkTopologyId,
+				LabelKey:          &labelKey,
+				LabelValue:        &labelValue,
 			}
-			updateRequest.NetworkTopologyId.Set(&testNetworkTopologyId)
 
 			updateResponse, err := nodepoolService.UpdateNodepool(ctx, nodepool.Id, updateRequest)
 			Expect(err).To(BeNil())
@@ -3086,8 +3082,9 @@ var _ = Describe("Nodepools tests", Ordered, func() {
 
 			// Update with invalid NetworkTopologyId
 			invalidNetworkTopologyId := "invalid-uuid"
-			updateRequest := api.NodepoolUpdateFields{}
-			updateRequest.NetworkTopologyId.Set(&invalidNetworkTopologyId)
+			updateRequest := api.NodepoolUpdateFields{
+				NetworkTopologyId: &invalidNetworkTopologyId,
+			}
 
 			updateResponse, err := nodepoolService.UpdateNodepool(ctx, nodepool.Id, updateRequest)
 			errorBody := updateResponse.Body.(api.Error)
@@ -3124,10 +3121,11 @@ var _ = Describe("Nodepools tests", Ordered, func() {
 			Expect(nodepool.NetworkTopologyId).To(Not(BeNil()))
 			Expect(*nodepool.NetworkTopologyId).To(Equal(testNetworkTopologyId))
 
-			// A full replacement clears a topology omitted from the request.
+			// Update to remove NetworkTopologyId (set to nil)
 			updateRequest := api.NodepoolUpdateFields{
-				LabelValue: &labelValue,
-				LabelKey:   &labelKey,
+				NetworkTopologyId: nil,
+				LabelValue:        &labelValue,
+				LabelKey:          &labelKey,
 			}
 
 			updateResponse, err := nodepoolService.UpdateNodepool(ctx, nodepool.Id, updateRequest)
@@ -3149,49 +3147,45 @@ var _ = Describe("Nodepools tests", Ordered, func() {
 			Expect(getNodepool.NetworkTopologyName).To(BeNil())
 		})
 
-		It("only changes the network topology when the PATCH request includes it", func() {
-			createRequest := nodepoolCreateFields(testNetworkTopologyClusterId, "-topology-patch", nil)
-			createRequest.NetworkTopologyId = &testNetworkTopologyId
-			response, err := nodepoolService.CreateNodepool(ctx, *createRequest)
-			Expect(err).NotTo(HaveOccurred())
+		It("Patch nodepool with valid NetworkTopologyId", func() {
+			// Create a nodepool first
+			createNodepoolIndex++
+			createRequest := api.NodepoolCreateFields{
+				Name:              fmt.Sprintf("%s-network-topology-patch", testName),
+				LabelKey:          fmt.Sprintf("%s-network-topology-%d", testLabelKey, createNodepoolIndex),
+				LabelValue:        fmt.Sprintf("%s-network-topology-%d", testLabelValue, createNodepoolIndex),
+				ClusterId:         testNetworkTopologyClusterId,
+				NetworkTopologyId: nil,
+				SchedulingConfiguration: &api.SchedulingConfiguration{
+					PlacementStrategy: api.SchedulingConfigurationPlacementStrategy{
+						Cpu: ptr.To(api.PLACEMENTSTRATEGY_BINPACK),
+						Gpu: ptr.To(api.PLACEMENTSTRATEGY_BINPACK),
+					},
+				},
+			}
+
+			response, err := nodepoolService.CreateNodepool(ctx, createRequest)
+			Expect(err).To(BeNil())
 			Expect(response.Code).To(Equal(http.StatusCreated))
+
 			nodepool := response.Body.(api.Nodepool)
 			createdNodepools = append(createdNodepools, nodepool)
 
-			controller := api.NewNodePoolsAPIController(nodepoolService)
-			router := chi.NewRouter()
-			router.Patch("/api/v1/node-pools/{nodepoolId}", controller.PatchNodepool)
-			patch := func(body string) api.Nodepool {
-				GinkgoHelper()
-				req := httptest.NewRequestWithContext(ctx, http.MethodPatch, "/api/v1/node-pools/"+nodepool.Id, strings.NewReader(body))
-				req.Header.Set("Content-Type", "application/json")
-				res := httptest.NewRecorder()
-				router.ServeHTTP(res, req)
-				Expect(res.Code).To(Equal(http.StatusOK), res.Body.String())
-				var updated api.Nodepool
-				Expect(json.Unmarshal(res.Body.Bytes(), &updated)).To(Succeed())
-				return updated
+			// Patch with NetworkTopologyId
+			patchRequest := api.NodepoolUpdateFields{
+				NetworkTopologyId: &testNetworkTopologyId,
 			}
 
-			// The scheduling edit was prepared before the separate topology edit.
-			const schedulingPatch = `{"schedulingConfiguration":{"placementStrategy":{"cpu":"spread"}}}`
-			cleared := patch(`{"networkTopologyId":null}`)
-			Expect(cleared.NetworkTopologyId).To(BeNil())
-			Expect(cleared.NetworkTopologyName).To(BeNil())
+			patchResponse, err := nodepoolService.PatchNodepool(ctx, nodepool.Id, patchRequest)
+			Expect(err).To(BeNil())
+			Expect(patchResponse.Code).To(Equal(http.StatusOK))
 
-			scheduled := patch(schedulingPatch)
-			Expect(scheduled.NetworkTopologyId).To(BeNil())
-			Expect(scheduled.NetworkTopologyName).To(BeNil())
-
-			assigned := patch(fmt.Sprintf(`{"networkTopologyId":%q}`, testNetworkTopologyId))
-			Expect(assigned.NetworkTopologyId).To(HaveValue(Equal(testNetworkTopologyId)))
-			Expect(assigned.NetworkTopologyName).To(HaveValue(Equal(testNetworkTopologyName)))
-
-			scheduled = patch(schedulingPatch)
-			Expect(scheduled.SchedulingConfiguration.PlacementStrategy.Cpu).To(HaveValue(Equal(api.PLACEMENTSTRATEGY_SPREAD)))
-			Expect(scheduled.NetworkTopologyId).To(HaveValue(Equal(testNetworkTopologyId)))
-			Expect(scheduled.NetworkTopologyName).To(HaveValue(Equal(testNetworkTopologyName)))
-
+			patchedNodepool, ok := patchResponse.Body.(api.Nodepool)
+			Expect(ok).To(BeTrue())
+			Expect(patchedNodepool.NetworkTopologyId).To(Not(BeNil()))
+			Expect(patchedNodepool.NetworkTopologyName).To(Not(BeNil()))
+			Expect(*patchedNodepool.NetworkTopologyId).To(Equal(testNetworkTopologyId))
+			Expect(*patchedNodepool.NetworkTopologyName).To(Equal(testNetworkTopologyName))
 		})
 
 		It("Patch nodepool with invalid NetworkTopologyId should fail", func() {
@@ -3220,8 +3214,9 @@ var _ = Describe("Nodepools tests", Ordered, func() {
 
 			// Patch with invalid NetworkTopologyId
 			invalidNetworkTopologyId := "invalid-uuid"
-			patchRequest := api.NodepoolUpdateFields{}
-			patchRequest.NetworkTopologyId.Set(&invalidNetworkTopologyId)
+			patchRequest := api.NodepoolUpdateFields{
+				NetworkTopologyId: &invalidNetworkTopologyId,
+			}
 
 			patchResponse, err := nodepoolService.PatchNodepool(ctx, nodepool.Id, patchRequest)
 			errorBody := patchResponse.Body.(api.Error)
@@ -3352,10 +3347,10 @@ var _ = Describe("Nodepools tests", Ordered, func() {
 
 			// Update NetworkTopologyId - should trigger phase change to UPDATING
 			updateRequest := api.NodepoolUpdateFields{
-				LabelValue: &createRequest.LabelValue,
-				LabelKey:   &createRequest.LabelKey,
+				NetworkTopologyId: &testNetworkTopologyId,
+				LabelValue:        &createRequest.LabelValue,
+				LabelKey:          &createRequest.LabelKey,
 			}
-			updateRequest.NetworkTopologyId.Set(&testNetworkTopologyId)
 
 			updateResponse, err := nodepoolService.UpdateNodepool(ctx, nodepool.Id, updateRequest)
 			Expect(err).To(BeNil())

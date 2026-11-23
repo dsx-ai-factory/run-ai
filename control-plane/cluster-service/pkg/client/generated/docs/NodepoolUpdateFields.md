@@ -11,7 +11,7 @@ Name | Type | Description | Notes
 **GpuNetworkAccelerationLabelKey** | Pointer to **NullableString** | Label key by which to determine GPUNetworkAccelerationDetection nodes | [optional] 
 **GpuNetworkAccelerationDetection** | Pointer to [**NullableNodepoolGPUNetworkAccelerationDetection**](NodepoolGPUNetworkAccelerationDetection.md) |  | [optional] [default to NODEPOOLGPUNETWORKACCELERATIONDETECTION_AUTO]
 **SchedulingConfiguration** | Pointer to [**NullableSchedulingConfiguration**](SchedulingConfiguration.md) |  | [optional] 
-**NetworkTopologyId** | Pointer to **NullableString** | For PATCH, omit this field to keep the current network topology, send null to clear it, or send a topology UUID to assign it. For PUT, omitting this field clears the topology. | [optional]
+**NetworkTopologyId** | Pointer to **NullableString** | The unique identifier for the network topology | [optional] 
 
 ## Methods
 

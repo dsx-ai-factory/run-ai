@@ -6,7 +6,6 @@
 package services_test
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -143,72 +142,6 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		stored := storedCapabilities(np.Id)
 		Expect(stored.CpuQuota).To(BeTrue())
 		Expect(stored.AdjustableWeights).To(BeTrue())
-	})
-
-	It("merges overlapping CPU and GPU placement patches without repeating the org-unit reset", func() {
-		np := createNodepool(clusterId)
-		turnOnCpuQuotaAndWeights(np.Id)
-
-		orgClient.On("NodePoolResetResources", mock.Anything, clusterId, np.Id, openapi.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT).
-			Run(func(mock.Arguments) {
-				var gpuPatch api.NodepoolUpdateFields
-				Expect(json.Unmarshal([]byte(`{"schedulingConfiguration":{"placementStrategy":{"gpu":"spread"}},"schedulingCapabilities":{"adjustableWeights":false}}`), &gpuPatch)).To(Succeed())
-				res, err := nodepoolService.PatchNodepool(ctx, np.Id, gpuPatch)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(res.Code).To(Equal(http.StatusOK))
-			}).Return(nil).Once()
-
-		var cpuPatch api.NodepoolUpdateFields
-		Expect(json.Unmarshal([]byte(`{"schedulingConfiguration":{"placementStrategy":{"cpu":"spread"}},"schedulingCapabilities":{"cpuQuota":false}}`), &cpuPatch)).To(Succeed())
-		res, err := nodepoolService.PatchNodepool(ctx, np.Id, cpuPatch)
-		Expect(err).NotTo(HaveOccurred())
-		Expect(res.Code).To(Equal(http.StatusOK))
-
-		stored, err := nodepoolService.GetNodepool(ctx, np.Id)
-		Expect(err).NotTo(HaveOccurred())
-		pool := stored.Body.(api.Nodepool)
-		Expect(pool.SchedulingConfiguration.PlacementStrategy.Cpu).To(Equal(ptr.To(api.PLACEMENTSTRATEGY_SPREAD)))
-		Expect(pool.SchedulingConfiguration.PlacementStrategy.Gpu).To(Equal(ptr.To(api.PLACEMENTSTRATEGY_SPREAD)))
-		Expect(pool.SchedulingCapabilities.CpuQuota).To(BeFalse())
-		Expect(pool.SchedulingCapabilities.AdjustableWeights).To(BeFalse())
-	})
-
-	It("reports a completed org-unit reset if a concurrent edit invalidates the scheduling patch", func() {
-		np := createNodepool(clusterId)
-		turnOnCpuQuotaAndWeights(np.Id)
-		setFairShare := func(enabled bool) {
-			GinkgoHelper()
-			res, err := nodepoolService.PatchNodepool(ctx, np.Id, api.NodepoolUpdateFields{
-				SchedulingConfiguration: &api.SchedulingConfiguration{TimeBasedFairShare: &api.TimeBasedFairShare{Enabled: &enabled}},
-			})
-			Expect(err).NotTo(HaveOccurred())
-			Expect(res.Code).To(Equal(http.StatusOK))
-		}
-		setFairShare(true)
-		orgClient.On("NodePoolResetResources", mock.Anything, clusterId, np.Id, openapi.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT).
-			Run(func(mock.Arguments) { setFairShare(false) }).Return(nil).Once()
-
-		var patch api.NodepoolUpdateFields
-		Expect(json.Unmarshal([]byte(`{"schedulingConfiguration":{"timeBasedFairShare":{"historicalUsageWeight":0.5}},"schedulingCapabilities":{"cpuQuota":false}}`), &patch)).To(Succeed())
-		res, err := nodepoolService.PatchNodepool(ctx, np.Id, patch)
-		Expect(err).NotTo(HaveOccurred())
-		Expect(res.Code).To(Equal(http.StatusBadRequest))
-		Expect(res.Body).To(ContainSubstring("Already reset: CPU_QUOTAS_TO_DEFAULT"))
-	})
-
-	It("does not recreate a pool deleted while its PATCH is in progress", func() {
-		np := createNodepool(clusterId)
-		turnOnCpuQuotaAndWeights(np.Id)
-		orgClient.On("NodePoolResetResources", mock.Anything, clusterId, np.Id, openapi.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT).
-			Run(func(mock.Arguments) {
-				Expect(dao.DeleteNodepool(ctx, tenantId, testUser, np.Id)).To(Succeed())
-			}).Return(nil).Once()
-
-		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{CpuQuota: ptr.To(false)})
-		Expect(response.Code).To(Equal(http.StatusNotFound))
-		Expect(response.Body.(api.Error).Message).To(ContainSubstring("Already reset: CPU_QUOTAS_TO_DEFAULT"))
-		_, err := dao.GetNodepoolById(ctx, tenantId, np.Id)
-		Expect(err).To(HaveOccurred())
 	})
 
 	It("falls back to the defaults on a PUT without schedulingCapabilities", func() {

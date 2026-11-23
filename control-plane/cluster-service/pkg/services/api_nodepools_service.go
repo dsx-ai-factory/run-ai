@@ -467,75 +467,50 @@ func (s *NodePoolsApiService) PatchNodepool(ctx context.Context, nodepoolId stri
 		return NewErrorResponse(err), nil
 	}
 
-	// An overlapping edit can change the row between validation and persistence.
-	// Reapply the requested fields to that row without repeating completed org-unit resets.
-	const maxPatchAttempts = 3
-	var checkedDisables disabledSchedulingCapabilities
-	var completedResets []string
-	var nodepool models.Nodepool
-	for attempt := range maxPatchAttempts {
-		current, revision, dbErr := dao.GetNodepoolForPatch(ctx, tenantId, nodepoolId)
-		if dbErr != nil {
-			if errors.Is(dbErr, gorm.ErrRecordNotFound) {
-				return NewErrorResponse(api.NewError(http.StatusNotFound,
-					fmt.Sprintf("Nodepool %s was not found%s", nodepoolId, describeCompletedResets(completedResets)), dbErr)), nil
-			}
-			return NewErrorResponse(api.NewError(http.StatusInternalServerError,
-				fmt.Sprintf("Failed to get nodepool with id %s%s", nodepoolId, describeCompletedResets(completedResets)), dbErr)), nil
-		}
-		capChecker := s.clusterCapabilityCheckerFactory(current.ClusterId.String())
-		if validationErr := validatePatchParams(ctx, current, fields, capChecker); validationErr != nil {
-			logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Patch nodepool %s failed validation: %v", current.Name, validationErr)
-			return api.Response(http.StatusBadRequest, validationErr.Error()+describeCompletedResets(completedResets)), nil
-		}
-		patched, mapErr := mapPatchFieldsToModel(ctx, current, fields, capChecker)
-		if mapErr != nil {
-			mapErr.Message += describeCompletedResets(completedResets)
-			return NewErrorResponse(mapErr), nil
-		}
-		if validationErr := nodepoolValidations(*patched); validationErr != nil {
-			logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Patch nodepool %s failed validation: %v", current.Name, validationErr)
-			return api.Response(http.StatusBadRequest, validationErr.Error()+describeCompletedResets(completedResets)), nil
-		}
+	nodepoolModel, dbErr := dao.GetNodepoolById(ctx, tenantId, nodepoolId)
+	if dbErr != nil {
+		return NewErrorResponse(api.NewError(http.StatusInternalServerError,
+			fmt.Sprintf("Failed to get nodepool with id %s", nodepoolId), dbErr)), nil
+	}
+	capChecker := s.clusterCapabilityCheckerFactory(nodepoolModel.ClusterId.String())
+	validationErr := validatePatchParams(ctx, nodepoolModel, fields, capChecker)
+	if validationErr != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Patch nodepool %s request failed valdiations. error: %s", nodepoolModel.Name, validationErr.Error())
+		return api.Response(http.StatusBadRequest, validationErr.Error()), nil
+	}
 
-		disabled := capabilitiesBeingDisabled(current, *patched)
-		if attempt == 0 || disabled != checkedDisables {
-			if len(completedResets) > 0 {
-				return NewErrorResponse(api.NewError(http.StatusConflict,
-					"Nodepool scheduling capabilities changed during the update"+describeCompletedResets(completedResets), nil)), nil
-			}
-			var apiErr *api.Error
-			completedResets, apiErr = s.validateSchedulingCapabilitiesChangeAndResetOrgUnits(ctx, *patched, disabled)
-			if apiErr != nil {
-				logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Nodepool %s capability change failed: %v", current.Name, apiErr)
-				return NewErrorResponse(apiErr), nil
-			}
-			checkedDisables = disabled
-		}
+	patched, mapErr := mapPatchFieldsToModel(ctx, nodepoolModel, fields, capChecker)
+	if mapErr != nil {
+		return NewErrorResponse(mapErr), nil
+	}
 
-		patched.UpdatedBy = subjectId
-		if patched.Phase != api.NODEPOOLPHASE_CREATING && clusterFieldsUpdated(*patched, current) {
-			patched.Phase = api.NODEPOOLPHASE_UPDATING
-			patched.PhaseMessage = nil
-		}
-		nodepool, dbErr = dao.UpdateNodepoolAtRevision(ctx, *patched, revision)
-		if dbErr == nil {
-			break
-		}
-		if !errors.Is(dbErr, gorm.ErrRecordNotFound) {
-			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Patch nodepool %s failed: %v", current.Name, dbErr)
-			return NewErrorResponse(api.NewError(http.StatusInternalServerError,
-				fmt.Sprintf("Failed to update nodepool %s in cluster %s%s", current.Name, current.ClusterId, describeCompletedResets(completedResets)), dbErr)), nil
-		}
-		if attempt == maxPatchAttempts-1 {
-			return NewErrorResponse(api.NewError(http.StatusConflict,
-				"Nodepool changed during the update. Retry the PATCH"+describeCompletedResets(completedResets), nil)), nil
-		}
+	validationErr = nodepoolValidations(*patched)
+	if validationErr != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Patch nodepool %s with id %s request failed valdiations. err: %v", nodepoolModel.Name, nodepoolId, validationErr.Error())
+		return api.Response(http.StatusBadRequest, validationErr.Error()), nil
+	}
+
+	completedResets, apiErr := s.validateSchedulingCapabilitiesChangeAndResetOrgUnits(ctx, nodepoolModel, *patched)
+	if apiErr != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Nodepool %s with id %s capabilities change failed. error: %v", nodepoolModel.Name, nodepoolId, apiErr.Message)
+		return NewErrorResponse(apiErr), nil
+	}
+
+	patched.UpdatedBy = subjectId
+	if patched.Phase != api.NODEPOOLPHASE_CREATING && clusterFieldsUpdated(*patched, nodepoolModel) {
+		patched.Phase = api.NODEPOOLPHASE_UPDATING
+		patched.PhaseMessage = nil
+	}
+	nodepool, dbErr := dao.UpdateNodepool(ctx, *patched)
+	if dbErr != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Patch nodepool %s with id %s request failed. error: %v", nodepoolModel.Name, nodepoolId, dbErr)
+		return NewErrorResponse(api.NewError(http.StatusInternalServerError,
+			fmt.Sprintf("Failed to update nodepool %s in cluster %s%s", nodepoolModel.Name, nodepoolModel.ClusterId, describeCompletedResets(completedResets)), dbErr)), nil
 	}
 
 	audit.AuditFromCtx(ctx).WithEntityName(nodepool.Name).WithEntityType(NodepoolAuditEntityType).WithEntityId(strconv.Itoa(int(nodepool.ID)))
 
-	logging.WithCtx(runaictx.LoggerHook(ctx)).Debugf("Patch nodepool %s with id %s request completed successfuly", nodepool.Name, nodepoolId)
+	logging.WithCtx(runaictx.LoggerHook(ctx)).Debugf("Patch nodepool %s with id %s request completed successfuly", nodepoolModel.Name, nodepoolId)
 	apiNp, shapeErr := s.nodepoolToApiResponseWithGpuTypes(ctx, nodepool)
 	if shapeErr != nil {
 		return NewErrorResponse(api.NewError(http.StatusInternalServerError,
@@ -636,7 +611,7 @@ func (s *NodePoolsApiService) UpdateNodepool(ctx context.Context, nodepoolId str
 		return api.Response(http.StatusBadRequest, validationErr.Error()), nil
 	}
 
-	completedResets, apiErr := s.validateSchedulingCapabilitiesChangeAndResetOrgUnits(ctx, *updated, capabilitiesBeingDisabled(nodepoolModel, *updated))
+	completedResets, apiErr := s.validateSchedulingCapabilitiesChangeAndResetOrgUnits(ctx, nodepoolModel, *updated)
 	if apiErr != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Nodepool %s with id %s capabilities change failed. error: %v", nodepoolModel.Name, nodepoolId, apiErr.Message)
 		return NewErrorResponse(apiErr), nil
@@ -787,7 +762,7 @@ func mapUpdateFieldsToModel(ctx context.Context, nodepoolModel models.Nodepool, 
 	}
 	setSchedulingCapabilitiesOnCreateUpdate(ctx, result, updateFields.SchedulingCapabilities)
 
-	ntErr := setNetworkTopology(ctx, nodepoolModel.TenantId, result, updateFields.NetworkTopologyId.Get())
+	ntErr := setNetworkTopology(ctx, nodepoolModel.TenantId, result, updateFields.NetworkTopologyId)
 	if ntErr != nil {
 		return nil, ntErr
 	}
@@ -821,10 +796,9 @@ func mapPatchFieldsToModel(ctx context.Context, nodepoolModel models.Nodepool, p
 	}
 	setSchedulingCapabilitiesOnPatch(result, patchFields.SchedulingCapabilities)
 
-	if patchFields.NetworkTopologyId.IsSet() {
-		if err := setNetworkTopology(ctx, nodepoolModel.TenantId, result, patchFields.NetworkTopologyId.Get()); err != nil {
-			return nil, err
-		}
+	ntErr := setNetworkTopology(ctx, nodepoolModel.TenantId, result, patchFields.NetworkTopologyId)
+	if ntErr != nil {
+		return nil, ntErr
 	}
 	return result, nil
 }

@@ -78,38 +78,16 @@ func CreateNodepools(ctx context.Context, nodepools []models.Nodepool) error {
 	return nil
 }
 
-// GetNodepoolForPatch also reads the PostgreSQL row version. Unlike updated_at,
-// xmin changes for every writer, including the cluster's status sync.
-func GetNodepoolForPatch(ctx context.Context, tenantId int32, nodepoolId string) (models.Nodepool, string, error) {
-	var snapshot struct {
-		models.Nodepool
-		Revision string
-	}
-	err := runaidb.DB().WithContext(ctx).Model(&models.Nodepool{}).
-		Select("nodepools.*, xmin::text AS revision").
-		Where("tenant_id = ? AND id = ?", tenantId, nodepoolId).
-		First(&snapshot)
-	return snapshot.Nodepool, snapshot.Revision, err
-}
-
 func UpdateNodepool(ctx context.Context, nodepool models.Nodepool) (models.Nodepool, error) {
-	return updateNodepool(runaidb.DB().WithContext(ctx), nodepool)
-}
-
-// UpdateNodepoolAtRevision returns ErrRecordNotFound if the row was changed or deleted.
-func UpdateNodepoolAtRevision(ctx context.Context, nodepool models.Nodepool, revision string) (models.Nodepool, error) {
-	return updateNodepool(runaidb.DB().WithContext(ctx).Where("xmin = ?::xid", revision), nodepool)
-}
-
-func updateNodepool(db orm.DB, nodepool models.Nodepool) (models.Nodepool, error) {
-	rows, err := db.Where("tenant_id = ? AND id = ?", nodepool.TenantId, nodepool.ID).
-		Select("*").Clauses(clause.Returning{}).Updates(&nodepool)
+	_, err := runaidb.DB().WithContext(ctx).
+		Where("tenant_id = ? AND id = ?", nodepool.TenantId, nodepool.ID).
+		Save(&nodepool)
 	if err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to update nodepool <%s> in cluster <%s>, error: %v",
+			nodepool.Name, nodepool.ClusterId, err)
 		return models.Nodepool{}, err
 	}
-	if rows == 0 {
-		return models.Nodepool{}, orm.ErrRecordNotFound
-	}
+
 	return nodepool, nil
 }
 
