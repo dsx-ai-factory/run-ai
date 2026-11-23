@@ -214,10 +214,11 @@ func getResetResourcesResourcesQuery(projects bool, action ResetResourcesAction,
 		setQuery = disableCpuQuotaQuerySet
 		conditionQuery = disableCpuQuotaQueryCondition
 	case DepartmentWeightsToDefault:
-		// a department's weight starts as its quota (0, or -1 when unlimited), which gives it no share
-		// once weights alone divide the node pool; weights an admin set are positive and are kept
+		// a department's weight starts as its quota (0, or -1 when unlimited), or NULL when it was saved without
+		// one, and none of these gives it a fair share once weights alone divide the node pool. Positive weights
+		// are kept; nothing stops an admin from setting 0, so that is reset too.
 		setQuery = fmt.Sprintf(`gpu_over_quota_weight = %f, updated_at=now()`, models.DefaultOverQuotaWeight)
-		conditionQuery = `(gpu_over_quota_weight <= 0)`
+		conditionQuery = `(COALESCE(gpu_over_quota_weight, 0) <= 0)`
 	default:
 		return ""
 	}

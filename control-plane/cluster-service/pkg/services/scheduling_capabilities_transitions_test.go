@@ -344,6 +344,34 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		Expect(storedCapabilities(np.Id).AdjustableWeights).To(BeFalse())
 	})
 
+	It("resets the departments' unset weights when a PUT turns weights on for a nodepool without quota", func() {
+		np := createNodepool(clusterId)
+		turnQuotaOff(np.Id)
+		permitResets()
+		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_DEPARTMENT_WEIGHTS_TO_DEFAULT, nil)
+
+		fields := nodepoolUpdateFields(fmt.Sprintf("-capabilities-put-weights-%d", len(createdNodepools)), nil)
+		fields.SchedulingCapabilities = api.SchedulingCapabilitiesNullable{Quota: ptr.To(false), Limits: ptr.To(false), AdjustableWeights: ptr.To(true)}
+		response, err := nodepoolService.UpdateNodepool(ctx, np.Id, *fields)
+		Expect(err).To(BeNil())
+		Expect(response.Code).To(Equal(http.StatusOK))
+		Expect(storedCapabilities(np.Id).AdjustableWeights).To(BeTrue())
+	})
+
+	It("names the CPU quota reset already done when the department weights reset fails", func() {
+		np := createNodepool(clusterId)
+		turnOnCpuQuotaAndWeights(np.Id)
+		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_QUOTA, nil, nil)
+		permitResets()
+		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT, nil)
+		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_DEPARTMENT_WEIGHTS_TO_DEFAULT, errors.New("org-unit-service is down"))
+
+		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Quota: ptr.To(false), CpuQuota: ptr.To(false), Limits: ptr.To(false)})
+		Expect(response.Code).To(Equal(http.StatusServiceUnavailable))
+		Expect(response.Body.(api.Error).Message).To(ContainSubstring("Already reset: CPU_QUOTAS_TO_DEFAULT"))
+		Expect(storedCapabilities(np.Id).Quota).To(BeTrue())
+	})
+
 	withLimits := []openapi.OrgUnitsNodepoolSummaryInner{{Type: ptr.To("project"), Name: ptr.To("team-c")}}
 
 	It("resets the org units' limits when limits turns off and the caller may update every department and project", func() {
