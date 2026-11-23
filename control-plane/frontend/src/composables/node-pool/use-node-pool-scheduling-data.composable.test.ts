@@ -41,7 +41,6 @@ import { orgUnitService } from "@/services/control-plane/org-unit.service/org-un
 import {
   loadChildQuotaSum,
   loadNodePoolGpuLimits,
-  loadDepartmentPage,
   loadSchedulingTotals,
   loadSchedulingDepartmentSnapshot,
   loadSchedulingResources,
@@ -61,7 +60,7 @@ beforeEach(() => {
 });
 describe("scoped scheduling reads", () => {
   it("reuses the complete baseline for initial rows and rank data without duplicate requests", async () => {
-    const rows = Array.from({ length: 58 }, (_, i) => ({
+    const rows = Array.from({ length: 158 }, (_, i) => ({
       id: String(i),
       orgUnitId: String(i),
       orgUnitName: `Dept ${i}`,
@@ -81,23 +80,18 @@ describe("scoped scheduling reads", () => {
     vi.mocked(orgUnitService.getDepartmentNodePoolResources).mockImplementation(
       async (_filters, _sort, _order, offset, limit) => ({
         nodePoolResources: rows.slice(offset ?? 0, (offset ?? 0) + (limit ?? 50)),
+        next: offset ? undefined : 100,
       }),
     );
     vi.mocked(orgUnitService.countDepartmentNodePoolResources).mockResolvedValue(58);
     vi.mocked(orgUnitService.sumDepartmentNodePoolResources).mockResolvedValue({ weightsSum: 116, deservedSum: 0 });
     const data = useNodePoolSchedulingData(ref("p"));
     await flushPromises();
-    expect(data.baselineRows.value).toHaveLength(58);
-    expect(data.pages.value).toHaveLength(50);
-    expect(data.rankCounts.value.High).toBe(58);
-    expect(vi.mocked(orgUnitService.getDepartmentNodePoolResources)).toHaveBeenCalledTimes(1);
+    expect(data.baselineRows.value).toHaveLength(158);
+    expect(data.rankCounts.value.High).toBe(158);
+    expect(vi.mocked(orgUnitService.getDepartmentNodePoolResources)).toHaveBeenCalledTimes(2);
     expect(vi.mocked(orgUnitService.sumDepartmentNodePoolResources)).toHaveBeenCalledTimes(1);
-    expect(vi.mocked(orgUnitService.countDepartmentNodePoolResources)).toHaveBeenCalledTimes(1);
-    const first = data.pages.value.slice();
-    await data.loadMore();
-    expect(data.pages.value).toHaveLength(58);
-    expect(data.pages.value.slice(0, 50)).toEqual(first);
-    expect(data.hasMore.value).toBe(false);
+    expect(vi.mocked(orgUnitService.countDepartmentNodePoolResources)).not.toHaveBeenCalled();
   });
   it("treats an explicit empty department child list as zero project quota", async () => {
     vi.mocked(orgUnitService.getDepartment).mockResolvedValue({ clusterId: "c", children: [] } as never);
@@ -158,10 +152,6 @@ describe("scoped scheduling reads", () => {
   it("scopes pages and unfiltered aggregates", async () => {
     vi.mocked(orgUnitService.getDepartmentNodePoolResources).mockResolvedValue({ nodePoolResources: [] });
     vi.mocked(orgUnitService.sumDepartmentNodePoolResources).mockResolvedValue({ weightsSum: 10, deservedSum: 3 });
-    await loadDepartmentPage({ poolId: "p", clusterId: "c", search: "abc", rank: "High", offset: 50, limit: 50 });
-    const args = vi.mocked(orgUnitService.getDepartmentNodePoolResources).mock.calls.at(-1) ?? [];
-    expect(args[0]).toEqual(expect.arrayContaining(["nodePoolId==p", "clusterId==c", "rank==High"]));
-    expect(args.slice(3)).toEqual([50, 50, "abc"]);
     expect(await loadSchedulingTotals({ poolId: "p", clusterId: "c" })).toEqual({ weightsSum: 10, deservedSum: 3 });
     expect(vi.mocked(orgUnitService.sumDepartmentNodePoolResources).mock.calls.at(-1)).toEqual(["p", ["clusterId==c"]]);
   });
@@ -309,126 +299,6 @@ describe("scoped scheduling reads", () => {
     });
     expect(vi.mocked(orgUnitService.getDepartmentNodePoolResources).mock.calls.at(-1)?.[3]).toBe(1);
   });
-  it("keeps filtered pagination independent of unrelated rank reads", async () => {
-    vi.mocked(clusterService.getNodepool).mockResolvedValue({
-      id: "p",
-      clusterId: "c",
-      name: "pool",
-      schedulingCapabilities: { adjustableWeights: true },
-    } as never);
-    vi.mocked(clusterService.getNodepoolMetrics).mockResolvedValue({ measurements: [] });
-    vi.mocked(orgUnitService.sumDepartmentNodePoolResources).mockResolvedValue({ weightsSum: 120, deservedSum: 0 });
-    vi.mocked(orgUnitService.countDepartmentNodePoolResources).mockImplementation(async (filters) =>
-      filters?.includes("rank==High") ? 60 : filters?.includes("rank==MediumLow") ? 10 : 70,
-    );
-    const make = (id: number, rank: string) => ({
-      id: String(id),
-      orgUnitId: String(id),
-      orgUnitName: `match ${id}`,
-      clusterId: "c",
-      nodePoolId: "p",
-      nodePoolName: "pool",
-      rank,
-      resources: { gpu: { overQuotaWeight: 2, deserved: 0 } },
-    });
-    vi.mocked(orgUnitService.getDepartmentNodePoolResources).mockImplementation(
-      async (filters, _sort, _order, offset, limit) => {
-        if (limit === 100) return { nodePoolResources: [] };
-        if (filters?.includes("rank==MediumLow"))
-          return { nodePoolResources: Array.from({ length: 10 }, (_, i) => make(100 + i, "MediumLow")) };
-        return {
-          nodePoolResources: Array.from({ length: offset ? 10 : 50 }, (_, i) => make((offset ?? 0) + i, "High")),
-        };
-      },
-    );
-    const data = useNodePoolSchedulingData(ref("p"));
-    await flushPromises();
-    data.search.value = "match";
-    data.rank.value = "High";
-    await flushPromises();
-    await data.loadRank("MediumLow");
-    expect(data.pages.value.every((row) => row.rank === "High")).toBe(true);
-    expect(data.hasMore.value).toBe(true);
-    await data.loadMore();
-    expect(data.pages.value).toHaveLength(60);
-    expect(data.hasMore.value).toBe(false);
-  });
-  it("ignores delayed rank rows after query replacement and permits fresh rank reads", async () => {
-    vi.mocked(clusterService.getNodepool).mockResolvedValue({ id: "p", clusterId: "c", name: "pool" } as never);
-    vi.mocked(clusterService.getNodepoolMetrics).mockResolvedValue({ measurements: [] });
-    vi.mocked(orgUnitService.sumDepartmentNodePoolResources).mockResolvedValue({ weightsSum: 0, deservedSum: 0 });
-    vi.mocked(orgUnitService.countDepartmentNodePoolResources).mockResolvedValue(0);
-    let resolveOld!: (value: { nodePoolResources: never[] }) => void;
-    vi.mocked(orgUnitService.getDepartmentNodePoolResources).mockImplementation(
-      async (filters, _sort, _order, _offset, limit, search) => {
-        if (limit === 50 && filters?.includes("rank==MediumLow") && !search)
-          return new Promise((resolve) => {
-            resolveOld = resolve;
-          });
-        return { nodePoolResources: [] };
-      },
-    );
-    const data = useNodePoolSchedulingData(ref("p"));
-    await flushPromises();
-    const pending = data.loadRank("MediumLow");
-    await flushPromises();
-    data.search.value = "new query";
-    await flushPromises();
-    const before = vi.mocked(orgUnitService.getDepartmentNodePoolResources).mock.calls.length;
-    await data.loadRank("MediumLow");
-    expect(vi.mocked(orgUnitService.getDepartmentNodePoolResources).mock.calls.length).toBe(before + 1);
-    resolveOld({ nodePoolResources: [{ orgUnitId: "stale", rank: "MediumLow" } as never] });
-    await pending;
-    expect(data.pages.value).toEqual([]);
-  });
-  it("waits for a replacement first page before appending an expanded selected rank", async () => {
-    vi.mocked(clusterService.getNodepool).mockResolvedValue({ id: "p", clusterId: "c", name: "pool" } as never);
-    vi.mocked(clusterService.getNodepoolMetrics).mockResolvedValue({ measurements: [] });
-    vi.mocked(orgUnitService.sumDepartmentNodePoolResources).mockResolvedValue({ weightsSum: 300, deservedSum: 0 });
-    vi.mocked(orgUnitService.countDepartmentNodePoolResources).mockImplementation(async (filters) =>
-      filters?.includes("rank==High") ? 100 : 150,
-    );
-    const make = (i: number, rank: string) => ({
-      id: `${rank}${i}`,
-      orgUnitId: `${rank}${i}`,
-      orgUnitName: `${rank} ${i}`,
-      clusterId: "c",
-      nodePoolId: "p",
-      nodePoolName: "pool",
-      rank,
-      resources: { gpu: { overQuotaWeight: 2, deserved: 0 } },
-    });
-    let resolveFirst!: (value: { nodePoolResources: ReturnType<typeof make>[] }) => void;
-    vi.mocked(orgUnitService.getDepartmentNodePoolResources).mockImplementation(
-      async (filters, _sort, _order, offset, limit) => {
-        if (limit === 100) return { nodePoolResources: [] };
-        if (filters?.includes("rank==High") && offset === 0)
-          return new Promise((resolve) => {
-            resolveFirst = resolve;
-          });
-        const rank = filters?.includes("rank==High") ? "High" : "Low";
-        return { nodePoolResources: Array.from({ length: 50 }, (_, i) => make((offset ?? 0) + i, rank)) };
-      },
-    );
-    const data = useNodePoolSchedulingData(ref("p"));
-    await flushPromises();
-    expect(data.pages.value).toHaveLength(50);
-    data.rank.value = "High";
-    await flushPromises();
-    const calls = vi.mocked(orgUnitService.getDepartmentNodePoolResources).mock.calls.length;
-    await data.loadRank("High");
-    await data.loadMore();
-    expect(vi.mocked(orgUnitService.getDepartmentNodePoolResources).mock.calls.length).toBe(calls);
-    expect(data.hasMore.value).toBe(false);
-    resolveFirst({ nodePoolResources: Array.from({ length: 50 }, (_, i) => make(i, "High")) });
-    await flushPromises();
-    expect(data.pages.value.map((row) => row.orgUnitId)).toEqual(Array.from({ length: 50 }, (_, i) => `High${i}`));
-    expect(data.hasMore.value).toBe(true);
-    await data.loadRank("High");
-    expect(data.pages.value.map((row) => row.orgUnitId)).toEqual(Array.from({ length: 100 }, (_, i) => `High${i}`));
-    expect(data.hasMore.value).toBe(false);
-  });
-
   it("clears all prior-pool department state while a replacement pool is pending", async () => {
     const oldRow = {
       id: "resource-a",
@@ -451,14 +321,11 @@ describe("scoped scheduling reads", () => {
     const data = useNodePoolSchedulingData(id);
     await flushPromises();
     expect(data.baselineRows.value.map((row) => row.orgUnitId)).toEqual(["department-a"]);
-    expect(data.count.value).toBe(1);
     id.value = "b";
     await flushPromises();
     expect(data.snapshot.value).toBeUndefined();
     expect(data.loading.value).toBe(true);
-    expect(data.pages.value).toEqual([]);
     expect(data.baselineRows.value).toEqual([]);
-    expect(data.count.value).toBe(0);
   });
 
   it("loads pool metadata and capacity without requesting forbidden department data", async () => {
@@ -475,7 +342,6 @@ describe("scoped scheduling reads", () => {
     expect(data.snapshot.value?.id).toBe("p");
     expect(data.resources.value?.gpus).toBe(8);
     expect(data.permissions.value).toEqual({ view: false, edit: false });
-    expect(data.pages.value).toEqual([]);
     expect(data.baselineRows.value).toEqual([]);
     expect(data.loading.value).toBe(false);
     expect(vi.mocked(orgUnitService.getDepartmentNodePoolResources).mock.calls).toHaveLength(reads);
@@ -508,7 +374,7 @@ describe("scoped scheduling reads", () => {
     vi.mocked(orgUnitService.sumDepartmentNodePoolResources).mockClear();
     const data = useNodePoolSchedulingData(ref("p"));
     await flushPromises();
-    expect(data.pages.value.map((value) => value.orgUnitId)).toEqual(["visible"]);
+    expect(data.baselineRows.value.map((value) => value.orgUnitId)).toEqual(["visible"]);
     expect(data.totalsComplete.value).toBe(false);
     expect(
       vi
@@ -541,49 +407,6 @@ describe("scoped scheduling reads", () => {
     await flushPromises();
     expect(data.totalsComplete.value).toBe(true);
     expect(data.canResetResources.value).toBe(canReset);
-  });
-  it("retains the first page on append failure and retries the same offset without duplicate rows", async () => {
-    const make = (id: string) => ({
-      id,
-      orgUnitId: id,
-      orgUnitName: id,
-      clusterId: "c",
-      nodePoolId: "p",
-      nodePoolName: "pool",
-      rank: "High",
-      resources: { gpu: { overQuotaWeight: 2, deserved: 0 } },
-    });
-    vi.mocked(clusterService.getNodepool).mockResolvedValue({ id: "p", clusterId: "c", name: "pool" } as never);
-    vi.mocked(clusterService.getNodepoolMetrics).mockResolvedValue({ measurements: [] });
-    vi.mocked(orgUnitService.sumDepartmentNodePoolResources).mockResolvedValue({ weightsSum: 6, deservedSum: 0 });
-    vi.mocked(orgUnitService.countDepartmentNodePoolResources).mockResolvedValue(4);
-    let appendAttempts = 0;
-    vi.mocked(orgUnitService.getDepartmentNodePoolResources).mockImplementation(
-      async (_filters, _sort, _order, offset, limit) => {
-        if (limit === 100) return { nodePoolResources: [make("a"), make("b"), make("c")] };
-        if (!offset) return { nodePoolResources: [make("a"), make("b")] };
-        if (appendAttempts++ === 0) throw new Error("Temporary page failure");
-        return { nodePoolResources: [make("b"), make("c")] };
-      },
-    );
-    const data = useNodePoolSchedulingData(ref("p"));
-    await flushPromises();
-    expect(data.hasMore.value).toBe(true);
-    await data.loadMore();
-    expect(data.pages.value.map((row) => row.orgUnitId)).toEqual(["a", "b"]);
-    expect(data.loadError.value).toContain("Temporary page failure");
-    expect(data.hasMore.value).toBe(true);
-    expect(data.loading.value).toBe(false);
-    await data.loadMore();
-    expect(data.pages.value.map((row) => row.orgUnitId)).toEqual(["a", "b", "c"]);
-    expect(data.loadError.value).toBe("");
-    expect(data.hasMore.value).toBe(false);
-    const offsets = vi
-      .mocked(orgUnitService.getDepartmentNodePoolResources)
-      .mock.calls.filter((call) => call[4] === 50)
-      .slice(-3)
-      .map((call) => call[3]);
-    expect(offsets).toEqual([0, 2, 2]);
   });
   it("ignores old department and telemetry responses after a new pool has loaded", async () => {
     vi.mocked(clusterService.getNodepool).mockImplementation(async (id) => ({ id, clusterId: "c", name: id }) as never);
@@ -631,7 +454,6 @@ describe("scoped scheduling reads", () => {
     } as never);
     await flushPromises();
     expect(data.snapshot.value?.id).toBe("b");
-    expect(data.pages.value).toEqual([]);
     expect(data.baselineRows.value).toEqual([]);
     expect(data.resources.value?.gpus).toBeUndefined();
     expect(data.loadError.value).toBe("");

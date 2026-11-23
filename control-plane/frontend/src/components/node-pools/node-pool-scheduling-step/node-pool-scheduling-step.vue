@@ -136,7 +136,6 @@
                   :raw-weights-available="pool.schedulingCapabilities?.adjustableWeights === true"
                   :can-edit-department="canEditDepartment"
                   :loading="!!loading"
-                  :has-more="hasMore"
                   :has-error="!!loadError"
                   :search-term="searchTerm"
                   :rank-filter="rankFilter"
@@ -144,8 +143,6 @@
                   @edit="applyEdit"
                   @search="emit('search', $event)"
                   @filter-rank="emit('filter-rank', $event)"
-                  @load-more="emit('load-more')"
-                  @load-rank="emit('load-rank', $event)"
                   @refresh="emit('refresh')"
                   @automatic-weights="draft.automaticWeights = $event"
                   @advanced-settings="showSettings = !showSettings"
@@ -272,7 +269,6 @@ const props = withDefaults(
     loading?: boolean;
     loadError?: string;
     telemetryError?: string;
-    hasMore?: boolean;
     searchTerm?: string;
     rankFilter?: string;
     quotaPolicy?: boolean;
@@ -296,8 +292,6 @@ const emit = defineEmits<{
   refresh: [];
   search: [string];
   "filter-rank": [string | undefined];
-  "load-more": [];
-  "load-rank": [string];
 }>();
 const showSettings = ref(false);
 const showNewDepartment = ref(false);

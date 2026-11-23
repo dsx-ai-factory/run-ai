@@ -9,7 +9,7 @@
     :key="pool.id"
     :pool="pool"
     :resources="resources"
-    :rows="pages"
+    :rows="baselineRows"
     :baseline-rows="baselineRows"
     :aggregates="aggregates"
     :ranks="ranks"
@@ -24,7 +24,6 @@
     :load-has-gpu-limits="loadHasGpuLimits"
     :totals-complete="totalsComplete"
     :can-edit-department="canEditDepartment"
-    :has-more="hasMore"
     :search-term="search"
     :rank-filter="rank"
     :quota-policy="quotaPolicy"
@@ -32,8 +31,6 @@
     @refresh="refresh"
     @search="search = $event"
     @filter-rank="rank = $event"
-    @load-more="loadMore"
-    @load-rank="loadRank"
     @leave-approved="leaveApproved = true"
     @saving="saving = $event"
     @pool-saved="pool = $event"
@@ -59,9 +56,7 @@ const canSavePool = computed(() => permissionStore.hasPermission(ResourceType.No
 const poolId = computed(() => (typeof route.params.id === "string" ? route.params.id : ""));
 const {
   snapshot: pool,
-  pages,
   baselineRows,
-  hasMore,
   aggregates,
   rankCounts,
   resources,
@@ -78,8 +73,6 @@ const {
   search,
   rank,
   refresh,
-  loadMore,
-  loadRank,
   loadChildQuotaSum,
 } = useNodePoolSchedulingData(poolId);
 const { saving, leaveApproved, openStep, finish } = useNodePoolWizardNavigation(pool);

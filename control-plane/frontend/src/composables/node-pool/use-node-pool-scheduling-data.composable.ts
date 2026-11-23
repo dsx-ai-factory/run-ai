@@ -2,7 +2,7 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { computed, getCurrentScope, onScopeDispose, ref, watch, type Ref } from "vue";
+import { computed, getCurrentScope, onScopeDispose, ref, type Ref } from "vue";
 import { permissionService } from "@/services/authorization/permission.service/permission.service";
 import { useAuthStore } from "@/stores/auth.store/index";
 import type { PermittedScopes } from "@/swagger-models/authorization-client/index";
@@ -20,7 +20,6 @@ import {
   loadChildQuotaSum,
   loadNodePoolGpuLimits,
   loadSchedulingDepartmentSnapshot,
-  loadDepartmentPage,
   loadSchedulingTotals,
   schedulingFilters,
 } from "@/composables/node-pool/node-pool-scheduling-data.util";
@@ -51,123 +50,21 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
     view: permissionStore.hasPermission(ResourceType.Department, Action.Read),
     edit: permissionStore.hasPermission(ResourceType.Department, Action.Update),
   }));
-  const pages = ref<DepartmentNodePoolResources[]>([]);
   const baselineRows = ref<DepartmentNodePoolResources[]>([]);
   const aggregates = ref<Record<string, ISchedulingTotals>>({});
   const rankCounts = ref<Record<string, number>>({});
   const quotaPolicy = ref<boolean>();
   const policyError = ref("");
-  const rowsLoading = ref(false);
   const search = ref("");
   const rank = ref<string>();
-  const count = ref(0);
-  const loadingRanks = new Map<string, string>();
-  const globalOffset = ref(0);
-  const queryKey = computed(() => JSON.stringify([poolId.value, search.value, rank.value]));
-  const completedQuery = ref<string>();
-  const hasMore = computed(() => completedQuery.value === queryKey.value && globalOffset.value < count.value);
   let scopeVersion = 0;
-  let rowsVersion = 0;
-  let appending = false;
-  async function loadRows(append = false) {
-    const pool = snapshot.value;
-    if (
-      !pool ||
-      !permissions.value.view ||
-      (append && (appending || rowsLoading.value || completedQuery.value !== queryKey.value))
-    )
-      return;
-    const requestQuery = queryKey.value;
-    if (!append) {
-      completedQuery.value = undefined;
-      globalOffset.value = 0;
-      count.value = 0;
-      pages.value = [];
-    }
-    const current = ++rowsVersion;
-    const scopeRequest = scopeVersion;
-    if (append) appending = true;
-    rowsLoading.value = true;
-    loadError.value = "";
-    const scope = { poolId: pool.id, clusterId: pool.clusterId, rank: rank.value };
-    try {
-      const [rows, total] = await Promise.all([
-        loadDepartmentPage({ ...scope, search: search.value, offset: append ? globalOffset.value : 0, limit: 50 }),
-        orgUnitService.countDepartmentNodePoolResources(schedulingFilters(scope), search.value),
-      ]);
-      if (rowsVersion !== current || scopeVersion !== scopeRequest) return;
-      globalOffset.value = (append ? globalOffset.value : 0) + rows.length;
-      completedQuery.value = requestQuery;
-      pages.value = append
-        ? [
-            ...pages.value,
-            ...rows.filter((row) => !pages.value.some((existing) => existing.orgUnitId === row.orgUnitId)),
-          ]
-        : rows;
-      count.value = total;
-    } catch (error) {
-      if (rowsVersion === current && scopeVersion === scopeRequest)
-        loadError.value = extractErrorMessages(error, "Failed to load departments.").join(" ");
-    } finally {
-      if (rowsVersion === current) {
-        rowsLoading.value = false;
-        appending = false;
-      }
-    }
-  }
-  async function loadRank(rankValue: string) {
-    const pool = snapshot.value;
-    const requestIdentity = `${scopeVersion}:${rowsVersion}`;
-    if (
-      !pool ||
-      !permissions.value.view ||
-      rowsLoading.value ||
-      completedQuery.value !== queryKey.value ||
-      loadingRanks.get(rankValue) === requestIdentity ||
-      (rank.value && rank.value !== rankValue)
-    )
-      return;
-    if (rank.value === rankValue) return loadRows(true);
-    const scopeRequest = scopeVersion;
-    const rowRequest = rowsVersion;
-    const offset = pages.value.filter((row) => row.rank === rankValue).length;
-    loadingRanks.set(rankValue, requestIdentity);
-    try {
-      const rows = await loadDepartmentPage({
-        poolId: pool.id,
-        clusterId: pool.clusterId,
-        rank: rankValue,
-        search: search.value,
-        offset,
-        limit: 50,
-      });
-      if (scopeVersion !== scopeRequest || rowsVersion !== rowRequest) return;
-      pages.value = [
-        ...pages.value,
-        ...rows.filter((row) => !pages.value.some((existing) => existing.orgUnitId === row.orgUnitId)),
-      ];
-    } catch (error) {
-      if (scopeVersion === scopeRequest && rowsVersion === rowRequest)
-        loadError.value = extractErrorMessages(error, "Failed to load rank departments.").join(" ");
-    } finally {
-      if (loadingRanks.get(rankValue) === requestIdentity) loadingRanks.delete(rankValue);
-    }
-  }
   function resetScheduling(poolChanged: boolean) {
-    completedQuery.value = undefined;
-    rowsLoading.value = false;
     scopeVersion++;
-    rowsVersion++;
-    appending = false;
-    loadingRanks.clear();
-    globalOffset.value = 0;
     if (poolChanged) {
       search.value = "";
       rank.value = undefined;
     }
-    pages.value = [];
     baselineRows.value = [];
-    count.value = 0;
     aggregates.value = {};
     rankCounts.value = {};
     quotaPolicy.value = undefined;
@@ -192,9 +89,8 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
     };
     const departments = async () => {
       if (!permissions.value.view) return;
-      const [total, totalCount, departmentSnapshot, scopes, projects] = await Promise.all([
+      const [total, departmentSnapshot, scopes, projects] = await Promise.all([
         loadSchedulingTotals(scope),
-        orgUnitService.countDepartmentNodePoolResources(schedulingFilters(scope)),
         loadSchedulingDepartmentSnapshot(scope, pool.schedulingCapabilities?.adjustableWeights === true),
         permissionService.getPermittedScopesForAction(ResourceType.Department),
         permissionService.getPermittedScopesForAction(ResourceType.Project).catch(() => ({})),
@@ -253,15 +149,6 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
       rankCounts.value = Object.fromEntries(
         ENTITY_PRIORITY_SELECT_OPTIONS.map((option, i) => [option.value, counts[i]]),
       );
-      if (!search.value && !rank.value && totalCount === departmentSnapshot.rows.length) {
-        rowsVersion++;
-        appending = false;
-        rowsLoading.value = false;
-        pages.value = departmentSnapshot.rows.slice(0, 50);
-        count.value = totalCount;
-        globalOffset.value = pages.value.length;
-        completedQuery.value = queryKey.value;
-      } else await loadRows();
     };
     try {
       await Promise.all([policy(), departments()]);
@@ -273,20 +160,14 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
   const {
     pool: snapshot,
     resources,
-    loading: poolLoading,
+    loading,
     loadError,
     telemetryError,
     refresh,
   } = useNodePoolWizardData(poolId, { retryCapacity: true, resetStep: resetScheduling, loadStep: loadScheduling });
-  const loading = computed(() => poolLoading.value || rowsLoading.value);
-  watch([search, rank], () => {
-    appending = false;
-    void loadRows();
-  });
   if (getCurrentScope())
     onScopeDispose(() => {
       scopeVersion++;
-      rowsVersion++;
     });
   return {
     snapshot,
@@ -302,9 +183,7 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
       if (!snapshot.value) throw new Error("Node pool is unavailable.");
       return loadChildQuotaSum({ poolId: snapshot.value.id, clusterId: snapshot.value.clusterId }, id);
     },
-    pages,
     baselineRows,
-    hasMore,
     aggregates,
     rankCounts,
     resources,
@@ -319,9 +198,6 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
     loading,
     search,
     rank,
-    count,
     refresh,
-    loadRank,
-    loadMore: () => loadRows(true),
   };
 }

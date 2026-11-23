@@ -175,6 +175,44 @@ describe("simulation capacity", () => {
     expect(vi.mocked(simulateNodePool).mock.lastCall?.[1].nodePool?.capacity?.gpu).toBe(0);
   });
 
+  it("shows all 51 matching departments in a rank without a paging action", async () => {
+    wrapper = renderSimulation(40);
+    const members = Array.from({ length: 51 }, (_, i) => ({
+      ...rows[0],
+      orgUnitId: String(i),
+      orgUnitName: `demo-${i}`,
+      rank: "Medium",
+    }));
+    await wrapper.setProps({
+      rows: [...members, rows[0]],
+      ranks: ["Medium"],
+      searchTerm: "demo-",
+      draft: { ...draft, mode: ESchedulingMode.Ranked },
+    });
+    expect(wrapper.text()).toContain("Medium (51 departments)");
+    await wrapper.get('[aid="rank-Medium"]').trigger("click");
+    expect(wrapper.findAll(".department-name")).toHaveLength(51);
+    expect(wrapper.text()).not.toContain("Load more");
+  });
+
+  it("turns simulation off when all ranks collapse or a search hides every department", async () => {
+    wrapper = renderSimulation(40);
+    await wrapper.setProps({ draft: { ...draft, mode: ESchedulingMode.Ranked } });
+    const toggle = wrapper.get('[role="switch"]');
+    await toggle.trigger("click");
+    await wrapper.get('[aid="rank-MediumLow"]').trigger("click");
+    expect(toggle.attributes("aria-disabled")).toBe("true");
+    expect(toggle.attributes("aria-checked")).toBe("false");
+    await wrapper.get('[aid="rank-MediumLow"]').trigger("click");
+    await toggle.trigger("click");
+    await wrapper.setProps({ searchTerm: "no match" });
+    expect(toggle.attributes("aria-disabled")).toBe("true");
+    expect(toggle.attributes("aria-checked")).toBe("false");
+    expect(wrapper.find(".simulation-notice").exists()).toBe(false);
+    await vi.advanceTimersByTimeAsync(500);
+    expect(simulateNodePool).not.toHaveBeenCalled();
+  });
+
   it("cancels a queued simulation if capacity disappears before the request is sent", async () => {
     wrapper = renderSimulation(8);
     await wrapper.get('[role="switch"]').trigger("click");
@@ -814,7 +852,7 @@ describe("scheduling department table", () => {
     expect(displayedWeights()).toEqual(["Unknown"]);
     wrapper.unmount();
   });
-  it("counts draft rank moves before offering to load more departments", async () => {
+  it("counts draft rank moves and shows all matching departments", async () => {
     const wrapper = mount(Table, {
       props: {
         rows: [...rows, { ...rows[0], id: "resource-b", orgUnitId: "b", orgUnitName: "Beta", rank: "High" }],
@@ -835,10 +873,6 @@ describe("scheduling department table", () => {
     expect(wrapper.text()).toContain("Alpha");
     expect(wrapper.text()).toContain("Beta");
     expect(wrapper.find('[aid="load-rank-High"]').exists()).toBe(false);
-    await wrapper.setProps({ rankCounts: { High: 3, MediumLow: 1 } });
-    expect(wrapper.text()).toContain("High (4 departments)");
-    await wrapper.get('[aid="load-rank-High"]').trigger("click");
-    expect(wrapper.emitted("load-rank")).toEqual([["High"], ["High"]]);
     wrapper.unmount();
   });
   it("uses the reference zero-state copy and uses Show settings during search, including matching rows", async () => {
@@ -1040,27 +1074,6 @@ describe("scheduling department table", () => {
     expect(wrapper.text()).not.toContain("Raw weights are unavailable");
     expect(wrapper.text()).toContain("Unknown");
     expect(wrapper.findComponent({ name: "EditableCellPopup" }).props("displayValue")).toBe("Unknown");
-    wrapper.unmount();
-  });
-  it("does not prefetch the default rank under another active rank filter", () => {
-    const wrapper = mount(Table, {
-      props: {
-        rows: [],
-        draft: { ...draft, mode: ESchedulingMode.Ranked },
-        aggregates: {},
-        ranks: ["High", "MediumLow"],
-        rankCounts: { High: 60, MediumLow: 10 },
-        rankFilter: "High",
-        searchTerm: "match",
-        readonly: false,
-        loading: false,
-      },
-      global: {
-        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
-        directives: { "click-outside": {}, permission: {} },
-      },
-    });
-    expect(wrapper.emitted("load-rank")).toBeUndefined();
     wrapper.unmount();
   });
   it("rebases hidden edits from the same complete snapshot as refreshed totals", async () => {

@@ -2,6 +2,7 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
+import type { DepartmentNodePoolResources } from "@/swagger-models/org-unit-service-client";
 import type { Nodepool } from "@/swagger-models/cluster-service-client/index";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
@@ -34,19 +35,6 @@ export async function loadNodePoolGpuLimits(scope: ISchedulingScope): Promise<bo
   }
   return counts.some((count) => count > 0);
 }
-export async function loadDepartmentPage(
-  params: ISchedulingScope & { search?: string; offset?: number; limit?: number },
-) {
-  const response = await orgUnitService.getDepartmentNodePoolResources(
-    schedulingFilters(params),
-    "orgUnitName",
-    "asc",
-    params.offset ?? 0,
-    params.limit ?? 50,
-    params.search,
-  );
-  return response.nodePoolResources;
-}
 export function loadSchedulingTotals(scope: ISchedulingScope) {
   // The sum endpoint takes pool scope as nodepoolId, and rejects nodePoolId filters.
   return orgUnitService.sumDepartmentNodePoolResources(scope.poolId, schedulingFilters(scope).slice(1));
@@ -54,7 +42,7 @@ export function loadSchedulingTotals(scope: ISchedulingScope) {
 // Sum APIs use the saved capability's weight semantics. Read all scoped pages to
 // obtain both denominators while previewing an unsaved mode change.
 export async function loadSchedulingDepartmentSnapshot(scope: ISchedulingScope, rawWeightsAvailable = true) {
-  const rows: Awaited<ReturnType<typeof loadDepartmentPage>> = [];
+  const rows: DepartmentNodePoolResources[] = [];
   let offset: number | undefined = 0;
   do {
     const response = await orgUnitService.getDepartmentNodePoolResources(

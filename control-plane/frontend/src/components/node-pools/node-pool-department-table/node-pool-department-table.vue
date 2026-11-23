@@ -120,7 +120,7 @@
                         v-model="simulation"
                         dense
                         size="35px"
-                        :disable="!canView || capacity == null"
+                        :disable="!canView || capacity == null || !hasVisibleDepartments"
                         :aria-describedby="capacity == null ? capacityHintId : undefined"
                         aid="simulate-demand"
                         aria-label="Simulate workload demand"
@@ -151,17 +151,8 @@
                   <span :class="{ 'rank-label-quota': draft.mode === ESchedulingMode.Guaranteed }"
                     >{{ row.name }} ({{ row.count }} {{ row.count === 1 ? "department" : "departments" }})</span
                   >
-                  <runai-btn
-                    v-if="
-                      expanded.has(row.rank) && effectiveRows.filter((item) => item.rank === row.rank).length < row.count
-                    "
-                    :aid="`load-rank-${row.rank}`"
-                    flat
-                    label="Load more"
-                    :disable="loading"
-                    @click="emit('load-rank', row.rank)"
-                  /></div
-              ></q-td>
+                </div></q-td
+              >
             </q-tr>
             <q-tr v-else :key="row.key" :class="{ 'selected-department': selected.has(row.id) }">
               <q-td class="column-selection"
@@ -293,15 +284,6 @@
           <span>{{ simulationMessage }}</span>
           <runai-btn v-if="canRetrySimulation" flat label="Retry" aid="retry-simulation" @click="retrySimulation" />
         </div>
-        <div v-if="hasMore" class="q-pa-md text-center">
-          <runai-btn
-            aid="load-more-departments"
-            flat
-            label="Load more departments"
-            :loading="loading"
-            @click="emit('load-more')"
-          />
-        </div>
       </div>
     </div>
     <move-to-rank-modal
@@ -372,7 +354,6 @@ const props = withDefaults(
     rawWeightsAvailable?: boolean;
     canEditDepartment?: (id: string) => boolean;
     loading: boolean;
-    hasMore?: boolean;
     hasError?: boolean;
     searchTerm?: string;
     rankFilter?: string;
@@ -384,8 +365,6 @@ const emit = defineEmits<{
   edit: [IDepartmentSchedulingEdit];
   search: [string];
   "filter-rank": [string | undefined];
-  "load-more": [];
-  "load-rank": [string];
   refresh: [];
   "new-department": [];
   "advanced-settings": [];
@@ -460,25 +439,6 @@ const quotaExcess = computed(() => {
   return Number.isFinite(finiteTotal) && finiteTotal > capacity ? finiteTotal - capacity : undefined;
 });
 
-watch(
-  [
-    ranked,
-    () => props.rankCounts?.[ENTITY_PRIORITY_DEFAULT_VALUE],
-    () => props.rows.length,
-    () => props.rankFilter,
-    () => props.searchTerm,
-  ],
-  () => {
-    if (
-      ranked.value &&
-      !props.rankFilter &&
-      (props.rankCounts?.[ENTITY_PRIORITY_DEFAULT_VALUE] ?? 0) > 0 &&
-      !props.rows.some((row) => row.rank === ENTITY_PRIORITY_DEFAULT_VALUE)
-    )
-      emit("load-rank", ENTITY_PRIORITY_DEFAULT_VALUE);
-  },
-  { immediate: true },
-);
 const filters = ref<IFilterBy>({ advancedFilters: [], displayedColumns: [] });
 const unfilteredHeight = ref(0);
 const preserveTableSpace = computed(
@@ -586,13 +546,18 @@ watch(
   },
   { deep: true, flush: "sync" },
 );
+const visibleDepartmentIds = computed(() => displayRows.value.flatMap((row) => ("id" in row ? [row.id] : [])));
+const hasVisibleDepartments = computed(() => visibleDepartmentIds.value.length > 0);
+watch([hasVisibleDepartments, () => props.loading], ([visible, loading]) => {
+  if (!visible && !loading) simulation.value = false;
+});
 const scenario = computed(() =>
-  simulation.value && props.canView && props.poolId && props.capacity != null
+  simulation.value && hasVisibleDepartments.value && props.canView && props.poolId && props.capacity != null
     ? {
         poolId: props.poolId,
         capacity: props.capacity,
         draft: props.draft,
-        ids: displayRows.value.flatMap((row) => ("id" in row ? [row.id] : [])),
+        ids: visibleDepartmentIds.value,
         demand: demand.value,
       }
     : undefined,
@@ -709,10 +674,7 @@ function setDemand(row: IDepartmentSchedulingEdit, event: Event) {
 function toggle(rank: string) {
   const next = new Set(expanded.value);
   if (next.has(rank)) next.delete(rank);
-  else {
-    next.add(rank);
-    emit("load-rank", rank);
-  }
+  else next.add(rank);
   expanded.value = next;
 }
 function select(id: string, value: boolean) {
