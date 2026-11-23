@@ -220,6 +220,40 @@ describe("department resource editor", () => {
     expect(wrapper.emitted("apply")).toEqual([[6]]);
     wrapper.unmount();
   });
+  it("opens a saved unlimited quota without errors and validates a numeric replacement", async () => {
+    const wrapper = mount(Editor, {
+      props: {
+        value: -1,
+        kind: EResourceEditorKind.Quota,
+        id: "default",
+        context: { childQuotaSum: 4, enforceChildQuota: true },
+      },
+      global: { plugins: [Quasar], stubs: { EditableCellPopup: popup } },
+    });
+    const menu = wrapper.getComponent(popup);
+    menu.vm.$emit("before-show");
+    await wrapper.vm.$nextTick();
+    const input = wrapper.get("input");
+    expect(input.element.value).toBe("");
+    expect(input.attributes("placeholder")).toBe("Unlimited");
+    expect(wrapper.getComponent(QInput).props("error")).toBe(false);
+    expect(wrapper.find(".text-warning").exists()).toBe(false);
+    expect(menu.props("isSubmitDisabled")).toBe(true);
+    menu.vm.$emit("apply");
+    expect(wrapper.emitted("apply")).toBeUndefined();
+
+    await input.setValue("-1");
+    expect(wrapper.text()).toContain("Enter a value equal to or above 0");
+    await input.setValue("3");
+    expect(wrapper.text()).toContain("equal to or above 4 GPUs");
+    expect(menu.props("isSubmitDisabled")).toBe(true);
+    await input.setValue("4");
+    expect(menu.props("isSubmitDisabled")).toBe(false);
+    menu.vm.$emit("apply");
+    expect(wrapper.emitted("apply")).toEqual([[4]]);
+    wrapper.unmount();
+  });
+
   it("renders the saved unlimited quota sentinel as Unlimited", () => {
     const wrapper = mount(Editor, {
       props: { value: -1, kind: EResourceEditorKind.Quota, id: "default" },

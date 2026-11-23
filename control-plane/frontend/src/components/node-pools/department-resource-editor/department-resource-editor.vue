@@ -18,7 +18,7 @@
     "
     :disabled="disabled"
     :disabled-tooltip="disabledTooltip"
-    :is-submit-disabled="loading || validation.errors.length > 0"
+    :is-submit-disabled="applyDisabled"
     @before-show="opened"
     @reset="reset"
     @apply="apply"
@@ -65,7 +65,7 @@
           :aria-label="editorTitle"
           :max="kind === EResourceEditorKind.Weight ? 20 : undefined"
           :step="kind === EResourceEditorKind.Weight ? 1 : 'any'"
-          :placeholder="kind === EResourceEditorKind.Limit ? 'Unlimited' : undefined"
+          :placeholder="kind === EResourceEditorKind.Limit || savedUnlimitedQuota ? 'Unlimited' : undefined"
           :error="validation.errors.length > 0"
           :color="!validation.errors.length && validation.warnings.length ? 'warning' : 'primary'"
           :class="{
@@ -145,8 +145,11 @@ const weightHelp = computed(
   () =>
     `Weight determines a department’s share relative to the other departments${rankedWeight.value ? " in the same rank" : ""}. A higher weight means a larger portion of the resources. The weight is expressed as a percentage, calculated as the weight divided by the total weight of all departments${rankedWeight.value ? " in the rank" : ""}. For example, a department with a weight of 2${rankedWeight.value ? " in a rank" : ""} where the weights total 20 receives 10%.`,
 );
+const savedUnlimitedQuota = computed(() => props.kind === EResourceEditorKind.Quota && props.value === -1);
 const initialInput = () =>
-  props.kind === EResourceEditorKind.Limit && (props.value == null || props.value === -1) ? "" : (props.value ?? "");
+  savedUnlimitedQuota.value || (props.kind === EResourceEditorKind.Limit && props.value === -1)
+    ? ""
+    : (props.value ?? "");
 const nativeBadInput = ref(false);
 function updateNativeValidity(event: Event) {
   if (event.target instanceof HTMLInputElement) nativeBadInput.value = event.target.validity.badInput;
@@ -159,7 +162,8 @@ const parsedValue = () =>
       : String(input.value).trim() === ""
         ? NaN
         : Number(input.value);
-const input = ref<string | number>(props.value ?? "");
+const input = ref<string | number>(initialInput());
+const unchangedUnlimitedQuota = computed(() => savedUnlimitedQuota.value && input.value === "" && !nativeBadInput.value);
 const proposedWeightPercentage = computed(() => {
   const value = parsedValue();
   if (!isValidSchedulingWeight(value)) return "Unknown";
@@ -196,6 +200,7 @@ const loadError = ref("");
 let request = 0;
 const validation = computed(() => {
   if (loading.value) return { errors: [], warnings: [] };
+  if (unchangedUnlimitedQuota.value) return { errors: loadError.value ? [loadError.value] : [], warnings: [] };
   const value = parsedValue();
   const result = validateDepartmentEdit(
     {
@@ -249,8 +254,11 @@ async function opened() {
     if (version === request) loading.value = false;
   }
 }
+const applyDisabled = computed(
+  () => loading.value || unchangedUnlimitedQuota.value || validation.value.errors.length > 0,
+);
 function apply() {
-  if (!loading.value && !validation.value.errors.length) emit("apply", parsedValue());
+  if (!applyDisabled.value) emit("apply", parsedValue());
 }
 watch(() => props.value, reset);
 </script>
