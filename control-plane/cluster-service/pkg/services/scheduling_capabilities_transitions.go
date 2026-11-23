@@ -49,9 +49,8 @@ func (s *NodePoolsApiService) validateSchedulingCapabilitiesChangeAndResetOrgUni
 		}
 	}
 
-	// with quota turned off too, the quota check above already guarantees no org unit has a limit
 	resetLimits := false
-	if before.AllowLimits && !after.AllowLimits && after.AllowQuota {
+	if before.AllowLimits && !after.AllowLimits {
 		withLimits, apiErr := s.orgUnitsUsingSchedulingCapability(ctx, after, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_LIMIT)
 		if apiErr != nil {
 			return nil, apiErr

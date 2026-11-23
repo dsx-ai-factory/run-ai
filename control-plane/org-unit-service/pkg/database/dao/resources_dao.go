@@ -31,7 +31,12 @@ const (
 	disableCpuQuotaQuerySet = `cpu_deserved = NULL, cpu_limit = NULL, cpu_over_quota_weight = NULL, 
                      memory_deserved = NULL, memory_limit = NULL, memory_over_quota_weight = NULL, updated_at=now()`
 
-	hasQuotaQueryCondition = `(gpu_deserved <> 0 OR gpu_limit <> -1 OR 
+	resetQuotasQueryCondition = `(gpu_deserved <> 0 OR gpu_limit <> -1 OR 
+					 cpu_deserved <> -1 OR cpu_limit <> -1 OR 
+					 memory_deserved <> -1 OR memory_limit <> -1)`
+
+	// A GPU limit isn't quota: limits apply in every scheduling mode, so it doesn't stop quota from turning off.
+	hasQuotaQueryCondition = `(gpu_deserved <> 0 OR 
 					 cpu_deserved <> -1 OR cpu_limit <> -1 OR 
 					 memory_deserved <> -1 OR memory_limit <> -1)`
 
@@ -183,7 +188,7 @@ func getResetResourcesResourcesQuery(projects bool, action ResetResourcesAction,
 		setQuery = `gpu_deserved = 0, gpu_limit = NULL,
                      cpu_deserved = NULL, cpu_limit = NULL,
                      memory_deserved = NULL, memory_limit = NULL, updated_at=now()`
-		conditionQuery = hasQuotaQueryCondition
+		conditionQuery = resetQuotasQueryCondition
 	case RanksToDefault:
 		setQuery = fmt.Sprintf(`priority = '%s', updated_at=now()`, models.DefaultResourceRank)
 		conditionQuery = nonDefaultRankQueryCondition

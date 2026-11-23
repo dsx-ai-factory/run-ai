@@ -7849,7 +7849,7 @@ components:
         limits:
           default: true
           description: "Whether to allow GPU, CPU and memory limits for the nodepool's\
-            \ resources. Only allowed when quota=true."
+            \ resources. With quota=false, only GPU limits are allowed."
           example: false
           nullable: true
           type: boolean
@@ -8236,7 +8236,7 @@ components:
         limits:
           default: true
           description: "Whether to allow GPU, CPU and memory limits for the nodepool's\
-            \ resources. Only allowed when quota=true."
+            \ resources. With quota=false, only GPU limits are allowed."
           example: false
           type: boolean
       required:

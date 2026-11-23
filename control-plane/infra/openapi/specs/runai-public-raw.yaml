@@ -28647,7 +28647,7 @@ components:
           type: boolean
           description: >-
             Whether to allow GPU, CPU and memory limits for the nodepool's
-            resources. Only allowed when quota=true.
+            resources. With quota=false, only GPU limits are allowed.
           example: false
           default: true
           nullable: true
@@ -28935,7 +28935,7 @@ components:
           type: boolean
           description: >-
             Whether to allow GPU, CPU and memory limits for the nodepool's
-            resources. Only allowed when quota=true.
+            resources. With quota=false, only GPU limits are allowed.
           example: false
           default: true
     NodepoolGPUNetworkAccelerationDetection:
@@ -32890,7 +32890,7 @@ components:
           type: boolean
         limits:
           type: boolean
-          description: Whether GPU limits apply. Only allowed when quota is true.
+          description: Whether GPU limits apply.
     FairShareSimulationNodePool:
       type: object
       description: 'The node pool to simulate, saved or not.'

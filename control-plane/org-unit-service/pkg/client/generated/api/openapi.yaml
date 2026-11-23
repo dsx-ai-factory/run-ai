@@ -10843,7 +10843,7 @@ components:
         adjustableWeights:
           type: boolean
         limits:
-          description: Whether GPU limits apply. Only allowed when quota is true.
+          description: Whether GPU limits apply.
           type: boolean
       required:
       - adjustableWeights

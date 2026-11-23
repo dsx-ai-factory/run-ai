@@ -1163,12 +1163,13 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				clusterId3             string
 				limitsOnDepartments    api.DepartmentsAPIServicer
 				limitsOffDepartments   api.DepartmentsAPIServicer
+				quotaOffDepartments    api.DepartmentsAPIServicer
 				limitedDepartmentId    string
 				limitsCapabilityDepIds []string
 			)
 
-			departmentsServiceWithLimits := func(limits bool) api.DepartmentsAPIServicer {
-				capabilities := npSchedCapabilities(false, false, true, true)
+			departmentsServiceWithLimits := func(quota, limits bool) api.DepartmentsAPIServicer {
+				capabilities := npSchedCapabilities(false, false, quota, true)
 				capabilities.Limits = limits
 				clusterServiceClient3 := mocks.IClusterClient{}
 				clusterServiceClient3.On("GetClusterMinimalDataById", mock.Anything, mock.Anything).Return(&clustersOpenapi.ClustersMinimalData{
@@ -1188,8 +1189,9 @@ var _ = Describe("Org unit tests", Ordered, func() {
 
 			BeforeAll(func() {
 				clusterId3 = uuid.New().String()
-				limitsOnDepartments = departmentsServiceWithLimits(true)
-				limitsOffDepartments = departmentsServiceWithLimits(false)
+				limitsOnDepartments = departmentsServiceWithLimits(true, true)
+				limitsOffDepartments = departmentsServiceWithLimits(true, false)
+				quotaOffDepartments = departmentsServiceWithLimits(false, true)
 
 				depReq := getDepartmentCreateRequest(createDepartmentName(), clusterId3)
 				depReq.Resources = []api.ResourcesNullable{CreateNodePoolApiResources(false, fmt.Sprint(defaultNodePoolId), "default")}
@@ -1224,6 +1226,42 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				Expect(err).To(BeNil())
 				Expect(depRes.Code).To(Equal(http.StatusCreated), fmt.Sprint(depRes.Body))
 				limitsCapabilityDepIds = append(limitsCapabilityDepIds, depRes.Body.(api.Department).Id)
+			})
+
+			It("accepts a GPU limit on a node pool with quota off and limits on", func() {
+				depReq := getDepartmentCreateRequest(createDepartmentName(), clusterId3)
+				resources := CreateNodePoolApiResourcesNoQuota(fmt.Sprint(defaultNodePoolId), "default")
+				resources.Gpu.Limit = ptr.To(float64(2))
+				depReq.Resources = []api.ResourcesNullable{resources}
+				depRes, err := quotaOffDepartments.CreateDepartment(ctx, depReq)
+				Expect(err).To(BeNil())
+				Expect(depRes.Code).To(Equal(http.StatusCreated), fmt.Sprint(depRes.Body))
+				department := depRes.Body.(api.Department)
+				limitsCapabilityDepIds = append(limitsCapabilityDepIds, department.Id)
+				Expect(department.Resources[0].Gpu.Limit).To(Equal(ptr.To(float64(2))))
+			})
+
+			It("rejects CPU and memory limits on a node pool with quota off and limits on", func() {
+				depReq := getDepartmentCreateRequest(createDepartmentName(), clusterId3)
+				resources := CreateNodePoolApiResourcesNoQuota(fmt.Sprint(defaultNodePoolId), "default")
+				resources.Cpu.Limit = ptr.To(float64(4))
+				depReq.Resources = []api.ResourcesNullable{resources}
+				depRes, err := quotaOffDepartments.CreateDepartment(ctx, depReq)
+				Expect(err).To(BeNil())
+				Expect(depRes.Code).To(Equal(http.StatusBadRequest))
+				Expect(fmt.Sprint(depRes.Body)).To(ContainSubstring("CPU and memory limits should be -1, null or omitted"))
+			})
+
+			It("rejects GPU quota on a node pool with quota off and limits on", func() {
+				depReq := getDepartmentCreateRequest(createDepartmentName(), clusterId3)
+				resources := CreateNodePoolApiResourcesNoQuota(fmt.Sprint(defaultNodePoolId), "default")
+				resources.Gpu.Deserved = ptr.To(float64(1))
+				resources.Gpu.Limit = ptr.To(float64(2))
+				depReq.Resources = []api.ResourcesNullable{resources}
+				depRes, err := quotaOffDepartments.CreateDepartment(ctx, depReq)
+				Expect(err).To(BeNil())
+				Expect(depRes.Code).To(Equal(http.StatusBadRequest))
+				Expect(fmt.Sprint(depRes.Body)).To(ContainSubstring("quota is not enabled"))
 			})
 		})
 

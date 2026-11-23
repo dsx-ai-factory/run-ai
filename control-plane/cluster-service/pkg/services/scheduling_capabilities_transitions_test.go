@@ -259,6 +259,7 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		np := createNodepool(clusterId)
 		turnOnCpuQuotaAndWeights(np.Id)
 		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_QUOTA, nil, nil)
+		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_LIMIT, nil, nil)
 		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT, nil)
 
 		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Quota: ptr.To(false), CpuQuota: ptr.To(false), Limits: ptr.To(false)})
@@ -322,13 +323,78 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		Expect(storedCapabilities(np.Id).Limits).To(BeTrue())
 	})
 
-	It("refuses to turn quota off while limits stays on", func() {
+	It("turns quota off and keeps the org units' GPU limits while limits stays on", func() {
 		np := createNodepool(clusterId)
+		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_QUOTA, nil, nil)
 
 		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Quota: ptr.To(false)})
-		Expect(response.Code).To(Equal(http.StatusBadRequest))
-		Expect(storedCapabilities(np.Id).Quota).To(BeTrue())
-		Expect(storedCapabilities(np.Id).Limits).To(BeTrue())
+		Expect(response.Code).To(Equal(http.StatusOK))
+		orgClient.AssertNotCalled(GinkgoT(), "NodePoolResetResources", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+
+		stored := storedCapabilities(np.Id)
+		Expect(stored.Quota).To(BeFalse())
+		Expect(stored.Limits).To(BeTrue())
+	})
+
+	It("resets the org units' limits when quota and limits turn off together", func() {
+		np := createNodepool(clusterId)
+		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_QUOTA, nil, nil)
+		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_LIMIT, withLimits, nil)
+		permitUpdate(authorization_api.RESOURCETYPE_DEPARTMENT, authorization_api.PermittedScopes{System: ptr.To(true)})
+		permitUpdate(authorization_api.RESOURCETYPE_PROJECT, authorization_api.PermittedScopes{System: ptr.To(true)})
+		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_LIMITS_TO_DEFAULT, nil)
+
+		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Quota: ptr.To(false), Limits: ptr.To(false)})
+		Expect(response.Code).To(Equal(http.StatusOK))
+
+		stored := storedCapabilities(np.Id)
+		Expect(stored.Quota).To(BeFalse())
+		Expect(stored.Limits).To(BeFalse())
+	})
+
+	It("resets the org units' limits when limits turns off on a nodepool without quota", func() {
+		np := createNodepool(clusterId)
+		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_QUOTA, nil, nil)
+		Expect(patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Quota: ptr.To(false)}).Code).To(Equal(http.StatusOK))
+
+		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_LIMIT, withLimits, nil)
+		permitUpdate(authorization_api.RESOURCETYPE_DEPARTMENT, authorization_api.PermittedScopes{System: ptr.To(true)})
+		permitUpdate(authorization_api.RESOURCETYPE_PROJECT, authorization_api.PermittedScopes{System: ptr.To(true)})
+		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_LIMITS_TO_DEFAULT, nil)
+
+		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Limits: ptr.To(false)})
+		Expect(response.Code).To(Equal(http.StatusOK))
+		Expect(storedCapabilities(np.Id).Limits).To(BeFalse())
+	})
+
+	It("turns limits on for a nodepool without quota", func() {
+		fields := nodepoolCreateFields(clusterId, fmt.Sprintf("-capabilities-%d", len(createdNodepools)), nil)
+		fields.SchedulingCapabilities = api.SchedulingCapabilitiesNullable{Quota: ptr.To(false)}
+		response, err := nodepoolService.CreateNodepool(ctx, *fields)
+		Expect(err).To(BeNil())
+		Expect(response.Code).To(Equal(http.StatusCreated))
+		np := response.Body.(api.Nodepool)
+		createdNodepools = append(createdNodepools, np)
+		Expect(np.SchedulingCapabilities.Limits).To(BeFalse())
+
+		Expect(patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Limits: ptr.To(true)}).Code).To(Equal(http.StatusOK))
+
+		stored := storedCapabilities(np.Id)
+		Expect(stored.Quota).To(BeFalse())
+		Expect(stored.Limits).To(BeTrue())
+	})
+
+	It("creates a nodepool with limits on and quota off", func() {
+		fields := nodepoolCreateFields(clusterId, fmt.Sprintf("-capabilities-%d", len(createdNodepools)), nil)
+		fields.SchedulingCapabilities = api.SchedulingCapabilitiesNullable{Quota: ptr.To(false), Limits: ptr.To(true)}
+		response, err := nodepoolService.CreateNodepool(ctx, *fields)
+		Expect(err).To(BeNil())
+		Expect(response.Code).To(Equal(http.StatusCreated))
+		np := response.Body.(api.Nodepool)
+		createdNodepools = append(createdNodepools, np)
+
+		Expect(np.SchedulingCapabilities.Quota).To(BeFalse())
+		Expect(np.SchedulingCapabilities.Limits).To(BeTrue())
 	})
 
 	It("refuses to turn ranks off while org units have a non-default rank", func() {
