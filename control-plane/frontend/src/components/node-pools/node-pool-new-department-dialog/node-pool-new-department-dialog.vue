@@ -452,6 +452,9 @@ async function createDepartment() {
 .scheduling-new-department .administrator-rule .role-select {
   width: 250px;
 }
+.scheduling-new-department .subject-select + .role-select {
+  margin-block-start: 40px;
+}
 .scheduling-new-department .administrator-rule .subject-addable-multi-select {
   width: 100%;
 }
