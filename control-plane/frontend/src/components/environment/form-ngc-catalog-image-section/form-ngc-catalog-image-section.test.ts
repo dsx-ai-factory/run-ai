@@ -17,42 +17,45 @@ function createWrapper(authenticatedOnly = true) {
   });
 }
 
-describe("Distributed catalog authentication", () => {
-  it("requires a credential before showing the catalog image picker and offers no guest option", async () => {
-    const wrapper = createWrapper();
-    expect(wrapper.findComponent({ name: "runai-radio-options" }).exists()).toBe(false);
-    const credentialSelector = wrapper.findComponent({ name: "runai-credential-selector-by-source" });
-    expect(credentialSelector.props("credentialSelectConfig").required).toBe(true);
-    expect(wrapper.findComponent({ name: "ngc-image-tag-selector" }).exists()).toBe(false);
+describe("NGC catalog authentication", () => {
+  it.each([true, false])(
+    "requires a credential before browsing regardless of caller auth flag: %s",
+    async (authenticatedOnly) => {
+      const wrapper = createWrapper(authenticatedOnly);
+      expect(wrapper.findComponent({ name: "runai-radio-options" }).exists()).toBe(false);
+      const credentialSelector = wrapper.findComponent({ name: "runai-credential-selector-by-source" });
+      expect(credentialSelector.props("credentialSelectConfig").required).toBe(true);
+      expect(wrapper.findComponent({ name: "ngc-image-tag-selector" }).exists()).toBe(false);
 
-    credentialSelector.vm.$emit("update:model-value", {
-      id: "personal-key-id",
-      credentialName: "personal-key",
-      source: ERunaiCredentialSource.MyCredentials,
-      type: ERunaiCredentialType.NgcApiKey,
-    });
-    await wrapper.vm.$nextTick();
+      credentialSelector.vm.$emit("update:model-value", {
+        id: "personal-key-id",
+        credentialName: "personal-key",
+        source: ERunaiCredentialSource.MyCredentials,
+        type: ERunaiCredentialType.NgcApiKey,
+      });
+      await wrapper.vm.$nextTick();
 
-    const imageSelector = wrapper.findComponent({ name: "ngc-image-tag-selector" });
-    expect(imageSelector.props()).toMatchObject({ credentialId: "personal-key-id" });
-    expect(wrapper.emitted("credential-changed")?.at(-1)?.[0]).toEqual({
-      credentialName: "personal-key",
-      credentialSource: ERunaiCredentialSource.MyCredentials,
-    });
+      const imageSelector = wrapper.findComponent({ name: "ngc-image-tag-selector" });
+      expect(imageSelector.props()).toMatchObject({ credentialId: "personal-key-id" });
+      expect(wrapper.emitted("credential-changed")?.at(-1)?.[0]).toEqual({
+        credentialName: "personal-key",
+        credentialSource: ERunaiCredentialSource.MyCredentials,
+      });
 
-    credentialSelector.vm.$emit("update:model-value", {
-      credentialName: "",
-      source: ERunaiCredentialSource.MyCredentials,
-      type: ERunaiCredentialType.NgcApiKey,
-    });
-    await wrapper.vm.$nextTick();
-    expect(wrapper.findComponent({ name: "ngc-image-tag-selector" }).exists()).toBe(false);
-    expect(wrapper.emitted("update:model-value")?.at(-1)).toEqual([null]);
-    expect(wrapper.emitted("credential-changed")?.at(-1)?.[0]).toEqual({
-      credentialName: "",
-      credentialSource: ERunaiCredentialSource.MyCredentials,
-    });
-  });
+      credentialSelector.vm.$emit("update:model-value", {
+        credentialName: "",
+        source: ERunaiCredentialSource.MyCredentials,
+        type: ERunaiCredentialType.NgcApiKey,
+      });
+      await wrapper.vm.$nextTick();
+      expect(wrapper.findComponent({ name: "ngc-image-tag-selector" }).exists()).toBe(false);
+      expect(wrapper.emitted("update:model-value")?.at(-1)).toEqual([null]);
+      expect(wrapper.emitted("credential-changed")?.at(-1)?.[0]).toEqual({
+        credentialName: "",
+        credentialSource: ERunaiCredentialSource.MyCredentials,
+      });
+    },
+  );
 
   it("uses the selected project scope for shared-credential browsing", () => {
     const wrapper = shallowMount(FormNgcCatalogImageSection, {
@@ -66,11 +69,14 @@ describe("Distributed catalog authentication", () => {
     });
   });
 
-  it("preserves guest catalog browsing for other workload forms", () => {
-    const wrapper = createWrapper(false);
-    const options = wrapper.findComponent({ name: "runai-radio-options" }).props("options");
-    expect(options).toContainEqual({ value: "guest", label: "As a guest" });
-    expect(wrapper.findComponent({ name: "ngc-image-tag-selector" }).exists()).toBe(true);
-    expect(wrapper.findComponent({ name: "runai-credential-selector-by-source" }).exists()).toBe(false);
+  it("requires a credential when the caller supplies no authentication flags", () => {
+    const wrapper = shallowMount(FormNgcCatalogImageSection, {
+      props: { ngcCatalogRegistryId: "ngc-registry" },
+    });
+    expect(wrapper.findComponent({ name: "runai-radio-options" }).exists()).toBe(false);
+    const credentialSelector = wrapper.findComponent({ name: "runai-credential-selector-by-source" });
+    expect(credentialSelector.exists()).toBe(true);
+    expect(credentialSelector.props("credentialSelectConfig").required).toBe(true);
+    expect(wrapper.findComponent({ name: "ngc-image-tag-selector" }).exists()).toBe(false);
   });
 });

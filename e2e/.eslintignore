@@ -1,0 +1,8 @@
+dist
+node_modules
+generated
+cli.js
+example
+docs/*.ts
+reports/
+load_tests/

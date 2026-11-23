@@ -18,7 +18,7 @@ tests:
       - templates/ocp/admission-webhooks.yaml
     asserts:
       - hasDocuments:
-          count: 5
+          count: 6
 
   - it: should retain the project validator after retiring the Secret/PVC webhook
     set:
@@ -55,6 +55,47 @@ tests:
           path: webhooks[0].rules[0].resources
           value:
             - restartrequests
+
+  - it: should register the snapshot restore webhook
+    set:
+      openShift.mode: Enabled
+    templates:
+      - templates/ocp/admission-webhooks.yaml
+    documentSelector:
+      path: metadata.name
+      value: runai-snapshot-restore
+    asserts:
+      - isKind:
+          of: MutatingWebhookConfiguration
+      - equal:
+          path: metadata.annotations["service.beta.openshift.io/inject-cabundle"]
+          value: "true"
+      - equal:
+          path: webhooks[0].clientConfig.service.name
+          value: anyworkload-controller
+      - equal:
+          path: webhooks[0].clientConfig.service.path
+          value: /mutate-pod-snapshot-restore
+      # An outage means cold starts, never blocked pods.
+      - equal:
+          path: webhooks[0].failurePolicy
+          value: Ignore
+      # A pod that has not opted in is never sent to it.
+      - equal:
+          path: webhooks[0].objectSelector.matchLabels
+          value:
+            run.ai/snapshot: "true"
+      - equal:
+          path: webhooks[0].namespaceSelector.matchExpressions[0].key
+          value: runai/queue
+      - equal:
+          path: webhooks[0].rules[0].operations
+          value:
+            - CREATE
+      - equal:
+          path: webhooks[0].rules[0].resources
+          value:
+            - pods
 
   - it: should preserve the shared pod-controller rules without RunaiJob
     set:
