@@ -40,7 +40,8 @@
             <div class="scheduling-overview">
               <div class="capacity-label text-b-subtitle1">Total node pool capacity</div>
               <div class="capacity" aid="pool-gpu-capacity">
-                <template v-if="resources?.gpus != null">
+                <span v-if="resources?.nodes === 0" class="capacity-number">Empty</span>
+                <template v-else-if="resources?.gpus != null">
                   <span class="capacity-number">{{ resources.gpus }}</span> <span class="capacity-unit">GPUs</span>
                 </template>
                 <span v-else class="capacity-number">Unknown</span>

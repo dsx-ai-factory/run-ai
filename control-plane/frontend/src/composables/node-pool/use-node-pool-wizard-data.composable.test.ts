@@ -58,6 +58,21 @@ describe("wizard pool loading", () => {
     expect(loadSchedulingResources).toHaveBeenCalledWith(pool("a"));
   });
 
+  it("keeps known capacity during a refresh and clears it if the new reading fails", async () => {
+    const pending = deferred<INodePoolSummaryResources>();
+    vi.mocked(clusterService.getNodepool).mockResolvedValue(pool("a"));
+    vi.mocked(loadSchedulingResources).mockResolvedValueOnce({ gpus: 8 }).mockReturnValueOnce(pending.promise);
+    const { data } = setup();
+    await flushPromises();
+    const refresh = data.refresh();
+    await flushPromises();
+    expect(data.resources.value?.gpus).toBe(8);
+    pending.reject(new Error("Metrics unavailable"));
+    await refresh;
+    expect(data.resources.value?.gpus).toBeUndefined();
+    expect(data.telemetryError.value).toContain("Metrics unavailable");
+  });
+
   it("clears the prior pool and capacity synchronously when the ID changes", async () => {
     const next = deferred<Nodepool>();
     vi.mocked(clusterService.getNodepool).mockResolvedValueOnce(pool("a")).mockReturnValueOnce(next.promise);

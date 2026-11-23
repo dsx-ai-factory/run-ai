@@ -405,10 +405,15 @@ describe("scheduling step foundation", () => {
     wrapper.unmount();
   });
 
-  it("distinguishes unknown capacity from a measured zero", async () => {
+  it("distinguishes an empty pool, an unknown capacity, and a measured zero with nodes", async () => {
     const wrapper = render();
     expect(wrapper.get('[aid="pool-gpu-capacity"]').text()).toBe("Unknown");
-    await wrapper.setProps({ resources: { gpus: 0 } });
+    await wrapper.setProps({ resources: { nodes: 2 } });
+    expect(wrapper.get('[aid="pool-gpu-capacity"]').text()).toBe("Unknown");
+    await wrapper.setProps({ resources: { nodes: 0, gpus: 0 } });
+    expect(wrapper.get('[aid="pool-gpu-capacity"]').text()).toBe("Empty");
+    expect(wrapper.getComponent(Table).props("capacity")).toBe(0);
+    await wrapper.setProps({ resources: { nodes: 2, gpus: 0 } });
     expect(wrapper.get('[aid="pool-gpu-capacity"]').text()).toBe("0 GPUs");
     wrapper.unmount();
   });

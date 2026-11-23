@@ -98,9 +98,9 @@ function telemetryResources(response: MetricsResponse): INodePoolSummaryResource
 export async function loadSchedulingResources(
   pool: Pick<Nodepool, "clusterId" | "name" | "phase" | "status" | "gpuTypes">,
 ): Promise<INodePoolSummaryResources> {
-  // Empty is an authoritative pool state, even before metrics report zeros.
-  if (pool.phase === "Empty") return { gpus: 0, nodes: 0 };
-  const inventory: INodePoolSummaryResources = { nodes: pool.status?.nodes?.length };
+  const nodes = pool.status?.nodes?.length;
+  if (pool.phase === "Empty" || nodes === 0) return { gpus: 0, nodes: 0 };
+  const inventory: INodePoolSummaryResources = { nodes };
   const types = pool.gpuTypes;
   // Inventory is reported by the cluster before a newly created pool has metric samples.
   if (types?.length && types.every((type) => Number.isFinite(type.totalDevices) && type.totalDevices >= 0)) {

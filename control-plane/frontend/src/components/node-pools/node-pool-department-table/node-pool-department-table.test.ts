@@ -4,7 +4,7 @@
  */
 import { ENodePoolSchedulingMode as ESchedulingMode } from "@/models/node-pool.model";
 import { flushPromises, mount } from "@vue/test-utils";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestingPinia } from "@pinia/testing";
 import { QCheckbox, QToggle, QResizeObserver, Quasar } from "quasar";
 import type { SchedulingDraft } from "@/models/node-pool-scheduling.model";
@@ -106,6 +106,118 @@ const draft: SchedulingDraft = {
   cpuQuota: false,
   departments: {},
 };
+
+function renderSimulation(capacity?: number) {
+  return mount(Table, {
+    props: {
+      poolId: "17",
+      rows,
+      draft,
+      capacity,
+      aggregates: { all: { weightsSum: 2, deservedSum: 3 } },
+      ranks: [],
+      readonly: true,
+      loading: false,
+    },
+    global: {
+      plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+      directives: { "click-outside": {}, permission: {} },
+    },
+  });
+}
+
+describe("simulation capacity", () => {
+  const hint = "Simulation needs the node pool’s GPU capacity.";
+  let wrapper: ReturnType<typeof renderSimulation>;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.mocked(simulateNodePool).mockReset().mockResolvedValue({ orgUnits: [] });
+  });
+  afterEach(() => {
+    wrapper.unmount();
+    vi.useRealTimers();
+  });
+
+  it("explains the disabled switch when capacity is unknown and skips simulation requests", async () => {
+    wrapper = renderSimulation();
+    const toggle = wrapper.get('[role="switch"]');
+    expect(toggle.isVisible()).toBe(true);
+    expect(toggle.attributes("aria-checked")).toBe("false");
+    expect(toggle.attributes("aria-disabled")).toBe("true");
+    const description = wrapper.get(`[id="${toggle.attributes("aria-describedby")}"]`);
+    expect(description.text()).toBe(hint);
+    expect(description.isVisible()).toBe(true);
+    expect(toggle.element.closest("th")?.contains(description.element)).toBe(true);
+    await toggle.trigger("click");
+    await vi.advanceTimersByTimeAsync(500);
+    expect(wrapper.find(".demand-slider").exists()).toBe(false);
+    expect(simulateNodePool).not.toHaveBeenCalled();
+  });
+
+  it("enables simulation for a confirmed zero only with department read permission", async () => {
+    wrapper = renderSimulation();
+    await wrapper.setProps({ capacity: 0, canView: false });
+    const toggle = wrapper.get('[role="switch"]');
+    expect(toggle.attributes("aria-disabled")).toBe("true");
+    expect(toggle.attributes("aria-describedby")).toBeUndefined();
+    expect(wrapper.text()).not.toContain(hint);
+    await toggle.trigger("click");
+    await vi.advanceTimersByTimeAsync(500);
+    expect(simulateNodePool).not.toHaveBeenCalled();
+
+    await wrapper.setProps({ canView: true });
+    expect(toggle.attributes("aria-disabled")).toBeUndefined();
+    expect(toggle.attributes("aria-checked")).toBe("false");
+    await toggle.trigger("click");
+    await vi.advanceTimersByTimeAsync(500);
+    expect(toggle.attributes("aria-checked")).toBe("true");
+    expect(vi.mocked(simulateNodePool).mock.lastCall?.[1].nodePool?.capacity?.gpu).toBe(0);
+  });
+
+  it("cancels a queued simulation if capacity disappears before the request is sent", async () => {
+    wrapper = renderSimulation(8);
+    await wrapper.get('[role="switch"]').trigger("click");
+    expect(wrapper.find(".demand-slider").exists()).toBe(true);
+    await wrapper.setProps({ capacity: undefined });
+    await vi.advanceTimersByTimeAsync(500);
+    expect(simulateNodePool).not.toHaveBeenCalled();
+  });
+
+  it("restores the normal Result view on capacity loss and keeps demand for an explicit restart", async () => {
+    wrapper = renderSimulation(40);
+    const toggle = wrapper.get('[role="switch"]');
+    await toggle.trigger("click");
+    await wrapper.get('input[aria-label="Simulated GPU demand for Alpha"]').setValue("13");
+    await vi.advanceTimersByTimeAsync(500);
+    expect(simulateNodePool).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(simulateNodePool).mock.lastCall?.[1].orgUnits[0].demand?.gpu).toBe(13);
+
+    await wrapper.setProps({ capacity: undefined });
+    expect(toggle.attributes("aria-checked")).toBe("false");
+    expect(toggle.attributes("aria-disabled")).toBe("true");
+    expect(wrapper.get(`[id="${toggle.attributes("aria-describedby")}"]`).text()).toBe(hint);
+    expect(wrapper.find(".demand-slider").exists()).toBe(false);
+    expect(wrapper.get(".result-bar").classes()).not.toContain("simulation-bar");
+    expect(wrapper.find(".quota-marker").exists()).toBe(true);
+    await vi.advanceTimersByTimeAsync(500);
+    expect(simulateNodePool).toHaveBeenCalledTimes(1);
+
+    await wrapper.setProps({ capacity: 32 });
+    expect(toggle.attributes("aria-checked")).toBe("false");
+    expect(toggle.attributes("aria-disabled")).toBeUndefined();
+    expect(toggle.attributes("aria-describedby")).toBeUndefined();
+    expect(wrapper.text()).not.toContain(hint);
+    await vi.advanceTimersByTimeAsync(500);
+    expect(simulateNodePool).toHaveBeenCalledTimes(1);
+    await toggle.trigger("click");
+    expect((wrapper.get(".demand-slider").element as HTMLInputElement).value).toBe("13");
+    await vi.advanceTimersByTimeAsync(500);
+    expect(vi.mocked(simulateNodePool).mock.lastCall?.[1].orgUnits[0].demand?.gpu).toBe(13);
+    expect(simulateNodePool).toHaveBeenCalledTimes(2);
+  });
+});
+
 describe("scheduling department table", () => {
   it("shows rank filters and row selection only for ranked scheduling modes", async () => {
     const wrapper = mount(Table, {

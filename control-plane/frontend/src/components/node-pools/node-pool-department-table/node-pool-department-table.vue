@@ -113,20 +113,27 @@
                       ><q-tooltip max-width="340px">{{ headerTooltips[col.name] }}</q-tooltip></q-icon
                     >
                   </div>
-                  <div v-if="col.name === 'result'" class="simulation-control">
-                    Simulate workload demand
-                    <q-toggle
-                      v-model="simulation"
-                      dense
-                      size="35px"
-                      :disable="!canView"
-                      aid="simulate-demand"
-                      aria-label="Simulate workload demand"
-                    />
-                  </div>
+                  <template v-if="col.name === 'result'">
+                    <div class="simulation-control">
+                      Simulate workload demand
+                      <q-toggle
+                        v-model="simulation"
+                        dense
+                        size="35px"
+                        :disable="!canView || capacity == null"
+                        :aria-describedby="capacity == null ? capacityHintId : undefined"
+                        aid="simulate-demand"
+                        aria-label="Simulate workload demand"
+                      />
+                    </div>
+                    <div v-if="capacity == null" :id="capacityHintId" class="simulation-capacity-hint">
+                      Simulation needs the node pool’s GPU capacity.
+                    </div>
+                  </template>
                 </template>
-              </q-th> </q-tr
-          ></template>
+              </q-th>
+            </q-tr></template
+          >
           <template #body="{ row }">
             <q-tr v-if="row.group" :key="row.key" class="rank-header">
               <q-td :colspan="columns.length"
@@ -314,7 +321,7 @@ import { ENodePoolSchedulingMode as ESchedulingMode } from "@/models/node-pool.m
 import { NotificationAlertBar, ENotificationBarVariant } from "@/components/common/notification-alert-bar/index";
 import { SimulationResultBar } from "@/components/node-pools/simulation-result-bar";
 import { SchedulingFilters } from "@/components/node-pools/scheduling-filters";
-import { computed, ref, watch } from "vue";
+import { computed, ref, useId, watch } from "vue";
 import { RunaiPageActions } from "@/components/common/runai-page-actions/index";
 import { RunaiEllipsisTextWithTooltip } from "@/components/common/runai-ellipsis-text-with-tooltip/index";
 import { RunaiActionButton } from "@/components/common/runai-page-actions/runai-action-button/index";
@@ -486,6 +493,7 @@ function updateFilters(value: IFilterBy) {
 }
 const columns = computed(() => departmentTableColumns(props.draft.mode, maxAllocation.value));
 const simulation = ref(false);
+const capacityHintId = useId();
 const demand = ref<Record<string, number>>({});
 const demandPreview = ref<Record<string, number>>({});
 const currentRank = computed(() => {
@@ -566,6 +574,10 @@ const displayRows = computed(() =>
 watch(
   () => [props.capacity, maxAllocation.value, baseline.value, props.draft.departments],
   () => {
+    if (props.capacity == null) {
+      simulation.value = false;
+      return;
+    }
     for (const values of [demand.value, demandPreview.value])
       for (const id of Object.keys(values)) {
         const row = effectiveDepartmentEdit(baseline.value, props.draft.departments, id);
@@ -935,6 +947,11 @@ async function quotaContext(row: IDepartmentSchedulingEdit) {
 .simulation-control :deep(.q-toggle__inner) {
   padding-top: 3px;
   padding-bottom: 0;
+}
+.simulation-capacity-hint {
+  color: var(--b-text-sub);
+  font-weight: 400;
+  margin-top: 4px;
 }
 .simulation-control :deep(.q-toggle__inner--truthy .q-toggle__track) {
   background: var(--interactive-primary-default-bg);

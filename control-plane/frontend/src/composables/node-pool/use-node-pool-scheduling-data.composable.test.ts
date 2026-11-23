@@ -175,6 +175,13 @@ describe("scoped scheduling reads", () => {
     vi.mocked(clusterService.getNodepoolMetrics).mockResolvedValue({ measurements: [] });
     expect((await loadSchedulingResources({ clusterId: "c", name: "ready", phase: "Ready" })).gpus).toBeUndefined();
   });
+  it("uses zero capacity for an explicitly empty node list without fetching metrics", async () => {
+    vi.mocked(clusterService.getNodepoolMetrics).mockClear();
+    expect(
+      await loadSchedulingResources({ clusterId: "c", name: "no-nodes", phase: "Ready", status: { nodes: [] } }),
+    ).toEqual({ gpus: 0, nodes: 0 });
+    expect(clusterService.getNodepoolMetrics).not.toHaveBeenCalled();
+  });
   it("uses the saved pool inventory before telemetry is available", async () => {
     vi.mocked(clusterService.getNodepoolMetrics).mockClear();
     expect(

@@ -39,6 +39,7 @@ export function useNodePoolWizardData(poolId: Ref<string>, options: IWizardDataO
         retryCapacity && capacity.gpus == null ? "Capacity is not available yet. Retrying automatically." : "";
     } catch (error) {
       if (request !== version) return;
+      resources.value = undefined;
       telemetryError.value = extractErrorMessages(
         error,
         retryCapacity ? "Capacity is unavailable. Retrying automatically." : "Node pool capacity is unavailable.",
@@ -54,8 +55,10 @@ export function useNodePoolWizardData(poolId: Ref<string>, options: IWizardDataO
     const request = ++version;
     const id = poolId.value;
     const poolChanged = pool.value?.id !== id;
-    if (poolChanged) pool.value = undefined;
-    resources.value = undefined;
+    if (poolChanged) {
+      pool.value = undefined;
+      resources.value = undefined;
+    }
     loadError.value = "";
     telemetryError.value = "";
     options.resetStep?.(poolChanged);
@@ -68,6 +71,7 @@ export function useNodePoolWizardData(poolId: Ref<string>, options: IWizardDataO
       await Promise.all([refreshCapacity(snapshot, request), options.loadStep?.(snapshot)]);
     } catch (error) {
       if (request === version) {
+        resources.value = undefined;
         if (error instanceof ForbiddenError || error instanceof NotFoundError) pool.value = undefined;
         loadError.value = extractErrorMessages(error, "Failed to load node pool.").join(" ");
       }

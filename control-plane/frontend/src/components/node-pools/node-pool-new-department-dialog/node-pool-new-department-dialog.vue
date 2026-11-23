@@ -464,15 +464,10 @@ async function createDepartment() {
   min-height: 38px;
   padding: 10px;
   border-radius: 3px;
-  box-shadow: var(--shadow-s);
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
   letter-spacing: 0;
-}
-.scheduling-new-department .runai-base-dialog-footer .footer .q-btn:before,
-.scheduling-new-department .add-administrator:before {
-  box-shadow: none;
 }
 .scheduling-new-department .runai-base-dialog-footer .footer .q-btn + .q-btn {
   margin-left: 0;
@@ -483,6 +478,11 @@ async function createDepartment() {
 }
 .q-card.scheduling-new-department .runai-base-dialog-footer .footer [aid="create-department"] {
   min-width: 164px;
+  box-shadow: var(--shadow-s);
+
+  &::before {
+    box-shadow: none;
+  }
 }
 .scheduling-new-department .add-administrator {
   min-width: 160px;
