@@ -7,6 +7,7 @@ package client
 
 import (
 	"context"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api/httputils"
 	"net/http"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api/config"
@@ -106,5 +107,6 @@ func handleSubmitResponse(training *openapi.Training, response *http.Response, e
 		defer response.Body.Close()
 	}
 
+	httputils.PrintSubmissionWarnings(training.Warnings)
 	return training.Name, nil
 }

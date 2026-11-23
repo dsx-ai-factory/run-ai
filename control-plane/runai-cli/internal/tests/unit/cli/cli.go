@@ -102,6 +102,10 @@ func RunCommandStringSplit(ctx context.Context, command []string, env map[string
 
 // resetCommandFlags known issue with CLI with unit tests
 func resetCommandFlags(commandList []*cobra.Command, cmdSplit []string) {
+	// Cobra handles completion on a hidden command before invoking the target command.
+	if len(cmdSplit) > 0 && (cmdSplit[0] == cobra.ShellCompRequestCmd || cmdSplit[0] == cobra.ShellCompNoDescRequestCmd) {
+		cmdSplit = cmdSplit[1:]
+	}
 	if commandList != nil {
 		for _, cmdStr := range cmdSplit {
 			for _, subCmd := range commandList {

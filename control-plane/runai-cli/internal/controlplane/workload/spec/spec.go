@@ -912,6 +912,13 @@ func (gs *GeneralSpec) setSchedulingProperties(ctx context.Context, clusterId st
 		}
 		spec.SetTolerations(t)
 	}
+	specset.SetNullableString(scheduling.GpuType, &spec.GpuType)
+	if scheduling.Accelerator != "" || scheduling.DeviceLabelKey != "" {
+		selection := openapi.NewAcceleratorSelection()
+		specset.SetNullableString(scheduling.Accelerator, &selection.ResourceName)
+		specset.SetNullableString(scheduling.DeviceLabelKey, &selection.DeviceLabelKey)
+		spec.SetAccelerator(*selection)
+	}
 	//nolint:staticcheck // NodeType is deprecated but still supported for backward compatibility
 	specset.SetNullableString(scheduling.NodeType, &spec.NodeType)
 

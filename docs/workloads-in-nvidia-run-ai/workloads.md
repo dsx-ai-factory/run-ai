@@ -328,7 +328,7 @@ To create a new workload:
    * [Via YAML](submit-via-yaml.md) - Submission of a range of supported workload types using a standard Kubernetes YAML
 3. Click **CREATE WORKLOAD**
 
-### Selecting a GPU model with the API
+### Selecting a GPU model with the API or CLI
 
 For typed workspace, training, and inference submissions, use the exact model value from the node pool’s `gpuTypes`. To request two H100 GPUs, include these fields in the workload spec:
 
@@ -339,9 +339,11 @@ For typed workspace, training, and inference submissions, use the exact model va
 }
 ```
 
+In the CLI, pass `--gpu-type NVIDIA-H100-80GB-HBM3` for the same model. Shell completion suggests model names from the selected project’s GPU-enabled pools. You can also enter a model directly.
+
 The default resource is `nvidia.com/gpu` and the default NVIDIA model label is `nvidia.com/gpu.product`. Omit the model to allow any model. On a supported update, set `gpuType` to `any` to clear a previous model.
 
-To use a different whole-device resource, set `accelerator.resourceName`, for example `amd.com/gpu`. To select a model on that resource, also set `accelerator.deviceLabelKey` to the node label your cluster uses for that model.
+To use a different whole-device resource, set `accelerator.resourceName` or pass `--accelerator`, for example `amd.com/gpu`. To select a model on that resource, also set `accelerator.deviceLabelKey` or pass `--device-label-key` with the node label your cluster uses for that model.
 
 If inventory lacks a requested model and the label key is known, submission returns a warning and preserves the placement requirement. The workload stays Pending until a node with the requested resource, model, and capacity can run it.
 

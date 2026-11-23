@@ -19,6 +19,8 @@ import (
 	nodes "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/node"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
+	clusterconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/utils/ptr"
 )
 
@@ -112,7 +114,38 @@ func GenerateMasterSpec(gs *GeneralSpec, ctx context.Context, clusterId string, 
 	if err != nil {
 		return nil, err
 	}
+	// The CLI's shared placement flags describe the workers. A dedicated
+	// CPU-only master, including the MPI launcher, needs no accelerator.
+	if gs.framework == api.MPI || masterRequestsZeroGPUs(&gs.fullSpec) {
+		gs.fullSpec.UnsetGpuType()
+		gs.fullSpec.UnsetAccelerator()
+	}
 	return generateMasterSpec(&gs.fullSpec)
+}
+
+// An omitted size may come from a template or policy. Only discard inherited
+// placement when the effective master compute explicitly asks for zero GPUs.
+func masterRequestsZeroGPUs(spec *GeneralFullSpec) bool {
+	compute := spec.Compute.Get()
+	if compute == nil || !(compute.HasGpuDevicesRequest() || compute.HasGpuPortionRequest() || compute.HasGpuMemoryPortionRequest()) {
+		return false
+	}
+	if compute.GetGpuDevicesRequest() > 0 || compute.GetGpuPortionRequest() > 0 || compute.GetGpuMemoryPortionRequest() > 0 || compute.GetGpuMemoryRequest() != "" {
+		return false
+	}
+	resourceName := clusterconstants.NvidiaGpuResourceName
+	if selected := spec.Accelerator.Get(); selected != nil && selected.ResourceName.Get() != nil {
+		resourceName = selected.GetResourceName()
+	}
+	for _, extended := range compute.ExtendedResources {
+		if extended.GetResource() == resourceName && !extended.GetExclude() {
+			quantity, err := resource.ParseQuantity(extended.GetQuantity())
+			if err == nil && quantity.Sign() > 0 {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func GenerateWorkerSpec(gs *GeneralSpec, ctx context.Context, clusterId string, nodesService *nodes.BackendNodeService) (*openapi.DistributedSpecSpec, error) {
