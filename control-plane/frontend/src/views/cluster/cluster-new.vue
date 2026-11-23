@@ -39,7 +39,7 @@
         <q-field class="col-4 form-hint no-padding" :model-value="displayFormHint" :rules="[isFormIncomplete]"></q-field>
         <runai-btn aid="continue-btn" @click="goNext" :loading="loading" color="primary" label="Continue" />
       </div>
-      <div v-else class="stepper-controls row justify-end full-width">
+      <div v-else class="stepper-controls stepper-controls--installation row justify-end full-width">
         <runai-btn
           v-if="isClusterEditMode"
           flat
@@ -291,5 +291,10 @@ export default defineComponent({
 <style scoped lang="scss">
 .stepper-controls {
   padding-right: 20px;
+}
+
+// The installation card ends further right than the step 1 form card, so Done needs less inset to line up with it.
+.stepper-controls--installation {
+  padding-right: 11px;
 }
 </style>
