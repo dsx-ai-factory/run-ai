@@ -19,6 +19,21 @@ export function schedulingFilters(scope: ISchedulingScope) {
   if (scope.rank) filters.push(filterUtil.getEqualsFilterString("rank", scope.rank));
   return filters;
 }
+// Count the entire pool, including projects and rows outside the current table filters/pages.
+export async function loadNodePoolGpuLimits(scope: ISchedulingScope): Promise<boolean> {
+  const filters = [
+    ...schedulingFilters({ poolId: scope.poolId, clusterId: scope.clusterId }),
+    filterUtil.getNotEqualsFilterString("gpuLimit", -1),
+  ];
+  const counts = await Promise.all([
+    orgUnitService.countDepartmentNodePoolResources(filters),
+    orgUnitService.countProjectsNodePoolResources(filters),
+  ]);
+  if (counts.some((count) => !Number.isFinite(count) || count < 0)) {
+    throw new Error("Failed to check GPU allocation limits. Try again.");
+  }
+  return counts.some((count) => count > 0);
+}
 export const loadSchedulingPool = (poolId: string) => clusterService.getNodepool(poolId);
 export async function loadDepartmentPage(
   params: ISchedulingScope & { search?: string; offset?: number; limit?: number },

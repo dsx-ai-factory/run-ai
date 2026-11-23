@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { ENodePoolSchedulingMode as ESchedulingMode } from "@/models/node-pool.model";
-import { mount } from "@vue/test-utils";
-import { describe, expect, it } from "vitest";
+import { mount, flushPromises } from "@vue/test-utils";
+import { describe, expect, it, vi } from "vitest";
 import { QInput, QOptionGroup, Quasar } from "quasar";
 import { RunaiToggle } from "@/components/common/runai-toggle/index";
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog/index";
@@ -18,6 +18,90 @@ const draft: SchedulingDraft = {
   departments: { a: { id: "a", limit: 8, weight: 2, quota: 3, rank: "High" } },
 };
 describe("scheduling settings draft interactions", () => {
+  it.each([false, true])("checks saved limits before disabling (has limits: %s)", async (hasLimits) => {
+    let resolveCheck!: (value: boolean) => void;
+    const loadHasGpuLimits = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          resolveCheck = resolve;
+        }),
+    );
+    const wrapper = mount(Settings, {
+      props: { draft, savedMaxAllocation: true, canResetResources: true, loadHasGpuLimits },
+      global: { plugins: [Quasar] },
+    });
+    const toggle = wrapper.findAllComponents(RunaiToggle).find((item) => item.props("aid") === "max-allocation-toggle");
+    if (!toggle) throw new Error("Maximum allocation toggle is missing");
+    toggle.vm.$emit("update:model-value", false);
+    await flushPromises();
+    expect(loadHasGpuLimits).toHaveBeenCalledOnce();
+    expect(toggle.props("disable")).toBe(true);
+    expect(wrapper.emitted("patch")).toBeUndefined();
+    expect(wrapper.findComponent(RunaiBaseDialog).exists()).toBe(false);
+    resolveCheck(hasLimits);
+    await flushPromises();
+    expect(wrapper.findComponent(RunaiBaseDialog).exists()).toBe(hasLimits);
+    if (hasLimits) {
+      expect(wrapper.emitted("patch")).toBeUndefined();
+      expect(document.body.textContent).toContain("Disabling this will reset the max GPU allocation");
+      (document.querySelector('[aid="keep-setting-enabled"]') as HTMLButtonElement).click();
+      await flushPromises();
+      expect(wrapper.emitted("patch")).toBeUndefined();
+      toggle.vm.$emit("update:model-value", false);
+      await flushPromises();
+      resolveCheck(true);
+      await flushPromises();
+      (document.querySelector('[aid="confirm-disable-setting"]') as HTMLButtonElement).click();
+      await flushPromises();
+    }
+    expect(wrapper.emitted("patch")).toEqual([[{ maxAllocation: false }]]);
+    expect(draft.departments.a.limit).toBe(8);
+    wrapper.unmount();
+  });
+  it("keeps allocation enabled after a failed check and allows retry", async () => {
+    const loadHasGpuLimits = vi.fn().mockRejectedValueOnce(new Error("Unavailable")).mockResolvedValueOnce(false);
+    const wrapper = mount(Settings, {
+      props: { draft, savedMaxAllocation: true, canResetResources: true, loadHasGpuLimits },
+      global: { plugins: [Quasar] },
+    });
+    const toggle = wrapper.findAllComponents(RunaiToggle).find((item) => item.props("aid") === "max-allocation-toggle");
+    if (!toggle) throw new Error("Maximum allocation toggle is missing");
+    toggle.vm.$emit("update:model-value", false);
+    await flushPromises();
+    expect(wrapper.emitted("patch")).toBeUndefined();
+    expect(wrapper.findComponent(RunaiBaseDialog).exists()).toBe(false);
+    expect(wrapper.get('[role="alert"]').text()).toContain("Unavailable");
+    expect(toggle.props("disable")).toBe(false);
+    toggle.vm.$emit("update:model-value", false);
+    await flushPromises();
+    expect(wrapper.emitted("patch")).toEqual([[{ maxAllocation: false }]]);
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it("ignores an old limit check after the user switches modes", async () => {
+    let resolveCheck!: (value: boolean) => void;
+    const loadHasGpuLimits = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          resolveCheck = resolve;
+        }),
+    );
+    const wrapper = mount(Settings, {
+      props: { draft, savedMaxAllocation: true, canResetResources: true, loadHasGpuLimits },
+      global: { plugins: [Quasar] },
+    });
+    const toggle = wrapper.findAllComponents(RunaiToggle).find((item) => item.props("aid") === "max-allocation-toggle");
+    if (!toggle) throw new Error("Maximum allocation toggle is missing");
+    toggle.vm.$emit("update:model-value", false);
+    await flushPromises();
+    await wrapper.setProps({ draft: { ...draft, mode: ESchedulingMode.Ranked } });
+    resolveCheck(true);
+    await flushPromises();
+    expect(wrapper.findComponent(RunaiBaseDialog).exists()).toBe(false);
+    expect(wrapper.emitted("patch")).toBeUndefined();
+    wrapper.unmount();
+  });
   it("changes custom weights through the local radio group and prevents readonly patches", async () => {
     const wrapper = mount(Settings, {
       props: { draft },
@@ -52,7 +136,13 @@ describe("scheduling settings draft interactions", () => {
   );
   it("reveals historical usage settings when fairshare is enabled and validates negative values", async () => {
     const wrapper = mount(Settings, {
-      props: { draft, savedMaxAllocation: true, savedCpuQuota: false, canResetResources: true },
+      props: {
+        draft,
+        savedMaxAllocation: true,
+        savedCpuQuota: false,
+        canResetResources: true,
+        loadHasGpuLimits: vi.fn().mockResolvedValue(true),
+      },
       global: { plugins: [Quasar] },
     });
     expect(wrapper.find(".historical-fields").exists()).toBe(false);
@@ -92,7 +182,13 @@ describe("scheduling settings draft interactions", () => {
   });
   it("keeps unsaved limits when disabling the capability; backend resets stored limits", async () => {
     const wrapper = mount(Settings, {
-      props: { draft, savedMaxAllocation: true, savedCpuQuota: false, canResetResources: true },
+      props: {
+        draft,
+        savedMaxAllocation: true,
+        savedCpuQuota: false,
+        canResetResources: true,
+        loadHasGpuLimits: vi.fn().mockResolvedValue(true),
+      },
       global: { plugins: [Quasar] },
     });
     const toggle = wrapper
@@ -100,15 +196,15 @@ describe("scheduling settings draft interactions", () => {
       .find((toggle) => toggle.props("aid") === "max-allocation-toggle");
     if (!toggle) throw new Error("Maximum allocation toggle is missing");
     toggle.vm.$emit("update:model-value", false);
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(wrapper.emitted("patch")).toBeUndefined();
     wrapper.findComponent(RunaiBaseDialog).vm.$emit("close");
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(wrapper.emitted("patch")).toBeUndefined();
     toggle.vm.$emit("update:model-value", false);
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     (document.querySelector('[aid="confirm-disable-setting"]') as HTMLButtonElement).click();
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(wrapper.emitted("patch")?.[0]).toEqual([{ maxAllocation: false }]);
     expect(draft.departments.a.limit).toBe(8);
     wrapper.unmount();
@@ -154,7 +250,13 @@ describe("scheduling settings draft interactions", () => {
   });
   it("never offers an organization policy mutation", () => {
     const wrapper = mount(Settings, {
-      props: { draft, savedMaxAllocation: true, savedCpuQuota: false, canResetResources: true },
+      props: {
+        draft,
+        savedMaxAllocation: true,
+        savedCpuQuota: false,
+        canResetResources: true,
+        loadHasGpuLimits: vi.fn().mockResolvedValue(true),
+      },
       global: { plugins: [Quasar] },
     });
     const policy = wrapper

@@ -154,6 +154,7 @@
                       :draft="draft"
                       :readonly="saving || !canEditDepartments"
                       :can-reset-resources="canResetResources"
+                      :load-has-gpu-limits="loadHasGpuLimits"
                       :saved-max-allocation="!!pool.schedulingCapabilities?.limits"
                       :saved-cpu-quota="!!pool.schedulingCapabilities?.cpuQuota"
                       @close="showSettings = false"
@@ -243,6 +244,7 @@ const props = withDefaults(
     canEditDepartments?: boolean;
     canSavePool?: boolean;
     canResetResources?: boolean;
+    loadHasGpuLimits?: () => Promise<boolean>;
     totalsComplete?: boolean;
     canEditDepartment?: (id: string) => boolean;
     loading?: boolean;

@@ -61,11 +61,12 @@
         </scheduling-section-title>
         <runai-toggle
           :model-value="!!draft.maxAllocation"
-          :disable="readonly || (!canResetResources && (savedMaxAllocation ?? draft.maxAllocation))"
+          :disable="readonly || checkingLimits || (!canResetResources && (savedMaxAllocation ?? draft.maxAllocation))"
           aid="max-allocation-toggle"
           @update:model-value="setMax"
         />
       </section>
+      <p v-if="maxAllocationError" role="alert" class="text-negative q-mt-sm">{{ maxAllocationError }}</p>
       <section>
         <div class="toggle-section">
           <scheduling-section-title
@@ -271,7 +272,8 @@
 import { ENodePoolSchedulingMode as ESchedulingMode } from "@/models/node-pool.model";
 
 import { numericKeydown, numericPaste, numericBeforeInput } from "@/utils/numeric-input.util/numeric-input.util";
-import { ref } from "vue";
+import { onBeforeUnmount, ref, watch } from "vue";
+import { extractErrorMessages } from "@/utils/error-alert.util";
 import { DOCS } from "@/constants/docs/index";
 import { SchedulingSectionTitle } from "@/components/node-pools/scheduling-section-title";
 import { SchedulingHelpTooltip } from "@/components/node-pools/scheduling-help-tooltip";
@@ -283,6 +285,7 @@ const props = defineProps<{
   draft: SchedulingDraft;
   readonly?: boolean;
   canResetResources?: boolean;
+  loadHasGpuLimits?: () => Promise<boolean>;
   savedMaxAllocation?: boolean;
   savedCpuQuota?: boolean;
 }>();
@@ -326,15 +329,52 @@ function number(value: string | number | null, key: string) {
 function setDuration(field: "historicalWindow" | "minimumRuntime", unit: string, value: string | number | null) {
   patch({ [field]: { ...props.draft[field], [unit]: number(value, `${field}.${unit}`) } });
 }
-function setMax(value: boolean) {
+const checkingLimits = ref(false);
+const maxAllocationError = ref("");
+let limitCheckVersion = 0;
+function invalidateLimitCheck() {
+  limitCheckVersion++;
+  checkingLimits.value = false;
+  maxAllocationError.value = "";
+}
+watch(
+  [() => props.draft.mode, () => props.draft.maxAllocation, () => props.readonly, () => props.canResetResources],
+  () => {
+    invalidateLimitCheck();
+    if (confirmation.value === "maxAllocation") confirmation.value = undefined;
+  },
+);
+onBeforeUnmount(invalidateLimitCheck);
+async function setMax(value: boolean) {
   if (
     props.draft.mode !== ESchedulingMode.Guaranteed ||
     props.readonly ||
+    checkingLimits.value ||
     (!value && (props.savedMaxAllocation ?? props.draft.maxAllocation) && !props.canResetResources)
   )
     return;
-  if (!value && (props.savedMaxAllocation ?? props.draft.maxAllocation)) confirmation.value = "maxAllocation";
-  else patch({ maxAllocation: value });
+  maxAllocationError.value = "";
+  if (value || !(props.savedMaxAllocation ?? props.draft.maxAllocation)) {
+    patch({ maxAllocation: value });
+    return;
+  }
+  const version = ++limitCheckVersion;
+  checkingLimits.value = true;
+  try {
+    if (!props.loadHasGpuLimits) throw new Error("Failed to check GPU allocation limits. Try again.");
+    const hasLimits = await props.loadHasGpuLimits();
+    if (version !== limitCheckVersion) return;
+    if (hasLimits) confirmation.value = "maxAllocation";
+    else patch({ maxAllocation: false });
+  } catch (error) {
+    if (version === limitCheckVersion) {
+      maxAllocationError.value = extractErrorMessages(error, "Failed to check GPU allocation limits. Try again.").join(
+        " ",
+      );
+    }
+  } finally {
+    if (version === limitCheckVersion) checkingLimits.value = false;
+  }
 }
 function setCpu(value: boolean) {
   if (props.readonly || (!value && (props.savedCpuQuota ?? props.draft.cpuQuota) && !props.canResetResources)) return;

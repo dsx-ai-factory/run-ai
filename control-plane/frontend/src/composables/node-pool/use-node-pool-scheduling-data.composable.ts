@@ -18,6 +18,7 @@ import { ENTITY_PRIORITY_SELECT_OPTIONS } from "@/models/org-unit.model";
 import type { INodePoolSummaryResources } from "@/models/node-pool.model";
 import {
   loadChildQuotaSum,
+  loadNodePoolGpuLimits,
   loadSchedulingDepartmentSnapshot,
   loadSchedulingPool,
   loadDepartmentPage,
@@ -321,6 +322,14 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
     });
   return {
     snapshot,
+    loadHasGpuLimits: async () => {
+      const pool = snapshot.value;
+      const version = scopeVersion;
+      if (!pool) throw new Error("Node pool is unavailable.");
+      const hasLimits = await loadNodePoolGpuLimits({ poolId: pool.id, clusterId: pool.clusterId });
+      if (version !== scopeVersion) throw new Error("Node pool changed. Try again.");
+      return hasLimits;
+    },
     loadChildQuotaSum: async (id: string) => {
       if (!snapshot.value) throw new Error("Node pool is unavailable.");
       return loadChildQuotaSum({ poolId: snapshot.value.id, clusterId: snapshot.value.clusterId }, id);
