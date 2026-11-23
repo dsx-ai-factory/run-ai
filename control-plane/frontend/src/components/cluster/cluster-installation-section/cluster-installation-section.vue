@@ -35,6 +35,17 @@
     <div class="dashed-seperator"></div>
     <div class="q-my-md">Once all the requirements are met, run the following commands:</div>
 
+    <notification-alert-bar
+      aid="bootstrap-token-expiry-notice"
+      class="q-mb-md"
+      :variant="ENotificationBarVariant.Info"
+      orientation="vertical"
+      show-h1-content
+      title="Bootstrap token expires after 2 hours."
+    >
+      For a new one, go to the Clusters table, select the cluster, and click "Get installation instructions".
+    </notification-alert-bar>
+
     <!-- HELM -->
     <template v-if="showHelmInstructions">
       <installation-command-box :max-height="60">
@@ -79,6 +90,7 @@
 <script lang="ts">
 // cmps
 import { RunaiExpansionItem } from "@/components/common/runai-expansion-item";
+import { NotificationAlertBar, ENotificationBarVariant } from "@/components/common/notification-alert-bar";
 import { InstallationCommandBox } from "./installation-command-box";
 import { clusterK8SDistributionOptions } from "@/models/cluster.model";
 import type { IClusterInstalltionModel } from "@/models/cluster.model";
@@ -95,6 +107,7 @@ export default defineComponent({
   components: {
     RunaiExpansionItem,
     InstallationCommandBox,
+    NotificationAlertBar,
   },
   props: {
     createdCluster: {
@@ -127,6 +140,7 @@ export default defineComponent({
       authStore: useAuthStore(),
       installationInstructions: "" as string | undefined,
       DOCS,
+      ENotificationBarVariant,
     };
   },
   async created() {
