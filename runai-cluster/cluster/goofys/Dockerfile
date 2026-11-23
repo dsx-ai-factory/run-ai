@@ -20,9 +20,8 @@
 #
 # Two things are deliberately no longer in the image:
 #
-#   * fusermount. unmount (jacobsa/fuse unmount_linux.go) still execs it, so
-#     that call now fails. Teardown is handled by the container exiting and
-#     the kernel releasing the mount, not by that call succeeding.
+#   * fusermount. Linux shutdown unmounts directly, with lazy unmount
+#     on failure so busy mounts do not block pod cleanup.
 #   * catfs. goofys only needs it for its --cache mode (internal/flags.go).
 #     Nothing in the platform passes --cache; goofysBaseCommand in
 #     init_containers/s3.go does not include it. Running this image with
