@@ -457,6 +457,13 @@ jobs:
                   continue;
                 }
               }
+              // A fork run held for maintainer approval must stay held: re-running
+              // it with this job's token counts as approving it. Once a maintainer
+              // approves, the run reads the current labels anyway.
+              if (latest.conclusion === 'action_required') {
+                core.info(`PR #${pr.number}: validation run ${latest.id} is awaiting maintainer approval; not re-running.`);
+                continue;
+              }
               try {
                 await github.rest.actions.reRunWorkflow({ owner, repo, run_id: latest.id });
                 core.info(`PR #${pr.number}: re-running validation (run ${latest.id}).`);
