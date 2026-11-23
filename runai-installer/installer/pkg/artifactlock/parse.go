@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/yamldoc"
 	"gopkg.in/yaml.v3"
 )
 
@@ -30,6 +31,9 @@ func Parse(r io.Reader, name string) (*ArtifactLock, error) {
 
 	var lock ArtifactLock
 	if err := dec.Decode(&lock); err != nil {
+		return nil, fmt.Errorf("parse artifact lock %q: %w", name, err)
+	}
+	if err := yamldoc.EnsureNoExtraDocuments(dec); err != nil {
 		return nil, fmt.Errorf("parse artifact lock %q: %w", name, err)
 	}
 	if lock.APIVersion != APIVersion || lock.Kind != Kind {

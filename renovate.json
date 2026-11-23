@@ -22,12 +22,29 @@
     "control-plane/frontend/**",
     "control-plane/keycloak-extensions/**",
     "control-plane/control-plane-chart/**",
-    "build/makefile/**"
+    "build/makefile/**",
+    "control-plane/infra/openapi/scripts/openapi-scanner/**",
+    "control-plane/infra/openapi/scripts/stringvalidator/**",
+    "control-plane/infra/openapi/scripts/xtestcoverage/**"
   ],
   "prConcurrentLimit": 60,
   "prHourlyLimit": 40,
   "dependencyDashboard": false,
   "packageRules": [
+    {
+      "enabled": true,
+      "major": {
+        "enabled": false
+      },
+      "description": "Python bumps are grouped by the file they change, not by package: one PR per pyproject.toml or requirements.txt.",
+      "matchManagers": [
+        "poetry",
+        "pip_requirements"
+      ],
+      "branchName": "{{{branchPrefix}}}-{{{packageFileDir}}}-dependencies",
+      "groupName": "{{{packageFileDir}}} dependencies",
+      "groupSlug": "{{{packageFileDir}}}-dependencies"
+    },
     {
       "description": "frontend and frontend-v2 are two separate npm apps that happen to share a folder. Keep them in separate PRs rather than letting the folder-based group key merge them.",
       "matchFileNames": [

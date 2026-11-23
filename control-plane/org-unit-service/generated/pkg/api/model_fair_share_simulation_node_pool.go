@@ -20,7 +20,7 @@ var dummyFairShareSimulationNodePool = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// FairShareSimulationNodePool - The node pool as it is in the form.
+// FairShareSimulationNodePool - The node pool to simulate, saved or not.
 type FairShareSimulationNodePool struct {
 
 	// GPUs to split. 0 is valid; quotas are still granted, as the scheduler does, and nothing is given above them. Required; null is rejected.

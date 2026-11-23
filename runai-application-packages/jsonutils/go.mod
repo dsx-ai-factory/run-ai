@@ -3,7 +3,7 @@ module github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils
 go 1.27.4
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.21
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.22
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.44.0
 	github.com/sirupsen/logrus v1.10.2
