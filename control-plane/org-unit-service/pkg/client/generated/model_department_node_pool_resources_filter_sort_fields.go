@@ -30,6 +30,7 @@ const (
 	DEPARTMENTNODEPOOLRESOURCESFILTERSORTFIELDS_CLUSTER_ID            DepartmentNodePoolResourcesFilterSortFields = "clusterId"
 	DEPARTMENTNODEPOOLRESOURCESFILTERSORTFIELDS_GPU_DESERVED          DepartmentNodePoolResourcesFilterSortFields = "gpuDeserved"
 	DEPARTMENTNODEPOOLRESOURCESFILTERSORTFIELDS_GPU_OVER_QUOTA_WEIGHT DepartmentNodePoolResourcesFilterSortFields = "gpuOverQuotaWeight"
+	DEPARTMENTNODEPOOLRESOURCESFILTERSORTFIELDS_GPU_LIMIT             DepartmentNodePoolResourcesFilterSortFields = "gpuLimit"
 )
 
 // All allowed values of DepartmentNodePoolResourcesFilterSortFields enum
@@ -41,6 +42,7 @@ var AllowedDepartmentNodePoolResourcesFilterSortFieldsEnumValues = []DepartmentN
 	"clusterId",
 	"gpuDeserved",
 	"gpuOverQuotaWeight",
+	"gpuLimit",
 }
 
 func (v *DepartmentNodePoolResourcesFilterSortFields) UnmarshalJSON(src []byte) error {

@@ -114,7 +114,7 @@ import (
 )
 
 func main() {
-	filterBy := []string{"Inner_example"} // []string | Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=. (optional)
+	filterBy := []string{"Inner_example"} // []string | Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!=-1 matches only org units with a GPU limit. (optional)
 	search := "test project" // string | Filter results by a free text search. (optional)
 
 	configuration := openapiclient.NewConfiguration()
@@ -140,7 +140,7 @@ Other parameters are passed through a pointer to a apiCountDepartmentNodePoolRes
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **filterBy** | **[]string** | Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. | 
+ **filterBy** | **[]string** | Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit. | 
  **search** | **string** | Filter results by a free text search. | 
 
 ### Return type
@@ -665,7 +665,7 @@ import (
 )
 
 func main() {
-	filterBy := []string{"Inner_example"} // []string | Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=. (optional)
+	filterBy := []string{"Inner_example"} // []string | Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!=-1 matches only org units with a GPU limit. (optional)
 	sortBy := openapiclient.DepartmentNodePoolResourcesFilterSortFields("nodePoolName") // DepartmentNodePoolResourcesFilterSortFields | Sort results by a parameters. (optional)
 	sortOrder := "sortOrder_example" // string | Sort results in descending or ascending order. (optional) (default to "asc")
 	offset := int32(100) // int32 | The offset of the first item returned in the collection. (optional)
@@ -695,7 +695,7 @@ Other parameters are passed through a pointer to a apiGetDepartmentNodePoolResou
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **filterBy** | **[]string** | Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. | 
+ **filterBy** | **[]string** | Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit. | 
  **sortBy** | [**DepartmentNodePoolResourcesFilterSortFields**](DepartmentNodePoolResourcesFilterSortFields.md) | Sort results by a parameters. | 
  **sortOrder** | **string** | Sort results in descending or ascending order. | [default to &quot;asc&quot;]
  **offset** | **int32** | The offset of the first item returned in the collection. | 
