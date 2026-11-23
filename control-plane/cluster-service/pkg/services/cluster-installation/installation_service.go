@@ -50,21 +50,14 @@ type InstallationData struct {
 	LastLiveness         *time.Time
 }
 
-// minVersionForPublicRepo is the first cluster version published to the public (no credentials) Helm repository.
 const minVersionForPublicRepo = "3.0.0"
 
-// HelmRepo describes the Helm repository a cluster chart version is installed from.
 type HelmRepo struct {
 	URL                 string
 	Username            string
 	PasswordPlaceholder string
 }
 
-// SelectHelmRepoForVersion returns the Helm repository hosting the given cluster version.
-// Versions >= 3.0 are served from the public repository (no credentials). Older versions, versions
-// and non-concrete versions (e.g. ">0.0.0-0", "development", meaning "latest") are public too.
-// Older versions, and installations without a public repository configured, use the legacy
-// repository with its credentials.
 func SelectHelmRepoForVersion(installationConfig *config.Installation, version string) HelmRepo {
 	legacy := HelmRepo{
 		URL:                 installationConfig.HelmRegistryUrl,
@@ -81,7 +74,6 @@ func SelectHelmRepoForVersion(installationConfig *config.Installation, version s
 	public := HelmRepo{URL: installationConfig.HelmRegistryUrlPublic}
 	ver, err := semver.NewVersion(version)
 	if err != nil {
-		// Not a concrete version (e.g. ">0.0.0-0" or "development"): it means "latest", which is public.
 		return public
 	}
 	if ver.LessThan(minVer) {
@@ -177,7 +169,6 @@ func (v *ClusterInstallServiceImpl) GetClusterSupportedVersions(ctx context.Cont
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("GetClusterVersions - trying to get versions list from %s ", url)
 		list, err := v.helmAction.GetVersionListFromHelm(ctx, url)
 		if err != nil {
-			// a repo may be unreachable or require credentials; keep going with the others
 			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("GetClusterVersions - Failed to get versions list from %s - %s", url, err.Error())
 			fetchErrs = append(fetchErrs, err.Error())
 			continue
@@ -185,7 +176,6 @@ func (v *ClusterInstallServiceImpl) GetClusterSupportedVersions(ctx context.Cont
 		versionList = append(versionList, list...)
 	}
 	if len(fetchErrs) == len(urls) {
-		// if failed to get versions list from every repo, return the current version
 		return getCurrentVersionAsVersionList(curVersion, minVersion, maxVersion), nil
 	}
 
@@ -194,7 +184,6 @@ func (v *ClusterInstallServiceImpl) GetClusterSupportedVersions(ctx context.Cont
 	return response, nil
 }
 
-// registryUrls returns the distinct, non-empty Helm repositories cluster versions are listed from.
 func registryUrls(installationConfig *config.Installation) []string {
 	var urls []string
 	for _, u := range []string{installationConfig.HelmRegistryUrlPublic, installationConfig.HelmRegistryUrl} {
