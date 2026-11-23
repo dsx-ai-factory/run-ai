@@ -461,7 +461,7 @@ func (s *ClustersApiService) GetClusterInstallInfoByUuid(ctx context.Context, cl
 	}
 
 	installationConfig := runai_config.Get[*cluster_config.Installation]()
-	helmRegistryUrl := installationConfig.HelmRegistryUrl
+	helmRepo := clusterinstallation.SelectHelmRepoForVersion(installationConfig, version)
 	fullHostKey := ctx.Value(utils.FullHostKey)
 	if fullHostKey == nil {
 		fullHostKey = s.appConfig.Host
@@ -490,9 +490,9 @@ func (s *ClustersApiService) GetClusterInstallInfoByUuid(ctx context.Context, cl
 	}
 
 	installationData := clusterinstallation.InstallationData{
-		RepoURL:              helmRegistryUrl,
-		HelmRegistryUsername: installationConfig.HelmRegistryUsername,
-		PasswordPlaceholder:  installationConfig.HelmRegistryPasswordPlaceholder,
+		RepoURL:              helmRepo.URL,
+		HelmRegistryUsername: helmRepo.Username,
+		PasswordPlaceholder:  helmRepo.PasswordPlaceholder,
 		IngressClass:         ingressClass,
 		LastLiveness:         lastLiveness,
 		FipsMode:             installationConfig.FipsMode,

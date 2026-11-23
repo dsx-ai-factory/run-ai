@@ -2204,7 +2204,11 @@ clusterService:
         # Inclusive
         # Defaults to the chart's app version
         max: ''
-      helmRegistryUrl: https://helm.ngc.nvidia.com/nvidia/runai-oss
+      # Repository for cluster versions 3.0 and above (public, no credentials).
+      # Leave empty to use helmRegistryUrl for every version.
+      helmRegistryUrlPublic: https://helm.ngc.nvidia.com/nvidia/runai-oss
+      # Repository for cluster versions below 3.0 (private NGC, requires credentials).
+      helmRegistryUrl: https://helm.ngc.nvidia.com/nvidia/runai
       helmRegistryUsername: ''
       helmRegistryPasswordPlaceholder: ''
     maxWaitForClusterRemoteConfigStatusUpdate: 5m

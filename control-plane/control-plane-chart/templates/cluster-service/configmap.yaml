@@ -52,6 +52,9 @@ data:
   {{- $helmRegistryPasswordPlaceholder := $helmRegistryConfig.helmRegistryPasswordPlaceholder | default "" }}
   {{- $isNgcHelmRegistry := or (eq $helmRegistryUrl "https://helm.ngc.nvidia.com") (hasPrefix "https://helm.ngc.nvidia.com/" $helmRegistryUrl) }}
   CLUSTER_INSTALLATION_HELM_REGISTRY_URL: {{ $helmRegistryUrl | quote }}
+  {{- if $helmRegistryConfig.helmRegistryUrlPublic }}
+  CLUSTER_INSTALLATION_HELM_REGISTRY_URL_PUBLIC: {{ $helmRegistryConfig.helmRegistryUrlPublic | quote }}
+  {{- end }}
   {{- if $helmRegistryUsername }}
   CLUSTER_INSTALLATION_HELM_REGISTRY_USERNAME: {{ $helmRegistryUsername | quote }}
   CLUSTER_INSTALLATION_HELM_REGISTRY_PASSWORD_PLACEHOLDER: {{ required "helmRegistryPasswordPlaceholder is required when helmRegistryUsername is set" $helmRegistryPasswordPlaceholder | quote }}

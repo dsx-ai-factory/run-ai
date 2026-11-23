@@ -88,7 +88,10 @@ func (a *App) SetDefaults() {
 
 // Installation holds cluster installation configuration
 type Installation struct {
-	HelmRegistryUrl                 string   `mapstructure:"cluster_installation_helm_registry_url"`
+	HelmRegistryUrl string `mapstructure:"cluster_installation_helm_registry_url"`
+	// HelmRegistryUrlPublic is the public (no credentials) repository that hosts cluster chart versions
+	// 3.0 and above. When empty, HelmRegistryUrl is used for every version.
+	HelmRegistryUrlPublic           string   `mapstructure:"cluster_installation_helm_registry_url_public"`
 	HelmRegistryUsername            string   `mapstructure:"cluster_installation_helm_registry_username"`
 	HelmRegistryPasswordPlaceholder string   `mapstructure:"cluster_installation_helm_registry_password_placeholder"`
 	Version                         string   `mapstructure:"version"`

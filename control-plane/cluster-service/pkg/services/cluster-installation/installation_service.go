@@ -8,6 +8,7 @@ package cluster_installation
 import (
 	"bytes"
 	"context"
+	"slices"
 	"text/template"
 	"time"
 
@@ -47,6 +48,46 @@ type InstallationData struct {
 	FipsMode             string
 	FipsModeFlag         string
 	LastLiveness         *time.Time
+}
+
+// minVersionForPublicRepo is the first cluster version published to the public (no credentials) Helm repository.
+const minVersionForPublicRepo = "3.0.0"
+
+// HelmRepo describes the Helm repository a cluster chart version is installed from.
+type HelmRepo struct {
+	URL                 string
+	Username            string
+	PasswordPlaceholder string
+}
+
+// SelectHelmRepoForVersion returns the Helm repository hosting the given cluster version.
+// Versions >= 3.0 are served from the public repository (no credentials). Older versions, versions
+// and non-concrete versions (e.g. ">0.0.0-0", "development", meaning "latest") are public too.
+// Older versions, and installations without a public repository configured, use the legacy
+// repository with its credentials.
+func SelectHelmRepoForVersion(installationConfig *config.Installation, version string) HelmRepo {
+	legacy := HelmRepo{
+		URL:                 installationConfig.HelmRegistryUrl,
+		Username:            installationConfig.HelmRegistryUsername,
+		PasswordPlaceholder: installationConfig.HelmRegistryPasswordPlaceholder,
+	}
+	if installationConfig.HelmRegistryUrlPublic == "" {
+		return legacy
+	}
+	minVer, err := semver.NewVersion(minVersionForPublicRepo)
+	if err != nil {
+		return legacy
+	}
+	public := HelmRepo{URL: installationConfig.HelmRegistryUrlPublic}
+	ver, err := semver.NewVersion(version)
+	if err != nil {
+		// Not a concrete version (e.g. ">0.0.0-0" or "development"): it means "latest", which is public.
+		return public
+	}
+	if ver.LessThan(minVer) {
+		return legacy
+	}
+	return public
 }
 
 type ClusterInstallService interface {
@@ -122,24 +163,44 @@ func (v *ClusterInstallServiceImpl) GetClusterSupportedVersions(ctx context.Cont
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof(
 		"CLUSTER_INSTALLATION_MIN_VERSION - CLUSTER_INSTALLATION_MAX_VERSION is set to %s - %s. Effective range is %s - %s",
 		installationConfig.MinVersion, installationConfig.MaxVersion, minVersion, maxVersion)
-	url := installationConfig.HelmRegistryUrl
-	if url == "" {
+	urls := registryUrls(installationConfig)
+	if len(urls) == 0 {
 		// In case of air gapped installation, the url is set empty, we return the current version as the only available version
 		defaultResponse := getCurrentVersionAsVersionList(curVersion, minVersion, maxVersion)
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("GetClusterVersions - CLUSTER_INSTALLATION_HELM_REGISTRY_URL is not set. returning current cluster version:%s", curVersion)
 		return defaultResponse, nil
 	}
 
-	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("GetClusterVersions - trying to get versions list from %s ", url)
-	versionList, err := v.helmAction.GetVersionListFromHelm(ctx, url)
-	if err != nil {
-		// if failed to get versions list, return the current version
-		defaultResponse := getCurrentVersionAsVersionList(curVersion, minVersion, maxVersion)
-		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("GetClusterVersions - Failed to get versions list from %s - %s", url, err.Error())
-		return defaultResponse, nil
+	var versionList VersionsList
+	var fetchErrs []string
+	for _, url := range urls {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("GetClusterVersions - trying to get versions list from %s ", url)
+		list, err := v.helmAction.GetVersionListFromHelm(ctx, url)
+		if err != nil {
+			// a repo may be unreachable or require credentials; keep going with the others
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("GetClusterVersions - Failed to get versions list from %s - %s", url, err.Error())
+			fetchErrs = append(fetchErrs, err.Error())
+			continue
+		}
+		versionList = append(versionList, list...)
+	}
+	if len(fetchErrs) == len(urls) {
+		// if failed to get versions list from every repo, return the current version
+		return getCurrentVersionAsVersionList(curVersion, minVersion, maxVersion), nil
 	}
 
 	allVersions := getLatestMinorVersions(versionList, minVersion, maxVersion)
 	response := excludeVersions(allVersions, installationConfig.ExcludeVersions)
 	return response, nil
+}
+
+// registryUrls returns the distinct, non-empty Helm repositories cluster versions are listed from.
+func registryUrls(installationConfig *config.Installation) []string {
+	var urls []string
+	for _, u := range []string{installationConfig.HelmRegistryUrlPublic, installationConfig.HelmRegistryUrl} {
+		if u != "" && !slices.Contains(urls, u) {
+			urls = append(urls, u)
+		}
+	}
+	return urls
 }
