@@ -70,7 +70,9 @@ func setInitialScaleOnMinimumUpdate(previous map[string]any, service *servingv1.
 	// A minimum-only PATCH composed from a stale snapshot must not roll the image back.
 	currentContainers, desiredContainers := prior.Template.Spec.Containers, service.Spec.Template.Spec.Containers
 	if minimum > 0 && len(currentContainers) > 0 && len(desiredContainers) > 0 && currentContainers[0].Image != desiredContainers[0].Image {
-		return false, workloadsApi.NewSubmissionErrorV2(http.StatusConflict, "Cannot lower minReplicas to 0 because the inference image differs from the latest accepted update. Retry after the image update synchronizes. If the conflict persists, submit the intended image separately.")
+		return false, workloadsApi.NewSubmissionErrorV2(http.StatusConflict,
+			"Cannot lower minReplicas to 0 because the inference image differs from the latest accepted update. "+
+				"Retry after the image update synchronizes. If the conflict persists, submit the intended image separately.")
 	}
 	initial, explicit := old[autoscaling.InitialScaleAnnotationKey]
 	retain := minimum == 0 && initial == "0"
