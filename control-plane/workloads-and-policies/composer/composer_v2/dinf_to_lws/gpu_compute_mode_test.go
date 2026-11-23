@@ -26,9 +26,40 @@ var _ = Describe("GPU mode annotation projection", func() {
 		c := NewDistributedInferenceToLWSComposer("example", "p1", "runai-p1", "user", nil, nil, options, nil)
 		for _, name := range []string{"leader-main", "worker-main"} {
 			target := &corev1.PodTemplateSpec{Spec: corev1.PodSpec{Containers: []corev1.Container{{Name: name}}}}
-			Expect(c.processComputeFields(context.Background(), &src, target)()).To(BeNil())
+			Expect(c.processComputeFields(context.Background(), &src, nil, target)()).To(BeNil())
 			Expect(target.Annotations).To(HaveKeyWithValue(fmt.Sprintf("nvidia.com/container.%s.gpu-compute.mode", name), mode))
 			Expect(target.Annotations).To(HaveKeyWithValue(composer.GpuFractionAnnotation, "0.25"))
+		}
+	})
+})
+
+var _ = Describe("GPU selection in distributed inference", func() {
+	It("keeps separate resource names and models for the leader and worker", func() {
+		var spec workloadsApi.DistributedInferenceSpecSpec
+		Expect(json.Unmarshal([]byte(`{
+			"servingPort":{"port":8080,"exposeExternally":false},"workers":1,
+			"leader":{"image":"leader:latest","compute":{"gpuDevicesRequest":1},"gpuType":"H100"},
+			"worker":{"image":"worker:latest","compute":{"gpuDevicesRequest":2},"gpuType":"MI300X",
+					  "accelerator":{"resourceName":"amd.com/gpu","deviceLabelKey":"hardware.example.com/model"}}
+		}`), &spec)).To(Succeed())
+		options := composer.FieldsComposerOptions{NodeAffinitySupported: true, WorkloadV2NetworkingSupported: true}
+		c := NewDistributedInferenceToLWSComposer("example", "team", "runai-team", "user", nil, nil, options, nil).
+			WithClusterStorageConfig(legacyTypedTestClusterConfig()).WithLeaderWorkerSetName("example")
+		target := NewMinimalLeaderWorkerSetTarget()
+		Expect(c.Compose(context.Background(), &spec, target)()).To(BeNil())
+		templates := target.LeaderWorkerSet.Spec.LeaderWorkerTemplate
+		for _, tc := range []struct {
+			pod                  *corev1.PodTemplateSpec
+			key, model, resource string
+			count                int64
+		}{
+			{templates.LeaderTemplate, composer.NvidiaProductLabel, "H100", composer.NvidiaResourceName, 1},
+			{&templates.WorkerTemplate, "hardware.example.com/model", "MI300X", "amd.com/gpu", 2},
+		} {
+			Expect(tc.pod.Spec.NodeSelector).To(HaveKeyWithValue(tc.key, tc.model))
+			limits := tc.pod.Spec.Containers[0].Resources.Limits
+			quantity := limits[corev1.ResourceName(tc.resource)]
+			Expect(quantity.Value()).To(Equal(tc.count))
 		}
 	})
 })

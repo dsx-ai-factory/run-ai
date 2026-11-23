@@ -1519,6 +1519,55 @@
         }
       }
     },
+    "/internal/clusters/{clusterUuid}/accelerators": {
+      "x-internal": true,
+      "post": {
+        "summary": "Get accelerator inventory for the supplied node pools",
+        "x-internal": true,
+        "x-no-authorization": true,
+        "x-service": "cluster-service",
+        "x-test-coverage": [
+          "control-plane/cluster-service/pkg/services/api_nodepools_gpu_types_test.go"
+        ],
+        "tags": [
+          "Nodes"
+        ],
+        "operationId": "get_node_pool_accelerators",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NodePoolAcceleratorsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Accelerator inventory for the requested pools",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectAccelerators"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          }
+        }
+      }
+    },
     "/internal/clusters/{clusterUuid}/nodes/{nodeName}": {
       "x-internal": true,
       "get": {
@@ -5598,6 +5647,14 @@
           "createdAt"
         ],
         "properties": {
+          "acceleratorResources": {
+            "writeOnly": true,
+            "type": "array",
+            "description": "Positive Kubernetes extended resources used to match project accelerator selections.",
+            "items": {
+              "type": "string"
+            }
+          },
           "labels": {
             "writeOnly": true,
             "type": "object",
@@ -6874,6 +6931,98 @@
           },
           "gpuTypes": {
             "$ref": "#/components/schemas/NodepoolGpuTypes"
+          }
+        }
+      },
+      "AcceleratorSelection": {
+        "type": "object",
+        "nullable": true,
+        "required": [
+          "resourceName",
+          "deviceLabelKey",
+          "gpuType"
+        ],
+        "properties": {
+          "resourceName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "deviceLabelKey": {
+            "type": "string",
+            "minLength": 1
+          },
+          "gpuType": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "NodePoolAcceleratorsRequest": {
+        "type": "object",
+        "required": [
+          "nodePoolIds"
+        ],
+        "properties": {
+          "nodePoolIds": {
+            "type": "array",
+            "description": "IDs of node pools assigned to the project.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "selection": {
+            "$ref": "#/components/schemas/AcceleratorSelection"
+          }
+        }
+      },
+      "AcceleratorDevice": {
+        "type": "object",
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Exact Kubernetes node label key for this device model."
+          },
+          "value": {
+            "type": "string",
+            "description": "Exact Kubernetes node label value for this device model."
+          }
+        }
+      },
+      "AcceleratorOption": {
+        "type": "object",
+        "required": [
+          "resourceName",
+          "devices"
+        ],
+        "properties": {
+          "resourceName": {
+            "type": "string",
+            "description": "Allocatable Kubernetes extended resource name."
+          },
+          "devices": {
+            "type": "array",
+            "description": "Model selectors observed alongside this resource on the same node.",
+            "items": {
+              "$ref": "#/components/schemas/AcceleratorDevice"
+            }
+          }
+        }
+      },
+      "ProjectAccelerators": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AcceleratorOption"
+            }
           }
         }
       },

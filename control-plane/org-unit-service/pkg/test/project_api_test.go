@@ -135,6 +135,51 @@ var _ = Describe("Project API tests", Ordered, func() {
 	})
 
 	Context("test create/get projects", func() {
+		It("does not advertise accelerators in a pool with an explicit zero GPU limit", func() {
+			name := createProjectName()
+			request := getProjectCreateRequest(name, name, departmentId, clusterId)
+			for i := range request.Resources {
+				request.Resources[i].Gpu.Deserved = ptr.To(0.0)
+				request.Resources[i].Gpu.Limit = ptr.To(0.0)
+				request.Resources[i].Gpu.OverQuotaWeight = nil
+			}
+			response, err := projectApiService.CreateProject(ctx, request)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(response.Code).To(Equal(http.StatusCreated))
+			id := response.Body.(api.Project).Id
+			projectIds = append(projectIds, id)
+			for _, selector := range [][3]string{{}, {"nvidia.com/gpu", "nvidia.com/gpu.product", "H100"}} {
+				inventory, err := projectApiService.GetProjectAccelerators(ctx, id, selector[0], selector[1], selector[2])
+				Expect(err).NotTo(HaveOccurred())
+				Expect(inventory.Code).To(Equal(http.StatusOK))
+				Expect(inventory.Body.(api.ProjectAccelerators).Items).To(BeEmpty())
+			}
+		})
+
+		It("limits accelerator discovery to the project pool membership", func() {
+			name := createProjectName()
+			request := getProjectCreateRequest(name, name, departmentId, clusterId)
+			response, err := projectApiService.CreateProject(ctx, request)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(response.Code).To(Equal(http.StatusCreated))
+			id := response.Body.(api.Project).Id
+			projectIds = append(projectIds, id)
+			poolIDs := make([]string, 0, len(request.Resources))
+			for _, r := range request.Resources {
+				poolIDs = append(poolIDs, r.NodePool.Id)
+			}
+			clusterServiceClient.On("GetNodePoolAccelerators", mock.Anything, clusterId, clustersOpenapi.NodePoolAcceleratorsRequest{NodePoolIds: poolIDs}).Once().Return(&clustersOpenapi.ProjectAccelerators{Items: []clustersOpenapi.AcceleratorOption{
+				{ResourceName: "amd.com/gpu", Devices: []clustersOpenapi.AcceleratorDevice{}},
+			}}, nil)
+			inv, err := projectApiService.GetProjectAccelerators(ctx, id, "", "", "")
+			Expect(err).NotTo(HaveOccurred())
+			Expect(inv.Code).To(Equal(http.StatusOK))
+			partial, err := projectApiService.GetProjectAccelerators(ctx, id, "amd.com/gpu", "", "MI300X")
+			Expect(err).NotTo(HaveOccurred())
+			Expect(partial.Code).To(Equal(http.StatusBadRequest))
+			Expect(inv.Body.(api.ProjectAccelerators).Items).To(Equal([]api.AcceleratorOption{{ResourceName: "amd.com/gpu", Devices: []api.AcceleratorDevice{}}}))
+		})
+
 		It("test create/get one project no override", func() {
 			projectApiService = projects.NewProjectApiService(projectDeletionService, &clusterServiceClient, nil)
 			name := createProjectName()
@@ -1867,6 +1912,82 @@ var _ = Describe("Project API tests", Ordered, func() {
 		BeforeEach(func() {
 			projectApiService = projects.NewProjectApiService(projectDeletionService, &clusterServiceClient, nil)
 		})
+
+		DescribeTable("applies project and department GPU limits to discovery", func(parentLimit, projectLimit *float64, unparented, firstPoolVisible, secondPoolVisible bool) {
+			department := getDepartmentCreateRequest(createDepartmentName(), clusterId)
+			department.Resources[0].Gpu = api.ResourcesNullableGpu{Deserved: ptr.To(0.0), Limit: parentLimit}
+			secondPool := api.ResourcesNullable{
+				NodePool: &api.ResourcesNodePool{Id: fmt.Sprint(nodePoolId), Name: nodePoolName},
+				Gpu:      api.ResourcesNullableGpu{Deserved: ptr.To(0.0), Limit: ptr.To(1.0)},
+			}
+			department.Resources = append(department.Resources, secondPool)
+			resp, err := departmentApiService.CreateDepartment(ctx, department)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.Code).To(Equal(http.StatusCreated))
+			parentID := resp.Body.(api.Department).Id
+			DeferCleanup(func() {
+				result, err := departmentApiService.DeleteDepartment(ctx, parentID)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(result.Code).To(Equal(http.StatusNoContent))
+			})
+
+			name := createProjectName()
+			project := getProjectCreateRequest(name, name, parentID, clusterId)
+			project.Resources[0].Gpu = api.ResourcesNullableGpu{Deserved: ptr.To(0.0), Limit: projectLimit}
+			expectedPools := []string{}
+			if firstPoolVisible {
+				expectedPools = append(expectedPools, project.Resources[0].NodePool.Id)
+			}
+			if secondPoolVisible {
+				expectedPools = append(expectedPools, secondPool.NodePool.Id)
+			} else {
+				secondPool.Gpu.Limit = ptr.To(0.0)
+			}
+			project.Resources = append(project.Resources, secondPool)
+			resp, err = projectApiService.CreateProject(ctx, project)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.Code).To(Equal(http.StatusCreated))
+			id := resp.Body.(api.Project).Id
+			projectIds = append(projectIds, id)
+			if unparented {
+				// Modern creation assigns a default department. Reproduce the existing legacy database shape.
+				db := runaidb.DB().Actual()
+				Expect(db.Exec("UPDATE project SET parent_id = NULL WHERE id = ?", id).Error).To(Succeed())
+				defer func() {
+					Expect(db.Exec("UPDATE project SET parent_id = ? WHERE id = ?", parentID, id).Error).To(Succeed())
+				}()
+			}
+
+			for _, selection := range [][3]string{{}, {"nvidia.com/gpu", "nvidia.com/gpu.product", "H100"}, {"amd.com/gpu", "hardware.example.com/model", "MI300X"}} {
+				if len(expectedPools) > 0 {
+					req := clustersOpenapi.NodePoolAcceleratorsRequest{NodePoolIds: expectedPools}
+					resourceName := selection[0]
+					if resourceName == "" {
+						resourceName = "nvidia.com/gpu"
+					} else {
+						req.Selection.Set(&clustersOpenapi.AcceleratorSelection{ResourceName: resourceName, DeviceLabelKey: selection[1], GpuType: selection[2]})
+					}
+					clusterServiceClient.On("GetNodePoolAccelerators", mock.Anything, clusterId, req).Once().Return(&clustersOpenapi.ProjectAccelerators{
+						Items: []clustersOpenapi.AcceleratorOption{{ResourceName: resourceName}},
+					}, nil)
+				}
+				inventory, err := projectApiService.GetProjectAccelerators(ctx, id, selection[0], selection[1], selection[2])
+				Expect(err).NotTo(HaveOccurred())
+				Expect(inventory.Code).To(Equal(http.StatusOK))
+				items := inventory.Body.(api.ProjectAccelerators).Items
+				if len(expectedPools) > 0 {
+					Expect(items).To(HaveLen(1))
+				} else {
+					Expect(items).To(BeEmpty())
+				}
+			}
+		},
+			Entry("department hard zero", ptr.To(0.0), ptr.To(1.0), false, false, false),
+			Entry("department hard zero on one of two otherwise enabled pools", ptr.To(0.0), ptr.To(1.0), false, false, true),
+			Entry("unset department and unlimited project", (*float64)(nil), ptr.To(-1.0), false, true, false),
+			Entry("unlimited department and unset project", ptr.To(-1.0), (*float64)(nil), false, true, false),
+			Entry("legacy project without a department", ptr.To(0.0), ptr.To(1.0), true, true, false),
+		)
 
 		It("test update project resources ok status", func() {
 			name := createProjectName()

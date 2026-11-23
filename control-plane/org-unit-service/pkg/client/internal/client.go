@@ -415,3 +415,45 @@ func (client *OrgUnitClient) GetInternalDeletedOrgUnits(ctx context.Context, del
 	}
 	return response.OrgUnits, nil
 }
+
+func (client *OrgUnitClient) GetProjectAccelerators(ctx context.Context, projectID string) (*openapi.ProjectAccelerators, *openapi.Error) {
+	return getProjectAccelerators(client.ApiClient.ProjectsAPI.GetProjectAccelerators(ctx, projectID))
+}
+
+func (client *OrgUnitClient) MatchProjectAccelerator(ctx context.Context, projectID, resourceName, deviceLabelKey, gpuType string) (bool, *openapi.Error) {
+	request := client.ApiClient.ProjectsAPI.GetProjectAccelerators(ctx, projectID).ResourceName(resourceName).DeviceLabelKey(deviceLabelKey).GpuType(gpuType)
+	inventory, err := getProjectAccelerators(request)
+	if err != nil {
+		return false, err
+	}
+	// Older services may ignore query parameters and return a complete inventory.
+	for _, item := range inventory.Items {
+		if item.ResourceName == resourceName {
+			for _, device := range item.Devices {
+				if device.Key == deviceLabelKey && device.Value == gpuType {
+					return true, nil
+				}
+			}
+		}
+	}
+	return false, nil
+}
+
+func getProjectAccelerators(request openapi.ApiGetProjectAcceleratorsRequest) (*openapi.ProjectAccelerators, *openapi.Error) {
+	result, resp, err := request.Execute()
+	if resp != nil {
+		if resp.Body != nil {
+			defer resp.Body.Close()
+		}
+		if resp.StatusCode >= http.StatusBadRequest {
+			return nil, openapi.NewErrorFromResponse(resp, err)
+		}
+	}
+	if err != nil {
+		return nil, openapi.NewError(http.StatusServiceUnavailable, err.Error())
+	}
+	if result == nil {
+		return nil, openapi.NewError(http.StatusServiceUnavailable, "empty project accelerator response")
+	}
+	return result, nil
+}

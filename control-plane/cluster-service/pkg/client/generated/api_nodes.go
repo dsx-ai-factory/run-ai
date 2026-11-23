@@ -148,6 +148,19 @@ type NodesAPI interface {
 	GetNodeMetricsExecute(r ApiGetNodeMetricsRequest) (*MetricsResponse, *http.Response, error)
 
 	/*
+		GetNodePoolAccelerators Get accelerator inventory for the supplied node pools
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@return ApiGetNodePoolAcceleratorsRequest
+	*/
+	GetNodePoolAccelerators(ctx context.Context, clusterUuid string) ApiGetNodePoolAcceleratorsRequest
+
+	// GetNodePoolAcceleratorsExecute executes the request
+	//  @return ProjectAccelerators
+	GetNodePoolAcceleratorsExecute(r ApiGetNodePoolAcceleratorsRequest) (*ProjectAccelerators, *http.Response, error)
+
+	/*
 		GetNodeTelemetry Get node telemetry data.
 
 		Retrieve node telemetry data for use in analysis applications.
@@ -1634,6 +1647,144 @@ func (a *NodesAPIService) GetNodeMetricsExecute(r ApiGetNodeMetricsRequest) (*Me
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 503 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetNodePoolAcceleratorsRequest struct {
+	ctx                         context.Context
+	ApiService                  NodesAPI
+	clusterUuid                 string
+	nodePoolAcceleratorsRequest *NodePoolAcceleratorsRequest
+}
+
+func (r ApiGetNodePoolAcceleratorsRequest) NodePoolAcceleratorsRequest(nodePoolAcceleratorsRequest NodePoolAcceleratorsRequest) ApiGetNodePoolAcceleratorsRequest {
+	r.nodePoolAcceleratorsRequest = &nodePoolAcceleratorsRequest
+	return r
+}
+
+func (r ApiGetNodePoolAcceleratorsRequest) Execute() (*ProjectAccelerators, *http.Response, error) {
+	return r.ApiService.GetNodePoolAcceleratorsExecute(r)
+}
+
+/*
+GetNodePoolAccelerators Get accelerator inventory for the supplied node pools
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@return ApiGetNodePoolAcceleratorsRequest
+*/
+func (a *NodesAPIService) GetNodePoolAccelerators(ctx context.Context, clusterUuid string) ApiGetNodePoolAcceleratorsRequest {
+	return ApiGetNodePoolAcceleratorsRequest{
+		ApiService:  a,
+		ctx:         ctx,
+		clusterUuid: clusterUuid,
+	}
+}
+
+// Execute executes the request
+//  @return ProjectAccelerators
+///////// RUNAI (remove isResponseFile filter on pointer)//////////
+func (a *NodesAPIService) GetNodePoolAcceleratorsExecute(r ApiGetNodePoolAcceleratorsRequest) (*ProjectAccelerators, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ProjectAccelerators
+	)
+	///////////////////////////
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NodesAPIService.GetNodePoolAccelerators")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/internal/clusters/{clusterUuid}/accelerators"
+	localVarPath = strings.Replace(localVarPath, "{"+"clusterUuid"+"}", url.PathEscape(parameterValueToString(r.clusterUuid, "clusterUuid")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if strlen(r.clusterUuid) < 1 {
+		return localVarReturnValue, nil, reportError("clusterUuid must have at least 1 elements")
+	}
+	if r.nodePoolAcceleratorsRequest == nil {
+		return localVarReturnValue, nil, reportError("nodePoolAcceleratorsRequest is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.nodePoolAcceleratorsRequest
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

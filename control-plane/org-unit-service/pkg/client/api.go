@@ -25,6 +25,8 @@ type IOrgUnitExternalClient interface {
 }
 
 type IOrgUnitClient interface {
+	MatchProjectAccelerator(ctx context.Context, projectID, resourceName, deviceLabelKey, gpuType string) (bool, *openapi.Error)
+	GetProjectAccelerators(ctx context.Context, projectId string) (*openapi.ProjectAccelerators, *openapi.Error)
 	IOrgUnitExternalClient
 	NodePoolCreated(ctx context.Context, clusterId string, nodePoolId string, nodePoolName string) error
 	NodePoolDeleted(ctx context.Context, clusterId string, nodePoolId string, nodePoolName string) error

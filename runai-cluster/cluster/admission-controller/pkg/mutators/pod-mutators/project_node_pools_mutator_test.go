@@ -13,11 +13,14 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/admission-controller/pkg/kube-client/mock"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/component-helpers/scheduling/corev1/nodeaffinity"
 )
 
 func getFieldFromName(name string, field string) string {
@@ -467,4 +470,106 @@ func validateExpressionInOp(t *testing.T, name string, expression v1.NodeSelecto
 	assert.Equal(t, getFieldFromName(name, "Key"), expression.Key)
 	assert.Equal(t, v1.NodeSelectorOpIn, expression.Operator)
 	assert.Equal(t, getFieldFromName(name, "Value"), expression.Values[0])
+}
+
+func TestExplicitGPUSelectionRequiresPoolsOnAllBranches(t *testing.T) {
+	const key = "nvidia.com/gpu.product"
+	model := v1.NodeSelectorRequirement{Key: key, Operator: v1.NodeSelectorOpIn, Values: []string{"H100"}}
+	pools := map[KeyValuePair]bool{{Key: key, Value: "H100"}: true}
+	terms := []v1.NodeSelectorTerm{{MatchExpressions: []v1.NodeSelectorRequirement{model}}}
+	assert.True(t, hasNodePoolInNodeAffinity(terms, pools, true))
+	assert.True(t, hasNodePoolInNodeAffinity(terms, pools, false))
+	terms = append(terms, v1.NodeSelectorTerm{MatchFields: []v1.NodeSelectorRequirement{{Key: "metadata.name", Operator: v1.NodeSelectorOpIn, Values: []string{"other-worker"}}}})
+	assert.False(t, hasNodePoolInNodeAffinity(terms, pools, true))
+	assert.True(t, hasNodePoolInNodeAffinity(terms, pools, false))
+}
+
+func TestGeneratedGPURequirementsKeepProjectPoolDefaults(t *testing.T) {
+	const modelKey = "nvidia.com/gpu.product"
+	resourceKey := constants.AcceleratorResourceNodeLabel("nvidia.com/gpu")
+	in := func(key, value string) v1.NodeSelectorRequirement {
+		return v1.NodeSelectorRequirement{Key: key, Operator: v1.NodeSelectorOpIn, Values: []string{value}}
+	}
+
+	for _, tc := range []struct {
+		name, model, explicitPool string
+		callerModel               bool
+	}{
+		{name: "resource-only inference"},
+		{name: "model and resource both coincide with pools", model: "H100"},
+		{name: "resource only with a converted caller nodeSelector", callerModel: true},
+		{name: "explicit resource pool", explicitPool: "nvidia"},
+		{name: "explicit model pool", model: "H100", explicitPool: "h100s"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			client := mock.NewMockClient(gomock.NewController(t))
+			project := defaultTestProject()
+			project.Object["spec"] = map[string]any{defaultNodePoolsFieldName: []any{"blue"}}
+			client.EXPECT().GetNamespace(testNamespaceName).Return(defaultTestNamespace(), nil).AnyTimes()
+			client.EXPECT().GetProject(testProjectName).Return(project, nil).AnyTimes()
+			list := &unstructured.UnstructuredList{}
+			for _, pool := range []struct{ name, key, value string }{{"blue", "fabric", "blue"}, {"nvidia", resourceKey, "true"}, {"h100s", modelKey, "H100"}} {
+				obj := unstructured.Unstructured{Object: map[string]any{"metadata": map[string]any{"name": pool.name},
+					"spec": map[string]any{"labelKey": pool.key, "labelValue": pool.value}, "status": map[string]any{"phase": "Ready"}}}
+				list.Items = append(list.Items, obj)
+				client.EXPECT().GetNodePool(pool.name).Return(&obj, nil).AnyTimes()
+			}
+			client.EXPECT().GetNodePoolsList().Return(list, nil).AnyTimes()
+			pod := &v1.Pod{ObjectMeta: metav1.ObjectMeta{Namespace: testNamespaceName, Annotations: map[string]string{}}}
+			patch.AddPlacementRequirements(&pod.Spec, pod.Annotations, []v1.NodeSelectorRequirement{in(resourceKey, "true")})
+			if tc.model != "" {
+				pod.Annotations[constants.AnnotationGPUTypeLabel] = modelKey + "=" + tc.model
+			}
+			if tc.model != "" || tc.callerModel {
+				patch.AddPlacementRequirements(&pod.Spec, pod.Annotations, []v1.NodeSelectorRequirement{in(modelKey, "H100")})
+			}
+			if tc.explicitPool != "" {
+				pod.Annotations[constants.AnnotationNodepools] = tc.explicitPool
+			}
+			mutator := &PodMutator{client: client}
+			for range 2 {
+				require.NoError(t, mutator.mutateNodeAffinityForDefaultNodePools(pod, nil))
+				for _, fabric := range []string{"red", "blue"} {
+					node := &v1.Node{ObjectMeta: metav1.ObjectMeta{Name: fabric, Labels: map[string]string{
+						resourceKey: "true", modelKey: "H100", "fabric": fabric,
+					}}}
+					eligible, err := nodeaffinity.GetRequiredNodeAffinity(pod).Match(node)
+					require.NoError(t, err)
+					assert.Equal(t, fabric == "blue" || tc.explicitPool != "", eligible, fabric)
+				}
+			}
+		})
+	}
+}
+
+func TestAdmissionKeepsGpuModelAndConflictingDefaultPool(t *testing.T) {
+	const gpuKey = "nvidia.com/gpu.product"
+	m := mock.NewMockClient(gomock.NewController(t))
+	project := &unstructured.Unstructured{Object: map[string]interface{}{
+		"spec": map[string]interface{}{defaultNodePoolsFieldName: []interface{}{"default-h100"}},
+	}}
+	namespace := &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{"runai/queue": testProjectName}}}
+	m.EXPECT().GetNamespace(testNamespaceName).Return(namespace, nil).Times(2)
+	m.EXPECT().GetProject(testProjectName).Return(project, nil).Times(2)
+
+	makePool := func(name, model string) unstructured.Unstructured {
+		return unstructured.Unstructured{Object: map[string]interface{}{
+			"metadata": map[string]interface{}{"name": name},
+			"spec":     map[string]interface{}{"labelKey": gpuKey, "labelValue": model},
+			"status":   map[string]interface{}{"phase": "Ready"},
+		}}
+	}
+	defaultPool := makePool("default-h100", "H100")
+	m.EXPECT().GetNodePool("default-h100").Return(&defaultPool, nil).Times(2)
+	pod := &v1.Pod{ObjectMeta: metav1.ObjectMeta{Namespace: testNamespaceName, Annotations: map[string]string{constants.AnnotationGPUTypeLabel: gpuKey + "=A100"}}}
+	model := v1.NodeSelectorRequirement{Key: gpuKey, Operator: v1.NodeSelectorOpIn, Values: []string{"A100"}}
+	pool := v1.NodeSelectorRequirement{Key: gpuKey, Operator: v1.NodeSelectorOpIn, Values: []string{"H100"}}
+	patch.AddPlacementRequirements(&pod.Spec, pod.Annotations, []v1.NodeSelectorRequirement{model})
+
+	mutator := createMutator(testNamespaceName, false)
+	mutator.client = m
+	for range 2 {
+		require.NoError(t, mutator.mutateNodeAffinityForDefaultNodePools(pod, nil))
+		require.Equal(t, []v1.NodeSelectorTerm{{MatchExpressions: []v1.NodeSelectorRequirement{model, pool}}}, pod.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms)
+	}
 }

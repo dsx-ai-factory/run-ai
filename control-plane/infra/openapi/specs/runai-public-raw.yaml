@@ -1080,6 +1080,38 @@ paths:
           $ref: '#/components/responses/403Forbidden'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
+  '/internal/clusters/{clusterUuid}/accelerators':
+    x-internal: true
+    post:
+      summary: Get accelerator inventory for the supplied node pools
+      x-internal: true
+      x-no-authorization: true
+      x-service: cluster-service
+      x-test-coverage:
+        - >-
+          control-plane/cluster-service/pkg/services/api_nodepools_gpu_types_test.go
+      tags:
+        - Nodes
+      operationId: get_node_pool_accelerators
+      parameters:
+        - $ref: '#/components/parameters/ClusterUuid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodePoolAcceleratorsRequest'
+      responses:
+        '200':
+          description: Accelerator inventory for the requested pools
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectAccelerators'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
   '/internal/clusters/{clusterUuid}/nodes/{nodeName}':
     x-internal: true
     get:
@@ -4353,6 +4385,60 @@ paths:
           $ref: '#/components/responses/404NotFound'
         '500':
           $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  '/api/v1/org-unit/projects/{projectId}/accelerators':
+    get:
+      summary: List accelerator resources and models accessible to a project
+      operationId: get_project_accelerators
+      x-service: org-unit-service
+      description: >-
+        List observed accelerator resources and model selectors across the
+        project's assigned node pools. Includes busy devices.
+      x-test-coverage:
+        - control-plane/org-unit-service/pkg/test/project_api_test.go
+      x-authorize:
+        resource-type: project
+        action: read
+        resource-id: projectId
+      tags:
+        - Projects
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - in: query
+          name: resourceName
+          description: >-
+            With deviceLabelKey and gpuType, check only this exact accelerator
+            selection.
+          schema:
+            type: string
+        - in: query
+          name: deviceLabelKey
+          description: 'Exact node label key to check, including administrator-defined keys.'
+          schema:
+            type: string
+        - in: query
+          name: gpuType
+          description: >-
+            Exact device label value to check. Supply all three parameters for
+            an exact lookup.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Project accelerator inventory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectAccelerators'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
   '/api/v1/org-unit/projects/{projectId}/resources':
@@ -28417,6 +28503,14 @@ components:
         - nodePool
         - createdAt
       properties:
+        acceleratorResources:
+          writeOnly: true
+          type: array
+          description: >-
+            Positive Kubernetes extended resources used to match project
+            accelerator selections.
+          items:
+            type: string
         labels:
           writeOnly: true
           type: object
@@ -29494,6 +29588,70 @@ components:
           $ref: '#/components/schemas/SchedulingCapabilities'
         gpuTypes:
           $ref: '#/components/schemas/NodepoolGpuTypes'
+    AcceleratorSelection:
+      type: object
+      nullable: true
+      required:
+        - resourceName
+        - deviceLabelKey
+        - gpuType
+      properties:
+        resourceName:
+          type: string
+          minLength: 1
+        deviceLabelKey:
+          type: string
+          minLength: 1
+        gpuType:
+          type: string
+          minLength: 1
+    NodePoolAcceleratorsRequest:
+      type: object
+      required:
+        - nodePoolIds
+      properties:
+        nodePoolIds:
+          type: array
+          description: IDs of node pools assigned to the project.
+          items:
+            type: string
+        selection:
+          $ref: '#/components/schemas/AcceleratorSelection'
+    AcceleratorDevice:
+      type: object
+      required:
+        - key
+        - value
+      properties:
+        key:
+          type: string
+          description: Exact Kubernetes node label key for this device model.
+        value:
+          type: string
+          description: Exact Kubernetes node label value for this device model.
+    AcceleratorOption:
+      type: object
+      required:
+        - resourceName
+        - devices
+      properties:
+        resourceName:
+          type: string
+          description: Allocatable Kubernetes extended resource name.
+        devices:
+          type: array
+          description: Model selectors observed alongside this resource on the same node.
+          items:
+            $ref: '#/components/schemas/AcceleratorDevice'
+    ProjectAccelerators:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AcceleratorOption'
     NetworkTopologyLabelValuesOptional:
       type: array
       items:
@@ -38133,6 +38291,25 @@ components:
           nullable: true
       nullable: true
       type: object
+    AcceleratorSelection1:
+      description: >-
+        Accelerator resource and optional device model label key for workload
+        placement.
+      type: object
+      nullable: true
+      properties:
+        resourceName:
+          description: Kubernetes extended resource name. Defaults to nvidia.com/gpu.
+          type: string
+          nullable: true
+          example: nvidia.com/gpu
+        deviceLabelKey:
+          description: >-
+            Node label key for gpuType. Defaults to nvidia.com/gpu.product for
+            NVIDIA.
+          type: string
+          nullable: true
+          example: nvidia.com/gpu.product
     Annotation:
       description: Annotation details to be populated into the container.
       properties:
@@ -38203,6 +38380,15 @@ components:
       format: int32
       example: 1
       nullable: true
+    GpuType:
+      description: >-
+        Exact device model label value required on the workload's nodes. Use any
+        for no model restriction.
+      type: string
+      nullable: true
+      minLength: 1
+      maxLength: 63
+      example: NVIDIA-H100-80GB-HBM3
     ImagePullSecret:
       description: >-
         A reference to a secret in the same namespace used to pull container
@@ -38292,8 +38478,8 @@ components:
         key:
           description: The label key that the selector applies to (mandatory).
           type: string
-          pattern: .*
-          maxLength: 63
+          pattern: '^$|^([^\x2F]{1,253}\x2F)?[^\x2F]{1,63}$'
+          maxLength: 317
         operator:
           $ref: '#/components/schemas/MatchExpressionOperator'
         values:
@@ -38781,6 +38967,8 @@ components:
         - $ref: '#/components/schemas/SpecificRunConnections'
         - nullable: true
           properties:
+            accelerator:
+              $ref: '#/components/schemas/AcceleratorSelection1'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -38797,6 +38985,8 @@ components:
               $ref: '#/components/schemas/Completions'
             environmentVariables:
               $ref: '#/components/schemas/EnvironmentVariablesOfAsset'
+            gpuType:
+              $ref: '#/components/schemas/GpuType'
             imagePullSecrets:
               $ref: '#/components/schemas/ImagePullSecrets'
             labels:
@@ -39183,6 +39373,19 @@ components:
         - Completed
         - Terminating
         - Unknown
+    SubmissionWarning:
+      type: object
+      required:
+        - code
+        - field
+        - message
+      properties:
+        code:
+          type: string
+        field:
+          type: string
+        message:
+          type: string
     WorkloadMeta:
       required:
         - name
@@ -39230,12 +39433,19 @@ components:
           $ref: '#/components/schemas/WorkloadDesiredPhase'
         actualPhase:
           $ref: '#/components/schemas/Phase'
+        warnings:
+          description: Advisory messages returned when submitting the workload.
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionWarning'
     WorkspaceSpecificRunParams:
       allOf:
         - $ref: '#/components/schemas/SpecificRunConnections'
         - $ref: '#/components/schemas/AllowOverQuota'
         - nullable: true
           properties:
+            accelerator:
+              $ref: '#/components/schemas/AcceleratorSelection1'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -39250,6 +39460,8 @@ components:
               $ref: '#/components/schemas/Command'
             environmentVariables:
               $ref: '#/components/schemas/EnvironmentVariablesOfAsset'
+            gpuType:
+              $ref: '#/components/schemas/GpuType'
             imagePullSecrets:
               $ref: '#/components/schemas/ImagePullSecrets'
             labels:
@@ -39726,6 +39938,22 @@ components:
           type: object
       nullable: true
       type: object
+    ArbitraryRules:
+      properties:
+        sourceOfRule:
+          $ref: '#/components/schemas/SourceOfRule'
+        required:
+          description: Whether this arbitrary object is mandatory. default to false.
+          type: boolean
+          nullable: true
+        canEdit:
+          description: >-
+            Whether the value of the field, as a whole, is editable. default to
+            false.
+          type: boolean
+          nullable: true
+      nullable: true
+      type: object
     InstancesRules:
       properties:
         instances:
@@ -39803,22 +40031,6 @@ components:
           $ref: '#/components/schemas/ImagePullSecretsRulesAttributes'
         instances:
           $ref: '#/components/schemas/ItemRules'
-      nullable: true
-      type: object
-    ArbitraryRules:
-      properties:
-        sourceOfRule:
-          $ref: '#/components/schemas/SourceOfRule'
-        required:
-          description: Whether this arbitrary object is mandatory. default to false.
-          type: boolean
-          nullable: true
-        canEdit:
-          description: >-
-            Whether the value of the field, as a whole, is editable. default to
-            false.
-          type: boolean
-          nullable: true
       nullable: true
       type: object
     ArrayRules:
@@ -40143,6 +40355,8 @@ components:
       allOf:
         - nullable: true
           properties:
+            accelerator:
+              $ref: '#/components/schemas/ArbitraryRules'
             annotations:
               $ref: '#/components/schemas/InstancesRules'
             args:
@@ -40159,6 +40373,8 @@ components:
               $ref: '#/components/schemas/IntegerRules'
             environmentVariables:
               $ref: '#/components/schemas/InstancesRules'
+            gpuType:
+              $ref: '#/components/schemas/StringRules'
             imagePullSecrets:
               $ref: '#/components/schemas/ImagePullSecretsRules'
             labels:
@@ -40273,6 +40489,8 @@ components:
         - $ref: '#/components/schemas/AllowOverQuota'
         - nullable: true
           properties:
+            accelerator:
+              $ref: '#/components/schemas/AcceleratorSelection1'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -40289,6 +40507,8 @@ components:
               $ref: '#/components/schemas/Completions'
             environmentVariables:
               $ref: '#/components/schemas/EnvironmentVariablesOfAsset'
+            gpuType:
+              $ref: '#/components/schemas/GpuType'
             imagePullSecrets:
               $ref: '#/components/schemas/ImagePullSecrets'
             labels:
@@ -40447,6 +40667,8 @@ components:
         - $ref: '#/components/schemas/SpecificRunServingPortAccess'
         - nullable: true
           properties:
+            accelerator:
+              $ref: '#/components/schemas/AcceleratorSelection1'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -40461,6 +40683,8 @@ components:
               $ref: '#/components/schemas/Command'
             environmentVariables:
               $ref: '#/components/schemas/EnvironmentVariablesOfAsset'
+            gpuType:
+              $ref: '#/components/schemas/GpuType'
             imagePullSecrets:
               $ref: '#/components/schemas/ImagePullSecrets'
             labels:
@@ -41037,6 +41261,8 @@ components:
       nullable: true
     DistributedInferenceLeaderWorkerSpec:
       properties:
+        accelerator:
+          $ref: '#/components/schemas/AcceleratorSelection1'
         annotations:
           $ref: '#/components/schemas/Annotations'
         args:
@@ -41081,6 +41307,8 @@ components:
           $ref: '#/components/schemas/CreateHomeDir'
         environmentVariables:
           $ref: '#/components/schemas/EnvironmentVariables'
+        gpuType:
+          $ref: '#/components/schemas/GpuType'
         image:
           $ref: '#/components/schemas/Image'
         imagePullPolicy:
@@ -41123,7 +41351,7 @@ components:
             Defines the pod specification for the leader. Must always be
             provided, regardless of the number of workers.
           allOf:
-            - $ref: '#/components/schemas/DistributedInferenceLeaderWorkerSpec1'
+            - $ref: '#/components/schemas/DistributedInferenceLeaderWorkerSpec'
           nullable: true
           type: object
     DistributedInferenceWorkerSpecFields:
@@ -41902,12 +42130,14 @@ components:
       nullable: true
     SupersetSpec:
       allOf:
-        - $ref: '#/components/schemas/DistributedInferenceLeaderSpecFields'
+        - $ref: '#/components/schemas/DistributedInferenceLeaderSpecFields1'
         - $ref: '#/components/schemas/DistributedInferenceWorkerSpecFields'
         - $ref: '#/components/schemas/DistributedInferenceCommonSpec'
         - $ref: '#/components/schemas/InferenceFields'
         - nullable: true
           properties:
+            accelerator:
+              $ref: '#/components/schemas/AcceleratorSelection3'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -41966,6 +42196,8 @@ components:
               $ref: '#/components/schemas/EnvironmentVariables'
             exposedUrls:
               $ref: '#/components/schemas/ExposedUrls'
+            gpuType:
+              $ref: '#/components/schemas/GpuType'
             image:
               $ref: '#/components/schemas/Image'
             imagePullPolicy:
@@ -42128,6 +42360,8 @@ components:
     MasterSpec:
       nullable: true
       properties:
+        accelerator:
+          $ref: '#/components/schemas/AcceleratorSelection3'
         annotations:
           $ref: '#/components/schemas/Annotations'
         args:
@@ -42180,6 +42414,8 @@ components:
           $ref: '#/components/schemas/EnvironmentVariables'
         exposedUrls:
           $ref: '#/components/schemas/ExposedUrls'
+        gpuType:
+          $ref: '#/components/schemas/GpuType'
         image:
           $ref: '#/components/schemas/Image'
         imagePullPolicy:
@@ -42555,6 +42791,25 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PolicyListEntry'
+    AcceleratorSelection2:
+      description: >-
+        Accelerator resource and optional device model label key for workload
+        placement.
+      type: object
+      nullable: true
+      properties:
+        resourceName:
+          description: Kubernetes extended resource name. Defaults to nvidia.com/gpu.
+          type: string
+          nullable: true
+          example: nvidia.com/gpu
+        deviceLabelKey:
+          description: >-
+            Node label key for gpuType. Defaults to nvidia.com/gpu.product for
+            NVIDIA.
+          type: string
+          nullable: true
+          example: nvidia.com/gpu.product
     AnnotationsDefaults:
       properties:
         instances:
@@ -42710,6 +42965,8 @@ components:
       type: object
     DistributedInferenceLeaderWorkerDefaultsV2:
       properties:
+        accelerator:
+          $ref: '#/components/schemas/AcceleratorSelection2'
         annotations:
           $ref: '#/components/schemas/AnnotationsDefaults'
         args:
@@ -42722,6 +42979,8 @@ components:
           $ref: '#/components/schemas/CreateHomeDir'
         environmentVariables:
           $ref: '#/components/schemas/EnvironmentVariablesDefaults'
+        gpuType:
+          $ref: '#/components/schemas/GpuType'
         image:
           $ref: '#/components/schemas/Image'
         imagePullPolicy:
@@ -42765,7 +43024,7 @@ components:
             Defines the pod specification for the leader. Must always be
             provided, regardless of the number of workers.
           allOf:
-            - $ref: '#/components/schemas/DistributedInferenceLeaderWorkerDefaultsV21'
+            - $ref: '#/components/schemas/DistributedInferenceLeaderWorkerDefaultsV2'
           nullable: true
           type: object
     DistributedInferenceWorkerDefaultsFields:
@@ -42898,11 +43157,13 @@ components:
     SupersetDefaults:
       allOf:
         - $ref: '#/components/schemas/InferenceFields'
-        - $ref: '#/components/schemas/DistributedInferenceLeaderDefaultsFields'
+        - $ref: '#/components/schemas/DistributedInferenceLeaderDefaultsFields1'
         - $ref: '#/components/schemas/DistributedInferenceWorkerDefaultsFields'
         - $ref: '#/components/schemas/DistributedInferenceCommonDefaultsV2'
         - nullable: true
           properties:
+            accelerator:
+              $ref: '#/components/schemas/AcceleratorSelection3'
             annotations:
               $ref: '#/components/schemas/AnnotationsDefaults'
             args:
@@ -42929,6 +43190,8 @@ components:
               $ref: '#/components/schemas/EnvironmentVariablesDefaults'
             exposedUrls:
               $ref: '#/components/schemas/ExposedUrlsDefaults'
+            gpuType:
+              $ref: '#/components/schemas/GpuType'
             image:
               $ref: '#/components/schemas/Image'
             imagePullPolicy:
@@ -43261,6 +43524,8 @@ components:
       type: object
     DistributedInferenceLeaderWorkerRulesV2:
       properties:
+        accelerator:
+          $ref: '#/components/schemas/ArbitraryRules'
         annotations:
           $ref: '#/components/schemas/InstancesRules'
         args:
@@ -43273,6 +43538,8 @@ components:
           $ref: '#/components/schemas/BooleanRules'
         environmentVariables:
           $ref: '#/components/schemas/InstancesRules'
+        gpuType:
+          $ref: '#/components/schemas/StringRules'
         image:
           $ref: '#/components/schemas/StringRules'
         imagePullPolicy:
@@ -43709,6 +43976,8 @@ components:
         - $ref: '#/components/schemas/DistributedInferenceCommonRulesV2'
         - nullable: true
           properties:
+            accelerator:
+              $ref: '#/components/schemas/ArbitraryRules'
             annotations:
               $ref: '#/components/schemas/InstancesRules'
             args:
@@ -43735,6 +44004,8 @@ components:
               $ref: '#/components/schemas/InstancesRules'
             exposedUrls:
               $ref: '#/components/schemas/ExposedUrlsRules'
+            gpuType:
+              $ref: '#/components/schemas/StringRules'
             image:
               $ref: '#/components/schemas/StringRules'
             imagePullPolicy:
@@ -43918,6 +44189,8 @@ components:
       allOf:
         - nullable: true
           properties:
+            accelerator:
+              $ref: '#/components/schemas/AcceleratorSelection2'
             annotations:
               $ref: '#/components/schemas/AnnotationsDefaults'
             args:
@@ -43940,6 +44213,8 @@ components:
               $ref: '#/components/schemas/EnvironmentVariablesDefaults'
             exposedUrls:
               $ref: '#/components/schemas/ExposedUrlsDefaults'
+            gpuType:
+              $ref: '#/components/schemas/GpuType'
             image:
               $ref: '#/components/schemas/Image'
             imagePullPolicy:
@@ -44011,6 +44286,8 @@ components:
       allOf:
         - nullable: true
           properties:
+            accelerator:
+              $ref: '#/components/schemas/ArbitraryRules'
             annotations:
               $ref: '#/components/schemas/InstancesRules'
             args:
@@ -44033,6 +44310,8 @@ components:
               $ref: '#/components/schemas/InstancesRules'
             exposedUrls:
               $ref: '#/components/schemas/ExposedUrlsRules'
+            gpuType:
+              $ref: '#/components/schemas/StringRules'
             image:
               $ref: '#/components/schemas/StringRules'
             imagePullPolicy:
@@ -44166,6 +44445,8 @@ components:
     ReplicaDefaultsV2:
       nullable: true
       properties:
+        accelerator:
+          $ref: '#/components/schemas/AcceleratorSelection2'
         annotations:
           $ref: '#/components/schemas/AnnotationsDefaults'
         args:
@@ -44186,6 +44467,8 @@ components:
           $ref: '#/components/schemas/EnvironmentVariablesDefaults'
         exposedUrls:
           $ref: '#/components/schemas/ExposedUrlsDefaults'
+        gpuType:
+          $ref: '#/components/schemas/GpuType'
         image:
           $ref: '#/components/schemas/Image'
         imagePullPolicy:
@@ -44284,6 +44567,8 @@ components:
     ReplicaRulesV2:
       nullable: true
       properties:
+        accelerator:
+          $ref: '#/components/schemas/ArbitraryRules'
         annotations:
           $ref: '#/components/schemas/InstancesRules'
         args:
@@ -44304,6 +44589,8 @@ components:
           $ref: '#/components/schemas/InstancesRules'
         exposedUrls:
           $ref: '#/components/schemas/ExposedUrlsRules'
+        gpuType:
+          $ref: '#/components/schemas/StringRules'
         image:
           $ref: '#/components/schemas/StringRules'
         imagePullPolicy:
@@ -44512,6 +44799,8 @@ components:
       allOf:
         - nullable: true
           properties:
+            accelerator:
+              $ref: '#/components/schemas/AcceleratorSelection2'
             annotations:
               $ref: '#/components/schemas/AnnotationsDefaults'
             args:
@@ -44532,6 +44821,8 @@ components:
               $ref: '#/components/schemas/EnvironmentVariablesDefaults'
             exposedUrls:
               $ref: '#/components/schemas/ExposedUrlsDefaults'
+            gpuType:
+              $ref: '#/components/schemas/GpuType'
             image:
               $ref: '#/components/schemas/Image'
             imagePullPolicy:
@@ -44601,6 +44892,8 @@ components:
       allOf:
         - nullable: true
           properties:
+            accelerator:
+              $ref: '#/components/schemas/ArbitraryRules'
             annotations:
               $ref: '#/components/schemas/InstancesRules'
             args:
@@ -44621,6 +44914,8 @@ components:
               $ref: '#/components/schemas/InstancesRules'
             exposedUrls:
               $ref: '#/components/schemas/ExposedUrlsRules'
+            gpuType:
+              $ref: '#/components/schemas/StringRules'
             image:
               $ref: '#/components/schemas/StringRules'
             imagePullPolicy:
@@ -44788,6 +45083,8 @@ components:
       allOf:
         - nullable: true
           properties:
+            accelerator:
+              $ref: '#/components/schemas/AcceleratorSelection2'
             annotations:
               $ref: '#/components/schemas/AnnotationsDefaults'
             args:
@@ -44804,6 +45101,8 @@ components:
               $ref: '#/components/schemas/EnvironmentVariablesDefaults'
             exposedUrls:
               $ref: '#/components/schemas/ExposedUrlsDefaults'
+            gpuType:
+              $ref: '#/components/schemas/GpuType'
             image:
               $ref: '#/components/schemas/Image'
             imagePullPolicy:
@@ -44950,6 +45249,8 @@ components:
       allOf:
         - nullable: true
           properties:
+            accelerator:
+              $ref: '#/components/schemas/ArbitraryRules'
             annotations:
               $ref: '#/components/schemas/InstancesRules'
             args:
@@ -44966,6 +45267,8 @@ components:
               $ref: '#/components/schemas/InstancesRules'
             exposedUrls:
               $ref: '#/components/schemas/ExposedUrlsRules'
+            gpuType:
+              $ref: '#/components/schemas/StringRules'
             image:
               $ref: '#/components/schemas/StringRules'
             imagePullPolicy:
@@ -53724,6 +54027,25 @@ components:
       properties:
         assets:
           $ref: '#/components/schemas/AssetSubmissionIds'
+    AcceleratorSelection3:
+      description: >-
+        Accelerator resource and optional device model label key for workload
+        placement.
+      type: object
+      nullable: true
+      properties:
+        resourceName:
+          description: Kubernetes extended resource name. Defaults to nvidia.com/gpu.
+          type: string
+          nullable: true
+          example: nvidia.com/gpu
+        deviceLabelKey:
+          description: >-
+            Node label key for gpuType. Defaults to nvidia.com/gpu.product for
+            NVIDIA.
+          type: string
+          nullable: true
+          example: nvidia.com/gpu.product
     NodeType3:
       deprecated: true
       description: >-
@@ -53745,6 +54067,8 @@ components:
       allOf:
         - nullable: true
           properties:
+            accelerator:
+              $ref: '#/components/schemas/AcceleratorSelection3'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -53797,6 +54121,8 @@ components:
               $ref: '#/components/schemas/EnvironmentVariables'
             exposedUrls:
               $ref: '#/components/schemas/ExposedUrls'
+            gpuType:
+              $ref: '#/components/schemas/GpuType'
             image:
               $ref: '#/components/schemas/Image'
             imagePullPolicy:
@@ -53907,6 +54233,8 @@ components:
         - $ref: '#/components/schemas/WorkspaceSpec'
     DistributedInferenceLeaderWorkerSpec1:
       properties:
+        accelerator:
+          $ref: '#/components/schemas/AcceleratorSelection3'
         annotations:
           $ref: '#/components/schemas/Annotations'
         args:
@@ -53951,6 +54279,8 @@ components:
           $ref: '#/components/schemas/CreateHomeDir'
         environmentVariables:
           $ref: '#/components/schemas/EnvironmentVariables'
+        gpuType:
+          $ref: '#/components/schemas/GpuType'
         image:
           $ref: '#/components/schemas/Image'
         imagePullPolicy:
@@ -53986,6 +54316,16 @@ components:
         workingDir:
           $ref: '#/components/schemas/WorkingDir'
       type: object
+    DistributedInferenceLeaderSpecFields1:
+      properties:
+        leader:
+          description: >-
+            Defines the pod specification for the leader. Must always be
+            provided, regardless of the number of workers.
+          allOf:
+            - $ref: '#/components/schemas/DistributedInferenceLeaderWorkerSpec1'
+          nullable: true
+          type: object
     MasterSpecSameAsWorker:
       description: >-
         used for distributed workloads to indicate that the master spec should
@@ -54048,6 +54388,8 @@ components:
       allOf:
         - nullable: true
           properties:
+            accelerator:
+              $ref: '#/components/schemas/AcceleratorSelection3'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -54102,6 +54444,8 @@ components:
               $ref: '#/components/schemas/EnvironmentVariables'
             exposedUrls:
               $ref: '#/components/schemas/ExposedUrls'
+            gpuType:
+              $ref: '#/components/schemas/GpuType'
             image:
               $ref: '#/components/schemas/Image'
             imagePullPolicy:
@@ -54216,6 +54560,8 @@ components:
       allOf:
         - nullable: true
           properties:
+            accelerator:
+              $ref: '#/components/schemas/AcceleratorSelection3'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -54272,6 +54618,8 @@ components:
               $ref: '#/components/schemas/EnvironmentVariables'
             exposedUrls:
               $ref: '#/components/schemas/ExposedUrls'
+            gpuType:
+              $ref: '#/components/schemas/GpuType'
             image:
               $ref: '#/components/schemas/Image'
             imagePullPolicy:
@@ -54413,7 +54761,7 @@ components:
     DistributedInferenceSpecSpec:
       allOf:
         - $ref: '#/components/schemas/DistributedInferenceCommonSpec'
-        - $ref: '#/components/schemas/DistributedInferenceLeaderSpecFields'
+        - $ref: '#/components/schemas/DistributedInferenceLeaderSpecFields1'
         - $ref: '#/components/schemas/DistributedInferenceWorkerSpecFields'
     DistributedInferenceSpec:
       description: The specifications of the distributed inference to be created.
@@ -54554,6 +54902,8 @@ components:
     InferenceSpecSpec:
       allOf:
         - properties:
+            accelerator:
+              $ref: '#/components/schemas/AcceleratorSelection3'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -54602,6 +54952,8 @@ components:
               $ref: '#/components/schemas/EnvironmentVariables'
             exposedUrls:
               $ref: '#/components/schemas/ExposedUrls'
+            gpuType:
+              $ref: '#/components/schemas/GpuType'
             image:
               $ref: '#/components/schemas/Image'
             imagePullPolicy:
@@ -54710,6 +55062,8 @@ components:
           allOf:
             - nullable: true
               properties:
+                accelerator:
+                  $ref: '#/components/schemas/AcceleratorSelection3'
                 args:
                   $ref: '#/components/schemas/Args'
                 category:
@@ -54754,6 +55108,8 @@ components:
                   $ref: '#/components/schemas/CreateHomeDir'
                 environmentVariables:
                   $ref: '#/components/schemas/EnvironmentVariables'
+                gpuType:
+                  $ref: '#/components/schemas/GpuType'
                 image:
                   $ref: '#/components/schemas/Image'
                 imagePullPolicy:
@@ -55133,6 +55489,8 @@ components:
     MasterTemplateSpec:
       nullable: true
       properties:
+        accelerator:
+          $ref: '#/components/schemas/AcceleratorSelection3'
         annotations:
           $ref: '#/components/schemas/Annotations'
         args:
@@ -55185,6 +55543,8 @@ components:
           $ref: '#/components/schemas/EnvironmentVariables'
         exposedUrls:
           $ref: '#/components/schemas/ExposedUrls'
+        gpuType:
+          $ref: '#/components/schemas/GpuType'
         image:
           $ref: '#/components/schemas/Image'
         imagePullPolicy:
@@ -55342,6 +55702,8 @@ components:
       allOf:
         - nullable: true
           properties:
+            accelerator:
+              $ref: '#/components/schemas/AcceleratorSelection3'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -55394,6 +55756,8 @@ components:
               $ref: '#/components/schemas/EnvironmentVariables'
             exposedUrls:
               $ref: '#/components/schemas/ExposedUrls'
+            gpuType:
+              $ref: '#/components/schemas/GpuType'
             image:
               $ref: '#/components/schemas/Image'
             imagePullPolicy:
@@ -55612,6 +55976,8 @@ components:
       allOf:
         - nullable: true
           properties:
+            accelerator:
+              $ref: '#/components/schemas/AcceleratorSelection3'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -55666,6 +56032,8 @@ components:
               $ref: '#/components/schemas/EnvironmentVariables'
             exposedUrls:
               $ref: '#/components/schemas/ExposedUrls'
+            gpuType:
+              $ref: '#/components/schemas/GpuType'
             image:
               $ref: '#/components/schemas/Image'
             imagePullPolicy:
@@ -55810,6 +56178,8 @@ components:
       allOf:
         - nullable: true
           properties:
+            accelerator:
+              $ref: '#/components/schemas/AcceleratorSelection3'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -55866,6 +56236,8 @@ components:
               $ref: '#/components/schemas/EnvironmentVariables'
             exposedUrls:
               $ref: '#/components/schemas/ExposedUrls'
+            gpuType:
+              $ref: '#/components/schemas/GpuType'
             image:
               $ref: '#/components/schemas/Image'
             imagePullPolicy:
@@ -56051,6 +56423,8 @@ components:
     InferenceTemplateSpec:
       allOf:
         - properties:
+            accelerator:
+              $ref: '#/components/schemas/AcceleratorSelection3'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -56099,6 +56473,8 @@ components:
               $ref: '#/components/schemas/EnvironmentVariables'
             exposedUrls:
               $ref: '#/components/schemas/ExposedUrls'
+            gpuType:
+              $ref: '#/components/schemas/GpuType'
             image:
               $ref: '#/components/schemas/Image'
             imagePullPolicy:
@@ -56229,6 +56605,8 @@ components:
         - $ref: '#/components/schemas/TemplateAssets'
     DistributedInferenceLeaderWorkerTemplateSpec:
       properties:
+        accelerator:
+          $ref: '#/components/schemas/AcceleratorSelection3'
         annotations:
           $ref: '#/components/schemas/Annotations'
         args:
@@ -56273,6 +56651,8 @@ components:
           $ref: '#/components/schemas/CreateHomeDir'
         environmentVariables:
           $ref: '#/components/schemas/EnvironmentVariables'
+        gpuType:
+          $ref: '#/components/schemas/GpuType'
         image:
           $ref: '#/components/schemas/Image'
         imagePullPolicy:
@@ -56433,6 +56813,8 @@ components:
       nullable: true
     DistributedInferenceLeaderWorkerDefaultsV21:
       properties:
+        accelerator:
+          $ref: '#/components/schemas/AcceleratorSelection3'
         annotations:
           $ref: '#/components/schemas/AnnotationsDefaults'
         args:
@@ -56445,6 +56827,8 @@ components:
           $ref: '#/components/schemas/CreateHomeDir'
         environmentVariables:
           $ref: '#/components/schemas/EnvironmentVariablesDefaults'
+        gpuType:
+          $ref: '#/components/schemas/GpuType'
         image:
           $ref: '#/components/schemas/Image'
         imagePullPolicy:
@@ -56481,6 +56865,16 @@ components:
         workingDir:
           $ref: '#/components/schemas/WorkingDir'
       type: object
+    DistributedInferenceLeaderDefaultsFields1:
+      properties:
+        leader:
+          description: >-
+            Defines the pod specification for the leader. Must always be
+            provided, regardless of the number of workers.
+          allOf:
+            - $ref: '#/components/schemas/DistributedInferenceLeaderWorkerDefaultsV21'
+          nullable: true
+          type: object
     UnifiedPolicyInfoPerReplicaType:
       x-internal: true
       properties:

@@ -15,6 +15,8 @@ api_reports.go
 api_settings.go
 client.go
 configuration.go
+docs/AcceleratorDevice.md
+docs/AcceleratorOption.md
 docs/AggregatedResources.md
 docs/AggregatedResourcesMemory.md
 docs/AggregatedResourcesNodePool.md
@@ -138,6 +140,7 @@ docs/OrgsNodePoolSummary200Response.md
 docs/OvertimeData.md
 docs/OvertimeRangeData.md
 docs/Project.md
+docs/ProjectAccelerators.md
 docs/ProjectAggregatedResourcesV1.md
 docs/ProjectAggregatedResourcesV1Cpu.md
 docs/ProjectAggregatedResourcesV1Gpu.md
@@ -235,6 +238,8 @@ docs/Verbosity.md
 git_push.sh
 go.mod
 go.sum
+model_accelerator_device.go
+model_accelerator_option.go
 model_aggregated_resources.go
 model_aggregated_resources_memory.go
 model_aggregated_resources_node_pool.go
@@ -352,6 +357,7 @@ model_orgs_node_pool_summary_200_response.go
 model_overtime_data.go
 model_overtime_range_data.go
 model_project.go
+model_project_accelerators.go
 model_project_aggregated_resources_v1.go
 model_project_aggregated_resources_v1_cpu.go
 model_project_aggregated_resources_v1_gpu.go

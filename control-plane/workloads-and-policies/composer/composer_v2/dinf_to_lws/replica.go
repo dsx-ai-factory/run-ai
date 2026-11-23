@@ -76,7 +76,7 @@ func (dinfComposer *DistributedInferenceToLWSComposer) processReplica(
 		runner.Run(dinfComposer.fc.ComposeEnvVarsUsingCreds(envVarsUsingCreds, &envCredentialsTarget, composer_v2.EnvVarsUsingCredSetter, &credentialsCookie))
 
 		runner.Batch(
-			dinfComposer.processComputeFields(ctx, src.Compute.Get(), target),
+			dinfComposer.processComputeFields(ctx, src.Compute.Get(), composer.RequestedAccelerator(src.GpuType.Get(), src.Accelerator.Get()), target),
 			dinfComposer.processStorageFields(src.Storage.Get(), src.CreateHomeDir.Get(), largeShmRequest(src.Compute.Get()), role, target, &fullTarget.Config),
 			dinfComposer.processPlacementFields(common.NodePools, src, target),
 			dinfComposer.fc.ComposeTolerations(replicaItemPrefix(itemized.TolerationPrefix, role), src.Tolerations, &podSpec.Tolerations, composer.MapToK8sTolerations, nil),
@@ -112,13 +112,15 @@ func (dinfComposer *DistributedInferenceToLWSComposer) processPlacementFields(
 		}
 
 		nodePoolsInfo := &composer.NodePoolsInfo{
-			RequestedNodePools: nodePools,
-			ActualNodePools:    dinfComposer.ActualNodePools,
+			RequestedNodePools:   nodePools,
+			ActualNodePools:      dinfComposer.ActualNodePools,
+			PreserveRequirements: src.GpuType.Get() != nil || src.Accelerator.Get() != nil,
 		}
 		runner := &composer.StepRunner{}
 		runner.Batch(
-			dinfComposer.fc.ComposeNodeAffinity(src.NodeAffinityRequired.Get(), &target.Spec.Affinity.NodeAffinity, composer.NodeAffinityRequiredToK8s, nil),
+			dinfComposer.fc.ComposeNodeAffinity(src.NodeAffinityRequired.Get(), &target.Spec.Affinity.NodeAffinity, composer.NodeAffinityRequiredToK8s, src.GpuType.Get() != nil || src.Accelerator.Get() != nil),
 			dinfComposer.fc.ComposePodAffinity(src.PodAffinity.Get(), &target.Spec.Affinity.PodAffinity, composer.PodAffinityToK8s, dinfComposer.fc.WorkloadName),
+			dinfComposer.fc.ComposeGPUPlacement(src.GpuType.Get(), src.Accelerator.Get(), nodePools, &target.Spec, &target.ObjectMeta),
 			dinfComposer.fc.ComposeNodePools(nodePoolsInfo, &target.Spec.Affinity.NodeAffinity, composer.NodePoolsToK8s, nil),
 		)
 

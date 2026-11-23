@@ -12,6 +12,7 @@ Method | HTTP request | Description
 [**DeleteProject**](ProjectsAPI.md#DeleteProject) | **Delete** /api/v1/org-unit/projects/{projectId} | Delete project
 [**GetInternalProjectsTelemetry**](ProjectsAPI.md#GetInternalProjectsTelemetry) | **Get** /internal/org-unit/projects/telemetry | Get internal projects telemetry
 [**GetProject**](ProjectsAPI.md#GetProject) | **Get** /api/v1/org-unit/projects/{projectId} | Get project
+[**GetProjectAccelerators**](ProjectsAPI.md#GetProjectAccelerators) | **Get** /api/v1/org-unit/projects/{projectId}/accelerators | List accelerator resources and models accessible to a project
 [**GetProjectAncestors**](ProjectsAPI.md#GetProjectAncestors) | **Get** /internal/org-unit/projects/{projectId}/ancestors | Get project ancestors
 [**GetProjectMetrics**](ProjectsAPI.md#GetProjectMetrics) | **Get** /api/v1/org-unit/projects/{projectId}/metrics | Get project metrics data.
 [**GetProjectNodePoolResources**](ProjectsAPI.md#GetProjectNodePoolResources) | **Get** /api/v1/org-unit/projects/node-pool-resources | Get projects node pool resources
@@ -571,6 +572,82 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**Project**](Project.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetProjectAccelerators
+
+> ProjectAccelerators GetProjectAccelerators(ctx, projectId).ResourceName(resourceName).DeviceLabelKey(deviceLabelKey).GpuType(gpuType).Execute()
+
+List accelerator resources and models accessible to a project
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
+)
+
+func main() {
+	projectId := "575c19e8-c7c3-45b0-8290-2f47397a8383" // string | The project id
+	resourceName := "resourceName_example" // string | With deviceLabelKey and gpuType, check only this exact accelerator selection. (optional)
+	deviceLabelKey := "deviceLabelKey_example" // string | Exact node label key to check, including administrator-defined keys. (optional)
+	gpuType := "gpuType_example" // string | Exact device label value to check. Supply all three parameters for an exact lookup. (optional)
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.ProjectsAPI.GetProjectAccelerators(context.Background(), projectId).ResourceName(resourceName).DeviceLabelKey(deviceLabelKey).GpuType(gpuType).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `ProjectsAPI.GetProjectAccelerators``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetProjectAccelerators`: ProjectAccelerators
+	fmt.Fprintf(os.Stdout, "Response from `ProjectsAPI.GetProjectAccelerators`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**projectId** | **string** | The project id | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetProjectAcceleratorsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **resourceName** | **string** | With deviceLabelKey and gpuType, check only this exact accelerator selection. | 
+ **deviceLabelKey** | **string** | Exact node label key to check, including administrator-defined keys. | 
+ **gpuType** | **string** | Exact device label value to check. Supply all three parameters for an exact lookup. | 
+
+### Return type
+
+[**ProjectAccelerators**](ProjectAccelerators.md)
 
 ### Authorization
 

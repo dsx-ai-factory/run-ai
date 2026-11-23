@@ -414,6 +414,8 @@ func (dkc *DistributedToKubeflowComposer) Compose(ctx context.Context, src *work
 						return workloadsApi.NewError(http.StatusInternalServerError, copyErr.Error())
 					}
 					clearMpiMasterGpuFields(masterFromWorker.Compute.Get())
+					masterFromWorker.UnsetGpuType()
+					masterFromWorker.UnsetAccelerator()
 				}
 			} else {
 				masterFromWorker = &workloadsApi.DistributedSpecSpec{}
@@ -425,7 +427,7 @@ func (dkc *DistributedToKubeflowComposer) Compose(ctx context.Context, src *work
 
 			// MPI: GPU resources are not allowed on the launcher/master pod.
 			// Mirrors the cluster builder's masterResourceGPUCheck.
-			if target.Framework == workloadsApi.DISTRIBUTEDFRAMEWORK_MPI && computeHasGpu(masterFromWorker.Compute.Get()) {
+			if target.Framework == workloadsApi.DISTRIBUTEDFRAMEWORK_MPI && (computeHasGpu(masterFromWorker.Compute.Get()) || masterFromWorker.GpuType.Get() != nil || masterFromWorker.Accelerator.Get() != nil) {
 				return workloadsApi.NewError(http.StatusBadRequest,
 					"GPU resources are not allowed on MPI master pod. Please resubmit without master GPU fields")
 			}
@@ -727,7 +729,7 @@ func (dkc *DistributedToKubeflowComposer) processReplicaFields(ctx context.Conte
 	runner.Batch(
 		dkc.fc.ComposeTerminationGracePeriod(ctx, src.TerminationGracePeriodSeconds.Get(), &podSpec.TerminationGracePeriodSeconds, composer.NonZeroIntToInt, nil),
 
-		dkc.processComputeFields(ctx, src.Compute.Get(), replicaSpec, &sizingInfo),
+		dkc.processComputeFields(ctx, src.Compute.Get(), composer.RequestedAccelerator(src.GpuType.Get(), src.Accelerator.Get()), replicaSpec, &sizingInfo),
 		dkc.processStorageFields(ctx, src.Storage.Get(), uidGid, createHomeDir, getLargeShmRequest(src.Compute.Get()), replicaSpec, &target.Config, replicaType),
 		dkc.processAffinityFields(ctx, src, replicaSpec),
 	)
@@ -821,7 +823,7 @@ func activeNonEmptyAnnotationValue(annotations []workloadsApi.Annotation, name s
 	return &value
 }
 
-func (dkc *DistributedToKubeflowComposer) processComputeFields(ctx context.Context, src *workloadsApi.WorkspaceSpecSpecAllOfCompute,
+func (dkc *DistributedToKubeflowComposer) processComputeFields(ctx context.Context, src *workloadsApi.WorkspaceSpecSpecAllOfCompute, accelerator *workloadsApi.AcceleratorSelection,
 	replicaSpec *corev1.PodTemplateSpec, sizingInfo *composer.GpuSizingInfo,
 ) func() *workloadsApi.Error {
 	return func() *workloadsApi.Error {
@@ -849,10 +851,10 @@ func (dkc *DistributedToKubeflowComposer) processComputeFields(ctx context.Conte
 			dkc.fc.ComposeGpuRequestsAndLimits(ctx, src.GpuDevicesRequest.Get(), src.GpuRequestType.Get(),
 				src.GpuMemoryPortionRequest.Get(), src.GpuMemoryPortionLimit.Get(),
 				src.GpuMemoryRequest.Get(), src.GpuMemoryLimit.Get(), composer.WholeGpusToK8sResources,
-				&container.Resources, nil, sizingInfo),
+				&container.Resources, accelerator, sizingInfo),
 
 			dkc.fc.ComposeExtendedResources(replicaBasedItemPrefix(itemized.ExtendedResourceNickPrefix, nil), src.ExtendedResources,
-				&container.Resources, composer.ExtendedResourcesToK8sResources, nil),
+				&container.Resources, composer.ExtendedResourcesToK8sResources, accelerator),
 		)
 
 		if sizingInfo.MemoryLimit != nil || sizingInfo.PortionLimit != nil {
@@ -1061,13 +1063,15 @@ func (dkc *DistributedToKubeflowComposer) processAffinityFields(_ context.Contex
 		}
 
 		nodePoolsInfo := &composer.NodePoolsInfo{
-			RequestedNodePools: src.NodePools,
-			ActualNodePools:    dkc.ActualNodePools,
+			RequestedNodePools:   src.NodePools,
+			ActualNodePools:      dkc.ActualNodePools,
+			PreserveRequirements: src.GpuType.Get() != nil || src.Accelerator.Get() != nil,
 		}
 
 		runner.Batch(
-			dkc.fc.ComposeNodeAffinity(src.NodeAffinityRequired.Get(), &podSpec.Affinity.NodeAffinity, composer.NodeAffinityRequiredToK8s, nil),
+			dkc.fc.ComposeNodeAffinity(src.NodeAffinityRequired.Get(), &podSpec.Affinity.NodeAffinity, composer.NodeAffinityRequiredToK8s, src.GpuType.Get() != nil || src.Accelerator.Get() != nil),
 			dkc.fc.ComposePodAffinity(src.PodAffinity.Get(), &podSpec.Affinity.PodAffinity, composer.PodAffinityToK8s, dkc.fc.WorkloadName),
+			dkc.fc.ComposeGPUPlacement(src.GpuType.Get(), src.Accelerator.Get(), src.NodePools, podSpec, &replicaSpec.ObjectMeta),
 			dkc.fc.ComposeNodePools(nodePoolsInfo, &podSpec.Affinity.NodeAffinity, composer.NodePoolsToK8s, nil),
 			// Match workload-controller BuildAnnotationsAndLabels: stamp runai-nodepools
 			// on the pod template whenever node pools were requested.

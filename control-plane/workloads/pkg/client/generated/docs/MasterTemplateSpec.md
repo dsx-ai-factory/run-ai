@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**Accelerator** | Pointer to [**NullableAcceleratorSelection**](AcceleratorSelection.md) |  | [optional] 
 **Annotations** | Pointer to [**[]Annotation**](Annotation.md) | Set of annotations to populate into the container running the workload. | [optional] 
 **Args** | Pointer to **NullableString** | Arguments to the command that the container running the workload executes. | [optional] 
 **AutoDeletionTimeAfterCompletionSeconds** | Pointer to **NullableInt64** | Specifies the duration after which a finished workload (completed or failed) will be automatically deleted. The default is 30 days. Log retention is managed separately. | [optional] 
@@ -14,6 +15,7 @@ Name | Type | Description | Notes
 **CreateHomeDir** | Pointer to **NullableBool** | When set to &#x60;true&#x60;, creates a home directory for the container. | [optional] 
 **EnvironmentVariables** | Pointer to [**[]EnvironmentVariable**](EnvironmentVariable.md) | Set of environment variables to populate into the container running the workload. | [optional] 
 **ExposedUrls** | Pointer to [**[]ExposedUrl**](ExposedUrl.md) | Set of container ports that the workload exposes via URLs. | [optional] 
+**GpuType** | Pointer to **NullableString** | Exact device model label value required on the workload&#39;s nodes. Use any for no model restriction. | [optional] 
 **Image** | Pointer to **NullableString** | Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload. | [optional] 
 **ImagePullPolicy** | Pointer to [**NullableImagePullPolicy**](ImagePullPolicy.md) |  | [optional] 
 **Labels** | Pointer to [**[]Label**](Label.md) | Set of labels to populate into the container running the workload. | [optional] 
@@ -55,6 +57,41 @@ NewMasterTemplateSpecWithDefaults instantiates a new MasterTemplateSpec object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
+### GetAccelerator
+
+`func (o *MasterTemplateSpec) GetAccelerator() AcceleratorSelection`
+
+GetAccelerator returns the Accelerator field if non-nil, zero value otherwise.
+
+### GetAcceleratorOk
+
+`func (o *MasterTemplateSpec) GetAcceleratorOk() (*AcceleratorSelection, bool)`
+
+GetAcceleratorOk returns a tuple with the Accelerator field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAccelerator
+
+`func (o *MasterTemplateSpec) SetAccelerator(v AcceleratorSelection)`
+
+SetAccelerator sets Accelerator field to given value.
+
+### HasAccelerator
+
+`func (o *MasterTemplateSpec) HasAccelerator() bool`
+
+HasAccelerator returns a boolean if a field has been set.
+
+### SetAcceleratorNil
+
+`func (o *MasterTemplateSpec) SetAcceleratorNil(b bool)`
+
+ SetAcceleratorNil sets the value for Accelerator to be an explicit nil
+
+### UnsetAccelerator
+`func (o *MasterTemplateSpec) UnsetAccelerator()`
+
+UnsetAccelerator ensures that no value is present for Accelerator, not even an explicit nil
 ### GetAnnotations
 
 `func (o *MasterTemplateSpec) GetAnnotations() []Annotation`
@@ -405,6 +442,41 @@ HasExposedUrls returns a boolean if a field has been set.
 `func (o *MasterTemplateSpec) UnsetExposedUrls()`
 
 UnsetExposedUrls ensures that no value is present for ExposedUrls, not even an explicit nil
+### GetGpuType
+
+`func (o *MasterTemplateSpec) GetGpuType() string`
+
+GetGpuType returns the GpuType field if non-nil, zero value otherwise.
+
+### GetGpuTypeOk
+
+`func (o *MasterTemplateSpec) GetGpuTypeOk() (*string, bool)`
+
+GetGpuTypeOk returns a tuple with the GpuType field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuType
+
+`func (o *MasterTemplateSpec) SetGpuType(v string)`
+
+SetGpuType sets GpuType field to given value.
+
+### HasGpuType
+
+`func (o *MasterTemplateSpec) HasGpuType() bool`
+
+HasGpuType returns a boolean if a field has been set.
+
+### SetGpuTypeNil
+
+`func (o *MasterTemplateSpec) SetGpuTypeNil(b bool)`
+
+ SetGpuTypeNil sets the value for GpuType to be an explicit nil
+
+### UnsetGpuType
+`func (o *MasterTemplateSpec) UnsetGpuType()`
+
+UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
 ### GetImage
 
 `func (o *MasterTemplateSpec) GetImage() string`

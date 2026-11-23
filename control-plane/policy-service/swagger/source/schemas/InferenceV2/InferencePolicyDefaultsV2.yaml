@@ -5,6 +5,8 @@
 allOf:
 - nullable: true
   properties:
+    accelerator:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/AcceleratorSelection.yaml
     annotations:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/AnnotationsDefaults.yaml
     args:
@@ -21,6 +23,8 @@ allOf:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/EnvironmentVariablesDefaults.yaml
     exposedUrls:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/connectivity/ExposedUrlsDefaults.yaml
+    gpuType:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/GpuType.yaml
     image:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/Image.yaml
     imagePullPolicy:

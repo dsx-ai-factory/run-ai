@@ -8,6 +8,8 @@ properties:
     allOf:
     - nullable: true
       properties:
+        accelerator:
+          $ref: ../workloads_spec/resources/AcceleratorSelection.yaml
         args:
           $ref: ../workloads_spec/container/Args.yaml
         category:
@@ -52,6 +54,8 @@ properties:
           $ref: ../workloads_spec/container/CreateHomeDir.yaml
         environmentVariables:
           $ref: ../workloads_spec/container/EnvironmentVariables.yaml
+        gpuType:
+          $ref: ../workloads_spec/resources/GpuType.yaml
         image:
           $ref: ../workloads_spec/container/Image.yaml
         imagePullPolicy:

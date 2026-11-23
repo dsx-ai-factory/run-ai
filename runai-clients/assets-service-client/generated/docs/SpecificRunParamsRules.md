@@ -6,6 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Autoscaling** | Pointer to [**NullableAutoScalingRules**](AutoScalingRules.md) |  | [optional] 
 **ServingConfiguration** | Pointer to [**NullableServingConfigurationRules**](ServingConfigurationRules.md) |  | [optional] 
+**Accelerator** | Pointer to [**NullableArbitraryRules**](ArbitraryRules.md) |  | [optional] 
 **Annotations** | Pointer to [**NullableInstancesRules**](InstancesRules.md) |  | [optional] 
 **Args** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
 **AutoDeletionTimeAfterCompletionSeconds** | Pointer to [**NullableIntegerRules**](IntegerRules.md) |  | [optional] 
@@ -14,6 +15,7 @@ Name | Type | Description | Notes
 **Command** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
 **Completions** | Pointer to [**NullableIntegerRules**](IntegerRules.md) |  | [optional] 
 **EnvironmentVariables** | Pointer to [**NullableInstancesRules**](InstancesRules.md) |  | [optional] 
+**GpuType** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
 **ImagePullSecrets** | Pointer to [**NullableImagePullSecretsRules**](ImagePullSecretsRules.md) |  | [optional] 
 **Labels** | Pointer to [**NullableInstancesRules**](InstancesRules.md) |  | [optional] 
 **NodeAffinityRequired** | Pointer to [**NullableArbitraryRules**](ArbitraryRules.md) |  | [optional] 
@@ -120,6 +122,41 @@ HasServingConfiguration returns a boolean if a field has been set.
 `func (o *SpecificRunParamsRules) UnsetServingConfiguration()`
 
 UnsetServingConfiguration ensures that no value is present for ServingConfiguration, not even an explicit nil
+### GetAccelerator
+
+`func (o *SpecificRunParamsRules) GetAccelerator() ArbitraryRules`
+
+GetAccelerator returns the Accelerator field if non-nil, zero value otherwise.
+
+### GetAcceleratorOk
+
+`func (o *SpecificRunParamsRules) GetAcceleratorOk() (*ArbitraryRules, bool)`
+
+GetAcceleratorOk returns a tuple with the Accelerator field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAccelerator
+
+`func (o *SpecificRunParamsRules) SetAccelerator(v ArbitraryRules)`
+
+SetAccelerator sets Accelerator field to given value.
+
+### HasAccelerator
+
+`func (o *SpecificRunParamsRules) HasAccelerator() bool`
+
+HasAccelerator returns a boolean if a field has been set.
+
+### SetAcceleratorNil
+
+`func (o *SpecificRunParamsRules) SetAcceleratorNil(b bool)`
+
+ SetAcceleratorNil sets the value for Accelerator to be an explicit nil
+
+### UnsetAccelerator
+`func (o *SpecificRunParamsRules) UnsetAccelerator()`
+
+UnsetAccelerator ensures that no value is present for Accelerator, not even an explicit nil
 ### GetAnnotations
 
 `func (o *SpecificRunParamsRules) GetAnnotations() InstancesRules`
@@ -400,6 +437,41 @@ HasEnvironmentVariables returns a boolean if a field has been set.
 `func (o *SpecificRunParamsRules) UnsetEnvironmentVariables()`
 
 UnsetEnvironmentVariables ensures that no value is present for EnvironmentVariables, not even an explicit nil
+### GetGpuType
+
+`func (o *SpecificRunParamsRules) GetGpuType() StringRules`
+
+GetGpuType returns the GpuType field if non-nil, zero value otherwise.
+
+### GetGpuTypeOk
+
+`func (o *SpecificRunParamsRules) GetGpuTypeOk() (*StringRules, bool)`
+
+GetGpuTypeOk returns a tuple with the GpuType field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuType
+
+`func (o *SpecificRunParamsRules) SetGpuType(v StringRules)`
+
+SetGpuType sets GpuType field to given value.
+
+### HasGpuType
+
+`func (o *SpecificRunParamsRules) HasGpuType() bool`
+
+HasGpuType returns a boolean if a field has been set.
+
+### SetGpuTypeNil
+
+`func (o *SpecificRunParamsRules) SetGpuTypeNil(b bool)`
+
+ SetGpuTypeNil sets the value for GpuType to be an explicit nil
+
+### UnsetGpuType
+`func (o *SpecificRunParamsRules) UnsetGpuType()`
+
+UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
 ### GetImagePullSecrets
 
 `func (o *SpecificRunParamsRules) GetImagePullSecrets() ImagePullSecretsRules`

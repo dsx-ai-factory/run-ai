@@ -789,7 +789,7 @@ func (fc *FieldsComposer) ComposeNodePools(input *NodePoolsInfo,
 	target any, setter FnNodePoolsSetter, cookie any,
 ) func() *workloadsApi.Error {
 	return func() *workloadsApi.Error {
-		if input == nil || len(input.RequestedNodePools) == 0 || (len(input.RequestedNodePools) == 1 && input.RequestedNodePools[0] == "default") {
+		if input == nil || len(input.RequestedNodePools) == 0 || (!input.PreserveRequirements && len(input.RequestedNodePools) == 1 && input.RequestedNodePools[0] == "default") {
 			return nil
 		}
 

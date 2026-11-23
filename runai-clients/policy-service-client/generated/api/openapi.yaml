@@ -7578,6 +7578,26 @@ components:
       - $ref: '#/components/schemas/ServingConfigurationField'
       nullable: true
       type: object
+    AcceleratorSelection:
+      description: Accelerator resource and optional device model label key for workload
+        placement.
+      example:
+        resourceName: nvidia.com/gpu
+        deviceLabelKey: nvidia.com/gpu.product
+      nullable: true
+      properties:
+        resourceName:
+          description: Kubernetes extended resource name. Defaults to nvidia.com/gpu.
+          example: nvidia.com/gpu
+          nullable: true
+          type: string
+        deviceLabelKey:
+          description: Node label key for gpuType. Defaults to nvidia.com/gpu.product
+            for NVIDIA.
+          example: nvidia.com/gpu.product
+          nullable: true
+          type: string
+      type: object
     Annotation:
       description: Annotation details to be populated into the container.
       example:
@@ -8276,6 +8296,14 @@ components:
           nullable: true
           type: array
       type: object
+    GpuType:
+      description: Exact device model label value required on the workload's nodes.
+        Use any for no model restriction.
+      example: NVIDIA-H100-80GB-HBM3
+      maxLength: 63
+      minLength: 1
+      nullable: true
+      type: string
     Image:
       description: "Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images).\
         \ The image name is mandatory for creating a workload."
@@ -8450,8 +8478,8 @@ components:
       properties:
         key:
           description: The label key that the selector applies to (mandatory).
-          maxLength: 63
-          pattern: .*
+          maxLength: 317
+          pattern: "^$|^([^\\x2F]{1,253}\\x2F)?[^\\x2F]{1,63}$"
           type: string
         operator:
           $ref: '#/components/schemas/MatchExpressionOperator'
@@ -9981,6 +10009,8 @@ components:
       type: string
     DistributedInferenceLeaderWorkerDefaultsV2:
       properties:
+        accelerator:
+          $ref: '#/components/schemas/AcceleratorSelection'
         annotations:
           $ref: '#/components/schemas/AnnotationsDefaults'
         args:
@@ -10009,6 +10039,14 @@ components:
           type: boolean
         environmentVariables:
           $ref: '#/components/schemas/EnvironmentVariablesDefaults'
+        gpuType:
+          description: Exact device model label value required on the workload's nodes.
+            Use any for no model restriction.
+          example: NVIDIA-H100-80GB-HBM3
+          maxLength: 63
+          minLength: 1
+          nullable: true
+          type: string
         image:
           description: "Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images).\
             \ The image name is mandatory for creating a workload."
@@ -11682,6 +11720,8 @@ components:
       - $ref: '#/components/schemas/DistributedInferenceCommonDefaultsV2'
       - nullable: true
         properties:
+          accelerator:
+            $ref: '#/components/schemas/AcceleratorSelection'
           annotations:
             $ref: '#/components/schemas/AnnotationsDefaults'
           args:
@@ -11708,6 +11748,8 @@ components:
             $ref: '#/components/schemas/EnvironmentVariablesDefaults'
           exposedUrls:
             $ref: '#/components/schemas/ExposedUrlsDefaults'
+          gpuType:
+            $ref: '#/components/schemas/GpuType'
           image:
             $ref: '#/components/schemas/Image'
           imagePullPolicy:
@@ -11996,6 +12038,27 @@ components:
           $ref: '#/components/schemas/AutoScalingRules'
         servingConfiguration:
           $ref: '#/components/schemas/ServingConfigurationRules'
+      type: object
+    ArbitraryRules:
+      example:
+        sourceOfRule:
+          scope: project
+          projectId: 3
+        canEdit: true
+        required: true
+      nullable: true
+      properties:
+        sourceOfRule:
+          $ref: '#/components/schemas/SourceOfRule'
+        required:
+          description: Whether this arbitrary object is mandatory. default to false.
+          nullable: true
+          type: boolean
+        canEdit:
+          description: "Whether the value of the field, as a whole, is editable. default\
+            \ to false."
+          nullable: true
+          type: boolean
       type: object
     ItemRules:
       example:
@@ -12539,27 +12602,6 @@ components:
           $ref: '#/components/schemas/ImagePullSecretsRulesAttributes'
         instances:
           $ref: '#/components/schemas/ItemRules'
-      type: object
-    ArbitraryRules:
-      example:
-        sourceOfRule:
-          scope: project
-          projectId: 3
-        canEdit: true
-        required: true
-      nullable: true
-      properties:
-        sourceOfRule:
-          $ref: '#/components/schemas/SourceOfRule'
-        required:
-          description: Whether this arbitrary object is mandatory. default to false.
-          nullable: true
-          type: boolean
-        canEdit:
-          description: "Whether the value of the field, as a whole, is editable. default\
-            \ to false."
-          nullable: true
-          type: boolean
       type: object
     PodAffinityTypeOptions:
       properties:
@@ -13872,6 +13914,8 @@ components:
       type: object
     DistributedInferenceLeaderWorkerRulesV2:
       properties:
+        accelerator:
+          $ref: '#/components/schemas/ArbitraryRules'
         annotations:
           $ref: '#/components/schemas/InstancesRules'
         args:
@@ -13884,6 +13928,8 @@ components:
           $ref: '#/components/schemas/BooleanRules'
         environmentVariables:
           $ref: '#/components/schemas/InstancesRules'
+        gpuType:
+          $ref: '#/components/schemas/StringRules'
         image:
           $ref: '#/components/schemas/StringRules'
         imagePullPolicy:
@@ -15344,6 +15390,8 @@ components:
       - $ref: '#/components/schemas/DistributedInferenceCommonRulesV2'
       - nullable: true
         properties:
+          accelerator:
+            $ref: '#/components/schemas/ArbitraryRules'
           annotations:
             $ref: '#/components/schemas/InstancesRules'
           args:
@@ -15370,6 +15418,8 @@ components:
             $ref: '#/components/schemas/InstancesRules'
           exposedUrls:
             $ref: '#/components/schemas/ExposedUrlsRules'
+          gpuType:
+            $ref: '#/components/schemas/StringRules'
           image:
             $ref: '#/components/schemas/StringRules'
           imagePullPolicy:
@@ -15748,6 +15798,8 @@ components:
       allOf:
       - nullable: true
         properties:
+          accelerator:
+            $ref: '#/components/schemas/AcceleratorSelection'
           annotations:
             $ref: '#/components/schemas/AnnotationsDefaults'
           args:
@@ -15770,6 +15822,8 @@ components:
             $ref: '#/components/schemas/EnvironmentVariablesDefaults'
           exposedUrls:
             $ref: '#/components/schemas/ExposedUrlsDefaults'
+          gpuType:
+            $ref: '#/components/schemas/GpuType'
           image:
             $ref: '#/components/schemas/Image'
           imagePullPolicy:
@@ -15850,6 +15904,8 @@ components:
       allOf:
       - nullable: true
         properties:
+          accelerator:
+            $ref: '#/components/schemas/ArbitraryRules'
           annotations:
             $ref: '#/components/schemas/InstancesRules'
           args:
@@ -15872,6 +15928,8 @@ components:
             $ref: '#/components/schemas/InstancesRules'
           exposedUrls:
             $ref: '#/components/schemas/ExposedUrlsRules'
+          gpuType:
+            $ref: '#/components/schemas/StringRules'
           image:
             $ref: '#/components/schemas/StringRules'
           imagePullPolicy:
@@ -16910,6 +16968,10 @@ components:
         podAffinity:
           type: Required
           key: key
+        gpuType: NVIDIA-H100-80GB-HBM3
+        accelerator:
+          resourceName: nvidia.com/gpu
+          deviceLabelKey: nvidia.com/gpu.product
         image: python:3.8
         imagePullPolicy: Always
         nodeAffinityRequired:
@@ -17250,6 +17312,8 @@ components:
         category: category
       nullable: true
       properties:
+        accelerator:
+          $ref: '#/components/schemas/AcceleratorSelection'
         annotations:
           $ref: '#/components/schemas/AnnotationsDefaults'
         args:
@@ -17302,6 +17366,14 @@ components:
           $ref: '#/components/schemas/EnvironmentVariablesDefaults'
         exposedUrls:
           $ref: '#/components/schemas/ExposedUrlsDefaults'
+        gpuType:
+          description: Exact device model label value required on the workload's nodes.
+            Use any for no model restriction.
+          example: NVIDIA-H100-80GB-HBM3
+          maxLength: 63
+          minLength: 1
+          nullable: true
+          type: string
         image:
           description: "Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images).\
             \ The image name is mandatory for creating a workload."
@@ -18181,6 +18253,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: null
           nodeAffinityRequired:
@@ -19276,6 +19352,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -20849,6 +20929,24 @@ components:
             - value: value
               displayed: A description of the value.
             required: true
+        gpuType:
+          sourceOfRule:
+            scope: project
+            projectId: 3
+          blocked: true
+          canEdit: true
+          options:
+          - value: value
+            displayed: A description of the value.
+          - value: value
+            displayed: A description of the value.
+          required: true
+        accelerator:
+          sourceOfRule:
+            scope: project
+            projectId: 3
+          canEdit: true
+          required: true
         image:
           sourceOfRule:
             scope: project
@@ -21035,6 +21133,8 @@ components:
           required: true
       nullable: true
       properties:
+        accelerator:
+          $ref: '#/components/schemas/ArbitraryRules'
         annotations:
           $ref: '#/components/schemas/InstancesRules'
         args:
@@ -21055,6 +21155,8 @@ components:
           $ref: '#/components/schemas/InstancesRules'
         exposedUrls:
           $ref: '#/components/schemas/ExposedUrlsRules'
+        gpuType:
+          $ref: '#/components/schemas/StringRules'
         image:
           $ref: '#/components/schemas/StringRules'
         imagePullPolicy:
@@ -22401,6 +22503,24 @@ components:
               - value: value
                 displayed: A description of the value.
               required: true
+          gpuType:
+            sourceOfRule:
+              scope: project
+              projectId: 3
+            blocked: true
+            canEdit: true
+            options:
+            - value: value
+              displayed: A description of the value.
+            - value: value
+              displayed: A description of the value.
+            required: true
+          accelerator:
+            sourceOfRule:
+              scope: project
+              projectId: 3
+            canEdit: true
+            required: true
           image:
             sourceOfRule:
               scope: project
@@ -23836,6 +23956,24 @@ components:
               - value: value
                 displayed: A description of the value.
               required: true
+          gpuType:
+            sourceOfRule:
+              scope: project
+              projectId: 3
+            blocked: true
+            canEdit: true
+            options:
+            - value: value
+              displayed: A description of the value.
+            - value: value
+              displayed: A description of the value.
+            required: true
+          accelerator:
+            sourceOfRule:
+              scope: project
+              projectId: 3
+            canEdit: true
+            required: true
           image:
             sourceOfRule:
               scope: project
@@ -24842,6 +24980,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: null
             nodeAffinityRequired:
@@ -25937,6 +26079,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -27575,6 +27721,24 @@ components:
                 - value: value
                   displayed: A description of the value.
                 required: true
+            gpuType:
+              sourceOfRule:
+                scope: project
+                projectId: 3
+              blocked: true
+              canEdit: true
+              options:
+              - value: value
+                displayed: A description of the value.
+              - value: value
+                displayed: A description of the value.
+              required: true
+            accelerator:
+              sourceOfRule:
+                scope: project
+                projectId: 3
+              canEdit: true
+              required: true
             image:
               sourceOfRule:
                 scope: project
@@ -29010,6 +29174,24 @@ components:
                 - value: value
                   displayed: A description of the value.
                 required: true
+            gpuType:
+              sourceOfRule:
+                scope: project
+                projectId: 3
+              blocked: true
+              canEdit: true
+              options:
+              - value: value
+                displayed: A description of the value.
+              - value: value
+                displayed: A description of the value.
+              required: true
+            accelerator:
+              sourceOfRule:
+                scope: project
+                projectId: 3
+              canEdit: true
+              required: true
             image:
               sourceOfRule:
                 scope: project
@@ -30011,6 +30193,10 @@ components:
                 podAffinity:
                   type: Required
                   key: key
+                gpuType: NVIDIA-H100-80GB-HBM3
+                accelerator:
+                  resourceName: nvidia.com/gpu
+                  deviceLabelKey: nvidia.com/gpu.product
                 image: python:3.8
                 imagePullPolicy: null
                 nodeAffinityRequired:
@@ -31106,6 +31292,10 @@ components:
                 podAffinity:
                   type: Required
                   key: key
+                gpuType: NVIDIA-H100-80GB-HBM3
+                accelerator:
+                  resourceName: nvidia.com/gpu
+                  deviceLabelKey: nvidia.com/gpu.product
                 image: python:3.8
                 imagePullPolicy: Always
                 nodeAffinityRequired:
@@ -32744,6 +32934,24 @@ components:
                     - value: value
                       displayed: A description of the value.
                     required: true
+                gpuType:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - value: value
+                    displayed: A description of the value.
+                  - value: value
+                    displayed: A description of the value.
+                  required: true
+                accelerator:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  canEdit: true
+                  required: true
                 image:
                   sourceOfRule:
                     scope: project
@@ -34179,6 +34387,24 @@ components:
                     - value: value
                       displayed: A description of the value.
                     required: true
+                gpuType:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - value: value
+                    displayed: A description of the value.
+                  - value: value
+                    displayed: A description of the value.
+                  required: true
+                accelerator:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  canEdit: true
+                  required: true
                 image:
                   sourceOfRule:
                     scope: project
@@ -35162,6 +35388,10 @@ components:
                 podAffinity:
                   type: Required
                   key: key
+                gpuType: NVIDIA-H100-80GB-HBM3
+                accelerator:
+                  resourceName: nvidia.com/gpu
+                  deviceLabelKey: nvidia.com/gpu.product
                 image: python:3.8
                 imagePullPolicy: null
                 nodeAffinityRequired:
@@ -36257,6 +36487,10 @@ components:
                 podAffinity:
                   type: Required
                   key: key
+                gpuType: NVIDIA-H100-80GB-HBM3
+                accelerator:
+                  resourceName: nvidia.com/gpu
+                  deviceLabelKey: nvidia.com/gpu.product
                 image: python:3.8
                 imagePullPolicy: Always
                 nodeAffinityRequired:
@@ -37895,6 +38129,24 @@ components:
                     - value: value
                       displayed: A description of the value.
                     required: true
+                gpuType:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - value: value
+                    displayed: A description of the value.
+                  - value: value
+                    displayed: A description of the value.
+                  required: true
+                accelerator:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  canEdit: true
+                  required: true
                 image:
                   sourceOfRule:
                     scope: project
@@ -39330,6 +39582,24 @@ components:
                     - value: value
                       displayed: A description of the value.
                     required: true
+                gpuType:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - value: value
+                    displayed: A description of the value.
+                  - value: value
+                    displayed: A description of the value.
+                  required: true
+                accelerator:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  canEdit: true
+                  required: true
                 image:
                   sourceOfRule:
                     scope: project
@@ -39635,6 +39905,8 @@ components:
       allOf:
       - nullable: true
         properties:
+          accelerator:
+            $ref: '#/components/schemas/AcceleratorSelection'
           annotations:
             $ref: '#/components/schemas/AnnotationsDefaults'
           args:
@@ -39655,6 +39927,8 @@ components:
             $ref: '#/components/schemas/EnvironmentVariablesDefaults'
           exposedUrls:
             $ref: '#/components/schemas/ExposedUrlsDefaults'
+          gpuType:
+            $ref: '#/components/schemas/GpuType'
           image:
             $ref: '#/components/schemas/Image'
           imagePullPolicy:
@@ -39704,6 +39978,8 @@ components:
       allOf:
       - nullable: true
         properties:
+          accelerator:
+            $ref: '#/components/schemas/ArbitraryRules'
           annotations:
             $ref: '#/components/schemas/InstancesRules'
           args:
@@ -39724,6 +40000,8 @@ components:
             $ref: '#/components/schemas/InstancesRules'
           exposedUrls:
             $ref: '#/components/schemas/ExposedUrlsRules'
+          gpuType:
+            $ref: '#/components/schemas/StringRules'
           image:
             $ref: '#/components/schemas/StringRules'
           imagePullPolicy:
@@ -40774,6 +41052,10 @@ components:
               podAffinity:
                 type: Required
                 key: key
+              gpuType: NVIDIA-H100-80GB-HBM3
+              accelerator:
+                resourceName: nvidia.com/gpu
+                deviceLabelKey: nvidia.com/gpu.product
               image: python:3.8
               imagePullPolicy: null
               nodeAffinityRequired:
@@ -41869,6 +42151,10 @@ components:
               podAffinity:
                 type: Required
                 key: key
+              gpuType: NVIDIA-H100-80GB-HBM3
+              accelerator:
+                resourceName: nvidia.com/gpu
+                deviceLabelKey: nvidia.com/gpu.product
               image: python:3.8
               imagePullPolicy: Always
               nodeAffinityRequired:
@@ -43507,6 +43793,24 @@ components:
                   - value: value
                     displayed: A description of the value.
                   required: true
+              gpuType:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                blocked: true
+                canEdit: true
+                options:
+                - value: value
+                  displayed: A description of the value.
+                - value: value
+                  displayed: A description of the value.
+                required: true
+              accelerator:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                canEdit: true
+                required: true
               image:
                 sourceOfRule:
                   scope: project
@@ -44942,6 +45246,24 @@ components:
                   - value: value
                     displayed: A description of the value.
                   required: true
+              gpuType:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                blocked: true
+                canEdit: true
+                options:
+                - value: value
+                  displayed: A description of the value.
+                - value: value
+                  displayed: A description of the value.
+                required: true
+              accelerator:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                canEdit: true
+                required: true
               image:
                 sourceOfRule:
                   scope: project
@@ -45927,6 +46249,10 @@ components:
               podAffinity:
                 type: Required
                 key: key
+              gpuType: NVIDIA-H100-80GB-HBM3
+              accelerator:
+                resourceName: nvidia.com/gpu
+                deviceLabelKey: nvidia.com/gpu.product
               image: python:3.8
               imagePullPolicy: null
               nodeAffinityRequired:
@@ -47022,6 +47348,10 @@ components:
               podAffinity:
                 type: Required
                 key: key
+              gpuType: NVIDIA-H100-80GB-HBM3
+              accelerator:
+                resourceName: nvidia.com/gpu
+                deviceLabelKey: nvidia.com/gpu.product
               image: python:3.8
               imagePullPolicy: Always
               nodeAffinityRequired:
@@ -48660,6 +48990,24 @@ components:
                   - value: value
                     displayed: A description of the value.
                   required: true
+              gpuType:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                blocked: true
+                canEdit: true
+                options:
+                - value: value
+                  displayed: A description of the value.
+                - value: value
+                  displayed: A description of the value.
+                required: true
+              accelerator:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                canEdit: true
+                required: true
               image:
                 sourceOfRule:
                   scope: project
@@ -50095,6 +50443,24 @@ components:
                   - value: value
                     displayed: A description of the value.
                   required: true
+              gpuType:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                blocked: true
+                canEdit: true
+                options:
+                - value: value
+                  displayed: A description of the value.
+                - value: value
+                  displayed: A description of the value.
+                required: true
+              accelerator:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                canEdit: true
+                required: true
               image:
                 sourceOfRule:
                   scope: project
@@ -51090,6 +51456,10 @@ components:
               podAffinity:
                 type: Required
                 key: key
+              gpuType: NVIDIA-H100-80GB-HBM3
+              accelerator:
+                resourceName: nvidia.com/gpu
+                deviceLabelKey: nvidia.com/gpu.product
               image: python:3.8
               imagePullPolicy: null
               nodeAffinityRequired:
@@ -52185,6 +52555,10 @@ components:
               podAffinity:
                 type: Required
                 key: key
+              gpuType: NVIDIA-H100-80GB-HBM3
+              accelerator:
+                resourceName: nvidia.com/gpu
+                deviceLabelKey: nvidia.com/gpu.product
               image: python:3.8
               imagePullPolicy: Always
               nodeAffinityRequired:
@@ -53823,6 +54197,24 @@ components:
                   - value: value
                     displayed: A description of the value.
                   required: true
+              gpuType:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                blocked: true
+                canEdit: true
+                options:
+                - value: value
+                  displayed: A description of the value.
+                - value: value
+                  displayed: A description of the value.
+                required: true
+              accelerator:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                canEdit: true
+                required: true
               image:
                 sourceOfRule:
                   scope: project
@@ -55258,6 +55650,24 @@ components:
                   - value: value
                     displayed: A description of the value.
                   required: true
+              gpuType:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                blocked: true
+                canEdit: true
+                options:
+                - value: value
+                  displayed: A description of the value.
+                - value: value
+                  displayed: A description of the value.
+                required: true
+              accelerator:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                canEdit: true
+                required: true
               image:
                 sourceOfRule:
                   scope: project
@@ -56247,6 +56657,10 @@ components:
               podAffinity:
                 type: Required
                 key: key
+              gpuType: NVIDIA-H100-80GB-HBM3
+              accelerator:
+                resourceName: nvidia.com/gpu
+                deviceLabelKey: nvidia.com/gpu.product
               image: python:3.8
               imagePullPolicy: null
               nodeAffinityRequired:
@@ -57342,6 +57756,10 @@ components:
               podAffinity:
                 type: Required
                 key: key
+              gpuType: NVIDIA-H100-80GB-HBM3
+              accelerator:
+                resourceName: nvidia.com/gpu
+                deviceLabelKey: nvidia.com/gpu.product
               image: python:3.8
               imagePullPolicy: Always
               nodeAffinityRequired:
@@ -58980,6 +59398,24 @@ components:
                   - value: value
                     displayed: A description of the value.
                   required: true
+              gpuType:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                blocked: true
+                canEdit: true
+                options:
+                - value: value
+                  displayed: A description of the value.
+                - value: value
+                  displayed: A description of the value.
+                required: true
+              accelerator:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                canEdit: true
+                required: true
               image:
                 sourceOfRule:
                   scope: project
@@ -60415,6 +60851,24 @@ components:
                   - value: value
                     displayed: A description of the value.
                   required: true
+              gpuType:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                blocked: true
+                canEdit: true
+                options:
+                - value: value
+                  displayed: A description of the value.
+                - value: value
+                  displayed: A description of the value.
+                required: true
+              accelerator:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                canEdit: true
+                required: true
               image:
                 sourceOfRule:
                   scope: project
@@ -60702,6 +61156,8 @@ components:
       allOf:
       - nullable: true
         properties:
+          accelerator:
+            $ref: '#/components/schemas/AcceleratorSelection'
           annotations:
             $ref: '#/components/schemas/AnnotationsDefaults'
           args:
@@ -60718,6 +61174,8 @@ components:
             $ref: '#/components/schemas/EnvironmentVariablesDefaults'
           exposedUrls:
             $ref: '#/components/schemas/ExposedUrlsDefaults'
+          gpuType:
+            $ref: '#/components/schemas/GpuType'
           image:
             $ref: '#/components/schemas/Image'
           imagePullPolicy:
@@ -60806,6 +61264,8 @@ components:
       allOf:
       - nullable: true
         properties:
+          accelerator:
+            $ref: '#/components/schemas/ArbitraryRules'
           annotations:
             $ref: '#/components/schemas/InstancesRules'
           args:
@@ -60822,6 +61282,8 @@ components:
             $ref: '#/components/schemas/InstancesRules'
           exposedUrls:
             $ref: '#/components/schemas/ExposedUrlsRules'
+          gpuType:
+            $ref: '#/components/schemas/StringRules'
           image:
             $ref: '#/components/schemas/StringRules'
           imagePullPolicy:
@@ -63051,6 +63513,10 @@ components:
                 podAffinity:
                   type: Required
                   key: key
+                gpuType: NVIDIA-H100-80GB-HBM3
+                accelerator:
+                  resourceName: nvidia.com/gpu
+                  deviceLabelKey: nvidia.com/gpu.product
                 image: python:3.8
                 imagePullPolicy: null
                 nodeAffinityRequired:
@@ -64146,6 +64612,10 @@ components:
                 podAffinity:
                   type: Required
                   key: key
+                gpuType: NVIDIA-H100-80GB-HBM3
+                accelerator:
+                  resourceName: nvidia.com/gpu
+                  deviceLabelKey: nvidia.com/gpu.product
                 image: python:3.8
                 imagePullPolicy: Always
                 nodeAffinityRequired:
@@ -65784,6 +66254,24 @@ components:
                     - value: value
                       displayed: A description of the value.
                     required: true
+                gpuType:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - value: value
+                    displayed: A description of the value.
+                  - value: value
+                    displayed: A description of the value.
+                  required: true
+                accelerator:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  canEdit: true
+                  required: true
                 image:
                   sourceOfRule:
                     scope: project
@@ -67219,6 +67707,24 @@ components:
                     - value: value
                       displayed: A description of the value.
                     required: true
+                gpuType:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - value: value
+                    displayed: A description of the value.
+                  - value: value
+                    displayed: A description of the value.
+                  required: true
+                accelerator:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  canEdit: true
+                  required: true
                 image:
                   sourceOfRule:
                     scope: project
@@ -68204,6 +68710,10 @@ components:
                 podAffinity:
                   type: Required
                   key: key
+                gpuType: NVIDIA-H100-80GB-HBM3
+                accelerator:
+                  resourceName: nvidia.com/gpu
+                  deviceLabelKey: nvidia.com/gpu.product
                 image: python:3.8
                 imagePullPolicy: null
                 nodeAffinityRequired:
@@ -69299,6 +69809,10 @@ components:
                 podAffinity:
                   type: Required
                   key: key
+                gpuType: NVIDIA-H100-80GB-HBM3
+                accelerator:
+                  resourceName: nvidia.com/gpu
+                  deviceLabelKey: nvidia.com/gpu.product
                 image: python:3.8
                 imagePullPolicy: Always
                 nodeAffinityRequired:
@@ -70937,6 +71451,24 @@ components:
                     - value: value
                       displayed: A description of the value.
                     required: true
+                gpuType:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - value: value
+                    displayed: A description of the value.
+                  - value: value
+                    displayed: A description of the value.
+                  required: true
+                accelerator:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  canEdit: true
+                  required: true
                 image:
                   sourceOfRule:
                     scope: project
@@ -72372,6 +72904,24 @@ components:
                     - value: value
                       displayed: A description of the value.
                     required: true
+                gpuType:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - value: value
+                    displayed: A description of the value.
+                  - value: value
+                    displayed: A description of the value.
+                  required: true
+                accelerator:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  canEdit: true
+                  required: true
                 image:
                   sourceOfRule:
                     scope: project
@@ -77362,6 +77912,10 @@ components:
         podAffinity:
           type: Required
           key: key
+        gpuType: NVIDIA-H100-80GB-HBM3
+        accelerator:
+          resourceName: nvidia.com/gpu
+          deviceLabelKey: nvidia.com/gpu.product
         image: python:3.8
         imagePullPolicy: null
         nodeAffinityRequired:
@@ -79025,6 +79579,24 @@ components:
             - value: value
               displayed: A description of the value.
             required: true
+        gpuType:
+          sourceOfRule:
+            scope: project
+            projectId: 3
+          blocked: true
+          canEdit: true
+          options:
+          - value: value
+            displayed: A description of the value.
+          - value: value
+            displayed: A description of the value.
+          required: true
+        accelerator:
+          sourceOfRule:
+            scope: project
+            projectId: 3
+          canEdit: true
+          required: true
         image:
           sourceOfRule:
             scope: project
@@ -80068,6 +80640,10 @@ components:
               podAffinity:
                 type: Required
                 key: key
+              gpuType: NVIDIA-H100-80GB-HBM3
+              accelerator:
+                resourceName: nvidia.com/gpu
+                deviceLabelKey: nvidia.com/gpu.product
               image: python:3.8
               imagePullPolicy: null
               nodeAffinityRequired:
@@ -81163,6 +81739,10 @@ components:
               podAffinity:
                 type: Required
                 key: key
+              gpuType: NVIDIA-H100-80GB-HBM3
+              accelerator:
+                resourceName: nvidia.com/gpu
+                deviceLabelKey: nvidia.com/gpu.product
               image: python:3.8
               imagePullPolicy: Always
               nodeAffinityRequired:
@@ -82801,6 +83381,24 @@ components:
                   - value: value
                     displayed: A description of the value.
                   required: true
+              gpuType:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                blocked: true
+                canEdit: true
+                options:
+                - value: value
+                  displayed: A description of the value.
+                - value: value
+                  displayed: A description of the value.
+                required: true
+              accelerator:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                canEdit: true
+                required: true
               image:
                 sourceOfRule:
                   scope: project
@@ -84236,6 +84834,24 @@ components:
                   - value: value
                     displayed: A description of the value.
                   required: true
+              gpuType:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                blocked: true
+                canEdit: true
+                options:
+                - value: value
+                  displayed: A description of the value.
+                - value: value
+                  displayed: A description of the value.
+                required: true
+              accelerator:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                canEdit: true
+                required: true
               image:
                 sourceOfRule:
                   scope: project

@@ -160,6 +160,7 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [AcceleratorSelection](docs/AcceleratorSelection.md)
  - [ActivationReplicasField](docs/ActivationReplicasField.md)
  - [AllowOverride](docs/AllowOverride.md)
  - [Annotation](docs/Annotation.md)

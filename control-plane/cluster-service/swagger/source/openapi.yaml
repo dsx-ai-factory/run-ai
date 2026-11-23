@@ -103,6 +103,10 @@ paths:
     x-internal: true
     $ref: "./resources/NodepoolsMinimalInternal.yaml"
 
+  /internal/clusters/{clusterUuid}/accelerators:
+    x-internal: true
+    $ref: "./resources/internal/ClusterAccelerators.yaml"
+
   /internal/clusters/{clusterUuid}/nodes/{nodeName}:
     x-internal: true
     $ref: "./resources/internal/NodeInternal.yaml"

@@ -825,6 +825,76 @@ func (_c *IOrgUnitClient_GetOrgUnits_Call) RunAndReturn(run func(ctx context.Con
 	return _c
 }
 
+// GetProjectAccelerators provides a mock function for the type IOrgUnitClient
+func (_mock *IOrgUnitClient) GetProjectAccelerators(ctx context.Context, projectId string) (*openapi.ProjectAccelerators, *openapi.Error) {
+	ret := _mock.Called(ctx, projectId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetProjectAccelerators")
+	}
+
+	var r0 *openapi.ProjectAccelerators
+	var r1 *openapi.Error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*openapi.ProjectAccelerators, *openapi.Error)); ok {
+		return returnFunc(ctx, projectId)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *openapi.ProjectAccelerators); ok {
+		r0 = returnFunc(ctx, projectId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.ProjectAccelerators)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) *openapi.Error); ok {
+		r1 = returnFunc(ctx, projectId)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*openapi.Error)
+		}
+	}
+	return r0, r1
+}
+
+// IOrgUnitClient_GetProjectAccelerators_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetProjectAccelerators'
+type IOrgUnitClient_GetProjectAccelerators_Call struct {
+	*mock.Call
+}
+
+// GetProjectAccelerators is a helper method to define mock.On call
+//   - ctx context.Context
+//   - projectId string
+func (_e *IOrgUnitClient_Expecter) GetProjectAccelerators(ctx any, projectId any) *IOrgUnitClient_GetProjectAccelerators_Call {
+	return &IOrgUnitClient_GetProjectAccelerators_Call{Call: _e.mock.On("GetProjectAccelerators", ctx, projectId)}
+}
+
+func (_c *IOrgUnitClient_GetProjectAccelerators_Call) Run(run func(ctx context.Context, projectId string)) *IOrgUnitClient_GetProjectAccelerators_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *IOrgUnitClient_GetProjectAccelerators_Call) Return(projectAccelerators *openapi.ProjectAccelerators, error *openapi.Error) *IOrgUnitClient_GetProjectAccelerators_Call {
+	_c.Call.Return(projectAccelerators, error)
+	return _c
+}
+
+func (_c *IOrgUnitClient_GetProjectAccelerators_Call) RunAndReturn(run func(ctx context.Context, projectId string) (*openapi.ProjectAccelerators, *openapi.Error)) *IOrgUnitClient_GetProjectAccelerators_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetProjectAncestors provides a mock function for the type IOrgUnitClient
 func (_mock *IOrgUnitClient) GetProjectAncestors(ctx context.Context, projectId string) (*openapi.Ancestors, *openapi.Error) {
 	ret := _mock.Called(ctx, projectId)
@@ -1193,6 +1263,92 @@ func (_c *IOrgUnitClient_GetProjectsSync_Call) Return(getSyncProjects200Response
 }
 
 func (_c *IOrgUnitClient_GetProjectsSync_Call) RunAndReturn(run func(ctx context.Context, clusterId string, limit int32, offset int32, UpdatedAfter time.Time, excludePermissions bool) (*openapi.GetSyncProjects200Response, error)) *IOrgUnitClient_GetProjectsSync_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// MatchProjectAccelerator provides a mock function for the type IOrgUnitClient
+func (_mock *IOrgUnitClient) MatchProjectAccelerator(ctx context.Context, projectID string, resourceName string, deviceLabelKey string, gpuType string) (bool, *openapi.Error) {
+	ret := _mock.Called(ctx, projectID, resourceName, deviceLabelKey, gpuType)
+
+	if len(ret) == 0 {
+		panic("no return value specified for MatchProjectAccelerator")
+	}
+
+	var r0 bool
+	var r1 *openapi.Error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string, string) (bool, *openapi.Error)); ok {
+		return returnFunc(ctx, projectID, resourceName, deviceLabelKey, gpuType)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string, string) bool); ok {
+		r0 = returnFunc(ctx, projectID, resourceName, deviceLabelKey, gpuType)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, string, string) *openapi.Error); ok {
+		r1 = returnFunc(ctx, projectID, resourceName, deviceLabelKey, gpuType)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*openapi.Error)
+		}
+	}
+	return r0, r1
+}
+
+// IOrgUnitClient_MatchProjectAccelerator_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'MatchProjectAccelerator'
+type IOrgUnitClient_MatchProjectAccelerator_Call struct {
+	*mock.Call
+}
+
+// MatchProjectAccelerator is a helper method to define mock.On call
+//   - ctx context.Context
+//   - projectID string
+//   - resourceName string
+//   - deviceLabelKey string
+//   - gpuType string
+func (_e *IOrgUnitClient_Expecter) MatchProjectAccelerator(ctx any, projectID any, resourceName any, deviceLabelKey any, gpuType any) *IOrgUnitClient_MatchProjectAccelerator_Call {
+	return &IOrgUnitClient_MatchProjectAccelerator_Call{Call: _e.mock.On("MatchProjectAccelerator", ctx, projectID, resourceName, deviceLabelKey, gpuType)}
+}
+
+func (_c *IOrgUnitClient_MatchProjectAccelerator_Call) Run(run func(ctx context.Context, projectID string, resourceName string, deviceLabelKey string, gpuType string)) *IOrgUnitClient_MatchProjectAccelerator_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		var arg4 string
+		if args[4] != nil {
+			arg4 = args[4].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
+	})
+	return _c
+}
+
+func (_c *IOrgUnitClient_MatchProjectAccelerator_Call) Return(b bool, error *openapi.Error) *IOrgUnitClient_MatchProjectAccelerator_Call {
+	_c.Call.Return(b, error)
+	return _c
+}
+
+func (_c *IOrgUnitClient_MatchProjectAccelerator_Call) RunAndReturn(run func(ctx context.Context, projectID string, resourceName string, deviceLabelKey string, gpuType string) (bool, *openapi.Error)) *IOrgUnitClient_MatchProjectAccelerator_Call {
 	_c.Call.Return(run)
 	return _c
 }

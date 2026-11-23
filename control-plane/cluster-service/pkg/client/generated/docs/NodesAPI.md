@@ -12,6 +12,7 @@ Method | HTTP request | Description
 [**GetNodeLabelKeys**](NodesAPI.md#GetNodeLabelKeys) | **Get** /api/v1/clusters/{clusterUuid}/nodes/labels/keys | Get node label keys.
 [**GetNodeLabelValues**](NodesAPI.md#GetNodeLabelValues) | **Get** /api/v1/clusters/{clusterUuid}/nodes/labels/values | Get node label values.
 [**GetNodeMetrics**](NodesAPI.md#GetNodeMetrics) | **Get** /api/v1/nodes/{nodeId}/metrics | Get the node metrics data.
+[**GetNodePoolAccelerators**](NodesAPI.md#GetNodePoolAccelerators) | **Post** /internal/clusters/{clusterUuid}/accelerators | Get accelerator inventory for the supplied node pools
 [**GetNodeTelemetry**](NodesAPI.md#GetNodeTelemetry) | **Get** /api/v1/nodes/telemetry | Get node telemetry data.
 [**GetTenantNodes**](NodesAPI.md#GetTenantNodes) | **Get** /api/v1/nodes | Get a list of nodes.
 [**SyncNodes**](NodesAPI.md#SyncNodes) | **Post** /api/v1/clusters/{clusterUuid}/nodes/sync | Sync the nodes in the cluster.
@@ -603,6 +604,76 @@ Name | Type | Description  | Notes
 
 - **Content-Type**: Not defined
 - **Accept**: application/json, text/csv
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetNodePoolAccelerators
+
+> ProjectAccelerators GetNodePoolAccelerators(ctx, clusterUuid).NodePoolAcceleratorsRequest(nodePoolAcceleratorsRequest).Execute()
+
+Get accelerator inventory for the supplied node pools
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client"
+)
+
+func main() {
+	clusterUuid := "9f55255e-11ed-47c7-acef-fc4054768dbc" // string | The Universally Unique Identifier (UUID) of the cluster.
+	nodePoolAcceleratorsRequest := *openapiclient.NewNodePoolAcceleratorsRequest([]string{"NodePoolIds_example"}) // NodePoolAcceleratorsRequest | 
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.NodesAPI.GetNodePoolAccelerators(context.Background(), clusterUuid).NodePoolAcceleratorsRequest(nodePoolAcceleratorsRequest).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `NodesAPI.GetNodePoolAccelerators``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetNodePoolAccelerators`: ProjectAccelerators
+	fmt.Fprintf(os.Stdout, "Response from `NodesAPI.GetNodePoolAccelerators`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**clusterUuid** | **string** | The Universally Unique Identifier (UUID) of the cluster. | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetNodePoolAcceleratorsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **nodePoolAcceleratorsRequest** | [**NodePoolAcceleratorsRequest**](NodePoolAcceleratorsRequest.md) |  | 
+
+### Return type
+
+[**ProjectAccelerators**](ProjectAccelerators.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

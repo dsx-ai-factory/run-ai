@@ -1,0 +1,13 @@
+type: object
+nullable: true
+required: [resourceName, deviceLabelKey, gpuType]
+properties:
+  resourceName:
+    type: string
+    minLength: 1
+  deviceLabelKey:
+    type: string
+    minLength: 1
+  gpuType:
+    type: string
+    minLength: 1

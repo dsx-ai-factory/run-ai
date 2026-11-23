@@ -5,6 +5,8 @@
 allOf:
 - nullable: true
   properties:
+    accelerator:
+      $ref: ../workloads_spec/resources/AcceleratorSelection.yaml
     annotations:
       $ref: ../workloads_spec/advanced/Annotations.yaml
     args:
@@ -57,6 +59,8 @@ allOf:
       $ref: ../workloads_spec/container/EnvironmentVariables.yaml
     exposedUrls:
       $ref: ../workloads_spec/connectivity/ExposedUrls.yaml
+    gpuType:
+      $ref: ../workloads_spec/resources/GpuType.yaml
     image:
       $ref: ../workloads_spec/container/Image.yaml
     imagePullPolicy:

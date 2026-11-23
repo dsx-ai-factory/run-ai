@@ -89,6 +89,12 @@ type WorkloadMeta struct {
 	//ActualPhase Phase `json:"actualPhase,omitempty"`
 	ActualPhase Phase `json:"actualPhase,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Advisory messages returned when submitting the workload.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Warnings []SubmissionWarning `json:"warnings,omitempty"`
+	Warnings []SubmissionWarning `json:"warnings,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertWorkloadMetaRequired checks if the required fields are not zero-ed
@@ -109,6 +115,11 @@ func AssertWorkloadMetaRequired(obj WorkloadMeta) error {
 		}
 	}
 
+	for _, el := range obj.Warnings {
+		if err := AssertSubmissionWarningRequired(el); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -192,5 +203,15 @@ func AssertWorkloadMetaConstraints(obj WorkloadMeta) error {
 	}
 
 	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	for _, el := range obj.Warnings {
+		if err := AssertSubmissionWarningConstraints(el); err != nil {
+			return err
+		}
+	}
 	return nil
 }

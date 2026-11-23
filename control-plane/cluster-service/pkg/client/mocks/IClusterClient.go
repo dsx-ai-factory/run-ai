@@ -947,6 +947,80 @@ func (_c *IClusterClient_GetNodeNetworkTopologyLabelValues_Call) RunAndReturn(ru
 	return _c
 }
 
+// GetNodePoolAccelerators provides a mock function for the type IClusterClient
+func (_mock *IClusterClient) GetNodePoolAccelerators(ctx context.Context, clusterID string, request openapi.NodePoolAcceleratorsRequest) (*openapi.ProjectAccelerators, error) {
+	ret := _mock.Called(ctx, clusterID, request)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetNodePoolAccelerators")
+	}
+
+	var r0 *openapi.ProjectAccelerators
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, openapi.NodePoolAcceleratorsRequest) (*openapi.ProjectAccelerators, error)); ok {
+		return returnFunc(ctx, clusterID, request)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, openapi.NodePoolAcceleratorsRequest) *openapi.ProjectAccelerators); ok {
+		r0 = returnFunc(ctx, clusterID, request)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.ProjectAccelerators)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, openapi.NodePoolAcceleratorsRequest) error); ok {
+		r1 = returnFunc(ctx, clusterID, request)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// IClusterClient_GetNodePoolAccelerators_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetNodePoolAccelerators'
+type IClusterClient_GetNodePoolAccelerators_Call struct {
+	*mock.Call
+}
+
+// GetNodePoolAccelerators is a helper method to define mock.On call
+//   - ctx context.Context
+//   - clusterID string
+//   - request openapi.NodePoolAcceleratorsRequest
+func (_e *IClusterClient_Expecter) GetNodePoolAccelerators(ctx any, clusterID any, request any) *IClusterClient_GetNodePoolAccelerators_Call {
+	return &IClusterClient_GetNodePoolAccelerators_Call{Call: _e.mock.On("GetNodePoolAccelerators", ctx, clusterID, request)}
+}
+
+func (_c *IClusterClient_GetNodePoolAccelerators_Call) Run(run func(ctx context.Context, clusterID string, request openapi.NodePoolAcceleratorsRequest)) *IClusterClient_GetNodePoolAccelerators_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 openapi.NodePoolAcceleratorsRequest
+		if args[2] != nil {
+			arg2 = args[2].(openapi.NodePoolAcceleratorsRequest)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *IClusterClient_GetNodePoolAccelerators_Call) Return(projectAccelerators *openapi.ProjectAccelerators, err error) *IClusterClient_GetNodePoolAccelerators_Call {
+	_c.Call.Return(projectAccelerators, err)
+	return _c
+}
+
+func (_c *IClusterClient_GetNodePoolAccelerators_Call) RunAndReturn(run func(ctx context.Context, clusterID string, request openapi.NodePoolAcceleratorsRequest) (*openapi.ProjectAccelerators, error)) *IClusterClient_GetNodePoolAccelerators_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetNodePoolsByCluster provides a mock function for the type IClusterClient
 func (_mock *IClusterClient) GetNodePoolsByCluster(ctx context.Context, clusterUUID string) (*openapi.GetNodepools200Response, error) {
 	ret := _mock.Called(ctx, clusterUUID)

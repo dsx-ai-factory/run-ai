@@ -239,7 +239,7 @@ func (itc *InterTrainToJobComposer) Compose(ctx context.Context, src *workloadsA
 		runner.Run(itc.fc.ComposeImagePullSecrets(itc.AssetsMapping, src.ImagePullSecrets, &ipsTarget, composer_v2.ArrayToImagePullSecretsSetter, &ipsCookie))
 
 		runner.Batch(
-			itc.processComputeFields(ctx, src.Compute.Get(), target),
+			itc.processComputeFields(ctx, src.Compute.Get(), composer.RequestedAccelerator(src.GpuType.Get(), src.Accelerator.Get()), target),
 			itc.processStorageFields(ctx, src.Storage.Get(), uidGid, src.CreateHomeDir.Get(), getLargeShmRequest(src.Compute.Get()), target),
 			itc.processAffinityFields(ctx, src, target),
 		)
@@ -264,7 +264,7 @@ func (itc *InterTrainToJobComposer) Compose(ctx context.Context, src *workloadsA
 	}
 }
 
-func (itc *InterTrainToJobComposer) processComputeFields(ctx context.Context, src *workloadsApi.WorkspaceSpecSpecAllOfCompute,
+func (itc *InterTrainToJobComposer) processComputeFields(ctx context.Context, src *workloadsApi.WorkspaceSpecSpecAllOfCompute, accelerator *workloadsApi.AcceleratorSelection,
 	target *BatchJobTarget,
 ) func() *workloadsApi.Error {
 	return func() *workloadsApi.Error {
@@ -295,10 +295,10 @@ func (itc *InterTrainToJobComposer) processComputeFields(ctx context.Context, sr
 			itc.fc.ComposeGpuRequestsAndLimits(ctx, src.GpuDevicesRequest.Get(), src.GpuRequestType.Get(),
 				src.GpuMemoryPortionRequest.Get(), src.GpuMemoryPortionLimit.Get(),
 				src.GpuMemoryRequest.Get(), src.GpuMemoryLimit.Get(), composer.WholeGpusToK8sResources,
-				&container.Resources, nil, &sizingInfo),
+				&container.Resources, accelerator, &sizingInfo),
 
 			itc.fc.ComposeExtendedResources(replicaBasedItemPrefix(itemized.ExtendedResourceNickPrefix, nil), src.ExtendedResources,
-				&container.Resources, composer.ExtendedResourcesToK8sResources, nil),
+				&container.Resources, composer.ExtendedResourcesToK8sResources, accelerator),
 		)
 
 		if sizingInfo.MemoryLimit != nil || sizingInfo.PortionLimit != nil {
@@ -453,13 +453,15 @@ func (itc *InterTrainToJobComposer) processAffinityFields(_ context.Context, src
 		}
 
 		nodePoolsInfo := &composer.NodePoolsInfo{
-			RequestedNodePools: src.NodePools,
-			ActualNodePools:    itc.ActualNodePools,
+			RequestedNodePools:   src.NodePools,
+			ActualNodePools:      itc.ActualNodePools,
+			PreserveRequirements: src.GpuType.Get() != nil || src.Accelerator.Get() != nil,
 		}
 
 		runner.Batch(
-			itc.fc.ComposeNodeAffinity(src.NodeAffinityRequired.Get(), &podSpec.Affinity.NodeAffinity, composer.NodeAffinityRequiredToK8s, nil),
+			itc.fc.ComposeNodeAffinity(src.NodeAffinityRequired.Get(), &podSpec.Affinity.NodeAffinity, composer.NodeAffinityRequiredToK8s, src.GpuType.Get() != nil || src.Accelerator.Get() != nil),
 			itc.fc.ComposePodAffinity(src.PodAffinity.Get(), &podSpec.Affinity.PodAffinity, composer.PodAffinityToK8s, itc.fc.WorkloadName),
+			itc.fc.ComposeGPUPlacement(src.GpuType.Get(), src.Accelerator.Get(), src.NodePools, podSpec, &target.Job.Spec.Template.ObjectMeta),
 			itc.fc.ComposeNodePools(nodePoolsInfo, &podSpec.Affinity.NodeAffinity, composer.NodePoolsToK8s, nil),
 		)
 

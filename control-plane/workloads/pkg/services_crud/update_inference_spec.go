@@ -231,6 +231,14 @@ func UpdateInferenceSpec(ctx context.Context, workloadId string, tenantSettingsC
 		policyErr = redactSensitiveValuesFromResponse(policyErr, sensitiveRequestValues)
 		return api.Response(int(policyErr.Code), policyErr), nil
 	}
+	var warnings []workloadsApi.SubmissionWarning
+	if request.Spec.GpuType != nil || request.Spec.Accelerator != nil {
+		var selectionErr *workloadsApi.SubmissionErrorV2
+		warnings, selectionErr = resolveWorkloadAccelerators(ctx, mergedWorkload.ProjectId, mergedWorkload.Spec, nil)
+		if selectionErr != nil {
+			return api.Response(int(selectionErr.Code), selectionErr), nil
+		}
+	}
 	// Mutates mergedWorkload.Spec, so it must run before the submitter recomposes.
 	if scErr := workloadutils.ValidateAndHandelServingConfigurationFields(ctx, mergedWorkload.Spec, mergedWorkload.ClusterId); scErr != nil {
 		apiErr := NewSubmissionErrorWithDetails(http.StatusBadRequest, scErr.Error(), nil)
@@ -276,6 +284,7 @@ func UpdateInferenceSpec(ctx context.Context, workloadId string, tenantSettingsC
 	// not turn a successful update into an error response - log it and preserve the success.
 	snapshot.Spec = mergedWorkload.Spec
 	response := workloadFromV2Snapshot(snapshot, workloadsApi.WorkloadDesiredPhase(updatedWorkload.DesiredPhase))
+	response.Warnings = warnings
 
 	if updatedBy := runaictx.GetString(ctx, runaictx.CfSubjectID); updatedBy != nil {
 		snapshot.UpdatedBy = *updatedBy

@@ -22,6 +22,7 @@ var _ MappedNullable = &DistributedInferenceLeaderWorkerTemplateSpec{}
 
 // DistributedInferenceLeaderWorkerTemplateSpec struct for DistributedInferenceLeaderWorkerTemplateSpec
 type DistributedInferenceLeaderWorkerTemplateSpec struct {
+	Accelerator NullableAcceleratorSelection `json:"accelerator,omitempty"`
 	// Set of annotations to populate into the container running the workload.
 	Annotations []Annotation `json:"annotations,omitempty"`
 	// Arguments to the command that the container running the workload executes.
@@ -33,6 +34,8 @@ type DistributedInferenceLeaderWorkerTemplateSpec struct {
 	CreateHomeDir NullableBool `json:"createHomeDir,omitempty"`
 	// Set of environment variables to populate into the container running the workload.
 	EnvironmentVariables []EnvironmentVariable `json:"environmentVariables,omitempty"`
+	// Exact device model label value required on the workload's nodes. Use any for no model restriction.
+	GpuType NullableString `json:"gpuType,omitempty"`
 	// Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
 	Image           NullableString          `json:"image,omitempty" validate:"regexp=.*"`
 	ImagePullPolicy NullableImagePullPolicy `json:"imagePullPolicy,omitempty"`
@@ -67,6 +70,49 @@ func NewDistributedInferenceLeaderWorkerTemplateSpec() *DistributedInferenceLead
 func NewDistributedInferenceLeaderWorkerTemplateSpecWithDefaults() *DistributedInferenceLeaderWorkerTemplateSpec {
 	this := DistributedInferenceLeaderWorkerTemplateSpec{}
 	return &this
+}
+
+// GetAccelerator returns the Accelerator field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *DistributedInferenceLeaderWorkerTemplateSpec) GetAccelerator() AcceleratorSelection {
+	if o == nil || IsNil(o.Accelerator.Get()) {
+		var ret AcceleratorSelection
+		return ret
+	}
+	return *o.Accelerator.Get()
+}
+
+// GetAcceleratorOk returns a tuple with the Accelerator field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DistributedInferenceLeaderWorkerTemplateSpec) GetAcceleratorOk() (*AcceleratorSelection, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Accelerator.Get(), o.Accelerator.IsSet()
+}
+
+// HasAccelerator returns a boolean if a field has been set.
+func (o *DistributedInferenceLeaderWorkerTemplateSpec) HasAccelerator() bool {
+	if o != nil && o.Accelerator.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetAccelerator gets a reference to the given NullableAcceleratorSelection and assigns it to the Accelerator field.
+func (o *DistributedInferenceLeaderWorkerTemplateSpec) SetAccelerator(v AcceleratorSelection) {
+	o.Accelerator.Set(&v)
+}
+
+// SetAcceleratorNil sets the value for Accelerator to be an explicit nil
+func (o *DistributedInferenceLeaderWorkerTemplateSpec) SetAcceleratorNil() {
+	o.Accelerator.Set(nil)
+}
+
+// UnsetAccelerator ensures that no value is present for Accelerator, not even an explicit nil
+func (o *DistributedInferenceLeaderWorkerTemplateSpec) UnsetAccelerator() {
+	o.Accelerator.Unset()
 }
 
 // GetAnnotations returns the Annotations field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -305,6 +351,49 @@ func (o *DistributedInferenceLeaderWorkerTemplateSpec) HasEnvironmentVariables()
 // SetEnvironmentVariables gets a reference to the given []EnvironmentVariable and assigns it to the EnvironmentVariables field.
 func (o *DistributedInferenceLeaderWorkerTemplateSpec) SetEnvironmentVariables(v []EnvironmentVariable) {
 	o.EnvironmentVariables = v
+}
+
+// GetGpuType returns the GpuType field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *DistributedInferenceLeaderWorkerTemplateSpec) GetGpuType() string {
+	if o == nil || IsNil(o.GpuType.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.GpuType.Get()
+}
+
+// GetGpuTypeOk returns a tuple with the GpuType field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DistributedInferenceLeaderWorkerTemplateSpec) GetGpuTypeOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuType.Get(), o.GpuType.IsSet()
+}
+
+// HasGpuType returns a boolean if a field has been set.
+func (o *DistributedInferenceLeaderWorkerTemplateSpec) HasGpuType() bool {
+	if o != nil && o.GpuType.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuType gets a reference to the given NullableString and assigns it to the GpuType field.
+func (o *DistributedInferenceLeaderWorkerTemplateSpec) SetGpuType(v string) {
+	o.GpuType.Set(&v)
+}
+
+// SetGpuTypeNil sets the value for GpuType to be an explicit nil
+func (o *DistributedInferenceLeaderWorkerTemplateSpec) SetGpuTypeNil() {
+	o.GpuType.Set(nil)
+}
+
+// UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
+func (o *DistributedInferenceLeaderWorkerTemplateSpec) UnsetGpuType() {
+	o.GpuType.Unset()
 }
 
 // GetImage returns the Image field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -773,6 +862,9 @@ func (o DistributedInferenceLeaderWorkerTemplateSpec) MarshalJSON() ([]byte, err
 
 func (o DistributedInferenceLeaderWorkerTemplateSpec) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if o.Accelerator.IsSet() {
+		toSerialize["accelerator"] = o.Accelerator.Get()
+	}
 	if o.Annotations != nil {
 		toSerialize["annotations"] = o.Annotations
 	}
@@ -790,6 +882,9 @@ func (o DistributedInferenceLeaderWorkerTemplateSpec) ToMap() (map[string]interf
 	}
 	if o.EnvironmentVariables != nil {
 		toSerialize["environmentVariables"] = o.EnvironmentVariables
+	}
+	if o.GpuType.IsSet() {
+		toSerialize["gpuType"] = o.GpuType.Get()
 	}
 	if o.Image.IsSet() {
 		toSerialize["image"] = o.Image.Get()

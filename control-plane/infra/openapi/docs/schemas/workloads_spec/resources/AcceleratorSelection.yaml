@@ -1,0 +1,14 @@
+description: Accelerator resource and optional device model label key for workload placement.
+type: object
+nullable: true
+properties:
+  resourceName:
+    description: Kubernetes extended resource name. Defaults to nvidia.com/gpu.
+    type: string
+    nullable: true
+    example: nvidia.com/gpu
+  deviceLabelKey:
+    description: Node label key for gpuType. Defaults to nvidia.com/gpu.product for NVIDIA.
+    type: string
+    nullable: true
+    example: nvidia.com/gpu.product

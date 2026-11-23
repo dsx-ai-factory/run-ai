@@ -165,6 +165,60 @@ var _ = Describe("Nodepool gpu types", Ordered, func() {
 			&api.GpuInfo{GpuType: v100, GpuCount: 3, GpuMemoryBytes: v100Memory})
 	})
 
+	It("discovers exact resource/model pairs only on associated nodes in the requested tenant and pools", func() {
+		clusterID := cluster.ID.String()
+		allowed := createNodepool(clusterID, "accelerator-mixed")
+		hidden := createNodepool(clusterID, "accelerator-unassigned")
+		writeNode := func(name, pool, res, key, value string) {
+			result, err := nodeService.UpsertNode(testCtx, clusterID, name, api.NodeInfo{
+				Status: "Ready", CreatedAt: time.Now(), NodePool: pool, AcceleratorResources: []string{res}, Labels: map[string]string{key: value},
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.Code).To(Equal(http.StatusNoContent))
+		}
+		writeNode("accelerator-nv", "accelerator-mixed", "nvidia.com/gpu", "nvidia.com/gpu.product", h100)
+		writeNode("accelerator-amd", "accelerator-mixed", "amd.com/gpu", "nvidia.com/gpu.product", "must-not-match")
+		writeNode("accelerator-amd-hidden", "accelerator-unassigned", "amd.com/gpu", "amd.com/gpu.product-name", "MI300X")
+		writeNode("accelerator-intel", "accelerator-mixed", "gpu.intel.com/i915", "hardware.example.com/model", "Flex170")
+		writeNode("rdma", "accelerator-mixed", "example.com/rdma", "network.example.com/card", "cx7")
+		result, err := nodeService.GetNodePoolAccelerators(testCtx, clusterID, api.NodePoolAcceleratorsRequest{NodePoolIds: []string{allowed}})
+		Expect(err).NotTo(HaveOccurred())
+		Expect(result.Code).To(Equal(http.StatusOK))
+		Expect(result.Body.(api.ProjectAccelerators).Items).To(Equal([]api.AcceleratorOption{
+			{ResourceName: "amd.com/gpu", Devices: []api.AcceleratorDevice{}},
+			{ResourceName: "nvidia.com/gpu", Devices: []api.AcceleratorDevice{{Key: "nvidia.com/gpu.product", Value: h100}}},
+		}))
+		writeNode("accelerator-explicit", "accelerator-mixed", "amd.com/gpu", "ops.example.com/gpu-model", "MI300X")
+		for _, test := range []struct {
+			res, key, value string
+			matches         bool
+		}{
+			{"amd.com/gpu", "ops.example.com/gpu-model", "MI300X", true},
+			{"gpu.intel.com/i915", "hardware.example.com/model", "Flex170", true},
+			{"gpu.intel.com/i915", "nvidia.com/gpu.product", h100, false},
+			{"nvidia.com/gpu", "ops.example.com/gpu-model", "MI300X", false},
+			{"amd.com/gpu", "ops.example.com/gpu-model", "another-model", false},
+			{"amd.com/gpu", "amd.com/gpu.product-name", "MI300X", false},
+		} {
+			response, err := nodeService.GetNodePoolAccelerators(testCtx, clusterID, api.NodePoolAcceleratorsRequest{NodePoolIds: []string{allowed}, Selection: &api.AcceleratorSelection{ResourceName: test.res, DeviceLabelKey: test.key, GpuType: test.value}})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(response.Code).To(Equal(http.StatusOK))
+			Expect(len(response.Body.(api.ProjectAccelerators).Items) > 0).To(Equal(test.matches))
+		}
+		wrongTenant := context.WithValue(testCtx, runaictx.CfTenantId, "715")
+		for _, query := range []struct {
+			ctx     context.Context
+			cluster string
+			ids     []string
+		}{
+			{wrongTenant, clusterID, []string{allowed}}, {testCtx, otherCluster.ID.String(), []string{hidden}}, {testCtx, clusterID, nil},
+		} {
+			response, err := nodeService.GetNodePoolAccelerators(query.ctx, query.cluster, api.NodePoolAcceleratorsRequest{NodePoolIds: query.ids})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(response.Code).To(Equal(http.StatusOK))
+			Expect(response.Body.(api.ProjectAccelerators).Items).To(BeEmpty())
+		}
+	})
 	AfterAll(func() {
 		for _, id := range createdIds {
 			Expect(dao.DeleteNodepool(testCtx, tenantId, "", id)).To(BeNil())

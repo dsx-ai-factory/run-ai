@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 	"sync"
 	"time"
@@ -32,6 +33,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/services"
 	workloads_client "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
 	telemetry "github.com/dsx-ai-factory/run-ai/runai-application-packages/telemetry"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
@@ -66,14 +68,14 @@ const (
 type ProjectApiService struct {
 	authorizationClient    auth_client.IAuthorizationClient
 	projectDeletionService services.ProjectDeletionService
-	clusterClient          cluster_service_client.IClusterExternalClient
+	clusterClient          cluster_service_client.IClusterClient
 	workloadsClient        workloads_client.IWorkloadsClient
 	modelFieldToDbFieldMap map[string][]string
 }
 
 func NewProjectApiService(
 	projectDeletionService services.ProjectDeletionService,
-	clusterClient cluster_service_client.IClusterExternalClient,
+	clusterClient cluster_service_client.IClusterClient,
 	workloadsClient workloads_client.IWorkloadsClient,
 ) api.ProjectsAPIServicer {
 	return &ProjectApiService{
@@ -1359,4 +1361,64 @@ func (s *ProjectApiService) enrichProjectsRankingWithWorkloadCounts(
 	)
 
 	return projects, err
+}
+
+func (s *ProjectApiService) GetProjectAccelerators(ctx context.Context, projectId, resourceName, deviceLabelKey, gpuType string) (api.ImplResponse, error) {
+	id, err := strconv.ParseInt(projectId, 10, 64)
+	if err != nil || id <= 0 {
+		return api.Response(http.StatusBadRequest, api.NewError(http.StatusBadRequest, "Invalid project ID", err)), nil
+	}
+	tenantID, err := services.ParseTenantId(ctx)
+	if err != nil {
+		return services.HandleError(err, http.StatusBadRequest, "Failed to parse tenant id"), nil
+	}
+	// The gateway authorizes read on this specific project, just as it does for GetProject.
+	project, err := dao.GetProjectById(ctx, id, *tenantID, models.SlimVerbosity)
+	if err != nil {
+		return services.HandleDbError(ctx, err, "Failed to get project"), nil
+	}
+	request := cluster_openapi.NodePoolAcceleratorsRequest{}
+	if resourceName != "" || deviceLabelKey != "" || gpuType != "" {
+		if resourceName == "" || deviceLabelKey == "" || gpuType == "" {
+			return api.Response(http.StatusBadRequest, api.NewError(http.StatusBadRequest, "An exact lookup requires resourceName, deviceLabelKey, and gpuType", nil)), nil
+		}
+		request.Selection.Set(&cluster_openapi.AcceleratorSelection{ResourceName: resourceName, DeviceLabelKey: deviceLabelKey, GpuType: gpuType})
+	}
+	poolIDs := gpuEnabledPoolIDs(project.OrgUnitData.Resources)
+	if project.ParentID != nil && len(poolIDs) > 0 {
+		// KAI enforces hard limits on both the project's queue and its department's queue for the same pool.
+		department, err := dao.GetDepartmentByIdAndCluster(ctx, *project.ParentID, *tenantID, project.ClusterId, models.SlimVerbosity)
+		if err != nil {
+			return services.HandleDbError(ctx, err, "Failed to get project department"), nil
+		}
+		parentPools := datastructs.NewSet(gpuEnabledPoolIDs(department.OrgUnitData.Resources)...)
+		poolIDs = slices.DeleteFunc(poolIDs, func(id string) bool { return !parentPools.Has(id) })
+	}
+	result := api.ProjectAccelerators{Items: []api.AcceleratorOption{}}
+	if len(poolIDs) == 0 {
+		return api.Response(http.StatusOK, result), nil
+	}
+	request.NodePoolIds = poolIDs
+	inventory, err := s.clusterClient.GetNodePoolAccelerators(ctx, project.ClusterId.String(), request)
+	if err != nil {
+		return services.HandleError(err, http.StatusServiceUnavailable, "Failed to retrieve accelerator inventory"), nil
+	}
+	for _, item := range inventory.Items {
+		option := api.AcceleratorOption{ResourceName: item.ResourceName, Devices: make([]api.AcceleratorDevice, 0, len(item.Devices))}
+		for _, device := range item.Devices {
+			option.Devices = append(option.Devices, api.AcceleratorDevice{Key: device.Key, Value: device.Value})
+		}
+		result.Items = append(result.Items, option)
+	}
+	return api.Response(http.StatusOK, result), nil
+}
+
+func gpuEnabledPoolIDs(resources []models.Resources) []string {
+	poolIDs := make([]string, 0, len(resources))
+	for _, resource := range resources {
+		if resource.GpuLimit == nil || *resource.GpuLimit != 0 {
+			poolIDs = append(poolIDs, resource.NodePoolId)
+		}
+	}
+	return poolIDs
 }

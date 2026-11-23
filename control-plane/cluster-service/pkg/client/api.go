@@ -46,6 +46,7 @@ type IClusterExternalClient interface {
 }
 
 type IClusterClient interface {
+	GetNodePoolAccelerators(ctx context.Context, clusterID string, request openapi.NodePoolAcceleratorsRequest) (*openapi.ProjectAccelerators, error)
 	IClusterExternalClient
 	GetNodePoolsMinimalForTenants(ctx context.Context, tenantIds []string) (*openapi.GetNodepoolsMinimalInternal200Response, error)
 	GetNodePoolsInternalByCluster(ctx context.Context, clusterId string) (*openapi.GetNodepoolsInternal200Response, error)

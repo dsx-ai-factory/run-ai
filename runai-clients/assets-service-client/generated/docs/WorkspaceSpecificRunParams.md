@@ -6,6 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Connections** | Pointer to [**[]SpecificRunConnectionInfo**](SpecificRunConnectionInfo.md) |  | [optional] 
 **AllowOverQuota** | Pointer to **NullableBool** | Whether to allow the workload to exceed the quota of the project. | [optional] 
+**Accelerator** | Pointer to [**NullableAcceleratorSelection**](AcceleratorSelection.md) |  | [optional] 
 **Annotations** | Pointer to [**[]Annotation**](Annotation.md) | Set of annotations to populate into the container running the workload. | [optional] 
 **Args** | Pointer to **NullableString** | Arguments to the command that the container running the workload executes. | [optional] 
 **AutoDeletionTimeAfterCompletionSeconds** | Pointer to **NullableInt64** | Specifies the duration after which a finished workload (completed or failed) will be automatically deleted. The default is 30 days. Log retention is managed separately. | [optional] 
@@ -13,6 +14,7 @@ Name | Type | Description | Notes
 **Category** | Pointer to **NullableString** | Specify the workload category assigned to the workload. Categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform. | [optional] 
 **Command** | Pointer to **NullableString** | A command to the server as the entry point of the container running the workload. | [optional] 
 **EnvironmentVariables** | Pointer to [**[]EnvironmentVariableOfAsset**](EnvironmentVariableOfAsset.md) | Set of environment variables to populate into the container running the workspace. | [optional] 
+**GpuType** | Pointer to **NullableString** | Exact device model label value required on the workload&#39;s nodes. Use any for no model restriction. | [optional] 
 **ImagePullSecrets** | Pointer to [**[]ImagePullSecret**](ImagePullSecret.md) | A list of references to Kubernetes secrets in the same namespace used for pulling container images. | [optional] 
 **Labels** | Pointer to [**[]Label**](Label.md) | Set of labels to populate into the container running the workload. | [optional] 
 **NodeAffinityRequired** | Pointer to [**NullableNodeAffinityRequired**](NodeAffinityRequired.md) |  | [optional] 
@@ -118,6 +120,41 @@ HasAllowOverQuota returns a boolean if a field has been set.
 `func (o *WorkspaceSpecificRunParams) UnsetAllowOverQuota()`
 
 UnsetAllowOverQuota ensures that no value is present for AllowOverQuota, not even an explicit nil
+### GetAccelerator
+
+`func (o *WorkspaceSpecificRunParams) GetAccelerator() AcceleratorSelection`
+
+GetAccelerator returns the Accelerator field if non-nil, zero value otherwise.
+
+### GetAcceleratorOk
+
+`func (o *WorkspaceSpecificRunParams) GetAcceleratorOk() (*AcceleratorSelection, bool)`
+
+GetAcceleratorOk returns a tuple with the Accelerator field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAccelerator
+
+`func (o *WorkspaceSpecificRunParams) SetAccelerator(v AcceleratorSelection)`
+
+SetAccelerator sets Accelerator field to given value.
+
+### HasAccelerator
+
+`func (o *WorkspaceSpecificRunParams) HasAccelerator() bool`
+
+HasAccelerator returns a boolean if a field has been set.
+
+### SetAcceleratorNil
+
+`func (o *WorkspaceSpecificRunParams) SetAcceleratorNil(b bool)`
+
+ SetAcceleratorNil sets the value for Accelerator to be an explicit nil
+
+### UnsetAccelerator
+`func (o *WorkspaceSpecificRunParams) UnsetAccelerator()`
+
+UnsetAccelerator ensures that no value is present for Accelerator, not even an explicit nil
 ### GetAnnotations
 
 `func (o *WorkspaceSpecificRunParams) GetAnnotations() []Annotation`
@@ -363,6 +400,41 @@ HasEnvironmentVariables returns a boolean if a field has been set.
 `func (o *WorkspaceSpecificRunParams) UnsetEnvironmentVariables()`
 
 UnsetEnvironmentVariables ensures that no value is present for EnvironmentVariables, not even an explicit nil
+### GetGpuType
+
+`func (o *WorkspaceSpecificRunParams) GetGpuType() string`
+
+GetGpuType returns the GpuType field if non-nil, zero value otherwise.
+
+### GetGpuTypeOk
+
+`func (o *WorkspaceSpecificRunParams) GetGpuTypeOk() (*string, bool)`
+
+GetGpuTypeOk returns a tuple with the GpuType field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuType
+
+`func (o *WorkspaceSpecificRunParams) SetGpuType(v string)`
+
+SetGpuType sets GpuType field to given value.
+
+### HasGpuType
+
+`func (o *WorkspaceSpecificRunParams) HasGpuType() bool`
+
+HasGpuType returns a boolean if a field has been set.
+
+### SetGpuTypeNil
+
+`func (o *WorkspaceSpecificRunParams) SetGpuTypeNil(b bool)`
+
+ SetGpuTypeNil sets the value for GpuType to be an explicit nil
+
+### UnsetGpuType
+`func (o *WorkspaceSpecificRunParams) UnsetGpuType()`
+
+UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
 ### GetImagePullSecrets
 
 `func (o *WorkspaceSpecificRunParams) GetImagePullSecrets() []ImagePullSecret`

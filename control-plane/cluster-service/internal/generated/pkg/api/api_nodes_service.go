@@ -216,6 +216,23 @@ func (s *NodesAPIService) SyncNumaNodes(ctx context.Context, clusterUuid string,
 	return Response(http.StatusNotImplemented, nil), errors.New("SyncNumaNodes method not implemented")
 }
 
+// GetNodePoolAccelerators - Get accelerator inventory for the supplied node pools
+func (s *NodesAPIService) GetNodePoolAccelerators(ctx context.Context, clusterUuid string, nodePoolAcceleratorsRequest NodePoolAcceleratorsRequest) (ImplResponse, error) {
+	// TODO - update GetNodePoolAccelerators with the required logic for this service method.
+	// Add api_nodes_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	// TODO: Uncomment the next line to return response Response(200, ProjectAccelerators{}) or use other options such as http.Ok ...
+	// return Response(200, ProjectAccelerators{}), nil
+
+	// TODO: Uncomment the next line to return response Response(400, Error{}) or use other options such as http.Ok ...
+	// return Response(400, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(500, Error{}) or use other options such as http.Ok ...
+	// return Response(500, Error{}), nil
+
+	return Response(http.StatusNotImplemented, nil), errors.New("GetNodePoolAccelerators method not implemented")
+}
+
 // GetNodeInternal - Get node internal data by cluster UUID and name
 func (s *NodesAPIService) GetNodeInternal(ctx context.Context, clusterUuid string, nodeName string) (ImplResponse, error) {
 	// TODO - update GetNodeInternal with the required logic for this service method.

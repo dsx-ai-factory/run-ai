@@ -953,6 +953,133 @@ func (_c *ProjectsAPI_GetProject_Call) RunAndReturn(run func(ctx context.Context
 	return _c
 }
 
+// GetProjectAccelerators provides a mock function for the type ProjectsAPI
+func (_mock *ProjectsAPI) GetProjectAccelerators(ctx context.Context, projectId string) openapi.ApiGetProjectAcceleratorsRequest {
+	ret := _mock.Called(ctx, projectId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetProjectAccelerators")
+	}
+
+	var r0 openapi.ApiGetProjectAcceleratorsRequest
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) openapi.ApiGetProjectAcceleratorsRequest); ok {
+		r0 = returnFunc(ctx, projectId)
+	} else {
+		r0 = ret.Get(0).(openapi.ApiGetProjectAcceleratorsRequest)
+	}
+	return r0
+}
+
+// ProjectsAPI_GetProjectAccelerators_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetProjectAccelerators'
+type ProjectsAPI_GetProjectAccelerators_Call struct {
+	*mock.Call
+}
+
+// GetProjectAccelerators is a helper method to define mock.On call
+//   - ctx context.Context
+//   - projectId string
+func (_e *ProjectsAPI_Expecter) GetProjectAccelerators(ctx any, projectId any) *ProjectsAPI_GetProjectAccelerators_Call {
+	return &ProjectsAPI_GetProjectAccelerators_Call{Call: _e.mock.On("GetProjectAccelerators", ctx, projectId)}
+}
+
+func (_c *ProjectsAPI_GetProjectAccelerators_Call) Run(run func(ctx context.Context, projectId string)) *ProjectsAPI_GetProjectAccelerators_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *ProjectsAPI_GetProjectAccelerators_Call) Return(apiGetProjectAcceleratorsRequest openapi.ApiGetProjectAcceleratorsRequest) *ProjectsAPI_GetProjectAccelerators_Call {
+	_c.Call.Return(apiGetProjectAcceleratorsRequest)
+	return _c
+}
+
+func (_c *ProjectsAPI_GetProjectAccelerators_Call) RunAndReturn(run func(ctx context.Context, projectId string) openapi.ApiGetProjectAcceleratorsRequest) *ProjectsAPI_GetProjectAccelerators_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetProjectAcceleratorsExecute provides a mock function for the type ProjectsAPI
+func (_mock *ProjectsAPI) GetProjectAcceleratorsExecute(r openapi.ApiGetProjectAcceleratorsRequest) (*openapi.ProjectAccelerators, *http.Response, error) {
+	ret := _mock.Called(r)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetProjectAcceleratorsExecute")
+	}
+
+	var r0 *openapi.ProjectAccelerators
+	var r1 *http.Response
+	var r2 error
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiGetProjectAcceleratorsRequest) (*openapi.ProjectAccelerators, *http.Response, error)); ok {
+		return returnFunc(r)
+	}
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiGetProjectAcceleratorsRequest) *openapi.ProjectAccelerators); ok {
+		r0 = returnFunc(r)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.ProjectAccelerators)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(openapi.ApiGetProjectAcceleratorsRequest) *http.Response); ok {
+		r1 = returnFunc(r)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*http.Response)
+		}
+	}
+	if returnFunc, ok := ret.Get(2).(func(openapi.ApiGetProjectAcceleratorsRequest) error); ok {
+		r2 = returnFunc(r)
+	} else {
+		r2 = ret.Error(2)
+	}
+	return r0, r1, r2
+}
+
+// ProjectsAPI_GetProjectAcceleratorsExecute_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetProjectAcceleratorsExecute'
+type ProjectsAPI_GetProjectAcceleratorsExecute_Call struct {
+	*mock.Call
+}
+
+// GetProjectAcceleratorsExecute is a helper method to define mock.On call
+//   - r openapi.ApiGetProjectAcceleratorsRequest
+func (_e *ProjectsAPI_Expecter) GetProjectAcceleratorsExecute(r any) *ProjectsAPI_GetProjectAcceleratorsExecute_Call {
+	return &ProjectsAPI_GetProjectAcceleratorsExecute_Call{Call: _e.mock.On("GetProjectAcceleratorsExecute", r)}
+}
+
+func (_c *ProjectsAPI_GetProjectAcceleratorsExecute_Call) Run(run func(r openapi.ApiGetProjectAcceleratorsRequest)) *ProjectsAPI_GetProjectAcceleratorsExecute_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 openapi.ApiGetProjectAcceleratorsRequest
+		if args[0] != nil {
+			arg0 = args[0].(openapi.ApiGetProjectAcceleratorsRequest)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *ProjectsAPI_GetProjectAcceleratorsExecute_Call) Return(projectAccelerators *openapi.ProjectAccelerators, response *http.Response, err error) *ProjectsAPI_GetProjectAcceleratorsExecute_Call {
+	_c.Call.Return(projectAccelerators, response, err)
+	return _c
+}
+
+func (_c *ProjectsAPI_GetProjectAcceleratorsExecute_Call) RunAndReturn(run func(r openapi.ApiGetProjectAcceleratorsRequest) (*openapi.ProjectAccelerators, *http.Response, error)) *ProjectsAPI_GetProjectAcceleratorsExecute_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetProjectAncestors provides a mock function for the type ProjectsAPI
 func (_mock *ProjectsAPI) GetProjectAncestors(ctx context.Context, projectId string) openapi.ApiGetProjectAncestorsRequest {
 	ret := _mock.Called(ctx, projectId)

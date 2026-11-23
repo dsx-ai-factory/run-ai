@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**AcceleratorResources** | Pointer to **[]string** | GPU resource names advertised by the node&#39;s allocatable resources. | [optional] 
 **Labels** | Pointer to **map[string]string** | Labels assigned to the node. | [optional] 
 **Status** | **string** | The calculated status of the node. | 
 **Conditions** | Pointer to [**[]NodeStatusConditionDetails**](NodeStatusConditionDetails.md) |  | [optional] 
@@ -34,6 +35,31 @@ will change when the set of required properties is changed
 NewNodeInfoWithDefaults instantiates a new NodeInfo object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetAcceleratorResources
+
+`func (o *NodeInfo) GetAcceleratorResources() []string`
+
+GetAcceleratorResources returns the AcceleratorResources field if non-nil, zero value otherwise.
+
+### GetAcceleratorResourcesOk
+
+`func (o *NodeInfo) GetAcceleratorResourcesOk() (*[]string, bool)`
+
+GetAcceleratorResourcesOk returns a tuple with the AcceleratorResources field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAcceleratorResources
+
+`func (o *NodeInfo) SetAcceleratorResources(v []string)`
+
+SetAcceleratorResources sets AcceleratorResources field to given value.
+
+### HasAcceleratorResources
+
+`func (o *NodeInfo) HasAcceleratorResources() bool`
+
+HasAcceleratorResources returns a boolean if a field has been set.
 
 ### GetLabels
 

@@ -13,6 +13,14 @@ const (
 	ScalingPodAppLabelValue  = "scaling-pod"
 	AnnotationNodepools      = "runai-nodepools"
 
+	// AnnotationGPUTypeLabel identifies the workload GPU model predicate as labelKey=labelValue.
+	AnnotationGPUTypeLabel = "run.ai/gpu-type-label"
+	// AnnotationGPUPlacementResource carries the resource to enforce on the final Pod.
+	AnnotationGPUPlacementResource = "run.ai/gpu-placement-resource"
+	// GPUPlacementAdmissionNode is used in a contradictory metadata.name affinity
+	// pair. It cannot match any node, including a real node with this name.
+	GPUPlacementAdmissionNode = "runai-awaiting-gpu-placement-admission"
+
 	ControlPlaneWorkloadIdAnnotationForWorkload = "workloadId"
 	ControlPlaneWorkloadNameLabelForWorkload    = "workloadName"
 	ControlPlaneWorkloadKindLabelForWorkload    = "workloadKind"

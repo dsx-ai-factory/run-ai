@@ -4,6 +4,8 @@
 ###########################################################
 nullable: true
 properties:
+  accelerator:
+    $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/ArbitraryRules.yaml
   annotations:
     $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/InstancesRules.yaml
   args:
@@ -24,6 +26,8 @@ properties:
     $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/InstancesRules.yaml
   exposedUrls:
     $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/connectivity/ExposedUrlsRules.yaml
+  gpuType:
+    $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
   image:
     $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
   imagePullPolicy:

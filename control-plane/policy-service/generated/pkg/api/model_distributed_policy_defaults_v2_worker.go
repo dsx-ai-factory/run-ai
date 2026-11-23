@@ -27,6 +27,11 @@ var dummyDistributedPolicyDefaultsV2Worker = runaihttp.AssertPattern
 type DistributedPolicyDefaultsV2Worker struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Accelerator *AcceleratorSelection `json:"accelerator,omitempty"`
+	Accelerator *AcceleratorSelection `json:"accelerator,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Annotations *AnnotationsDefaults `json:"annotations,omitempty"`
 	Annotations *AnnotationsDefaults `json:"annotations,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
@@ -80,6 +85,12 @@ type DistributedPolicyDefaultsV2Worker struct {
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//ExposedUrls *ExposedUrlsDefaults `json:"exposedUrls,omitempty"`
 	ExposedUrls *ExposedUrlsDefaults `json:"exposedUrls,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Exact device model label value required on the workload's nodes. Use any for no model restriction.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuType *string `json:"gpuType,omitempty"`
+	GpuType *string `json:"gpuType,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	// Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
@@ -250,6 +261,11 @@ type DistributedPolicyDefaultsV2Worker struct {
 
 // AssertDistributedPolicyDefaultsV2WorkerRequired checks if the required fields are not zero-ed
 func AssertDistributedPolicyDefaultsV2WorkerRequired(obj DistributedPolicyDefaultsV2Worker) error {
+	if obj.Accelerator != nil {
+		if err := AssertAcceleratorSelectionRequired(*obj.Accelerator); err != nil {
+			return err
+		}
+	}
 	if obj.Annotations != nil {
 		if err := AssertAnnotationsDefaultsRequired(*obj.Annotations); err != nil {
 			return err
@@ -325,6 +341,16 @@ func AssertDistributedPolicyDefaultsV2WorkerRequired(obj DistributedPolicyDefaul
 
 // AssertDistributedPolicyDefaultsV2WorkerConstraints checks if the values respects the defined constraints
 func AssertDistributedPolicyDefaultsV2WorkerConstraints(obj DistributedPolicyDefaultsV2Worker) error {
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.Accelerator != nil {
+		if err := AssertAcceleratorSelectionConstraints(*obj.Accelerator); err != nil {
+			return err
+		}
+	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
@@ -416,6 +442,17 @@ func AssertDistributedPolicyDefaultsV2WorkerConstraints(obj DistributedPolicyDef
 			return err
 		}
 	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if minLengthErr := runaihttp.AssertMinLength(obj.GpuType, "GpuType", 1); minLengthErr != nil {
+		return &ParsingError{Param: "GpuType", Err: minLengthErr}
+	}
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.GpuType, "GpuType", 63); maxLengthErr != nil {
+		return &ParsingError{Param: "GpuType", Err: maxLengthErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	if patternErr := runaihttp.AssertPattern(obj.Image, "Image", "/.*/"); patternErr != nil {
 		return &ParsingError{Param: "Image", Err: patternErr}

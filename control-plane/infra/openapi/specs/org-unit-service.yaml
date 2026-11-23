@@ -1483,6 +1483,54 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/org-unit/projects/{projectId}/accelerators:
+    get:
+      summary: List accelerator resources and models accessible to a project
+      operationId: get_project_accelerators
+      x-service: org-unit-service
+      description: List observed accelerator resources and model selectors across the project's assigned node pools. Includes busy devices.
+      x-test-coverage:
+        - control-plane/org-unit-service/pkg/test/project_api_test.go
+      x-authorize:
+        resource-type: project
+        action: read
+        resource-id: projectId
+      tags:
+        - Projects
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - in: query
+          name: resourceName
+          description: With deviceLabelKey and gpuType, check only this exact accelerator selection.
+          schema:
+            type: string
+        - in: query
+          name: deviceLabelKey
+          description: Exact node label key to check, including administrator-defined keys.
+          schema:
+            type: string
+        - in: query
+          name: gpuType
+          description: Exact device label value to check. Supply all three parameters for an exact lookup.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Project accelerator inventory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectAccelerators'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/org-unit/projects/{projectId}/resources:
     put:
       summary: Update project resources
@@ -4919,6 +4967,41 @@ components:
               items:
                 $ref: '#/components/schemas/ResourcesNullable'
               description: Resources assigned to this Organization per Node Pool
+    AcceleratorDevice:
+      type: object
+      required:
+        - key
+        - value
+      properties:
+        key:
+          type: string
+          description: Exact Kubernetes node label key for this device model.
+        value:
+          type: string
+          description: Exact Kubernetes node label value for this device model.
+    AcceleratorOption:
+      type: object
+      required:
+        - resourceName
+        - devices
+      properties:
+        resourceName:
+          type: string
+          description: Allocatable Kubernetes extended resource name.
+        devices:
+          type: array
+          description: Model selectors observed alongside this resource on the same node.
+          items:
+            $ref: '#/components/schemas/AcceleratorDevice'
+    ProjectAccelerators:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AcceleratorOption'
     ProjectStatusUpdateRequest:
       type: object
       description: status update fields

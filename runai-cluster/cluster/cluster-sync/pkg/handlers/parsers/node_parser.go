@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"maps"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -198,12 +199,13 @@ func (nodeParser *NodeParser) ParseNodeToServerScheme(node *corev1.Node) swagger
 	domainUid, cliqueId := tryGetNVLinkValues(node)
 	// Parse Node label <gpuNetworkAccelerationLabelKey> value and set relevant fields
 	nodeInfo := swagger.NodeInfo{
-		Labels:     ptr.To(labels),
-		Status:     nodePhase,
-		Conditions: conditions,
-		Taints:     parseTaints(node.Spec.Taints),
-		NodePool:   getObjNodePool(node.Labels),
-		CreatedAt:  node.CreationTimestamp.Time,
+		AcceleratorResources: acceleratorResources(node),
+		Labels:               ptr.To(labels),
+		Status:               nodePhase,
+		Conditions:           conditions,
+		Taints:               parseTaints(node.Spec.Taints),
+		NodePool:             getObjNodePool(node.Labels),
+		CreatedAt:            node.CreationTimestamp.Time,
 
 		NvLinkCliqueId:  *swagger.NewNullableString(cliqueId),
 		NvLinkDomainUid: *swagger.NewNullableString(domainUid),
@@ -223,6 +225,22 @@ func (nodeParser *NodeParser) ParseNodeToServerScheme(node *corev1.Node) swagger
 	}
 
 	return nodeInfo
+}
+
+// Kubernetes has no GPU class discriminator for extended resources. Send all
+// positive extended resource names so an explicit vendor resource can be matched
+// even when its product label uses a custom key.
+func acceleratorResources(node *corev1.Node) []string {
+	var names []string
+	for name, quantity := range node.Status.Allocatable {
+		resource := string(name)
+		domain, _, extended := strings.Cut(resource, "/")
+		if quantity.Sign() > 0 && extended && domain != "kubernetes.io" && !strings.HasSuffix(domain, ".kubernetes.io") {
+			names = append(names, resource)
+		}
+	}
+	slices.Sort(names)
+	return names
 }
 
 // ParseNodesToServerScheme returns a map of all node names; and the list of swagger NodeForSync.

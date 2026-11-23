@@ -26,6 +26,8 @@ pkg/api/error.go
 pkg/api/helpers.go
 pkg/api/impl.go
 pkg/api/logger.go
+pkg/api/model_accelerator_device.go
+pkg/api/model_accelerator_option.go
 pkg/api/model_aggregated_resources.go
 pkg/api/model_aggregated_resources_memory.go
 pkg/api/model_aggregated_resources_node_pool.go
@@ -143,6 +145,7 @@ pkg/api/model_orgs_node_pool_summary_200_response.go
 pkg/api/model_overtime_data.go
 pkg/api/model_overtime_range_data.go
 pkg/api/model_project.go
+pkg/api/model_project_accelerators.go
 pkg/api/model_project_aggregated_resources_v1.go
 pkg/api/model_project_aggregated_resources_v1_cpu.go
 pkg/api/model_project_aggregated_resources_v1_gpu.go

@@ -9,6 +9,8 @@ allOf:
 - $ref: ./distributed_inferences/DistributedInferenceCommonDefaults.yaml
 - nullable: true
   properties:
+    accelerator:
+      $ref: ./resources/AcceleratorSelection.yaml
     annotations:
       $ref: ./advanced/AnnotationsDefaults.yaml
     args:
@@ -35,6 +37,8 @@ allOf:
       $ref: ./container/EnvironmentVariablesDefaults.yaml
     exposedUrls:
       $ref: ./connectivity/ExposedUrlsDefaults.yaml
+    gpuType:
+      $ref: ./resources/GpuType.yaml
     image:
       $ref: ./container/Image.yaml
     imagePullPolicy:

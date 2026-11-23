@@ -18,7 +18,7 @@ import (
 
 func (dinfComposer *DistributedInferenceToLWSComposer) processComputeFields(
 	ctx context.Context,
-	src *workloadsApi.WorkspaceSpecSpecAllOfCompute,
+	src *workloadsApi.WorkspaceSpecSpecAllOfCompute, accelerator *workloadsApi.AcceleratorSelection,
 	target *corev1.PodTemplateSpec,
 ) func() *workloadsApi.Error {
 	return func() *workloadsApi.Error {
@@ -42,8 +42,8 @@ func (dinfComposer *DistributedInferenceToLWSComposer) processComputeFields(
 			dinfComposer.fc.ComposeGpuRequestsAndLimits(ctx, src.GpuDevicesRequest.Get(), src.GpuRequestType.Get(),
 				src.GpuMemoryPortionRequest.Get(), src.GpuMemoryPortionLimit.Get(),
 				src.GpuMemoryRequest.Get(), src.GpuMemoryLimit.Get(), composer.WholeGpusToK8sResources,
-				&container.Resources, nil, &sizingInfo),
-			dinfComposer.fc.ComposeExtendedResources(itemized.ExtendedResourceNickPrefix, src.ExtendedResources, &container.Resources, composer.ExtendedResourcesToK8sResources, nil),
+				&container.Resources, accelerator, &sizingInfo),
+			dinfComposer.fc.ComposeExtendedResources(itemized.ExtendedResourceNickPrefix, src.ExtendedResources, &container.Resources, composer.ExtendedResourcesToK8sResources, accelerator),
 		)
 
 		if sizingInfo.MemoryLimit != nil || sizingInfo.PortionLimit != nil {

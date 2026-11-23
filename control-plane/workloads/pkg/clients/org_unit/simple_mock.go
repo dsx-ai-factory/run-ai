@@ -16,9 +16,10 @@ import (
 )
 
 type SimpleMock struct {
-	ProjectInfoById     map[string]orgUnitApi.Project
-	DepartmentNamesById map[string]string
-	Randoms             *testutils.RandomValues
+	ProjectAcceleratorsById map[string]*orgUnitApi.ProjectAccelerators
+	ProjectInfoById         map[string]orgUnitApi.Project
+	DepartmentNamesById     map[string]string
+	Randoms                 *testutils.RandomValues
 }
 
 func NewSimpleMock() *SimpleMock {
@@ -86,4 +87,24 @@ func (smc *SimpleMock) GetDepartmentName(_ context.Context, departmentId string)
 		return name, nil
 	}
 	return "", nil
+}
+
+func (smc *SimpleMock) GetProjectAccelerators(_ context.Context, projectId string) (*orgUnitApi.ProjectAccelerators, *orgUnitApi.Error) {
+	return smc.ProjectAcceleratorsById[projectId], nil
+}
+
+func (smc *SimpleMock) MatchProjectAccelerator(_ context.Context, projectID, resourceName, deviceLabelKey, gpuType string) (bool, *orgUnitApi.Error) {
+	if inventory := smc.ProjectAcceleratorsById[projectID]; inventory != nil {
+		for _, item := range inventory.Items {
+			if item.ResourceName != resourceName {
+				continue
+			}
+			for _, device := range item.Devices {
+				if device.Key == deviceLabelKey && device.Value == gpuType {
+					return true, nil
+				}
+			}
+		}
+	}
+	return false, nil
 }

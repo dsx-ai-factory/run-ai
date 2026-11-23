@@ -22,6 +22,7 @@ var _ MappedNullable = &WorkspaceSpecSpec{}
 
 // WorkspaceSpecSpec struct for WorkspaceSpecSpec
 type WorkspaceSpecSpec struct {
+	Accelerator NullableAcceleratorSelection `json:"accelerator,omitempty"`
 	// Set of annotations to populate into the container running the workload.
 	Annotations []Annotation `json:"annotations,omitempty"`
 	// Arguments to the command that the container running the workload executes.
@@ -41,6 +42,8 @@ type WorkspaceSpecSpec struct {
 	EnvironmentVariables []EnvironmentVariable `json:"environmentVariables,omitempty"`
 	// Set of container ports that the workload exposes via URLs.
 	ExposedUrls []ExposedUrl `json:"exposedUrls,omitempty"`
+	// Exact device model label value required on the workload's nodes. Use any for no model restriction.
+	GpuType NullableString `json:"gpuType,omitempty"`
 	// Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
 	Image           NullableString          `json:"image,omitempty" validate:"regexp=.*"`
 	ImagePullPolicy NullableImagePullPolicy `json:"imagePullPolicy,omitempty"`
@@ -95,6 +98,49 @@ func NewWorkspaceSpecSpec() *WorkspaceSpecSpec {
 func NewWorkspaceSpecSpecWithDefaults() *WorkspaceSpecSpec {
 	this := WorkspaceSpecSpec{}
 	return &this
+}
+
+// GetAccelerator returns the Accelerator field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *WorkspaceSpecSpec) GetAccelerator() AcceleratorSelection {
+	if o == nil || IsNil(o.Accelerator.Get()) {
+		var ret AcceleratorSelection
+		return ret
+	}
+	return *o.Accelerator.Get()
+}
+
+// GetAcceleratorOk returns a tuple with the Accelerator field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *WorkspaceSpecSpec) GetAcceleratorOk() (*AcceleratorSelection, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Accelerator.Get(), o.Accelerator.IsSet()
+}
+
+// HasAccelerator returns a boolean if a field has been set.
+func (o *WorkspaceSpecSpec) HasAccelerator() bool {
+	if o != nil && o.Accelerator.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetAccelerator gets a reference to the given NullableAcceleratorSelection and assigns it to the Accelerator field.
+func (o *WorkspaceSpecSpec) SetAccelerator(v AcceleratorSelection) {
+	o.Accelerator.Set(&v)
+}
+
+// SetAcceleratorNil sets the value for Accelerator to be an explicit nil
+func (o *WorkspaceSpecSpec) SetAcceleratorNil() {
+	o.Accelerator.Set(nil)
+}
+
+// UnsetAccelerator ensures that no value is present for Accelerator, not even an explicit nil
+func (o *WorkspaceSpecSpec) UnsetAccelerator() {
+	o.Accelerator.Unset()
 }
 
 // GetAnnotations returns the Annotations field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -495,6 +541,49 @@ func (o *WorkspaceSpecSpec) HasExposedUrls() bool {
 // SetExposedUrls gets a reference to the given []ExposedUrl and assigns it to the ExposedUrls field.
 func (o *WorkspaceSpecSpec) SetExposedUrls(v []ExposedUrl) {
 	o.ExposedUrls = v
+}
+
+// GetGpuType returns the GpuType field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *WorkspaceSpecSpec) GetGpuType() string {
+	if o == nil || IsNil(o.GpuType.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.GpuType.Get()
+}
+
+// GetGpuTypeOk returns a tuple with the GpuType field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *WorkspaceSpecSpec) GetGpuTypeOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuType.Get(), o.GpuType.IsSet()
+}
+
+// HasGpuType returns a boolean if a field has been set.
+func (o *WorkspaceSpecSpec) HasGpuType() bool {
+	if o != nil && o.GpuType.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuType gets a reference to the given NullableString and assigns it to the GpuType field.
+func (o *WorkspaceSpecSpec) SetGpuType(v string) {
+	o.GpuType.Set(&v)
+}
+
+// SetGpuTypeNil sets the value for GpuType to be an explicit nil
+func (o *WorkspaceSpecSpec) SetGpuTypeNil() {
+	o.GpuType.Set(nil)
+}
+
+// UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
+func (o *WorkspaceSpecSpec) UnsetGpuType() {
+	o.GpuType.Unset()
 }
 
 // GetImage returns the Image field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -1396,6 +1485,9 @@ func (o WorkspaceSpecSpec) MarshalJSON() ([]byte, error) {
 
 func (o WorkspaceSpecSpec) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if o.Accelerator.IsSet() {
+		toSerialize["accelerator"] = o.Accelerator.Get()
+	}
 	if o.Annotations != nil {
 		toSerialize["annotations"] = o.Annotations
 	}
@@ -1425,6 +1517,9 @@ func (o WorkspaceSpecSpec) ToMap() (map[string]interface{}, error) {
 	}
 	if o.ExposedUrls != nil {
 		toSerialize["exposedUrls"] = o.ExposedUrls
+	}
+	if o.GpuType.IsSet() {
+		toSerialize["gpuType"] = o.GpuType.Get()
 	}
 	if o.Image.IsSet() {
 		toSerialize["image"] = o.Image.Get()

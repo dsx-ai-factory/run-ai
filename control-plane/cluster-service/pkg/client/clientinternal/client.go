@@ -369,3 +369,17 @@ func (client *ClusterClient) GetNodeNetworkTopologyLabelValues(ctx context.Conte
 func (client *ClusterClient) GetNodeInternal(ctx context.Context, clusterUuid string, nodeName string) (*openapi.NodeInternal, *http.Response, error) {
 	return client.ApiClient.NodesAPI.GetNodeInternal(ctx, clusterUuid, nodeName).Execute()
 }
+
+func (client *ClusterClient) GetNodePoolAccelerators(ctx context.Context, clusterID string, request openapi.NodePoolAcceleratorsRequest) (*openapi.ProjectAccelerators, error) {
+	result, resp, err := client.ApiClient.NodesAPI.GetNodePoolAccelerators(ctx, clusterID).NodePoolAcceleratorsRequest(request).Execute()
+	if resp != nil && resp.Body != nil {
+		defer resp.Body.Close()
+	}
+	if err != nil {
+		return nil, fmt.Errorf("get node pool accelerators: %w", err)
+	}
+	if result == nil {
+		return nil, errors.New("empty node pool accelerator response")
+	}
+	return result, nil
+}

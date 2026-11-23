@@ -26,9 +26,37 @@ var _ = Describe("GPU mode annotation projection", func() {
 			c := NewInterTrainJobComposer(kind, "example", "p1", "runai-p1", "user", nil, options, nil)
 			target := NewMinimalBatchJobTarget()
 			target.Job.Spec.Template.Spec.Containers[0] = corev1.Container{Name: "workload-main"}
-			Expect(c.processComputeFields(context.Background(), &src, target)()).To(BeNil())
+			Expect(c.processComputeFields(context.Background(), &src, nil, target)()).To(BeNil())
 			Expect(target.Job.Spec.Template.Annotations).To(HaveKeyWithValue("nvidia.com/container.workload-main.gpu-compute.mode", mode))
 			Expect(target.Job.Spec.Template.Annotations).To(HaveKeyWithValue(composer.GpuFractionAnnotation, "0.25"))
+		}
+	})
+})
+
+var _ = Describe("GPU selection in submitted jobs", func() {
+	It("keeps the selected resource and GPU model in the final Pod template", func() {
+		var spec workloadsApi.SupersetSpec
+		Expect(json.Unmarshal([]byte(`{
+			"image":"ubuntu", "compute":{"gpuDevicesRequest":2},
+			"accelerator":{"resourceName":"amd.com/gpu","deviceLabelKey":"hardware.example.com/model"},
+			"gpuType":"MI300X"
+		}`), &spec)).To(Succeed())
+		for _, kind := range []string{composer.Training, composer.Workspace} {
+			options := composer.FieldsComposerOptions{NodeAffinitySupported: true}
+			c := NewInterTrainJobComposer(kind, "example", "team", "team-namespace", "user", nil, options, nil)
+			c.WithClusterStorageConfig(testClusterStorageConfig("https://example.com", false))
+			target := NewMinimalBatchJobTarget()
+			Expect(c.Compose(context.Background(), &spec, target)()).To(BeNil())
+			template := target.Job.Spec.Template
+			resources := template.Spec.Containers[0].Resources
+			for _, list := range []corev1.ResourceList{resources.Requests, resources.Limits} {
+				Expect(list).To(HaveKey(corev1.ResourceName("amd.com/gpu")))
+				Expect(list).NotTo(HaveKey(corev1.ResourceName("nvidia.com/gpu")))
+				quantity := list[corev1.ResourceName("amd.com/gpu")]
+				Expect(quantity.Value()).To(Equal(int64(2)))
+			}
+			Expect(template.Spec.NodeSelector).To(HaveKeyWithValue("hardware.example.com/model", "MI300X"))
+			Expect(template.Annotations).To(HaveKeyWithValue("run.ai/gpu-type-label", "hardware.example.com/model=MI300X"))
 		}
 	})
 })

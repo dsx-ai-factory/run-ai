@@ -274,7 +274,7 @@ func MapToK8sTolerations(src map[string]*workloadsApi.Toleration, target any, _ 
 	return nil
 }
 
-func WholeGpusToK8sResources(src *GpuSizingInfo, target any, _ any) *workloadsApi.Error {
+func WholeGpusToK8sResources(src *GpuSizingInfo, target any, cookie any) *workloadsApi.Error {
 	if src == nil {
 		return nil
 	}
@@ -282,6 +282,22 @@ func WholeGpusToK8sResources(src *GpuSizingInfo, target any, _ any) *workloadsAp
 	targetPtr, ok := target.(*corev1.ResourceRequirements)
 	if !ok {
 		return workloadsApi.NewError(http.StatusInternalServerError, fmt.Sprintf("target type %T is not *corev1.ResourceRequirements", target))
+	}
+
+	var accelerator *workloadsApi.AcceleratorSelection
+	if cookie != nil {
+		var ok bool
+		accelerator, ok = cookie.(*workloadsApi.AcceleratorSelection)
+		if !ok {
+			return workloadsApi.NewError(http.StatusInternalServerError, fmt.Sprintf("WholeGpusToK8sResources: cookie %T is not *AcceleratorSelection", cookie))
+		}
+	}
+	resourceName, _, err := ResolveGPUSelection(nil, accelerator)
+	if err != nil {
+		return err
+	}
+	if resourceName != NvidiaResourceName && (src.IsFractionalPortion() || src.MemoryRequest != nil || src.MemoryLimit != nil || src.PortionLimit != nil) {
+		return workloadsApi.NewError(http.StatusBadRequest, "non-default accelerator resources require whole GPU units")
 	}
 
 	// set gpu resources limits
@@ -302,11 +318,11 @@ func WholeGpusToK8sResources(src *GpuSizingInfo, target any, _ any) *workloadsAp
 	}
 
 	if numDevices > 0 {
-		err := IntToK8sResourceList[int32](&numDevices, &targetPtr.Limits, NvidiaResourceName)
+		err := IntToK8sResourceList[int32](&numDevices, &targetPtr.Limits, resourceName)
 		if err != nil {
 			return err
 		}
-		err = IntToK8sResourceList[int32](&numDevices, &targetPtr.Requests, NvidiaResourceName)
+		err = IntToK8sResourceList[int32](&numDevices, &targetPtr.Requests, resourceName)
 		if err != nil {
 			return err
 		}
@@ -315,7 +331,7 @@ func WholeGpusToK8sResources(src *GpuSizingInfo, target any, _ any) *workloadsAp
 	return nil
 }
 
-func ExtendedResourcesToK8sResources(src map[string]*workloadsApi.ExtendedResource, target any, _ any) *workloadsApi.Error {
+func ExtendedResourcesToK8sResources(src map[string]*workloadsApi.ExtendedResource, target any, cookie any) *workloadsApi.Error {
 	if len(src) == 0 {
 		return nil
 	}
@@ -341,6 +357,15 @@ func ExtendedResourcesToK8sResources(src map[string]*workloadsApi.ExtendedResour
 		resourceName := extendedResource.Resource.Get()
 		if resourceName == nil {
 			continue
+		}
+
+		// Do not let an extended-resource entry silently replace the first-class
+		// accelerator count after the sizing step has written its quantity.
+		if accelerator, ok := cookie.(*workloadsApi.AcceleratorSelection); ok && accelerator != nil {
+			selectedResource := convutils.Deref(accelerator.ResourceName.Get(), NvidiaResourceName)
+			if _, exists := targetPtr.Limits[corev1.ResourceName(selectedResource)]; exists && *resourceName == selectedResource {
+				return workloadsApi.NewError(http.StatusBadRequest, fmt.Sprintf("compute.extendedResources duplicates the requested accelerator resource %q", selectedResource))
+			}
 		}
 
 		quantityStr := extendedResource.Quantity.Get()
@@ -714,8 +739,8 @@ func UrlsToK8sContainers(info *ExposedUrlInfo, target any, _ any) *workloadsApi.
 	return nil
 }
 
-func NodeAffinityRequiredToK8s(src [][]corev1.NodeSelectorRequirement, target any, _ any) *workloadsApi.Error {
-	if len(src) == 0 {
+func NodeAffinityRequiredToK8s(src [][]corev1.NodeSelectorRequirement, target any, cookie any) *workloadsApi.Error {
+	if len(src) == 0 && cookie != true {
 		return nil
 	}
 
@@ -900,13 +925,20 @@ func NodePoolsToK8s(src *NodePoolsInfo, target any, _ any) *workloadsApi.Error {
 	}
 
 	if len(matchExpressionsToAdd) == 0 {
+		if src.PreserveRequirements {
+			return workloadsApi.NewError(http.StatusBadRequest, "all requested node pools are being deleted")
+		}
 		return nil
 	}
 
 	if *targetPtr == nil {
 		*targetPtr = &corev1.NodeAffinity{}
 	}
-	addNodePoolMatchExpressionsToNodeAffinity(*targetPtr, matchExpressionsToAdd)
+	if src.PreserveRequirements {
+		intersectNodePools(*targetPtr, matchExpressionsToAdd)
+	} else {
+		addNodePoolMatchExpressionsToNodeAffinity(*targetPtr, matchExpressionsToAdd)
+	}
 
 	return nil
 }

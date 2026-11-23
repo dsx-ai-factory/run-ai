@@ -25,6 +25,8 @@ import (
 
 // ClientInterface lists the org unit services that the workloads service needs
 type ClientInterface interface {
+	MatchProjectAccelerator(ctx context.Context, projectID, resourceName, deviceLabelKey, gpuType string) (bool, *orgUnitApi.Error)
+	GetProjectAccelerators(ctx context.Context, projectId string) (*orgUnitApi.ProjectAccelerators, *orgUnitApi.Error)
 	GetProjectById(ctx context.Context, projectId string) (*orgUnitApi.Project, *orgUnitApi.Error)
 	GetProjectsMetadataByDepartment(ctx context.Context, departmentId string) ([]orgUnitApi.ProjectMetadata, *orgUnitApi.Error)
 	GetAncestorsOfScope(ctx context.Context, scopeType orgUnitApi.ScopeType, scopeId string) (*orgUnitApi.Ancestors, *orgUnitApi.Error)
@@ -151,4 +153,12 @@ func tenantIdFromContext(ctx context.Context) string {
 		return *t
 	}
 	return ""
+}
+
+func (c *cacheClient) GetProjectAccelerators(ctx context.Context, projectId string) (*orgUnitApi.ProjectAccelerators, *orgUnitApi.Error) {
+	return c.client.GetProjectAccelerators(ctx, projectId)
+}
+
+func (c *cacheClient) MatchProjectAccelerator(ctx context.Context, projectID, resourceName, deviceLabelKey, gpuType string) (bool, *orgUnitApi.Error) {
+	return c.client.MatchProjectAccelerator(ctx, projectID, resourceName, deviceLabelKey, gpuType)
 }

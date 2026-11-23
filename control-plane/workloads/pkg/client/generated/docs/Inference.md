@@ -15,6 +15,7 @@ Name | Type | Description | Notes
 **DeletedAt** | Pointer to **NullableTime** | The deletion time of the workload. | [optional] 
 **DesiredPhase** | [**WorkloadDesiredPhase**](WorkloadDesiredPhase.md) |  | 
 **ActualPhase** | Pointer to [**Phase**](Phase.md) |  | [optional] 
+**Warnings** | Pointer to [**[]SubmissionWarning**](SubmissionWarning.md) | Advisory messages returned when submitting the workload. | [optional] 
 **Spec** | Pointer to [**InferenceSpecSpec**](InferenceSpecSpec.md) |  | [optional] 
 
 ## Methods
@@ -280,6 +281,31 @@ SetActualPhase sets ActualPhase field to given value.
 `func (o *Inference) HasActualPhase() bool`
 
 HasActualPhase returns a boolean if a field has been set.
+
+### GetWarnings
+
+`func (o *Inference) GetWarnings() []SubmissionWarning`
+
+GetWarnings returns the Warnings field if non-nil, zero value otherwise.
+
+### GetWarningsOk
+
+`func (o *Inference) GetWarningsOk() (*[]SubmissionWarning, bool)`
+
+GetWarningsOk returns a tuple with the Warnings field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetWarnings
+
+`func (o *Inference) SetWarnings(v []SubmissionWarning)`
+
+SetWarnings sets Warnings field to given value.
+
+### HasWarnings
+
+`func (o *Inference) HasWarnings() bool`
+
+HasWarnings returns a boolean if a field has been set.
 
 ### GetSpec
 

@@ -9,6 +9,8 @@ import (
 	"context"
 	"net/http"
 
+	clusterApi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
+
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v2"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/itemized"
@@ -54,7 +56,8 @@ func NewMinimalKnativeServiceTarget() *KnativeServiceTarget {
 }
 
 type InferenceToKnativeComposer struct {
-	fc *composer.FieldsComposer
+	fc              *composer.FieldsComposer
+	ActualNodePools []clusterApi.Nodepool
 
 	AssetsMapping        []workloadsApi.AssetsMapping
 	WorkloadRequirements composer.WorkloadRequirements
@@ -194,7 +197,7 @@ func (itc *InferenceToKnativeComposer) Compose(
 		}
 		runner.Run(itc.fc.ComposeImagePullSecrets(itc.AssetsMapping, src.ImagePullSecrets, &credTarget, composer_v2.ArrayToImagePullSecretsSetter, &credCookie))
 
-		runner.Run(itc.processComputeFields(ctx, src.Compute.Get(), target))
+		runner.Run(itc.processComputeFields(ctx, src.Compute.Get(), composer.RequestedAccelerator(src.GpuType.Get(), src.Accelerator.Get()), target))
 		runner.Run(itc.processSecurityFields(ctx, src.Security.Get(), target))
 
 		rc := composer_v2.ExpandTemplateVarsInCommandAndArgs(container, itc.fc.ProjectName, itc.fc.WorkloadName)

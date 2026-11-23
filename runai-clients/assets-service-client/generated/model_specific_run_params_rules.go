@@ -24,6 +24,7 @@ var _ MappedNullable = &SpecificRunParamsRules{}
 type SpecificRunParamsRules struct {
 	Autoscaling                            NullableAutoScalingRules          `json:"autoscaling,omitempty"`
 	ServingConfiguration                   NullableServingConfigurationRules `json:"servingConfiguration,omitempty"`
+	Accelerator                            NullableArbitraryRules            `json:"accelerator,omitempty"`
 	Annotations                            NullableInstancesRules            `json:"annotations,omitempty"`
 	Args                                   NullableStringRules               `json:"args,omitempty"`
 	AutoDeletionTimeAfterCompletionSeconds NullableIntegerRules              `json:"autoDeletionTimeAfterCompletionSeconds,omitempty"`
@@ -32,6 +33,7 @@ type SpecificRunParamsRules struct {
 	Command                                NullableStringRules               `json:"command,omitempty"`
 	Completions                            NullableIntegerRules              `json:"completions,omitempty"`
 	EnvironmentVariables                   NullableInstancesRules            `json:"environmentVariables,omitempty"`
+	GpuType                                NullableStringRules               `json:"gpuType,omitempty"`
 	ImagePullSecrets                       NullableImagePullSecretsRules     `json:"imagePullSecrets,omitempty"`
 	Labels                                 NullableInstancesRules            `json:"labels,omitempty"`
 	NodeAffinityRequired                   NullableArbitraryRules            `json:"nodeAffinityRequired,omitempty"`
@@ -151,6 +153,49 @@ func (o *SpecificRunParamsRules) SetServingConfigurationNil() {
 // UnsetServingConfiguration ensures that no value is present for ServingConfiguration, not even an explicit nil
 func (o *SpecificRunParamsRules) UnsetServingConfiguration() {
 	o.ServingConfiguration.Unset()
+}
+
+// GetAccelerator returns the Accelerator field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *SpecificRunParamsRules) GetAccelerator() ArbitraryRules {
+	if o == nil || IsNil(o.Accelerator.Get()) {
+		var ret ArbitraryRules
+		return ret
+	}
+	return *o.Accelerator.Get()
+}
+
+// GetAcceleratorOk returns a tuple with the Accelerator field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *SpecificRunParamsRules) GetAcceleratorOk() (*ArbitraryRules, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Accelerator.Get(), o.Accelerator.IsSet()
+}
+
+// HasAccelerator returns a boolean if a field has been set.
+func (o *SpecificRunParamsRules) HasAccelerator() bool {
+	if o != nil && o.Accelerator.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetAccelerator gets a reference to the given NullableArbitraryRules and assigns it to the Accelerator field.
+func (o *SpecificRunParamsRules) SetAccelerator(v ArbitraryRules) {
+	o.Accelerator.Set(&v)
+}
+
+// SetAcceleratorNil sets the value for Accelerator to be an explicit nil
+func (o *SpecificRunParamsRules) SetAcceleratorNil() {
+	o.Accelerator.Set(nil)
+}
+
+// UnsetAccelerator ensures that no value is present for Accelerator, not even an explicit nil
+func (o *SpecificRunParamsRules) UnsetAccelerator() {
+	o.Accelerator.Unset()
 }
 
 // GetAnnotations returns the Annotations field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -495,6 +540,49 @@ func (o *SpecificRunParamsRules) SetEnvironmentVariablesNil() {
 // UnsetEnvironmentVariables ensures that no value is present for EnvironmentVariables, not even an explicit nil
 func (o *SpecificRunParamsRules) UnsetEnvironmentVariables() {
 	o.EnvironmentVariables.Unset()
+}
+
+// GetGpuType returns the GpuType field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *SpecificRunParamsRules) GetGpuType() StringRules {
+	if o == nil || IsNil(o.GpuType.Get()) {
+		var ret StringRules
+		return ret
+	}
+	return *o.GpuType.Get()
+}
+
+// GetGpuTypeOk returns a tuple with the GpuType field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *SpecificRunParamsRules) GetGpuTypeOk() (*StringRules, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuType.Get(), o.GpuType.IsSet()
+}
+
+// HasGpuType returns a boolean if a field has been set.
+func (o *SpecificRunParamsRules) HasGpuType() bool {
+	if o != nil && o.GpuType.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuType gets a reference to the given NullableStringRules and assigns it to the GpuType field.
+func (o *SpecificRunParamsRules) SetGpuType(v StringRules) {
+	o.GpuType.Set(&v)
+}
+
+// SetGpuTypeNil sets the value for GpuType to be an explicit nil
+func (o *SpecificRunParamsRules) SetGpuTypeNil() {
+	o.GpuType.Set(nil)
+}
+
+// UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
+func (o *SpecificRunParamsRules) UnsetGpuType() {
+	o.GpuType.Unset()
 }
 
 // GetImagePullSecrets returns the ImagePullSecrets field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -1201,6 +1289,9 @@ func (o SpecificRunParamsRules) ToMap() (map[string]interface{}, error) {
 	if o.ServingConfiguration.IsSet() {
 		toSerialize["servingConfiguration"] = o.ServingConfiguration.Get()
 	}
+	if o.Accelerator.IsSet() {
+		toSerialize["accelerator"] = o.Accelerator.Get()
+	}
 	if o.Annotations.IsSet() {
 		toSerialize["annotations"] = o.Annotations.Get()
 	}
@@ -1224,6 +1315,9 @@ func (o SpecificRunParamsRules) ToMap() (map[string]interface{}, error) {
 	}
 	if o.EnvironmentVariables.IsSet() {
 		toSerialize["environmentVariables"] = o.EnvironmentVariables.Get()
+	}
+	if o.GpuType.IsSet() {
+		toSerialize["gpuType"] = o.GpuType.Get()
 	}
 	if o.ImagePullSecrets.IsSet() {
 		toSerialize["imagePullSecrets"] = o.ImagePullSecrets.Get()

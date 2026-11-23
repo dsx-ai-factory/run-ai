@@ -69,7 +69,7 @@ func setNodeAffinityForNodeType(pod *v1.Pod, project *unstructured.Unstructured,
 		Operator: v1.NodeSelectorOpIn,
 		Values:   nodeAffinityTypes,
 	}
-	patch.AddNodeAffinityToPodSpec(&pod.Spec, []v1.NodeSelectorRequirement{matchExpressionToAdd})
+	patch.AddPlacementRequirements(&pod.Spec, pod.Annotations, []v1.NodeSelectorRequirement{matchExpressionToAdd})
 }
 
 func (pm *PodMutator) setKubevirtNodeAntiAffinity(pod *v1.Pod) {
@@ -86,5 +86,5 @@ func (pm *PodMutator) setKubevirtNodeAntiAffinity(pod *v1.Pod) {
 		Operator: v1.NodeSelectorOpNotIn,
 		Values:   []string{"true"},
 	}
-	patch.AddNodeAffinityToPodSpec(&pod.Spec, []v1.NodeSelectorRequirement{matchExpressionToAdd})
+	patch.AddPlacementRequirements(&pod.Spec, pod.Annotations, []v1.NodeSelectorRequirement{matchExpressionToAdd})
 }

@@ -127,6 +127,7 @@ Class | Method | HTTP request | Description
 *ProjectsAPI* | [**DeleteProject**](docs/ProjectsAPI.md#deleteproject) | **Delete** /api/v1/org-unit/projects/{projectId} | Delete project
 *ProjectsAPI* | [**GetInternalProjectsTelemetry**](docs/ProjectsAPI.md#getinternalprojectstelemetry) | **Get** /internal/org-unit/projects/telemetry | Get internal projects telemetry
 *ProjectsAPI* | [**GetProject**](docs/ProjectsAPI.md#getproject) | **Get** /api/v1/org-unit/projects/{projectId} | Get project
+*ProjectsAPI* | [**GetProjectAccelerators**](docs/ProjectsAPI.md#getprojectaccelerators) | **Get** /api/v1/org-unit/projects/{projectId}/accelerators | List accelerator resources and models accessible to a project
 *ProjectsAPI* | [**GetProjectAncestors**](docs/ProjectsAPI.md#getprojectancestors) | **Get** /internal/org-unit/projects/{projectId}/ancestors | Get project ancestors
 *ProjectsAPI* | [**GetProjectMetrics**](docs/ProjectsAPI.md#getprojectmetrics) | **Get** /api/v1/org-unit/projects/{projectId}/metrics | Get project metrics data.
 *ProjectsAPI* | [**GetProjectNodePoolResources**](docs/ProjectsAPI.md#getprojectnodepoolresources) | **Get** /api/v1/org-unit/projects/node-pool-resources | Get projects node pool resources
@@ -162,6 +163,8 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [AcceleratorDevice](docs/AcceleratorDevice.md)
+ - [AcceleratorOption](docs/AcceleratorOption.md)
  - [AggregatedResources](docs/AggregatedResources.md)
  - [AggregatedResourcesMemory](docs/AggregatedResourcesMemory.md)
  - [AggregatedResourcesNodePool](docs/AggregatedResourcesNodePool.md)
@@ -279,6 +282,7 @@ Class | Method | HTTP request | Description
  - [OvertimeData](docs/OvertimeData.md)
  - [OvertimeRangeData](docs/OvertimeRangeData.md)
  - [Project](docs/Project.md)
+ - [ProjectAccelerators](docs/ProjectAccelerators.md)
  - [ProjectAggregatedResourcesV1](docs/ProjectAggregatedResourcesV1.md)
  - [ProjectAggregatedResourcesV1Cpu](docs/ProjectAggregatedResourcesV1Cpu.md)
  - [ProjectAggregatedResourcesV1Gpu](docs/ProjectAggregatedResourcesV1Gpu.md)

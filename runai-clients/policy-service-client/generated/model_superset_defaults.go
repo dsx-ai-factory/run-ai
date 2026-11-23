@@ -41,8 +41,9 @@ type SupersetDefaults struct {
 	// Specifies the number of worker nodes to run. If set to 0, only the leader node will run, and no worker pods will be created. In this case, worker spec is not required.
 	Workers NullableInt32 `json:"workers,omitempty"`
 	// Specifies the number of leader-worker sets to deploy. Each replica represents a group consisting of one leader pod and multiple worker pods.  For example, setting replicas: 3 will create 3 independent groups, each with its own leader and corresponding set of workers.
-	Replicas    NullableInt32               `json:"replicas,omitempty"`
-	Annotations NullableAnnotationsDefaults `json:"annotations,omitempty"`
+	Replicas    NullableInt32                `json:"replicas,omitempty"`
+	Accelerator NullableAcceleratorSelection `json:"accelerator,omitempty"`
+	Annotations NullableAnnotationsDefaults  `json:"annotations,omitempty"`
 	// Arguments to the command that the container running the workload executes.
 	Args NullableString `json:"args,omitempty" validate:"regexp=.*"`
 	// Specifies the duration after which a finished workload (completed or failed) will be automatically deleted. The default is 30 days. Log retention is managed separately.
@@ -60,6 +61,8 @@ type SupersetDefaults struct {
 	DistributedFramework NullableDistributedFramework         `json:"distributedFramework,omitempty"`
 	EnvironmentVariables NullableEnvironmentVariablesDefaults `json:"environmentVariables,omitempty"`
 	ExposedUrls          NullableExposedUrlsDefaults          `json:"exposedUrls,omitempty"`
+	// Exact device model label value required on the workload's nodes. Use any for no model restriction.
+	GpuType NullableString `json:"gpuType,omitempty"`
 	// Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
 	Image            NullableString                   `json:"image,omitempty" validate:"regexp=.*"`
 	ImagePullPolicy  NullableImagePullPolicy          `json:"imagePullPolicy,omitempty"`
@@ -687,6 +690,49 @@ func (o *SupersetDefaults) UnsetReplicas() {
 	o.Replicas.Unset()
 }
 
+// GetAccelerator returns the Accelerator field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *SupersetDefaults) GetAccelerator() AcceleratorSelection {
+	if o == nil || IsNil(o.Accelerator.Get()) {
+		var ret AcceleratorSelection
+		return ret
+	}
+	return *o.Accelerator.Get()
+}
+
+// GetAcceleratorOk returns a tuple with the Accelerator field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *SupersetDefaults) GetAcceleratorOk() (*AcceleratorSelection, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Accelerator.Get(), o.Accelerator.IsSet()
+}
+
+// HasAccelerator returns a boolean if a field has been set.
+func (o *SupersetDefaults) HasAccelerator() bool {
+	if o != nil && o.Accelerator.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetAccelerator gets a reference to the given NullableAcceleratorSelection and assigns it to the Accelerator field.
+func (o *SupersetDefaults) SetAccelerator(v AcceleratorSelection) {
+	o.Accelerator.Set(&v)
+}
+
+// SetAcceleratorNil sets the value for Accelerator to be an explicit nil
+func (o *SupersetDefaults) SetAcceleratorNil() {
+	o.Accelerator.Set(nil)
+}
+
+// UnsetAccelerator ensures that no value is present for Accelerator, not even an explicit nil
+func (o *SupersetDefaults) UnsetAccelerator() {
+	o.Accelerator.Unset()
+}
+
 // GetAnnotations returns the Annotations field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *SupersetDefaults) GetAnnotations() AnnotationsDefaults {
 	if o == nil || IsNil(o.Annotations.Get()) {
@@ -1201,6 +1247,49 @@ func (o *SupersetDefaults) SetExposedUrlsNil() {
 // UnsetExposedUrls ensures that no value is present for ExposedUrls, not even an explicit nil
 func (o *SupersetDefaults) UnsetExposedUrls() {
 	o.ExposedUrls.Unset()
+}
+
+// GetGpuType returns the GpuType field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *SupersetDefaults) GetGpuType() string {
+	if o == nil || IsNil(o.GpuType.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.GpuType.Get()
+}
+
+// GetGpuTypeOk returns a tuple with the GpuType field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *SupersetDefaults) GetGpuTypeOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuType.Get(), o.GpuType.IsSet()
+}
+
+// HasGpuType returns a boolean if a field has been set.
+func (o *SupersetDefaults) HasGpuType() bool {
+	if o != nil && o.GpuType.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuType gets a reference to the given NullableString and assigns it to the GpuType field.
+func (o *SupersetDefaults) SetGpuType(v string) {
+	o.GpuType.Set(&v)
+}
+
+// SetGpuTypeNil sets the value for GpuType to be an explicit nil
+func (o *SupersetDefaults) SetGpuTypeNil() {
+	o.GpuType.Set(nil)
+}
+
+// UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
+func (o *SupersetDefaults) UnsetGpuType() {
+	o.GpuType.Unset()
 }
 
 // GetImage returns the Image field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -2330,6 +2419,9 @@ func (o SupersetDefaults) ToMap() (map[string]interface{}, error) {
 	if o.Replicas.IsSet() {
 		toSerialize["replicas"] = o.Replicas.Get()
 	}
+	if o.Accelerator.IsSet() {
+		toSerialize["accelerator"] = o.Accelerator.Get()
+	}
 	if o.Annotations.IsSet() {
 		toSerialize["annotations"] = o.Annotations.Get()
 	}
@@ -2365,6 +2457,9 @@ func (o SupersetDefaults) ToMap() (map[string]interface{}, error) {
 	}
 	if o.ExposedUrls.IsSet() {
 		toSerialize["exposedUrls"] = o.ExposedUrls.Get()
+	}
+	if o.GpuType.IsSet() {
+		toSerialize["gpuType"] = o.GpuType.Get()
 	}
 	if o.Image.IsSet() {
 		toSerialize["image"] = o.Image.Get()

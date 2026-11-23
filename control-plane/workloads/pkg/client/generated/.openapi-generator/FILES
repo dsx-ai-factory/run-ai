@@ -49,6 +49,7 @@ docs/AIApplicationVerbosity.md
 docs/AIApplicationsAPI.md
 docs/AIApplicationsForSync.md
 docs/AIApplicationsSortFilterFields.md
+docs/AcceleratorSelection.md
 docs/Action.md
 docs/ActionsSupport.md
 docs/ActivationReplicasField.md
@@ -491,6 +492,7 @@ docs/StringRulesCommon.md
 docs/StringRulesOptions.md
 docs/SubmissionError.md
 docs/SubmissionErrorV2.md
+docs/SubmissionWarning.md
 docs/SubmitWithAssetIds.md
 docs/SubmitWithTemplateId.md
 docs/SupersetDefaults.md
@@ -656,6 +658,7 @@ docs/WorkspacesAPI.md
 git_push.sh
 go.mod
 go.sum
+model_accelerator_selection.go
 model_action.go
 model_actions_support.go
 model_activation_replicas_field.go
@@ -1111,6 +1114,7 @@ model_string_rules_common.go
 model_string_rules_options.go
 model_submission_error.go
 model_submission_error_v2.go
+model_submission_warning.go
 model_submit_with_asset_ids.go
 model_submit_with_template_id.go
 model_superset_defaults.go

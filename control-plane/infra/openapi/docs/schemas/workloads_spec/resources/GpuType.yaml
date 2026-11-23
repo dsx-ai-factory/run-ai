@@ -1,0 +1,6 @@
+description: Exact device model label value required on the workload's nodes. Use any for no model restriction.
+type: string
+nullable: true
+minLength: 1
+maxLength: 63
+example: NVIDIA-H100-80GB-HBM3

@@ -46,6 +46,7 @@ pkg/api/error.go
 pkg/api/helpers.go
 pkg/api/impl.go
 pkg/api/logger.go
+pkg/api/model_accelerator_selection.go
 pkg/api/model_action.go
 pkg/api/model_actions_support.go
 pkg/api/model_activation_replicas_field.go
@@ -501,6 +502,7 @@ pkg/api/model_string_rules_common.go
 pkg/api/model_string_rules_options.go
 pkg/api/model_submission_error.go
 pkg/api/model_submission_error_v2.go
+pkg/api/model_submission_warning.go
 pkg/api/model_submit_with_asset_ids.go
 pkg/api/model_submit_with_template_id.go
 pkg/api/model_superset_defaults.go

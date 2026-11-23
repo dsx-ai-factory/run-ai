@@ -25,6 +25,44 @@ import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObj
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError } from './base';
 
 /**
+ * 
+ * @export
+ * @interface AcceleratorDevice
+ */
+export interface AcceleratorDevice {
+    /**
+     * Exact Kubernetes node label key for this device model.
+     * @type {string}
+     * @memberof AcceleratorDevice
+     */
+    'key': string;
+    /**
+     * Exact Kubernetes node label value for this device model.
+     * @type {string}
+     * @memberof AcceleratorDevice
+     */
+    'value': string;
+}
+/**
+ * 
+ * @export
+ * @interface AcceleratorOption
+ */
+export interface AcceleratorOption {
+    /**
+     * Allocatable Kubernetes extended resource name.
+     * @type {string}
+     * @memberof AcceleratorOption
+     */
+    'resourceName': string;
+    /**
+     * Model selectors observed alongside this resource on the same node.
+     * @type {Array<AcceleratorDevice>}
+     * @memberof AcceleratorOption
+     */
+    'devices': Array<AcceleratorDevice>;
+}
+/**
  * Sum of all resources assigned to the projects under this department per Node Pool
  * @export
  * @interface AggregatedResources
@@ -4346,6 +4384,19 @@ export interface Project {
      * @memberof Project
      */
     'resources': Array<Resources>;
+}
+/**
+ * 
+ * @export
+ * @interface ProjectAccelerators
+ */
+export interface ProjectAccelerators {
+    /**
+     * 
+     * @type {Array<AcceleratorOption>}
+     * @memberof ProjectAccelerators
+     */
+    'items': Array<AcceleratorOption>;
 }
 /**
  * 
@@ -11581,6 +11632,59 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
+         * List observed accelerator resources and model selectors across the project\'s assigned node pools. Includes busy devices.
+         * @summary List accelerator resources and models accessible to a project
+         * @param {string} projectId The project id
+         * @param {string} [resourceName] With deviceLabelKey and gpuType, check only this exact accelerator selection.
+         * @param {string} [deviceLabelKey] Exact node label key to check, including administrator-defined keys.
+         * @param {string} [gpuType] Exact device label value to check. Supply all three parameters for an exact lookup.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getProjectAccelerators: async (projectId: string, resourceName?: string, deviceLabelKey?: string, gpuType?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'projectId' is not null or undefined
+            assertParamExists('getProjectAccelerators', 'projectId', projectId)
+            const localVarPath = `/api/v1/org-unit/projects/{projectId}/accelerators`
+                .replace(`{${"projectId"}}`, encodeURIComponent(String(projectId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (resourceName !== undefined) {
+                localVarQueryParameter['resourceName'] = resourceName;
+            }
+
+            if (deviceLabelKey !== undefined) {
+                localVarQueryParameter['deviceLabelKey'] = deviceLabelKey;
+            }
+
+            if (gpuType !== undefined) {
+                localVarQueryParameter['gpuType'] = gpuType;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * 
          * @summary Get project ancestors
          * @param {string} projectId The project id
@@ -12490,6 +12594,20 @@ export const ProjectsApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
+         * List observed accelerator resources and model selectors across the project\'s assigned node pools. Includes busy devices.
+         * @summary List accelerator resources and models accessible to a project
+         * @param {string} projectId The project id
+         * @param {string} [resourceName] With deviceLabelKey and gpuType, check only this exact accelerator selection.
+         * @param {string} [deviceLabelKey] Exact node label key to check, including administrator-defined keys.
+         * @param {string} [gpuType] Exact device label value to check. Supply all three parameters for an exact lookup.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getProjectAccelerators(projectId: string, resourceName?: string, deviceLabelKey?: string, gpuType?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProjectAccelerators>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getProjectAccelerators(projectId, resourceName, deviceLabelKey, gpuType, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
          * 
          * @summary Get project ancestors
          * @param {string} projectId The project id
@@ -12794,6 +12912,19 @@ export const ProjectsApiFactory = function (configuration?: Configuration, baseP
             return localVarFp.getProject(projectId, options).then((request) => request(axios, basePath));
         },
         /**
+         * List observed accelerator resources and model selectors across the project\'s assigned node pools. Includes busy devices.
+         * @summary List accelerator resources and models accessible to a project
+         * @param {string} projectId The project id
+         * @param {string} [resourceName] With deviceLabelKey and gpuType, check only this exact accelerator selection.
+         * @param {string} [deviceLabelKey] Exact node label key to check, including administrator-defined keys.
+         * @param {string} [gpuType] Exact device label value to check. Supply all three parameters for an exact lookup.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getProjectAccelerators(projectId: string, resourceName?: string, deviceLabelKey?: string, gpuType?: string, options?: any): AxiosPromise<ProjectAccelerators> {
+            return localVarFp.getProjectAccelerators(projectId, resourceName, deviceLabelKey, gpuType, options).then((request) => request(axios, basePath));
+        },
+        /**
          * 
          * @summary Get project ancestors
          * @param {string} projectId The project id
@@ -13096,6 +13227,21 @@ export class ProjectsApi extends BaseAPI {
      */
     public getProject(projectId: string, options?: AxiosRequestConfig) {
         return ProjectsApiFp(this.configuration).getProject(projectId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * List observed accelerator resources and model selectors across the project\'s assigned node pools. Includes busy devices.
+     * @summary List accelerator resources and models accessible to a project
+     * @param {string} projectId The project id
+     * @param {string} [resourceName] With deviceLabelKey and gpuType, check only this exact accelerator selection.
+     * @param {string} [deviceLabelKey] Exact node label key to check, including administrator-defined keys.
+     * @param {string} [gpuType] Exact device label value to check. Supply all three parameters for an exact lookup.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ProjectsApi
+     */
+    public getProjectAccelerators(projectId: string, resourceName?: string, deviceLabelKey?: string, gpuType?: string, options?: AxiosRequestConfig) {
+        return ProjectsApiFp(this.configuration).getProjectAccelerators(projectId, resourceName, deviceLabelKey, gpuType, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

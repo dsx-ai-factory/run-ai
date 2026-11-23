@@ -90,6 +90,12 @@ type Training struct {
 	ActualPhase Phase `json:"actualPhase,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Advisory messages returned when submitting the workload.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Warnings []SubmissionWarning `json:"warnings,omitempty"`
+	Warnings []SubmissionWarning `json:"warnings,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Spec TrainingSpecSpec `json:"spec,omitempty"`
 	Spec TrainingSpecSpec `json:"spec,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
@@ -114,6 +120,11 @@ func AssertTrainingRequired(obj Training) error {
 		}
 	}
 
+	for _, el := range obj.Warnings {
+		if err := AssertSubmissionWarningRequired(el); err != nil {
+			return err
+		}
+	}
 	if err := AssertTrainingSpecSpecRequired(obj.Spec); err != nil {
 		return err
 	}
@@ -200,6 +211,16 @@ func AssertTrainingConstraints(obj Training) error {
 	}
 
 	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	for _, el := range obj.Warnings {
+		if err := AssertSubmissionWarningConstraints(el); err != nil {
+			return err
+		}
+	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////

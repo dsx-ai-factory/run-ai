@@ -45,3 +45,8 @@ properties:
     $ref: "./WorkloadDesiredPhase.yaml"
   actualPhase:
     $ref: "./Phase.yaml"
+  warnings:
+    description: Advisory messages returned when submitting the workload.
+    type: array
+    items:
+      $ref: "./SubmissionWarning.yaml"

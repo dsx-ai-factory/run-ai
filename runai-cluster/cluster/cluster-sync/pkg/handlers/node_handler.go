@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"maps"
 	"net/http"
+	"slices"
 	"sort"
 	"sync"
 	"sync/atomic"
@@ -277,6 +278,7 @@ func (nodeHandler *NodeHandler) NodeChanged(old *corev1.Node, new *corev1.Node) 
 	newNodeInfo := nodeHandler.nodeParser.ParseNodeToServerScheme(new)
 
 	if !maps.Equal(oldNodeInfo.GetLabels(), newNodeInfo.GetLabels()) ||
+		!slices.Equal(oldNodeInfo.GetAcceleratorResources(), newNodeInfo.GetAcceleratorResources()) ||
 		oldNodeInfo.NodePool != newNodeInfo.NodePool ||
 		oldNodeInfo.Status != newNodeInfo.Status ||
 		oldNodeInfo.CreatedAt != newNodeInfo.CreatedAt ||

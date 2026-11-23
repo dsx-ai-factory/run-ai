@@ -11706,6 +11706,25 @@
         "nullable": true,
         "type": "object"
       },
+      "AcceleratorSelection": {
+        "description": "Accelerator resource and optional device model label key for workload placement.",
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "resourceName": {
+            "description": "Kubernetes extended resource name. Defaults to nvidia.com/gpu.",
+            "type": "string",
+            "nullable": true,
+            "example": "nvidia.com/gpu"
+          },
+          "deviceLabelKey": {
+            "description": "Node label key for gpuType. Defaults to nvidia.com/gpu.product for NVIDIA.",
+            "type": "string",
+            "nullable": true,
+            "example": "nvidia.com/gpu.product"
+          }
+        }
+      },
       "Annotation": {
         "description": "Annotation details to be populated into the container.",
         "properties": {
@@ -11772,6 +11791,14 @@
         "format": "int32",
         "example": 1,
         "nullable": true
+      },
+      "GpuType": {
+        "description": "Exact device model label value required on the workload's nodes. Use any for no model restriction.",
+        "type": "string",
+        "nullable": true,
+        "minLength": 1,
+        "maxLength": 63,
+        "example": "NVIDIA-H100-80GB-HBM3"
       },
       "ImagePullSecret": {
         "description": "A reference to a secret in the same namespace used to pull container images.",
@@ -11864,8 +11891,8 @@
           "key": {
             "description": "The label key that the selector applies to (mandatory).",
             "type": "string",
-            "pattern": ".*",
-            "maxLength": 63
+            "pattern": "^$|^([^\\x2F]{1,253}\\x2F)?[^\\x2F]{1,63}$",
+            "maxLength": 317
           },
           "operator": {
             "$ref": "#/components/schemas/MatchExpressionOperator"
@@ -12360,6 +12387,9 @@
           {
             "nullable": true,
             "properties": {
+              "accelerator": {
+                "$ref": "#/components/schemas/AcceleratorSelection"
+              },
               "annotations": {
                 "$ref": "#/components/schemas/Annotations"
               },
@@ -12383,6 +12413,9 @@
               },
               "environmentVariables": {
                 "$ref": "#/components/schemas/EnvironmentVariablesOfAsset"
+              },
+              "gpuType": {
+                "$ref": "#/components/schemas/GpuType"
               },
               "imagePullSecrets": {
                 "$ref": "#/components/schemas/ImagePullSecrets"
@@ -12922,6 +12955,25 @@
           "Unknown"
         ]
       },
+      "SubmissionWarning": {
+        "type": "object",
+        "required": [
+          "code",
+          "field",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "field": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
       "WorkloadMeta": {
         "required": [
           "name",
@@ -12976,6 +13028,13 @@
           },
           "actualPhase": {
             "$ref": "#/components/schemas/Phase"
+          },
+          "warnings": {
+            "description": "Advisory messages returned when submitting the workload.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SubmissionWarning"
+            }
           }
         }
       },
@@ -12990,6 +13049,9 @@
           {
             "nullable": true,
             "properties": {
+              "accelerator": {
+                "$ref": "#/components/schemas/AcceleratorSelection"
+              },
               "annotations": {
                 "$ref": "#/components/schemas/Annotations"
               },
@@ -13010,6 +13072,9 @@
               },
               "environmentVariables": {
                 "$ref": "#/components/schemas/EnvironmentVariablesOfAsset"
+              },
+              "gpuType": {
+                "$ref": "#/components/schemas/GpuType"
               },
               "imagePullSecrets": {
                 "$ref": "#/components/schemas/ImagePullSecrets"
@@ -13705,6 +13770,25 @@
         "nullable": true,
         "type": "object"
       },
+      "ArbitraryRules": {
+        "properties": {
+          "sourceOfRule": {
+            "$ref": "#/components/schemas/SourceOfRule"
+          },
+          "required": {
+            "description": "Whether this arbitrary object is mandatory. default to false.",
+            "type": "boolean",
+            "nullable": true
+          },
+          "canEdit": {
+            "description": "Whether the value of the field, as a whole, is editable. default to false.",
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "nullable": true,
+        "type": "object"
+      },
       "InstancesRules": {
         "properties": {
           "instances": {
@@ -13793,25 +13877,6 @@
           },
           "instances": {
             "$ref": "#/components/schemas/ItemRules"
-          }
-        },
-        "nullable": true,
-        "type": "object"
-      },
-      "ArbitraryRules": {
-        "properties": {
-          "sourceOfRule": {
-            "$ref": "#/components/schemas/SourceOfRule"
-          },
-          "required": {
-            "description": "Whether this arbitrary object is mandatory. default to false.",
-            "type": "boolean",
-            "nullable": true
-          },
-          "canEdit": {
-            "description": "Whether the value of the field, as a whole, is editable. default to false.",
-            "type": "boolean",
-            "nullable": true
           }
         },
         "nullable": true,
@@ -14268,6 +14333,9 @@
           {
             "nullable": true,
             "properties": {
+              "accelerator": {
+                "$ref": "#/components/schemas/ArbitraryRules"
+              },
               "annotations": {
                 "$ref": "#/components/schemas/InstancesRules"
               },
@@ -14291,6 +14359,9 @@
               },
               "environmentVariables": {
                 "$ref": "#/components/schemas/InstancesRules"
+              },
+              "gpuType": {
+                "$ref": "#/components/schemas/StringRules"
               },
               "imagePullSecrets": {
                 "$ref": "#/components/schemas/ImagePullSecretsRules"
@@ -14462,6 +14533,9 @@
           {
             "nullable": true,
             "properties": {
+              "accelerator": {
+                "$ref": "#/components/schemas/AcceleratorSelection"
+              },
               "annotations": {
                 "$ref": "#/components/schemas/Annotations"
               },
@@ -14485,6 +14559,9 @@
               },
               "environmentVariables": {
                 "$ref": "#/components/schemas/EnvironmentVariablesOfAsset"
+              },
+              "gpuType": {
+                "$ref": "#/components/schemas/GpuType"
               },
               "imagePullSecrets": {
                 "$ref": "#/components/schemas/ImagePullSecrets"
@@ -14710,6 +14787,9 @@
           {
             "nullable": true,
             "properties": {
+              "accelerator": {
+                "$ref": "#/components/schemas/AcceleratorSelection"
+              },
               "annotations": {
                 "$ref": "#/components/schemas/Annotations"
               },
@@ -14730,6 +14810,9 @@
               },
               "environmentVariables": {
                 "$ref": "#/components/schemas/EnvironmentVariablesOfAsset"
+              },
+              "gpuType": {
+                "$ref": "#/components/schemas/GpuType"
               },
               "imagePullSecrets": {
                 "$ref": "#/components/schemas/ImagePullSecrets"
@@ -15517,6 +15600,9 @@
       },
       "DistributedInferenceLeaderWorkerSpec": {
         "properties": {
+          "accelerator": {
+            "$ref": "#/components/schemas/AcceleratorSelection"
+          },
           "annotations": {
             "$ref": "#/components/schemas/Annotations"
           },
@@ -15582,6 +15668,9 @@
           },
           "environmentVariables": {
             "$ref": "#/components/schemas/EnvironmentVariables"
+          },
+          "gpuType": {
+            "$ref": "#/components/schemas/GpuType"
           },
           "image": {
             "$ref": "#/components/schemas/Image"
@@ -16518,6 +16607,9 @@
           {
             "nullable": true,
             "properties": {
+              "accelerator": {
+                "$ref": "#/components/schemas/AcceleratorSelection"
+              },
               "annotations": {
                 "$ref": "#/components/schemas/Annotations"
               },
@@ -16604,6 +16696,9 @@
               },
               "exposedUrls": {
                 "$ref": "#/components/schemas/ExposedUrls"
+              },
+              "gpuType": {
+                "$ref": "#/components/schemas/GpuType"
               },
               "image": {
                 "$ref": "#/components/schemas/Image"
@@ -16812,6 +16907,9 @@
       "MasterSpec": {
         "nullable": true,
         "properties": {
+          "accelerator": {
+            "$ref": "#/components/schemas/AcceleratorSelection"
+          },
           "annotations": {
             "$ref": "#/components/schemas/Annotations"
           },
@@ -16889,6 +16987,9 @@
           },
           "exposedUrls": {
             "$ref": "#/components/schemas/ExposedUrls"
+          },
+          "gpuType": {
+            "$ref": "#/components/schemas/GpuType"
           },
           "image": {
             "$ref": "#/components/schemas/Image"

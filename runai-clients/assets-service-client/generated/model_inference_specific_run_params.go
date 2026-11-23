@@ -25,6 +25,7 @@ type InferenceSpecificRunParams struct {
 	Connections       []SpecificRunConnectionInfo               `json:"connections,omitempty"`
 	AutoScaling       NullableSpecificRunAutoScalingAutoScaling `json:"autoScaling,omitempty"`
 	ServingPortAccess NullableServingPortAccess                 `json:"servingPortAccess,omitempty"`
+	Accelerator       NullableAcceleratorSelection              `json:"accelerator,omitempty"`
 	// Set of annotations to populate into the container running the workload.
 	Annotations []Annotation `json:"annotations,omitempty"`
 	// Arguments to the command that the container running the workload executes.
@@ -39,6 +40,8 @@ type InferenceSpecificRunParams struct {
 	Command NullableString `json:"command,omitempty" validate:"regexp=.*"`
 	// Set of environment variables to populate into the container running the workspace.
 	EnvironmentVariables []EnvironmentVariableOfAsset `json:"environmentVariables,omitempty"`
+	// Exact device model label value required on the workload's nodes. Use any for no model restriction.
+	GpuType NullableString `json:"gpuType,omitempty"`
 	// A list of references to Kubernetes secrets in the same namespace used for pulling container images.
 	ImagePullSecrets []ImagePullSecret `json:"imagePullSecrets,omitempty"`
 	// Set of labels to populate into the container running the workload.
@@ -202,6 +205,49 @@ func (o *InferenceSpecificRunParams) SetServingPortAccessNil() {
 // UnsetServingPortAccess ensures that no value is present for ServingPortAccess, not even an explicit nil
 func (o *InferenceSpecificRunParams) UnsetServingPortAccess() {
 	o.ServingPortAccess.Unset()
+}
+
+// GetAccelerator returns the Accelerator field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *InferenceSpecificRunParams) GetAccelerator() AcceleratorSelection {
+	if o == nil || IsNil(o.Accelerator.Get()) {
+		var ret AcceleratorSelection
+		return ret
+	}
+	return *o.Accelerator.Get()
+}
+
+// GetAcceleratorOk returns a tuple with the Accelerator field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *InferenceSpecificRunParams) GetAcceleratorOk() (*AcceleratorSelection, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Accelerator.Get(), o.Accelerator.IsSet()
+}
+
+// HasAccelerator returns a boolean if a field has been set.
+func (o *InferenceSpecificRunParams) HasAccelerator() bool {
+	if o != nil && o.Accelerator.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetAccelerator gets a reference to the given NullableAcceleratorSelection and assigns it to the Accelerator field.
+func (o *InferenceSpecificRunParams) SetAccelerator(v AcceleratorSelection) {
+	o.Accelerator.Set(&v)
+}
+
+// SetAcceleratorNil sets the value for Accelerator to be an explicit nil
+func (o *InferenceSpecificRunParams) SetAcceleratorNil() {
+	o.Accelerator.Set(nil)
+}
+
+// UnsetAccelerator ensures that no value is present for Accelerator, not even an explicit nil
+func (o *InferenceSpecificRunParams) UnsetAccelerator() {
+	o.Accelerator.Unset()
 }
 
 // GetAnnotations returns the Annotations field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -483,6 +529,49 @@ func (o *InferenceSpecificRunParams) HasEnvironmentVariables() bool {
 // SetEnvironmentVariables gets a reference to the given []EnvironmentVariableOfAsset and assigns it to the EnvironmentVariables field.
 func (o *InferenceSpecificRunParams) SetEnvironmentVariables(v []EnvironmentVariableOfAsset) {
 	o.EnvironmentVariables = v
+}
+
+// GetGpuType returns the GpuType field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *InferenceSpecificRunParams) GetGpuType() string {
+	if o == nil || IsNil(o.GpuType.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.GpuType.Get()
+}
+
+// GetGpuTypeOk returns a tuple with the GpuType field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *InferenceSpecificRunParams) GetGpuTypeOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuType.Get(), o.GpuType.IsSet()
+}
+
+// HasGpuType returns a boolean if a field has been set.
+func (o *InferenceSpecificRunParams) HasGpuType() bool {
+	if o != nil && o.GpuType.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuType gets a reference to the given NullableString and assigns it to the GpuType field.
+func (o *InferenceSpecificRunParams) SetGpuType(v string) {
+	o.GpuType.Set(&v)
+}
+
+// SetGpuTypeNil sets the value for GpuType to be an explicit nil
+func (o *InferenceSpecificRunParams) SetGpuTypeNil() {
+	o.GpuType.Set(nil)
+}
+
+// UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
+func (o *InferenceSpecificRunParams) UnsetGpuType() {
+	o.GpuType.Unset()
 }
 
 // GetImagePullSecrets returns the ImagePullSecrets field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -1112,6 +1201,9 @@ func (o InferenceSpecificRunParams) ToMap() (map[string]interface{}, error) {
 	if o.ServingPortAccess.IsSet() {
 		toSerialize["servingPortAccess"] = o.ServingPortAccess.Get()
 	}
+	if o.Accelerator.IsSet() {
+		toSerialize["accelerator"] = o.Accelerator.Get()
+	}
 	if o.Annotations != nil {
 		toSerialize["annotations"] = o.Annotations
 	}
@@ -1132,6 +1224,9 @@ func (o InferenceSpecificRunParams) ToMap() (map[string]interface{}, error) {
 	}
 	if o.EnvironmentVariables != nil {
 		toSerialize["environmentVariables"] = o.EnvironmentVariables
+	}
+	if o.GpuType.IsSet() {
+		toSerialize["gpuType"] = o.GpuType.Get()
 	}
 	if o.ImagePullSecrets != nil {
 		toSerialize["imagePullSecrets"] = o.ImagePullSecrets

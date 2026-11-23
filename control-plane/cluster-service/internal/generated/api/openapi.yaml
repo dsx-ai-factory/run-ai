@@ -2316,6 +2316,60 @@ paths:
       x-test-coverage:
       - e2e/src/test/suites/playwright/serial/regression/node-pools/advancedNodePoolsApi.test.ts
     x-internal: true
+  /internal/clusters/{clusterUuid}/accelerators:
+    post:
+      operationId: get_node_pool_accelerators
+      parameters:
+      - description: The Universally Unique Identifier (UUID) of the cluster.
+        explode: false
+        in: path
+        name: clusterUuid
+        required: true
+        schema:
+          example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+          format: uuid
+          minLength: 1
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodePoolAcceleratorsRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectAccelerators'
+          description: Accelerator inventory for the requested pools
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get accelerator inventory for the supplied node pools
+      tags:
+      - Nodes
+      x-no-authorization: true
+      x-service: cluster-service
+      x-test-coverage:
+      - control-plane/cluster-service/pkg/services/api_nodepools_gpu_types_test.go
+    x-internal: true
   /internal/clusters/{clusterUuid}/nodes/{nodeName}:
     get:
       description: Returns minimal node data including topology labels for internal
@@ -7432,6 +7486,9 @@ components:
         - reason: KubeletNotReady
           type: type
           message: container runtime status check may not have completed yet
+        acceleratorResources:
+        - acceleratorResources
+        - acceleratorResources
         gpuInfo:
           gpuMemoryBytes: 85899345920
           gpuCount: 0
@@ -7442,6 +7499,12 @@ components:
           key: labels
         status: Ready
       properties:
+        acceleratorResources:
+          description: Positive Kubernetes extended resources used to match project accelerator selections.
+          items:
+            type: string
+          type: array
+          writeOnly: true
         labels:
           additionalProperties:
             type: string
@@ -7547,6 +7610,9 @@ components:
           - reason: KubeletNotReady
             type: type
             message: container runtime status check may not have completed yet
+          acceleratorResources:
+          - acceleratorResources
+          - acceleratorResources
           gpuInfo:
             gpuMemoryBytes: 85899345920
             gpuCount: 0
@@ -7585,6 +7651,9 @@ components:
             - reason: KubeletNotReady
               type: type
               message: container runtime status check may not have completed yet
+            acceleratorResources:
+            - acceleratorResources
+            - acceleratorResources
             gpuInfo:
               gpuMemoryBytes: 85899345920
               gpuCount: 0
@@ -7619,6 +7688,9 @@ components:
             - reason: KubeletNotReady
               type: type
               message: container runtime status check may not have completed yet
+            acceleratorResources:
+            - acceleratorResources
+            - acceleratorResources
             gpuInfo:
               gpuMemoryBytes: 85899345920
               gpuCount: 0
@@ -8934,6 +9006,107 @@ components:
       - id
       - name
       type: object
+    AcceleratorSelection:
+      example:
+        resourceName: resourceName
+        deviceLabelKey: deviceLabelKey
+        gpuType: gpuType
+      nullable: true
+      properties:
+        resourceName:
+          minLength: 1
+          type: string
+        deviceLabelKey:
+          minLength: 1
+          type: string
+        gpuType:
+          minLength: 1
+          type: string
+      required:
+      - deviceLabelKey
+      - gpuType
+      - resourceName
+      type: object
+    NodePoolAcceleratorsRequest:
+      example:
+        nodePoolIds:
+        - nodePoolIds
+        - nodePoolIds
+        selection:
+          resourceName: resourceName
+          deviceLabelKey: deviceLabelKey
+          gpuType: gpuType
+      properties:
+        nodePoolIds:
+          description: IDs of node pools assigned to the project.
+          items:
+            type: string
+          type: array
+        selection:
+          $ref: '#/components/schemas/AcceleratorSelection'
+      required:
+      - nodePoolIds
+      type: object
+    AcceleratorDevice:
+      example:
+        value: value
+        key: key
+      properties:
+        key:
+          description: Exact Kubernetes node label key for this device model.
+          type: string
+        value:
+          description: Exact Kubernetes node label value for this device model.
+          type: string
+      required:
+      - key
+      - value
+      type: object
+    AcceleratorOption:
+      example:
+        devices:
+        - value: value
+          key: key
+        - value: value
+          key: key
+        resourceName: resourceName
+      properties:
+        resourceName:
+          description: Allocatable Kubernetes extended resource name.
+          type: string
+        devices:
+          description: Model selectors observed alongside this resource on the same
+            node.
+          items:
+            $ref: '#/components/schemas/AcceleratorDevice'
+          type: array
+      required:
+      - devices
+      - resourceName
+      type: object
+    ProjectAccelerators:
+      example:
+        items:
+        - devices:
+          - value: value
+            key: key
+          - value: value
+            key: key
+          resourceName: resourceName
+        - devices:
+          - value: value
+            key: key
+          - value: value
+            key: key
+          resourceName: resourceName
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/AcceleratorOption'
+          type: array
+      required:
+      - items
+      type: object
     NetworkTopologyLabelValuesOptional:
       description: The topology levels of node (node address) according to nodepool
         assigned topology
@@ -9777,6 +9950,9 @@ components:
         - reason: KubeletNotReady
           type: type
           message: container runtime status check may not have completed yet
+        acceleratorResources:
+        - acceleratorResources
+        - acceleratorResources
         nvLinkDomainUid: nvlink-domain-uid
         status: Ready
         updatedAt: 2000-01-23T04:56:07.000+00:00
@@ -9817,6 +9993,9 @@ components:
           - reason: KubeletNotReady
             type: type
             message: container runtime status check may not have completed yet
+          acceleratorResources:
+          - acceleratorResources
+          - acceleratorResources
           nvLinkDomainUid: nvlink-domain-uid
           status: Ready
           updatedAt: 2000-01-23T04:56:07.000+00:00
@@ -9853,6 +10032,9 @@ components:
           - reason: KubeletNotReady
             type: type
             message: container runtime status check may not have completed yet
+          acceleratorResources:
+          - acceleratorResources
+          - acceleratorResources
           nvLinkDomainUid: nvlink-domain-uid
           status: Ready
           updatedAt: 2000-01-23T04:56:07.000+00:00
@@ -9953,6 +10135,9 @@ components:
         - reason: KubeletNotReady
           type: type
           message: container runtime status check may not have completed yet
+        acceleratorResources:
+        - acceleratorResources
+        - acceleratorResources
         nvLinkDomainUid: nvlink-domain-uid
         status: Ready
         updatedAt: 2000-01-23T04:56:07.000+00:00

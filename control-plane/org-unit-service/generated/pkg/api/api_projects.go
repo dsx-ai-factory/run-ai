@@ -298,6 +298,28 @@ func (c *ProjectsAPIController) Routes() Routes {
 			),
 			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
 		},
+		"GetProjectAccelerators": Route{
+			strings.ToUpper("Get"),
+			"/api/v1/org-unit/projects/{projectId}/accelerators",
+			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
+			BuildHandlerChain(
+				func(next http.HandlerFunc) http.HandlerFunc {
+					return c.authorizationClient.AuthorizeMiddleware(
+						next,
+						"project",
+						"read",
+						true,
+						"projectId",
+					)
+				},
+				func(next http.HandlerFunc) http.HandlerFunc {
+					////////////////////////////// RUNAI END (11.4) ///////////////////////////////
+					return c.GetProjectAccelerators
+					////////////////////////////// RUNAI START (11.5) ///////////////////////////////
+				},
+			),
+			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
+		},
 		"UpdateProjectResources": Route{
 			strings.ToUpper("Put"),
 			"/api/v1/org-unit/projects/{projectId}/resources",
@@ -1387,6 +1409,91 @@ func (c *ProjectsAPIController) DeleteProject(w http.ResponseWriter, r *http.Req
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
+
+	////////////////////////////// RUNAI END ///////////////////////////////
+
+	// If no error, encode the body and the result code
+	EncodeJSONResponse(result.Body, &result.Code, w)
+
+}
+
+// GetProjectAccelerators - List accelerator resources and models accessible to a project
+func (c *ProjectsAPIController) GetProjectAccelerators(w http.ResponseWriter, r *http.Request) {
+	query, err := parseQuery(r.URL.RawQuery)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
+		return
+	}
+	projectIdParam := chi.URLParam(r, "projectId")
+	if projectIdParam == "" {
+		c.errorHandler(w, r, &RequiredError{"projectId"}, nil, nil)
+		return
+	}
+	var resourceNameParam string
+	if query.Has("resourceName") {
+		param := query.Get("resourceName")
+
+		resourceNameParam = param
+	} else {
+	}
+	var deviceLabelKeyParam string
+	if query.Has("deviceLabelKey") {
+		param := query.Get("deviceLabelKey")
+
+		deviceLabelKeyParam = param
+	} else {
+	}
+	var gpuTypeParam string
+	if query.Has("gpuType") {
+		param := query.Get("gpuType")
+
+		gpuTypeParam = param
+	} else {
+	}
+	result, err := c.service.GetProjectAccelerators(r.Context(), projectIdParam, resourceNameParam, deviceLabelKeyParam, gpuTypeParam)
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result, nil)
+		return
+	}
+	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
+
+	if result.Code == 200 {
+		// generated from status code: 200
+		acceptHeader := r.Header.Get("Accept")
+		acceptTypes := strings.Split(acceptHeader, ",")
+
+		var contentTypeHandler func(interface{}, *int, http.ResponseWriter) error
+
+		for _, acceptType := range acceptTypes {
+			// Trim spaces and handle quality values (e.g., "text/html;q=0.9")
+			acceptType = strings.TrimSpace(strings.Split(acceptType, ";")[0])
+
+			switch acceptType {
+			case "*/*":
+				// fallback to default server defined value
+				contentTypeHandler = nil
+			case "application/json", "application/*":
+				contentTypeHandler = EncodeJSONResponse
+			}
+
+			if contentTypeHandler != nil {
+				break
+			}
+		}
+
+		// If no acceptable content type was found, default to server defined default
+		if contentTypeHandler == nil {
+		}
+
+		// If no default content type was found, default to application/json
+		if contentTypeHandler == nil {
+			contentTypeHandler = EncodeJSONResponse
+		}
+		contentTypeHandler(result.Body, &result.Code, w)
+
+		return
+	}
 
 	////////////////////////////// RUNAI END ///////////////////////////////
 

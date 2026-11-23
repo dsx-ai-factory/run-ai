@@ -267,6 +267,12 @@ func createWorkload(ctx context.Context, backendClient clients.TenantSettingsCli
 		return rebuildErr
 	}
 
+	warnings, selectionErr := resolveWorkloadAccelerators(ctx, params.Response.ProjectId, responseSpec, responseMasterSpec)
+	if selectionErr != nil {
+		return selectionErr
+	}
+	params.Response.Warnings = warnings
+
 	responseSpec, priorityClassError := applyPriorityClassLabelWorkaround(ctx, responseSpec, workloadType, params.Response.ClusterId)
 	if priorityClassError != nil {
 		return workloadsApi.NewSubmissionErrorV2(priorityClassError.Code, priorityClassError.Message)
