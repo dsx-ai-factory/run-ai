@@ -76,9 +76,38 @@ The controller manages routing resources; it does not create serving workloads.
 | `make validate` | Regenerate and check API, CRD, and Helm RBAC artifacts |
 | `make test-e2e` | Create a disposable Kind cluster and run the smoke suite |
 | `make generate manifests copy-crds` | Update deepcopy, CRD, RBAC, and packaged manifests |
+| `make format` | Shared Go formatting |
 | `make run` | Run against the selected kubeconfig |
+| `make docker-build IMG=<image>` | Build the host-architecture binary and a test image; used by the Kind smoke suite |
+| `make install` / `make uninstall` | Apply or delete the CRD from `config/crd` on the selected cluster |
+| `make deploy IMG=<image>` / `make undeploy` | Apply or delete the standalone test deployment from `config/default` |
+| `make build-installer` | Write the `config/default` manifests to `dist/install.yaml` |
+| `make controller-gen`, `make kustomize`, `make setup-envtest` | Install the pinned tools into `bin/` |
 
-For host-side Linux image builds use `OS=linux ARCH=amd64`, as in `local-dev.sh`.
+### Local build (local-dev.sh)
+
+`inference-endpoint-controller` is a runai-cluster Go service (listed in `RC_GO_SERVICES` in
+[`local-dev.sh`](../../../local-dev.sh)). `local-dev.sh` builds amd64 only, with the image tag
+`0.0.0-dev` that the runai-cluster chart values reference:
+
+```bash
+# amd64, what local-dev.sh runs (build_go_service)
+make build-go-amd OS=linux ARCH=amd64 DOCKERHUB_PROXY= GITHUB_TOKEN=
+docker build --build-arg TARGETARCH=amd64 -t runai-local/inference-endpoint-controller:0.0.0-dev .
+```
+
+For an arm64 cluster, build manually. `build-go-arm` sets `GOOS=linux GOARCH=arm64` itself, so
+do not pass `OS=` or `ARCH=`:
+
+```bash
+# arm64, manual
+make build-go-arm DOCKERHUB_PROXY= GITHUB_TOKEN=
+docker build --build-arg TARGETARCH=arm64 -t runai-local/inference-endpoint-controller:0.0.0-dev .
+```
+
+To rebuild and redeploy only the cluster services, run `./local-dev.sh --skip-build-cp --skip-cluster`
+from the repository root.
+
 The normal artifact metadata drives PR/release builds and controller image inventory.
 The scoped GitHub workflow adds the Kind smoke test.
 

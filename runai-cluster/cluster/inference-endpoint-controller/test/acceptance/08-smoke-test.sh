@@ -20,6 +20,15 @@ trap cleanup EXIT
 gateway_svc() {
   kubectl get svc -n "$NS" -l "gateway.networking.k8s.io/gateway-name=${GW}" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null
 }
+# forward <target> <local:remote>: start a port-forward and report whether it is still running.
+# kubectl exits at once when the local port is taken, so a dead process means no forward.
+forward() {
+  kubectl port-forward -n "$NS" "$1" "$2" >/dev/null 2>&1 &
+  local pid=$!
+  pf_pids+=("$pid")
+  sleep 3
+  kill -0 "$pid" 2>/dev/null
+}
 chat() { # chat <extra curl args...>
   curl -s -m 30 "http://localhost:${LOCAL_PORT}/v1/chat/completions" -H "Host: ${HOST}" -H 'Content-Type: application/json' "$@" \
     -d '{"model":"llama3","messages":[{"role":"user","content":"Hello!"}],"max_tokens":20}'
@@ -46,38 +55,52 @@ echo "  ${flag:-<flag line not found>}"
 [ "$flag" = '"secure-serving":true' ] && ok "secure-serving true in EPP flags" || echo "  (could not confirm from logs; not fatal, agentgateway will tell us in check 6)"
 
 step 4 "EPP sees the pool's pods (metrics, bearer token required)"
-kubectl port-forward -n "$NS" svc/llama3-epp 9090:9090 >/dev/null 2>&1 & pf_pids+=($!); sleep 3
-TOKEN=$(kubectl create token llama3-epp -n "$NS" --duration=10m 2>/dev/null)
-metrics=$(curl -s -m 10 -H "Authorization: Bearer ${TOKEN}" localhost:9090/metrics)
-ready=$(echo "$metrics" | grep -E '^inference_pool_ready_pods' | head -1)
-echo "  ${ready:-<no inference_pool_ready_pods line; families: $(echo "$metrics" | grep '^# TYPE inference' | awk '{print $3}' | tr '\n' ' ')>}"
-echo "$ready" | grep -qE ' 3(\.0)?$' && ok "inference_pool_ready_pods = 3" || bad "expected 3 ready pods"
+if forward svc/llama3-epp 9090:9090; then
+  TOKEN=$(kubectl create token llama3-epp -n "$NS" --duration=10m 2>/dev/null)
+  metrics=$(curl -s -m 10 -H "Authorization: Bearer ${TOKEN}" localhost:9090/metrics)
+  ready=$(echo "$metrics" | grep -E '^inference_pool_ready_pods' | head -1)
+  echo "  ${ready:-<no inference_pool_ready_pods line; families: $(echo "$metrics" | grep '^# TYPE inference' | awk '{print $3}' | tr '\n' ' ')>}"
+  echo "$ready" | grep -qE ' 3(\.0)?$' && ok "inference_pool_ready_pods = 3" || bad "expected 3 ready pods"
+else
+  bad "port-forward to svc/llama3-epp failed; is local port 9090 in use?"
+fi
 
 step 5 "A sim answers directly (bypass the gateway)"
 POD=$(kubectl get pods -n "$NS" -l app=vllm-llama3 -o jsonpath='{.items[0].metadata.name}')
-kubectl port-forward -n "$NS" "pod/$POD" 8000:8000 >/dev/null 2>&1 & pf_pids+=($!); sleep 2
-r=$(curl -s -m 10 localhost:8000/v1/chat/completions -H 'Content-Type: application/json' -d '{"model":"llama3","messages":[{"role":"user","content":"Hello!"}],"max_tokens":20}')
-echo "$r" | grep -q '"choices"' && ok "direct sim response has choices" || bad "direct sim response: $r"
+if forward "pod/$POD" 8000:8000; then
+  r=$(curl -s -m 10 localhost:8000/v1/chat/completions -H 'Content-Type: application/json' -d '{"model":"llama3","messages":[{"role":"user","content":"Hello!"}],"max_tokens":20}')
+  echo "$r" | grep -q '"choices"' && ok "direct sim response has choices" || bad "direct sim response: $r"
+else
+  bad "port-forward to pod/$POD failed; is local port 8000 in use?"
+fi
 
 step 6 "End to end: client → agentgateway → HTTPRoute → InferencePool → EPP → sim"
 SVC=$(gateway_svc); echo "  gateway service: ${SVC:-<not found>}"
-[ -z "$SVC" ] && bad "no Service labeled gateway-name=$GW in $NS" || {
-  kubectl port-forward -n "$NS" "svc/$SVC" "${LOCAL_PORT}:80" >/dev/null 2>&1 & pf_pids+=($!); sleep 2
+gw_forward=0
+if [ -z "$SVC" ]; then
+  bad "no Service labeled gateway-name=$GW in $NS"
+elif forward "svc/$SVC" "${LOCAL_PORT}:80"; then
+  gw_forward=1
   r=$(chat)
   echo "$r" | grep -q '"choices"' && ok "e2e response has choices" || bad "e2e response: $r"
   kubectl logs -n "$NS" deploy/llama3-epp --tail=100 | grep -qi 'Scheduling succeeded\|scheduling.*succeeded\|selected.*endpoint' \
     && ok "EPP log shows a scheduling decision" || echo "  (no 'Scheduling succeeded' line found at this verbosity)"
-}
+else
+  bad "port-forward to svc/$SVC failed; is local port ${LOCAL_PORT} in use?"
+fi
 
 step 7 "Load awareness: 30 parallel requests, look at which pods were picked"
-SVC=$(gateway_svc)
-[ -n "$SVC" ] && {
-  load_pids=(); for i in $(seq 1 30); do chat >/dev/null & load_pids+=($!); done; wait "${load_pids[@]}"
+if [ "$gw_forward" = 1 ]; then
+  # Each request runs in its own subshell that exits 0 only when the response has choices.
+  load_pids=(); for i in $(seq 1 30); do ( r=$(chat); case "$r" in *'"choices"'*) exit 0 ;; *) exit 1 ;; esac ) & load_pids+=($!); done
+  load_failed=0; for p in "${load_pids[@]}"; do wait "$p" || load_failed=$((load_failed+1)); done
+  [ "$load_failed" -eq 0 ] && ok "30 of 30 parallel requests returned choices" || bad "$load_failed of 30 parallel requests failed"
   echo "  destination endpoints chosen (from EPP logs):"
   kubectl logs -n "$NS" deploy/llama3-epp --tail=400 | grep -oE '10\.[0-9]+\.[0-9]+\.[0-9]+:8000' | sort | uniq -c | sort -rn | head -5
   echo "  a spread that is NOT perfectly even is expected: the EPP prefers pods with shorter queues"
-  ok "load test sent; inspect the spread above"
-}
+else
+  bad "load test skipped: no port-forward to the gateway"
+fi
 
 printf '\n\033[1mResult: %d passed, %d failed\033[0m\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ]

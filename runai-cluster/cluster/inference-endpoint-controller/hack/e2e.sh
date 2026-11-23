@@ -124,8 +124,13 @@ json.dump({"apiVersion": "v1", "kind": "List", "items": keep}, sys.stdout)
     | kubectl apply -n "$ns" -f - >/dev/null
 }
 
+# The golden namespace is deleted only when this run created it, so a namespace that already
+# holds someone else's resources is never removed.
+GOLDEN_NS_CREATED=0
 cleanup_golden() {
+  [[ "$GOLDEN_NS_CREATED" == 1 ]] || return 0
   kubectl delete namespace "$GOLDEN_NS" --ignore-not-found --wait=false >/dev/null 2>&1 || true
+  GOLDEN_NS_CREATED=0
 }
 trap cleanup_golden EXIT
 
@@ -134,6 +139,14 @@ kubectl get gateway "$GW" -n "$NS" >/dev/null && ok "Gateway $GW exists in $NS" 
 kubectl get crd inferenceendpoints.inference.platform.run.ai >/dev/null 2>&1 && ok "InferenceEndpoint CRD installed" || { bad "CRD missing, run make install"; exit 1; }
 sims=$(kubectl get pods -n "$NS" -l app=vllm-llama3 --field-selector=status.phase=Running -o name | wc -l | tr -d ' ')
 [[ "$sims" -ge 1 ]] && ok "$sims simulator pod(s) running" || bad "no simulator pods with app=vllm-llama3 in $NS"
+# create fails when the namespace exists, so success means this run owns it.
+if kubectl create namespace "$GOLDEN_NS" >/dev/null 2>&1; then
+  GOLDEN_NS_CREATED=1
+  ok "created namespace $GOLDEN_NS for the hand-applied golden objects"
+else
+  bad "namespace $GOLDEN_NS already exists or cannot be created; delete it or set GOLDEN_NS to an unused name"
+  exit 1
+fi
 
 step 1 "GOLDEN DIFF · one CR in, the Track A stack out"
 kubectl apply -f "$SAMPLE" >/dev/null && ok "applied $SAMPLE"
@@ -151,7 +164,6 @@ for ref in "${CHILDREN[@]}"; do
   fi
 done
 
-kubectl create namespace "$GOLDEN_NS" --dry-run=client -o yaml | kubectl apply -f - >/dev/null
 for f in 03-inferencepool.yaml 04-epp.yaml 05-httproute.yaml; do
   apply_golden_namespaced "${GOLDEN_DIR}/${f}" "$GOLDEN_NS"
 done

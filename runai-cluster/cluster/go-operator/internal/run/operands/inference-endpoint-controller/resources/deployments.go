@@ -8,6 +8,7 @@ package resources
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strconv"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -27,6 +28,11 @@ import (
 const (
 	DeploymentName = operands.RunaiInferenceEndpointControllerName
 	appLabelKey    = "app"
+
+	defaultHealthProbePort   int32 = 8081
+	alternateHealthProbePort int32 = 8082
+
+	allCapabilities v1.Capability = "ALL"
 )
 
 type DeploymentResource struct {
@@ -95,8 +101,8 @@ func (d *DeploymentResource) Object(ctx context.Context) (client.Object, error) 
 				VolumeMounts:    outils.GlobalVolumeMounts(d.runaiConfig),
 				Args:            deploymentArgs(d.runaiConfig),
 				Env:             []v1.EnvVar{{Name: "GODEBUG", Value: outils.FipsGodebugValue(d.runaiConfig, "off")}},
-				LivenessProbe:   &v1.Probe{ProbeHandler: v1.ProbeHandler{HTTPGet: &v1.HTTPGetAction{Path: "/healthz", Port: intstr.FromInt32(8081)}}, InitialDelaySeconds: 15, PeriodSeconds: 20},
-				ReadinessProbe:  &v1.Probe{ProbeHandler: v1.ProbeHandler{HTTPGet: &v1.HTTPGetAction{Path: "/readyz", Port: intstr.FromInt32(8081)}}, InitialDelaySeconds: 5, PeriodSeconds: 10},
+				LivenessProbe:   &v1.Probe{ProbeHandler: v1.ProbeHandler{HTTPGet: &v1.HTTPGetAction{Path: "/healthz", Port: intstr.FromInt32(healthProbePort(config.Metrics.Port))}}, InitialDelaySeconds: 15, PeriodSeconds: 20},
+				ReadinessProbe:  &v1.Probe{ProbeHandler: v1.ProbeHandler{HTTPGet: &v1.HTTPGetAction{Path: "/readyz", Port: intstr.FromInt32(healthProbePort(config.Metrics.Port))}}, InitialDelaySeconds: 5, PeriodSeconds: 10},
 				Ports: []v1.ContainerPort{
 					{
 						ContainerPort: config.Metrics.Port,
@@ -153,7 +159,7 @@ func deploymentArgs(runaiConfig *runaiv1.RunaiConfig) []string {
 	}
 	return []string{
 		"--leader-elect",
-		"--health-probe-bind-address=:8081",
+		"--health-probe-bind-address=:" + strconv.Itoa(int(healthProbePort(config.Metrics.Port))),
 		"--metrics-bind-address=:" + strconv.Itoa(int(config.Metrics.Port)),
 		"--metrics-secure=false",
 		"--metrics-scrape-namespace=" + *config.MetricsScrapeNamespace,
@@ -161,6 +167,16 @@ func deploymentArgs(runaiConfig *runaiv1.RunaiConfig) []string {
 		"--zap-encoder=json",
 		"--zap-devel=false",
 	}
+}
+
+// healthProbePort returns the port of the health probe listener. The metrics port is
+// configurable and the two listeners cannot share a port, so the probe moves when the
+// administrator assigns its default port to metrics.
+func healthProbePort(metricsPort int32) int32 {
+	if metricsPort == defaultHealthProbePort {
+		return alternateHealthProbePort
+	}
+	return defaultHealthProbePort
 }
 
 // controllerSecurityContext preserves administrator overrides and lets OpenShift
@@ -184,8 +200,9 @@ func controllerSecurityContext(config *runaiv1.RunaiConfig) *v1.SecurityContext 
 	if security.Capabilities == nil {
 		security.Capabilities = &v1.Capabilities{}
 	}
-	if len(security.Capabilities.Drop) == 0 {
-		security.Capabilities.Drop = []v1.Capability{"ALL"}
+	// The controller needs no capabilities, so ALL is dropped next to any administrator entries.
+	if !slices.Contains(security.Capabilities.Drop, allCapabilities) {
+		security.Capabilities.Drop = append(security.Capabilities.Drop, allCapabilities)
 	}
 	if security.SeccompProfile == nil {
 		security.SeccompProfile = &v1.SeccompProfile{Type: v1.SeccompProfileTypeRuntimeDefault}

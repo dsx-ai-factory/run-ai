@@ -347,6 +347,13 @@ var _ = Describe("Render", func() {
 		Entry("scorer without plugin", func(in *render.Input) { in.Scorers = []render.Scorer{{Plugin: "", Weight: 1}} }),
 	)
 
+	It("accepts a metrics namespace with consecutive dashes", func() {
+		in := llama3Input()
+		in.MetricsNamespace = "monitoring--prod"
+		_, err := render.Render(in)
+		Expect(err).NotTo(HaveOccurred())
+	})
+
 	It("accepts the longest name whose EPP Service is still a DNS label", func() {
 		in := llama3Input()
 		in.Name = strings.Repeat("a", 59)

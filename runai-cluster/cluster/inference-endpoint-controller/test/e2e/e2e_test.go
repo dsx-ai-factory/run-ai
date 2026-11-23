@@ -26,10 +26,10 @@ package e2e
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -83,21 +83,26 @@ var _ = Describe("Manager", Ordered, func() {
 	// After all tests have been executed, clean up by undeploying the controller, uninstalling CRDs,
 	// and deleting the namespace.
 	AfterAll(func() {
-		By("cleaning up the curl pod for metrics")
-		cmd := exec.Command("kubectl", "delete", "pod", "curl-metrics", "-n", namespace)
-		_, _ = utils.Run(cmd)
+		// Every step runs even when an earlier one fails; the failures are reported together.
+		var cleanupErrs []error
+		cleanup := func(step string, cmd *exec.Cmd) {
+			By(step)
+			if _, err := utils.Run(cmd); err != nil {
+				cleanupErrs = append(cleanupErrs, fmt.Errorf("%s: %w", step, err))
+			}
+		}
 
-		By("undeploying the controller-manager")
-		cmd = exec.Command("make", "undeploy")
-		_, _ = utils.Run(cmd)
+		cleanup("cleaning up the curl pod for metrics",
+			exec.Command("kubectl", "delete", "pod", "curl-metrics", "-n", namespace, "--ignore-not-found"))
+		cleanup("undeploying the controller-manager", exec.Command("make", "undeploy"))
+		cleanup("uninstalling CRDs", exec.Command("make", "uninstall"))
+		// The binding is cluster-scoped and not part of config/default, so nothing else removes it.
+		cleanup("removing the metrics ClusterRoleBinding",
+			exec.Command("kubectl", "delete", "clusterrolebinding", metricsRoleBindingName, "--ignore-not-found"))
+		cleanup("removing manager namespace",
+			exec.Command("kubectl", "delete", "ns", namespace, "--ignore-not-found"))
 
-		By("uninstalling CRDs")
-		cmd = exec.Command("make", "uninstall")
-		_, _ = utils.Run(cmd)
-
-		By("removing manager namespace")
-		cmd = exec.Command("kubectl", "delete", "ns", namespace)
-		_, _ = utils.Run(cmd)
+		Expect(errors.Join(cleanupErrs...)).NotTo(HaveOccurred(), "cleanup left resources behind")
 	})
 
 	// After each test, check for failures and collect logs, events,
@@ -193,11 +198,6 @@ var _ = Describe("Manager", Ordered, func() {
 			_, err = utils.Run(cmd)
 			Expect(err).NotTo(HaveOccurred(), "Metrics service should exist")
 
-			By("getting the service account token")
-			token, err := serviceAccountToken()
-			Expect(err).NotTo(HaveOccurred())
-			Expect(token).NotTo(BeEmpty())
-
 			By("ensuring the controller pod is ready")
 			verifyControllerPodReady := func(g Gomega) {
 				cmd := exec.Command("kubectl", "get", "pod", controllerPodName, "-n", namespace,
@@ -220,6 +220,15 @@ var _ = Describe("Manager", Ordered, func() {
 
 			// +kubebuilder:scaffold:e2e-metrics-webhooks-readiness
 
+			// The Pod reads the token kubelet mounts for its service account, so the token never
+			// appears in the command line, the Pod spec, or the test output.
+			curlScript, err := json.Marshal(fmt.Sprintf("for i in $(seq 1 30); do "+
+				"curl -s -f -k -o /dev/null -w 'http_code=%%{http_code}\\n' "+
+				"-H \"Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\" "+
+				"https://%s.%s.svc.cluster.local:8443/metrics && exit 0 || sleep 2; done; exit 1",
+				metricsServiceName, namespace))
+			Expect(err).NotTo(HaveOccurred())
+
 			By("creating the curl-metrics pod to access the metrics endpoint")
 			cmd = exec.Command("kubectl", "run", "curl-metrics", "--restart=Never",
 				"--namespace", namespace,
@@ -231,9 +240,7 @@ var _ = Describe("Manager", Ordered, func() {
 							"name": "curl",
 							"image": "curlimages/curl:latest",
 							"command": ["/bin/sh", "-c"],
-							"args": [
-								"for i in $(seq 1 30); do curl -v -k -H 'Authorization: Bearer %s' https://%s.%s.svc.cluster.local:8443/metrics && exit 0 || sleep 2; done; exit 1"
-							],
+							"args": [%s],
 							"securityContext": {
 								"readOnlyRootFilesystem": true,
 								"allowPrivilegeEscalation": false,
@@ -247,9 +254,10 @@ var _ = Describe("Manager", Ordered, func() {
 								}
 							}
 						}],
-						"serviceAccountName": "%s"
+						"serviceAccountName": "%s",
+						"automountServiceAccountToken": true
 					}
-				}`, token, metricsServiceName, namespace, serviceAccountName))
+				}`, curlScript, serviceAccountName))
 			_, err = utils.Run(cmd)
 			Expect(err).NotTo(HaveOccurred(), "Failed to create curl-metrics pod")
 
@@ -269,7 +277,7 @@ var _ = Describe("Manager", Ordered, func() {
 				metricsOutput, err := getMetricsOutput()
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to retrieve logs from curl pod")
 				g.Expect(metricsOutput).NotTo(BeEmpty())
-				g.Expect(metricsOutput).To(ContainSubstring("< HTTP/1.1 200 OK"))
+				g.Expect(metricsOutput).To(ContainSubstring("http_code=200"))
 			}
 			Eventually(verifyMetricsAvailable, 2*time.Minute).Should(Succeed())
 		})
@@ -294,58 +302,9 @@ var _ = Describe("Manager", Ordered, func() {
 	})
 })
 
-// serviceAccountToken returns a token for the specified service account in the given namespace.
-// It uses the Kubernetes TokenRequest API to generate a token by directly sending a request
-// and parsing the resulting token from the API response.
-func serviceAccountToken() (string, error) {
-	const tokenRequestRawString = `{
-		"apiVersion": "authentication.k8s.io/v1",
-		"kind": "TokenRequest"
-	}`
-
-	By("creating temporary file to store the token request")
-	secretName := fmt.Sprintf("%s-token-request", serviceAccountName)
-	tokenRequestFile := filepath.Join("/tmp", secretName)
-	err := os.WriteFile(tokenRequestFile, []byte(tokenRequestRawString), os.FileMode(0o644))
-	if err != nil {
-		return "", err
-	}
-
-	var out string
-	verifyTokenCreation := func(g Gomega) {
-		By("executing kubectl command to create the token")
-		cmd := exec.Command("kubectl", "create", "--raw", fmt.Sprintf(
-			"/api/v1/namespaces/%s/serviceaccounts/%s/token",
-			namespace,
-			serviceAccountName,
-		), "-f", tokenRequestFile)
-
-		output, err := cmd.CombinedOutput()
-		g.Expect(err).NotTo(HaveOccurred())
-
-		By("parsing the JSON output to extract the token")
-		var token tokenRequest
-		err = json.Unmarshal(output, &token)
-		g.Expect(err).NotTo(HaveOccurred())
-
-		out = token.Status.Token
-	}
-	Eventually(verifyTokenCreation).Should(Succeed())
-
-	return out, err
-}
-
 // getMetricsOutput retrieves and returns the logs from the curl pod used to access the metrics endpoint.
 func getMetricsOutput() (string, error) {
 	By("getting the curl-metrics logs")
 	cmd := exec.Command("kubectl", "logs", "curl-metrics", "-n", namespace)
 	return utils.Run(cmd)
-}
-
-// tokenRequest is a simplified representation of the Kubernetes TokenRequest API response,
-// containing only the token field that we need to extract.
-type tokenRequest struct {
-	Status struct {
-		Token string `json:"token"`
-	} `json:"status"`
 }

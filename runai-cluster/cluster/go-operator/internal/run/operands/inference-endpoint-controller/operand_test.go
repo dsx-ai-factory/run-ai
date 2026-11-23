@@ -8,6 +8,7 @@ package inference_endpoint_controller
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/inference-endpoint-controller/resources"
@@ -124,6 +125,29 @@ var _ = Describe("Inference endpoint operand", func() {
 		Expect(security.Capabilities.Add).To(Equal([]corev1.Capability{"NET_BIND_SERVICE"}))
 		Expect(*global).To(Equal(before))
 	})
+
+	It("drops ALL capabilities next to a drop list set by the administrator", func() {
+		config.Spec.Global.SecurityContext.Capabilities.Drop = []corev1.Capability{"NET_RAW"}
+		object, err := resources.NewDeploymentResource(Name, reader, config).Object(context.Background())
+		Expect(err).NotTo(HaveOccurred())
+		security := object.(*appsv1.Deployment).Spec.Template.Spec.Containers[0].SecurityContext
+		Expect(security.Capabilities.Drop).To(ConsistOf(corev1.Capability("NET_RAW"), corev1.Capability("ALL")))
+		Expect(config.Spec.Global.SecurityContext.Capabilities.Drop).To(Equal([]corev1.Capability{"NET_RAW"}))
+	})
+
+	DescribeTable("keeps the health probe listener off the metrics port", func(metricsPort, healthPort int32) {
+		config.Spec.InferenceEndpointController.Metrics.Port = metricsPort
+		object, err := resources.NewDeploymentResource(Name, reader, config).Object(context.Background())
+		Expect(err).NotTo(HaveOccurred())
+		container := object.(*appsv1.Deployment).Spec.Template.Spec.Containers[0]
+		Expect(container.Args).To(ContainElement(fmt.Sprintf("--metrics-bind-address=:%d", metricsPort)))
+		Expect(container.Args).To(ContainElement(fmt.Sprintf("--health-probe-bind-address=:%d", healthPort)))
+		Expect(container.LivenessProbe.HTTPGet.Port.IntValue()).To(Equal(int(healthPort)))
+		Expect(container.ReadinessProbe.HTTPGet.Port.IntValue()).To(Equal(int(healthPort)))
+	},
+		Entry("metrics on another port", int32(8080), int32(8081)),
+		Entry("metrics on the default health probe port", int32(8081), int32(8082)),
+	)
 
 	It("connects the metrics monitor to the controller without sending a service account token", func() {
 		deploymentObject, err := resources.NewDeploymentResource(Name, reader, config).Object(context.Background())

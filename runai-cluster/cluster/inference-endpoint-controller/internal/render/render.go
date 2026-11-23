@@ -28,6 +28,7 @@ import (
 	"text/template"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/util/validation"
 	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
 )
 
@@ -156,9 +157,9 @@ func (in *Input) validate() error {
 	if in.EppImage == "" {
 		errs = append(errs, errors.New("epp image is required"))
 	}
-	// A namespace is a DNS label, so a valid value is unchanged by DNSLabel.
-	if in.MetricsNamespace == "" || DNSLabel(in.MetricsNamespace) != in.MetricsNamespace {
-		errs = append(errs, fmt.Errorf("metrics namespace %q is not a DNS label", in.MetricsNamespace))
+	// DNSLabel collapses repeated dashes, so it cannot be used to check a namespace such as "a--b".
+	if msgs := validation.IsDNS1123Label(in.MetricsNamespace); len(msgs) > 0 {
+		errs = append(errs, fmt.Errorf("metrics namespace %q is not a DNS label: %s", in.MetricsNamespace, strings.Join(msgs, "; ")))
 	}
 	for i, s := range in.Scorers {
 		if s.Plugin == "" {

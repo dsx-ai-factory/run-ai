@@ -11,8 +11,10 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/common"
 	appsv1 "k8s.io/api/apps/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 // An Available condition alone can describe old pods during a blocked upgrade.
@@ -40,6 +42,12 @@ func (rp *RunaiPublic) inferenceEndpointIntegrationAvailable(ctx context.Context
 		}
 		deployment := &appsv1.Deployment{}
 		if err := component.reader.Get(ctx, client.ObjectKey{Namespace: rp.runaiConfig.Namespace, Name: component.name}, deployment); err != nil {
+			// A missing Deployment is expected while the component installs; any other error
+			// hides the capability for a reason the administrator has to see.
+			if !apierrors.IsNotFound(err) {
+				log.FromContext(ctx).Error(err, "Failed to get Deployment, withholding the inference endpoint capability",
+					"deployment", component.name, "namespace", rp.runaiConfig.Namespace)
+			}
 			return false
 		}
 		replicas := ptr.Deref(deployment.Spec.Replicas, 1)

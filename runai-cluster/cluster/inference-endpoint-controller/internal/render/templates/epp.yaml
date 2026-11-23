@@ -8,6 +8,8 @@ kind: ServiceAccount
 metadata:
   name: {{ printf "%s-epp" .Name | toJSON }}
   namespace: {{ .Namespace | toJSON }}
+# The EPP Pod opts in explicitly; other Pods that use this account get no token.
+automountServiceAccountToken: false
 ---
 apiVersion: v1
 kind: ConfigMap
