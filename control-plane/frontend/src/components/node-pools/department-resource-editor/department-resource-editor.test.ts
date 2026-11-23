@@ -13,6 +13,44 @@ const popup = {
   emits: ["apply", "reset", "before-show"],
 };
 describe("resource editor opening transition", () => {
+  it("waits for project quotas before showing the pool capacity warning", async () => {
+    let finishLoading!: () => void;
+    const pending = new Promise<void>((resolve) => {
+      finishLoading = resolve;
+    });
+    const wrapper = mount(Editor, {
+      props: {
+        id: "a",
+        kind: EResourceEditorKind.Quota,
+        value: 1,
+        loadContext: async () => {
+          await pending;
+          return { childQuotaSum: 0, capacity: 0 };
+        },
+      },
+      global: { plugins: [Quasar], stubs: { EditableCellPopup: popup } },
+    });
+    try {
+      const menu = wrapper.getComponent(popup);
+      menu.vm.$emit("before-show");
+      await wrapper.vm.$nextTick();
+      expect(wrapper.find('[aria-label="Loading project quotas"]').exists()).toBe(true);
+      expect(menu.props("isSubmitDisabled")).toBe(true);
+      expect(wrapper.getComponent(QInput).props("error")).toBe(false);
+      expect(wrapper.text()).not.toContain("Project quota totals are unavailable.");
+      expect(wrapper.find(".text-warning").exists()).toBe(false);
+
+      finishLoading();
+      await flushPromises();
+      expect(wrapper.find('[aria-label="Loading project quotas"]').exists()).toBe(false);
+      expect(wrapper.get("p.text-warning").text()).toContain("exceeds the node pool’s total");
+      expect(wrapper.getComponent(QInput).props("error")).toBe(false);
+      expect(menu.props("isSubmitDisabled")).toBe(false);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
   it("does not overwrite input entered while the popup is opening", async () => {
     const wrapper = mount(Editor, {
       props: { id: "a", kind: EResourceEditorKind.Weight, value: 2 },

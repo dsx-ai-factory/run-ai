@@ -195,6 +195,7 @@ const active = ref(false);
 const loadError = ref("");
 let request = 0;
 const validation = computed(() => {
+  if (loading.value) return { errors: [], warnings: [] };
   const value = parsedValue();
   const result = validateDepartmentEdit(
     {
