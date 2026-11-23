@@ -79,6 +79,68 @@ describe("scheduling step foundation", () => {
     }
   });
 
+  it.each(["ranked", "proportional"])(
+    "requires cluster-wide update permission when saving a weights-off Ranked pool as %s",
+    async (mode) => {
+      const wrapper = render({
+        ...pool,
+        schedulingCapabilities: { quota: false, ranks: true, adjustableWeights: false, cpuQuota: false, limits: false },
+      });
+      try {
+        await wrapper.setProps({ canSavePool: true, canResetResources: false });
+        await wrapper.get(`[aid="mode-${mode}"]`).trigger("click");
+        const save = wrapper.get('[aid="scheduling-save-close"]');
+        expect(wrapper.get('[role="alert"]').text()).toContain(
+          "Using adjustable weights without GPU quota requires update permission for all departments and projects in this cluster.",
+        );
+        expect(save.attributes("disabled")).toBeDefined();
+        saveMocks.patchPool.mockClear();
+        await save.trigger("click");
+        await flushPromises();
+        expect(saveMocks.patchPool).not.toHaveBeenCalled();
+
+        await wrapper.setProps({ canResetResources: true });
+        expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+        expect(save.attributes("disabled")).toBeUndefined();
+      } finally {
+        wrapper.unmount();
+      }
+    },
+  );
+
+  it("allows Ranked to Proportional when the pool already uses adjustable weights without quota", async () => {
+    const wrapper = render({
+      ...pool,
+      schedulingCapabilities: { quota: false, ranks: true, adjustableWeights: true, cpuQuota: false, limits: false },
+    });
+    try {
+      await wrapper.setProps({ canSavePool: true, canResetResources: false });
+      await wrapper.get('[aid="mode-proportional"]').trigger("click");
+      expect(wrapper.get('[aid="scheduling-save-close"]').attributes("disabled")).toBeUndefined();
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it("allows turning on custom weights while Guaranteed quota stays enabled", async () => {
+    const wrapper = render({
+      ...pool,
+      schedulingCapabilities: { quota: true, ranks: true, adjustableWeights: false, cpuQuota: false, limits: false },
+    });
+    try {
+      await wrapper.setProps({ canSavePool: true, canResetResources: false });
+      await wrapper.get('[aid="advanced-settings"]').trigger("click");
+      wrapper.findComponent(Settings).vm.$emit("patch", { automaticWeights: false });
+      await wrapper.vm.$nextTick();
+      expect(wrapper.findComponent(NodePoolWizardSummary).props("pool").schedulingCapabilities?.adjustableWeights).toBe(
+        true,
+      );
+      expect(wrapper.get('[aid="scheduling-save-close"]').attributes("disabled")).toBeUndefined();
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
   it("identifies unsaved pool settings when a changed retry fails after partial success", async () => {
     const wrapper = render();
     await wrapper.setProps({ canSavePool: true });
