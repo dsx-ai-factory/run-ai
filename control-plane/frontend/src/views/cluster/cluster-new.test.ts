@@ -267,7 +267,6 @@ describe("cluster-new.vue", () => {
     expect(clusterNewCmp.vm.currentStep).toBe(2);
     expect(clusterNewCmp.vm.installationInstructions).toBe("preloaded-install-command");
     expect(clusterNewCmp.text()).toContain("preloaded-install-command");
-    // The installation section must reuse the preloaded command instead of fetching it again.
     expect(clusterService.getClusterInstallationInfo).toHaveBeenCalledTimes(1);
     expect(clusterService.getClusterInstallationInfo).toHaveBeenCalledWith("new-id", "2.23.17", "");
   });

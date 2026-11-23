@@ -121,7 +121,6 @@ export default defineComponent({
       type: Object as PropType<Record<string, string>>,
       required: true,
     },
-    // Lets the parent load the command before showing this section, so the content does not grow after it renders.
     preloadedInstructions: {
       type: String as PropType<string>,
       required: false,

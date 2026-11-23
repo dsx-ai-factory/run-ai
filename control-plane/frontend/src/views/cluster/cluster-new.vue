@@ -243,8 +243,6 @@ export default defineComponent({
       }
       await this.createCluster();
     },
-    // Loaded before moving to step 2 so the step renders complete instead of growing once the command arrives.
-    // On failure the installation section falls back to loading the command itself.
     async loadInstallationInstructions(): Promise<void> {
       this.installationInstructions = undefined;
       if (!this.createdCluster?.uuid || !this.operatorVersionsMap) return;
