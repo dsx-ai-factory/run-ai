@@ -160,6 +160,7 @@ control-plane/infra/openapi/scripts/openapi-scanner @dsx-ai-factory/appsec-guild
 /runai-cluster/cluster/cluster-installer-helm/ @dsx-ai-factory/infra
 /runai-cluster/cluster/ocp-cluster-installer/ @dsx-ai-factory/infra
 /runai-cluster/cluster/runai-chart @dsx-ai-factory/infra
+/runai-cluster/cluster/runai-chart/templates/clusterroles/ @dsx-ai-factory/resource-mgmt
 /runai-cluster/cluster/runai-crd-upgrader/ @dsx-ai-factory/infra
 /runai-installer/ @dsx-ai-factory/infra
 
