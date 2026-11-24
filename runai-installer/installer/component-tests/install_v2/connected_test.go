@@ -14,6 +14,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/component-tests/harness"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/installconfig"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2"
+	compatmatrix "github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/compat"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/spec"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/specrun"
 	"github.com/stretchr/testify/assert"
@@ -68,9 +69,10 @@ func TestConnectedInstall_FullFlow(t *testing.T) {
 	require.NoError(t, specrun.Execute(context.Background(), cfg.ToSpec(opts), deps, term, execOpts()))
 
 	// Prerequisites install first, with versions resolved from the 2.26 matrix.
+	locks, _ := compatmatrix.Resolve("2.26")
 	prom := helm.CallsByRelease("kube-prometheus-stack")
 	require.Len(t, prom, 1)
-	assert.Equal(t, "76.2.0", prom[0].Version)
+	assert.Equal(t, locks[compatmatrix.Prometheus], prom[0].Version)
 	assert.Contains(t, prom[0].Values, "grafana.enabled=false")
 
 	gpu := helm.CallsByRelease("gpu-operator")
@@ -184,18 +186,20 @@ func TestConnectedInstall_CompatFallbackWarns(t *testing.T) {
 	assert.Equal(t, "2.23.0", compat["requestedVersion"])
 	assert.Equal(t, "3.0", compat["usingVersion"])
 
+	latestLocks, _ := compatmatrix.Resolve(compatmatrix.LatestVersion())
 	components := compat["components"].([]any)
 	versions := map[string]string{}
 	for _, c := range components {
 		m := c.(map[string]any)
 		versions[m["name"].(string)] = m["version"].(string)
 	}
-	assert.Equal(t, "92.7.0", versions["prometheus"], "fallback reports the latest matrix versions")
+
+	assert.Equal(t, latestLocks[compatmatrix.Prometheus], versions["prometheus"], "fallback reports the latest matrix versions")
 	assert.Equal(t, "v26.7.1", versions["gpu-operator"])
 
 	// The warning does not fail the install: prereqs still install with the
 	// fallback versions and the run succeeds.
-	assert.Equal(t, "92.7.0", helm.CallsByRelease("kube-prometheus-stack")[0].Version)
+	assert.Equal(t, latestLocks[compatmatrix.Prometheus], helm.CallsByRelease("kube-prometheus-stack")[0].Version)
 	assert.True(t, hasPipelineEvent(evs, "pipeline_succeeded", "runai"))
 	assert.False(t, hasPipelineEvent(evs, "pipeline_failed", ""))
 }
