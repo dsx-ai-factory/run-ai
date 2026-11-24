@@ -18,6 +18,7 @@
         placeholder="Select..."
         stack-label
         label="Network topology"
+        popup-content-class="network-topology-menu"
         :clear-icon="networkTopologyId ? 'ph-bold ph-x' : undefined"
         :custom-action="canStartCreation ? { text: 'new network topology' } : undefined"
         @custom-action="setModalOpen(true)"
@@ -247,6 +248,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+:global(.network-topology-menu .custom-action-item-text) {
+  font-weight: 500;
+}
+
 .topology-form-fields {
   border: 0;
   margin: 0;
