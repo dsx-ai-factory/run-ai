@@ -1,0 +1,2 @@
+CS_HOST: "cluster-service"
+CS_PORT: "8080"
