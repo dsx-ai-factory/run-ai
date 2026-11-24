@@ -291,7 +291,30 @@ func validateCreationRequestRole(ctx context.Context, roleId int32, tenantId uin
 	if err != nil {
 		return nil, err
 	}
+
+	err = validateRoleAssignable(role)
+	if err != nil {
+		return nil, err
+	}
 	return role, nil
+}
+
+// internalAssignedOnlyRoles are the internal-only roles that are assigned solely through the internal API
+// (see AllowedInternalCreateRoles). The public API must never assign them. Other internal-only roles, such as
+// the Integration metrics collector, are intentionally assignable through the public API.
+var internalAssignedOnlyRoles = map[string]struct{}{
+	static_roles.InstallerServiceAccount.Name: {},
+	static_roles.ClusterServiceAccount.Name:   {},
+	static_roles.CloudOperator.Name:           {},
+}
+
+// validateRoleAssignable rejects the roles in internalAssignedOnlyRoles. The privilege-escalation guard only
+// compares permissions, so it must not be the only thing keeping users from assigning them.
+func validateRoleAssignable(role *models.Role) *api.Error {
+	if _, blocked := internalAssignedOnlyRoles[role.Name]; blocked && role.InternalOnly {
+		return api.NewError(http.StatusForbidden, fmt.Sprintf("Cannot create access rule, role %s cannot be assigned", role.Name), nil)
+	}
+	return nil
 }
 
 func validateRoleEnabled(role *models.Role) *api.Error {
