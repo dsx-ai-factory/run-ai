@@ -45,7 +45,6 @@
             <section class="mnnvl-section">
               <runai-radio-options
                 aid="topology-mnnvl"
-                separate-tooltips
                 title-tooltip-width="300px"
                 tooltip-width="300px"
                 title="Define whether MNNVL is present on this node pool"
@@ -124,7 +123,6 @@
                 <h3 class="text-b-subtitle1">GPU pods</h3>
                 <runai-radio-options
                   aid="topology-gpu-node-placement"
-                  separate-tooltips
                   title-tooltip-width="300px"
                   tooltip-width="300px"
                   title="Set the node placement strategy"
@@ -137,7 +135,6 @@
                 <runai-radio-options
                   v-if="supports.gpuDevice"
                   aid="topology-gpu-device-placement"
-                  separate-tooltips
                   title-tooltip-width="300px"
                   tooltip-width="300px"
                   title="Set the device placement strategy"
@@ -152,7 +149,6 @@
                 <h3 class="text-b-subtitle1">CPU pods</h3>
                 <runai-radio-options
                   aid="topology-cpu-node-placement"
-                  separate-tooltips
                   title-tooltip-width="300px"
                   tooltip-width="300px"
                   title="Set the node placement strategy"

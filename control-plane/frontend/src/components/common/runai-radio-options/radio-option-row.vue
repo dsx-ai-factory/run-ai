@@ -22,7 +22,6 @@
         {{ option.disabledTooltip }}
       </q-tooltip>
     </div>
-    <slot />
   </div>
 </template>
 

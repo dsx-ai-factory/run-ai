@@ -18,9 +18,8 @@
         :tooltip-text="disableTooltip"
         :toggle-tooltip="innerToolTipShown"
       >
-        <!-- QOptionGroup exposes only a label slot inside QRadio. Independent help needs a sibling button. -->
         <div
-          v-if="separateTooltips && optionsWithPolicyApplied.length > 0"
+          v-if="optionsWithPolicyApplied.length > 0"
           class="q-option-group q-gutter-x-sm runai-option-group"
           :class="{ 'horizontal-options row': horizontal, 'scrollable-y': scrollableY }"
           role="radiogroup"
@@ -32,10 +31,10 @@
             :key="index"
             class="row items-center no-wrap"
             :class="{ 'q-mr-md': !horizontal }"
-            :aid="getOptionAid(opt)"
           >
             <q-radio
               ref="optionRadios"
+              :aid="getOptionAid(opt)"
               :model-value="modelValue"
               :val="opt.value"
               :disable="isGroupDisabled || opt.disable"
@@ -54,6 +53,7 @@
             </q-radio>
             <runai-tooltip
               v-if="opt.toolTip"
+              interactive
               :aria-label="`More information about ${opt.label}`"
               :tooltip-text="opt.toolTip"
               tooltip-position="right"
@@ -64,43 +64,6 @@
             <span v-if="opt.toolTip" :id="`${radioDescriptionId}-${index}`" hidden>{{ opt.toolTip }}</span>
           </div>
         </div>
-        <q-option-group
-          v-else-if="optionsWithPolicyApplied.length > 0"
-          :class="{
-            'runai-option-group': true,
-            'horizontal-options': horizontal,
-            row: horizontal,
-            'scrollable-y': scrollableY,
-          }"
-          :options="optionsWithPolicyApplied"
-          :model-value="modelValue"
-          @update:model-value="$emit('update:model-value', $event)"
-          type="radio"
-          :inline="horizontal"
-          :disable="isGroupDisabled"
-          :dense="dense"
-          :aria-label="title || 'Options'"
-        >
-          <template v-slot:label="opt">
-            <div :class="{ row: !horizontal, 'items-center': !horizontal }" :aid="getOptionAid(opt)">
-              <radio-option-row
-                :option="opt"
-                :class="{ 'q-mr-md': !horizontal }"
-                :max-width="optionMaxWidth"
-                :min-chars-to-show-overflow-tooltip="minCharsToShowOverflowTooltip"
-              >
-                <runai-tooltip
-                  v-if="opt.toolTip"
-                  @revealed="innerToolTipShown = true"
-                  @hidden="innerToolTipShown = false"
-                  :tooltip-text="opt.toolTip"
-                  tooltip-position="right"
-                  :width="opt.toolTipWidth ?? tooltipWidth"
-                />
-              </radio-option-row>
-            </div>
-          </template>
-        </q-option-group>
         <div v-else class="q-pl-sm" aid="empty-state">No results</div>
       </runai-tooltip-wrapper>
     </section>
@@ -196,10 +159,6 @@ export default defineComponent({
       type: Boolean as PropType<boolean>,
       default: false,
     },
-    separateTooltips: {
-      type: Boolean,
-      default: false,
-    },
   },
   data() {
     return {
@@ -230,8 +189,8 @@ export default defineComponent({
         const isAllowed = allowedOpts.includes(o.value as string);
         return {
           ...o,
-          disable: !isAllowed,
-          disabledTooltip: errorMessages.CANT_BE_SELECTED_POLICY,
+          disable: o.disable || !isAllowed,
+          disabledTooltip: isAllowed ? o.disabledTooltip : errorMessages.CANT_BE_SELECTED_POLICY,
         };
       });
     },

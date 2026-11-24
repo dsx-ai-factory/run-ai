@@ -68,14 +68,14 @@ describe("runai-radio-options.vue", () => {
   });
 });
 
-describe("separate option tooltips", () => {
+describe("option help and keyboard navigation", () => {
   let wrapper: VueWrapper<InstanceType<typeof RunaiRadioOptions>>;
 
   function mountOptions(props: Record<string, unknown> = {}) {
     wrapper = mount(RunaiRadioOptions, {
       attachTo: document.body,
       global: { plugins: [Quasar] },
-      props: { modelValue: "option1", options, separateTooltips: true, ...props },
+      props: { modelValue: "option1", options, ...props },
     });
     return wrapper;
   }
@@ -104,6 +104,9 @@ describe("separate option tooltips", () => {
     mountOptions();
     const help = wrapper.findAll("button")[1];
 
+    help.element.focus();
+    await wrapper.vm.$nextTick();
+    expect(document.body.querySelector('[role="tooltip"]')?.textContent).toContain("tooltip2");
     await help.trigger("click");
     await help.trigger("keydown", { key: "Enter", keyCode: 13 });
     await help.trigger("keyup", { key: "Enter", keyCode: 13 });
@@ -190,7 +193,7 @@ describe("separate option tooltips", () => {
         },
       ],
     });
-    expect(wrapper.get('[aid="custom-option"]').find('[role="radio"]').exists()).toBe(true);
+    expect(wrapper.get('[aid="custom-option"]').attributes("role")).toBe("radio");
     const tooltip = wrapper.findComponent({ name: "QTooltip" });
     expect(tooltip.props("maxWidth")).toBe("310px");
 
@@ -219,13 +222,17 @@ describe("separate option tooltips", () => {
 
   test("arrow navigation respects policy-disabled options", async () => {
     mountOptions({
-      policyRules: { options: [{ value: "option1" }, { value: "option3" }] },
-      options: [...options, { label: "Option 3", value: "option3" }],
+      policyRules: { options: [{ value: "option1" }, { value: "option3" }, { value: "option4" }] },
+      options: [
+        ...options,
+        { label: "Option 3", value: "option3", disable: true },
+        { label: "Option 4", value: "option4" },
+      ],
     });
 
     await wrapper.findAll('[role="radio"]')[0].trigger("keydown", { key: "ArrowDown", keyCode: 40 });
 
-    expect(wrapper.emitted("update:model-value")).toEqual([["option3"]]);
+    expect(wrapper.emitted("update:model-value")).toEqual([["option4"]]);
   });
 
   test.each([
@@ -242,38 +249,35 @@ describe("separate option tooltips", () => {
   });
 });
 
-test.each([false, true])(
-  "preserves icons, overflow text and disabled help with separateTooltips=%s",
-  async (separateTooltips) => {
-    const option = {
-      label: "Unavailable cluster",
-      value: "unavailable",
-      disable: true,
-      icon: "eks",
-      svg: "gke",
-      disabledTooltip: "Cluster is offline",
-      disabledTooltipWidth: "210px",
-    };
-    const wrapper = mount(RunaiRadioOptions, {
-      attachTo: document.body,
-      global: { plugins: [Quasar], stubs: { RunaiSvgIcon: true } },
-      props: { modelValue: null, options: [option], minCharsToShowOverflowTooltip: 5, separateTooltips },
-    });
-    try {
-      const radio = wrapper.get('[role="radio"]');
-      expect(radio.text()).toContain("Unavailable cluster");
-      expect(radio.attributes("aria-disabled")).toBe("true");
-      expect(wrapper.findAllComponents(RunaiSvgIcon).map((icon) => icon.props("name"))).toEqual(["eks", "gke"]);
-      const [overflow, disabled] = wrapper.findAllComponents(QTooltip);
-      overflow.vm.show();
-      await wrapper.vm.$nextTick();
-      expect(document.body.querySelector('[role="tooltip"]')?.textContent).toContain("Unavailable cluster");
-      disabled.vm.show();
-      await wrapper.vm.$nextTick();
-      expect(disabled.props("maxWidth")).toBe("210px");
-      expect(document.body.querySelectorAll('[role="tooltip"]')[1]?.textContent).toContain("Cluster is offline");
-    } finally {
-      wrapper.unmount();
-    }
-  },
-);
+test.each([false, true])("preserves icons, overflow text and disabled help with horizontal=%s", async (horizontal) => {
+  const option = {
+    label: "Unavailable cluster",
+    value: "unavailable",
+    disable: true,
+    icon: "eks",
+    svg: "gke",
+    disabledTooltip: "Cluster is offline",
+    disabledTooltipWidth: "210px",
+  };
+  const wrapper = mount(RunaiRadioOptions, {
+    attachTo: document.body,
+    global: { plugins: [Quasar], stubs: { RunaiSvgIcon: true } },
+    props: { modelValue: null, options: [option], minCharsToShowOverflowTooltip: 5, horizontal },
+  });
+  try {
+    const radio = wrapper.get('[role="radio"]');
+    expect(radio.text()).toContain("Unavailable cluster");
+    expect(radio.attributes("aria-disabled")).toBe("true");
+    expect(wrapper.findAllComponents(RunaiSvgIcon).map((icon) => icon.props("name"))).toEqual(["eks", "gke"]);
+    const [overflow, disabled] = wrapper.findAllComponents(QTooltip);
+    overflow.vm.show();
+    await wrapper.vm.$nextTick();
+    expect(document.body.querySelector('[role="tooltip"]')?.textContent).toContain("Unavailable cluster");
+    disabled.vm.show();
+    await wrapper.vm.$nextTick();
+    expect(disabled.props("maxWidth")).toBe("210px");
+    expect(document.body.querySelectorAll('[role="tooltip"]')[1]?.textContent).toContain("Cluster is offline");
+  } finally {
+    wrapper.unmount();
+  }
+});
