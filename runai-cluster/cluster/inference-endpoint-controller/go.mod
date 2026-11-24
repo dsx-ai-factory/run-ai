@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/inference-endpoint-controller
 
-go 1.26.8
+go 1.27.4
 
 require (
 	github.com/onsi/ginkgo/v2 v2.34.0
