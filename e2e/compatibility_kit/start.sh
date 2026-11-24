@@ -300,7 +300,9 @@ echo "📁 Test directory: src/test/suites/playwright/"
 # Run only tests with the k8s-flav-cert-kit-temp tag using our custom compatibility kit config
 # Set Node.js options to handle TypeScript config files properly and OpenSSL legacy provider
 export NODE_OPTIONS="--openssl-legacy-provider --loader ts-node/esm"
-npx playwright test --grep="@k8s-flav-cert-kit-temp" --config=playwright-config/compatibility-kit.config.ts
+# Call the suite's own playwright binary rather than npx: the kit image ships
+# no npm/npx.
+./node_modules/.bin/playwright test --grep="@k8s-flav-cert-kit-temp" --config=playwright-config/compatibility-kit.config.ts
 
 # Check if tests ran and results were generated
 echo "🔍 Checking test results..."

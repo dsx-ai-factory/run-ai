@@ -319,7 +319,9 @@ run_playwright_tests() {
     echo "Config: ${config_file}"
 
     export NODE_OPTIONS="--openssl-legacy-provider --loader ts-node/esm"
-    npx playwright test --grep="${grep_tag}" --config="${config_file}"
+    # Call the suite's own playwright binary rather than npx: the kit images
+    # ship no npm/npx.
+    ./node_modules/.bin/playwright test --grep="${grep_tag}" --config="${config_file}"
     local exit_code=$?
     unset NODE_OPTIONS
 
