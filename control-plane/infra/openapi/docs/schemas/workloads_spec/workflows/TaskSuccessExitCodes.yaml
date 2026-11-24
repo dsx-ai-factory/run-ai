@@ -1,0 +1,7 @@
+description: Ranges of exit codes that end the task as succeeded, in addition to 0.
+  A non-zero exit code that isn't in this list or in `retry.onExitCodes` fails the task.
+type: array
+items:
+  $ref: "./TaskExitCodeRange.yaml"
+maxItems: 256
+nullable: true

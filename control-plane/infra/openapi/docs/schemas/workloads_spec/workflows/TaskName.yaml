@@ -1,0 +1,8 @@
+description: The name of the task. It must be unique in its group, and begin with a letter.
+  It can be omitted in a group with a single task, which then takes the group's name.
+type: string
+minLength: 1
+maxLength: 63
+example: train
+nullable: true
+pattern: "^[a-z][-a-z0-9]{0,62}$"

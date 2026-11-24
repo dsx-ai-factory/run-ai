@@ -1,0 +1,9 @@
+properties:
+  name:
+    $ref: "./WorkflowProfileName.yaml"
+  bucket:
+    $ref: "./WorkflowS3BucketName.yaml"
+  url:
+    $ref: "./WorkflowS3Url.yaml"
+nullable: true
+type: object

@@ -1,0 +1,22 @@
+description: A storage of the workflow that the task uses.
+properties:
+  name:
+    $ref: "./WorkflowProfileName.yaml"
+  type:
+    $ref: "./WorkflowStorageType.yaml"
+  inputs:
+    description: The outputs of other tasks that the task reads.
+    type: array
+    items:
+      $ref: "./WorkflowStorageRefInput.yaml"
+    maxItems: 1000
+    nullable: true
+  outputs:
+    description: The folder in which the task writes its outputs. Its files are kept in the storage, in a folder of the task's own.
+    properties:
+      mountPath:
+        $ref: "./WorkflowS3MountPath.yaml"
+    nullable: true
+    type: object
+nullable: true
+type: object

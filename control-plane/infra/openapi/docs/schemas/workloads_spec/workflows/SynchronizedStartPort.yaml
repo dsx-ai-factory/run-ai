@@ -1,0 +1,8 @@
+description: The port that the tasks of the group use to reach each other before they start.
+  It must be a port that the group's tasks don't use. (mandatory when enabled)
+type: integer
+format: int32
+minimum: 1
+maximum: 65535
+example: 9900
+nullable: true

@@ -1,0 +1,7 @@
+description: The path of the folder in the task's container. (mandatory)
+type: string
+minLength: 1
+maxLength: 4096
+example: /mnt/data
+nullable: true
+pattern: .*

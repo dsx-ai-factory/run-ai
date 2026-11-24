@@ -1,0 +1,10 @@
+description: The outputs of another task that the task reads.
+properties:
+  group:
+    $ref: "./GroupName.yaml"
+  task:
+    $ref: "./TaskName.yaml"
+  mountPath:
+    $ref: "./WorkflowS3MountPath.yaml"
+nullable: true
+type: object
