@@ -37,6 +37,7 @@ func CreateRouter(clusterServices *services.ClusterServiceServices) chi.Router {
 		r.Use(runaimetrics.HttpMiddleware)
 		r.Use(logginghttp.HttpMiddleware)
 		r.Use(addFullHostToContext)
+		r.Use(markNetworkTopologyIdSent)
 		api.AddRoutes(r, networkTopologiesApiController, nodesApiController,
 			nodepoolsApiController, clustersApiController, internalApiController,
 			cpConfigApiController, clustersConfigApiController, settingsApiController)

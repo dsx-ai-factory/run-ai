@@ -12,6 +12,9 @@ type ContextKey string
 // context keys
 const (
 	FullHostKey ContextKey = "fullHost"
+	// NetworkTopologyIdSentKey marks a node pool PATCH whose body has networkTopologyId, even as null. The generated
+	// model decodes an omitted field and an explicit null to the same nil pointer, so only the raw body tells them apart.
+	NetworkTopologyIdSentKey ContextKey = "networkTopologyIdSent"
 )
 
 const (

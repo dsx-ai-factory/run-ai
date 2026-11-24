@@ -23,6 +23,11 @@ func GetTenantNameFromHost(host string) string {
 	return strings.ToLower(strings.Split(host, ".")[0])
 }
 
+func NetworkTopologyIdSent(ctx context.Context) bool {
+	sent, _ := ctx.Value(NetworkTopologyIdSentKey).(bool)
+	return sent
+}
+
 func GetStringFromCtx(ctx context.Context, value any) string {
 	val, ok := ctx.Value(value).(string)
 	if !ok {

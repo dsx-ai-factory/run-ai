@@ -16,6 +16,7 @@ import (
 
 	authorization_utils "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/helpers"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/services"
+	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/utils"
 
 	authorization_api "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/internal/generated/pkg/api"
@@ -3799,6 +3800,63 @@ var _ = Describe("Nodepools tests", Ordered, func() {
 			Expect(singleConditionItem.Type).To(Equal(missingNrtHealthyPrerequisiteCondition))
 			Expect(singleConditionItem.Reason).To(Equal(missingNrtHealthyPrerequisiteReason))
 			Expect(singleConditionItem.Message).To(Equal(missingPrerequisitesPhaseMessage))
+		})
+
+		createNodepoolWithTopology := func(suffix string) api.Nodepool {
+			createNodepoolIndex++
+			response, err := nodepoolService.CreateNodepool(ctx, api.NodepoolCreateFields{
+				Name:              fmt.Sprintf("%s-network-topology-%s", testName, suffix),
+				LabelKey:          fmt.Sprintf("%s-network-topology-%d", testLabelKey, createNodepoolIndex),
+				LabelValue:        fmt.Sprintf("%s-network-topology-%d", testLabelValue, createNodepoolIndex),
+				ClusterId:         testNetworkTopologyClusterId,
+				NetworkTopologyId: &testNetworkTopologyId,
+			})
+			Expect(err).To(BeNil())
+			Expect(response.Code).To(Equal(http.StatusCreated))
+			nodepool := response.Body.(api.Nodepool)
+			createdNodepools = append(createdNodepools, nodepool)
+			return nodepool
+		}
+
+		storedNetworkTopologyId := func(nodepoolId string) *string {
+			response, err := nodepoolService.GetNodepool(ctx, nodepoolId)
+			Expect(err).To(BeNil())
+			Expect(response.Code).To(Equal(http.StatusOK))
+			return response.Body.(api.Nodepool).NetworkTopologyId
+		}
+
+		It("Patch nodepool without NetworkTopologyId keeps the topology", func() {
+			nodepool := createNodepoolWithTopology("patch-omitted")
+			sentWithoutTopology := context.WithValue(ctx, utils.NetworkTopologyIdSentKey, false)
+
+			response, err := nodepoolService.PatchNodepool(sentWithoutTopology, nodepool.Id, api.NodepoolUpdateFields{
+				Description: ptr.To("patched without a topology"),
+			})
+			Expect(err).To(BeNil())
+			Expect(response.Code).To(Equal(http.StatusOK))
+			Expect(storedNetworkTopologyId(nodepool.Id)).To(Equal(&testNetworkTopologyId))
+		})
+
+		It("Patch nodepool with a null NetworkTopologyId removes the topology", func() {
+			nodepool := createNodepoolWithTopology("patch-null")
+			sentAsNull := context.WithValue(ctx, utils.NetworkTopologyIdSentKey, true)
+
+			response, err := nodepoolService.PatchNodepool(sentAsNull, nodepool.Id, api.NodepoolUpdateFields{})
+			Expect(err).To(BeNil())
+			Expect(response.Code).To(Equal(http.StatusOK))
+			Expect(storedNetworkTopologyId(nodepool.Id)).To(BeNil())
+		})
+
+		It("Legacy label update keeps the topology", func() {
+			nodepool := createNodepoolWithTopology("legacy-labels")
+
+			response, err := nodepoolService.LegacyUpdateNodepoolLabels(ctx, testNetworkTopologyClusterId, nodepool.Id, api.LegacyNodePoolLabelsRequest{
+				LabelKey:   fmt.Sprintf("%s-network-topology-legacy", testLabelKey),
+				LabelValue: fmt.Sprintf("%s-network-topology-legacy", testLabelValue),
+			})
+			Expect(err).To(BeNil())
+			Expect(response.Code).To(Equal(http.StatusOK))
+			Expect(storedNetworkTopologyId(nodepool.Id)).To(Equal(&testNetworkTopologyId))
 		})
 	})
 })

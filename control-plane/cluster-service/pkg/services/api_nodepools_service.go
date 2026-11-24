@@ -33,6 +33,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/database/dao"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/services/metrics"
+	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/utils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
@@ -479,7 +480,7 @@ func (s *NodePoolsApiService) PatchNodepool(ctx context.Context, nodepoolId stri
 		return api.Response(http.StatusBadRequest, validationErr.Error()), nil
 	}
 
-	patched, mapErr := mapPatchFieldsToModel(ctx, nodepoolModel, fields, capChecker)
+	patched, mapErr := mapPatchFieldsToModel(ctx, nodepoolModel, fields, capChecker, utils.NetworkTopologyIdSent(ctx))
 	if mapErr != nil {
 		return NewErrorResponse(mapErr), nil
 	}
@@ -769,7 +770,9 @@ func mapUpdateFieldsToModel(ctx context.Context, nodepoolModel models.Nodepool, 
 	return result, nil
 }
 
-func mapPatchFieldsToModel(ctx context.Context, nodepoolModel models.Nodepool, patchFields api.NodepoolUpdateFields, capChecker clients_local.ClusterCapabilityChecker) (*models.Nodepool, *api.Error) {
+func mapPatchFieldsToModel(ctx context.Context, nodepoolModel models.Nodepool, patchFields api.NodepoolUpdateFields,
+	capChecker clients_local.ClusterCapabilityChecker, networkTopologyIdSent bool,
+) (*models.Nodepool, *api.Error) {
 	result := &models.Nodepool{}
 	(&nodepoolModel).DeepCopyInto(result)
 
@@ -796,9 +799,11 @@ func mapPatchFieldsToModel(ctx context.Context, nodepoolModel models.Nodepool, p
 	}
 	setSchedulingCapabilitiesOnPatch(result, patchFields.SchedulingCapabilities)
 
-	ntErr := setNetworkTopology(ctx, nodepoolModel.TenantId, result, patchFields.NetworkTopologyId)
-	if ntErr != nil {
-		return nil, ntErr
+	// The decoded field is nil both when omitted and when null, so only a field that was sent clears the topology.
+	if patchFields.NetworkTopologyId != nil || networkTopologyIdSent {
+		if ntErr := setNetworkTopology(ctx, nodepoolModel.TenantId, result, patchFields.NetworkTopologyId); ntErr != nil {
+			return nil, ntErr
+		}
 	}
 	return result, nil
 }
