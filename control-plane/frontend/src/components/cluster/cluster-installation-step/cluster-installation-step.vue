@@ -15,6 +15,7 @@
       :is-higher-cluster-version="isHigherClusterVersion"
       :is-multi-tenant="isMultiTenant"
       :versions-map="versionsMap"
+      :preloaded-instructions="preloadedInstructions"
     />
   </runai-form-wrapper>
 </template>
@@ -61,6 +62,10 @@ export default {
     isHigherClusterVersion: {
       type: Boolean as PropType<boolean>,
       required: true,
+    },
+    preloadedInstructions: {
+      type: String as PropType<string>,
+      required: false,
     },
   },
   computed: {

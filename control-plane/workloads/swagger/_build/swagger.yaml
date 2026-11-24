@@ -11089,6 +11089,11 @@ components:
             - $ref: '#/components/schemas/DistributedInferenceLeaderWorkerSpec'
           nullable: true
           type: object
+    LoadAwareRouting:
+      description: Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+      type: boolean
+      default: false
+      nullable: true
     DistributedInferenceRestartPolicy:
       description: |
         Determines the behavior when a pod fails.
@@ -11223,6 +11228,8 @@ components:
           properties:
             category:
               $ref: '#/components/schemas/Category'
+            loadAwareRouting:
+              $ref: '#/components/schemas/LoadAwareRouting'
             nodePools:
               $ref: '#/components/schemas/NodePools'
             preemptibility:
@@ -14621,6 +14628,8 @@ components:
           properties:
             category:
               $ref: '#/components/schemas/Category'
+            loadAwareRouting:
+              $ref: '#/components/schemas/LoadAwareRouting'
             nodePools:
               $ref: '#/components/schemas/NodePools'
             preemptibility:
@@ -15839,6 +15848,8 @@ components:
           properties:
             category:
               $ref: '#/components/schemas/StringRules'
+            loadAwareRouting:
+              $ref: '#/components/schemas/BooleanRules'
             nodePools:
               $ref: '#/components/schemas/ArrayRules'
             preemptibility:

@@ -477,6 +477,11 @@ func createWorkload(ctx context.Context, backendClient clients.TenantSettingsCli
 		// No any-workload submission was produced - either the cluster/tenant is not on the
 		// any-workload path, or the submitter cannot (yet) handle this spec. Fall back to
 		// native submission, which is still available on this cluster.
+		// Native submission cannot route through the endpoint picker; an explicit opt-in
+		// must fail instead of being dropped.
+		if dinfLoadAwareRoutingRequested(wc.distributedInferenceSpec) {
+			return workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, loadAwareRoutingUnavailableMessage)
+		}
 		var nativeErr *workloadsApi.SubmissionErrorV2
 		workloadRequirements, nativeErr = composeNative(ctx, wc)
 		if nativeErr != nil {
