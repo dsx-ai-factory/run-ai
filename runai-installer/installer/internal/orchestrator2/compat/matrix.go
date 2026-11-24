@@ -94,7 +94,7 @@ var matrix = map[string]Locks{
 		CertManagerOperator: "stable-v1",
 	},
 	"2.26": {
-		// renovate: datasource=helm depName=kube-prometheus-stack registryUrl=https://prometheus-community.github.io/helm-charts allow=patch
+		// renovate: datasource=helm depName=kube-prometheus-stack registryUrl=https://prometheus-community.github.io/helm-charts allow=minor
 		Prometheus:          "76.2.0",
 		GPUOperator:         "v25.3.0",
 		GPUOperatorFake:     "0.0.62",
@@ -114,7 +114,7 @@ var matrix = map[string]Locks{
 		CertManagerOperator: "stable-v1",
 	},
 	"2.25": {
-		// renovate: datasource=helm depName=kube-prometheus-stack registryUrl=https://prometheus-community.github.io/helm-charts allow=patch
+		// renovate: datasource=helm depName=kube-prometheus-stack registryUrl=https://prometheus-community.github.io/helm-charts allow=minor
 		Prometheus:          "76.2.0",
 		GPUOperator:         "v25.3.0",
 		GPUOperatorFake:     "0.0.62",
