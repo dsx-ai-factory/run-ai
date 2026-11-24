@@ -69,9 +69,10 @@ func TestConnectedInstall_FullFlow(t *testing.T) {
 	require.NoError(t, specrun.Execute(context.Background(), cfg.ToSpec(opts), deps, term, execOpts()))
 
 	// Prerequisites install first, with versions resolved from the 2.26 matrix.
+	locks, _ := compatmatrix.Resolve("2.26")
 	prom := helm.CallsByRelease("kube-prometheus-stack")
 	require.Len(t, prom, 1)
-	assert.Equal(t, "76.2.0", prom[0].Version)
+	assert.Equal(t, locks[compatmatrix.Prometheus], prom[0].Version)
 	assert.Contains(t, prom[0].Values, "grafana.enabled=false")
 
 	gpu := helm.CallsByRelease("gpu-operator")
