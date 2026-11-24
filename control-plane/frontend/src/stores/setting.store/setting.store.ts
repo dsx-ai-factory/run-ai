@@ -22,7 +22,6 @@ import type {
   IAllowGPT2ModelSetting,
   IEnableModelCatalogSetting,
   IEnablePoliciesSetting,
-  IEnableHybridSubmissionSetting,
   IGpuOverProvisioningSetting,
   IEnableNgcIntegrationSetting,
   IEnableDataVolumesSetting,
@@ -52,7 +51,6 @@ interface SettingStoreState {
   enableModelCatalog: IEnableModelCatalogSetting;
   bannerConfig: GetBannerConfigValue | undefined;
   enablePolicies: IEnablePoliciesSetting;
-  enableHybridSubmission: IEnableHybridSubmissionSetting;
   gpuOverProvisioning: IGpuOverProvisioningSetting;
   enableNgcIntegration: IEnableNgcIntegrationSetting;
   enableDataVolumes: IEnableDataVolumesSetting;
@@ -68,7 +66,6 @@ const bffSettingsState: Record<string, keyof SettingStoreState> = {
   [SettingKeys.AllowGPT2Model]: "allowGPT2Model",
   [SettingKeys.EnableModelCatalog]: "enableModelCatalog",
   [SettingKeys.EnablePolicies]: "enablePolicies",
-  [SettingKeys.EnableHybridSubmission]: "enableHybridSubmission",
   [SettingKeys.GpuOverProvisioning]: "gpuOverProvisioning",
   [SettingKeys.EnableNgcIntegration]: "enableNgcIntegration",
   [SettingKeys.EnableDataVolumes]: "enableDataVolumes",
@@ -85,7 +82,6 @@ const bffSettingsUpdaters: Record<string, (store: ReturnType<typeof useSettingSt
   [SettingKeys.AllowGPT2Model]: (store) => (value) => store.updateAllowGPT2Model(value),
   [SettingKeys.EnableModelCatalog]: (store) => (value) => store.updateEnableModelCatalog(value),
   [SettingKeys.EnablePolicies]: (store) => (value) => store.updateEnablePolicies(value),
-  [SettingKeys.EnableHybridSubmission]: (store) => (value) => store.updateEnableHybridSubmission(value),
   [SettingKeys.GpuOverProvisioning]: (store) => (value) => store.updateGpuOverProvisioning(value),
   [SettingKeys.EnableNgcIntegration]: (store) => (value) => store.updateEnableNgcIntegration(value),
   [SettingKeys.EnableDataVolumes]: (store) => (value) => store.updateEnableDataVolumes(value),
@@ -100,9 +96,6 @@ type MigratedSettingRefresher = (store: ReturnType<typeof useSettingStore>) => P
 const migratedSettingsRefreshers: Record<string, MigratedSettingRefresher> = {
   [SettingKeys.EnablePolicies]: async (store) => {
     store.enablePolicies = await workloadsServiceSettingsService.getEnablePolicies();
-  },
-  [SettingKeys.EnableHybridSubmission]: async (store) => {
-    store.enableHybridSubmission = await workloadsServiceSettingsService.getEnableHybridSubmission();
   },
   [SettingKeys.GpuOverProvisioning]: async (store) => {
     store.gpuOverProvisioning = await workloadsServiceSettingsService.getGpuOverProvisioning();
@@ -140,7 +133,6 @@ export const useSettingStore = defineStore("Setting", {
     enableModelCatalog: { value: true },
     bannerConfig: undefined,
     enablePolicies: { value: false },
-    enableHybridSubmission: { value: false },
     gpuOverProvisioning: { value: false },
     enableNgcIntegration: { value: false },
     enableDataVolumes: { value: false },
@@ -173,10 +165,6 @@ export const useSettingStore = defineStore("Setting", {
     },
     isAllowDeployingGPT2ModelEnabled(): boolean {
       return this.allowGPT2Model?.value || false;
-    },
-
-    isHybridSubmissionEnabled(): boolean {
-      return this.enableHybridSubmission?.value || false;
     },
     isDataVolumeEnabled(): boolean {
       return this.enableDataVolumes?.value || false;
@@ -258,7 +246,6 @@ export const useSettingStore = defineStore("Setting", {
       try {
         const settings = await workloadsServiceSettingsService.getAll();
         this.enablePolicies = settings.enablePolicies;
-        this.enableHybridSubmission = settings.enableHybridSubmission;
         this.gpuOverProvisioning = settings.gpuOverProvisioning;
       } catch (error) {
         console.warn("Failed to load workloads service settings:", error);
@@ -312,16 +299,6 @@ export const useSettingStore = defineStore("Setting", {
         await workloadsServiceSettingsService.updateEnablePolicies(enabled);
       } catch (err) {
         this.enablePolicies = original;
-        throw err;
-      }
-    },
-    async updateEnableHybridSubmission(enabled: boolean): Promise<void> {
-      const original = this.enableHybridSubmission;
-      this.enableHybridSubmission = { ...this.enableHybridSubmission, value: enabled };
-      try {
-        await workloadsServiceSettingsService.updateEnableHybridSubmission(enabled);
-      } catch (err) {
-        this.enableHybridSubmission = original;
         throw err;
       }
     },

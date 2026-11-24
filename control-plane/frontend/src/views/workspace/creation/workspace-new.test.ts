@@ -14,7 +14,6 @@ import { Quasar } from "quasar";
 import { assetService } from "@/services/control-plane/asset.service/asset.service";
 import { WORKSPACE_ROUTE_NAMES } from "@/router/workspace.routes/workspace.routes.names";
 import { workloadTemplateService } from "@/services/control-plane/workload-template.service/workload-template.service";
-import { useSettingStore } from "@/stores/setting.store";
 import { useClusterStore } from "@/stores/cluster.store";
 import { createMemoryHistory, createRouter, type RouteRecordRaw } from "vue-router";
 import { workspaceRoutes } from "@/router/workspace.routes/workspace.routes";
@@ -89,7 +88,6 @@ describe("workspace-new.vue", () => {
     });
     vi.mocked(workloadTemplateService.templatesCount).mockResolvedValue(0);
     vi.mocked(workloadService.canSubmitWorkload).mockReturnValue(null);
-    useSettingStore(pinia).enableHybridSubmission = { value: false };
     setActivePinia(pinia);
 
     workspaceNewCmp = mount(WorkspaceNew, {
@@ -201,7 +199,7 @@ describe("workspace-new.vue", () => {
     expect(workspaceNewCmp.vm.$router).toEqual([]);
   });
 
-  test("opens the flexible workspace form from scratch with flexible submission disabled", async () => {
+  test("opens the flexible workspace form from scratch", async () => {
     await flushPromises();
     const project = projectsMockData[0];
     await workspaceNewCmp.find(`[aid=${project.name}-card]`).trigger("click");

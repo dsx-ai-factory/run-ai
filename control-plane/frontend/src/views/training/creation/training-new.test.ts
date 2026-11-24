@@ -15,7 +15,6 @@ import { DistributedFramework } from "@/swagger-models/assets-service-client";
 import { assetService } from "@/services/control-plane/asset.service/asset.service";
 import { TRAINING_ROUTE_NAMES } from "@/router/training.routes/training.routes.names";
 import { workloadTemplateService } from "@/services/control-plane/workload-template.service/workload-template.service";
-import { useSettingStore } from "@/stores/setting.store";
 import { useClusterStore } from "@/stores/cluster.store";
 import { createMemoryHistory, createRouter, type RouteRecordRaw } from "vue-router";
 import { trainingRoutes } from "@/router/training.routes/training.routes";
@@ -97,7 +96,6 @@ describe("training-new.vue", () => {
     });
     vi.mocked(workloadTemplateService.templatesCount).mockResolvedValue(0);
     vi.mocked(workloadService.canSubmitWorkload).mockReturnValue(null);
-    useSettingStore(pinia).enableHybridSubmission = { value: false };
     setActivePinia(pinia);
 
     trainingNewCmp = mount(TrainingNew, {
@@ -210,7 +208,7 @@ describe("training-new.vue", () => {
     expect(trainingNewCmp.vm.$router).toEqual([]);
   });
 
-  test("opens the flexible training form from scratch with flexible submission disabled", async () => {
+  test("opens the flexible training form from scratch", async () => {
     await flushPromises();
     const project = projectsMockData[0];
     await trainingNewCmp.find(`[aid=${project.name}-card]`).trigger("click");

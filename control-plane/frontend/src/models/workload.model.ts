@@ -200,7 +200,6 @@ export enum EWorkloadErrorMessage {
   WorkloadDeletingCantBeUpdated = "The selected workload is deleting and can't be updated",
   WorkloadTerminatingCantBeUpdated = "The selected workload is terminating and can't be updated",
   CliWorkloadsCantBeUpdated = "This action is not supported for the selected workload because it was created via the CLI. To perform the action, go to the CLI to update the workload.",
-  RequiresFlexibleSubmissionForm = "This action is not supported for the selected workload. To perform it, ask your administrator to enable the flexible workload submission form.",
   ActionNotSupported = "This action is not supported for the selected workload",
 }
 

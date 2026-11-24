@@ -63,7 +63,6 @@ describe("inference-new.vue", () => {
     vi.mocked(clusterStore.isClusterVersionSufficient).mockImplementation(
       (_, version) => version === MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION,
     );
-    settingStore.$patch({ enableHybridSubmission: { value: true } });
 
     inferenceStore.$patch({
       inference: getEmptyInferenceNewModel(),
@@ -175,14 +174,9 @@ describe("inference-new.vue", () => {
       vi.mocked(workloadTemplateService.templatesCount).mockResolvedValue(0);
     });
 
-    it.each([
-      { enabled: true, supported: true },
-      { enabled: false, supported: true },
-      { enabled: true, supported: false },
-    ])(
-      "only offers and loads templates on supported clusters ($enabled, $supported)",
-      async ({ enabled, supported }) => {
-        settingStore.$patch({ enableHybridSubmission: { value: enabled } });
+    it.each([true, false])(
+      "only offers and loads templates when the cluster supports them (supported = %s)",
+      async (supported) => {
         vi.mocked(clusterStore.isClusterVersionSufficient).mockImplementation(
           (_, version) => supported && version === MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION,
         );
@@ -243,8 +237,7 @@ describe("inference-new.vue", () => {
       expect(workloadTemplateService.inferenceTemplatesList).toHaveBeenCalledOnce();
     });
 
-    it("restores a selected template when the old submission setting is disabled", async () => {
-      settingStore.$patch({ enableHybridSubmission: { value: false } });
+    it("restores a selected template on a supported cluster", async () => {
       inferenceStore.$patch({ inference: { templateId: "template-123", clusterId: clusters[0].uuid } });
 
       wrapper = createWrapper();
@@ -305,8 +298,7 @@ describe("inference-new.vue", () => {
         });
       });
 
-      it("opens the flexible editor for Custom inference when the old setting is disabled", async () => {
-        settingStore.$patch({ enableHybridSubmission: { value: false } });
+      it("opens the flexible editor for Custom inference", async () => {
         vi.mocked(settingStore.isFeatureEnabled).mockReturnValue(false);
         vi.mocked(workloadTemplateService.inferenceTemplatesList).mockResolvedValue({ entries: [], pagination: {} });
         wrapper = createWrapper();

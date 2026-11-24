@@ -1173,8 +1173,7 @@ const WorkloadIndex = defineComponent({
       const supportsHybridCLI =
         [EWorkloadType.Inference].includes(workload?.type as EWorkloadType) &&
         !!workload?.fullySaasWorkload &&
-        isFlatWorkload &&
-        this.settingStore.isHybridSubmissionEnabled;
+        isFlatWorkload;
 
       if (supportsHybridCLI) this.updateHybridWorkload(workload);
       else this.isCopyCliModalOpen = true;
@@ -1212,7 +1211,7 @@ const WorkloadIndex = defineComponent({
           routeName = INFERENCE_ROUTE_NAMES.INFERENCE_FLAT_HYBRID;
           break;
         case EWorkloadType.DistributedInference:
-          if (!isFlatWorkload || !this.settingStore.isHybridSubmissionEnabled) return;
+          if (!isFlatWorkload) return;
           routeName = INFERENCE_ROUTE_NAMES.INFERENCE_DISTRIBUTED_EDIT;
           break;
         default:
