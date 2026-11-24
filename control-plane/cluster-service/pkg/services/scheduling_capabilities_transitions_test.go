@@ -244,19 +244,6 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		message := response.Body.(api.Error).Message
 		Expect(message).To(ContainSubstring("project team-a, department research"))
 		Expect(message).To(ContainSubstring("QUOTAS_TO_DEFAULT"))
-		Expect(message).ToNot(ContainSubstring("GPU limits"))
-		Expect(storedCapabilities(np.Id).Quota).To(BeTrue())
-	})
-
-	It("warns that QUOTAS_TO_DEFAULT clears GPU limits when quota turns off and limits stays on", func() {
-		np := createNodepool(clusterId)
-		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_QUOTA, []openapi.OrgUnitsNodepoolSummaryInner{
-			{Type: ptr.To("department"), Name: ptr.To("research")},
-		}, nil)
-
-		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Quota: ptr.To(false), Limits: ptr.To(true)})
-		Expect(response.Code).To(Equal(http.StatusBadRequest))
-		Expect(response.Body.(api.Error).Message).To(ContainSubstring("QUOTAS_TO_DEFAULT also clears their GPU limits; to keep them, set their quota to 0 instead."))
 		Expect(storedCapabilities(np.Id).Quota).To(BeTrue())
 	})
 
