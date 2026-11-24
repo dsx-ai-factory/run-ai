@@ -113,7 +113,8 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useAccessRuleRoles } from "@/composables/node-pool/use-access-rule-roles.composable";
 import { useAuthStore } from "@/stores/auth.store/index";
 import { errorMessages } from "@/common/error-message.constant";
-import { QForm } from "quasar";
+import { QForm, useQuasar } from "quasar";
+import { alertUtil } from "@/utils/alert.util";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 import { accessRuleService } from "@/services/control-plane/rbac/access-rule.service/access-rule.service";
 import { usePermissionStore } from "@/stores/permissions.store/index";
@@ -132,6 +133,7 @@ import { SubjectTypeExtended } from "@/swagger-models/authorization-client/index
 import type { ISelectOption } from "@/models/global.model";
 const props = defineProps<{ clusterId: string; clusterName?: string }>();
 const emit = defineEmits<{ close: []; created: [department: Department]; saving: [value: boolean] }>();
+const $q = useQuasar();
 const name = ref(""),
   description = ref(""),
   administrator = ref(false);
@@ -219,10 +221,12 @@ async function createDepartment() {
     }
     emit("close");
   } catch (error) {
-    const message = extractErrorMessages(error, "Could not complete department creation.").join(" ");
-    saveError.value = createdDepartment.value
-      ? `Department created, but role assignments are incomplete. Retry to finish. ${message}`
-      : message;
+    if (createdDepartment.value) {
+      const message = extractErrorMessages(error, "Could not complete department creation.").join(" ");
+      saveError.value = `Department created, but role assignments are incomplete. Retry to finish. ${message}`;
+    } else {
+      $q.notify(alertUtil.getError(`Department ${name.value.trim()} couldn't be created`));
+    }
   } finally {
     saving.value = false;
     emit("saving", false);

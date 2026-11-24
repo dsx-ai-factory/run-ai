@@ -35,15 +35,11 @@ export function useNodePoolWizardData(poolId: Ref<string>, options: IWizardDataO
       const capacity = await loadSchedulingResources(latest);
       if (request !== version) return;
       resources.value = capacity;
-      telemetryError.value =
-        retryCapacity && capacity.gpus == null ? "Capacity is not available yet. Retrying automatically." : "";
+      telemetryError.value = "";
     } catch (error) {
       if (request !== version) return;
       resources.value = undefined;
-      telemetryError.value = extractErrorMessages(
-        error,
-        retryCapacity ? "Capacity is unavailable. Retrying automatically." : "Node pool capacity is unavailable.",
-      ).join(" ");
+      telemetryError.value = extractErrorMessages(error, "Node pool capacity is unavailable.").join(" ");
     }
     if (retryCapacity && resources.value?.gpus == null)
       retry = setTimeout(() => void refreshCapacity(snapshot, request, true), 5000);

@@ -10,7 +10,15 @@
   >
     <header>
       <span>Advanced settings</span
-      ><q-btn flat round dense icon="ph-bold ph-x" aria-label="Hide Advanced settings" @click="emit('close')">
+      ><q-btn
+        ref="closeButton"
+        flat
+        round
+        dense
+        icon="ph-bold ph-x"
+        aria-label="Hide Advanced settings"
+        @click="emit('close')"
+      >
         <q-tooltip class="node-pool-settings-hide-help">Hide Advanced settings</q-tooltip>
       </q-btn>
     </header>
@@ -274,7 +282,8 @@
 import { ENodePoolSchedulingMode as ESchedulingMode, isSupportedSchedulingMode } from "@/models/node-pool.model";
 
 import { numericKeydown, numericPaste, numericBeforeInput } from "@/utils/numeric-input.util/numeric-input.util";
-import { computed, onBeforeUnmount, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { QBtn } from "quasar";
 import { extractErrorMessages } from "@/utils/error-alert.util";
 import { DOCS } from "@/constants/docs/index";
 import { SchedulingSectionTitle } from "@/components/node-pools/scheduling-section-title";
@@ -292,6 +301,8 @@ const props = defineProps<{
   savedCpuQuota?: boolean;
 }>();
 const emit = defineEmits<{ close: []; patch: [Partial<SchedulingDraft>] }>();
+const closeButton = ref<QBtn>();
+onMounted(() => closeButton.value?.$el.focus({ preventScroll: true }));
 const weightOptions = [
   {
     label: "Automatic",
@@ -658,11 +669,6 @@ header :deep(.q-icon) {
 }
 </style>
 <style lang="scss">
-.scheduling-settings-popup {
-  width: 420px;
-  max-width: calc(100vw - 32px) !important;
-  scrollbar-gutter: stable;
-}
 .historical-weight-help {
   margin: 0;
   padding-left: 20px;

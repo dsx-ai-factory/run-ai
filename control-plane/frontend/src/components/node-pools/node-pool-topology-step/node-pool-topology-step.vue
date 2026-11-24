@@ -170,7 +170,6 @@
     </runai-form-wrapper>
     <template #content-footer>
       <div class="topology-footer">
-        <p v-if="saveError" id="node-pool-topology-save-error" class="text-negative" role="alert">{{ saveError }}</p>
         <runai-btn
           aid="topology-save-close"
           label="Save & close"
@@ -188,6 +187,7 @@
 </template>
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import { useQuasar } from "quasar";
 import RunaiWizardLayout from "@/components/common/runai-wizard-layout/runai-wizard-layout.vue";
 import RunaiFormWrapper from "@/components/common/runai-form-wrapper/runai-form-wrapper.vue";
 import RunaiExpansionWrapper from "@/components/common/runai-expansion-wrapper/runai-expansion-wrapper.vue";
@@ -216,7 +216,7 @@ import { DOCS } from "@/constants/docs";
 import { isValidKubernetesLabelKey, MAX_K8S_LABEL_KEY_CHARACTERS } from "@/common/form.validators";
 import { MIN_CLUSTER_VERSION_FOR_MNNVL_DETECTION } from "@/common/version.constant";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
-import { extractErrorMessages } from "@/utils/error-alert.util";
+import { alertUtil } from "@/utils/alert.util";
 import {
   topologyDraftFromPool,
   buildTopologyPatch,
@@ -248,7 +248,7 @@ const saving = ref(false);
 const topologyCreating = ref(false);
 const busy = computed(() => saving.value || topologyCreating.value);
 watch(busy, (value) => emit("saving", value), { flush: "sync" });
-const saveError = ref("");
+const $q = useQuasar();
 const form = ref<InstanceType<typeof RunaiFormWrapper>>();
 const topologies = ref<NetworkTopology[]>([]);
 const selectedTopologyName = computed(
@@ -301,18 +301,14 @@ function onStepClick({ name }: { name: string }) {
 async function save() {
   if (busy.value || !props.canSave || invalidMnnvlLabel.value) return;
   saving.value = true;
-  saveError.value = "";
   try {
     if (!(await form.value?.validate()) || !props.canSave) return;
     const patch = buildTopologyPatch(initialDraft, draft.value, props.supports, props.canReadTopologies);
     const saved = Object.keys(patch).length ? await clusterService.patchNodepool(props.pool.id, patch) : props.pool;
     saving.value = false;
     emit("saved", saved);
-  } catch (error) {
-    saveError.value = extractErrorMessages(
-      error,
-      "Could not save topology and placement. Your changes are preserved.",
-    ).join("; ");
+  } catch {
+    $q.notify(alertUtil.getError(`Node pool ${props.pool.name} couldn't be saved`));
   } finally {
     saving.value = false;
   }
@@ -390,10 +386,6 @@ async function save() {
   justify-content: flex-end;
   gap: 20px;
   align-items: center;
-}
-.topology-footer > p {
-  flex: 1;
-  margin: 0;
 }
 .node-pool-topology-wizard :deep(.wizard-step-title) {
   white-space: nowrap;

@@ -122,7 +122,7 @@ describe("Step 1 form", () => {
     expect(wrapper.text()).toContain("Select a value");
     wrapper.unmount();
   });
-  it("shows the backend error detail, preserves input and clears the error on successful retry", async () => {
+  it("shows a single failure toast and preserves the input for a successful retry", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     vi.mocked(clusterService.createNodepool)
       .mockRejectedValueOnce(new BadRequestError("This label is reserved by the cluster administrator"))
@@ -144,9 +144,10 @@ describe("Step 1 form", () => {
     await flushPromises();
     await wrapper.find('[aid="create-node-pool-continue"]').trigger("click");
     await flushPromises();
-    expect(wrapper.get('[role="alert"]').text()).toContain("This label is reserved by the cluster administrator");
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    expect(notify).toHaveBeenCalledTimes(1);
     expect(notify).toHaveBeenCalledWith(
-      expect.objectContaining({ message: "Node pool valid-pool couldn't be created" }),
+      expect.objectContaining({ type: "negative", message: "Node pool valid-pool couldn't be created" }),
     );
     expect(wrapper.findComponent(RunaiNameValidation).props("modelValue")).toBe("valid-pool");
     expect(wrapper.findComponent(RunaiDescriptionInput).props("modelValue")).toBe("Keep this description");

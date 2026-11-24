@@ -6,7 +6,7 @@ import { computed, getCurrentScope, onScopeDispose, ref, type Ref } from "vue";
 import { permissionService } from "@/services/authorization/permission.service/permission.service";
 import { useAuthStore } from "@/stores/auth.store/index";
 import type { PermittedScopes } from "@/swagger-models/authorization-client/index";
-import type { ISchedulingTotals } from "@/models/node-pool-scheduling.model";
+import type { IDepartmentPages, ISchedulingTotals } from "@/models/node-pool-scheduling.model";
 import { usePermissionStore } from "@/stores/permissions.store/index";
 import { useSettingStore } from "@/stores/setting.store/index";
 import { orgUnitSettingsService } from "@/services/control-plane/org-unit-settings.service/org-unit-settings.service";
@@ -19,7 +19,8 @@ import { useNodePoolWizardData } from "./use-node-pool-wizard-data.composable";
 import {
   loadChildQuotaSum,
   loadNodePoolGpuLimits,
-  loadSchedulingDepartmentSnapshot,
+  loadSchedulingDepartmentPage,
+  schedulingSnapshotTotals,
   loadSchedulingTotals,
   schedulingFilters,
 } from "@/composables/node-pool/node-pool-scheduling-data.util";
@@ -57,9 +58,75 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
   const policyError = ref("");
   const search = ref("");
   const rank = ref<string>();
+  const nextOffset = ref<number>();
+  const loadingAll = ref(false);
+  let pendingPage: Promise<boolean> | undefined;
+  let pendingAll: Promise<boolean> | undefined;
   let scopeVersion = 0;
+  function applySnapshotTotals(pool: Nodepool) {
+    if (!totalsComplete.value) return;
+    const totals = schedulingSnapshotTotals(baselineRows.value, pool.schedulingCapabilities?.adjustableWeights === true);
+    const empty = schedulingSnapshotTotals([], pool.schedulingCapabilities?.adjustableWeights === true).all;
+    for (const [rank, aggregate] of Object.entries(aggregates.value)) {
+      Object.assign(aggregate, totals[rank] ?? empty);
+    }
+  }
+  function loadNext(): Promise<boolean> {
+    if (pendingPage) return pendingPage;
+    const pool = snapshot.value;
+    const offset = nextOffset.value;
+    if (!pool || offset == null) return Promise.resolve(true);
+    const current = scopeVersion;
+    pendingPage = loadSchedulingDepartmentPage({ poolId: pool.id, clusterId: pool.clusterId }, offset)
+      .then((page) => {
+        if (current !== scopeVersion) return false;
+        const byId = new Map(baselineRows.value.map((row) => [row.orgUnitId, row]));
+        for (const row of page.nodePoolResources) byId.set(row.orgUnitId, row);
+        baselineRows.value = [...byId.values()];
+        nextOffset.value = page.next;
+        if (page.next == null) applySnapshotTotals(pool);
+        return true;
+      })
+      .catch((error) => {
+        if (current === scopeVersion)
+          loadError.value = extractErrorMessages(error, "Failed to load departments.").join(" ");
+        return false;
+      })
+      .finally(() => {
+        if (current === scopeVersion) pendingPage = undefined;
+      });
+    return pendingPage;
+  }
+  function loadAll(): Promise<boolean> {
+    if (pendingAll) return pendingAll;
+    if (nextOffset.value == null) return Promise.resolve(true);
+    const current = scopeVersion;
+    loadingAll.value = true;
+    pendingAll = (async () => {
+      while (current === scopeVersion && nextOffset.value != null) {
+        if (!(await loadNext())) return false;
+      }
+      return current === scopeVersion;
+    })().finally(() => {
+      if (current === scopeVersion) {
+        loadingAll.value = false;
+        pendingAll = undefined;
+      }
+    });
+    return pendingAll;
+  }
+  const departmentPages = computed<IDepartmentPages>(() => ({
+    nextOffset: nextOffset.value,
+    loadingAll: loadingAll.value,
+    loadNext,
+    loadAll,
+  }));
   function resetScheduling(poolChanged: boolean) {
     scopeVersion++;
+    nextOffset.value = undefined;
+    pendingPage = undefined;
+    pendingAll = undefined;
+    loadingAll.value = false;
     if (poolChanged) {
       search.value = "";
       rank.value = undefined;
@@ -89,66 +156,65 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
     };
     const departments = async () => {
       if (!permissions.value.view) return;
-      const [total, departmentSnapshot, scopes, projects] = await Promise.all([
+      const [total, page, scopes, projects] = await Promise.all([
         loadSchedulingTotals(scope),
-        loadSchedulingDepartmentSnapshot(scope, pool.schedulingCapabilities?.adjustableWeights === true),
+        loadSchedulingDepartmentPage(scope, 0),
         permissionService.getPermittedScopesForAction(ResourceType.Department),
         permissionService.getPermittedScopesForAction(ResourceType.Project).catch(() => ({})),
       ]);
       if (scopeVersion !== current) return;
       departmentScopes.value = scopes;
       projectScopes.value = projects;
-      const complete = coversCluster(scopes[Action.Read]);
+      const rawWeightsAvailable = pool.schedulingCapabilities?.adjustableWeights === true;
+      const ranks = ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => option.value);
+      const rowsComplete = page.next == null && coversCluster(scopes[Action.Read]);
+      const snapshotTotals = rowsComplete
+        ? schedulingSnapshotTotals(page.nodePoolResources, rawWeightsAvailable)
+        : undefined;
       const visibleCounts: Record<string, number> = {};
-      for (const row of departmentSnapshot.rows) visibleCounts[row.rank] = (visibleCounts[row.rank] ?? 0) + 1;
-      // Complete scoped snapshots already contain the rows behind every rank.
-      // Retain authoritative rank reads when visibility is restricted.
-      const [rankTotals, counts] = complete
-        ? ([
-            ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => {
-              const totals = departmentSnapshot.totals[option.value];
-              return {
-                weightsSum:
-                  pool.schedulingCapabilities?.adjustableWeights === true
-                    ? (totals?.rawWeightsSum ?? 0)
-                    : (totals?.automaticWeightsSum ?? 0),
+      for (const row of page.nodePoolResources) visibleCounts[row.rank] = (visibleCounts[row.rank] ?? 0) + 1;
+      const perRank = await Promise.all(
+        ranks.map(async (rank) => {
+          if (snapshotTotals) {
+            const totals = snapshotTotals[rank];
+            return {
+              count: visibleCounts[rank] ?? 0,
+              totals: {
                 deservedSum: totals?.deservedSum ?? 0,
-              };
-            }),
-            ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => visibleCounts[option.value] ?? 0),
-          ] as const)
-        : await Promise.all([
-            Promise.all(
-              ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => loadSchedulingTotals({ ...scope, rank: option.value })),
-            ),
-            Promise.all(
-              ENTITY_PRIORITY_SELECT_OPTIONS.map((option) =>
-                orgUnitService.countDepartmentNodePoolResources(schedulingFilters({ ...scope, rank: option.value })),
-              ),
-            ),
-          ]);
-      if (scopeVersion !== current) return;
-      const weightTotals = departmentSnapshot.totals;
-      baselineRows.value = departmentSnapshot.rows;
-      aggregates.value = Object.fromEntries([
-        ["all", { ...total, ...weightTotals.all }],
-        ...ENTITY_PRIORITY_SELECT_OPTIONS.map((option, i) => [
-          option.value,
-          {
-            ...rankTotals[i],
-            ...(weightTotals[option.value] ?? {
-              rawWeightsSum: pool.schedulingCapabilities?.adjustableWeights === true ? 0 : undefined,
-              automaticWeightsSum: 0,
-              finiteQuotaSum: 0,
-              unlimitedQuotaCount: 0,
-              deservedSum: 0,
-            }),
-          },
-        ]),
-      ]);
-      rankCounts.value = Object.fromEntries(
-        ENTITY_PRIORITY_SELECT_OPTIONS.map((option, i) => [option.value, counts[i]]),
+                weightsSum: (rawWeightsAvailable ? totals?.rawWeightsSum : totals?.automaticWeightsSum) ?? 0,
+              },
+            };
+          }
+          const rankScope = { ...scope, rank };
+          const count = await orgUnitService.countDepartmentNodePoolResources(schedulingFilters(rankScope));
+          const totals = count ? await loadSchedulingTotals(rankScope) : { weightsSum: 0, deservedSum: 0 };
+          return { count, totals };
+        }),
       );
+      if (scopeVersion !== current) return;
+      // The server sums weights using the saved capability. Keep the other denominator unknown
+      // until a complete peer snapshot or a finite quota sum supplies it.
+      function serverTotals(value: typeof total): ISchedulingTotals {
+        return {
+          ...value,
+          rawWeightsSum: rawWeightsAvailable ? value.weightsSum : undefined,
+          automaticWeightsSum: rawWeightsAvailable
+            ? value.deservedSum >= 0
+              ? value.deservedSum
+              : undefined
+            : value.weightsSum,
+          finiteQuotaSum: value.deservedSum >= 0 ? value.deservedSum : undefined,
+          unlimitedQuotaCount: value.deservedSum >= 0 ? 0 : undefined,
+        };
+      }
+      baselineRows.value = page.nodePoolResources;
+      aggregates.value = Object.fromEntries([
+        ["all", serverTotals(total)],
+        ...ranks.map((rank, i) => [rank, serverTotals(perRank[i].totals)]),
+      ]);
+      rankCounts.value = Object.fromEntries(ranks.map((rank, i) => [rank, perRank[i].count]));
+      if (page.next == null) applySnapshotTotals(pool);
+      nextOffset.value = page.next;
     };
     try {
       await Promise.all([policy(), departments()]);
@@ -162,7 +228,6 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
     resources,
     loading,
     loadError,
-    telemetryError,
     refresh,
   } = useNodePoolWizardData(poolId, { retryCapacity: true, resetStep: resetScheduling, loadStep: loadScheduling });
   if (getCurrentScope())
@@ -184,6 +249,7 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
       return loadChildQuotaSum({ poolId: snapshot.value.id, clusterId: snapshot.value.clusterId }, id);
     },
     baselineRows,
+    departmentPages,
     aggregates,
     rankCounts,
     resources,
@@ -194,7 +260,6 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
     quotaPolicy,
     policyError,
     loadError,
-    telemetryError,
     loading,
     search,
     rank,

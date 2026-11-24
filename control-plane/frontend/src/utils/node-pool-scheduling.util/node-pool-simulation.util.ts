@@ -30,8 +30,7 @@ export function buildSimulationRequest(scenario: ISimulationScenario): FairShare
   // orgUnits serves both as requested rows and scenario overrides. Include all
   // off-screen edits; splitting requests would silently change the competition.
   const ids = [...new Set([...scenario.ids, ...Object.keys(draft.departments), ...Object.keys(demand)])];
-  if (!ids.length || ids.length > 500)
-    throw new Error("Simulation supports 1–500 departments including off-screen edits. Your draft is preserved.");
+  if (!ids.length || ids.length > 500) throw new Error("Simulation supports 1–500 departments.");
   return {
     nodePool: {
       capacity: { gpu: capacity },

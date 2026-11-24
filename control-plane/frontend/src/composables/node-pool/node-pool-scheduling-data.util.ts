@@ -10,7 +10,7 @@ import { filterUtil } from "@/utils/filter.util/filter.util";
 import { metricUtil } from "@/utils/metric.util/index";
 import { MetricsType, type MetricsResponse } from "@/swagger-models/cluster-service-client/index";
 import type { INodePoolSummaryResources } from "@/models/node-pool.model";
-import type { ISchedulingScope } from "@/models/node-pool-scheduling.model";
+import { DEPARTMENT_PAGE_SIZE, type ISchedulingScope } from "@/models/node-pool-scheduling.model";
 import { completePeerSchedulingTotals } from "@/utils/node-pool-scheduling.util/node-pool-scheduling-totals.util";
 export function schedulingFilters(scope: ISchedulingScope) {
   const filters = [
@@ -39,25 +39,21 @@ export function loadSchedulingTotals(scope: ISchedulingScope) {
   // The sum endpoint takes pool scope as nodepoolId, and rejects nodePoolId filters.
   return orgUnitService.sumDepartmentNodePoolResources(scope.poolId, schedulingFilters(scope).slice(1));
 }
-// Sum APIs use the saved capability's weight semantics. Read all scoped pages to
-// obtain both denominators while previewing an unsaved mode change.
-export async function loadSchedulingDepartmentSnapshot(scope: ISchedulingScope, rawWeightsAvailable = true) {
-  const rows: DepartmentNodePoolResources[] = [];
-  let offset: number | undefined = 0;
-  do {
-    const response = await orgUnitService.getDepartmentNodePoolResources(
-      schedulingFilters(scope),
-      "orgUnitName",
-      "asc",
-      offset,
-      100,
-    );
-    rows.push(...response.nodePoolResources);
-    if (response.next != null && response.next <= offset)
-      throw new Error("Department weight pagination did not advance.");
-    offset = response.next;
-  } while (offset != null);
-  const totals = completePeerSchedulingTotals(
+
+export async function loadSchedulingDepartmentPage(scope: ISchedulingScope, offset: number) {
+  const page = await orgUnitService.getDepartmentNodePoolResources(
+    schedulingFilters(scope),
+    "orgUnitName",
+    "asc",
+    offset,
+    DEPARTMENT_PAGE_SIZE,
+  );
+  if (page.next != null && page.next <= offset) throw new Error("Department pagination did not advance.");
+  return page;
+}
+
+export function schedulingSnapshotTotals(rows: DepartmentNodePoolResources[], rawWeightsAvailable: boolean) {
+  return completePeerSchedulingTotals(
     rows.map((row) => ({
       id: row.orgUnitId,
       rank: row.rank,
@@ -66,7 +62,6 @@ export async function loadSchedulingDepartmentSnapshot(scope: ISchedulingScope, 
     })),
     { rawWeightsAvailable },
   );
-  return { totals, rows };
 }
 export async function loadChildQuotaSum(scope: ISchedulingScope, departmentId: string): Promise<number> {
   const value = await orgUnitService.getDepartmentSubordinateGpuQuota(departmentId, {

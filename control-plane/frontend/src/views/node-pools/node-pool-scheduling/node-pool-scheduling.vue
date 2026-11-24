@@ -9,6 +9,7 @@
     :key="pool.id"
     :pool="pool"
     :resources="resources"
+    :department-pages="departmentPages"
     :rows="baselineRows"
     :baseline-rows="baselineRows"
     :aggregates="aggregates"
@@ -16,7 +17,6 @@
     :rank-counts="rankCounts"
     :loading="loading"
     :load-error="loadError"
-    :telemetry-error="telemetryError"
     :can-view-departments="permissions.view"
     :can-edit-departments="permissions.edit"
     :can-save-pool="canSavePool"
@@ -57,6 +57,7 @@ const poolId = computed(() => (typeof route.params.id === "string" ? route.param
 const {
   snapshot: pool,
   baselineRows,
+  departmentPages,
   aggregates,
   rankCounts,
   resources,
@@ -68,7 +69,6 @@ const {
   quotaPolicy,
   policyError,
   loadError,
-  telemetryError,
   loading,
   search,
   rank,

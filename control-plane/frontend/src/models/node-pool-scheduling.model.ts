@@ -191,6 +191,14 @@ export enum EResourceEditorKind {
   Limit = "limit",
 }
 
+export const DEPARTMENT_PAGE_SIZE = 50;
+export interface IDepartmentPages {
+  nextOffset?: number;
+  loadingAll: boolean;
+  loadNext: () => Promise<boolean>;
+  loadAll: () => Promise<boolean>;
+}
+
 export interface ISchedulingScope {
   poolId: string;
   clusterId: string;

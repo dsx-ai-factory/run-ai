@@ -118,10 +118,10 @@
                 }}<template #action
                   ><runai-btn aid="retry-departments" flat label="Retry" @click="emit('refresh')" /></template
               ></q-banner>
-              <p v-if="telemetryError" class="q-px-md text-b-subtitle2" role="status">{{ telemetryError }}</p>
               <div class="scheduling-content">
                 <node-pool-department-table
                   :pool-id="pool.id"
+                  :department-pages="departmentPages"
                   :rows="rows"
                   :baseline-rows="baselineRows"
                   :draft="draft"
@@ -234,6 +234,7 @@ import { useNodePoolSchedulingDraft } from "@/composables/node-pool/use-node-poo
 import {
   toSchedulingCapabilities,
   isDepartmentLimitBelowQuota,
+  type IDepartmentPages,
   type IDepartmentSchedulingEdit,
   type ISchedulingTotals,
   type IDepartmentValidationContext,
@@ -255,6 +256,7 @@ const props = withDefaults(
     pool: Nodepool;
     resources?: INodePoolSummaryResources;
     rows?: DepartmentNodePoolResources[];
+    departmentPages?: IDepartmentPages;
     baselineRows?: DepartmentNodePoolResources[];
     aggregates?: Record<string, ISchedulingTotals>;
     ranks?: string[];
@@ -268,7 +270,6 @@ const props = withDefaults(
     canEditDepartment?: (id: string) => boolean;
     loading?: boolean;
     loadError?: string;
-    telemetryError?: string;
     searchTerm?: string;
     rankFilter?: string;
     quotaPolicy?: boolean;
@@ -490,8 +491,20 @@ watch(
   { deep: true },
 );
 const navigationDisabled = computed(() => saving.value || creatingDepartment.value || !props.canSavePool);
+const editedRowsPending = computed(
+  () =>
+    props.departmentPages?.nextOffset != null &&
+    Object.keys(draft.value.departments).some(
+      (id) => !(props.baselineRows ?? props.rows).some((row) => row.orgUnitId === id),
+    ),
+);
 const saveDisabled = computed(
-  () => navigationDisabled.value || props.loading || departmentsReadOnly.value || !!validationError.value,
+  () =>
+    navigationDisabled.value ||
+    props.loading ||
+    departmentsReadOnly.value ||
+    editedRowsPending.value ||
+    !!validationError.value,
 );
 async function save(destination: "close" | "continue" = "close") {
   if (saveDisabled.value) return;
@@ -519,7 +532,7 @@ async function save(destination: "close" | "continue" = "close") {
         ? "Pool settings were saved, but some department changes remain unsaved. "
         : saver.savedPool
           ? "Current pool settings were not saved. Some changes were saved in an earlier attempt. "
-          : "") + extractErrorMessages(error, "Could not save scheduling. Your changes are preserved.").join("; ");
+          : "") + extractErrorMessages(error, "Could not save scheduling.").join("; ");
   } finally {
     saving.value = false;
     emit("saving", false);

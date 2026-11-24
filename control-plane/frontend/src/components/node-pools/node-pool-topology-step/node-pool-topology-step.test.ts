@@ -5,7 +5,7 @@
 import { mount, flushPromises } from "@vue/test-utils";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { createTestingPinia } from "@pinia/testing";
-import { Quasar } from "quasar";
+import { Quasar, Notify } from "quasar";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import Step from "./node-pool-topology-step.vue";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
@@ -33,7 +33,7 @@ async function render(overrides = {}) {
   const wrapper = mount(Step, {
     props: { pool, supports, canSave: true, canReadTopologies: true, canCreateTopology: true, ...overrides },
     global: {
-      plugins: [Quasar, createTestingPinia({ createSpy: vi.fn }), router],
+      plugins: [[Quasar, { plugins: { Notify } }], createTestingPinia({ createSpy: vi.fn }), router],
       stubs: {
         NetworkTopologySelection: {
           name: "NetworkTopologySelection",
@@ -125,6 +125,7 @@ describe("node pool topology step", () => {
         }),
     );
     const wrapper = await render();
+    const notify = vi.spyOn(wrapper.vm.$q, "notify").mockImplementation(() => () => {});
     await wrapper.get('[aid="topology-mnnvl-label"]').setValue("example.com/Edited");
     await wrapper.get('[aid="topology-save-close"]').trigger("click");
     await wrapper.get('[aid="topology-save-close"]').trigger("click");
@@ -134,7 +135,11 @@ describe("node pool topology step", () => {
     expect(wrapper.emitted("saved")).toBeUndefined();
     reject(new Error("Service unavailable"));
     await flushPromises();
-    expect(wrapper.get('[role="alert"]').text()).toContain("Service unavailable");
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    expect(notify).toHaveBeenCalledTimes(1);
+    expect(notify).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "negative", message: "Node pool Training couldn't be saved" }),
+    );
     expect(wrapper.get<HTMLInputElement>('[aid="topology-mnnvl-label"]').element.value).toBe("example.com/Edited");
     await wrapper.get('[aid="topology-save-close"]').trigger("click");
     await flushPromises();

@@ -204,24 +204,82 @@ describe("simulation capacity", () => {
     expect(wrapper.find('.result-bar[aria-busy="true"] .simulation-values').exists()).toBe(true);
   });
 
-  it("shows all 51 matching departments in a rank without a paging action", async () => {
+  it("loads the next page when the expanded rank's last row enters the viewport", async () => {
+    const intersections = new Map<Element, (visible: boolean) => void>();
+    class ScrollObserver {
+      constructor(private callback: (entries: Partial<IntersectionObserverEntry>[]) => void) {}
+      observe(element: Element) {
+        intersections.set(element, (isIntersecting) => this.callback([{ isIntersecting }]));
+      }
+      disconnect() {}
+    }
+    vi.stubGlobal("IntersectionObserver", ScrollObserver);
+    try {
+      wrapper = renderSimulation(40);
+      const members = Array.from({ length: 51 }, (_, i) => ({
+        ...rows[0],
+        orgUnitId: String(i),
+        orgUnitName: `demo-${i}`,
+        rank: "Medium",
+      }));
+      const pages = { nextOffset: 50, loadingAll: false, loadNext: vi.fn().mockResolvedValue(true), loadAll: vi.fn() };
+      await wrapper.setProps({
+        rows: [rows[0]],
+        departmentPages: pages,
+        rankCounts: { Medium: 51, MediumLow: 1 },
+        ranks: ["Medium", "MediumLow"],
+        draft: { ...draft, mode: ESchedulingMode.Ranked },
+      });
+      // The first page has no matching members. The group must still have a scroll target.
+      await wrapper.get('[aid="rank-MediumLow"]').trigger("click");
+      await wrapper.get('[aid="rank-Medium"]').trigger("click");
+      expect(wrapper.findAll(".department-name")).toHaveLength(0);
+      expect(wrapper.text()).toContain("Medium (51 departments)");
+      const trigger = (visible: boolean) => {
+        const target = wrapper.get(".department-page-end div").element;
+        const intersect = intersections.get(target);
+        if (!intersect) throw new Error("The scroll target was not observed.");
+        intersect(visible);
+      };
+      trigger(false);
+      expect(pages.loadNext).not.toHaveBeenCalled();
+      trigger(true);
+      expect(pages.loadNext).toHaveBeenCalledTimes(1);
+      await wrapper.setProps({
+        rows: [...members.slice(0, 50), rows[0]],
+        departmentPages: { ...pages, nextOffset: 100 },
+      });
+      expect(wrapper.findAll(".department-name")).toHaveLength(50);
+      trigger(true);
+      expect(pages.loadNext).toHaveBeenCalledTimes(2);
+      await wrapper.setProps({ rows: [...members, rows[0]], departmentPages: { ...pages, nextOffset: undefined } });
+      expect(wrapper.findAll(".department-name")).toHaveLength(51);
+      expect(wrapper.find(".department-page-end").exists()).toBe(false);
+      expect(wrapper.text()).not.toContain("Load more");
+      expect(pages.loadAll).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("waits for matching peers across pages before reporting no results or sending a simulation", async () => {
     wrapper = renderSimulation(40);
-    const members = Array.from({ length: 51 }, (_, i) => ({
-      ...rows[0],
-      orgUnitId: String(i),
-      orgUnitName: `demo-${i}`,
-      rank: "Medium",
-    }));
-    await wrapper.setProps({
-      rows: [...members, rows[0]],
-      ranks: ["Medium"],
-      searchTerm: "demo-",
-      draft: { ...draft, mode: ESchedulingMode.Ranked },
-    });
-    expect(wrapper.text()).toContain("Medium (51 departments)");
-    await wrapper.get('[aid="rank-Medium"]').trigger("click");
-    expect(wrapper.findAll(".department-name")).toHaveLength(51);
-    expect(wrapper.text()).not.toContain("Load more");
+    const pages = { nextOffset: 50, loadingAll: false, loadNext: vi.fn(), loadAll: vi.fn().mockResolvedValue(true) };
+    await wrapper.setProps({ departmentPages: pages, searchTerm: "Beta" });
+    expect(pages.loadAll).toHaveBeenCalledOnce();
+    expect(wrapper.text()).not.toContain("No departments match");
+    const beta = { ...rows[0], orgUnitId: "b", orgUnitName: "Beta" };
+    await wrapper.setProps({ rows: [...rows, beta], departmentPages: { ...pages, nextOffset: undefined } });
+    expect(wrapper.findAll(".department-name").map((name) => name.text())).toEqual(["Beta"]);
+
+    // A paged simulation must keep the same requested competitors as the full table.
+    await wrapper.setProps({ searchTerm: "", rows, departmentPages: { ...pages, loadingAll: true } });
+    await wrapper.get('[role="switch"]').trigger("click");
+    await vi.advanceTimersByTimeAsync(500);
+    expect(simulateNodePool).not.toHaveBeenCalled();
+    await wrapper.setProps({ rows: [...rows, beta], departmentPages: { ...pages, nextOffset: undefined } });
+    await vi.advanceTimersByTimeAsync(500);
+    expect(vi.mocked(simulateNodePool).mock.lastCall?.[1].orgUnits.map((row) => row.id)).toEqual(["a", "b"]);
   });
 
   it("turns simulation off when all ranks collapse or a search hides every department", async () => {
@@ -934,6 +992,9 @@ describe("scheduling department table", () => {
       },
     });
     expect(wrapper.get(".scheduling-empty").text()).toBe("No departments yet");
+    await wrapper.setProps({ hasError: true });
+    expect(wrapper.find(".scheduling-empty").exists()).toBe(false);
+    await wrapper.setProps({ hasError: false });
     expect(wrapper.get('[aid="advanced-settings"]').text()).toBe("Advanced settings");
     await wrapper.setProps({ searchTerm: "missing" });
     expect(wrapper.get(".scheduling-empty").text()).toBe("No departments match your filters");
@@ -984,7 +1045,8 @@ describe("scheduling department table", () => {
     await wrapper.setProps({ draft: { ...draft, departments: { a: { id: "a", weight: 8 } } } });
     await vi.advanceTimersByTimeAsync(300);
     expect(wrapper.find(".allocated").exists()).toBe(false);
-    expect(wrapper.text()).toContain("Simulation failed. Your changes are preserved. Try again.");
+    expect(wrapper.get(".simulation-notice").text()).toContain("Simulation failed.");
+    expect(wrapper.text()).not.toContain("Your changes are preserved");
     expect(wrapper.props("draft").departments.a.weight).toBe(8);
     wrapper.unmount();
     vi.useRealTimers();

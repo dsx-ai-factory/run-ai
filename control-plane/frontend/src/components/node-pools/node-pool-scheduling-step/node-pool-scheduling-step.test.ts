@@ -162,6 +162,39 @@ describe("scheduling step foundation", () => {
     }
   });
 
+  it("opens Advanced settings beside the table and returns focus after Escape or Close", async () => {
+    const wrapper = render({
+      ...pool,
+      schedulingCapabilities: { quota: true, ranks: true, adjustableWeights: false, cpuQuota: false, limits: true },
+    });
+    document.body.appendChild(wrapper.element);
+    try {
+      const trigger = wrapper.get('[aid="advanced-settings"]');
+      await trigger.trigger("click");
+      const panel = wrapper.get(".table-settings-layout .scheduling-settings");
+      expect(trigger.attributes("aria-expanded")).toBe("true");
+      expect(panel.element.parentElement?.id).toBe(trigger.attributes("aria-controls"));
+      expect(wrapper.find(".column-result").exists()).toBe(false);
+      expect(wrapper.find(".column-limit").exists()).toBe(false);
+      expect(wrapper.find(".column-weight").exists()).toBe(true);
+      const close = panel.get('[aria-label="Hide Advanced settings"]');
+      expect(document.activeElement).toBe(close.element);
+      await close.trigger("keydown", { key: "Escape" });
+      expect(wrapper.find(".scheduling-settings").exists()).toBe(false);
+      expect(wrapper.find(".column-result").exists()).toBe(true);
+      expect(wrapper.find(".column-limit").exists()).toBe(true);
+      expect(document.activeElement).toBe(trigger.element);
+
+      await trigger.trigger("click");
+      await wrapper.get('[aria-label="Hide Advanced settings"]').trigger("click");
+      expect(trigger.attributes("aria-expanded")).toBe("false");
+      expect(document.activeElement).toBe(trigger.element);
+    } finally {
+      wrapper.element.remove();
+      wrapper.unmount();
+    }
+  });
+
   it("allows turning on custom weights while Guaranteed quota stays enabled", async () => {
     const wrapper = render({
       ...pool,

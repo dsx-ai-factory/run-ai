@@ -249,7 +249,7 @@ async function opened() {
     const result = await props.loadContext();
     if (version === request) context.value = result;
   } catch {
-    if (version === request) loadError.value = "Validation data is unavailable. Close and reopen to retry.";
+    if (version === request) loadError.value = "Validation data is unavailable.";
   } finally {
     if (version === request) loading.value = false;
   }

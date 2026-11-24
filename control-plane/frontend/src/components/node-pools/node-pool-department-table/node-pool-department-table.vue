@@ -50,6 +50,7 @@
       <template #right-actions
         ><q-btn
           v-if="canView"
+          ref="settingsTrigger"
           aid="advanced-settings"
           flat
           stack
@@ -57,21 +58,18 @@
           icon="ph-bold ph-gear-six"
           :label="props.searchTerm || noMatchingDepartments ? 'Show settings' : 'Advanced settings'"
           :disable="readonly"
+          :aria-expanded="!!settingsOpen"
+          :aria-controls="settingsOpen ? settingsPanelId : undefined"
           @click="emit('advanced-settings')"
-          ><q-menu
-            :model-value="settingsOpen"
-            no-parent-event
-            anchor="bottom right"
-            self="top right"
-            :offset="[0, 8]"
-            max-height="70vh"
-            class="scheduling-settings-popup"
-            @update:model-value="!$event && emit('close-settings')"
-          >
-            <slot name="settings" /> </q-menu></q-btn
-      ></template>
+      /></template>
     </runai-page-actions>
-    <div class="table-settings-layout">
+    <div
+      class="table-settings-layout"
+      :class="{
+        'table-settings-layout--open': panelVisible,
+        'table-settings-layout--guaranteed': draft.mode === ESchedulingMode.Guaranteed,
+      }"
+    >
       <div
         class="department-table-content"
         :style="preserveTableSpace ? { minHeight: `${unfilteredHeight}px` } : undefined"
@@ -81,10 +79,10 @@
           flat
           square
           class="scheduling-table"
-          :rows="canView ? displayRows : []"
+          :rows="canView && !resolvingFilters ? displayRows : []"
           :columns="columns"
           row-key="key"
-          :loading="loading"
+          :loading="loading || resolvingFilters"
           :pagination="{ rowsPerPage: 0 }"
           hide-pagination
           :rows-per-page-options="[0]"
@@ -135,7 +133,18 @@
             </q-tr></template
           >
           <template #body="{ row }">
-            <q-tr v-if="row.group" :key="row.key" class="rank-header">
+            <q-tr v-if="row.pageEnd" :key="row.key" class="department-page-end" aria-hidden="true">
+              <q-td :colspan="columns.length"
+                ><div
+                  v-intersection.once="
+                    (entry: IntersectionObserverEntry) => {
+                      if (entry.isIntersecting) showNextPage(row.rank);
+                      return true;
+                    }
+                  "
+              /></q-td>
+            </q-tr>
+            <q-tr v-else-if="row.group" :key="row.key" class="rank-header">
               <q-td :colspan="columns.length"
                 ><div class="rank-row">
                   <q-btn
@@ -180,6 +189,9 @@
                 :title="ranked ? 'Weight within rank' : 'Weight'"
                 :value="row.weight"
                 :display-value="percentage(row)"
+                :load-context="
+                  !automatic && totalsComplete && hasMore && weightTotal(row) == null ? loadWeightPeers : undefined
+                "
                 :preview-weight-percentage="(weight) => previewWeightPercentage(row, weight)"
                 :disabled="readonly || automatic || canEditDepartment?.(row.id) === false"
                 :disabled-tooltip="
@@ -190,7 +202,7 @@
                 @apply="emit('edit', { id: row.id, weight: $event })"
               />
               <department-resource-editor
-                v-if="maxAllocation"
+                v-if="maxAllocation && !panelVisible"
                 :id="row.id"
                 :kind="EResourceEditorKind.Limit"
                 :value="row.limit ?? -1"
@@ -198,7 +210,7 @@
                 :disabled="readonly || canEditDepartment?.(row.id) === false"
                 @apply="emit('edit', { id: row.id, limit: $event })"
               />
-              <q-td class="result-cell">
+              <q-td v-if="!panelVisible" class="result-cell">
                 <div
                   class="result-bar"
                   :class="{ 'simulation-bar': simulation }"
@@ -249,9 +261,6 @@
                         >
                       </div>
                     </div>
-                    <div v-if="simulation && !!simulationMessage" class="result-tooltip-unavailable">
-                      {{ simulationMessage }}
-                    </div>
                   </q-tooltip>
                   <input
                     v-if="simulation"
@@ -272,17 +281,13 @@
             </q-tr>
           </template>
           <template #no-data
-            ><div class="scheduling-empty" role="status">
+            ><div v-if="!canView || (!loading && !resolvingFilters && !hasError)" class="scheduling-empty" role="status">
               {{
                 !canView
                   ? "You’re missing permissions to view departments"
-                  : loading
-                    ? ""
-                    : hasError
-                      ? "Department data is unavailable."
-                      : searchTerm || rankFilter || filters.advancedFilters?.length
-                        ? "No departments match your filters"
-                        : "No departments yet"
+                  : searchTerm || rankFilter || filters.advancedFilters?.length
+                    ? "No departments match your filters"
+                    : "No departments yet"
               }}
             </div></template
           >
@@ -291,6 +296,14 @@
           <span>{{ simulationMessage }}</span>
           <runai-btn v-if="canRetrySimulation" flat label="Retry" aid="retry-simulation" @click="retrySimulation" />
         </div>
+      </div>
+      <div
+        v-if="panelVisible"
+        :id="settingsPanelId"
+        class="department-settings-panel"
+        @keydown.esc.stop="emit('close-settings')"
+      >
+        <slot name="settings" />
       </div>
     </div>
     <move-to-rank-modal
@@ -310,7 +323,8 @@ import { ENodePoolSchedulingMode as ESchedulingMode, isSupportedSchedulingMode }
 import { NotificationAlertBar, ENotificationBarVariant } from "@/components/common/notification-alert-bar/index";
 import { SimulationResultBar } from "@/components/node-pools/simulation-result-bar";
 import { SchedulingFilters } from "@/components/node-pools/scheduling-filters";
-import { computed, ref, useId, watch } from "vue";
+import { computed, nextTick, ref, useId, watch } from "vue";
+import { QBtn, Intersection as vIntersection } from "quasar";
 import { RunaiPageActions } from "@/components/common/runai-page-actions/index";
 import { RunaiEllipsisTextWithTooltip } from "@/components/common/runai-ellipsis-text-with-tooltip/index";
 import { RunaiActionButton } from "@/components/common/runai-page-actions/runai-action-button/index";
@@ -337,9 +351,11 @@ import { EQuotaEntity } from "@/models/resource.model";
 import type { DepartmentNodePoolResources } from "@/swagger-models/org-unit-service-client/index";
 import { DepartmentResourceEditor } from "@/components/node-pools/department-resource-editor";
 import {
+  DEPARTMENT_PAGE_SIZE,
   schedulingTotalsWithEdits,
   weightPercentage,
   type SchedulingDraft,
+  type IDepartmentPages,
   type IDepartmentSchedulingEdit,
   type ISchedulingTotals,
   type IDepartmentValidationContext,
@@ -348,6 +364,7 @@ const props = withDefaults(
   defineProps<{
     poolId?: string;
     rows: DepartmentNodePoolResources[];
+    departmentPages?: IDepartmentPages;
     baselineRows?: DepartmentNodePoolResources[];
     draft: SchedulingDraft;
     aggregates: Record<string, ISchedulingTotals>;
@@ -416,8 +433,11 @@ const ranked = computed(
   () => props.draft.mode === ESchedulingMode.Ranked || props.draft.mode === ESchedulingMode.Guaranteed,
 );
 const automatic = computed(() => props.draft.mode === ESchedulingMode.Guaranteed && props.draft.automaticWeights);
+const hasMore = computed(() => props.departmentPages?.nextOffset != null);
 const completeEffectiveRows = computed(() =>
-  props.baselineRows?.map((row) => effectiveDepartmentEdit(baseline.value, props.draft.departments, row.orgUnitId)),
+  hasMore.value
+    ? undefined
+    : props.baselineRows?.map((row) => effectiveDepartmentEdit(baseline.value, props.draft.departments, row.orgUnitId)),
 );
 const completeCustomWeightTotals = computed(() =>
   !automatic.value && props.totalsComplete !== false && completeEffectiveRows.value
@@ -458,9 +478,22 @@ function updateFilters(value: IFilterBy) {
   filters.value = value;
   if (value.searchTerm !== props.searchTerm) emit("search", value.searchTerm ?? "");
 }
-const columns = computed(() => departmentTableColumns(props.draft.mode, maxAllocation.value));
+const panelVisible = computed(() => props.canView && props.settingsOpen);
+const columns = computed(() => {
+  const columns = departmentTableColumns(props.draft.mode, maxAllocation.value);
+  return panelVisible.value ? columns.filter((col) => col.name !== "limit" && col.name !== "result") : columns;
+});
 const simulation = ref(false);
 const capacityHintId = useId();
+const settingsPanelId = useId();
+const settingsTrigger = ref<QBtn>();
+watch(
+  () => props.settingsOpen,
+  (open) => {
+    if (!open) settingsTrigger.value?.$el.focus();
+  },
+  { flush: "post" },
+);
 const demand = ref<Record<string, number>>({});
 const demandPreview = ref<Record<string, number>>({});
 const currentRank = computed(() => {
@@ -468,10 +501,20 @@ const currentRank = computed(() => {
   return ranks.size === 1 ? [...ranks][0] : undefined;
 });
 const allSelected = computed(
-  () => effectiveRows.value.length > 0 && effectiveRows.value.every((row) => selected.value.has(row.id)),
+  () =>
+    !hasMore.value && effectiveRows.value.length > 0 && effectiveRows.value.every((row) => selected.value.has(row.id)),
 );
-function selectAll(value: boolean) {
-  for (const row of effectiveRows.value) if (props.canEditDepartment?.(row.id) !== false) select(row.id, value);
+async function selectAll(value: boolean) {
+  if (hasMore.value && !(await props.departmentPages?.loadAll())) return;
+  await nextTick();
+  if (props.readonly) return;
+  const next = new Set(selected.value);
+  for (const row of effectiveRows.value) {
+    if (props.canEditDepartment?.(row.id) === false) continue;
+    if (value) next.add(row.id);
+    else next.delete(row.id);
+  }
+  selected.value = next;
 }
 const headerTooltips = computed<Record<string, string>>(() => ({
   selection: "The numbers indicate the order in which the Scheduler considers resource allocation in real time.",
@@ -517,17 +560,20 @@ const effectiveRows = computed(() => {
         matchesSchedulingFilters(row, filters.value.advancedFilters ?? []),
     );
 });
+const filtering = computed(() => !!(props.searchTerm || props.rankFilter || filters.value.advancedFilters?.length));
+const resolvingFilters = computed(() => filtering.value && hasMore.value && !props.hasError);
 const noMatchingDepartments = computed(
   () =>
     !!(
       props.canView &&
       !props.loading &&
       !props.hasError &&
+      !resolvingFilters.value &&
       (props.searchTerm || props.rankFilter || filters.value.advancedFilters?.length) &&
       !effectiveRows.value.length
     ),
 );
-const displayRows = computed(() =>
+const matchingRows = computed(() =>
   ranked.value
     ? rankedDepartmentRows(effectiveRows.value, {
         ranks: props.ranks,
@@ -539,6 +585,66 @@ const displayRows = computed(() =>
         edits: props.draft.departments,
       })
     : effectiveRows.value,
+);
+// Keep the DOM paged even when a search, bulk selection or simulation has needed every peer.
+const shownByRank = ref<Record<string, number>>({});
+watch([filtering, () => props.searchTerm, () => filters.value, ranked], () => {
+  shownByRank.value = {};
+});
+const displayRows = computed(() => {
+  if (!props.departmentPages) return matchingRows.value;
+  type Row = (typeof matchingRows.value)[number];
+  type PageEnd = { key: string; pageEnd: true; rank: string };
+  const result: (Row | PageEnd)[] = [];
+  let rank = "all",
+    shown = 0,
+    count = 0;
+  function finishGroup() {
+    if (props.hasError || props.loading || props.departmentPages?.loadingAll) return;
+    if (ranked.value && !expanded.value.has(rank)) return;
+    const limit = shownByRank.value[rank] ?? DEPARTMENT_PAGE_SIZE;
+    if ((shown < count && (shown >= limit || hasMore.value)) || (!ranked.value && hasMore.value))
+      result.push({
+        key: `page-end-${rank}-${shown}-${props.departmentPages?.nextOffset ?? props.rows.length}`,
+        pageEnd: true,
+        rank,
+      });
+  }
+  for (const row of matchingRows.value) {
+    if ("group" in row) {
+      finishGroup();
+      rank = row.rank;
+      count = row.count;
+      shown = 0;
+      result.push(row);
+    } else if (shown < (shownByRank.value[rank] ?? DEPARTMENT_PAGE_SIZE)) {
+      result.push(row);
+      shown++;
+    }
+  }
+  if (!ranked.value) count = matchingRows.value.length;
+  finishGroup();
+  return result;
+});
+function showNextPage(rank: string) {
+  const limit = shownByRank.value[rank] ?? DEPARTMENT_PAGE_SIZE;
+  const cached = effectiveRows.value.filter((row) => rank === "all" || row.rank === rank).length;
+  if (cached >= limit) shownByRank.value = { ...shownByRank.value, [rank]: limit + DEPARTMENT_PAGE_SIZE };
+  if (cached <= limit && hasMore.value) void props.departmentPages?.loadNext();
+}
+watch(
+  () =>
+    hasMore.value &&
+    !props.loading &&
+    !props.hasError &&
+    (filtering.value ||
+      simulation.value ||
+      (automatic.value && props.rawWeightsAvailable && props.aggregates.all?.deservedSum < 0) ||
+      Object.keys(props.draft.departments).some((id) => !baseline.value[id])),
+  (needsAll) => {
+    if (needsAll) void props.departmentPages?.loadAll();
+  },
+  { immediate: true },
 );
 watch(
   () => [props.capacity, maxAllocation.value, baseline.value, props.draft.departments],
@@ -555,13 +661,18 @@ watch(
   },
   { deep: true, flush: "sync" },
 );
-const visibleDepartmentIds = computed(() => displayRows.value.flatMap((row) => ("id" in row ? [row.id] : [])));
+const visibleDepartmentIds = computed(() => matchingRows.value.flatMap((row) => ("id" in row ? [row.id] : [])));
 const hasVisibleDepartments = computed(() => visibleDepartmentIds.value.length > 0);
 watch([hasVisibleDepartments, () => props.loading], ([visible, loading]) => {
   if (!visible && !loading) simulation.value = false;
 });
 const scenario = computed(() =>
-  simulation.value && hasVisibleDepartments.value && props.canView && props.poolId && props.capacity != null
+  simulation.value &&
+  !hasMore.value &&
+  hasVisibleDepartments.value &&
+  props.canView &&
+  props.poolId &&
+  props.capacity != null
     ? {
         poolId: props.poolId,
         capacity: props.capacity,
@@ -633,6 +744,10 @@ function weightTotal(row: IDepartmentSchedulingEdit) {
   const key = ranked.value ? (row.rank ?? "") : "all";
   return totals.value[key]?.weightsSum ?? completeCustomWeightTotals.value?.[key]?.rawWeightsSum;
 }
+async function loadWeightPeers() {
+  if (!(await props.departmentPages?.loadAll())) throw new Error("Department weights are unavailable.");
+  return {};
+}
 function previewWeightPercentage(row: IDepartmentSchedulingEdit, weight: number) {
   if (automatic.value || props.totalsComplete === false) return undefined;
   return previewDepartmentWeightPercentage(row, weight, weightTotal(row), completeEffectiveRows.value, ranked.value);
@@ -700,6 +815,10 @@ function move(rank: string) {
   selected.value = new Set();
 }
 async function quotaContext(row: IDepartmentSchedulingEdit) {
+  if (props.totalsComplete && hasMore.value && props.aggregates.all?.deservedSum < 0) {
+    if (!(await props.departmentPages?.loadAll())) throw new Error("Department quotas are unavailable.");
+    await nextTick();
+  }
   const result = await props.loadQuotaContext?.(row.id);
   return {
     ...result,
@@ -714,16 +833,43 @@ async function quotaContext(row: IDepartmentSchedulingEdit) {
 </script>
 <style scoped lang="scss">
 .table-settings-layout {
-  display: flex;
-  align-items: stretch;
+  --selection-width: 56px;
+  --department-width: 220px;
+  --resource-width: 150px;
+  --quota-width: 0px;
+  --uncovered-width: calc(var(--selection-width) + var(--department-width) + var(--resource-width) + var(--quota-width));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.table-settings-layout--guaranteed {
+  --quota-width: var(--resource-width);
+}
+.table-settings-layout--open {
+  grid-template-columns: minmax(0, var(--uncovered-width)) minmax(min(380px, 100%), 1fr);
+}
+.table-settings-layout--open .scheduling-table :deep(table) {
+  min-width: var(--uncovered-width);
+}
+.department-settings-panel {
+  min-width: 0;
+  background: var(--bg-primary-default);
+}
+@container department-section (max-width: 520px) {
+  .table-settings-layout--open {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .table-settings-layout--open .department-table-content {
+    display: none;
+  }
 }
 .department-table-content {
+  align-self: start;
   min-width: 0;
-  flex: 1 1 0;
   overflow: hidden;
   padding-bottom: 40px;
 }
 .department-section {
+  container: department-section / inline-size;
   min-width: 0;
 }
 .scheduling-actions {
@@ -862,17 +1008,17 @@ async function quotaContext(row: IDepartmentSchedulingEdit) {
   border-right: 1px solid var(--border-subtle);
 }
 .scheduling-table :deep(.column-selection) {
-  width: 56px;
+  width: var(--selection-width);
   padding: 0 10px;
   color: var(--text-sub);
 }
 .scheduling-table :deep(.column-department) {
-  width: 220px;
+  width: var(--department-width);
 }
 .scheduling-table :deep(.column-quota),
 .scheduling-table :deep(.column-weight),
 .scheduling-table :deep(.column-limit) {
-  width: 150px;
+  width: var(--resource-width);
 }
 .scheduling-table :deep(.column-result) {
   min-width: 220px;
@@ -934,6 +1080,14 @@ async function quotaContext(row: IDepartmentSchedulingEdit) {
 }
 .simulation-control :deep(.q-toggle__inner--truthy .q-toggle__thumb::after) {
   box-shadow: var(--shadow-s);
+}
+.scheduling-table :deep(.department-page-end td) {
+  height: 1px;
+  padding: 0;
+  box-shadow: none;
+}
+.department-page-end div {
+  height: 1px;
 }
 .rank-header td {
   height: 60px !important;
@@ -1138,8 +1292,5 @@ async function quotaContext(row: IDepartmentSchedulingEdit) {
   background: var(--b-text-main);
   border: 2px solid var(--text-inverse);
   border-radius: 50%;
-}
-.result-tooltip-unavailable {
-  margin-top: 7px;
 }
 </style>

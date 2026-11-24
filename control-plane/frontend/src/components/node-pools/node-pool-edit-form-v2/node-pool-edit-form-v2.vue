@@ -137,9 +137,6 @@
         </runai-expansion-wrapper>
       </runai-form-wrapper>
       <template #content-footer>
-        <q-banner v-if="submitError" class="bg-red-1 text-negative q-mt-md" role="alert">
-          {{ submitError }}
-        </q-banner>
         <div class="creation-footer">
           <div class="row justify-end q-gutter-md">
             <runai-btn

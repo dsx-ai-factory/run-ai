@@ -109,12 +109,12 @@ export function useNodePoolSimulation(source: Ref<ISimulationScenario | undefine
           code === 400
             ? typeof serverMessage === "string" && serverMessage.trim()
               ? serverMessage
-              : "Simulation inputs are invalid. Your changes are preserved."
+              : "Simulation inputs are invalid."
             : code === 403
-              ? "You’re missing permissions to simulate GPU allocation. Your changes are preserved."
+              ? "You’re missing permissions to simulate GPU allocation."
               : unavailable
-                ? "Simulation is unavailable. Your changes are preserved."
-                : "Simulation failed. Your changes are preserved. Try again.";
+                ? "Simulation is unavailable."
+                : "Simulation failed.";
       }
     }, delay);
   }

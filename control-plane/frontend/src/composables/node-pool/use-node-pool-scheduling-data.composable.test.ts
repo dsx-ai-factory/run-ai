@@ -42,9 +42,10 @@ import {
   loadChildQuotaSum,
   loadNodePoolGpuLimits,
   loadSchedulingTotals,
-  loadSchedulingDepartmentSnapshot,
+  loadSchedulingDepartmentPage,
   loadSchedulingResources,
 } from "@/composables/node-pool/node-pool-scheduling-data.util";
+import { DEPARTMENT_PAGE_SIZE } from "@/models/node-pool-scheduling.model";
 import { useNodePoolSchedulingData } from "@/composables/node-pool/use-node-pool-scheduling-data.composable";
 import { permissionService } from "@/services/authorization/permission.service/permission.service";
 import { Action, ResourceType } from "@/swagger-models/authorization-client/index";
@@ -59,7 +60,7 @@ beforeEach(() => {
   });
 });
 describe("scoped scheduling reads", () => {
-  it("reuses the complete baseline for initial rows and rank data without duplicate requests", async () => {
+  it("loads one page initially, keeps full rank counts and shares subsequent scroll and complete reads", async () => {
     const rows = Array.from({ length: 158 }, (_, i) => ({
       id: String(i),
       orgUnitId: String(i),
@@ -80,18 +81,28 @@ describe("scoped scheduling reads", () => {
     vi.mocked(orgUnitService.getDepartmentNodePoolResources).mockImplementation(
       async (_filters, _sort, _order, offset, limit) => ({
         nodePoolResources: rows.slice(offset ?? 0, (offset ?? 0) + (limit ?? 50)),
-        next: offset ? undefined : 100,
+        next: (offset ?? 0) + DEPARTMENT_PAGE_SIZE < rows.length ? (offset ?? 0) + DEPARTMENT_PAGE_SIZE : undefined,
       }),
     );
-    vi.mocked(orgUnitService.countDepartmentNodePoolResources).mockResolvedValue(58);
-    vi.mocked(orgUnitService.sumDepartmentNodePoolResources).mockResolvedValue({ weightsSum: 116, deservedSum: 0 });
+    vi.mocked(orgUnitService.countDepartmentNodePoolResources).mockImplementation(async (filters) =>
+      filters?.includes("rank==High") ? rows.length : 0,
+    );
+    vi.mocked(orgUnitService.sumDepartmentNodePoolResources).mockResolvedValue({ weightsSum: 316, deservedSum: 0 });
     const data = useNodePoolSchedulingData(ref("p"));
     await flushPromises();
-    expect(data.baselineRows.value).toHaveLength(158);
+    expect(data.baselineRows.value).toHaveLength(DEPARTMENT_PAGE_SIZE);
     expect(data.rankCounts.value.High).toBe(158);
-    expect(vi.mocked(orgUnitService.getDepartmentNodePoolResources)).toHaveBeenCalledTimes(2);
-    expect(vi.mocked(orgUnitService.sumDepartmentNodePoolResources)).toHaveBeenCalledTimes(1);
-    expect(vi.mocked(orgUnitService.countDepartmentNodePoolResources)).not.toHaveBeenCalled();
+    expect(data.aggregates.value.High.rawWeightsSum).toBe(316);
+    expect(orgUnitService.getDepartmentNodePoolResources).toHaveBeenCalledTimes(1);
+    await Promise.all([data.departmentPages.value.loadNext(), data.departmentPages.value.loadNext()]);
+    expect(data.baselineRows.value).toHaveLength(2 * DEPARTMENT_PAGE_SIZE);
+    await Promise.all([data.departmentPages.value.loadAll(), data.departmentPages.value.loadNext()]);
+    expect(data.baselineRows.value).toEqual(rows);
+    expect(data.departmentPages.value.nextOffset).toBeUndefined();
+    expect(orgUnitService.getDepartmentNodePoolResources).toHaveBeenCalledTimes(
+      Math.ceil(rows.length / DEPARTMENT_PAGE_SIZE),
+    );
+    expect(data.aggregates.value.High.rawWeightsSum).toBe(316);
   });
   it("treats an explicit empty department child list as zero project quota", async () => {
     vi.mocked(orgUnitService.getDepartment).mockResolvedValue({ clusterId: "c", children: [] } as never);
@@ -275,29 +286,11 @@ describe("scoped scheduling reads", () => {
     expect(data.snapshot.value).toBeUndefined();
     expect(data.loadError.value).toContain("Denied");
   });
-  it("loads complete hidden-page raw and automatic denominators with pool scope", async () => {
-    const row = {
-      id: "r",
-      orgUnitId: "a",
-      orgUnitName: "Alpha",
-      clusterId: "c",
-      nodePoolId: "p",
-      nodePoolName: "pool",
-      rank: "Low",
-      resources: { gpu: { overQuotaWeight: 2, deserved: 5 } },
-    };
-    vi.mocked(orgUnitService.getDepartmentNodePoolResources)
-      .mockResolvedValueOnce({ nodePoolResources: [row], next: 1 })
-      .mockResolvedValueOnce({
-        nodePoolResources: [
-          { ...row, id: "s", orgUnitId: "b", resources: { gpu: { overQuotaWeight: 8, deserved: 3 } } },
-        ],
-      });
-    expect((await loadSchedulingDepartmentSnapshot({ poolId: "p", clusterId: "c" })).totals.all).toMatchObject({
-      rawWeightsSum: 10,
-      automaticWeightsSum: 8,
-    });
-    expect(vi.mocked(orgUnitService.getDepartmentNodePoolResources).mock.calls.at(-1)?.[3]).toBe(1);
+  it("rejects a page that repeats its cursor", async () => {
+    vi.mocked(orgUnitService.getDepartmentNodePoolResources).mockResolvedValueOnce({ nodePoolResources: [], next: 50 });
+    await expect(loadSchedulingDepartmentPage({ poolId: "p", clusterId: "c" }, 50)).rejects.toThrow(
+      "pagination did not advance",
+    );
   });
   it("clears all prior-pool department state while a replacement pool is pending", async () => {
     const oldRow = {
@@ -351,7 +344,7 @@ describe("scoped scheduling reads", () => {
   it("preserves restricted read visibility and individual department edit scope", async () => {
     vi.mocked(clusterService.getNodepool).mockResolvedValue({ id: "p", clusterId: "c", name: "pool" } as never);
     vi.mocked(clusterService.getNodepoolMetrics).mockResolvedValue({ measurements: [] });
-    vi.mocked(orgUnitService.sumDepartmentNodePoolResources).mockResolvedValue({ weightsSum: 2, deservedSum: 0 });
+    vi.mocked(orgUnitService.sumDepartmentNodePoolResources).mockResolvedValue({ weightsSum: 9, deservedSum: 27 });
     vi.mocked(orgUnitService.countDepartmentNodePoolResources).mockResolvedValue(1);
     const row = {
       id: "resource",
@@ -376,6 +369,7 @@ describe("scoped scheduling reads", () => {
     await flushPromises();
     expect(data.baselineRows.value.map((value) => value.orgUnitId)).toEqual(["visible"]);
     expect(data.totalsComplete.value).toBe(false);
+    expect(data.aggregates.value.all).toMatchObject({ weightsSum: 9, deservedSum: 27 });
     expect(
       vi
         .mocked(orgUnitService.sumDepartmentNodePoolResources)
