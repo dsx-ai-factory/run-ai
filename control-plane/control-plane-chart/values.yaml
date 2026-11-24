@@ -1301,6 +1301,9 @@ keycloakx:
     otelLogsExporter: none
     otelMetricsExporter: none
     otelEndpoint: http://otel-collector:4318
+    # Extra JVM options appended to the Keycloak JAVA_OPTS_APPEND (after jgroups discovery
+    # and the optional OpenTelemetry agent), e.g. "-Xss512k".
+    extraJavaOpts: ""
   resources:
     requests:
       cpu: '1'
