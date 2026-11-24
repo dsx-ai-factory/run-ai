@@ -142,7 +142,6 @@ func (s *Spec) SetDefaultsWhereNeeded(internalSpec *runv1_internal.Internal, han
 						"runai-scheduler",
 						"nvidia-dcgm-exporter",
 						"dcgm-exporter",
-						"nvidia-dcgm-exporter-dra",
 						"runai-project-controller",
 						"kube-prometheus-stack-node-exporter",
 						"kube-prometheus-stack-kube-state-metrics",

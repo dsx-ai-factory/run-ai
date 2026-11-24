@@ -18,31 +18,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-var _ = Describe("resources_per_nodepool", func() {
-	var expr string
-
-	BeforeEach(func() {
-		rule := desiredPrometheusRule(defaultRunaiConfig())
-		Expect(rule.Spec.Groups).To(HaveLen(1))
-		Expect(rule.Spec.Groups[0].Rules).To(HaveLen(1))
-		Expect(rule.Spec.Groups[0].Rules[0].Record).To(Equal("resources_per_nodepool"))
-		expr = rule.Spec.Groups[0].Rules[0].Expr.String()
-	})
-
-	It("keeps summing node capacity for device-plugin resources", func() {
-		Expect(expr).To(ContainSubstring("kube_node_status_capacity * on(node) group_left(nodepool)"))
-	})
-
-	It("adds the DCGM-derived GPU count for DRA-only nodes that lack nvidia_com_gpu capacity", func() {
-		Expect(expr).To(ContainSubstring(`runai_gpu_count_per_node > 0`))
-		Expect(expr).To(ContainSubstring(`"resource", "nvidia_com_gpu"`))
-	})
-
-	It("ignores nodes whose device plugin still reports GPU capacity so they are not double counted", func() {
-		Expect(expr).To(ContainSubstring(`unless on(node) (kube_node_status_capacity{resource="nvidia_com_gpu"} > 0)`))
-	})
-})
-
 var _ = Describe("PrometheusRuleStatus", func() {
 	newClient := func(objects ...client.Object) client.Client {
 		testScheme := runtime.NewScheme()

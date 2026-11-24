@@ -149,7 +149,6 @@ rules:
     resources:
       - deviceclasses
       - resourceclaimtemplates
-      - resourceslices
     verbs:
       - get
       - list

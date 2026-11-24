@@ -20,17 +20,14 @@ import (
 	"go.uber.org/zap"
 
 	swagger "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/cachedclient"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/constants"
 	clusterconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/resourceutils/resources"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	sdkkaiv1alpha1 "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	"gopkg.in/yaml.v2"
 
 	corev1 "k8s.io/api/core/v1"
-	resourcev1 "k8s.io/api/resource/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -116,9 +113,6 @@ type NodeParser struct {
 	nodeLabelNvidiaDcgmExporter     string
 
 	gpuFractioningSupport gpuFractioningSupportState
-
-	// Set once at construction: reading an uninstalled kind from the cache would trigger REST-mapper discovery on every node parse.
-	resourceSlicesCached bool
 }
 
 // Written only when the cluster-info ConfigMap changes, so the per-node parse never unmarshals it.
@@ -150,9 +144,6 @@ func NewNodeParser(cachedReader client.Reader) *NodeParser {
 		cachedReader:                    cachedReader,
 		nodeLabelNvidiaContainerToolkit: config.Config().NodeLabelNvidiaContainerToolkit,
 		nodeLabelNvidiaDcgmExporter:     config.Config().NodeLabelNvidiaDcgmExporter,
-	}
-	if cachedClient, ok := cachedReader.(cachedclient.CachedClient); ok {
-		nodeParser.resourceSlicesCached = cachedClient.GetInformer(cachedclient.ResourceSliceType) != nil
 	}
 	return nodeParser
 }
@@ -226,7 +217,7 @@ func (nodeParser *NodeParser) ParseNodeToServerScheme(node *corev1.Node) swagger
 		nodeInfo.Numa.Set(&numaInfo)
 	}
 
-	gpuInfo := nodeParser.getGpuInfo(node)
+	gpuInfo := getGpuInfo(node.Labels, node.Name)
 	if gpuInfo != nil {
 		nodeInfo.GpuInfo = *swagger.NewNullableGpuInfo(gpuInfo)
 	}
@@ -572,11 +563,9 @@ func shouldNodeHaveNvidiaComponents(nodeLabels map[string]string) bool {
 func getLabelSelectorsForNvidiaComponent(nvidiaComponentName string) []client.ListOption {
 	// different gpu-operator versions have different labels on the components
 	appKeys := []string{"app", "app.kubernetes.io/name"}
-	// GPUCluster (DRA-only) mode deploys the "-dra" variants, e.g. nvidia-dcgm-exporter-dra.
 	appValues := []string{
 		fmt.Sprintf("nvidia-%s", nvidiaComponentName), fmt.Sprintf("nvidia-%s-daemonset", nvidiaComponentName),
 		fmt.Sprintf("%s-daemonset", nvidiaComponentName), nvidiaComponentName,
-		fmt.Sprintf("nvidia-%s-dra", nvidiaComponentName), fmt.Sprintf("%s-dra", nvidiaComponentName),
 	}
 
 	result := []client.ListOption{}
@@ -601,61 +590,18 @@ func parseTaints(taints []corev1.Taint) []swagger.NodeTaint {
 	return result
 }
 
-func (nodeParser *NodeParser) getGpuInfo(node *corev1.Node) *swagger.GpuInfo {
-	nvidiaGpuInfo := getNvidiaGpuInfo(node.Labels, node.Name)
-	if nvidiaGpuInfo == nil || nvidiaGpuInfo.GpuCount == 0 || nvidiaGpuInfo.GpuMemoryBytes == nil {
-		nvidiaGpuInfo = nodeParser.completeNvidiaGpuInfoFromResourceSlices(node.Name, nvidiaGpuInfo)
-	}
+func getGpuInfo(nodeLabels map[string]string, nodeName string) *swagger.GpuInfo {
+	nvidiaGpuInfo := getNvidiaGpuInfo(nodeLabels, nodeName)
 	if nvidiaGpuInfo != nil {
 		return nvidiaGpuInfo
 	}
 
-	return getAmdGpuInfo(node.Labels, node.Name)
-}
-
-// completeNvidiaGpuInfoFromResourceSlices fills what the GFD labels did not provide from the NVIDIA DRA driver's
-// ResourceSlices: GPU Operator's DRA-only mode does not require GFD, so its labels may be missing. A label that is
-// present always wins, since it is what the rest of the system (node pools, scheduling) keys on.
-func (nodeParser *NodeParser) completeNvidiaGpuInfoFromResourceSlices(nodeName string,
-	labelInfo *swagger.GpuInfo) *swagger.GpuInfo {
-	if !nodeParser.resourceSlicesCached {
-		return labelInfo
+	amdGpuInfo := getAmdGpuInfo(nodeLabels, nodeName)
+	if amdGpuInfo != nil {
+		return amdGpuInfo
 	}
 
-	var resourceSlices resourcev1.ResourceSliceList
-	err := nodeParser.cachedReader.List(context.Background(), &resourceSlices,
-		client.MatchingFields{constants.ResourceSliceByNvidiaNodeNameIndexer: nodeName})
-	if err != nil {
-		zap.S().Warnf("Failed to list NVIDIA DRA resource slices for node <%s>, reporting GPU info from labels only: %s",
-			nodeName, err.Error())
-		return labelInfo
-	}
-
-	sliceInfo := resources.NvidiaGpuNodeInfoFromResourceSlices(resourceSlices.Items)
-	if sliceInfo == nil {
-		return labelInfo
-	}
-
-	result := &swagger.GpuInfo{
-		GpuType:        sliceInfo.Product,
-		GpuCount:       int32(sliceInfo.Count),
-		GpuMemoryBytes: nil,
-	}
-	if sliceInfo.MemoryBytes > 0 {
-		result.GpuMemoryBytes = ptr.To(sliceInfo.MemoryBytes)
-	}
-
-	if labelInfo != nil {
-		result.GpuType = labelInfo.GpuType
-		if labelInfo.GpuCount != 0 {
-			result.GpuCount = labelInfo.GpuCount
-		}
-		if labelInfo.GpuMemoryBytes != nil {
-			result.GpuMemoryBytes = labelInfo.GpuMemoryBytes
-		}
-	}
-
-	return result
+	return nil
 }
 
 func getNvidiaGpuInfo(nodeLabels map[string]string, nodeName string) *swagger.GpuInfo {

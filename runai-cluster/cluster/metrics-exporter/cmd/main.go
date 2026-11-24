@@ -10,12 +10,10 @@ import (
 	"log"
 
 	"go.uber.org/zap/zapcore"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/metrics_exporter/pkg"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/metrics_exporter/pkg/metrics"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/metrics_exporter/pkg/reconcilers"
@@ -63,14 +61,8 @@ func main() {
 
 	client := mgr.GetClient()
 
-	kubeClient, err := kubernetes.NewForConfig(mgr.GetConfig())
-	if err != nil {
-		log.Fatalf("Unable to create kubernetes client, error: %v", err)
-	}
-	draParser := dra.NewDRAParser(client, kubeClient)
-
 	objectReconcilers := []reconcilers.Reconciler{
-		reconcilers.NewPodReconciler(client, draParser),
+		reconcilers.NewPodReconciler(client),
 		reconcilers.NewPodGroupReconciler(client),
 	}
 

@@ -527,24 +527,6 @@ var _ = Describe("getGpuStackStatus", func() {
 		Expect(status.Reason).To(Equal("NVIDIA GPU Operator version v25.3.0 is below minimum supported version v26.7.1"))
 	})
 
-	It("keeps the stack available on a DRA-only cluster when gpu-fractioning readiness fails", func() {
-		draExporter := newDCGMExporterService()
-		draExporter.Name = "nvidia-dcgm-exporter-dra"
-		draExporter.Labels = map[string]string{"app.kubernetes.io/name": "nvidia-dcgm-exporter-dra"}
-		kbClient = fake.NewClientBuilder().WithScheme(scheme).WithObjects(
-			draExporter,
-			newGpuFractioningConfigWithReadyCondition("False", "GPU fractions need the device plugin stack"),
-		).Build()
-
-		status := getGpuStackStatus(ctx, kbClient)
-		Expect(*status.Available).To(BeTrue())
-		Expect(status.Reason).To(BeEmpty())
-
-		fractioningStatus := status.Components["gpu-fractioning"]
-		Expect(*fractioningStatus.Available).To(BeFalse())
-		Expect(fractioningStatus.Reason).To(Equal("GPU fractions need the device plugin stack"))
-	})
-
 	It("prefers the gpu-fractioning reason when both sub-checks fail", func() {
 		kbClient = fake.NewClientBuilder().WithScheme(scheme).WithObjects(
 			newGpuFractioningConfigWithReadyCondition("False", "gpu-fractioning failure reason"),

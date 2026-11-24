@@ -35,11 +35,9 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
-	resourcev1 "k8s.io/api/resource/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/utils/ptr"
 
 	auth_client "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	clustersvcswagger "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
@@ -1026,98 +1024,6 @@ var _ = Describe("Parsers", Ordered, func() {
 			Expect(gpuInfo.GpuType).To(Equal(testGpuTypeA100))
 			Expect(gpuInfo.GpuCount).To(BeEquivalentTo(2))
 			Expect(gpuInfo.GpuMemoryBytes).To(BeNil())
-		})
-
-		It("Parse Node To Update Info Request - Ready - DRA-only dcgm exporter pod", func() {
-			nvidiaComponentsPod.Labels["app"] = "nvidia-dcgm-exporter-dra"
-			fakeClientBuilder = fakerunaiclient.NewClientBuilder().WithScheme(scheme).WithObjects(nvidiaComponentsPod)
-			fakeCachedClient = fakecachedclient.NewFakeCachedClient(fakeClientBuilder)
-			nodeParser = parsers.NewNodeParser(fakeCachedClient)
-
-			node.Status.Conditions = []corev1.NodeCondition{readyCondition}
-
-			parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
-			Expect(parsedNodeInfo.Status).To(Equal(parsers.ReadyPhase))
-			Expect(parsedNodeInfo.Conditions).To(BeEmpty())
-		})
-
-		Context("GPU info from NVIDIA DRA ResourceSlices", func() {
-			const draNodeProduct = "NVIDIA A100-SXM4-80GB"
-
-			var (
-				draGpuDevice = func(name string) resourcev1.Device {
-					return resourcev1.Device{
-						Name: name,
-						Attributes: map[resourcev1.QualifiedName]resourcev1.DeviceAttribute{
-							"type":        {StringValue: ptr.To("gpu")},
-							"productName": {StringValue: ptr.To(draNodeProduct)},
-						},
-						Capacity: map[resourcev1.QualifiedName]resourcev1.DeviceCapacity{
-							"memory": {Value: resource.MustParse("80Gi")},
-						},
-					}
-				}
-				nvidiaSlice = func(sliceNodeName string, devices ...resourcev1.Device) *resourcev1.ResourceSlice {
-					return &resourcev1.ResourceSlice{
-						ObjectMeta: metav1.ObjectMeta{Name: sliceNodeName + "-gpu.nvidia.com-0"},
-						Spec: resourcev1.ResourceSliceSpec{
-							Driver:   "gpu.nvidia.com",
-							NodeName: ptr.To(sliceNodeName),
-							Pool:     resourcev1.ResourcePool{Name: sliceNodeName, Generation: 1, ResourceSliceCount: 1},
-							Devices:  devices,
-						},
-					}
-				}
-			)
-
-			parseWithSlices := func(slices ...*resourcev1.ResourceSlice) clustersvcswagger.NodeInfo {
-				builder := fakerunaiclient.NewClientBuilder().WithScheme(scheme).WithObjects(nvidiaComponentsPod)
-				for _, slice := range slices {
-					builder = builder.WithObjects(slice)
-				}
-				nodeParser = parsers.NewNodeParser(fakecachedclient.NewFakeCachedClient(builder))
-				node.Status.Conditions = []corev1.NodeCondition{readyCondition}
-				return nodeParser.ParseNodeToServerScheme(node)
-			}
-
-			It("reports GPU info when the node has no GFD labels", func() {
-				parsedNodeInfo := parseWithSlices(nvidiaSlice(nodeName, draGpuDevice("gpu-0"), draGpuDevice("gpu-1")))
-
-				Expect(parsedNodeInfo.GpuInfo.IsSet()).To(BeTrue())
-				gpuInfo := parsedNodeInfo.GpuInfo.Get()
-				Expect(gpuInfo.GpuType).To(Equal("NVIDIA-A100-SXM4-80GB"))
-				Expect(gpuInfo.GpuCount).To(BeEquivalentTo(2))
-				Expect(gpuInfo.GpuMemoryBytes).ToNot(BeNil())
-				Expect(*gpuInfo.GpuMemoryBytes).To(BeEquivalentTo(int64(80) * 1024 * 1024 * 1024))
-			})
-
-			It("prefers labels over slices and only fills what the labels lack", func() {
-				node.Labels[parsers.NvidiaGpuTypeLabelKey] = testGpuTypeA100
-				node.Labels[parsers.NvidiaGpuCountLabelKey] = "8"
-
-				parsedNodeInfo := parseWithSlices(nvidiaSlice(nodeName, draGpuDevice("gpu-0"), draGpuDevice("gpu-1")))
-
-				gpuInfo := parsedNodeInfo.GpuInfo.Get()
-				Expect(gpuInfo.GpuType).To(Equal(testGpuTypeA100))
-				Expect(gpuInfo.GpuCount).To(BeEquivalentTo(8))
-				Expect(gpuInfo.GpuMemoryBytes).ToNot(BeNil())
-				Expect(*gpuInfo.GpuMemoryBytes).To(BeEquivalentTo(int64(80) * 1024 * 1024 * 1024))
-			})
-
-			It("ignores slices of other nodes", func() {
-				parsedNodeInfo := parseWithSlices(nvidiaSlice("some-other-node", draGpuDevice("gpu-0")))
-
-				Expect(parsedNodeInfo.GpuInfo.IsSet()).To(BeFalse())
-			})
-
-			It("ignores slices of other drivers", func() {
-				otherDriverSlice := nvidiaSlice(nodeName, draGpuDevice("gpu-0"))
-				otherDriverSlice.Spec.Driver = "example.com/gpu"
-
-				parsedNodeInfo := parseWithSlices(otherDriverSlice)
-
-				Expect(parsedNodeInfo.GpuInfo.IsSet()).To(BeFalse())
-			})
 		})
 
 		It("Parse Node To Update Info Request - AMD Gpu", func() {

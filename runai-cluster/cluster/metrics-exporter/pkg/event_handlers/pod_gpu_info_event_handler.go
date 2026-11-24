@@ -17,13 +17,11 @@ import (
 )
 
 type PodGpuInfoEventHandler struct {
-	k8sClient  client.Client
-	draCounter pod_exporter.DRAGpuCounter
+	k8sClient client.Client
 }
 
-// NewPodGpuInfoEventHandler's draCounter may be nil, in which case GPUs requested through DRA claims are not counted.
-func NewPodGpuInfoEventHandler(k8sClient client.Client, draCounter pod_exporter.DRAGpuCounter) *PodGpuInfoEventHandler {
-	return &PodGpuInfoEventHandler{k8sClient: k8sClient, draCounter: draCounter}
+func NewPodGpuInfoEventHandler(k8sClient client.Client) *PodGpuInfoEventHandler {
+	return &PodGpuInfoEventHandler{k8sClient: k8sClient}
 }
 
 func (pe *PodGpuInfoEventHandler) ResetMetrics(identifier ObjectIdentifier) {
@@ -36,6 +34,6 @@ func (pe *PodGpuInfoEventHandler) SetMetrics(ctx context.Context, eventObject in
 		return fmt.Errorf("PodGpuInfoEventHandler: eventObject is not a pod")
 	}
 
-	podExporter := pod_exporter.NewPodExporter(ctx, pe.k8sClient, pod).WithDRAGpuCounter(pe.draCounter)
+	podExporter := pod_exporter.NewPodExporter(ctx, pe.k8sClient, pod)
 	return metrics.SetPodGpuInfoMetrics(podExporter)
 }

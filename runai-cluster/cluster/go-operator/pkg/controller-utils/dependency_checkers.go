@@ -93,35 +93,40 @@ func componentMatches(name, namespace string, componentNameRegex *regexp.Regexp,
 	return componentNameRegex.MatchString(name)
 }
 
-// dcgmExporterNames are the values of the "app" and "app.kubernetes.io/name" labels that identify a DCGM exporter
-// Service. The "-dra" variant is deployed by the GPU Operator in GPUCluster (DRA-only) mode, where the legacy
-// nvidia-dcgm-exporter Service does not exist.
-var dcgmExporterNames = []string{"nvidia-dcgm-exporter", "dcgm-exporter", "nvidia-dcgm-exporter-dra", "dcgm-exporter-dra"}
-
-var dcgmExporterLabelKeys = []string{"app", "app.kubernetes.io/name"}
-
 func GetDCGMExporterService(ctx context.Context, k8sReader client.Reader) (*v1.Service, error) {
+	svcList := &v1.ServiceList{}
 	var svcs []v1.Service
-	seen := map[client.ObjectKey]struct{}{}
 
-	for _, labelKey := range dcgmExporterLabelKeys {
-		for _, name := range dcgmExporterNames {
-			svcList := &v1.ServiceList{}
-			if err := k8sReader.List(ctx, svcList, client.MatchingLabels{labelKey: name}); err != nil {
-				return nil, err
-			}
-
-			for _, svc := range svcList.Items {
-				// A Service labeled under both keys must be counted once.
-				key := client.ObjectKeyFromObject(&svc)
-				if _, found := seen[key]; found {
-					continue
-				}
-				seen[key] = struct{}{}
-				svcs = append(svcs, svc)
-			}
-		}
+	err := k8sReader.List(ctx, svcList, client.MatchingLabels{"app": "nvidia-dcgm-exporter"})
+	if err != nil {
+		return nil, err
 	}
+
+	svcs = append(svcs, svcList.Items...)
+
+	svcList = &v1.ServiceList{}
+	err = k8sReader.List(ctx, svcList, client.MatchingLabels{"app": "dcgm-exporter"})
+	if err != nil {
+		return nil, err
+	}
+
+	svcs = append(svcs, svcList.Items...)
+
+	svcList = &v1.ServiceList{}
+	err = k8sReader.List(ctx, svcList, client.MatchingLabels{"app.kubernetes.io/name": "nvidia-dcgm-exporter"})
+	if err != nil {
+		return nil, err
+	}
+
+	svcs = append(svcs, svcList.Items...)
+
+	svcList = &v1.ServiceList{}
+	err = k8sReader.List(ctx, svcList, client.MatchingLabels{"app.kubernetes.io/name": "dcgm-exporter"})
+	if err != nil {
+		return nil, err
+	}
+
+	svcs = append(svcs, svcList.Items...)
 
 	if len(svcs) == 0 {
 		return nil, fmt.Errorf("dcgm-exporter service not found in the cluster")
@@ -132,20 +137,6 @@ func GetDCGMExporterService(ctx context.Context, k8sReader client.Reader) (*v1.S
 	}
 
 	return &svcs[0], nil
-}
-
-// IsDRAOnlyDCGMExporter reports whether the DCGM exporter Service is the one GPU Operator deploys in GPUCluster
-// (DRA-only) mode. Its presence as the only exporter means there is no ClusterPolicy-managed device plugin stack.
-func IsDRAOnlyDCGMExporter(svc *v1.Service) bool {
-	if svc == nil {
-		return false
-	}
-	for _, labelKey := range dcgmExporterLabelKeys {
-		if strings.HasSuffix(svc.Labels[labelKey], "-dra") {
-			return true
-		}
-	}
-	return false
 }
 
 func GetPrometheusOperatorNamespace(ctx context.Context, k8sReader client.Reader) (string, error) {
@@ -193,10 +184,6 @@ func getMissingMetrics(resBodyStr string) []string {
 }
 
 func getMetricsFromExporterService(svc *v1.Service) (string, error) {
-	if len(svc.Spec.Ports) == 0 {
-		return "", fmt.Errorf("dcgm-exporter service %s/%s has no ports", svc.Namespace, svc.Name)
-	}
-
 	res, err := http.Get("http://" + svc.Spec.ClusterIP + ":" + strconv.Itoa(int(svc.Spec.Ports[0].Port)) + "/metrics")
 	if err != nil {
 		return "", fmt.Errorf("failed to connect to dcgm-exporter service in the cluster")
