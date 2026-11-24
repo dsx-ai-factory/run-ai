@@ -270,11 +270,16 @@ var _ = Describe("Privilege escalation tests", Ordered, func() {
 				ScopeType:        api.SCOPETYPE_CLUSTER,
 				Tenant:           testing.TestTenant,
 			}))
+		// The installer service account holds only cluster-config:read (#5520), so the
+		// privilege-escalation guard allows exactly the assigners that already hold
+		// cluster-config read (System administrators; cluster-config is a global resource,
+		// so scope is not checked). Granting it is not an escalation for them. Everyone else
+		// is still blocked. Internal-only roles are not exposed through the public role APIs.
 		entries = append(entries,
-			Entry("No one can assign InstallerServiceAccount role", ValidateCurrentUserHasPrivilegeTestArgs{
+			Entry(fmt.Sprintf("%s assign InstallerServiceAccount role only if holding cluster-config read", assigner), ValidateCurrentUserHasPrivilegeTestArgs{
 				SubjectId:        assigner,
 				AssignedRoleName: static_roles.InstallerServiceAccount.Name,
-				ShouldAllow:      false,
+				ShouldAllow:      assigner == OrgManager || assigner == ClusterAdmin,
 				ScopeId:          testTenant,
 				ScopeType:        api.SCOPETYPE_TENANT,
 				Tenant:           testing.TestTenant,
