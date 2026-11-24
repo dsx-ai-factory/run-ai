@@ -879,6 +879,9 @@ async function quotaContext(row: IDepartmentSchedulingEdit) {
   min-width: 0;
   background: var(--bg-primary-default);
 }
+.table-settings-layout--guaranteed .department-settings-panel {
+  display: flex;
+}
 @container department-section (max-width: 520px) {
   .table-settings-layout--open {
     grid-template-columns: minmax(0, 1fr);
