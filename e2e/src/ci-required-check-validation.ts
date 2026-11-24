@@ -3,5 +3,5 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Intentional type error for an unmerged required-check validation PR.
-export const requiredCheckValidation: number = 'intentional merge-blocking validation';
+// Harmless fixture for an unmerged required-check validation PR.
+export const requiredCheckValidation: number = 1;
