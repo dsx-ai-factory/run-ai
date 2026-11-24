@@ -54,7 +54,8 @@ const (
 	WeightsToDeserved = ResetResourcesAction(api.RESOURCESRESETACTION_WEIGHTS_TO_DESERVED)
 	LimitsToDefault   = ResetResourcesAction(api.RESOURCESRESETACTION_LIMITS_TO_DEFAULT)
 
-	CpuQuotasToDefault = ResetResourcesAction(api.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT)
+	CpuQuotasToDefault       = ResetResourcesAction(api.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT)
+	NegativeWeightsToDefault = ResetResourcesAction(api.NODEPOOLRESOURCESRESETACTION_NEGATIVE_WEIGHTS_TO_DEFAULT)
 )
 
 func getUpdateResourcesQuery(setQuery, conditionQuery string, projects bool) string {
@@ -217,6 +218,13 @@ func getResetResourcesResourcesQuery(projects bool, action ResetResourcesAction,
 	case CpuQuotasToDefault:
 		setQuery = disableCpuQuotaQuerySet
 		conditionQuery = disableCpuQuotaQueryCondition
+	case NegativeWeightsToDefault:
+		// a department's weight starts as a copy of its quota, so a department that had unlimited quota is left
+		// with -1, which isn't a weight. Weight 0 (no quota) is kept: that department gets no share above its
+		// quota, as on a node pool with quota and adjustable weights. Projects start at the default weight, so a
+		// negative project weight can only be an invalid value set through the API.
+		setQuery = fmt.Sprintf(`gpu_over_quota_weight = %f, updated_at=now()`, models.DefaultOverQuotaWeight)
+		conditionQuery = `(gpu_over_quota_weight < 0)`
 	default:
 		return ""
 	}

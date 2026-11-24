@@ -48,13 +48,14 @@ func registerSIGINTHandler(fs *Goofys, flags *FlagStorage) {
 			if len(flags.Cache) == 0 {
 				log.Infof("Received %v, attempting to unmount...", s)
 
-				err := TryUnmount(flags.MountPoint)
+				err := tryUnmount(flags.MountPoint)
 				if err != nil {
 					log.Errorf("Failed to unmount in response to %v: %v", s, err)
 				} else {
 					log.Printf("Successfully unmounted %v in response to %v",
 						flags.MountPoint, s)
-					return
+					// Exit now; open files may keep the filesystem running after unmount.
+					os.Exit(0)
 				}
 			} else {
 				log.Infof("Received %v", s)

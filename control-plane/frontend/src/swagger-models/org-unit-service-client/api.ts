@@ -3805,7 +3805,8 @@ export interface NodeTypesPerWorkload {
 
 export const NodepoolResourcesResetAction = {
     CpuQuotasToDefault: 'CPU_QUOTAS_TO_DEFAULT',
-    LimitsToDefault: 'LIMITS_TO_DEFAULT'
+    LimitsToDefault: 'LIMITS_TO_DEFAULT',
+    NegativeWeightsToDefault: 'NEGATIVE_WEIGHTS_TO_DEFAULT'
 } as const;
 
 export type NodepoolResourcesResetAction = typeof NodepoolResourcesResetAction[keyof typeof NodepoolResourcesResetAction];

@@ -26,7 +26,8 @@ import (
 const maxBlockingOrgUnitsInMessage = 10
 
 // validateSchedulingCapabilitiesChangeAndResetOrgUnits refuses turning quota or ranks off while org units still use
-// them, and resets the org units' CPU quotas when cpuQuota is turned off and their limits when limits is turned off.
+// them, and resets the org units' CPU quotas when cpuQuota is turned off, their limits when limits is turned off, and
+// the departments' negative weights when weights start to divide the nodepool without quota.
 func (s *NodePoolsApiService) validateSchedulingCapabilitiesChangeAndResetOrgUnits(ctx context.Context,
 	before, after models.Nodepool,
 ) ([]string, *api.Error) {
@@ -61,10 +62,21 @@ func (s *NodePoolsApiService) validateSchedulingCapabilitiesChangeAndResetOrgUni
 			return nil, apiErr
 		}
 		if len(withLimits) > 0 {
-			if apiErr := s.validateCallerCanResetOrgUnits(ctx, after, "limits", withLimits); apiErr != nil {
+			if apiErr := s.validateCallerCanResetOrgUnits(ctx, after, fmt.Sprintf(
+				"Cannot turn off limits on nodepool %s. It resets %d org units: %s.",
+				after.Name, len(withLimits), describeOrgUnits(withLimits))); apiErr != nil {
 				return nil, apiErr
 			}
 			resetLimits = true
+		}
+	}
+
+	resetWeights := weightsStartDividingWithoutQuota(before, after)
+	if resetWeights {
+		if apiErr := s.validateCallerCanResetOrgUnits(ctx, after, fmt.Sprintf(
+			"Cannot divide nodepool %s by weights without quota. It sets every negative department and project weight to the default.",
+			after.Name)); apiErr != nil {
+			return nil, apiErr
 		}
 	}
 
@@ -82,8 +94,24 @@ func (s *NodePoolsApiService) validateSchedulingCapabilitiesChangeAndResetOrgUni
 		}
 		completedResets = append(completedResets, string(openapi.NODEPOOLRESOURCESRESETACTION_LIMITS_TO_DEFAULT))
 	}
+	if resetWeights {
+		if apiErr := s.resetOrgUnits(ctx, after, openapi.NODEPOOLRESOURCESRESETACTION_NEGATIVE_WEIGHTS_TO_DEFAULT); apiErr != nil {
+			apiErr.Message += describeCompletedResets(completedResets)
+			return nil, apiErr
+		}
+		completedResets = append(completedResets, string(openapi.NODEPOOLRESOURCESRESETACTION_NEGATIVE_WEIGHTS_TO_DEFAULT))
+	}
 
 	return completedResets, nil
+}
+
+// weightsStartDividingWithoutQuota is the point where a department's stored weight becomes its whole share of the
+// nodepool: with quota on it only divides what is left above quota, and with weights off it is not sent to the cluster.
+func weightsStartDividingWithoutQuota(before, after models.Nodepool) bool {
+	dividesWithoutQuota := func(nodepool models.Nodepool) bool {
+		return !nodepool.AllowQuota && nodepool.AllowAdjustableWeights
+	}
+	return dividesWithoutQuota(after) && !dividesWithoutQuota(before)
 }
 
 func (s *NodePoolsApiService) resetOrgUnits(ctx context.Context, nodepool models.Nodepool,
@@ -101,9 +129,7 @@ func (s *NodePoolsApiService) resetOrgUnits(ctx context.Context, nodepool models
 // validateCallerCanResetOrgUnits is needed because resets go through org-unit-service's internal API, which doesn't
 // authorize the caller. It requires what the public reset endpoints require: update on every department and project
 // in the cluster.
-func (s *NodePoolsApiService) validateCallerCanResetOrgUnits(ctx context.Context, nodepool models.Nodepool,
-	capability string, orgUnits []openapi.OrgUnitsNodepoolSummaryInner,
-) *api.Error {
+func (s *NodePoolsApiService) validateCallerCanResetOrgUnits(ctx context.Context, nodepool models.Nodepool, refused string) *api.Error {
 	for _, resourceType := range []authorization_api.ResourceType{authorization_api.RESOURCETYPE_DEPARTMENT, authorization_api.RESOURCETYPE_PROJECT} {
 		scopes, _, err := s.authorizationClient.GetPermittedScopes(ctx, resourceType, ptr.To(authorization_api.ACTION_UPDATE))
 		if err != nil {
@@ -111,9 +137,8 @@ func (s *NodePoolsApiService) validateCallerCanResetOrgUnits(ctx context.Context
 			return api.NewError(http.StatusServiceUnavailable, "failed to check the caller's permissions", err)
 		}
 		if scopes == nil || !permittedScopesCoverCluster(scopes.Update, nodepool.TenantId, nodepool.ClusterId.String()) {
-			return api.NewError(http.StatusForbidden, fmt.Sprintf(
-				"Cannot turn off %s on nodepool %s. It resets %d org units: %s. That requires permission to update every department and project in the cluster.",
-				capability, nodepool.Name, len(orgUnits), describeOrgUnits(orgUnits)), nil)
+			return api.NewError(http.StatusForbidden,
+				refused+" That requires permission to update every department and project in the cluster.", nil)
 		}
 	}
 	return nil
