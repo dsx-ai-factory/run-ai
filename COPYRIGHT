@@ -320,7 +320,7 @@ SOFTWARE.
 Copyright Adrian Stoewer <adrian.stoewer@rz.ifi.lmu.de> - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/stoewer/go-strcase v1.3.0
+  github.com/stoewer/go-strcase v1.4.0
 
 The MIT License (MIT)
 
@@ -4790,7 +4790,6 @@ Copyright Alex Ogier, The Go Authors - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   github.com/spf13/pflag v1.0.10
-  github.com/spf13/pflag v1.0.9
   github.com/spf13/pflag v1.1.0
 
 Copyright (c) 2012 Alex Ogier. All rights reserved.
@@ -7021,7 +7020,6 @@ Apache license:
 Copyright Canonical Ltd, Kirill Simonov, staring in when the project was ported over - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  go.yaml.in/yaml/v3 v3.0.4
   go.yaml.in/yaml/v3 v3.0.5
   go.yaml.in/yaml/v3 v3.0.6
   gopkg.in/yaml.v3 v3.0.1
@@ -10698,7 +10696,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Copyright Felix Geisendörfer (felix@debuggable.com) - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/felixge/httpsnoop v1.0.4
   github.com/felixge/httpsnoop v1.1.0
 
 Copyright (c) 2016 Felix Geisendörfer (felix@debuggable.com)
@@ -10839,7 +10836,6 @@ License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   github.com/fsnotify/fsnotify v1.10.0
   github.com/fsnotify/fsnotify v1.10.1
-  github.com/fsnotify/fsnotify v1.9.0
 
 Copyright © 2012 The Go Authors. All rights reserved.
 Copyright © fsnotify Authors. All rights reserved.
@@ -10902,7 +10898,6 @@ SOFTWARE.
 Copyright Gengo, Inc - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
-  github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.7
   github.com/grpc-ecosystem/grpc-gateway/v2 v2.32.0
   github.com/grpc-ecosystem/grpc-gateway/v2 v2.33.0
   github.com/grpc-ecosystem/grpc-gateway/v2 v2.34.0
@@ -14326,7 +14321,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Copyright Miklos Szeredi, Miklos Szeredi <miklos@szeredi.hu>, Russ Cox and 3 others - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
-  github.com/jacobsa/fuse v0.0.0-20260630194014-a124548f6da7
+  github.com/jacobsa/fuse v0.0.0-20261123163607-fc8dd07009de
 
 Apache License
                            Version 2.0, January 2004
@@ -15446,7 +15441,6 @@ Copyright Onsi Fakhouri - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/onsi/ginkgo/v2 v2.27.2
-  github.com/onsi/ginkgo/v2 v2.27.4
   github.com/onsi/ginkgo/v2 v2.32.0
   github.com/onsi/ginkgo/v2 v2.34.0
   github.com/onsi/gomega v1.38.2
@@ -17745,7 +17739,6 @@ SOFTWARE.
 Copyright The ANTLR Project - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
-  github.com/antlr4-go/antlr/v4 v4.13.0
   github.com/antlr4-go/antlr/v4 v4.13.1
 
 Copyright (c) 2012-2023 The ANTLR Project. All rights reserved.
@@ -17800,9 +17793,9 @@ Components:
   echarts 6.1.0
   github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.34.0
   github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.55.0
-  github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.62.0
+  github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.63.0
   github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.55.0
-  github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.62.0
+  github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.63.0
   github.com/Masterminds/goutils v1.1.1
   github.com/NVIDIA/k8s-dra-driver-gpu v0.0.0-20260329235847-c657396bd619
   github.com/aws/amazon-ssm-agent/agent/versionutil v0.0.0-20260407151232-1233a2a55f57
@@ -17906,23 +17899,19 @@ Components:
   github.com/tklauser/numcpus v0.12.0
   go.opencensus.io v0.24.0
   go.uber.org/mock/gomock v0.6.0
-  google.golang.org/genproto/googleapis/api v0.0.0-20260526163538-3dc84a4a5aaa
   google.golang.org/genproto/googleapis/api v0.0.0-20261012220534-4341edf3f941
   google.golang.org/genproto/googleapis/api v0.0.0-20261104224025-d1e00e9f33ab
-  google.golang.org/genproto/googleapis/api v0.0.0-20261116203732-fd2c7689a808
+  google.golang.org/genproto/googleapis/api v0.0.0-20261123191846-1e707ab9fbc2
   google.golang.org/genproto/googleapis/api/expr/v1alpha1 v0.0.0-20261104224025-d1e00e9f33ab
   google.golang.org/genproto/googleapis/api/httpbody v0.0.0-20261012220534-4341edf3f941
   google.golang.org/genproto/googleapis/api/httpbody v0.0.0-20261104224025-d1e00e9f33ab
   google.golang.org/genproto/googleapis/api/httpbody v0.0.0-20261123191846-1e707ab9fbc2
-  google.golang.org/genproto/googleapis/rpc v0.0.0-20260526163538-3dc84a4a5aaa
   google.golang.org/genproto/googleapis/rpc v0.0.0-20261012220534-4341edf3f941
   google.golang.org/genproto/googleapis/rpc v0.0.0-20261104224025-d1e00e9f33ab
-  google.golang.org/genproto/googleapis/rpc v0.0.0-20261116203732-fd2c7689a808
   google.golang.org/genproto/googleapis/rpc v0.0.0-20261123191846-1e707ab9fbc2
   google.golang.org/genproto/googleapis/rpc/status v0.0.0-20261104224025-d1e00e9f33ab
   google.golang.org/genproto/googleapis/type v0.0.0-20260319201613-d00831a3d3e7
-  google.golang.org/genproto/googleapis/type v0.0.0-20261116203732-fd2c7689a808
-  google.golang.org/grpc v1.83.2
+  google.golang.org/genproto/googleapis/type v0.0.0-20261123191846-1e707ab9fbc2
   google.golang.org/grpc v1.84.0
   google.golang.org/grpc v1.85.0
   k8s.io/api v0.35.4
@@ -18256,9 +18245,9 @@ Components:
   github.com/prometheus/common v0.67.1
   github.com/prometheus/common v0.67.5
   github.com/prometheus/common v0.71.0
+  github.com/prometheus/common v0.72.0
   github.com/prometheus/common v0.72.1
   github.com/prometheus/procfs v0.19.1
-  github.com/prometheus/procfs v0.19.2
   github.com/prometheus/procfs v0.20.1
   github.com/prometheus/procfs v0.21.1
   github.com/prometheus/procfs v0.22.0
@@ -18277,22 +18266,15 @@ Components:
   go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.65.0
   go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0
   go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0
-  go.opentelemetry.io/otel v1.44.0
   go.opentelemetry.io/otel v1.47.0
-  go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.40.0
   go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.47.0
-  go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.40.0
   go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.47.0
   go.opentelemetry.io/otel/log v1.47.0
-  go.opentelemetry.io/otel/metric v1.44.0
   go.opentelemetry.io/otel/metric v1.47.0
-  go.opentelemetry.io/otel/sdk v1.44.0
   go.opentelemetry.io/otel/sdk v1.47.0
   go.opentelemetry.io/otel/sdk/metric v1.47.0
-  go.opentelemetry.io/otel/trace v1.44.0
   go.opentelemetry.io/otel/trace v1.47.0
   go.opentelemetry.io/proto/otlp v1.11.1
-  go.opentelemetry.io/proto/otlp v1.9.0
   knative.dev/networking/pkg v0.0.0-20260120131110-a7cdca238a0d
   knative.dev/pkg v0.0.0-20260120122510-4a022ed9999a
   kubevirt.io/controller-lifecycle-operator-sdk/api v0.2.4
@@ -20904,18 +20886,13 @@ Components:
   golang.org/x/exp v0.0.0-20250103183323-7d7fa50e5329
   golang.org/x/exp v0.0.0-20261014143641-f0251eb4aa3e
   golang.org/x/exp v0.0.0-20261124000051-d6646c509b6d
-  golang.org/x/exp/slices v0.0.0-20251219203646-944ab1f22d93
   golang.org/x/exp/slices v0.0.0-20260410095643-746e56fc9e2f
   golang.org/x/exp/slices v0.0.0-20261014143641-f0251eb4aa3e
-  golang.org/x/exp/slices v0.0.0-20261113113407-e3970619a1a4
   golang.org/x/exp/slices v0.0.0-20261124000051-d6646c509b6d
-  golang.org/x/mod/semver v0.41.0
   golang.org/x/mod/semver v0.42.0
   golang.org/x/mod/semver v0.43.0
-  golang.org/x/net v0.58.0
   golang.org/x/net v0.59.0
   golang.org/x/net v0.61.0
-  golang.org/x/net v0.62.0
   golang.org/x/net v0.63.0
   golang.org/x/oauth2 v0.32.0
   golang.org/x/oauth2 v0.36.0
@@ -20932,9 +20909,7 @@ Components:
   golang.org/x/sys v0.48.0
   golang.org/x/sys v0.49.0
   golang.org/x/sys v0.50.0
-  golang.org/x/sys/unix v0.47.0
   golang.org/x/sys/unix v0.50.0
-  golang.org/x/term v0.45.0
   golang.org/x/term v0.46.0
   golang.org/x/term v0.47.0
   golang.org/x/term v0.48.0
@@ -20944,7 +20919,6 @@ Components:
   golang.org/x/time/rate v0.14.0
   golang.org/x/time/rate v0.15.0
   golang.org/x/time/rate v0.16.0
-  golang.org/x/tools v0.49.0
   golang.org/x/tools v0.52.0
   golang.org/x/tools v0.53.0
 
@@ -21108,7 +21082,6 @@ Copyright The Go Authors - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   google.golang.org/protobuf v1.36.12
-  google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af
 
 Copyright (c) 2018 The Go Authors. All rights reserved.
 
@@ -24874,7 +24847,6 @@ License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   github.com/envoyproxy/go-control-plane/envoy v1.37.0
   github.com/envoyproxy/go-control-plane/envoy v1.40.0
-  github.com/go-logr/logr v1.4.3
   github.com/go-logr/logr v1.4.4
   github.com/go-logr/zapr v1.3.0
   github.com/go-logr/zerologr v1.2.3
@@ -24886,7 +24858,6 @@ Components:
   go.yaml.in/yaml/v2 v2.4.3
   go.yaml.in/yaml/v2 v2.4.4
   go.yaml.in/yaml/v2 v2.4.5
-  gomodules.xyz/jsonpatch/v2 v2.4.0
   gomodules.xyz/jsonpatch/v2 v2.5.0
   gopkg.in/yaml.v2 v2.4.0
   k8s.io/cloud-provider/volume v0.35.4
@@ -34764,6 +34735,7 @@ SoundCloud Ltd. (http://soundcloud.com/).
 NOTICE of github.com/prometheus/common
 Components:
   github.com/prometheus/common v0.67.5
+  github.com/prometheus/common v0.72.0
   github.com/prometheus/common v0.72.1
 
 Common libraries shared by Prometheus Go components.
