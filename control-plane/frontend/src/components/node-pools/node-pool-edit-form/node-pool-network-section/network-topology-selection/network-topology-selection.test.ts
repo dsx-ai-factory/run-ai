@@ -111,6 +111,39 @@ describe("network topology selection", () => {
     });
   });
 
+  it("reveals a missing label key on Save and submits after it is filled", async () => {
+    vi.spyOn(clusterService, "getNetworkTopologyCount").mockResolvedValue(0);
+    mountComponent({}, document.body, false);
+    await flushPromises();
+    wrapper.getComponent(RunaiSelect).vm.$emit("custom-action");
+    await flushPromises();
+
+    const modal = new DOMWrapper(document.body);
+    await modal.get<HTMLInputElement>('input[aid="network-topology-name-input"]').setValue("fabric-a");
+    await modal.get('[aid="network-topology-add-label-btn"]').trigger("click");
+    const [filled, missing] = modal.findAll<HTMLInputElement>('input[aid="network-topology-label-key-input"]');
+    await filled.setValue("zone");
+    const field = missing.element.closest<HTMLElement>(".q-field")!;
+    field.scrollIntoView = vi.fn();
+    const save = modal.get('[aid="network-topologies-modal-save-button"]');
+
+    await save.trigger("click");
+    await flushPromises();
+    expect(field.scrollIntoView).toHaveBeenCalledOnce();
+    expect(field.textContent).toContain("Enter a label key.");
+    expect(clusterService.createNetworkTopology).not.toHaveBeenCalled();
+
+    await missing.setValue("rack");
+    await save.trigger("click");
+    await flushPromises();
+    expect(clusterService.createNetworkTopology).toHaveBeenCalledOnce();
+    expect(clusterService.createNetworkTopology).toHaveBeenCalledWith({
+      ...request,
+      levels: ["zone", "rack"],
+      name: "fabric-a",
+    });
+  });
+
   it("locks all creation fields while saving and retains the draft when the request fails", async () => {
     const pending = deferred<NetworkTopology>();
     vi.mocked(clusterService.createNetworkTopology).mockReturnValueOnce(pending.promise);

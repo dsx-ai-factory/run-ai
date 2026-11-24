@@ -177,7 +177,11 @@ export default defineComponent({
     async onSave(): Promise<void> {
       this.isFormValid = await this.validate();
 
-      if (!this.isFormValid) return;
+      if (!this.isFormValid) {
+        await this.$nextTick();
+        this.$el.querySelector(".q-field--error")?.scrollIntoView({ block: "center" });
+        return;
+      }
 
       this.$emit("submit", {
         name: this.name,
@@ -220,6 +224,7 @@ export default defineComponent({
       return isValidRunaiEntityNameFormat(val) || errorMessages.VALID_FORMAT;
     },
     validateLevelKey(val: string): boolean | string {
+      if (!val?.trim()) return "Enter a label key.";
       return (
         isValidNetworkTopologyLevel(val) ||
         "Enter a Kubernetes label key of up to 63 characters, including its optional lowercase DNS prefix."
