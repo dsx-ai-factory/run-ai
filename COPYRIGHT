@@ -21166,6 +21166,7 @@ Components:
   golang.org/x/exp/slices v0.0.0-20260410095643-746e56fc9e2f
   golang.org/x/exp/slices v0.0.0-20261014143641-f0251eb4aa3e
   golang.org/x/exp/slices v0.0.0-20261121134650-e1094eeca1b5
+  golang.org/x/exp/slices v0.0.0-20261124000051-d6646c509b6d
   golang.org/x/mod/semver v0.42.0
   golang.org/x/mod/semver v0.43.0
   golang.org/x/net v0.55.0
