@@ -39,7 +39,6 @@ func TestWorkloadsProvider_FetchSettings_AllSettings(t *testing.T) {
 	server := newWorkloadsBulkTestServer(map[string]interface{}{
 		"enablePolicies":              map[string]interface{}{"value": map[string]interface{}{"enabled": true}},
 		"workloadSubmissionV2Enabled": map[string]interface{}{"value": map[string]interface{}{"enabled": false}},
-		"enableHybridSubmission":      map[string]interface{}{"value": map[string]interface{}{"enabled": true}},
 		"gpuOverProvisioning":         map[string]interface{}{"value": map[string]interface{}{"enabled": true}},
 	})
 	defer server.Close()
@@ -52,8 +51,6 @@ func TestWorkloadsProvider_FetchSettings_AllSettings(t *testing.T) {
 	assert.Equal(t, true, result[settings.SettingKeyEnablePolicies].Value)
 	assert.Contains(t, result, settings.SettingKeyWorkloadSubmissionV2Enabled)
 	assert.Equal(t, false, result[settings.SettingKeyWorkloadSubmissionV2Enabled].Value)
-	assert.Contains(t, result, settings.SettingKeyEnableHybridSubmission)
-	assert.Equal(t, true, result[settings.SettingKeyEnableHybridSubmission].Value)
 	assert.Contains(t, result, settings.SettingKeyGpuOverProvisioning)
 	assert.Equal(t, true, result[settings.SettingKeyGpuOverProvisioning].Value)
 }
@@ -70,8 +67,7 @@ func TestWorkloadsProvider_FetchSettings_WithMetadata(t *testing.T) {
 			"value":       map[string]interface{}{"enabled": false},
 			"displayName": "Workload Submission V2",
 		},
-		"enableHybridSubmission": map[string]interface{}{"value": map[string]interface{}{"enabled": true}},
-		"gpuOverProvisioning":    map[string]interface{}{"value": map[string]interface{}{"enabled": true}},
+		"gpuOverProvisioning": map[string]interface{}{"value": map[string]interface{}{"enabled": true}},
 	})
 	defer server.Close()
 
@@ -98,7 +94,6 @@ func TestWorkloadsProvider_FetchSettings_MixedValues(t *testing.T) {
 	server := newWorkloadsBulkTestServer(map[string]interface{}{
 		"enablePolicies":              map[string]interface{}{"value": map[string]interface{}{"enabled": false}},
 		"workloadSubmissionV2Enabled": map[string]interface{}{"value": map[string]interface{}{"enabled": true}},
-		"enableHybridSubmission":      map[string]interface{}{"value": map[string]interface{}{"enabled": false}},
 		"gpuOverProvisioning":         map[string]interface{}{"value": map[string]interface{}{"enabled": false}},
 	})
 	defer server.Close()
@@ -109,7 +104,6 @@ func TestWorkloadsProvider_FetchSettings_MixedValues(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, false, result[settings.SettingKeyEnablePolicies].Value)
 	assert.Equal(t, true, result[settings.SettingKeyWorkloadSubmissionV2Enabled].Value)
-	assert.Equal(t, false, result[settings.SettingKeyEnableHybridSubmission].Value)
 	assert.Equal(t, false, result[settings.SettingKeyGpuOverProvisioning].Value)
 }
 
