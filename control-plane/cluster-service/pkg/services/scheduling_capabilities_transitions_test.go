@@ -283,7 +283,7 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		Expect(response.Code).To(Equal(http.StatusOK))
 	}
 
-	It("resets the departments' unset weights when weights turn on for a nodepool without quota", func() {
+	It("resets the departments' negative weights when weights turn on for a nodepool without quota", func() {
 		np := createNodepool(clusterId)
 		turnQuotaOff(np.Id)
 		permitResets()
@@ -301,7 +301,7 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 
 		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{AdjustableWeights: ptr.To(true)})
 		Expect(response.Code).To(Equal(http.StatusForbidden))
-		Expect(response.Body.(api.Error).Message).To(ContainSubstring("department weight of 0 or below"))
+		Expect(response.Body.(api.Error).Message).To(ContainSubstring("negative department weight"))
 		orgClient.AssertNotCalled(GinkgoT(), "NodePoolResetResources", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
 		Expect(storedCapabilities(np.Id).AdjustableWeights).To(BeFalse())
 	})
@@ -344,7 +344,7 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		Expect(storedCapabilities(np.Id).AdjustableWeights).To(BeFalse())
 	})
 
-	It("resets the departments' unset weights when a PUT turns weights on for a nodepool without quota", func() {
+	It("resets the departments' negative weights when a PUT turns weights on for a nodepool without quota", func() {
 		np := createNodepool(clusterId)
 		turnQuotaOff(np.Id)
 		permitResets()

@@ -27,7 +27,7 @@ const maxBlockingOrgUnitsInMessage = 10
 
 // validateSchedulingCapabilitiesChangeAndResetOrgUnits refuses turning quota or ranks off while org units still use
 // them, and resets the org units' CPU quotas when cpuQuota is turned off, their limits when limits is turned off, and
-// the departments' unset weights when weights start to divide the nodepool without quota.
+// the departments' negative weights when weights start to divide the nodepool without quota.
 func (s *NodePoolsApiService) validateSchedulingCapabilitiesChangeAndResetOrgUnits(ctx context.Context,
 	before, after models.Nodepool,
 ) ([]string, *api.Error) {
@@ -70,7 +70,7 @@ func (s *NodePoolsApiService) validateSchedulingCapabilitiesChangeAndResetOrgUni
 	resetWeights := weightsStartDividingWithoutQuota(before, after)
 	if resetWeights {
 		if apiErr := s.validateCallerCanResetOrgUnits(ctx, after, fmt.Sprintf(
-			"Cannot divide nodepool %s by weights without quota. It sets every department weight of 0 or below to the default.",
+			"Cannot divide nodepool %s by weights without quota. It sets every negative department weight to the default.",
 			after.Name)); apiErr != nil {
 			return nil, apiErr
 		}

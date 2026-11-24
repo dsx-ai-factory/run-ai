@@ -199,7 +199,7 @@ var _ = Describe("Resources DAO SQL", func() {
 		})
 		It("resets the weights of departments only", func() {
 			mocker := setupSQLMock()
-			sqlDepartments := `UPDATE resources SET gpu_over_quota_weight = 2.000000, updated_at=now() FROM department WHERE department.org_unit_data_id = resources.org_unit_data_id AND ((COALESCE(gpu_over_quota_weight, 0) <= 0) AND resources.node_pool_id IN (?)) AND department.tenant_id = ? AND department.cluster_id = ? AND department.deleted_at is NULL and resources.deleted_at is NULL;`
+			sqlDepartments := `UPDATE resources SET gpu_over_quota_weight = 2.000000, updated_at=now() FROM department WHERE department.org_unit_data_id = resources.org_unit_data_id AND ((gpu_over_quota_weight < 0) AND resources.node_pool_id IN (?)) AND department.tenant_id = ? AND department.cluster_id = ? AND department.deleted_at is NULL and resources.deleted_at is NULL;`
 			mocker.ExpectTransaction().Begin()
 			mocker.ExpectExec(sqlDepartments).Returns(1)
 			mocker.ExpectTransaction().Commit()
