@@ -18,6 +18,7 @@
         @saving="saving = $event"
         @leave-approved="leaveApproved = true"
         @saved="onSaved"
+        @open-identity="openStep('identity')"
         @back="openStep('scheduling')"
       />
     </template>

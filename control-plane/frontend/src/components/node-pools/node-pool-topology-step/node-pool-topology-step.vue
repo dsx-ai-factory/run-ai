@@ -227,7 +227,13 @@ const props = defineProps<{
   canReadTopologies: boolean;
   canCreateTopology: boolean;
 }>();
-const emit = defineEmits<{ saved: [Nodepool]; saving: [boolean]; "leave-approved": []; back: [] }>();
+const emit = defineEmits<{
+  saved: [Nodepool];
+  saving: [boolean];
+  "leave-approved": [];
+  back: [];
+  "open-identity": [];
+}>();
 const initialDraft = topologyDraftFromPool(props.pool);
 const draft = ref({ ...initialDraft });
 const effectiveDetection = computed(() =>
@@ -292,7 +298,9 @@ const placementOptions = {
   })),
 };
 function onStepClick({ name }: { name: string }) {
-  if (!busy.value && name === "scheduling") emit("back");
+  if (busy.value) return;
+  if (name === "identity") emit("open-identity");
+  if (name === "scheduling") emit("back");
 }
 async function save() {
   if (busy.value || !props.canSave || invalidMnnvlLabel.value) return;

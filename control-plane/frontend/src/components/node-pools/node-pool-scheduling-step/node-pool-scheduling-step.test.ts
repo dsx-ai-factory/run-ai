@@ -106,7 +106,7 @@ describe("scheduling step foundation", () => {
       await wrapper.setProps({ canEditDepartments: true });
       const enabledOptions = wrapper.findComponent(RunaiSegmentedButton).props("options");
       expect(enabledOptions[0].disabledTooltip).toBe(
-        saved.quota ? "An existing Guaranteed quota pool cannot switch to a lower scheduling mode." : undefined,
+        saved.quota ? "This can’t be modified once a node pool has been created." : undefined,
       );
     } finally {
       wrapper.unmount();
@@ -636,6 +636,7 @@ describe("scheduling step foundation", () => {
     await wrapper.vm.$nextTick();
     expect(wrapper.get('[aid="scheduling-save-continue"]').attributes("disabled")).toBeDefined();
     await wrapper.get('[aid="wizard-step-item-identity"]').trigger("click");
+    expect(wrapper.emitted("open-identity")).toHaveLength(1);
     expect(wrapper.emitted("open-topology")).toBeUndefined();
     await wrapper.get('[aid="wizard-step-item-topology"]').trigger("click");
     expect(wrapper.emitted("open-topology")).toHaveLength(1);

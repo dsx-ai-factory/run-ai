@@ -38,7 +38,7 @@ export function useNodePoolWizardNavigation(pool: Ref<Nodepool | undefined>) {
   onBeforeRouteLeave(canLeave);
   onBeforeRouteUpdate(canLeave);
 
-  async function openStep(stepName: "scheduling" | "topology", id = pool.value?.id) {
+  async function openStep(stepName: "identity" | "scheduling" | "topology", id = pool.value?.id) {
     if (id && !saving.value)
       await router.push({ name: NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT, params: { id }, query: { stepName } });
   }

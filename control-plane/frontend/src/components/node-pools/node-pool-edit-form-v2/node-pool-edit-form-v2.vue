@@ -227,7 +227,7 @@ watch(
 const topologySupport = useNodePoolTopologySupport(() => (created.value ?? draft).clusterId);
 const clusterName = computed(() => clusterStore.clusterList.find((c) => c.uuid === draft.clusterId)?.name);
 const { steps, activeStep, handleStepClick, markStepComplete } = useWizardLayout(
-  getNodePoolWizardSteps("identity"),
+  getNodePoolWizardSteps("identity", true),
   "identity",
 );
 watch(created, (pool) => {

@@ -218,7 +218,11 @@
 
 <script setup lang="ts">
 import { useNodePoolTopologySupport } from "@/composables/node-pool/use-node-pool-topology-support.composable";
-import { getNodePoolWizardSteps, ENodePoolSchedulingMode as ESchedulingMode } from "@/models/node-pool.model";
+import {
+  NODE_POOL_IMMUTABLE_TOOLTIP,
+  getNodePoolWizardSteps,
+  ENodePoolSchedulingMode as ESchedulingMode,
+} from "@/models/node-pool.model";
 
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { buildSchedulingSave } from "@/utils/node-pool-scheduling.util/node-pool-scheduling-save.util";
@@ -289,6 +293,7 @@ const emit = defineEmits<{
   saved: [pool: Nodepool, destination?: "close" | "continue"];
   "pool-saved": [Nodepool];
   "open-topology": [];
+  "open-identity": [];
   saving: [boolean];
   refresh: [];
   search: [string];
@@ -308,6 +313,7 @@ const steps = getNodePoolWizardSteps("scheduling");
 const topologySupport = useNodePoolTopologySupport(() => props.pool.clusterId);
 const departmentsReadOnly = computed(() => !props.canViewDepartments || !props.canEditDepartments);
 function onStepClick({ name }: { name: string }) {
+  if (!navigationDisabled.value && name === "identity") emit("open-identity");
   if (name === "topology") openTopology();
 }
 function openTopology() {
@@ -326,9 +332,7 @@ const options = computed(() => [
     disable: props.pool.schedulingCapabilities?.quota === true,
     disabledTooltip:
       modePermissionTooltip.value ??
-      (props.pool.schedulingCapabilities?.quota
-        ? "An existing Guaranteed quota pool cannot switch to a lower scheduling mode."
-        : undefined),
+      (props.pool.schedulingCapabilities?.quota ? NODE_POOL_IMMUTABLE_TOOLTIP : undefined),
     label: "Proportional",
     description: "Weight-based distribution",
     aid: "mode-proportional",
@@ -338,9 +342,7 @@ const options = computed(() => [
     disable: props.pool.schedulingCapabilities?.quota === true,
     disabledTooltip:
       modePermissionTooltip.value ??
-      (props.pool.schedulingCapabilities?.quota
-        ? "An existing Guaranteed quota pool cannot switch to a lower scheduling mode."
-        : undefined),
+      (props.pool.schedulingCapabilities?.quota ? NODE_POOL_IMMUTABLE_TOOLTIP : undefined),
     label: "Ranked",
     description: "Rank-based distribution",
     aid: "mode-ranked",

@@ -20,13 +20,14 @@ const NODE_POOL_WIZARD_STEPS = [
   { name: "topology", title: "Topology & placement" },
 ] as const;
 
-export function getNodePoolWizardSteps(active: (typeof NODE_POOL_WIZARD_STEPS)[number]["name"]) {
+export const NODE_POOL_IMMUTABLE_TOOLTIP = "This can’t be modified once a node pool has been created.";
+
+export function getNodePoolWizardSteps(active: (typeof NODE_POOL_WIZARD_STEPS)[number]["name"], creating = false) {
   const current = NODE_POOL_WIZARD_STEPS.findIndex((step) => step.name === active);
   return NODE_POOL_WIZARD_STEPS.map((step, index) => ({
     ...step,
     done: index < current,
-    // A saved pool's identity is fixed. Create the pool before opening either edit step.
-    disabled: active === "identity" ? step.name !== "identity" : step.name === "identity",
+    disabled: creating && step.name !== "identity",
   }));
 }
 

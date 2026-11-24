@@ -49,6 +49,16 @@ async function render(overrides = {}) {
 }
 beforeEach(() => patchNodepool.mockReset().mockResolvedValue(pool));
 describe("node pool topology step", () => {
+  it("opens Cluster & name from a saved pool without saving topology", async () => {
+    const wrapper = await render();
+    try {
+      await wrapper.get('[aid="wizard-step-item-identity"]').trigger("click");
+      expect(wrapper.emitted("open-identity")).toHaveLength(1);
+      expect(patchNodepool).not.toHaveBeenCalled();
+    } finally {
+      wrapper.unmount();
+    }
+  });
   it("preserves a saved Auto custom label and its draft when MNNVL is hidden", async () => {
     const wrapper = await render();
     expect(wrapper.get<HTMLInputElement>('[aid="topology-mnnvl-label"]').element.value).toBe("example.com/rack");

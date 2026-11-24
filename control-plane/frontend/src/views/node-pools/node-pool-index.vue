@@ -468,7 +468,7 @@ const NodePoolIndex = defineComponent({
       this.$router.push({
         name: NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT,
         params: { id: this.selectedNodePool?.id },
-        ...(ENABLE_NODE_POOL_CREATE_FLOW ? { query: { stepName: "scheduling" } } : {}),
+        ...(ENABLE_NODE_POOL_CREATE_FLOW ? { query: { stepName: "identity" } } : {}),
       });
     },
     async deleteNodepool(): Promise<void> {

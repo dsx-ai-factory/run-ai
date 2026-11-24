@@ -18,6 +18,6 @@ import { RunaiBtn } from "@/components/common/runai-btn";
 import { RunaiDefaultLoader } from "@/components/common/runai-default-loader";
 import RunaiFormWrapper from "@/components/common/runai-form-wrapper/runai-form-wrapper.vue";
 
-defineProps<{ step: "scheduling" | "topology"; loading: boolean; error: string }>();
+defineProps<{ step: "identity" | "scheduling" | "topology"; loading: boolean; error: string }>();
 const emit = defineEmits<{ retry: [] }>();
 </script>

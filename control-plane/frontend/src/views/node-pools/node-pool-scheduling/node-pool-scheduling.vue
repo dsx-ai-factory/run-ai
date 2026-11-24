@@ -34,6 +34,7 @@
     @leave-approved="leaveApproved = true"
     @saving="saving = $event"
     @pool-saved="pool = $event"
+    @open-identity="openStep('identity')"
     @open-topology="openStep('topology')"
     @saved="finish"
   />
