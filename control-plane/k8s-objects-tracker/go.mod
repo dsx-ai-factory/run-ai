@@ -33,7 +33,7 @@ require (
 	github.com/jinzhu/copier v0.4.0
 	github.com/onsi/ginkgo/v2 v2.34.0
 	github.com/onsi/gomega v1.44.0
-	golang.org/x/exp v0.0.0-20261121134650-e1094eeca1b5
+	golang.org/x/exp v0.0.0-20261124000051-d6646c509b6d
 	gorm.io/gorm v1.31.2
 	k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab
 )
