@@ -1,0 +1,35 @@
+suite: Test Keycloak ConfigMap JVM options
+templates:
+  - templates/keycloakx/configmap.yaml
+
+tests:
+  - it: "keeps jgroups discovery only by default"
+    asserts:
+      - equal:
+          path: data.JAVA_OPTS_APPEND
+          value: "-Djgroups.dns.query=keycloak-headless"
+
+  - it: "keeps the OTel agent and adds nothing by default when OTel is enabled"
+    set:
+      keycloakx.config.otelEnable: true
+    asserts:
+      - equal:
+          path: data.JAVA_OPTS_APPEND
+          value: "-Djgroups.dns.query=keycloak-headless -javaagent:/opt/keycloak/agent/opentelemetry-javaagent.jar"
+
+  - it: "appends custom extraJavaOpts"
+    set:
+      keycloakx.config.extraJavaOpts: "-Xss512k"
+    asserts:
+      - equal:
+          path: data.JAVA_OPTS_APPEND
+          value: "-Djgroups.dns.query=keycloak-headless -Xss512k"
+
+  - it: "appends custom extraJavaOpts after the OTel agent"
+    set:
+      keycloakx.config.otelEnable: true
+      keycloakx.config.extraJavaOpts: "-Xss512k"
+    asserts:
+      - equal:
+          path: data.JAVA_OPTS_APPEND
+          value: "-Djgroups.dns.query=keycloak-headless -javaagent:/opt/keycloak/agent/opentelemetry-javaagent.jar -Xss512k"
