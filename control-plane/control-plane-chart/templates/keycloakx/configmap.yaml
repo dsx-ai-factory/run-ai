@@ -9,15 +9,20 @@ data:
   KC_SPI_CLIENT_JPA_SEARCHABLE_ATTRIBUTES: "runai.cluster_id,runai.is_external,runai.client_type,runai.created.by"
   KC_METRICS_ENABLED: "true"
   KC_HTTP_METRICS_HISTOGRAMS_ENABLED: "true"
+  {{- /*
+    -XX:-UseBASE64Intrinsics is the vendor-recommended interim mitigation for a JDK
+    Base64 intrinsic flaw on AVX-512 VBMI x86-64 CPUs. Remove it once the Keycloak
+    image is rebuilt on a base with a fixed OpenJDK.
+  */}}
   {{- if $top.Values.keycloakx.config.otelEnable }}
   OTEL_EXPORTER_OTLP_ENDPOINT: {{ $top.Values.keycloakx.config.otelEndpoint }}
   OTEL_SERVICE_NAME: {{ $top.Values.keycloakx.config.otelServiceName }}
   OTEL_TRACES_EXPORTER: {{ $top.Values.keycloakx.config.otelTracesExporter }}
   OTEL_LOGS_EXPORTER: {{ $top.Values.keycloakx.config.otelLogsExporter }}
   OTEL_METRICS_EXPORTER: {{ $top.Values.keycloakx.config.otelMetricsExporter }}
-  JAVA_OPTS_APPEND: -Djgroups.dns.query=keycloak-headless -javaagent:/opt/keycloak/agent/opentelemetry-javaagent.jar
+  JAVA_OPTS_APPEND: -Djgroups.dns.query=keycloak-headless -javaagent:/opt/keycloak/agent/opentelemetry-javaagent.jar -XX:-UseBASE64Intrinsics
   {{- else }}
-  JAVA_OPTS_APPEND: -Djgroups.dns.query=keycloak-headless
+  JAVA_OPTS_APPEND: -Djgroups.dns.query=keycloak-headless -XX:-UseBASE64Intrinsics
   {{- end }}
   KC_HOSTNAME:  {{ printf "https://%s/auth" ($top.Values.global.domain) }}
   KC_RUNAI_AUTHORIZATION_SERVICE_URL: {{ $top.Values.keycloakx.config.authorizationServiceUrl | default (printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.authorization.name ($top.Values.authorization.service.port | toString)) | quote }}

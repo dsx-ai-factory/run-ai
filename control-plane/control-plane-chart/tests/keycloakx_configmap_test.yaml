@@ -1,0 +1,30 @@
+suite: Test Keycloak ConfigMap JVM options
+templates:
+  - templates/keycloakx/configmap.yaml
+
+tests:
+  - it: "disables the Base64 JIT intrinsic and keeps jgroups discovery by default"
+    asserts:
+      - matchRegex:
+          path: data.JAVA_OPTS_APPEND
+          pattern: -Djgroups\.dns\.query=keycloak-headless
+      - matchRegex:
+          path: data.JAVA_OPTS_APPEND
+          pattern: -XX:-UseBASE64Intrinsics
+      - notMatchRegex:
+          path: data.JAVA_OPTS_APPEND
+          pattern: opentelemetry-javaagent
+
+  - it: "keeps the Base64 mitigation and the OTel agent when OTel is enabled"
+    set:
+      keycloakx.config.otelEnable: true
+    asserts:
+      - matchRegex:
+          path: data.JAVA_OPTS_APPEND
+          pattern: -Djgroups\.dns\.query=keycloak-headless
+      - matchRegex:
+          path: data.JAVA_OPTS_APPEND
+          pattern: -javaagent:/opt/keycloak/agent/opentelemetry-javaagent\.jar
+      - matchRegex:
+          path: data.JAVA_OPTS_APPEND
+          pattern: -XX:-UseBASE64Intrinsics
