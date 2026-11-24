@@ -197,14 +197,16 @@ var _ = Describe("Resources DAO SQL", func() {
 			err := NodepoolResetResources(context.Background(), testTenantID, testClusterID().String(), testNodePoolID, api.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT)
 			Expect(err).NotTo(HaveOccurred())
 		})
-		It("resets the weights of departments only", func() {
+		It("resets the negative weights of projects and departments", func() {
 			mocker := setupSQLMock()
+			sqlProjects := `UPDATE resources SET gpu_over_quota_weight = 2.000000, updated_at=now() FROM project WHERE project.org_unit_data_id = resources.org_unit_data_id AND ((gpu_over_quota_weight < 0) AND resources.node_pool_id IN (?)) AND project.tenant_id = ? AND project.cluster_id = ? AND project.deleted_at is NULL and resources.deleted_at is NULL;`
 			sqlDepartments := `UPDATE resources SET gpu_over_quota_weight = 2.000000, updated_at=now() FROM department WHERE department.org_unit_data_id = resources.org_unit_data_id AND ((gpu_over_quota_weight < 0) AND resources.node_pool_id IN (?)) AND department.tenant_id = ? AND department.cluster_id = ? AND department.deleted_at is NULL and resources.deleted_at is NULL;`
 			mocker.ExpectTransaction().Begin()
+			mocker.ExpectExec(sqlProjects).Returns(1)
 			mocker.ExpectExec(sqlDepartments).Returns(1)
 			mocker.ExpectTransaction().Commit()
 
-			err := NodepoolResetResources(context.Background(), testTenantID, testClusterID().String(), testNodePoolID, api.NODEPOOLRESOURCESRESETACTION_DEPARTMENT_WEIGHTS_TO_DEFAULT)
+			err := NodepoolResetResources(context.Background(), testTenantID, testClusterID().String(), testNodePoolID, api.NODEPOOLRESOURCESRESETACTION_NEGATIVE_WEIGHTS_TO_DEFAULT)
 			Expect(err).NotTo(HaveOccurred())
 		})
 		It("returns error", func() {

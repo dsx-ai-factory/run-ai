@@ -5580,7 +5580,7 @@
         "enum": [
           "CPU_QUOTAS_TO_DEFAULT",
           "LIMITS_TO_DEFAULT",
-          "DEPARTMENT_WEIGHTS_TO_DEFAULT"
+          "NEGATIVE_WEIGHTS_TO_DEFAULT"
         ]
       },
       "OrgUnitsNodepoolResourcesResetRequest": {

@@ -70,7 +70,7 @@ func (s *NodePoolsApiService) validateSchedulingCapabilitiesChangeAndResetOrgUni
 	resetWeights := weightsStartDividingWithoutQuota(before, after)
 	if resetWeights {
 		if apiErr := s.validateCallerCanResetOrgUnits(ctx, after, fmt.Sprintf(
-			"Cannot divide nodepool %s by weights without quota. It sets every negative department weight to the default.",
+			"Cannot divide nodepool %s by weights without quota. It sets every negative department and project weight to the default.",
 			after.Name)); apiErr != nil {
 			return nil, apiErr
 		}
@@ -91,11 +91,11 @@ func (s *NodePoolsApiService) validateSchedulingCapabilitiesChangeAndResetOrgUni
 		completedResets = append(completedResets, string(openapi.NODEPOOLRESOURCESRESETACTION_LIMITS_TO_DEFAULT))
 	}
 	if resetWeights {
-		if apiErr := s.resetOrgUnits(ctx, after, openapi.NODEPOOLRESOURCESRESETACTION_DEPARTMENT_WEIGHTS_TO_DEFAULT); apiErr != nil {
+		if apiErr := s.resetOrgUnits(ctx, after, openapi.NODEPOOLRESOURCESRESETACTION_NEGATIVE_WEIGHTS_TO_DEFAULT); apiErr != nil {
 			apiErr.Message += describeCompletedResets(completedResets)
 			return nil, apiErr
 		}
-		completedResets = append(completedResets, string(openapi.NODEPOOLRESOURCESRESETACTION_DEPARTMENT_WEIGHTS_TO_DEFAULT))
+		completedResets = append(completedResets, string(openapi.NODEPOOLRESOURCESRESETACTION_NEGATIVE_WEIGHTS_TO_DEFAULT))
 	}
 
 	return completedResets, nil

@@ -1020,7 +1020,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 			})
 		})
 
-		It("NodepoolResetResources DEPARTMENT_WEIGHTS_TO_DEFAULT sets only the departments' negative weights on the target nodepool", func() {
+		It("NodepoolResetResources NEGATIVE_WEIGHTS_TO_DEFAULT sets the negative weights on the target nodepool to the default", func() {
 			setGpuWeight := func(table string, orgUnitId string, nodePoolId string, weight *float64) {
 				_, err := runaidb.DB().Exec(fmt.Sprintf(`UPDATE resources SET gpu_over_quota_weight = ? FROM %s
 					WHERE %s.org_unit_data_id = resources.org_unit_data_id AND %s.id = ? AND resources.node_pool_id = ?`, table, table, table),
@@ -1059,19 +1059,19 @@ var _ = Describe("Org unit tests", Ordered, func() {
 			dao.InvalidateAllCache(ctx, TestTenant, clusterId)
 
 			Expect(dao.NodepoolResetResources(ctx, TestTenant, clusterId, nodePoolId2,
-				api.NODEPOOLRESOURCESRESETACTION_DEPARTMENT_WEIGHTS_TO_DEFAULT)).To(Succeed())
+				api.NODEPOOLRESOURCESRESETACTION_NEGATIVE_WEIGHTS_TO_DEFAULT)).To(Succeed())
 
 			Expect(departmentGpuWeight(depA.Id, nodePoolId2)).To(Equal(float64(0)))
 			Expect(departmentGpuWeight(depB.Id, nodePoolId2)).To(Equal(models.DefaultOverQuotaWeight))
 			Expect(departmentGpuWeight(depB.Id, defaultNodePool)).To(Equal(float64(-1)))
-			Expect(projectGpuWeight(projA.Id, nodePoolId2)).To(Equal(float64(-1)))
+			Expect(projectGpuWeight(projA.Id, nodePoolId2)).To(Equal(models.DefaultOverQuotaWeight))
 			Expect(projectGpuWeight(projB.Id, nodePoolId2)).To(Equal(float64(7)))
 
 			setGpuWeight(models.DepartmentTable, depA.Id, nodePoolId2, ptr.To(-1.0))
 			setGpuWeight(models.DepartmentTable, depB.Id, nodePoolId2, ptr.To(5.0))
 			dao.InvalidateAllCache(ctx, TestTenant, clusterId)
 			Expect(dao.NodepoolResetResources(ctx, TestTenant, clusterId, nodePoolId2,
-				api.NODEPOOLRESOURCESRESETACTION_DEPARTMENT_WEIGHTS_TO_DEFAULT)).To(Succeed())
+				api.NODEPOOLRESOURCESRESETACTION_NEGATIVE_WEIGHTS_TO_DEFAULT)).To(Succeed())
 			Expect(departmentGpuWeight(depA.Id, nodePoolId2)).To(Equal(models.DefaultOverQuotaWeight))
 			Expect(departmentGpuWeight(depB.Id, nodePoolId2)).To(Equal(float64(5)))
 		})
