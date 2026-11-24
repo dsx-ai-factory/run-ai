@@ -270,11 +270,7 @@ var _ = Describe("Privilege escalation tests", Ordered, func() {
 				ScopeType:        api.SCOPETYPE_CLUSTER,
 				Tenant:           testing.TestTenant,
 			}))
-		// The installer service account holds only cluster-config:read (#5520), so the
-		// privilege-escalation guard allows only an assigner that already holds
-		// cluster-config read at the target (tenant) scope: the tenant-scoped System
-		// administrator (OrgManager). Granting it is not an escalation for them. The
-		// cluster-scoped admin, department admin and researcher are still blocked.
+		// https://github.com/dsx-ai-factory/run-ai/issues/5876
 		entries = append(entries,
 			Entry(fmt.Sprintf("%s assign InstallerServiceAccount role only if holding cluster-config read at tenant scope", assigner), ValidateCurrentUserHasPrivilegeTestArgs{
 				SubjectId:        assigner,
