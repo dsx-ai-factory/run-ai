@@ -61,7 +61,7 @@ async function refreshTokensIfNeeded(): Promise<void> {
 }
 
 export async function globalSetup(): Promise<void> {
-    logger.info('certification kit Playwright suites default hook begin');
+    logger.info('compatibility kit Playwright suites default hook begin');
     //print the process as string
     logger.info(`Process: ${JSON.stringify(process.argv)}`);
 
@@ -98,7 +98,7 @@ export async function globalSetup(): Promise<void> {
     await clusterUtils.deleteDisconnectedClusters();
 
     // CLI V1 Setup
-    logger.info('Setting up CLI tools for certification kit...');
+    logger.info('Setting up CLI tools for compatibility kit...');
     try {
         if (adminTokens && adminTokens.idToken) {
             await Promise.all([kubeCli.setFlowRootStateResources(adminTokens)]);
@@ -112,7 +112,7 @@ export async function globalSetup(): Promise<void> {
 
     // V2 CLI: download and install the runai CLI so CLI-tagged cert tests can run
     // (mirrors the dgxc setup). Guarded so a CLI-download hiccup degrades to
-    // CLI-test failures rather than failing the whole certification run.
+    // CLI-test failures rather than failing the whole compatibility run.
     try {
         await runaiCliV2.downloadAndInstall();
         logger.info('V2 CLI setup completed successfully');
@@ -140,7 +140,7 @@ export async function globalSetup(): Promise<void> {
         10 * 1000 // 10 seconds
     );
     setTimer(timer); // Store the timer reference
-    logger.info('Global certification kit Playwright setup terminated successfully');
+    logger.info('Global compatibility kit Playwright setup terminated successfully');
 }
 
 export default globalSetup;

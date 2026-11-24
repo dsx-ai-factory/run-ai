@@ -92,7 +92,7 @@ ${Object.entries(envInfo).map(([key, value]) => `    <parameter key="${key}" val
 }
 
 export default async function (): Promise<void> {
-    logger.debug('Certification kit global teardown begin');
+    logger.debug('Compatibility kit global teardown begin');
 
     if (!fs.existsSync(stateFile)) {
         logger.info('Global playwright setup Failed. Please check why');
@@ -162,7 +162,7 @@ export default async function (): Promise<void> {
             logger.error(`Failed to add environment info, error: ${e}`);
         }
     } else {
-        // Even in local run, try to write environment info for certification kit
+        // Even in local run, try to write environment info for compatibility kit
         try {
             writeEnvironmentInfo();
         } catch (e) {
@@ -170,5 +170,5 @@ export default async function (): Promise<void> {
         }
     }
     
-    logger.info('Certification kit global teardown completed successfully');
+    logger.info('Compatibility kit global teardown completed successfully');
 }
