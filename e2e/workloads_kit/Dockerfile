@@ -460,14 +460,16 @@ RUN status=0 && \
 # and runs ./node_modules/.bin/playwright, as there is no npx here. start.sh
 # has no `set -e`, so calling a function kit-utils.sh lacks is just "command
 # not found" and the step is silently skipped. Fail the build if start.sh
-# calls a function kit-utils.sh does not define, or if either still refers to
-# npx or a hardcoded /root/.kube outside a comment.
+# calls a function kit-utils.sh does not define, if the credential mask in
+# kit-utils.sh does not work with this image's sed, or if either file still
+# refers to npx or a hardcoded /root/.kube outside a comment.
 RUN cp /app/e2e/workloads_kit/start.sh /app/e2e/start.sh && \
     chmod +x /app/e2e/start.sh && \
     bash -c 'source kit-common/kit-utils.sh && \
       for fn in $(grep -oE "^[a-z_]+" start.sh | sort -u); do \
         type -t "$fn" >/dev/null || { echo "start.sh calls ${fn}, which kit-utils.sh does not define" >&2; exit 1; }; \
-      done' && \
+      done && \
+      redact_self_test || { echo "the credential mask in kit-utils.sh is not working" >&2; exit 1; }' && \
     ! grep -nE '^[^#]*(npx |/root/\.kube)' start.sh kit-common/kit-utils.sh
 
 # Create a non-root runtime user and writable output/configuration directories.

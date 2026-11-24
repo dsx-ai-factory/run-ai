@@ -455,11 +455,21 @@ RUN status=0 && \
     done && \
     exit "$status"
 
-# Promote the kit entry point. start.sh is self-contained: it validates its
-# inputs and writes the kubeconfig itself, to
-# ${KUBECONFIG:-$HOME/.kube/config}, which is writable by uid 65532.
+# Promote the kit entry point. start.sh validates its inputs and writes the
+# kubeconfig itself, to ${KUBECONFIG:-$HOME/.kube/config}, which is writable
+# by uid 65532. It sources kit-common/kit-utils.sh, relative to /app/e2e, for
+# the credential mask and the report counters; both ship from this checkout,
+# so neither can fall behind the other. start.sh has no `set -e`, so a helper
+# that is missing would just be "command not found". Fail the build if
+# kit-utils.sh does not define the helpers start.sh uses, or if the mask does
+# not work with this image's sed.
 RUN cp /app/e2e/compatibility_kit/start.sh /app/e2e/start.sh && \
-    chmod +x /app/e2e/start.sh
+    chmod +x /app/e2e/start.sh && \
+    bash -c 'source /app/e2e/kit-common/kit-utils.sh && \
+      for fn in redact_secrets redact_secrets_in_dir allure_stat; do \
+        type -t "$fn" >/dev/null || { echo "start.sh uses ${fn}, which kit-utils.sh does not define" >&2; exit 1; }; \
+      done && \
+      redact_self_test || { echo "the credential mask in kit-utils.sh is not working" >&2; exit 1; }'
 
 # Create a non-root runtime user and writable output/configuration directories.
 # Runs last so the chown covers the suite and the promoted entry point.
