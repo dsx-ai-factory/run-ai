@@ -3,11 +3,7 @@
   SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-  <aside
-    class="scheduling-settings"
-    :class="{ 'scheduling-settings--compact': draft.mode === ESchedulingMode.Proportional }"
-    aria-label="Advanced settings"
-  >
+  <aside class="scheduling-settings" aria-label="Advanced settings">
     <header>
       <span>Advanced settings</span
       ><q-btn
@@ -426,11 +422,7 @@ function confirmDisable() {
 .scheduling-settings {
   width: 100%;
   min-width: 0;
-  flex: 0 1 auto;
   border-left: 1px solid var(--border-subtle);
-}
-.scheduling-settings--compact {
-  align-self: flex-start;
   box-shadow: inset 0 -1px var(--border-subtle);
 }
 header {

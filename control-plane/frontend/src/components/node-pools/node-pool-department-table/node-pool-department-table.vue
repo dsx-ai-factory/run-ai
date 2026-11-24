@@ -63,16 +63,21 @@
           @click="emit('advanced-settings')"
       /></template>
     </runai-page-actions>
-    <div
-      class="table-settings-layout"
-      :class="{
-        'table-settings-layout--open': panelVisible,
-        'table-settings-layout--guaranteed': draft.mode === ESchedulingMode.Guaranteed,
-      }"
-    >
+    <div class="table-settings-layout" :class="{ 'table-settings-layout--open': panelVisible }">
       <div
+        v-if="panelVisible"
+        ref="settingsPanel"
+        :id="settingsPanelId"
+        class="department-settings-panel"
+        @keydown.esc.stop="emit('close-settings')"
+      >
+        <slot name="settings" />
+      </div>
+      <div
+        ref="tableContent"
         class="department-table-content"
         :style="preserveTableSpace ? { minHeight: `${unfilteredHeight}px` } : undefined"
+        @focusin="revealFocusedControl"
       >
         <q-resize-observer @resize="rememberTableHeight" />
         <q-table
@@ -202,7 +207,7 @@
                 @apply="emit('edit', { id: row.id, weight: $event })"
               />
               <department-resource-editor
-                v-if="maxAllocation && !panelVisible"
+                v-if="maxAllocation"
                 :id="row.id"
                 :kind="EResourceEditorKind.Limit"
                 :value="row.limit ?? -1"
@@ -210,7 +215,7 @@
                 :disabled="readonly || canEditDepartment?.(row.id) === false"
                 @apply="emit('edit', { id: row.id, limit: $event })"
               />
-              <q-td v-if="!panelVisible" class="result-cell">
+              <q-td class="result-cell">
                 <div
                   class="result-bar"
                   :class="{ 'simulation-bar': simulation }"
@@ -306,14 +311,6 @@
           <span>{{ simulationMessage }}</span>
           <runai-btn v-if="canRetrySimulation" flat label="Retry" aid="retry-simulation" @click="retrySimulation" />
         </div>
-      </div>
-      <div
-        v-if="panelVisible"
-        :id="settingsPanelId"
-        class="department-settings-panel"
-        @keydown.esc.stop="emit('close-settings')"
-      >
-        <slot name="settings" />
       </div>
     </div>
     <move-to-rank-modal
@@ -502,18 +499,29 @@ function updateFilters(value: IFilterBy) {
   if (value.searchTerm !== props.searchTerm) emit("search", value.searchTerm ?? "");
 }
 const panelVisible = computed(() => props.canView && props.settingsOpen);
-const columns = computed(() => {
-  const columns = departmentTableColumns(props.draft.mode, maxAllocation.value);
-  return panelVisible.value ? columns.filter((col) => col.name !== "limit" && col.name !== "result") : columns;
-});
+const columns = computed(() => departmentTableColumns(props.draft.mode, maxAllocation.value));
 const simulation = ref(false);
 const capacityHintId = useId();
 const settingsPanelId = useId();
 const settingsTrigger = ref<QBtn>();
+const tableContent = ref<HTMLElement>();
+const settingsPanel = ref<HTMLElement>();
+function revealFocusedControl(event: FocusEvent) {
+  if (!settingsPanel.value || !(event.target instanceof HTMLElement)) return;
+  const panel = settingsPanel.value.getBoundingClientRect();
+  const control = event.target.getBoundingClientRect();
+  if (
+    control.right > panel.left &&
+    control.left < panel.right &&
+    control.bottom > panel.top &&
+    control.top < panel.bottom
+  )
+    emit("close-settings");
+}
 watch(
   () => props.settingsOpen,
   (open) => {
-    if (!open) settingsTrigger.value?.$el.focus();
+    if (!open && !tableContent.value?.contains(document.activeElement)) settingsTrigger.value?.$el.focus();
   },
   { flush: "post" },
 );
@@ -875,36 +883,24 @@ async function quotaContext(row: IDepartmentSchedulingEdit) {
   --selection-width: 56px;
   --department-width: 220px;
   --resource-width: 150px;
-  --quota-width: 0px;
-  --uncovered-width: calc(var(--selection-width) + var(--department-width) + var(--resource-width) + var(--quota-width));
   display: grid;
   grid-template-columns: minmax(0, 1fr);
 }
-.table-settings-layout--guaranteed {
-  --quota-width: var(--resource-width);
-}
-.table-settings-layout--open {
-  grid-template-columns: minmax(0, var(--uncovered-width)) minmax(min(380px, 100%), 1fr);
-}
-.table-settings-layout--open .scheduling-table :deep(table) {
-  min-width: var(--uncovered-width);
-}
 .department-settings-panel {
-  min-width: 0;
+  grid-area: 1 / 1;
+  place-self: start end;
+  width: min(380px, 100%);
+  z-index: 1;
   background: var(--bg-primary-default);
 }
-.table-settings-layout--guaranteed .department-settings-panel {
-  display: flex;
-}
 @container department-section (max-width: 520px) {
-  .table-settings-layout--open {
-    grid-template-columns: minmax(0, 1fr);
-  }
   .table-settings-layout--open .department-table-content {
-    display: none;
+    grid-row: 2;
   }
 }
 .department-table-content {
+  grid-area: 1 / 1;
+  z-index: 0;
   align-self: start;
   min-width: 0;
   overflow: hidden;

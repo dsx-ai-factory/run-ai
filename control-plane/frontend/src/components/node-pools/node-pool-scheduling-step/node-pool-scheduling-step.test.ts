@@ -163,7 +163,7 @@ describe("scheduling step foundation", () => {
     }
   });
 
-  it("opens Advanced settings beside the table and returns focus after Escape or Close", async () => {
+  it("keeps all table columns when Advanced settings opens and returns focus after Escape or Close", async () => {
     const wrapper = render({
       ...pool,
       schedulingCapabilities: { quota: true, ranks: true, adjustableWeights: false, cpuQuota: false, limits: true },
@@ -175,8 +175,8 @@ describe("scheduling step foundation", () => {
       const panel = wrapper.get(".table-settings-layout .scheduling-settings");
       expect(trigger.attributes("aria-expanded")).toBe("true");
       expect(panel.element.parentElement?.id).toBe(trigger.attributes("aria-controls"));
-      expect(wrapper.find(".column-result").exists()).toBe(false);
-      expect(wrapper.find(".column-limit").exists()).toBe(false);
+      expect(wrapper.find(".column-result").exists()).toBe(true);
+      expect(wrapper.find(".column-limit").exists()).toBe(true);
       expect(wrapper.find(".column-weight").exists()).toBe(true);
       const close = panel.get('[aria-label="Hide Advanced settings"]');
       expect(document.activeElement).toBe(close.element);
@@ -190,6 +190,40 @@ describe("scheduling step foundation", () => {
       await wrapper.get('[aria-label="Hide Advanced settings"]').trigger("click");
       expect(trigger.attributes("aria-expanded")).toBe("false");
       expect(document.activeElement).toBe(trigger.element);
+    } finally {
+      wrapper.element.remove();
+      wrapper.unmount();
+    }
+  });
+
+  it("reveals a table control covered by Advanced settings when it receives focus", async () => {
+    const wrapper = render();
+    document.body.appendChild(wrapper.element);
+    try {
+      await wrapper.setProps({
+        resources: { gpus: 8 },
+        rows: [
+          {
+            id: "resource-1",
+            orgUnitId: "1",
+            orgUnitName: "Research",
+            rank: "MediumLow",
+            resources: { gpu: { overQuotaWeight: 2 } },
+            clusterId: pool.clusterId,
+            nodePoolId: pool.id,
+            nodePoolName: pool.name,
+          },
+        ],
+      });
+      await wrapper.get('[aid="advanced-settings"]').trigger("click");
+      const panel = wrapper.get(".department-settings-panel").element;
+      const toggle = wrapper.get<HTMLElement>('[aid="simulate-demand"]').element;
+      vi.spyOn(panel, "getBoundingClientRect").mockReturnValue(new DOMRect(620, 0, 380, 400));
+      vi.spyOn(toggle, "getBoundingClientRect").mockReturnValue(new DOMRect(800, 20, 30, 30));
+      toggle.focus();
+      await flushPromises();
+      expect(wrapper.find(".department-settings-panel").exists()).toBe(false);
+      expect(document.activeElement).toBe(toggle);
     } finally {
       wrapper.element.remove();
       wrapper.unmount();
