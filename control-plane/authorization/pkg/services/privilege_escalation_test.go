@@ -270,7 +270,7 @@ var _ = Describe("Privilege escalation tests", Ordered, func() {
 				ScopeType:        api.SCOPETYPE_CLUSTER,
 				Tenant:           testing.TestTenant,
 			}))
-		// https://github.com/dsx-ai-factory/run-ai/issues/5876
+		// should be blocked for all users - fix https://github.com/dsx-ai-factory/run-ai/issues/5876
 		entries = append(entries,
 			Entry(fmt.Sprintf("%s assign InstallerServiceAccount role only if holding cluster-config read at tenant scope", assigner), ValidateCurrentUserHasPrivilegeTestArgs{
 				SubjectId:        assigner,
