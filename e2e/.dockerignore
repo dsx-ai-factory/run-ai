@@ -93,5 +93,5 @@ Makefile
 # Ignore kit build artifacts
 workloads_kit/*.tar.gz
 workloads_kit/*.zip
-certificate_kit/*.tar.gz
-certificate_kit/*.zip
+compatibility_kit/*.tar.gz
+compatibility_kit/*.zip
