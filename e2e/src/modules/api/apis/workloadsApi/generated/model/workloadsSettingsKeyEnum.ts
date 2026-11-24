@@ -15,6 +15,7 @@ import { RequestFile } from './models';
 export enum WorkloadsSettingsKeyEnum {
     EnablePolicies = <any> 'enablePolicies',
     WorkloadSubmissionV2Enabled = <any> 'workloadSubmissionV2Enabled',
+    EnableHybridSubmission = <any> 'enableHybridSubmission',
     GpuOverProvisioning = <any> 'gpuOverProvisioning',
     ApplicationSubmission = <any> 'applicationSubmission'
 }
