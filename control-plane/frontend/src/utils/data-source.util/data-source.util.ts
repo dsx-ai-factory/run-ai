@@ -4,7 +4,6 @@
  */
 
 import { AssetKind } from "@/swagger-models/assets-service-client";
-import type { Pvc } from "@/swagger-models/assets-service-client";
 import type { SupersetRulesAllOfStorage } from "@/swagger-models/policy-service-client";
 import { makeId } from "../common.util";
 import type { TDataSourceKinds } from "@/models/data-source.model";
