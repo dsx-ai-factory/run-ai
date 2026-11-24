@@ -33,3 +33,11 @@ tests:
       - equal:
           path: data.JAVA_OPTS_APPEND
           value: "-Djgroups.dns.query=keycloak-headless -javaagent:/opt/keycloak/agent/opentelemetry-javaagent.jar -Xss512k"
+
+  - it: "keeps a value containing a colon and space valid"
+    set:
+      keycloakx.config.extraJavaOpts: '-Dhttp.agent="RunAI: Keycloak"'
+    asserts:
+      - equal:
+          path: data.JAVA_OPTS_APPEND
+          value: '-Djgroups.dns.query=keycloak-headless -Dhttp.agent="RunAI: Keycloak"'
