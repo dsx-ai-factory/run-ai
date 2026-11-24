@@ -17,6 +17,7 @@ export class SoftAssert {
     }
 
     assertNonStrictEqual<T>(actual: T, expected: T, message: string): void {
+        // Treat missing optional values as equal when API responses omit them.
         if ((actual === null && expected === undefined) || (expected === null && actual === undefined)) {
             return;
         }
