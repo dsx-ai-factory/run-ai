@@ -7,6 +7,8 @@
 
 * `LIMITS_TO_DEFAULT` (value: `"LIMITS_TO_DEFAULT"`)
 
+* `NEGATIVE_WEIGHTS_TO_DEFAULT` (value: `"NEGATIVE_WEIGHTS_TO_DEFAULT"`)
+
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
