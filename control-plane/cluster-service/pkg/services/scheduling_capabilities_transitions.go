@@ -36,15 +36,20 @@ func (s *NodePoolsApiService) validateSchedulingCapabilitiesChangeAndResetOrgUni
 	}
 
 	if before.AllowQuota && !after.AllowQuota {
+		// QUOTAS_TO_DEFAULT also clears GPU limits, which this nodepool keeps when limits stays on.
+		keepLimitsNote := ""
+		if after.AllowLimits {
+			keepLimitsNote = " QUOTAS_TO_DEFAULT also clears their GPU limits; to keep them, set their quota to 0 instead."
+		}
 		if apiErr := s.validateCanTurnOffSchedulingCapability(ctx, after, "quota",
-			openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_QUOTA, "QUOTAS_TO_DEFAULT"); apiErr != nil {
+			openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_QUOTA, "QUOTAS_TO_DEFAULT", keepLimitsNote); apiErr != nil {
 			return nil, apiErr
 		}
 	}
 
 	if before.AllowRanks && !after.AllowRanks {
 		if apiErr := s.validateCanTurnOffSchedulingCapability(ctx, after, "ranks",
-			openapi.ORGUNITSNODEPOOLSUMMARYTYPE_NON_DEFAULT_RANK, "RANKS_TO_DEFAULT"); apiErr != nil {
+			openapi.ORGUNITSNODEPOOLSUMMARYTYPE_NON_DEFAULT_RANK, "RANKS_TO_DEFAULT", ""); apiErr != nil {
 			return nil, apiErr
 		}
 	}
@@ -121,15 +126,15 @@ func permittedScopesCoverCluster(scopes authorization_api.PermittedScopes, tenan
 }
 
 func (s *NodePoolsApiService) validateCanTurnOffSchedulingCapability(ctx context.Context, nodepool models.Nodepool,
-	capability string, summaryType openapi.OrgUnitsNodepoolSummaryType, resetAction string,
+	capability string, summaryType openapi.OrgUnitsNodepoolSummaryType, resetAction string, note string,
 ) *api.Error {
 	blocking, apiErr := s.orgUnitsUsingSchedulingCapability(ctx, nodepool, summaryType)
 	if apiErr != nil || len(blocking) == 0 {
 		return apiErr
 	}
 	return api.NewError(http.StatusBadRequest, fmt.Sprintf(
-		"Cannot turn off %s on nodepool %s. %d org units use it: %s. Reset them with the org-unit resources reset action %s, then try again.",
-		capability, nodepool.Name, len(blocking), describeOrgUnits(blocking), resetAction), nil)
+		"Cannot turn off %s on nodepool %s. %d org units use it: %s. Reset them with the org-unit resources reset action %s, then try again.%s",
+		capability, nodepool.Name, len(blocking), describeOrgUnits(blocking), resetAction, note), nil)
 }
 
 func (s *NodePoolsApiService) orgUnitsUsingSchedulingCapability(ctx context.Context, nodepool models.Nodepool,
