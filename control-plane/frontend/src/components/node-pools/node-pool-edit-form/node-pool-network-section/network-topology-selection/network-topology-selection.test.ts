@@ -70,7 +70,7 @@ describe("network topology selection", () => {
     expect(guide?.parentElement?.querySelector(".list-numbers-col")?.textContent?.trim()).toBe("1");
   });
 
-  it("moves levels with the row buttons and saves their new order", async () => {
+  it("reorders label keys from the keyboard without row arrows and saves the new order", async () => {
     vi.spyOn(clusterService, "getNetworkTopologyCount").mockResolvedValue(0);
     mountComponent({}, document.body, false);
     await flushPromises();
@@ -84,8 +84,6 @@ describe("network topology selection", () => {
     const inputs = () => modal.findAll<HTMLInputElement>('input[aid="network-topology-label-key-input"]');
     const values = () => inputs().map((input) => input.element.value);
 
-    expect(modal.find(moveUp).attributes("aria-disabled")).toBe("true");
-    expect(modal.get(moveDown).attributes("aria-disabled")).toBe("true");
     await add.trigger("click");
     await add.trigger("click");
     await modal.get<HTMLInputElement>('input[aid="network-topology-name-input"]').setValue("fabric-a");
@@ -94,19 +92,15 @@ describe("network topology selection", () => {
     await middle.setValue("rack");
     await close.setValue("zone/Node");
 
-    await modal.findAll(moveUp)[0].trigger("click");
-    expect(values()).toEqual(["zone", "rack", "zone/Node"]);
-    const raiseRack = modal.findAll<HTMLButtonElement>(moveUp)[1];
-    raiseRack.element.focus();
-    await raiseRack.trigger("click");
+    expect(modal.find(moveUp).exists()).toBe(false);
+    expect(modal.find(moveDown).exists()).toBe(false);
+    middle.element.focus();
+    await middle.trigger("keydown", { key: "ArrowUp", altKey: true });
     expect(values()).toEqual(["rack", "zone", "zone/Node"]);
-    expect(document.activeElement).toBe(raiseRack.element);
-    expect(raiseRack.attributes("aria-disabled")).toBe("true");
+    expect(document.activeElement).toBe(middle.element);
     expect(modal.get('[role="status"]').text()).toContain("position 1 of 3");
-
-    await modal.findAll(moveDown)[1].trigger("click");
+    await far.trigger("keydown", { key: "ArrowDown", altKey: true });
     expect(values()).toEqual(["rack", "zone/Node", "zone"]);
-    expect(modal.findAll(moveDown)[2].attributes("aria-disabled")).toBe("true");
     await modal.get('[aid="network-topologies-modal-save-button"]').trigger("click");
     await flushPromises();
     expect(clusterService.createNetworkTopology).toHaveBeenCalledOnce();

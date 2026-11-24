@@ -553,13 +553,8 @@ async function getNodepoolsMinimal(
 }
 
 async function patchNodepool(nodepoolId: string, payload: NodepoolUpdateFields): Promise<Nodepool> {
-  // The API clears an omitted topology. Use its current value when saving unrelated fields.
-  const fields =
-    payload.networkTopologyId === undefined
-      ? { ...payload, networkTopologyId: (await getNodepool(nodepoolId)).networkTopologyId ?? null }
-      : payload;
   try {
-    return (await clusterServiceApi.nodePoolsApi.patchNodepool(nodepoolId, fields)).data;
+    return (await clusterServiceApi.nodePoolsApi.patchNodepool(nodepoolId, payload)).data;
   } catch (error) {
     throw httpService.handleHttpError(error);
   }

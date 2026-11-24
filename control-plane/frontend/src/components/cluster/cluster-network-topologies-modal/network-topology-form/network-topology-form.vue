@@ -19,11 +19,13 @@
         </div>
 
         <div class="q-mb-md">
-          Set node labels representing the network topology and
-          {{ showLevelOrderControls ? "use the move buttons or drag" : "drag" }} to order by their distance from the node
-          (far to close)
+          Set node labels representing the network topology and drag to order by their distance from the node (far to
+          close)
           <runai-tooltip
-            tooltip-text="Order levels from farthest (top) to closest (bottom). Use the Kubernetes label key on the nodes for each level."
+            :tooltip-text="
+              'Order levels from farthest (top) to closest (bottom). Use the Kubernetes label key on the nodes for each level.' +
+              (showLevelOrderControls ? ' Press Alt+Up or Alt+Down in a label field to move the level.' : '')
+            "
             width="542px"
           />
         </div>
@@ -57,31 +59,9 @@
                   :model-value="item.name"
                   :rules="[validateLevelKey]"
                   @update:model-value="onUpdateLabel(item.id, $event)"
+                  @keydown.alt.up="moveLabel(item.id, -1, $event)"
+                  @keydown.alt.down="moveLabel(item.id, 1, $event)"
                 />
-                <div v-if="showLevelOrderControls" class="row items-center no-wrap q-gutter-xs">
-                  <runai-btn
-                    aid="network-topology-move-up"
-                    class="topology-move-button"
-                    icon-button
-                    dense
-                    icon="ph-bold ph-arrow-up"
-                    tooltip="Move up"
-                    :aria-label="`Move up level ${labels.findIndex((label) => label.id === item.id) + 1}`"
-                    :aria-disabled="item.id === labels[0]?.id"
-                    @click="moveLabel(item.id, -1, $event)"
-                  />
-                  <runai-btn
-                    aid="network-topology-move-down"
-                    class="topology-move-button"
-                    icon-button
-                    dense
-                    icon="ph-bold ph-arrow-down"
-                    tooltip="Move down"
-                    :aria-label="`Move down level ${labels.findIndex((label) => label.id === item.id) + 1}`"
-                    :aria-disabled="item.id === labels.at(-1)?.id"
-                    @click="moveLabel(item.id, 1, $event)"
-                  />
-                </div>
                 <runai-tooltip
                   icon="ph-bold ph-x"
                   @click="onRemoveLabel(item.id)"
@@ -214,19 +194,21 @@ export default defineComponent({
     onUpdateLabel(id: string, name: string): void {
       this.labels = this.labels.map((label) => (label.id === id ? { ...label, name } : label));
     },
-    async moveLabel(id: string, offset: -1 | 1, event: MouseEvent): Promise<void> {
+    async moveLabel(id: string, offset: -1 | 1, event: KeyboardEvent): Promise<void> {
+      if (!this.showLevelOrderControls) return;
+      event.preventDefault();
       const from = this.labels.findIndex((label) => label.id === id);
       const to = from + offset;
       if (from < 0 || to < 0 || to >= this.labels.length) return;
 
-      const button = event.currentTarget as HTMLButtonElement;
+      const input = event.target as HTMLInputElement;
       const labels = [...this.labels];
       const [level] = labels.splice(from, 1);
       labels.splice(to, 0, level);
       this.labelsChanged(labels);
       this.orderAnnouncement = `Moved level from position ${from + 1} to position ${to + 1} of ${labels.length}.`;
       await this.$nextTick();
-      button.focus();
+      input.focus();
     },
     labelsChanged(labels: { name: string; id: string }[]): void {
       this.labels = labels;
@@ -301,11 +283,6 @@ export default defineComponent({
   flex: 1;
   width: 1px;
   background-color: var(--border-default);
-}
-
-.topology-levels :deep(.topology-move-button[aria-disabled="true"]) {
-  color: var(--icon-disabled);
-  cursor: default;
 }
 
 .topology-order-status {

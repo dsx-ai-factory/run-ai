@@ -89,31 +89,19 @@ describe("clusterService.patchNodepool", () => {
     patchNodepool.mockReset();
   });
 
-  it.each(["topology-from-another-tab", null, undefined])(
-    "preserves the latest topology (%s) when saving unrelated changes",
-    async (networkTopologyId) => {
-      const edits = { schedulingCapabilities: { quota: true } };
-      getNodepool.mockResolvedValue({ data: { id: "p", networkTopologyId } });
-      const saved = { id: "p", networkTopologyId, ...edits };
-      patchNodepool.mockResolvedValue({ data: saved });
-
-      await expect(clusterService.patchNodepool("p", edits)).resolves.toEqual(saved);
-      expect(getNodepool).toHaveBeenCalledWith("p");
-      expect(patchNodepool).toHaveBeenCalledWith("p", { ...edits, networkTopologyId: networkTopologyId ?? null });
-    },
-  );
+  it("omits topology when only scheduling changes", async () => {
+    const edits = { schedulingCapabilities: { quota: true } };
+    const saved = { id: "p", networkTopologyId: "existing", ...edits };
+    patchNodepool.mockResolvedValue({ data: saved });
+    await expect(clusterService.patchNodepool("p", edits)).resolves.toEqual(saved);
+    expect(getNodepool).not.toHaveBeenCalled();
+    expect(patchNodepool).toHaveBeenCalledWith("p", edits);
+  });
 
   it.each(["chosen-topology", null])("sends an explicit topology edit (%s) directly", async (networkTopologyId) => {
     patchNodepool.mockResolvedValue({ data: { id: "p", networkTopologyId } });
     await clusterService.patchNodepool("p", { networkTopologyId });
     expect(getNodepool).not.toHaveBeenCalled();
     expect(patchNodepool).toHaveBeenCalledWith("p", { networkTopologyId });
-  });
-
-  it("stops before writing if the current topology cannot be read", async () => {
-    getNodepool.mockRejectedValue(new Error("network error"));
-    await expect(clusterService.patchNodepool("p", { schedulingCapabilities: { quota: true } })).rejects.toThrow();
-    expect(getNodepool).toHaveBeenCalledWith("p");
-    expect(patchNodepool).not.toHaveBeenCalled();
   });
 });
