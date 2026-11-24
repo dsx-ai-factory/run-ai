@@ -166,10 +166,6 @@ func (c *RegistryTestFactory) createDepartmentBasedAsset(randoms *testutils.Rand
 func (c *RegistryTestFactory) validateListContent(_ *http.Request, _ datastructs.Set[string], createdSpecs ...[]byte) {
 }
 
-func (c *RegistryTestFactory) addToWorkloadCreationReq(*api.WorkloadCreationRequest, *api.AssetMeta) bool {
-	return false // registry asset cannot be part of workspace creation request
-}
-
 // ///////////////////////////////////////////////////////////////////////////////////////////
 //
 //	Asset Builders

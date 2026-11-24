@@ -27,7 +27,6 @@ import (
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 
-	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/flat_workloads"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/policies"
 	checkerClusterClient "github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/clients/cluster"
 
@@ -1831,44 +1830,21 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 
 // No nested tables in ginkgo but this test needs to repeat for both training and workspaces
 func cannotDeleteAssetBeingUsed(testData AssetTest, workloadType string, randoms *testutils.RandomValues, router chi.Router) {
-	// for this test we prefer old clusters, because we do not want workloads to be rejected for pvcs
-	// or secrets missing in the cluster (with new clusters we have to set k8s objects tracker mock to
-	// hold those assets, otherwise workload creation will fail
+	// Older clusters allow creating the catalog fixtures without synchronizing their Kubernetes objects.
 	checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
 		WithCluster(randoms.ClusterId, testing.BuildDisplayedCluster(randoms, testing.OldClustersPreK8sObjectsTracker, false)))
 
-	//   environment asset we always need
-	envAsset := buildRandomTenantEnvironmentAsset(randoms)
-	envAsset.Spec.UidGidSource = convutils.Ref(flat_workloads.CustomUidGid)
-
-	env1, _, _ := createEnvironmentAsset(envAsset, router, headerForAdmin(randoms))
-
-	createRequest := api.WorkloadCreationRequest{
-		Name:      fmt.Sprintf("test_%s", workloadType),
-		ClusterId: randoms.ClusterId,
-		ProjectId: int32(randoms.ProjectId),
-		Namespace: fmt.Sprintf("runai-proj-%d", randoms.ProjectId),
-		Assets: api.AssetsIds{
-			Environment: env1.Meta.Id,
-		},
+	if testData.cannotAppearInWorkload {
+		return
 	}
+	meta, _, _ := testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
+	seedLegacyWorkload(randoms, workloadType, fmt.Sprintf("test_%s", workloadType), meta)
 
-	// now create the relevant asset that we want to add to the workload
-	meta1, _, _ := testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
-	addedToWorkload := testData.factory.addToWorkloadCreationReq(&createRequest, &meta1)
-
-	if addedToWorkload {
-		seedLegacyWorkload(randoms, workloadType, createRequest.Name, meta1)
-
-		//   delete the asset
-		delByIdHttpReq, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", testData.url, meta1.Id), nil)
-		Expect(err).To(BeNil())
-		delByIdHttpReq.Header = *headerForAdmin(randoms)
-
-		delByIdHttpResp := httptest.NewRecorder()
-		router.ServeHTTP(delByIdHttpResp, delByIdHttpReq)
-		Expect(delByIdHttpResp.Code).To(Equal(http.StatusAccepted))
-	}
+	request := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("%s/%s", testData.url, meta.Id), nil)
+	request.Header = *headerForAdmin(randoms)
+	response := httptest.NewRecorder()
+	router.ServeHTTP(response, request)
+	Expect(response.Code).To(Equal(http.StatusAccepted))
 }
 
 func createAutoDeleteAsset(testData AssetTest, router chi.Router, randoms *testutils.RandomValues, request *api.AssetCreationRequest) (*api.AssetMeta, []byte) {

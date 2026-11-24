@@ -120,10 +120,6 @@ func (c *PasswordTestFactory) validateListContent(listRequest *http.Request, exp
 	tg.validateListContent(c.router, listRequest, expectedUsedBy, createdSpecs)
 }
 
-func (c *PasswordTestFactory) addToWorkloadCreationReq(*api.WorkloadCreationRequest, *api.AssetMeta) bool {
-	return false // password asset cannot be part of workload creation request
-}
-
 // ///////////////////////////////////////////////////////////////////////////////////////////
 //
 //	Asset Builders

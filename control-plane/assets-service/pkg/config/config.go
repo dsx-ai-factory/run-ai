@@ -18,8 +18,6 @@ var once sync.Once
 
 type ServerConfig struct {
 	ServicePort           int `mapstructure:"service_port"`
-	RetryMaxIntervalSec   int `mapstructure:"retry_max_interval_sec"`
-	RetryMaxElapsedSec    int `mapstructure:"retry_max_elapsed_sec"`
 	DaysLimitForFirstSync int `mapstructure:"days_limit_for_first_sync"`
 
 	CleanupRefreshRateHours int `mapstructure:"cleanup_refresh_rate_hours"`
@@ -28,8 +26,6 @@ type ServerConfig struct {
 
 func (sc *ServerConfig) SetDefaults() {
 	sc.ServicePort = 8080
-	sc.RetryMaxIntervalSec = 10
-	sc.RetryMaxElapsedSec = 60
 	sc.DaysLimitForFirstSync = 7
 	sc.CleanupKeepAssetsDays = 30
 	sc.CleanupRefreshRateHours = 24

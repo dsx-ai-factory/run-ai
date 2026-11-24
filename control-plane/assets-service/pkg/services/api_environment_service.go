@@ -32,7 +32,6 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/dao"
-	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/dbmodel"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/flat_workloads"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/query_types"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/services/asset_cluster_status"
@@ -355,139 +354,6 @@ func ValidateConnectionsField(connections []api.Connection) *api.Error {
 	return nil
 }
 
-func validateSpecificEnv(workloadType string, workloadAssets []dbmodel.AssetsContainedInWorkload, specificEnv *api.SpecificRunParams) *api.Error {
-	//
-	//   look for the environment asset
-	//
-	var envAsset *dbmodel.EnvironmentAssetRec
-	for _, assetPtrs := range workloadAssets {
-		if assetPtrs.AssetsEnvironment != nil {
-			envAsset = assetPtrs.AssetsEnvironment
-		}
-	}
-	if envAsset == nil {
-		return api.NewValidationError("environment asset is not selected, cannot create workload")
-	}
-
-	if specificEnv != nil {
-		// need to make sure specific env does not violate OverrideUidGidInWorkspace field of the environment asset
-		if !envAsset.OverrideUidGidInWorkspace {
-			if specificEnv.RunAsUid != nil {
-				return api.NewValidationError("it is not permitted to override the runAsUid from the environment asset")
-			}
-			if specificEnv.RunAsGid != nil {
-				return api.NewValidationError("it is not permitted to override the runAsGid from the environment asset")
-			}
-			if specificEnv.SupplementalGroups != nil {
-				return api.NewValidationError("it is not permitted to override the supplementalGroups from the environment asset")
-			}
-		}
-
-		validationErr := validateEnvironmentVars(specificEnv.EnvironmentVariables)
-		if validationErr != nil {
-			return validationErr
-		}
-	}
-
-	//
-	//   if runAsUser is requested in the environment asset, runAsUid must have value
-	//
-	runAsUid, runAsGid, supplementalGroups, convErr := flat_workloads.DetermineUidAndGid(specificEnv, envAsset.EnvironmentAssetSpec)
-	if convErr != nil {
-		return convErr
-	}
-
-	err := validateUidGidFields(&envAsset.EnvironmentAssetSpec, runAsUid, runAsGid, supplementalGroups)
-	if err != nil {
-		return nil
-	}
-
-	//
-	//   all the rest is validation of connections. with no connections in the asset, nothing more to validate
-	//
-	if envAsset.Connections == nil {
-		return nil
-	}
-
-	//
-	//   make sure that connections that appear in the specific env match those of the environment asset
-	//
-	if specificEnv != nil {
-		redundantErr := ValidateSpecEnvConnNamesVsEnvAsset(specificEnv.Connections, envAsset.Connections)
-		if redundantErr != nil {
-			return redundantErr
-		}
-	}
-
-	connSpecEnvById := map[string]api.SpecificRunConnectionInfo{}
-	if specificEnv != nil && specificEnv.Connections != nil {
-		for _, connSpecEnv := range *specificEnv.Connections {
-			connSpecEnvById[connSpecEnv.Name] = connSpecEnv
-		}
-	}
-
-	usedPorts := map[int32]string{}
-
-	for _, connection := range envAsset.Connections {
-		if connection.IsExternal || connection.InternalToolInfo == nil {
-			continue
-		}
-
-		specEnvOfConn := connSpecEnvById[connection.Name]
-
-		//
-		//  validate existence of port value for custom ports, and ports uniqueness
-		//
-		if connection.InternalToolInfo.NodePortInfo != nil {
-			if connection.InternalToolInfo.NodePortInfo.IsCustomPort {
-				if specEnvOfConn.NodePort == nil {
-					return api.NewValidationError(fmt.Sprintf("node port is mandatory for connection '%s'", connection.Name))
-				}
-				usedBy := usedPorts[*specEnvOfConn.NodePort]
-				if usedBy != "" {
-					return api.NewValidationError(fmt.Sprintf("node port %v is used by both '%s' and '%s' connections", *specEnvOfConn.NodePort, connection.Name, usedBy))
-				}
-				usedPorts[*specEnvOfConn.NodePort] = connection.Name
-			}
-		}
-
-		//
-		//  validate existence of url value for custom urls OR of ingress URL for auto generated urls
-		//
-		if connection.InternalToolInfo.ExternalUrlInfo != nil {
-			if connection.InternalToolInfo.ExternalUrlInfo.IsCustomUrl {
-				if convutils.IsEmptyOrNull(specEnvOfConn.ExternalUrl) && convutils.IsEmptyOrNull(connection.InternalToolInfo.ExternalUrlInfo.ExternalUrl) {
-					return api.NewValidationError(fmt.Sprintf("url is mandatory for connection '%s'", connection.Name))
-				}
-			}
-		}
-
-		if specEnvOfConn.AuthorizedUsers != nil && specEnvOfConn.AuthorizedGroups != nil {
-			return api.NewValidationError("authorizedUsers and authorizedGroups are mutually exclusive")
-		}
-
-		if specEnvOfConn.AuthorizedUsers != nil {
-			if connection.InternalToolInfo == nil || connection.InternalToolInfo.ConnectionType != api.INTERNALCONNECTIONTYPE_EXTERNAL_URL {
-				return api.NewValidationError(fmt.Sprintf("authorizedUsers is only supported with %s", api.INTERNALCONNECTIONTYPE_EXTERNAL_URL))
-			}
-		}
-
-		if specEnvOfConn.AuthorizedGroups != nil {
-			if connection.InternalToolInfo == nil || connection.InternalToolInfo.ConnectionType != api.INTERNALCONNECTIONTYPE_EXTERNAL_URL {
-				return api.NewValidationError(fmt.Sprintf("authorizedGroups is only supported with %s", api.INTERNALCONNECTIONTYPE_EXTERNAL_URL))
-			}
-		}
-	}
-
-	if specificEnv != nil && specificEnv.AutoScaling != nil {
-		if err := ValidateSpecEnvAutoScalingFields(workloadType, specificEnv.AutoScaling); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 func validateEnvironmentVars(vars *[]api.EnvironmentVariableOfAsset) *api.Error {
 	if vars == nil {
 		return nil
@@ -532,26 +398,6 @@ func validateEnvironmentVars(vars *[]api.EnvironmentVariableOfAsset) *api.Error 
 		}
 	}
 
-	return nil
-}
-
-// ValidateSpecEnvConnNamesVsEnvAsset makes sure that connection names appearing in the specific env also appear in the
-// environment asset from which the workload or template is created.
-func ValidateSpecEnvConnNamesVsEnvAsset(specEnvConnections *[]api.SpecificRunConnectionInfo, envAssetConnections []api.Connection) *api.Error {
-	if specEnvConnections == nil {
-		return nil
-	}
-
-	connNameInAsset := datastructs.Set[string]{}
-	for _, envConnection := range envAssetConnections {
-		connNameInAsset.Add(envConnection.Name)
-	}
-
-	for _, specEnvConnection := range *specEnvConnections {
-		if !connNameInAsset.Has(specEnvConnection.Name) {
-			return api.NewValidationError(fmt.Sprintf("connection named '%s' is not defined in the environment asset", specEnvConnection.Name))
-		}
-	}
 	return nil
 }
 

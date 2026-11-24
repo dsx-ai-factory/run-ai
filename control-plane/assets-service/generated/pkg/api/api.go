@@ -147,12 +147,6 @@ type HostPathAPIRouter interface {
 // The InferencesAPIRouter implementation should parse necessary information from the http request,
 // pass the data to a InferencesAPIServicer to perform the required actions, then write the service results to the http response.
 type InferencesAPIRouter interface {
-	CreateInference(http.ResponseWriter, *http.Request)
-	GetInferenceById(http.ResponseWriter, *http.Request)
-	DeleteInferenceById(http.ResponseWriter, *http.Request)
-	CreateInferenceV2(http.ResponseWriter, *http.Request)
-	GetInferenceMerged(http.ResponseWriter, *http.Request)
-	GetInferenceByIdV2(http.ResponseWriter, *http.Request)
 	GetHuggingFaceModelInfo(http.ResponseWriter, *http.Request)
 }
 
@@ -165,14 +159,6 @@ type ModelAPIRouter interface {
 	GetModelAssetById(http.ResponseWriter, *http.Request)
 	UpdateModelAssetById(http.ResponseWriter, *http.Request)
 	DeleteModelAssetById(http.ResponseWriter, *http.Request)
-}
-
-// ModelInferenceAPIRouter defines the required methods for binding the api requests to a responses for the ModelInferenceAPI
-// The ModelInferenceAPIRouter implementation should parse necessary information from the http request,
-// pass the data to a ModelInferenceAPIServicer to perform the required actions, then write the service results to the http response.
-type ModelInferenceAPIRouter interface {
-	CreateModelInference(http.ResponseWriter, *http.Request)
-	CreateModelInferenceV2(http.ResponseWriter, *http.Request)
 }
 
 // NFSAPIRouter defines the required methods for binding the api requests to a responses for the NFSAPI
@@ -425,12 +411,6 @@ type HostPathAPIServicer interface {
 // while the service implementation can be ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
 type InferencesAPIServicer interface {
-	CreateInference(context.Context, WorkloadCreationRequest) (ImplResponse, error)
-	GetInferenceById(context.Context, string) (ImplResponse, error)
-	DeleteInferenceById(context.Context, string) (ImplResponse, error)
-	CreateInferenceV2(context.Context, InferenceCreationRequestV2) (ImplResponse, error)
-	GetInferenceMerged(context.Context, string, string) (ImplResponse, error)
-	GetInferenceByIdV2(context.Context, string) (ImplResponse, error)
 	GetHuggingFaceModelInfo(context.Context, HuggingFaceModelInfoRequest) (ImplResponse, error)
 }
 
@@ -444,15 +424,6 @@ type ModelAPIServicer interface {
 	GetModelAssetById(context.Context, string, bool, int32, string, string) (ImplResponse, error)
 	UpdateModelAssetById(context.Context, string, ModelUpdateRequest) (ImplResponse, error)
 	DeleteModelAssetById(context.Context, string) (ImplResponse, error)
-}
-
-// ModelInferenceAPIServicer defines the api actions for the ModelInferenceAPI service
-// This interface intended to stay up to date with the openapi yaml used to generate it,
-// while the service implementation can be ignored with the .openapi-generator-ignore file
-// and updated with the logic required for the API.
-type ModelInferenceAPIServicer interface {
-	CreateModelInference(context.Context, ModelInferenceCreationRequest) (ImplResponse, error)
-	CreateModelInferenceV2(context.Context, ModelInferenceCreationRequestV2) (ImplResponse, error)
 }
 
 // NFSAPIServicer defines the api actions for the NFSAPI service

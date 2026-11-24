@@ -146,22 +146,6 @@ paths:
   /v1/k8s/clusters/{clusterUuid}/distributed/{workloadId}:
     $ref: './resources/V1/DistributedById.yaml'
 
-  /api/v1/inference:
-    $ref: './resources/V1/Inference.yaml'
-  /api/v1/inference/{workloadId}:
-    $ref: './resources/V1/InferenceById.yaml'
-  /api/v2/inference:
-    $ref: './resources/InferenceV2.yaml'
-  /api/v2/inference/merged:
-    $ref: './resources/InferenceMerged.yaml'
-  /api/v2/inference/{workloadId}:
-    $ref: './resources/InferenceByIdV2.yaml'
-
-  /api/v1/model-inference:
-    $ref: "./resources/V1/ModelInference.yaml"
-  /api/v2/model-inference:
-    $ref: "./resources/ModelInferenceV2.yaml"
-
   /api/v1/asset/name-availability:
     $ref: './resources/AssetNameAvailability.yaml'
   /api/v1/asset/count:
