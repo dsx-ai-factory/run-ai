@@ -2508,6 +2508,7 @@ fields:
       - spec: inferences/LoadAwareRouting.yaml
         defaults: inferences/LoadAwareRouting.yaml
         rules: ../policy_rules/BooleanRules.yaml
+        internal: true
         targets:
           - DinfCommonSpec
           - DinfCommonDefaults

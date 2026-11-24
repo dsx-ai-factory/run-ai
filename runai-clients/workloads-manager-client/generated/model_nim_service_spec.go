@@ -37,7 +37,7 @@ type NimServiceSpec struct {
 	ImagePullSecrets []ImagePullSecret `json:"imagePullSecrets,omitempty"`
 	// Set of labels to populate into the container running the workload.
 	Labels []Label `json:"labels,omitempty"`
-	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
 	LoadAwareRouting NullableBool                          `json:"loadAwareRouting,omitempty"`
 	ModelStore       NullableNimServiceSpecAllOfModelStore `json:"modelStore,omitempty"`
 	MultiNode        NullableNimServiceMultiNode           `json:"multiNode,omitempty"`
@@ -63,8 +63,6 @@ type NimServiceSpec struct {
 // will change when the set of required properties is changed
 func NewNimServiceSpec() *NimServiceSpec {
 	this := NimServiceSpec{}
-	var loadAwareRouting bool = false
-	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var replicas int32 = 1
 	this.Replicas = *NewNullableInt32(&replicas)
 	return &this
@@ -75,8 +73,6 @@ func NewNimServiceSpec() *NimServiceSpec {
 // but it doesn't guarantee that properties required by API are set
 func NewNimServiceSpecWithDefaults() *NimServiceSpec {
 	this := NimServiceSpec{}
-	var loadAwareRouting bool = false
-	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var replicas int32 = 1
 	this.Replicas = *NewNullableInt32(&replicas)
 	return &this

@@ -8588,7 +8588,7 @@ components:
           nullable: true
           type: object
     LoadAwareRouting:
-      description: Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+      description: Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
       type: boolean
       default: false
       nullable: true
@@ -8727,7 +8727,9 @@ components:
             category:
               $ref: '#/components/schemas/Category'
             loadAwareRouting:
-              $ref: '#/components/schemas/LoadAwareRouting'
+              allOf:
+                - $ref: '#/components/schemas/LoadAwareRouting'
+              x-internal: true
             nodePools:
               $ref: '#/components/schemas/NodePools'
             preemptibility:

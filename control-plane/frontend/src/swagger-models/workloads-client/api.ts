@@ -3163,11 +3163,11 @@ export interface DistributedInferenceCommonDefaultsV2 {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * 
      * @type {boolean}
      * @memberof DistributedInferenceCommonDefaultsV2
      */
-    'loadAwareRouting'?: boolean | null;
+    'loadAwareRouting'?: boolean;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -3234,7 +3234,7 @@ export interface DistributedInferenceCommonRulesV2 {
      * @type {BooleanRules}
      * @memberof DistributedInferenceCommonRulesV2
      */
-    'loadAwareRouting'?: BooleanRules | null;
+    'loadAwareRouting'?: BooleanRules;
     /**
      * 
      * @type {ArrayRules}
@@ -3301,7 +3301,7 @@ export interface DistributedInferenceCommonRulesV2AllOf {
      * @type {BooleanRules}
      * @memberof DistributedInferenceCommonRulesV2AllOf
      */
-    'loadAwareRouting'?: BooleanRules | null;
+    'loadAwareRouting'?: BooleanRules;
     /**
      * 
      * @type {ArrayRules}
@@ -3346,11 +3346,11 @@ export interface DistributedInferenceCommonSpec {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * 
      * @type {boolean}
      * @memberof DistributedInferenceCommonSpec
      */
-    'loadAwareRouting'?: boolean | null;
+    'loadAwareRouting'?: boolean;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -3413,11 +3413,11 @@ export interface DistributedInferenceCommonSpecAllOf {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * 
      * @type {boolean}
      * @memberof DistributedInferenceCommonSpecAllOf
      */
-    'loadAwareRouting'?: boolean | null;
+    'loadAwareRouting'?: boolean;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -5237,11 +5237,11 @@ export interface DistributedInferenceSpecSpec {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * 
      * @type {boolean}
      * @memberof DistributedInferenceSpecSpec
      */
-    'loadAwareRouting'?: boolean | null;
+    'loadAwareRouting'?: boolean;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -5513,11 +5513,11 @@ export interface DistributedInferenceTemplateSpec {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * 
      * @type {boolean}
      * @memberof DistributedInferenceTemplateSpec
      */
-    'loadAwareRouting'?: boolean | null;
+    'loadAwareRouting'?: boolean;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -16493,11 +16493,11 @@ export interface SupersetDefaults {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * 
      * @type {boolean}
      * @memberof SupersetDefaults
      */
-    'loadAwareRouting'?: boolean | null;
+    'loadAwareRouting'?: boolean;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -17316,7 +17316,7 @@ export interface SupersetRules {
      * @type {BooleanRules}
      * @memberof SupersetRules
      */
-    'loadAwareRouting'?: BooleanRules | null;
+    'loadAwareRouting'?: BooleanRules;
     /**
      * 
      * @type {ArrayRules}
@@ -18288,11 +18288,11 @@ export interface SupersetSpec {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * 
      * @type {boolean}
      * @memberof SupersetSpec
      */
-    'loadAwareRouting'?: boolean | null;
+    'loadAwareRouting'?: boolean;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -21267,11 +21267,11 @@ export interface UnifiedPolicyInfoPerReplicaTypeDefaults {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * 
      * @type {boolean}
      * @memberof UnifiedPolicyInfoPerReplicaTypeDefaults
      */
-    'loadAwareRouting'?: boolean | null;
+    'loadAwareRouting'?: boolean;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -21585,7 +21585,7 @@ export interface UnifiedPolicyInfoPerReplicaTypeRules {
      * @type {BooleanRules}
      * @memberof UnifiedPolicyInfoPerReplicaTypeRules
      */
-    'loadAwareRouting'?: BooleanRules | null;
+    'loadAwareRouting'?: BooleanRules;
     /**
      * 
      * @type {ArrayRules}
@@ -22124,11 +22124,11 @@ export interface UnifiedSpecWorker {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * 
      * @type {boolean}
      * @memberof UnifiedSpecWorker
      */
-    'loadAwareRouting'?: boolean | null;
+    'loadAwareRouting'?: boolean;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}

@@ -33,7 +33,7 @@ require (
 	github.com/jinzhu/copier v0.4.0
 	github.com/onsi/ginkgo/v2 v2.34.0
 	github.com/onsi/gomega v1.44.0
-	golang.org/x/exp v0.0.0-20261121134650-e1094eeca1b5
+	golang.org/x/exp v0.0.0-20261124000051-d6646c509b6d
 	gorm.io/gorm v1.31.2
 	k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab
 )
@@ -179,8 +179,8 @@ require (
 	golang.org/x/text v0.44.0 // indirect
 	golang.org/x/tools v0.53.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20261118221215-c8830f628b3f // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20261118221215-c8830f628b3f // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20261123191846-1e707ab9fbc2 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20261123191846-1e707ab9fbc2 // indirect
 	google.golang.org/grpc v1.85.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect

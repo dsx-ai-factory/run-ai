@@ -22,7 +22,7 @@ var _ MappedNullable = &WorkloadV2ConfigurationInferenceRouting{}
 
 // WorkloadV2ConfigurationInferenceRouting Inference routing fields from the policy-validated workload spec. Set only by the workloads service on the internal create API; rejected in public workload submissions. Workloads Manager resolves them into externalAccess.inference on the serving endpoint.
 type WorkloadV2ConfigurationInferenceRouting struct {
-	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
 	LoadAwareRouting NullableBool `json:"loadAwareRouting,omitempty"`
 }
 

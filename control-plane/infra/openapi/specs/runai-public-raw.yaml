@@ -27448,6 +27448,7 @@ components:
       type: object
       properties:
         inferenceEndpointSchemaVersion:
+          x-internal: true
           type: string
           nullable: true
           description: >-
@@ -30484,6 +30485,7 @@ components:
       enum:
         - CPU_QUOTAS_TO_DEFAULT
         - LIMITS_TO_DEFAULT
+        - NEGATIVE_WEIGHTS_TO_DEFAULT
     OrgUnitsNodepoolResourcesResetRequest:
       type: object
       required:
@@ -39204,6 +39206,8 @@ components:
       description: >-
         Route requests to the serving port through the endpoint picker, which
         picks a Pod by load. It can be set only when the workload is created.
+        Requires cluster version 3.1.0 or later, with the inference endpoint
+        controller enabled and an administrator-enabled Gateway on the cluster.
       type: boolean
       default: false
       nullable: true
@@ -39382,7 +39386,9 @@ components:
             category:
               $ref: '#/components/schemas/Category'
             loadAwareRouting:
-              $ref: '#/components/schemas/LoadAwareRouting'
+              allOf:
+                - $ref: '#/components/schemas/LoadAwareRouting'
+              x-internal: true
             nodePools:
               $ref: '#/components/schemas/NodePools'
             preemptibility:
@@ -40881,7 +40887,9 @@ components:
             category:
               $ref: '#/components/schemas/Category'
             loadAwareRouting:
-              $ref: '#/components/schemas/LoadAwareRouting'
+              allOf:
+                - $ref: '#/components/schemas/LoadAwareRouting'
+              x-internal: true
             nodePools:
               $ref: '#/components/schemas/NodePools'
             preemptibility:
@@ -42162,7 +42170,9 @@ components:
             category:
               $ref: '#/components/schemas/StringRules'
             loadAwareRouting:
-              $ref: '#/components/schemas/BooleanRules'
+              allOf:
+                - $ref: '#/components/schemas/BooleanRules'
+              x-internal: true
             nodePools:
               $ref: '#/components/schemas/ArrayRules'
             preemptibility:
@@ -44386,7 +44396,9 @@ components:
             labels:
               $ref: '#/components/schemas/LabelsDefaults'
             loadAwareRouting:
-              $ref: '#/components/schemas/LoadAwareRouting'
+              allOf:
+                - $ref: '#/components/schemas/LoadAwareRouting'
+              x-internal: true
             modelStore:
               nullable: true
               properties:
@@ -44600,7 +44612,9 @@ components:
             labels:
               $ref: '#/components/schemas/InstancesRules'
             loadAwareRouting:
-              $ref: '#/components/schemas/BooleanRules'
+              allOf:
+                - $ref: '#/components/schemas/BooleanRules'
+              x-internal: true
             modelStore:
               nullable: true
               properties:
@@ -57947,7 +57961,9 @@ components:
             labels:
               $ref: '#/components/schemas/Labels'
             loadAwareRouting:
-              $ref: '#/components/schemas/LoadAwareRouting'
+              allOf:
+                - $ref: '#/components/schemas/LoadAwareRouting'
+              x-internal: true
             modelStore:
               nullable: true
               properties:
