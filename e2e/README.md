@@ -166,3 +166,5 @@ Use `E2E_PRESERVED_USERS` for any additional accounts that shared-environment cl
 Local Allure reports and the shared result aggregation do not require Slack credentials. The Slack template has an empty destination; private CI supplies its webhook at runtime. No webhook, CQA credential, or Mailtrap credential belongs in committed configuration. Mailtrap-backed notification tests require environment credentials.
 
 For investigation guidance, see [Debug information collection](docs/DEBUG_INFO_COLLECTION_GUIDE.md).
+
+<!-- Temporary CI selection validation. Do not merge. -->
