@@ -5,7 +5,6 @@
 
 import { Project } from '../../../../../../modules/api/apis/projectsDepartmentsApi';
 import {
-    assetsApiV2Utils,
     dataSourcesUtils,
     environmentUtils,
     flowRootState,
@@ -14,18 +13,13 @@ import {
     operations,
     projectResourcesUtils,
     tags,
+    trainingUtils,
     waitUtils,
     workloadsCrudUtils
 } from '../../../../../../modules/helpers';
 import { assetsApi } from '../../../../../../modules/api';
-import {
-    AccessKey,
-    AssetKind,
-    S3Asset,
-    S3CreationRequest,
-    Scope,
-    TrainingV2
-} from '../../../../../../modules/api/apis/assetsApi';
+import { AccessKey, S3Asset, S3CreationRequest, Scope } from '../../../../../../modules/api/apis/assetsApi';
+import { Training } from '../../../../../../modules/api/apis/workloadsApi/generated/api';
 import { expect } from 'chai';
 import { test } from '@playwright/test';
 import { kubeCli } from '../../../../../../modules/cli';
@@ -44,19 +38,17 @@ test.describe(
         let createdS3: S3Asset;
         let serviceIp: string;
 
-        async function _createTraining(): Promise<TrainingV2> {
+        async function _createTraining(): Promise<Training> {
             const workloadPayload = {
-                meta: {
-                    name: trainingName,
-                    projectId: project.id.toString(),
-                    clusterId: flowRootState.cluster.uuid
-                },
+                name: trainingName,
+                projectId: project.id.toString(),
+                clusterId: flowRootState.cluster.uuid,
                 assets: {
                     environment: await environmentUtils.getId('tensorboard'),
-                    datasources: [{ id: createdS3.meta.id, kind: AssetKind.S3 }]
+                    datasources: [createdS3.meta.id]
                 }
             };
-            return (await assetsApiV2Utils.createTraining(workloadPayload)).body;
+            return trainingUtils.createTraining(workloadPayload);
         }
 
         async function setupMinioAndBucket(): Promise<void> {
@@ -160,7 +152,7 @@ test.describe(
             trainingName = objectGenerator.generateShortNameByPrefix('training');
 
             workloadsCrudUtils.accessToken = flowRootState.users.system_administrator.accessToken;
-            assetsApiV2Utils.accessToken = flowRootState.users.system_administrator.accessToken;
+
         });
 
         scopes.forEach((scope) => {
@@ -176,9 +168,9 @@ test.describe(
                     createdS3 = await _createS3AssetMinio(secret, scope);
                     const training = await _createTraining();
 
-                    await waitUtils.waitForPodPrefix(training.meta.name, project.namespace);
+                    await waitUtils.waitForPodPrefix(training.name, project.namespace);
                     const pod = (
-                        await kubeCli.listPodsByNamespaceAndPrefix(project.namespace, training.meta.name)
+                        await kubeCli.listPodsByNamespaceAndPrefix(project.namespace, training.name)
                     )[0];
                     const container = pod.spec.containers[0];
 
@@ -191,7 +183,7 @@ test.describe(
                     const volume = pod.spec.volumes.find((v) => v.name === s3Name);
                     expect(volume).to.not.be.undefined;
 
-                    await workloadsCrudUtils.deleteTraining(training.meta.workloadId);
+                    await workloadsCrudUtils.deleteTraining(training.workloadId);
                     await dataSourcesUtils.deleteS3Asset(createdS3.meta.id);
                     await assetsApi.credentialsApi.deleteAccessKey(secret.meta.id);
                 } catch (error) {

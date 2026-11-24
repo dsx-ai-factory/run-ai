@@ -22,16 +22,12 @@ export * from './inferencesApi';
 import { InferencesApi } from './inferencesApi';
 export * from './modelApi';
 import { ModelApi } from './modelApi';
-export * from './modelInferenceApi';
-import { ModelInferenceApi } from './modelInferenceApi';
 export * from './nFSApi';
 import { NFSApi } from './nFSApi';
 export * from './pVCApi';
 import { PVCApi } from './pVCApi';
 export * from './registryApi';
 import { RegistryApi } from './registryApi';
-export * from './resourceClaimTemplatesApi';
-import { ResourceClaimTemplatesApi } from './resourceClaimTemplatesApi';
 export * from './s3Api';
 import { S3Api } from './s3Api';
 export * from './secretApi';
@@ -44,11 +40,19 @@ export * from './workloadApi';
 import { WorkloadApi } from './workloadApi';
 export * from './workspacesApi';
 import { WorkspacesApi } from './workspacesApi';
-import { HttpError } from './httpError';
-export { HttpError };
+import * as http from 'http';
+
+export class HttpError extends Error {
+    constructor (public response: http.IncomingMessage, public body: any, public statusCode?: number, requestOptions?: any) {
+        /////Start: Modified by @Run.AI /////
+        super(`HTTP request failed with the following statusCode ${statusCode},\n Request: ${JSON.stringify(requestOptions)},\n Response: ${JSON.stringify(body)}`);
+        /////End: Modified by @Run.AI /////
+        this.name = 'HttpError';
+    }
+}
 
 export type { RequestFile } from '../model/models';
 
-export const APIS = [AssetsApi, ComputeApi, ConfigMapApi, CredentialsApi, DatasourcesApi, EnvironmentApi, EventsApi, GitApi, HealthApi, HostPathApi, InferencesApi, ModelApi, ModelInferenceApi, NFSApi, PVCApi, RegistryApi, ResourceClaimTemplatesApi, S3Api, SecretApi, SynchronizationApi, TrainingsApi, WorkloadApi, WorkspacesApi];
+export const APIS = [AssetsApi, ComputeApi, ConfigMapApi, CredentialsApi, DatasourcesApi, EnvironmentApi, EventsApi, GitApi, HealthApi, HostPathApi, InferencesApi, ModelApi, NFSApi, PVCApi, RegistryApi, S3Api, SecretApi, SynchronizationApi, TrainingsApi, WorkloadApi, WorkspacesApi];
 
 

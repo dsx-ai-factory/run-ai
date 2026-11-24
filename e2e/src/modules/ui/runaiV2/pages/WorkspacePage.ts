@@ -7,7 +7,6 @@ import { Page } from 'playwright';
 import { flowRootState, logger, Utils, waitUtils } from '../../../helpers';
 import { Response } from 'playwright-core';
 import { WorkloadPage } from './WorkloadPage';
-import { AssetKind } from '../../../api/apis/assetsApi';
 import { HybridForm } from './HybridSubmissionForm';
 
 export class WorkspacePage extends WorkloadPage {
@@ -21,27 +20,7 @@ export class WorkspacePage extends WorkloadPage {
 
     createWorkspaceContinueBtn: string;
 
-    newEnvironmentBtn: string;
-
-    newComputeBtn: string;
-
     customUrlInput: string;
-
-    uidInput: string;
-
-    gidInput: string;
-
-    supplementalGrpInput: string;
-
-    envSectionMoreSettingsButton: string;
-
-    envSectionArgsInput: string;
-
-    envSectionCommandInput: string;
-
-    annotationNameInput: string;
-
-    annotationValueInput: string;
 
     generalSection: string;
 
@@ -51,24 +30,6 @@ export class WorkspacePage extends WorkloadPage {
 
     terminationGracePeriodSecondsInput: string;
 
-    volumeSection: string;
-
-    addVolumeBtn: string;
-
-    volumeStorageClassSelect: string;
-
-    volumeAccessModeSelect: string;
-
-    volumeSizeInput: string;
-
-    volumeSizeUnitSelect: string;
-
-    volumePathInput: string;
-
-    persistentRadioBtn: string;
-
-    ephemeralRadioBtn: string;
-
     overQuotaToggle: string;
 
     templateSection: string;
@@ -76,22 +37,6 @@ export class WorkspacePage extends WorkloadPage {
     runaiGeneralSearch: string;
 
     jupyterTensorboardCard: string;
-
-    complianceModalCloseButton: string;
-
-    cancelWorkspaceBtn: string;
-
-    leaveModalLeaveBtn: string;
-
-    complianceInfoModalSubtitle: string;
-
-    environmentVarNameInput: string;
-
-    environmentVarValueInput: string;
-
-    submissionAssetsOption: string;
-
-    submissionSection: string;
 
     ngcImageSelect: string;
 
@@ -108,44 +53,17 @@ export class WorkspacePage extends WorkloadPage {
         this.runaiGeneralSearch = '.runai-general-search';
 
         // workspace elements
-        this.submissionAssetsOption = '[aid="radio-option-Original"]';
         this.createWorkspaceNameInput = '[aid="workspace-name-input"]';
         this.templateSection = '.template-section';
         this.createWorkspaceBtn = '[aid="submit-btn"]';
-        this.cancelWorkspaceBtn = '[aid="cancel-btn"]';
-        this.leaveModalLeaveBtn = '[aid="leave-page-modal-cancel-btn"]';
         this.createWorkspaceContinueBtn = '[aid="create-workspace-continue-btn"]';
-        this.newEnvironmentBtn = '[aid="add-new-environment-btn"]';
-        this.newComputeBtn = '[aid="add-new-compute-resource-btn"]';
         this.customUrlInput = '[aid="custom-url-input"]';
-        this.uidInput = '[aid="uid-input"]';
-        this.gidInput = '[aid="gid-input"]';
-        this.supplementalGrpInput = '[aid="supplemental-groups-input"]';
-        this.envSectionMoreSettingsButton = '[aid="env-section-more-settings-btn"]';
-        this.envSectionArgsInput = '[aid="args-input"]';
-        this.envSectionCommandInput = '[aid="command-input"]';
-        this.environmentVarNameInput = '[aid="environment-variable-name"]';
-        this.environmentVarValueInput = '[aid="environment-variable-value"]';
-        this.annotationNameInput = '[aid="itemized-name-input"]';
-        this.annotationValueInput = '[aid="itemized-value-input"]';
         this.generalSection = '[aid="general-section"]';
         this.autoDeletimeTimeSecondsInput = '[aid="seconds-input"]';
         this.autoDeletionTimeDaysInput = '[aid="days-input"]';
         this.terminationGracePeriodSecondsInput = '.termination-grace-period-section [aid="seconds-input"]';
-        this.volumeSection = '[aid="volume-section"]';
-        this.addVolumeBtn = '[aid="add-volume-btn"]';
-        this.volumeStorageClassSelect = '[aid="storage-class-select"]';
-        this.volumeAccessModeSelect = '[aid="access-mode-select"]';
-        this.volumeSizeInput = '[aid="size-input"]';
-        this.volumeSizeUnitSelect = '[aid="unit-select"]';
-        this.volumePathInput = '[aid="path-input"]';
-        this.persistentRadioBtn = '[aid="radio-option-Persistent"]';
-        this.ephemeralRadioBtn = '[aid="radio-option-Ephemeral"]';
         this.jupyterTensorboardCard = '[aid="jupyter-tensorboard-card"]';
-        this.complianceModalCloseButton = '[aid=compute-policy-info-modal-close-button]';
-        this.complianceInfoModalSubtitle = '[aid="compliance-info-modal-subtitle"]';
         this.overQuotaToggle = '[aid="allow-over-quota-input"]';
-        this.submissionSection = '[aid="workload-submission-type-section"]';
 
         this.ngcImageSelect = '[aid="ngc-image-select"]';
         this.ngcTagSelect = '[aid="ngc-tag-select"]';
@@ -189,14 +107,6 @@ export class WorkspacePage extends WorkloadPage {
         await this.waitForResponseByCallback(isFinished);
     }
 
-    async clickOnNewEnvironmentBtn(): Promise<void> {
-        return this.v2frame.locator(this.newEnvironmentBtn).click();
-    }
-
-    async clickOnNewComputeBtn(): Promise<void> {
-        return this.v2frame.locator(this.newComputeBtn).click();
-    }
-
     async clickOnContinue(): Promise<void> {
         if (await this.hybridForm.isQuickSubmitDropdownVisible()) {
             return this.hybridForm.continueWithQuickSubmit();
@@ -217,38 +127,6 @@ export class WorkspacePage extends WorkloadPage {
         return this.fillInputBySelector(this.customUrlInput, txt);
     }
 
-    async fillUidInput(txt: number): Promise<void> {
-        return this.fillInputBySelector(this.uidInput, txt.toString());
-    }
-
-    async fillGidInput(txt: number): Promise<void> {
-        return this.fillInputBySelector(this.gidInput, txt.toString());
-    }
-
-    async fillSupplementalGrpsInput(txt: string): Promise<void> {
-        return this.fillInputBySelector(this.supplementalGrpInput, txt);
-    }
-
-    async clickEnvSectionMoreSettings(): Promise<void> {
-        return this.v2frame.locator(this.envSectionMoreSettingsButton).click();
-    }
-
-    async fillEnvSectionArgsInput(txt: string): Promise<void> {
-        return this.fillInputBySelector(this.envSectionArgsInput, txt);
-    }
-
-    async fillEnvSectionCommandInput(txt: string): Promise<void> {
-        return this.fillInputBySelector(this.envSectionCommandInput, txt);
-    }
-
-    async fillAnnotationNameInput(txt: string): Promise<void> {
-        return this.fillInputBySelector(this.annotationNameInput, txt);
-    }
-
-    async fillAnnotationValueInput(txt: string): Promise<void> {
-        return this.fillInputBySelector(this.annotationValueInput, txt);
-    }
-
     async openDataSourceSection(): Promise<void> {
         await this.v2frame.locator(this.dataSourceSection).scrollIntoViewIfNeeded();
         await this.v2frame.locator(this.dataSourceSection).click();
@@ -256,10 +134,6 @@ export class WorkspacePage extends WorkloadPage {
 
     async openGeneralSection(): Promise<void> {
         await this.v2frame.locator(this.generalSection).click();
-    }
-
-    async openVolumeSection(): Promise<void> {
-        await this.v2frame.locator(this.volumeSection).click();
     }
 
     async addAutoDeletionTime(seconds: number): Promise<void> {
@@ -274,11 +148,6 @@ export class WorkspacePage extends WorkloadPage {
 
     async selectComputeResource(name: string): Promise<void> {
         await this.fillWorkloadFormGeneralSearchInput(this.computeResourceSection, name);
-        await this.clickOnElementByAidName(Utils.spaceToDash(`${name}`).toLowerCase() + '-card');
-    }
-
-    async selectDataSourceName(name: string): Promise<void> {
-        await this.fillWorkloadFormGeneralSearchInput(this.dataSourceSection, name);
         await this.clickOnElementByAidName(Utils.spaceToDash(`${name}`).toLowerCase() + '-card');
     }
 
@@ -302,32 +171,9 @@ export class WorkspacePage extends WorkloadPage {
         await this.selectOptionByValue(this.ngcTagSelect, tag);
     }
 
-    async addWorkloadVolume(isEphemeral?: boolean): Promise<void> {
-        await this.v2frame.locator(this.addVolumeBtn).click();
-        await this.selectFirstOption(this.volumeStorageClassSelect);
-        await this.selectOptionByValue(this.volumeAccessModeSelect, 'Read-write by one node');
-        await this.selectOptionByValue(this.volumeSizeUnitSelect, 'MB');
-        const volumePersistentSelector = isEphemeral ? this.ephemeralRadioBtn : this.persistentRadioBtn;
-        await this.v2frame.locator(volumePersistentSelector).click();
-        await this.fillInputBySelector(this.volumePathInput, '/home');
-    }
-
     async fillGeneralSearchInput(sectionSelector: string, name: string): Promise<void> {
         await this.v2frame.locator(`${sectionSelector} ${this.runaiGeneralSearch}`).click();
         await this.v2frame.locator(`${sectionSelector} ${this.runaiGeneralSearch} input`).fill(name);
-    }
-
-    async clickOnCardCompliaceButton(assetName: string, assetKind: AssetKind): Promise<void> {
-        await this.v2frame.locator(`[aid="${assetKind}-${assetName}-compliance-btn"]`).first().click();
-    }
-
-    async closeComplianceModal(): Promise<void> {
-        await this.v2frame.locator(this.complianceModalCloseButton).click();
-    }
-
-    async closeWorkspaceForm(): Promise<void> {
-        await this.v2frame.locator(this.cancelWorkspaceBtn).click();
-        await this.v2frame.locator(this.leaveModalLeaveBtn).click();
     }
 
     async clickOnAllowOverQuotaToggle(): Promise<void> {
@@ -336,86 +182,6 @@ export class WorkspacePage extends WorkloadPage {
 
     async fillTerminationGracePeriodSeconds(seconds: number): Promise<void> {
         await this.fillInputBySelector(this.terminationGracePeriodSecondsInput, seconds.toString());
-    }
-
-    async selectAssetsSubmissionOption(): Promise<void> {
-        try {
-            await this.v2frame.waitForSelector(this.submissionSection, { timeout: 3000 });
-        } catch {
-            logger.info('submission section is not visible');
-            return;
-        }
-        return this.v2frame.locator(this.submissionAssetsOption).click();
-    }
-
-    async createWorkspaceWithDataSource(
-        workspaceName: string,
-        projectName: string,
-        environmentName: string,
-        computeName: string,
-        dataSourceName: string
-    ): Promise<void> {
-        await this.goToPage();
-        await this.openWorkspaceForm();
-        await this.workloadFormSelectProject(projectName);
-        await this.fillWorkspaceName(workspaceName);
-        await this.waitForWorkspaceNameCount(workspaceName);
-        await this.selectAssetsSubmissionOption();
-        await this.clickOnContinue();
-        await this.selectEnvironment(environmentName);
-        await this.selectComputeResource(computeName);
-        await this.openDataSourceSection();
-        await this.selectDataSourceName(dataSourceName);
-        await this.clickOnCreateWorkspaceBtn();
-    }
-
-    async submitWorkspaceWorkloadUI(
-        projectName: string,
-        workspaceName: string,
-        options?: {
-            environment?: string;
-            computeResource?: string;
-            cmd?: string;
-            templateName?: string;
-            backoffLimit?: number;
-        }
-    ): Promise<void> {
-        const {
-            environment = 'tensorboard-tensorflow',
-            computeResource = 'one-gpu',
-            cmd,
-            templateName,
-            backoffLimit
-        } = options || {};
-
-        await this.navigateToWorkloads();
-        await this.openWorkspaceForm();
-        await this.selectClusterFromDropDown(flowRootState.cluster.name);
-        await this.workloadFormSelectProject(projectName);
-
-        if (templateName) {
-            await this.workloadFormSelectTemplate(templateName);
-        } else {
-            await this.workloadFormSelectTemplate();
-        }
-        await this.fillWorkspaceName(workspaceName);
-        await this.waitForWorkspaceNameCount(workspaceName);
-        await this.selectAssetsSubmissionOption();
-        await this.clickOnContinue();
-
-        if (!templateName) {
-            await this.selectEnvironment(environment);
-            await this.selectComputeResource(computeResource);
-        }
-        if (cmd) {
-            await this.clickEnvSectionMoreSettings();
-            await this.fillEnvSectionCommandInput(cmd);
-        }
-        if (backoffLimit) {
-            await this.clickOnGeneralExpansionLabel();
-            await this.fillAttemptsInput(backoffLimit);
-        }
-        await this.clickOnCreateWorkspaceBtn();
     }
 
     async fillFlexWorkspaceFirstPage(
@@ -488,7 +254,6 @@ export class WorkspacePage extends WorkloadPage {
         }
         await this.fillWorkspaceName(workspaceName);
         await this.waitForWorkspaceNameCount(workspaceName);
-        await this.selectAssetsSubmissionOption();
         await this.clickOnContinue();
 
         const hybridForm = new HybridForm(this.page);

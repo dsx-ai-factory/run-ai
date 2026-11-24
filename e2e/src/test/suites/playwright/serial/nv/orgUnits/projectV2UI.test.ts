@@ -38,8 +38,8 @@ import {
 } from '../../../../../../modules/ui/runaiV2/pages/OrgUnitsForm';
 import { NodepoolCreateFields, NodepoolPhase } from '../../../../../../modules/api/apis/clusterApi';
 import { DepartmentPageV2 } from '../../../../../../modules/ui/runaiV2/pages/DepartmentPageV2';
-import { Phase, Scope } from '../../../../../../modules/api/apis/assetsApi';
-import { Preemptibility } from '../../../../../../modules/api/apis/workloadsApi/generated/api';
+import { Scope } from '../../../../../../modules/api/apis/assetsApi';
+import { Phase, Preemptibility } from '../../../../../../modules/api/apis/workloadsApi/generated/api';
 import { workloadsCrudService } from '../../../../../../modules/api';
 import { skipPlaywrightTest } from '../../../../../../modules/helpers/utils/SkippedTestUtils';
 

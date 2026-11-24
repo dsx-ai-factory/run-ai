@@ -12,7 +12,6 @@
 
 import { RequestFile } from './models';
 import { GetApplicationSubmission } from './getApplicationSubmission';
-import { GetEnableHybridSubmission } from './getEnableHybridSubmission';
 import { GetEnablePolicies } from './getEnablePolicies';
 import { GetGpuOverProvisioning } from './getGpuOverProvisioning';
 import { GetWorkloadSubmissionV2Enabled } from './getWorkloadSubmissionV2Enabled';
@@ -20,7 +19,6 @@ import { GetWorkloadSubmissionV2Enabled } from './getWorkloadSubmissionV2Enabled
 export class WorkloadsSettingsGetResponse {
     'enablePolicies'?: GetEnablePolicies;
     'workloadSubmissionV2Enabled'?: GetWorkloadSubmissionV2Enabled;
-    'enableHybridSubmission'?: GetEnableHybridSubmission;
     'gpuOverProvisioning'?: GetGpuOverProvisioning;
     'applicationSubmission'?: GetApplicationSubmission;
 
@@ -36,11 +34,6 @@ export class WorkloadsSettingsGetResponse {
             "name": "workloadSubmissionV2Enabled",
             "baseName": "workloadSubmissionV2Enabled",
             "type": "GetWorkloadSubmissionV2Enabled"
-        },
-        {
-            "name": "enableHybridSubmission",
-            "baseName": "enableHybridSubmission",
-            "type": "GetEnableHybridSubmission"
         },
         {
             "name": "gpuOverProvisioning",

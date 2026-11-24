@@ -14,7 +14,6 @@ import {
     projectResourcesUtils,
     operations,
     policyUtils,
-    apiUtils,
     environmentUtils
 } from '../../../../../../modules/helpers';
 import { expect } from '@playwright/test';
@@ -167,7 +166,6 @@ testParams.forEach((params) => {
             test.beforeAll('creating project and namespace', async () => {
                 browserEngine = new BrowserEngine();
                 try {
-                    await apiUtils.enableHybridSubmission();
                     project = await projectResourcesUtils.createProjectAndNamespace('h-p');
                     logger.info(`created project ${project.name}`);
                     policyName = `project-${project.id}`;

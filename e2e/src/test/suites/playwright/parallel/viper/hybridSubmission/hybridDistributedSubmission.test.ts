@@ -13,7 +13,6 @@ import {
     tags,
     projectResourcesUtils,
     operations,
-    unleashClient,
     environmentUtils
 } from '../../../../../../modules/helpers';
 import { Project } from '../../../../../../modules/api/apis/projectsDepartmentsApi';
@@ -24,7 +23,6 @@ import {
     EnvironmentAsset,
     WorkloadSupportedTypes
 } from '../../../../../../modules/api/apis/assetsApi';
-import { EFeatureToggleKeys } from '../../../../../../modules/helpers/utils/Unleash/featureToggle';
 import {
     DISTRIBUTED_TOOLS_LABELS,
     TrainingPage

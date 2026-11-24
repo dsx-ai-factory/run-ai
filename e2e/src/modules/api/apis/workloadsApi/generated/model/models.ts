@@ -3,10 +3,6 @@ import localVarRequest from 'request';
 export * from './aIApplication';
 export * from './aIApplicationAllocatedResources';
 export * from './aIApplicationAuth';
-export * from './aIApplicationChartInspectionRequest';
-export * from './aIApplicationChartInspectionResponse';
-export * from './aIApplicationChartInspectionWarning';
-export * from './aIApplicationChartQuestionsStatus';
 export * from './aIApplicationChartUploadResponse';
 export * from './aIApplicationCreationRequest';
 export * from './aIApplicationForSync';
@@ -193,7 +189,6 @@ export * from './emptyDirInstance';
 export * from './emptyDirRules';
 export * from './emptyDirsDefaults';
 export * from './emptyDirsRules';
-export * from './enableHybridSubmissionSetting';
 export * from './enablePoliciesSetting';
 export * from './endpoint';
 export * from './endpointSync';
@@ -222,7 +217,6 @@ export * from './extendedResourcesRules';
 export * from './fieldsToClear';
 export * from './getApplicationSubmission';
 export * from './getAvailablePrioritiesAndCategories200Response';
-export * from './getEnableHybridSubmission';
 export * from './getEnablePolicies';
 export * from './getEnableSettingsValue';
 export * from './getGpuOverProvisioning';
@@ -237,7 +231,6 @@ export * from './getWorkloadPriorities200Response';
 export * from './getWorkloadSubmissionV2Enabled';
 export * from './getWorkloads200Response';
 export * from './getWorkloadsSetting';
-export * from './getWorkloadsSlimResponse';
 export * from './gitAuthenticationMethod';
 export * from './gitCommon';
 export * from './gitInstance';
@@ -317,7 +310,6 @@ export * from './integerRulesOptional';
 export * from './internalEnrichOrgUnitRankingRequest';
 export * from './internalEnrichOrgUnitRankingResponse';
 export * from './internalPodsSyncRequest';
-export * from './internalResourceClaimTemplateWorkloadsRequest';
 export * from './internalSyncPods207Response';
 export * from './internalSyncWorkloads207Response';
 export * from './internalWorkloadsSyncRequest';
@@ -378,8 +370,6 @@ export * from './podNodeAffinityPreferred';
 export * from './podNodeAffinityRequired';
 export * from './podPreferredNodeSelectorTerm';
 export * from './podRequestResources';
-export * from './podResourceClaim';
-export * from './podResourceClaimBinding';
 export * from './podSortFilterFields';
 export * from './podSyncFields';
 export * from './podToleration';
@@ -436,10 +426,6 @@ export * from './requestInfo';
 export * from './requestResourceCores';
 export * from './requestResourceQuantity';
 export * from './requestedPods';
-export * from './resourceClaimTemplateRef';
-export * from './resourceClaimTemplateWorkload';
-export * from './resourceClaimTemplateWorkloadPod';
-export * from './resourceClaimTemplateWorkloadsResponse';
 export * from './resourceRef';
 export * from './resourceRefKind';
 export * from './responseInfo';
@@ -611,15 +597,10 @@ export * from './workloadNetworkStatusServicesInnerPortsInner';
 export * from './workloadNetworkStatusServicesInnerUrlsInner';
 export * from './workloadNodeAffinity';
 export * from './workloadPatchFields';
-export * from './workloadPodResourceClaims';
 export * from './workloadPodsSyncRequest';
 export * from './workloadPriority';
 export * from './workloadPriorityAllOf';
 export * from './workloadRequestResources';
-export * from './workloadResourceClaim';
-export * from './workloadResourceClaimAllOf';
-export * from './workloadResourceClaimsResponse';
-export * from './workloadSlim';
 export * from './workloadSortFilterFields';
 export * from './workloadSubmissionV2EnabledSetting';
 export * from './workloadSyncFields';
@@ -687,10 +668,6 @@ export type RequestFile = string | Buffer | fs.ReadStream | RequestDetailedFile;
 import { AIApplication } from './aIApplication';
 import { AIApplicationAllocatedResources } from './aIApplicationAllocatedResources';
 import { AIApplicationAuth } from './aIApplicationAuth';
-import { AIApplicationChartInspectionRequest } from './aIApplicationChartInspectionRequest';
-import { AIApplicationChartInspectionResponse } from './aIApplicationChartInspectionResponse';
-import { AIApplicationChartInspectionWarning } from './aIApplicationChartInspectionWarning';
-import { AIApplicationChartQuestionsStatus } from './aIApplicationChartQuestionsStatus';
 import { AIApplicationChartUploadResponse } from './aIApplicationChartUploadResponse';
 import { AIApplicationCreationRequest } from './aIApplicationCreationRequest';
 import { AIApplicationForSync } from './aIApplicationForSync';
@@ -877,7 +854,6 @@ import { EmptyDirInstance } from './emptyDirInstance';
 import { EmptyDirRules } from './emptyDirRules';
 import { EmptyDirsDefaults } from './emptyDirsDefaults';
 import { EmptyDirsRules } from './emptyDirsRules';
-import { EnableHybridSubmissionSetting } from './enableHybridSubmissionSetting';
 import { EnablePoliciesSetting } from './enablePoliciesSetting';
 import { Endpoint } from './endpoint';
 import { EndpointSync } from './endpointSync';
@@ -906,7 +882,6 @@ import { ExtendedResourcesRules } from './extendedResourcesRules';
 import { FieldsToClear } from './fieldsToClear';
 import { GetApplicationSubmission } from './getApplicationSubmission';
 import { GetAvailablePrioritiesAndCategories200Response } from './getAvailablePrioritiesAndCategories200Response';
-import { GetEnableHybridSubmission } from './getEnableHybridSubmission';
 import { GetEnablePolicies } from './getEnablePolicies';
 import { GetEnableSettingsValue } from './getEnableSettingsValue';
 import { GetGpuOverProvisioning } from './getGpuOverProvisioning';
@@ -921,7 +896,6 @@ import { GetWorkloadPriorities200Response } from './getWorkloadPriorities200Resp
 import { GetWorkloadSubmissionV2Enabled } from './getWorkloadSubmissionV2Enabled';
 import { GetWorkloads200Response } from './getWorkloads200Response';
 import { GetWorkloadsSetting } from './getWorkloadsSetting';
-import { GetWorkloadsSlimResponse } from './getWorkloadsSlimResponse';
 import { GitAuthenticationMethod } from './gitAuthenticationMethod';
 import { GitCommon } from './gitCommon';
 import { GitInstance } from './gitInstance';
@@ -1001,7 +975,6 @@ import { IntegerRulesOptional } from './integerRulesOptional';
 import { InternalEnrichOrgUnitRankingRequest } from './internalEnrichOrgUnitRankingRequest';
 import { InternalEnrichOrgUnitRankingResponse } from './internalEnrichOrgUnitRankingResponse';
 import { InternalPodsSyncRequest } from './internalPodsSyncRequest';
-import { InternalResourceClaimTemplateWorkloadsRequest } from './internalResourceClaimTemplateWorkloadsRequest';
 import { InternalSyncPods207Response } from './internalSyncPods207Response';
 import { InternalSyncWorkloads207Response } from './internalSyncWorkloads207Response';
 import { InternalWorkloadsSyncRequest } from './internalWorkloadsSyncRequest';
@@ -1062,8 +1035,6 @@ import { PodNodeAffinityPreferred } from './podNodeAffinityPreferred';
 import { PodNodeAffinityRequired } from './podNodeAffinityRequired';
 import { PodPreferredNodeSelectorTerm } from './podPreferredNodeSelectorTerm';
 import { PodRequestResources } from './podRequestResources';
-import { PodResourceClaim } from './podResourceClaim';
-import { PodResourceClaimBinding } from './podResourceClaimBinding';
 import { PodSortFilterFields } from './podSortFilterFields';
 import { PodSyncFields } from './podSyncFields';
 import { PodToleration } from './podToleration';
@@ -1120,10 +1091,6 @@ import { RequestInfo } from './requestInfo';
 import { RequestResourceCores } from './requestResourceCores';
 import { RequestResourceQuantity } from './requestResourceQuantity';
 import { RequestedPods } from './requestedPods';
-import { ResourceClaimTemplateRef } from './resourceClaimTemplateRef';
-import { ResourceClaimTemplateWorkload } from './resourceClaimTemplateWorkload';
-import { ResourceClaimTemplateWorkloadPod } from './resourceClaimTemplateWorkloadPod';
-import { ResourceClaimTemplateWorkloadsResponse } from './resourceClaimTemplateWorkloadsResponse';
 import { ResourceRef } from './resourceRef';
 import { ResourceRefKind } from './resourceRefKind';
 import { ResponseInfo } from './responseInfo';
@@ -1295,15 +1262,10 @@ import { WorkloadNetworkStatusServicesInnerPortsInner } from './workloadNetworkS
 import { WorkloadNetworkStatusServicesInnerUrlsInner } from './workloadNetworkStatusServicesInnerUrlsInner';
 import { WorkloadNodeAffinity } from './workloadNodeAffinity';
 import { WorkloadPatchFields } from './workloadPatchFields';
-import { WorkloadPodResourceClaims } from './workloadPodResourceClaims';
 import { WorkloadPodsSyncRequest } from './workloadPodsSyncRequest';
 import { WorkloadPriority } from './workloadPriority';
 import { WorkloadPriorityAllOf } from './workloadPriorityAllOf';
 import { WorkloadRequestResources } from './workloadRequestResources';
-import { WorkloadResourceClaim } from './workloadResourceClaim';
-import { WorkloadResourceClaimAllOf } from './workloadResourceClaimAllOf';
-import { WorkloadResourceClaimsResponse } from './workloadResourceClaimsResponse';
-import { WorkloadSlim } from './workloadSlim';
 import { WorkloadSortFilterFields } from './workloadSortFilterFields';
 import { WorkloadSubmissionV2EnabledSetting } from './workloadSubmissionV2EnabledSetting';
 import { WorkloadSyncFields } from './workloadSyncFields';
@@ -1368,7 +1330,6 @@ let primitives = [
                  ];
 
 let enumsMap: {[index: string]: any} = {
-        "AIApplicationChartQuestionsStatus": AIApplicationChartQuestionsStatus,
         "AIApplicationSyncAction": AIApplicationSyncAction,
         "AIApplicationVerbosity": AIApplicationVerbosity,
         "AIApplicationsSortFilterFields": AIApplicationsSortFilterFields,
@@ -1433,9 +1394,6 @@ let typeMap: {[index: string]: any} = {
     "AIApplication": AIApplication,
     "AIApplicationAllocatedResources": AIApplicationAllocatedResources,
     "AIApplicationAuth": AIApplicationAuth,
-    "AIApplicationChartInspectionRequest": AIApplicationChartInspectionRequest,
-    "AIApplicationChartInspectionResponse": AIApplicationChartInspectionResponse,
-    "AIApplicationChartInspectionWarning": AIApplicationChartInspectionWarning,
     "AIApplicationChartUploadResponse": AIApplicationChartUploadResponse,
     "AIApplicationCreationRequest": AIApplicationCreationRequest,
     "AIApplicationForSync": AIApplicationForSync,
@@ -1608,7 +1566,6 @@ let typeMap: {[index: string]: any} = {
     "EmptyDirRules": EmptyDirRules,
     "EmptyDirsDefaults": EmptyDirsDefaults,
     "EmptyDirsRules": EmptyDirsRules,
-    "EnableHybridSubmissionSetting": EnableHybridSubmissionSetting,
     "EnablePoliciesSetting": EnablePoliciesSetting,
     "Endpoint": Endpoint,
     "EndpointSync": EndpointSync,
@@ -1637,7 +1594,6 @@ let typeMap: {[index: string]: any} = {
     "FieldsToClear": FieldsToClear,
     "GetApplicationSubmission": GetApplicationSubmission,
     "GetAvailablePrioritiesAndCategories200Response": GetAvailablePrioritiesAndCategories200Response,
-    "GetEnableHybridSubmission": GetEnableHybridSubmission,
     "GetEnablePolicies": GetEnablePolicies,
     "GetEnableSettingsValue": GetEnableSettingsValue,
     "GetGpuOverProvisioning": GetGpuOverProvisioning,
@@ -1652,7 +1608,6 @@ let typeMap: {[index: string]: any} = {
     "GetWorkloadSubmissionV2Enabled": GetWorkloadSubmissionV2Enabled,
     "GetWorkloads200Response": GetWorkloads200Response,
     "GetWorkloadsSetting": GetWorkloadsSetting,
-    "GetWorkloadsSlimResponse": GetWorkloadsSlimResponse,
     "GitCommon": GitCommon,
     "GitInstance": GitInstance,
     "GitInstanceAllOf": GitInstanceAllOf,
@@ -1724,7 +1679,6 @@ let typeMap: {[index: string]: any} = {
     "InternalEnrichOrgUnitRankingRequest": InternalEnrichOrgUnitRankingRequest,
     "InternalEnrichOrgUnitRankingResponse": InternalEnrichOrgUnitRankingResponse,
     "InternalPodsSyncRequest": InternalPodsSyncRequest,
-    "InternalResourceClaimTemplateWorkloadsRequest": InternalResourceClaimTemplateWorkloadsRequest,
     "InternalSyncPods207Response": InternalSyncPods207Response,
     "InternalSyncWorkloads207Response": InternalSyncWorkloads207Response,
     "InternalWorkloadsSyncRequest": InternalWorkloadsSyncRequest,
@@ -1778,8 +1732,6 @@ let typeMap: {[index: string]: any} = {
     "PodNodeAffinityRequired": PodNodeAffinityRequired,
     "PodPreferredNodeSelectorTerm": PodPreferredNodeSelectorTerm,
     "PodRequestResources": PodRequestResources,
-    "PodResourceClaim": PodResourceClaim,
-    "PodResourceClaimBinding": PodResourceClaimBinding,
     "PodSyncFields": PodSyncFields,
     "PodToleration": PodToleration,
     "PodVerbosityFields": PodVerbosityFields,
@@ -1828,10 +1780,6 @@ let typeMap: {[index: string]: any} = {
     "RequestResourceCores": RequestResourceCores,
     "RequestResourceQuantity": RequestResourceQuantity,
     "RequestedPods": RequestedPods,
-    "ResourceClaimTemplateRef": ResourceClaimTemplateRef,
-    "ResourceClaimTemplateWorkload": ResourceClaimTemplateWorkload,
-    "ResourceClaimTemplateWorkloadPod": ResourceClaimTemplateWorkloadPod,
-    "ResourceClaimTemplateWorkloadsResponse": ResourceClaimTemplateWorkloadsResponse,
     "ResourceRef": ResourceRef,
     "ResponseInfo": ResponseInfo,
     "Revision": Revision,
@@ -1989,15 +1937,10 @@ let typeMap: {[index: string]: any} = {
     "WorkloadNetworkStatusServicesInnerUrlsInner": WorkloadNetworkStatusServicesInnerUrlsInner,
     "WorkloadNodeAffinity": WorkloadNodeAffinity,
     "WorkloadPatchFields": WorkloadPatchFields,
-    "WorkloadPodResourceClaims": WorkloadPodResourceClaims,
     "WorkloadPodsSyncRequest": WorkloadPodsSyncRequest,
     "WorkloadPriority": WorkloadPriority,
     "WorkloadPriorityAllOf": WorkloadPriorityAllOf,
     "WorkloadRequestResources": WorkloadRequestResources,
-    "WorkloadResourceClaim": WorkloadResourceClaim,
-    "WorkloadResourceClaimAllOf": WorkloadResourceClaimAllOf,
-    "WorkloadResourceClaimsResponse": WorkloadResourceClaimsResponse,
-    "WorkloadSlim": WorkloadSlim,
     "WorkloadSubmissionV2EnabledSetting": WorkloadSubmissionV2EnabledSetting,
     "WorkloadSyncFields": WorkloadSyncFields,
     "WorkloadSyncFieldsTopology": WorkloadSyncFieldsTopology,

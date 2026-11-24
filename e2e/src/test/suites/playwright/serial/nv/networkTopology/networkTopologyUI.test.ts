@@ -40,7 +40,7 @@ import { NodePool } from '../../../../../../modules/api/apis/backendClusterApi';
 import { NodePoolPage } from '../../../../../../modules/ui/runaiV2/pages/NodePoolPage';
 import { DistributedFramework } from '../../../../../../modules/api/apis/policyApi';
 import { StatusCodes } from 'http-status-codes';
-import { Phase } from '../../../../../../modules/api/apis/assetsApi';
+import { Phase } from '../../../../../../modules/api/apis/workloadsApi/generated/model/phase';
 import { ProjectUpdateRequest } from '../../../../../../modules/api/apis/orgUnitApi';
 import {
     DISTRIBUTED_TOOLS_LABELS,

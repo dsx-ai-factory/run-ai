@@ -26,10 +26,6 @@ git_push.sh
 model/aIApplication.ts
 model/aIApplicationAllocatedResources.ts
 model/aIApplicationAuth.ts
-model/aIApplicationChartInspectionRequest.ts
-model/aIApplicationChartInspectionResponse.ts
-model/aIApplicationChartInspectionWarning.ts
-model/aIApplicationChartQuestionsStatus.ts
 model/aIApplicationChartUploadResponse.ts
 model/aIApplicationCreationRequest.ts
 model/aIApplicationForSync.ts
@@ -216,7 +212,6 @@ model/emptyDirInstance.ts
 model/emptyDirRules.ts
 model/emptyDirsDefaults.ts
 model/emptyDirsRules.ts
-model/enableHybridSubmissionSetting.ts
 model/enablePoliciesSetting.ts
 model/endpoint.ts
 model/endpointSync.ts
@@ -245,7 +240,6 @@ model/extendedResourcesRules.ts
 model/fieldsToClear.ts
 model/getApplicationSubmission.ts
 model/getAvailablePrioritiesAndCategories200Response.ts
-model/getEnableHybridSubmission.ts
 model/getEnablePolicies.ts
 model/getEnableSettingsValue.ts
 model/getGpuOverProvisioning.ts
@@ -260,7 +254,6 @@ model/getWorkloadPriorities200Response.ts
 model/getWorkloadSubmissionV2Enabled.ts
 model/getWorkloads200Response.ts
 model/getWorkloadsSetting.ts
-model/getWorkloadsSlimResponse.ts
 model/gitAuthenticationMethod.ts
 model/gitCommon.ts
 model/gitInstance.ts
@@ -340,7 +333,6 @@ model/integerRulesOptional.ts
 model/internalEnrichOrgUnitRankingRequest.ts
 model/internalEnrichOrgUnitRankingResponse.ts
 model/internalPodsSyncRequest.ts
-model/internalResourceClaimTemplateWorkloadsRequest.ts
 model/internalSyncPods207Response.ts
 model/internalSyncWorkloads207Response.ts
 model/internalWorkloadsSyncRequest.ts
@@ -402,8 +394,6 @@ model/podNodeAffinityPreferred.ts
 model/podNodeAffinityRequired.ts
 model/podPreferredNodeSelectorTerm.ts
 model/podRequestResources.ts
-model/podResourceClaim.ts
-model/podResourceClaimBinding.ts
 model/podSortFilterFields.ts
 model/podSyncFields.ts
 model/podToleration.ts
@@ -460,10 +450,6 @@ model/requestInfo.ts
 model/requestResourceCores.ts
 model/requestResourceQuantity.ts
 model/requestedPods.ts
-model/resourceClaimTemplateRef.ts
-model/resourceClaimTemplateWorkload.ts
-model/resourceClaimTemplateWorkloadPod.ts
-model/resourceClaimTemplateWorkloadsResponse.ts
 model/resourceRef.ts
 model/resourceRefKind.ts
 model/responseInfo.ts
@@ -635,15 +621,10 @@ model/workloadNetworkStatusServicesInnerPortsInner.ts
 model/workloadNetworkStatusServicesInnerUrlsInner.ts
 model/workloadNodeAffinity.ts
 model/workloadPatchFields.ts
-model/workloadPodResourceClaims.ts
 model/workloadPodsSyncRequest.ts
 model/workloadPriority.ts
 model/workloadPriorityAllOf.ts
 model/workloadRequestResources.ts
-model/workloadResourceClaim.ts
-model/workloadResourceClaimAllOf.ts
-model/workloadResourceClaimsResponse.ts
-model/workloadSlim.ts
 model/workloadSortFilterFields.ts
 model/workloadSubmissionV2EnabledSetting.ts
 model/workloadSyncFields.ts
