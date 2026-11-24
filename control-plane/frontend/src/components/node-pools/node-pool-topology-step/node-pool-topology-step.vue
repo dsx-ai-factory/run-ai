@@ -88,7 +88,7 @@
                 </template>
               </q-input>
             </runai-section>
-            <p class="guide-link text-b-subtitle2">
+            <p class="q-ma-none text-b-subtitle2 italic">
               For more information, see the
               <a :href="DOCS.TOPOLOGIES.GB200" target="_blank" rel="noopener noreferrer"
                 >Using GB200 NVL72 and Multi-Node NVLink Domains guide</a
@@ -108,9 +108,9 @@
                   >
                 </runai-tooltip>
               </div>
-              <p class="guide-link text-b-subtitle2">
+              <p class="q-ma-none text-b-subtitle2">
                 For more information on the prerequisites and configuration requirements, see the
-                <a :href="DOCS.NODE_POOLS.NUMA_AWARE_SCHEDULING" target="_blank" rel="noopener noreferrer"
+                <a class="italic" :href="DOCS.NODE_POOLS.NUMA_AWARE_SCHEDULING" target="_blank" rel="noopener noreferrer"
                   >Configuring NUMA-Aware Scheduling guide</a
                 >
               </p>
@@ -343,13 +343,6 @@ async function save() {
 }
 #node-pool-mnnvl-label-error {
   overflow-wrap: anywhere;
-}
-.guide-link {
-  margin: 0;
-  font-style: italic;
-}
-.guide-link a {
-  text-decoration: underline;
 }
 .numa-tooltip-content {
   white-space: pre-line;
