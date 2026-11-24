@@ -4811,6 +4811,151 @@
         }
       }
     },
+    "/api/v1/workflows": {
+      "post": {
+        "summary": "Create a workflow.",
+        "operationId": "create_workflow",
+        "description": "Create a workflow using container related fields.",
+        "x-service": "workloads",
+        "x-internal": true,
+        "x-test-coverage": [
+          "control-plane/workloads/pkg/services_crud/workflow_service_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "workflows",
+          "action": "create"
+        },
+        "tags": [
+          "Workflows"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Request completed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Workflow"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400SubmissionErrorV2"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/workflows/{workloadId}": {
+      "delete": {
+        "summary": "Delete a workflow.",
+        "operationId": "delete_workflow",
+        "description": "Delete a workflow using a workflow id.",
+        "x-service": "workloads",
+        "x-internal": true,
+        "x-test-coverage": [
+          "control-plane/workloads/pkg/services_crud/workflow_service_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "workflows",
+          "action": "delete"
+        },
+        "tags": [
+          "Workflows"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkloadId"
+          }
+        ],
+        "responses": {
+          "202": {
+            "$ref": "#/components/responses/202Accepted"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get workflow data.",
+        "operationId": "get_workflow",
+        "description": "Retrieve workflow details using a workflow id.",
+        "x-service": "workloads",
+        "x-internal": true,
+        "x-test-coverage": [
+          "control-plane/workloads/pkg/services_crud/workflow_service_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "workflows",
+          "action": "read"
+        },
+        "tags": [
+          "Workflows"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkloadId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Workflow"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
     "/api/v1/workload-templates": {
       "get": {
         "summary": "List templates. [Experimental]",
@@ -18890,6 +19035,147 @@
             }
           }
         }
+      },
+      "WorkflowFields": {
+        "type": "object",
+        "properties": {
+          "todo": {
+            "type": "boolean"
+          }
+        }
+      },
+      "WorkflowGroupFields": {
+        "type": "object",
+        "properties": {
+          "todo": {
+            "type": "boolean"
+          }
+        }
+      },
+      "WorkflowTask": {
+        "type": "object",
+        "properties": {
+          "todo": {
+            "type": "boolean"
+          }
+        }
+      },
+      "WorkflowGroups": {
+        "description": "Definitions of the workflow groups.",
+        "type": "array",
+        "items": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/WorkflowGroupFields"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "tasks": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WorkflowTask"
+                  },
+                  "maxItems": 1000
+                }
+              }
+            }
+          ]
+        }
+      },
+      "WorkflowComputeProfile": {
+        "type": "object",
+        "properties": {
+          "todo": {
+            "type": "boolean"
+          }
+        }
+      },
+      "WorkflowComputeProfiles": {
+        "description": "Defines the workflow compute profiles.",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/WorkflowComputeProfile"
+        },
+        "maxItems": 100
+      },
+      "WorkflowPlacementProfile": {
+        "type": "object",
+        "properties": {
+          "todo": {
+            "type": "boolean"
+          }
+        }
+      },
+      "WorkflowPlacementProfiles": {
+        "description": "Defines the workflow placement profiles.",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/WorkflowPlacementProfile"
+        },
+        "maxItems": 100
+      },
+      "WorkflowStorageProfile": {
+        "type": "object",
+        "properties": {
+          "todo": {
+            "type": "boolean"
+          }
+        }
+      },
+      "WorkflowStorageProfiles": {
+        "description": "Defines the workflow storage profiles.",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/WorkflowStorageProfile"
+        },
+        "maxItems": 100
+      },
+      "WorkflowSpec": {
+        "description": "The specifications of the workflow to be created.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WorkflowFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "groups": {
+                "$ref": "#/components/schemas/WorkflowGroups"
+              },
+              "compute": {
+                "$ref": "#/components/schemas/WorkflowComputeProfiles"
+              },
+              "placement": {
+                "$ref": "#/components/schemas/WorkflowPlacementProfiles"
+              },
+              "storage": {
+                "$ref": "#/components/schemas/WorkflowStorageProfiles"
+              }
+            }
+          }
+        ]
+      },
+      "WorkflowCreationRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WorkloadCreationMeta"
+          },
+          {
+            "$ref": "#/components/schemas/WorkflowSpec"
+          }
+        ]
+      },
+      "Workflow": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WorkloadMeta"
+          },
+          {
+            "$ref": "#/components/schemas/WorkflowSpec"
+          }
+        ]
       },
       "TemplateId": {
         "description": "A unique ID of the template.",

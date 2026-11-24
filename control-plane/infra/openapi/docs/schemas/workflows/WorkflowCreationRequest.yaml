@@ -1,0 +1,3 @@
+allOf:
+  - $ref: "../workloads/WorkloadCreationMeta.yaml"
+  - $ref: "./WorkflowSpec.yaml"

@@ -149,6 +149,9 @@ Class | Method | HTTP request | Description
 *TrainingsAPI* | [**ResumeTraining**](docs/TrainingsAPI.md#resumetraining) | **Post** /api/v1/workloads/trainings/{workloadId}/resume | Resume a training.
 *TrainingsAPI* | [**SuspendTraining**](docs/TrainingsAPI.md#suspendtraining) | **Post** /api/v1/workloads/trainings/{workloadId}/suspend | Suspend a training.
 *UnifiedAPI* | [**GetUnifiedWorkload**](docs/UnifiedAPI.md#getunifiedworkload) | **Post** /api/v1/workloads/unified | Request unified workload information (internal for UI purposes)
+*WorkflowsAPI* | [**CreateWorkflow**](docs/WorkflowsAPI.md#createworkflow) | **Post** /api/v1/workflows | Create a workflow.
+*WorkflowsAPI* | [**DeleteWorkflow**](docs/WorkflowsAPI.md#deleteworkflow) | **Delete** /api/v1/workflows/{workloadId} | Delete a workflow.
+*WorkflowsAPI* | [**GetWorkflow**](docs/WorkflowsAPI.md#getworkflow) | **Get** /api/v1/workflows/{workloadId} | Get workflow data.
 *WorkloadActionsAPI* | [**GetWorkloadActionsHistory**](docs/WorkloadActionsAPI.md#getworkloadactionshistory) | **Get** /api/v1/workloads/{workloadId}/actions | Get workload action history.
 *WorkloadActionsAPI* | [**InternalCreateWorkloadActions**](docs/WorkloadActionsAPI.md#internalcreateworkloadactions) | **Post** /internal/workloads/actions | Store workload actions.
 *WorkloadPropertiesAPI* | [**CreateWorkloadPriorities**](docs/WorkloadPropertiesAPI.md#createworkloadpriorities) | **Post** /api/v1/workload-priorities | Create workload priorities.
@@ -771,6 +774,16 @@ Class | Method | HTTP request | Description
  - [UpdateSpec](docs/UpdateSpec.md)
  - [UpdateSpecSpec](docs/UpdateSpecSpec.md)
  - [UpdateWorkloadsSettingByKeyRequest](docs/UpdateWorkloadsSettingByKeyRequest.md)
+ - [Workflow](docs/Workflow.md)
+ - [WorkflowComputeProfile](docs/WorkflowComputeProfile.md)
+ - [WorkflowCreationRequest](docs/WorkflowCreationRequest.md)
+ - [WorkflowFields](docs/WorkflowFields.md)
+ - [WorkflowGroupFields](docs/WorkflowGroupFields.md)
+ - [WorkflowGroupsInner](docs/WorkflowGroupsInner.md)
+ - [WorkflowPlacementProfile](docs/WorkflowPlacementProfile.md)
+ - [WorkflowSpec](docs/WorkflowSpec.md)
+ - [WorkflowStorageProfile](docs/WorkflowStorageProfile.md)
+ - [WorkflowTask](docs/WorkflowTask.md)
  - [Workload](docs/Workload.md)
  - [WorkloadActionRecord](docs/WorkloadActionRecord.md)
  - [WorkloadActionRecordInput](docs/WorkloadActionRecordInput.md)

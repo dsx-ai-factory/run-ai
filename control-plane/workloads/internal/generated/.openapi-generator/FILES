@@ -30,6 +30,8 @@ pkg/api/api_trainings.go
 pkg/api/api_trainings_service.go
 pkg/api/api_unified.go
 pkg/api/api_unified_service.go
+pkg/api/api_workflows.go
+pkg/api/api_workflows_service.go
 pkg/api/api_workload_actions.go
 pkg/api/api_workload_actions_service.go
 pkg/api/api_workload_properties.go
@@ -577,6 +579,16 @@ pkg/api/model_update_request.go
 pkg/api/model_update_spec.go
 pkg/api/model_update_spec_spec.go
 pkg/api/model_update_workloads_setting_by_key_request.go
+pkg/api/model_workflow.go
+pkg/api/model_workflow_compute_profile.go
+pkg/api/model_workflow_creation_request.go
+pkg/api/model_workflow_fields.go
+pkg/api/model_workflow_group_fields.go
+pkg/api/model_workflow_groups_inner.go
+pkg/api/model_workflow_placement_profile.go
+pkg/api/model_workflow_spec.go
+pkg/api/model_workflow_storage_profile.go
+pkg/api/model_workflow_task.go
 pkg/api/model_workload.go
 pkg/api/model_workload_action_record.go
 pkg/api/model_workload_action_record_input.go

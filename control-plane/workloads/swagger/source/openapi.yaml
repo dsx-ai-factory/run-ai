@@ -194,6 +194,11 @@ paths:
   /api/v1/workloads/inferences/revisions/{revisionId}/history:
     $ref: './resources/RevisionHistory.yaml'
 
+  /api/v1/workflows:
+    $ref: "./resources/Workflows.yaml"
+  /api/v1/workflows/{workloadId}:
+    $ref: "./resources/WorkflowsById.yaml"
+
   /api/v1/workload-templates:
     $ref: './resources/Templates.yaml'
   /api/v1/workload-templates/name-availability:

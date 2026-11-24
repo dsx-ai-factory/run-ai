@@ -31474,6 +31474,90 @@ components:
         additionalFields:
           type: object
           additionalProperties: true
+    WorkflowFields:
+      type: object
+      properties:
+        todo:
+          type: boolean
+    WorkflowGroupFields:
+      type: object
+      properties:
+        todo:
+          type: boolean
+    WorkflowTask:
+      type: object
+      properties:
+        todo:
+          type: boolean
+    WorkflowGroups:
+      description: Definitions of the workflow groups.
+      type: array
+      items:
+        allOf:
+          - $ref: '#/components/schemas/WorkflowGroupFields'
+          - type: object
+            properties:
+              tasks:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkflowTask'
+                maxItems: 1000
+    WorkflowComputeProfile:
+      type: object
+      properties:
+        todo:
+          type: boolean
+    WorkflowComputeProfiles:
+      description: Defines the workflow compute profiles.
+      type: array
+      items:
+        $ref: '#/components/schemas/WorkflowComputeProfile'
+      maxItems: 100
+    WorkflowPlacementProfile:
+      type: object
+      properties:
+        todo:
+          type: boolean
+    WorkflowPlacementProfiles:
+      description: Defines the workflow placement profiles.
+      type: array
+      items:
+        $ref: '#/components/schemas/WorkflowPlacementProfile'
+      maxItems: 100
+    WorkflowStorageProfile:
+      type: object
+      properties:
+        todo:
+          type: boolean
+    WorkflowStorageProfiles:
+      description: Defines the workflow storage profiles.
+      type: array
+      items:
+        $ref: '#/components/schemas/WorkflowStorageProfile'
+      maxItems: 100
+    WorkflowSpec:
+      description: The specifications of the workflow to be created.
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/WorkflowFields'
+        - type: object
+          properties:
+            groups:
+              $ref: '#/components/schemas/WorkflowGroups'
+            compute:
+              $ref: '#/components/schemas/WorkflowComputeProfiles'
+            placement:
+              $ref: '#/components/schemas/WorkflowPlacementProfiles'
+            storage:
+              $ref: '#/components/schemas/WorkflowStorageProfiles'
+    WorkflowCreationRequest:
+      allOf:
+        - $ref: '#/components/schemas/WorkloadCreationMeta'
+        - $ref: '#/components/schemas/WorkflowSpec'
+    Workflow:
+      allOf:
+        - $ref: '#/components/schemas/WorkloadMeta'
+        - $ref: '#/components/schemas/WorkflowSpec'
     TemplateId:
       description: A unique ID of the template.
       type: string

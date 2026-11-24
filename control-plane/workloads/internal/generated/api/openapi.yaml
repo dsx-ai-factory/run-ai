@@ -7390,6 +7390,220 @@ paths:
         resource-type: inferences
         action: read
         resource-id: revisionId
+  /api/v1/workflows:
+    post:
+      description: Create a workflow using container related fields.
+      operationId: create_workflow
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowCreationRequest'
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+          description: Request completed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: The workload request does not comply with the policy set
+                  by the administrator
+              schema:
+                $ref: '#/components/schemas/SubmissionErrorV2'
+          description: Bad submission request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Create a workflow.
+      tags:
+      - Workflows
+      x-service: workloads
+      x-test-coverage:
+      - control-plane/workloads/pkg/services_crud/workflow_service_test.go
+      x-authorize:
+        resource-type: workflows
+        action: create
+  /api/v1/workflows/{workloadId}:
+    delete:
+      description: Delete a workflow using a workflow id.
+      operationId: delete_workflow
+      parameters:
+      - description: The  Universally Unique Identifier (UUID) of the workload.
+        explode: false
+        in: path
+        name: workloadId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "202":
+          content:
+            application/json:
+              example:
+                code: 202
+                message: Request has been accepted.
+              schema:
+                $ref: '#/components/schemas/HttpResponse'
+          description: Accepted.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Delete a workflow.
+      tags:
+      - Workflows
+      x-service: workloads
+      x-test-coverage:
+      - control-plane/workloads/pkg/services_crud/workflow_service_test.go
+      x-authorize:
+        resource-type: workflows
+        action: delete
+    get:
+      description: Retrieve workflow details using a workflow id.
+      operationId: get_workflow
+      parameters:
+      - description: The  Universally Unique Identifier (UUID) of the workload.
+        explode: false
+        in: path
+        name: workloadId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get workflow data.
+      tags:
+      - Workflows
+      x-service: workloads
+      x-test-coverage:
+      - control-plane/workloads/pkg/services_crud/workflow_service_test.go
+      x-authorize:
+        resource-type: workflows
+        action: read
   /api/v1/workload-templates:
     get:
       description: Retrieve all available templates.
@@ -53994,6 +54208,175 @@ components:
       - projectId
       - revisions
       type: object
+    WorkflowFields:
+      properties:
+        todo:
+          type: boolean
+      type: object
+    WorkflowGroupFields:
+      properties:
+        todo:
+          type: boolean
+      type: object
+    WorkflowTask:
+      example:
+        todo: true
+      properties:
+        todo:
+          type: boolean
+      type: object
+    WorkflowGroups:
+      description: Definitions of the workflow groups.
+      items:
+        $ref: '#/components/schemas/WorkflowGroups_inner'
+      type: array
+    WorkflowComputeProfile:
+      example:
+        todo: true
+      properties:
+        todo:
+          type: boolean
+      type: object
+    WorkflowComputeProfiles:
+      description: Defines the workflow compute profiles.
+      items:
+        $ref: '#/components/schemas/WorkflowComputeProfile'
+      maxItems: 100
+      type: array
+    WorkflowPlacementProfile:
+      example:
+        todo: true
+      properties:
+        todo:
+          type: boolean
+      type: object
+    WorkflowPlacementProfiles:
+      description: Defines the workflow placement profiles.
+      items:
+        $ref: '#/components/schemas/WorkflowPlacementProfile'
+      maxItems: 100
+      type: array
+    WorkflowStorageProfile:
+      example:
+        todo: true
+      properties:
+        todo:
+          type: boolean
+      type: object
+    WorkflowStorageProfiles:
+      description: Defines the workflow storage profiles.
+      items:
+        $ref: '#/components/schemas/WorkflowStorageProfile'
+      maxItems: 100
+      type: array
+    WorkflowSpec:
+      allOf:
+      - $ref: '#/components/schemas/WorkflowFields'
+      - properties:
+          groups:
+            $ref: '#/components/schemas/WorkflowGroups'
+          compute:
+            $ref: '#/components/schemas/WorkflowComputeProfiles'
+          placement:
+            $ref: '#/components/schemas/WorkflowPlacementProfiles'
+          storage:
+            $ref: '#/components/schemas/WorkflowStorageProfiles'
+        type: object
+      description: The specifications of the workflow to be created.
+      type: object
+    WorkflowCreationRequest:
+      allOf:
+      - $ref: '#/components/schemas/WorkloadCreationMeta'
+      - $ref: '#/components/schemas/WorkflowSpec'
+      example:
+        todo: true
+        compute:
+        - todo: true
+        - todo: true
+        - todo: true
+        - todo: true
+        - todo: true
+        name: my-workload-name
+        groups:
+        - todo: true
+          tasks:
+          - todo: true
+          - todo: true
+          - todo: true
+          - todo: true
+          - todo: true
+        - todo: true
+          tasks:
+          - todo: true
+          - todo: true
+          - todo: true
+          - todo: true
+          - todo: true
+        useGivenNameAsPrefix: true
+        clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+        placement:
+        - todo: true
+        - todo: true
+        - todo: true
+        - todo: true
+        - todo: true
+        storage:
+        - todo: true
+        - todo: true
+        - todo: true
+        - todo: true
+        - todo: true
+        projectId: "1"
+    Workflow:
+      allOf:
+      - $ref: '#/components/schemas/WorkloadMeta'
+      - $ref: '#/components/schemas/WorkflowSpec'
+      example:
+        departmentId: "2"
+        desiredPhase: Running
+        groups:
+        - todo: true
+          tasks:
+          - todo: true
+          - todo: true
+          - todo: true
+          - todo: true
+          - todo: true
+        - todo: true
+          tasks:
+          - todo: true
+          - todo: true
+          - todo: true
+          - todo: true
+          - todo: true
+        clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+        storage:
+        - todo: true
+        - todo: true
+        - todo: true
+        - todo: true
+        - todo: true
+        todo: true
+        compute:
+        - todo: true
+        - todo: true
+        - todo: true
+        - todo: true
+        - todo: true
+        createdAt: 2022-01-01T03:49:52.531Z
+        deletedAt: 2022-01-01T03:49:52.531Z
+        requestedName: requestedName
+        createdBy: test@lab.com
+        workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        actualPhase: Creating
+        name: my-workload-name
+        placement:
+        - todo: true
+        - todo: true
+        - todo: true
+        - todo: true
+        - todo: true
+        projectId: "1"
     TemplateId:
       description: A unique ID of the template.
       example: 550e8400-e29b-41d4-a716-446655440000
@@ -135175,6 +135558,24 @@ components:
         podAffinity:
           type: Required
           key: key
+    WorkflowGroups_inner:
+      allOf:
+      - $ref: '#/components/schemas/WorkflowGroupFields'
+      - properties:
+          tasks:
+            items:
+              $ref: '#/components/schemas/WorkflowTask'
+            maxItems: 1000
+            type: array
+        type: object
+      example:
+        todo: true
+        tasks:
+        - todo: true
+        - todo: true
+        - todo: true
+        - todo: true
+        - todo: true
     DistributedInferenceLeaderWorkerDefaultsV2_storage:
       nullable: true
       properties:

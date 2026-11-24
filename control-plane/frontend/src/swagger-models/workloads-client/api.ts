@@ -22630,6 +22630,348 @@ export interface UpdateWorkloadsSettingByKeyRequest {
 /**
  * 
  * @export
+ * @interface Workflow
+ */
+export interface Workflow {
+    /**
+     * The name of the workload.
+     * @type {string}
+     * @memberof Workflow
+     */
+    'name': string;
+    /**
+     * The name as was requested for the workload. If useGivenNameAsPrefix, in the creation request, is false, name and requestedName should be identical. Otherwise, name should be composed of requestedName followed by a suffix of random characters.
+     * @type {string}
+     * @memberof Workflow
+     */
+    'requestedName': string;
+    /**
+     * A unique ID of the workload.
+     * @type {string}
+     * @memberof Workflow
+     */
+    'workloadId': string;
+    /**
+     * The id of the project.
+     * @type {string}
+     * @memberof Workflow
+     */
+    'projectId': string;
+    /**
+     * The id of the department.
+     * @type {string}
+     * @memberof Workflow
+     */
+    'departmentId'?: string;
+    /**
+     * The id of the cluster.
+     * @type {string}
+     * @memberof Workflow
+     */
+    'clusterId': string;
+    /**
+     * The user who created the workload
+     * @type {string}
+     * @memberof Workflow
+     */
+    'createdBy': string;
+    /**
+     * The creation time of the workload.
+     * @type {string}
+     * @memberof Workflow
+     */
+    'createdAt': string;
+    /**
+     * The deletion time of the workload.
+     * @type {string}
+     * @memberof Workflow
+     */
+    'deletedAt'?: string | null;
+    /**
+     * 
+     * @type {WorkloadDesiredPhase}
+     * @memberof Workflow
+     */
+    'desiredPhase': WorkloadDesiredPhase;
+    /**
+     * 
+     * @type {Phase}
+     * @memberof Workflow
+     */
+    'actualPhase'?: Phase;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Workflow
+     */
+    'todo'?: boolean;
+    /**
+     * Definitions of the workflow groups.
+     * @type {Array<WorkflowGroupsInner>}
+     * @memberof Workflow
+     */
+    'groups'?: Array<WorkflowGroupsInner>;
+    /**
+     * Defines the workflow compute profiles.
+     * @type {Array<WorkflowComputeProfile>}
+     * @memberof Workflow
+     */
+    'compute'?: Array<WorkflowComputeProfile>;
+    /**
+     * Defines the workflow placement profiles.
+     * @type {Array<WorkflowPlacementProfile>}
+     * @memberof Workflow
+     */
+    'placement'?: Array<WorkflowPlacementProfile>;
+    /**
+     * Defines the workflow storage profiles.
+     * @type {Array<WorkflowStorageProfile>}
+     * @memberof Workflow
+     */
+    'storage'?: Array<WorkflowStorageProfile>;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowComputeProfile
+ */
+export interface WorkflowComputeProfile {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof WorkflowComputeProfile
+     */
+    'todo'?: boolean;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowCreationRequest
+ */
+export interface WorkflowCreationRequest {
+    /**
+     * The name of the workload.
+     * @type {string}
+     * @memberof WorkflowCreationRequest
+     */
+    'name': string;
+    /**
+     * When true, the requested name will be treated as a prefix. The final name of the workload will be composed of the name followed by a random set of characters.
+     * @type {boolean}
+     * @memberof WorkflowCreationRequest
+     */
+    'useGivenNameAsPrefix'?: boolean;
+    /**
+     * The id of the project.
+     * @type {string}
+     * @memberof WorkflowCreationRequest
+     */
+    'projectId': string;
+    /**
+     * The id of the cluster.
+     * @type {string}
+     * @memberof WorkflowCreationRequest
+     */
+    'clusterId': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof WorkflowCreationRequest
+     */
+    'todo'?: boolean;
+    /**
+     * Definitions of the workflow groups.
+     * @type {Array<WorkflowGroupsInner>}
+     * @memberof WorkflowCreationRequest
+     */
+    'groups'?: Array<WorkflowGroupsInner>;
+    /**
+     * Defines the workflow compute profiles.
+     * @type {Array<WorkflowComputeProfile>}
+     * @memberof WorkflowCreationRequest
+     */
+    'compute'?: Array<WorkflowComputeProfile>;
+    /**
+     * Defines the workflow placement profiles.
+     * @type {Array<WorkflowPlacementProfile>}
+     * @memberof WorkflowCreationRequest
+     */
+    'placement'?: Array<WorkflowPlacementProfile>;
+    /**
+     * Defines the workflow storage profiles.
+     * @type {Array<WorkflowStorageProfile>}
+     * @memberof WorkflowCreationRequest
+     */
+    'storage'?: Array<WorkflowStorageProfile>;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowFields
+ */
+export interface WorkflowFields {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof WorkflowFields
+     */
+    'todo'?: boolean;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowGroupFields
+ */
+export interface WorkflowGroupFields {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof WorkflowGroupFields
+     */
+    'todo'?: boolean;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowGroupsInner
+ */
+export interface WorkflowGroupsInner {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof WorkflowGroupsInner
+     */
+    'todo'?: boolean;
+    /**
+     * 
+     * @type {Array<WorkflowTask>}
+     * @memberof WorkflowGroupsInner
+     */
+    'tasks'?: Array<WorkflowTask>;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowGroupsInnerAllOf
+ */
+export interface WorkflowGroupsInnerAllOf {
+    /**
+     * 
+     * @type {Array<WorkflowTask>}
+     * @memberof WorkflowGroupsInnerAllOf
+     */
+    'tasks'?: Array<WorkflowTask>;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowPlacementProfile
+ */
+export interface WorkflowPlacementProfile {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof WorkflowPlacementProfile
+     */
+    'todo'?: boolean;
+}
+/**
+ * The specifications of the workflow to be created.
+ * @export
+ * @interface WorkflowSpec
+ */
+export interface WorkflowSpec {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof WorkflowSpec
+     */
+    'todo'?: boolean;
+    /**
+     * Definitions of the workflow groups.
+     * @type {Array<WorkflowGroupsInner>}
+     * @memberof WorkflowSpec
+     */
+    'groups'?: Array<WorkflowGroupsInner>;
+    /**
+     * Defines the workflow compute profiles.
+     * @type {Array<WorkflowComputeProfile>}
+     * @memberof WorkflowSpec
+     */
+    'compute'?: Array<WorkflowComputeProfile>;
+    /**
+     * Defines the workflow placement profiles.
+     * @type {Array<WorkflowPlacementProfile>}
+     * @memberof WorkflowSpec
+     */
+    'placement'?: Array<WorkflowPlacementProfile>;
+    /**
+     * Defines the workflow storage profiles.
+     * @type {Array<WorkflowStorageProfile>}
+     * @memberof WorkflowSpec
+     */
+    'storage'?: Array<WorkflowStorageProfile>;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowSpecAllOf
+ */
+export interface WorkflowSpecAllOf {
+    /**
+     * Definitions of the workflow groups.
+     * @type {Array<WorkflowGroupsInner>}
+     * @memberof WorkflowSpecAllOf
+     */
+    'groups'?: Array<WorkflowGroupsInner>;
+    /**
+     * Defines the workflow compute profiles.
+     * @type {Array<WorkflowComputeProfile>}
+     * @memberof WorkflowSpecAllOf
+     */
+    'compute'?: Array<WorkflowComputeProfile>;
+    /**
+     * Defines the workflow placement profiles.
+     * @type {Array<WorkflowPlacementProfile>}
+     * @memberof WorkflowSpecAllOf
+     */
+    'placement'?: Array<WorkflowPlacementProfile>;
+    /**
+     * Defines the workflow storage profiles.
+     * @type {Array<WorkflowStorageProfile>}
+     * @memberof WorkflowSpecAllOf
+     */
+    'storage'?: Array<WorkflowStorageProfile>;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowStorageProfile
+ */
+export interface WorkflowStorageProfile {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof WorkflowStorageProfile
+     */
+    'todo'?: boolean;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowTask
+ */
+export interface WorkflowTask {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof WorkflowTask
+     */
+    'todo'?: boolean;
+}
+/**
+ * 
+ * @export
  * @interface Workload
  */
 export interface Workload {
@@ -33499,6 +33841,257 @@ export class UnifiedApi extends BaseAPI {
      */
     public getUnifiedWorkload(unifiedWorkloadRequest?: UnifiedWorkloadRequest, options?: AxiosRequestConfig) {
         return UnifiedApiFp(this.configuration).getUnifiedWorkload(unifiedWorkloadRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+/**
+ * WorkflowsApi - axios parameter creator
+ * @export
+ */
+export const WorkflowsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Create a workflow using container related fields.
+         * @summary Create a workflow.
+         * @param {WorkflowCreationRequest} [workflowCreationRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createWorkflow: async (workflowCreationRequest?: WorkflowCreationRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/workflows`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(workflowCreationRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Delete a workflow using a workflow id.
+         * @summary Delete a workflow.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteWorkflow: async (workloadId: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'workloadId' is not null or undefined
+            assertParamExists('deleteWorkflow', 'workloadId', workloadId)
+            const localVarPath = `/api/v1/workflows/{workloadId}`
+                .replace(`{${"workloadId"}}`, encodeURIComponent(String(workloadId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve workflow details using a workflow id.
+         * @summary Get workflow data.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getWorkflow: async (workloadId: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'workloadId' is not null or undefined
+            assertParamExists('getWorkflow', 'workloadId', workloadId)
+            const localVarPath = `/api/v1/workflows/{workloadId}`
+                .replace(`{${"workloadId"}}`, encodeURIComponent(String(workloadId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * WorkflowsApi - functional programming interface
+ * @export
+ */
+export const WorkflowsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = WorkflowsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Create a workflow using container related fields.
+         * @summary Create a workflow.
+         * @param {WorkflowCreationRequest} [workflowCreationRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createWorkflow(workflowCreationRequest?: WorkflowCreationRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Workflow>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createWorkflow(workflowCreationRequest, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Delete a workflow using a workflow id.
+         * @summary Delete a workflow.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteWorkflow(workloadId: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<HttpResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteWorkflow(workloadId, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Retrieve workflow details using a workflow id.
+         * @summary Get workflow data.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getWorkflow(workloadId: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Workflow>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkflow(workloadId, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+    }
+};
+
+/**
+ * WorkflowsApi - factory interface
+ * @export
+ */
+export const WorkflowsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = WorkflowsApiFp(configuration)
+    return {
+        /**
+         * Create a workflow using container related fields.
+         * @summary Create a workflow.
+         * @param {WorkflowCreationRequest} [workflowCreationRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createWorkflow(workflowCreationRequest?: WorkflowCreationRequest, options?: any): AxiosPromise<Workflow> {
+            return localVarFp.createWorkflow(workflowCreationRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Delete a workflow using a workflow id.
+         * @summary Delete a workflow.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteWorkflow(workloadId: string, options?: any): AxiosPromise<HttpResponse> {
+            return localVarFp.deleteWorkflow(workloadId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Retrieve workflow details using a workflow id.
+         * @summary Get workflow data.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getWorkflow(workloadId: string, options?: any): AxiosPromise<Workflow> {
+            return localVarFp.getWorkflow(workloadId, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * WorkflowsApi - object-oriented interface
+ * @export
+ * @class WorkflowsApi
+ * @extends {BaseAPI}
+ */
+export class WorkflowsApi extends BaseAPI {
+    /**
+     * Create a workflow using container related fields.
+     * @summary Create a workflow.
+     * @param {WorkflowCreationRequest} [workflowCreationRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WorkflowsApi
+     */
+    public createWorkflow(workflowCreationRequest?: WorkflowCreationRequest, options?: AxiosRequestConfig) {
+        return WorkflowsApiFp(this.configuration).createWorkflow(workflowCreationRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Delete a workflow using a workflow id.
+     * @summary Delete a workflow.
+     * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WorkflowsApi
+     */
+    public deleteWorkflow(workloadId: string, options?: AxiosRequestConfig) {
+        return WorkflowsApiFp(this.configuration).deleteWorkflow(workloadId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve workflow details using a workflow id.
+     * @summary Get workflow data.
+     * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WorkflowsApi
+     */
+    public getWorkflow(workloadId: string, options?: AxiosRequestConfig) {
+        return WorkflowsApiFp(this.configuration).getWorkflow(workloadId, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

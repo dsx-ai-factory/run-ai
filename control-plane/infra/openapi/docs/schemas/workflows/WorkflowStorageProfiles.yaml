@@ -1,0 +1,5 @@
+description: Defines the workflow storage profiles.
+type: array
+items:
+  $ref: WorkflowStorageProfile.yaml
+maxItems: 100

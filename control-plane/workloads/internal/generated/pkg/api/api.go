@@ -182,6 +182,15 @@ type UnifiedAPIRouter interface {
 	GetUnifiedWorkload(http.ResponseWriter, *http.Request)
 }
 
+// WorkflowsAPIRouter defines the required methods for binding the api requests to a responses for the WorkflowsAPI
+// The WorkflowsAPIRouter implementation should parse necessary information from the http request,
+// pass the data to a WorkflowsAPIServicer to perform the required actions, then write the service results to the http response.
+type WorkflowsAPIRouter interface {
+	CreateWorkflow(http.ResponseWriter, *http.Request)
+	GetWorkflow(http.ResponseWriter, *http.Request)
+	DeleteWorkflow(http.ResponseWriter, *http.Request)
+}
+
 // WorkloadActionsAPIRouter defines the required methods for binding the api requests to a responses for the WorkloadActionsAPI
 // The WorkloadActionsAPIRouter implementation should parse necessary information from the http request,
 // pass the data to a WorkloadActionsAPIServicer to perform the required actions, then write the service results to the http response.
@@ -471,6 +480,16 @@ type TrainingsAPIServicer interface {
 // and updated with the logic required for the API.
 type UnifiedAPIServicer interface {
 	GetUnifiedWorkload(context.Context, UnifiedWorkloadRequest) (ImplResponse, error)
+}
+
+// WorkflowsAPIServicer defines the api actions for the WorkflowsAPI service
+// This interface intended to stay up to date with the openapi yaml used to generate it,
+// while the service implementation can be ignored with the .openapi-generator-ignore file
+// and updated with the logic required for the API.
+type WorkflowsAPIServicer interface {
+	CreateWorkflow(context.Context, WorkflowCreationRequest) (ImplResponse, error)
+	GetWorkflow(context.Context, string) (ImplResponse, error)
+	DeleteWorkflow(context.Context, string) (ImplResponse, error)
 }
 
 // WorkloadActionsAPIServicer defines the api actions for the WorkloadActionsAPI service
