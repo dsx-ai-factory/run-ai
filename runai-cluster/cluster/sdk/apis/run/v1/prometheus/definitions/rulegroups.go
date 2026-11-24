@@ -1825,7 +1825,7 @@ func vllmEnrichedPodExpr(expr string) string {
 }
 
 func getOomKillerMetric(metricName string, labels string) string {
-	return fmt.Sprintf(`sum by(%s) (label_replace(%s, "pod_ip", "$1", "instance", "(.*):(.*)") * on (pod_ip) group_left(node) topk(1, kube_pod_info{pod_ip!=""}) by (pod_ip) * on (node) group_left(nodepool, modelName) runai_node_info_enriched)`, labels, metricName)
+	return fmt.Sprintf(`sum by(%s) (label_replace(%s, "pod_ip", "$1", "instance", "\\[?([^\\]]+)\\]?:[0-9]+") * on (pod_ip) group_left(node) topk(1, kube_pod_info{pod_ip!=""}) by (pod_ip) * on (node) group_left(nodepool, modelName) runai_node_info_enriched)`, labels, metricName)
 }
 
 func AdvancedRuleGroup() monitoringv1.RuleGroup {
@@ -2188,7 +2188,7 @@ func amdMetricsRule(amdMetric string) string {
 }
 
 func dcgmMetricsRule(dcgmMetric string) string {
-	return fmt.Sprintf(`label_replace(label_replace(label_replace(label_replace(%s, "pod_ip", "$1", "instance", "(.*):(.*)"), "pod_name", "$1", "exported_pod", "(.+)"), "pod_namespace", "$1", "exported_namespace", "(.+)"), "gpu_instance_id",
+	return fmt.Sprintf(`label_replace(label_replace(label_replace(label_replace(%s, "pod_ip", "$1", "instance", "\\[?([^\\]]+)\\]?:[0-9]+"), "pod_name", "$1", "exported_pod", "(.+)"), "pod_namespace", "$1", "exported_namespace", "(.+)"), "gpu_instance_id",
 	"$1", "GPU_I_ID", "(.+)") * on (pod_ip) group_left(node) kube_pod_info{created_by_name=~".*dcgm-exporter", pod_ip!=""} * on(node) group_left(nodepool) runai_node_nodepool_excluded`, dcgmMetric)
 }
 
