@@ -1,0 +1,20 @@
+{
+  "service_name": "runai-workloads-kit",
+  "artifact_type": "container",
+  "enabled": false,
+  "cache_artifacts": false,
+  "skip_container_validation": true,
+  "make": {
+    "build": {
+      "runs_on": "ubuntu-latest-4-cores"
+    }
+  },
+  "build_and_push": {
+    "runs_on": "ubuntu-latest-4-cores",
+    "context": "e2e",
+    "dockerfile": "e2e/workloads_kit/Dockerfile"
+  },
+  "ngc": {
+    "guest_access": false
+  }
+}

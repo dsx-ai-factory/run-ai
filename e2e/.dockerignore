@@ -95,3 +95,29 @@ workloads_kit/*.tar.gz
 workloads_kit/*.zip
 compatibility_kit/*.tar.gz
 compatibility_kit/*.zip
+
+# Ignore kit run results (written next to the kit Makefiles by `make run`)
+workloads_kit/results/
+compatibility_kit/results/
+
+# Ignore local run state and outputs. The kit images are built from this
+# directory, so any untracked file that is not named here ships in them.
+globalState.json
+authBrowserStorage.json
+reports/
+results/
+runai
+runaiCli
+tags.json
+failuresCountPerTeam.txt
+skippedTestsPerTeam.txt
+
+# The same leftovers below the top level (patterns above only match at the
+# context root)
+**/node_modules
+**/.DS_Store
+**/*.log
+**/.env
+**/.env.*
+**/bin
+**/vendor
