@@ -562,9 +562,6 @@ async function save(destination: "close" | "continue" = "close") {
 .node-pool-scheduling-wizard :deep(.wizard-step--disabled .wizard-step-title) {
   color: var(--text-disabled) !important;
 }
-.node-pool-scheduling-wizard :deep([aria-current="step"] .wizard-step-title) {
-  color: var(--b-text-main) !important;
-}
 .node-pool-scheduling-wizard :deep(.wizard-step--completed .wizard-step-indicator),
 .node-pool-scheduling-wizard :deep(.wizard-step--selected .wizard-step-indicator) {
   background-color: var(--feedback-success) !important;
