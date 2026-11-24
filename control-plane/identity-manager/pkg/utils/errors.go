@@ -65,6 +65,7 @@ func HandleError(ctx context.Context, entityType string, identifier string, iden
 	} else {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("error not recognized. %s. err: %v", errMsg, err.Error())
 	}
+	// Keep unclassified error details out of the API response.
 	return api.Response(http.StatusInternalServerError, nil), Error{Code: http.StatusInternalServerError, Message: ""}
 }
 
