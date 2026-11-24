@@ -482,9 +482,18 @@ describe("scheduling department table", () => {
       expect(input.attributes("max")).toBe("65");
       expect(input.attributes("aria-valuemax")).toBe("40");
       expect((input.element as HTMLInputElement).value).toBe("33");
+      const chip = wrapper.get(".demand-chip");
+      expect(chip.text()).toBe("33 GPUs");
+      (input.element as HTMLInputElement).value = "0";
+      await input.trigger("input");
+      expect(chip.text()).toBe("0 GPUs");
+      (input.element as HTMLInputElement).value = "1";
+      await input.trigger("input");
+      expect(chip.text()).toBe("1 GPU");
       (input.element as HTMLInputElement).value = "45.7";
       await input.trigger("input");
       expect((input.element as HTMLInputElement).value).toBe("40");
+      expect(chip.text()).toBe("40 GPUs");
       await vi.advanceTimersByTimeAsync(600);
       expect(transport).toHaveBeenCalledTimes(1);
       await input.trigger("change");

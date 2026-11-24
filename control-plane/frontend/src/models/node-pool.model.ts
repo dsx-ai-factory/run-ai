@@ -15,7 +15,7 @@ import { docsUtil } from "@/utils/docs.util/docs.util";
 import DOCS from "@/constants/docs";
 
 const NODE_POOL_WIZARD_STEPS = [
-  { name: "identity", title: "Cluster & name" },
+  { name: "identity", title: "Cluster & name", editTitle: "Description" },
   { name: "scheduling", title: "Scheduling mode" },
   { name: "topology", title: "Topology & placement" },
 ] as const;
@@ -24,11 +24,15 @@ export const NODE_POOL_IMMUTABLE_TOOLTIP = "This can’t be modified once a node
 
 export function getNodePoolWizardSteps(active: (typeof NODE_POOL_WIZARD_STEPS)[number]["name"], creating = false) {
   const current = NODE_POOL_WIZARD_STEPS.findIndex((step) => step.name === active);
-  return NODE_POOL_WIZARD_STEPS.map((step, index) => ({
-    ...step,
-    done: index < current,
-    disabled: creating && step.name !== "identity",
-  }));
+  return NODE_POOL_WIZARD_STEPS.map((step, index) => {
+    const disabled = creating && step.name !== "identity";
+    return {
+      ...step,
+      done: index < current,
+      disabled,
+      tooltip: disabled ? "Complete the first step to enable the steps that follow" : undefined,
+    };
+  });
 }
 
 export interface INodePoolFormDraft extends NodepoolCreateFields {

@@ -671,7 +671,11 @@ header :deep(.q-icon) {
 <style lang="scss">
 .historical-weight-help {
   margin: 0;
-  padding-left: 20px;
+  padding-inline-start: 20px;
+
+  > li {
+    list-style-type: disc;
+  }
 }
 .scheduling-confirm {
   width: 500px !important;

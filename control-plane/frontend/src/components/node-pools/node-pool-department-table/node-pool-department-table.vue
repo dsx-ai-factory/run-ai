@@ -272,10 +272,20 @@
                     :max="capacity ?? 0"
                     :value="sliderDemand(row)"
                     :aria-valuemax="maximumDemand(row)"
+                    :aria-valuetext="demandText(row)"
                     :disabled="!canView || capacity == null"
                     :aria-label="`Simulated GPU demand for ${row.name}`"
                     class="demand-slider"
                   />
+                  <q-chip
+                    v-if="simulation"
+                    aria-hidden="true"
+                    class="demand-chip"
+                    :style="{ '--demand-fraction': capacity ? sliderDemand(row) / capacity : 0 }"
+                  >
+                    <strong>{{ sliderDemand(row) }}</strong
+                    >{{ sliderDemand(row) === 1 ? " GPU" : " GPUs" }}
+                  </q-chip>
                 </div>
               </q-td>
             </q-tr>
@@ -808,6 +818,10 @@ function sliderDemand(row: IDepartmentSchedulingEdit) {
       defaultSimulationDemand(props.capacity ?? 0),
   );
 }
+function demandText(row: IDepartmentSchedulingEdit) {
+  const value = sliderDemand(row);
+  return `${value} ${value === 1 ? "GPU" : "GPUs"}`;
+}
 function previewDemand(row: IDepartmentSchedulingEdit, event: Event) {
   const input = event.target as HTMLInputElement;
   const value = clampDemand(row, Number(input.value));
@@ -1188,6 +1202,33 @@ async function quotaContext(row: IDepartmentSchedulingEdit) {
   height: 100%;
   overflow: hidden;
   border-radius: 2px;
+}
+.simulation-bar {
+  container-type: inline-size;
+}
+.demand-chip {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 0;
+  visibility: hidden;
+  pointer-events: none;
+  margin: 0;
+  padding: 0 10px;
+  height: 21px;
+  border-radius: 999px;
+  background: var(--b-text-main);
+  color: var(--text-inverse);
+  font-size: 12px;
+  font-weight: 400;
+  // The native thumb center travels from 5px inside the bar to 5px from its end.
+  // Center the chip on that point, keeping it within the bar at either end.
+  transform: translateX(clamp(0px, calc(5px + var(--demand-fraction) * (100cqw - 10px) - 50%), calc(100cqw - 100%)));
+}
+.demand-chip strong {
+  margin-right: 5px;
+}
+.demand-slider:enabled:is(:hover, :active, :focus-visible) + .demand-chip {
+  visibility: visible;
 }
 .demand-slider {
   appearance: none;

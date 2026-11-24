@@ -12,6 +12,7 @@
       margin-top="26px"
       left-width="200px"
       right-width="200px"
+      collapse-left-on-small-screen
       hide-right-on-small-screen
     >
       <runai-form-wrapper
