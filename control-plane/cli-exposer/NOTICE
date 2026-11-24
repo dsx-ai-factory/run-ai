@@ -109,7 +109,7 @@ Dependencies
 | `go.uber.org/atomic` | v1.12.0 | MIT | https://pkg.go.dev/go.uber.org/atomic@v1.12.0?tab=licenses |
 | `go.yaml.in/yaml/v3` | v3.0.6 | MIT | https://pkg.go.dev/go.yaml.in/yaml/v3@v3.0.6?tab=licenses |
 | `golang.org/x/crypto` | v0.59.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/crypto@v0.59.0?tab=licenses |
-| `golang.org/x/exp/slices` | v0.0.0-20261121134650-e1094eeca1b5 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/exp@v0.0.0-20261121134650-e1094eeca1b5?tab=licenses |
+| `golang.org/x/exp/slices` | v0.0.0-20261124000051-d6646c509b6d | BSD-3-Clause | https://pkg.go.dev/golang.org/x/exp@v0.0.0-20261124000051-d6646c509b6d?tab=licenses |
 | `golang.org/x/mod/semver` | v0.43.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/mod@v0.43.0?tab=licenses |
 | `golang.org/x/net` | v0.63.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/net@v0.63.0?tab=licenses |
 | `golang.org/x/sys` | v0.50.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sys@v0.50.0?tab=licenses |
