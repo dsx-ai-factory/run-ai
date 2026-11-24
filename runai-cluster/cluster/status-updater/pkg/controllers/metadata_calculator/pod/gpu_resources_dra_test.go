@@ -315,7 +315,7 @@ func TestCalcPodGpuResourcesDRAWithRealParser(t *testing.T) {
 	}
 	otherClassClaim := &resourcev1.ResourceClaim{
 		ObjectMeta: metav1.ObjectMeta{Name: "other-class", Namespace: draTestNamespace},
-		Spec:       draTestClaimSpec("research-gpus.example.com", 8),
+		Spec:       draTestClaimSpec("network.example.com", 8),
 	}
 	generatedClaimName := "dra-pod-tmpl-abcde"
 	foreignClaimName := "dra-pod-tmpl-foreign"
@@ -362,7 +362,7 @@ func TestCalcPodGpuResourcesDRAWithRealParser(t *testing.T) {
 			wantMemory: draTestMemoryOfThreeGpusMb,
 		},
 		{
-			name:       "Claim of a device class other than gpu.nvidia.com: reports zero GPUs",
+			name:       "Non-GPU device class (network.example.com): reports zero GPUs",
 			claims:     []v1.PodResourceClaim{draTestClaimRef("other-class")},
 			wantGpus:   0,
 			wantMemory: 0,
