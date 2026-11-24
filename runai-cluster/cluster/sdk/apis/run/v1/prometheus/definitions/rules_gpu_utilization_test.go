@@ -186,3 +186,35 @@ func TestGpuIdleSecondsPerGpu(t *testing.T) {
 		},
 	})
 }
+
+// --- GPUCluster (DRA-only) mode: nvidia-dcgm-exporter-dra pods ---
+
+func TestDcgmMetricsAreEnrichedForDraExporterPods(t *testing.T) {
+	newTester(t).Test(TestCase{
+		Interval: "1m",
+		Inputs: []Input{
+			{Series: `DCGM_FI_DEV_GPU_UTIL{instance="10.0.0.1:9400", UUID="gpu-1", gpu="0", modelName="A100"}`, Values: "50x3"},
+			{Series: `kube_pod_info{created_by_name="nvidia-dcgm-exporter-dra", pod_ip="10.0.0.1", node="n1"}`, Values: "1x3"},
+			{Series: `runai_node_nodepool{node="n1", nodepool="np1"}`, Values: "1x3"},
+			{Series: `kube_node_info{node="n1"}`, Values: "1x3"},
+		},
+		Tests: []Test{
+			{Expr: `sum(runai_dcgm_gpu_utilization{node="n1", nodepool="np1"})`, EvalTime: "2m", Samples: []Sample{{Value: 50}}},
+		},
+	})
+}
+
+func TestDcgmMetricsAreEnrichedForLegacyExporterPods(t *testing.T) {
+	newTester(t).Test(TestCase{
+		Interval: "1m",
+		Inputs: []Input{
+			{Series: `DCGM_FI_DEV_GPU_UTIL{instance="10.0.0.2:9400", UUID="gpu-2", gpu="0", modelName="A100"}`, Values: "70x3"},
+			{Series: `kube_pod_info{created_by_name="nvidia-dcgm-exporter", pod_ip="10.0.0.2", node="n2"}`, Values: "1x3"},
+			{Series: `runai_node_nodepool{node="n2", nodepool="np1"}`, Values: "1x3"},
+			{Series: `kube_node_info{node="n2"}`, Values: "1x3"},
+		},
+		Tests: []Test{
+			{Expr: `sum(runai_dcgm_gpu_utilization{node="n2", nodepool="np1"})`, EvalTime: "2m", Samples: []Sample{{Value: 70}}},
+		},
+	})
+}

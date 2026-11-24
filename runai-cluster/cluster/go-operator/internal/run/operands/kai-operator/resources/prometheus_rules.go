@@ -23,6 +23,21 @@ import (
 
 const prometheusRuleName = "runai-accounting"
 
+// resourcesPerNodepoolExpr is the capacity KAI's time-based fair share divides usage by.
+//
+// kube_node_status_capacity only carries nvidia_com_gpu on nodes that run the NVIDIA device plugin. On DRA-only
+// nodes (GPU Operator GPUCluster mode) the GPUs are published as ResourceSlices instead, so the series is missing and
+// KAI fails the whole usage fetch with "no data returned for cluster capacity metric". For those nodes the GPU count
+// comes from runai_gpu_count_per_node, which is derived from DCGM and works with both device-plugin and DRA nodes.
+// A node with device-plugin capacity above zero keeps it, so mixed clusters are not double counted.
+const resourcesPerNodepoolExpr = `sum(` +
+	`(kube_node_status_capacity * on(node) group_left(nodepool) (max by (node, nodepool) (runai_node_nodepool == 1)))` +
+	` or ` +
+	`label_replace(` +
+	`max by (node, nodepool) (runai_gpu_count_per_node > 0) unless on(node) (kube_node_status_capacity{resource="nvidia_com_gpu"} > 0),` +
+	` "resource", "nvidia_com_gpu", "", "")` +
+	`) by (nodepool, resource)`
+
 func PrometheusRuleForRunaiConfig(ctx context.Context, k8sReader client.Reader,
 	runaiConfig *runv1.RunaiConfig) (client.Object, error) {
 	rule := &monitoringv1.PrometheusRule{}
@@ -54,7 +69,7 @@ func desiredPrometheusRule(runaiConfig *runv1.RunaiConfig) *monitoringv1.Prometh
 		Name: "default",
 		Rules: []monitoringv1.Rule{{
 			Record: "resources_per_nodepool",
-			Expr:   intstr.FromString("sum(kube_node_status_capacity * on(node) group_left(nodepool) (max by (node, nodepool) (runai_node_nodepool == 1))) by (nodepool, resource)"),
+			Expr:   intstr.FromString(resourcesPerNodepoolExpr),
 		}},
 	}}
 	return rule

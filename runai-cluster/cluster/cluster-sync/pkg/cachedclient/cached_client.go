@@ -16,6 +16,7 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/constants"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/resourceutils/resources"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	dinfwv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/distributedinferenceworkload/v1alpha1"
@@ -186,6 +187,11 @@ var (
 		Version: resourcev1.SchemeGroupVersion.Version,
 		Kind:    "ResourceClaimTemplate",
 	}
+	ResourceSliceType = SupportedType{
+		Group:   resourcev1.SchemeGroupVersion.Group,
+		Version: resourcev1.SchemeGroupVersion.Version,
+		Kind:    "ResourceSlice",
+	}
 	ExternalWorkloadType = SupportedType{
 		Group:   v1alpha1.SchemeGroupVersion.Group,
 		Version: v1alpha1.SchemeGroupVersion.Version,
@@ -264,6 +270,7 @@ var (
 		StorageClassType,
 		DeviceClassType,
 		ResourceClaimTemplateType,
+		ResourceSliceType,
 		ExternalWorkloadType,
 		InteractivePolicyType,
 		TrainingPolicyType,
@@ -334,6 +341,7 @@ func isOptionalInformer(gvk SupportedType) bool {
 		gvk == NodeResourceTopologyType ||
 		gvk == DeviceClassType ||
 		gvk == ResourceClaimTemplateType ||
+		gvk == ResourceSliceType ||
 		isLegacyWorkloadType(gvk) ||
 		isLegacyPolicyType(gvk)
 }
@@ -553,6 +561,39 @@ func (c *ClusterSyncCachedClient) Shutdown() {
 func addIndexers(cachedClient cache.Cache) {
 	addPodIndexers(cachedClient)
 	addRunaiWorkloadIndexers(cachedClient)
+	addResourceSliceIndexers(cachedClient)
+}
+
+// addResourceSliceIndexers is optional like the ResourceSlice informer itself: DRA is not served on every cluster.
+func addResourceSliceIndexers(cachedClient cache.Cache) {
+	err := cachedClient.IndexField(context.Background(), &resourcev1.ResourceSlice{},
+		constants.ResourceSliceByNvidiaNodeNameIndexer, ResourceSliceByNvidiaNodeNameIndexer)
+	if err == nil {
+		return
+	}
+	if meta.IsNoMatchError(err) {
+		zap.S().Warnf("ResourceSlice API is not served (DRA not installed); skipping its indexer: %s", err.Error())
+		return
+	}
+	zap.S().Fatalf("Failed indexing resource slice field: %s, err: %s",
+		constants.ResourceSliceByNvidiaNodeNameIndexer, err.Error())
+}
+
+// ResourceSliceByNvidiaNodeNameIndexer maps the NVIDIA DRA driver's node-local slices to their node, so a node's GPU
+// inventory is a cheap lookup instead of a scan over every slice in the cluster.
+func ResourceSliceByNvidiaNodeNameIndexer(obj client.Object) []string {
+	resourceSlice, ok := obj.(*resourcev1.ResourceSlice)
+	if !ok {
+		zap.S().Errorf("Failed converting object to resource slice in ResourceSliceByNvidiaNodeNameIndexer: %v", obj)
+		return nil
+	}
+
+	if resourceSlice.Spec.Driver != resources.NvidiaDraDriverName || resourceSlice.Spec.NodeName == nil ||
+		*resourceSlice.Spec.NodeName == "" {
+		return nil
+	}
+
+	return []string{*resourceSlice.Spec.NodeName}
 }
 
 func addPodIndexers(cachedClient cache.Cache) {

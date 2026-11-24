@@ -44,6 +44,9 @@ const PodByPodGroupIndexerName = "podByPodGroupIndexer"
 const NonRunaiPodByNodeNameIndexer = "nonRunaiPodByNodeNameIndexer"
 const PodBySchedulerNameIndexer = "spec.schedulerName"
 
+// ResourceSliceByNvidiaNodeNameIndexer indexes the NVIDIA DRA driver's node-local ResourceSlices by node name.
+const ResourceSliceByNvidiaNodeNameIndexer = "resourceSliceByNvidiaNodeNameIndexer"
+
 const RunaiWorkloadByUsageIndexer = "runaiWorkloadByUsageIndexer"
 const RunaiWorkloadRelevantUsage = "Submit"
 

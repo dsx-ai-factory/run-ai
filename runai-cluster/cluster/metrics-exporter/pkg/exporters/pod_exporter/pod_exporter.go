@@ -36,10 +36,16 @@ const (
 	opportunisticPodGpuIndex      = "opportunistic"
 )
 
+// DRAGpuCounter resolves the NVIDIA GPUs a pod requests through DRA ResourceClaims.
+type DRAGpuCounter interface {
+	ResolvePodRequestedGpuCount(ctx context.Context, pod *v1.Pod) (int64, error)
+}
+
 type PodExporter struct {
-	ctx    context.Context
-	client client.Client
-	pod    *v1.Pod
+	ctx        context.Context
+	client     client.Client
+	pod        *v1.Pod
+	draCounter DRAGpuCounter
 }
 
 func NewPodExporter(ctx context.Context, k8sClient client.Client, pod *v1.Pod) *PodExporter {
@@ -48,6 +54,13 @@ func NewPodExporter(ctx context.Context, k8sClient client.Client, pod *v1.Pod) *
 		client: k8sClient,
 		pod:    pod,
 	}
+}
+
+// WithDRAGpuCounter makes the exporter count GPUs requested through DRA ResourceClaims, which pods on a
+// GPUCluster (DRA-only) cluster use instead of the nvidia.com/gpu resource request.
+func (pe *PodExporter) WithDRAGpuCounter(counter DRAGpuCounter) *PodExporter {
+	pe.draCounter = counter
+	return pe
 }
 
 func (pe *PodExporter) GetName() string {
@@ -135,6 +148,12 @@ func (pe *PodExporter) GetAllocatedGpus() float64 {
 		return float64(0)
 	}
 
+	// The scheduler's allocation annotations do not describe claim-based GPUs, so a pod that never received them
+	// would otherwise be reported as using no GPUs at all.
+	if _, found := pe.pod.Annotations[podAllocatedGPUsAnnotationName]; !found && pe.usesDRAClaims() {
+		return pe.getDRAGpus()
+	}
+
 	gpus, err := utils.ParseFloatFromAnnotation(pe.pod.Annotations, podAllocatedGPUsAnnotationName)
 	if err != nil {
 		log.Printf("failed to get allocated gpus for pod %s/%s, error: %s",
@@ -147,7 +166,32 @@ func (pe *PodExporter) GetAllocatedGpus() float64 {
 			pe.GetNamespace(), pe.GetName(), err.Error())
 		return float64(0)
 	}
-	return gpus + migDevices
+	if total := gpus + migDevices; total > 0 {
+		return total
+	}
+
+	return pe.getDRAGpus()
+}
+
+func (pe *PodExporter) usesDRAClaims() bool {
+	return pe.draCounter != nil && len(pe.pod.Spec.ResourceClaims) > 0
+}
+
+// getDRAGpus returns the GPUs requested through DRA claims, or 0 when none are used or the lookup fails.
+// A failed lookup is logged rather than returned: the exporter reports a metric for every pod, and a pod whose
+// claims cannot be read yet must not fail the whole metrics update.
+func (pe *PodExporter) getDRAGpus() float64 {
+	if !pe.usesDRAClaims() {
+		return float64(0)
+	}
+
+	gpus, err := pe.draCounter.ResolvePodRequestedGpuCount(pe.ctx, pe.pod)
+	if err != nil {
+		log.Printf("failed to resolve DRA gpus for pod %s/%s, error: %s",
+			pe.GetNamespace(), pe.GetName(), err.Error())
+		return float64(0)
+	}
+	return float64(gpus)
 }
 
 func (pe *PodExporter) GetAllocatedCpus() float64 {
@@ -201,7 +245,7 @@ func (pe *PodExporter) GetGpusFromResourceRequest() float64 {
 		amdGpuRequest := container.Resources.Requests[constants.AmdGpuResourceName]
 		gpus += float64(amdGpuRequest.Value())
 	}
-	return gpus
+	return gpus + pe.getDRAGpus()
 }
 
 func (pe *PodExporter) GetTopOwnerWorkloadId() (string, error) {

@@ -16,6 +16,7 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	v1 "k8s.io/api/core/v1"
+	resourcev1 "k8s.io/api/resource/v1"
 	k8sschedulingv1 "k8s.io/api/scheduling/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -27,6 +28,7 @@ var scheme = runtime.NewScheme()
 
 func CreateControllerManager(metricsListenPort string, enableLeaderElection bool) (manager.Manager, error) {
 	utilruntime.Must(v1.AddToScheme(scheme))
+	utilruntime.Must(resourcev1.AddToScheme(scheme))
 	utilruntime.Must(v2alpha2.AddToScheme(scheme))
 	utilruntime.Must(k8sschedulingv1.AddToScheme(scheme))
 	utilruntime.Must(kubeaischedv2alpha2.AddToScheme(scheme))

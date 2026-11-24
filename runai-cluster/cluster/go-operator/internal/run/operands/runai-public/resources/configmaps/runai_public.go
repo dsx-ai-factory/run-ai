@@ -327,13 +327,18 @@ func isVersionSupportsOauth2(version string) error {
 }
 
 func getGpuStackStatus(ctx context.Context, kbClient client.Client) runv1.PublicStatus {
-	nvidiaStatus := getNvidiaStatus(ctx, kbClient)
+	nvidiaStatus, dcgmExporterSvc := getNvidiaStatus(ctx, kbClient)
 	gpuFractioningStatus := controller_utils.CheckGpuFractioningReadiness(ctx, kbClient)
 
-	available := *nvidiaStatus.Available && *gpuFractioningStatus.Available
+	// Fractions are an optional capability on a GPUCluster (DRA-only) cluster, where kai-gpu-fractioning may
+	// legitimately not be ready. The gpu-fractioning component below still reports why, but it must not mark the
+	// whole GPU stack unavailable, which would block whole-GPU workloads that need none of it.
+	fractioningGatesStack := !controller_utils.IsDRAOnlyDCGMExporter(dcgmExporterSvc)
+
+	available := *nvidiaStatus.Available && (*gpuFractioningStatus.Available || !fractioningGatesStack)
 
 	var reason string
-	if !*gpuFractioningStatus.Available {
+	if !*gpuFractioningStatus.Available && fractioningGatesStack {
 		reason = gpuFractioningStatus.Reason
 	} else if !*nvidiaStatus.Available {
 		reason = nvidiaStatus.Reason
@@ -349,14 +354,14 @@ func getGpuStackStatus(ctx context.Context, kbClient client.Client) runv1.Public
 	}
 }
 
-func getNvidiaStatus(ctx context.Context, kbClient client.Client) runv1.PublicStatus {
+func getNvidiaStatus(ctx context.Context, kbClient client.Client) (runv1.PublicStatus, *corev1.Service) {
 	svc, nvidiaStackVerificationErr := controller_utils.GetDCGMExporterService(ctx, kbClient)
 	if svc == nil || nvidiaStackVerificationErr != nil {
-		return getUnavailableNvidiaStatus(nvidiaStackVerificationErr)
+		return getUnavailableNvidiaStatus(nvidiaStackVerificationErr), nil
 	}
 
 	nvidiaExporterVerificationErr, missingMetrics := controller_utils.VerifyNvidiaStackExistsInRightState(svc)
-	return getAvailableNvidiaStatus(nvidiaExporterVerificationErr, missingMetrics)
+	return getAvailableNvidiaStatus(nvidiaExporterVerificationErr, missingMetrics), svc
 }
 
 func getUnavailableNvidiaStatus(nvidiaStackVerificationErr error) runv1.PublicStatus {

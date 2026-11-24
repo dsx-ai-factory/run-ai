@@ -11,11 +11,14 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/handlers"
 	constants2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/resourceutils/resources"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
+	resourcev1 "k8s.io/api/resource/v1"
 	clientgocache "k8s.io/client-go/tools/cache"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func AddNodeHandlerToCache(backendClient *backendclient.BackendClient, cachedClient cachedclient.CachedClient,
@@ -25,6 +28,7 @@ func AddNodeHandlerToCache(backendClient *backendclient.BackendClient, cachedCli
 	rateLimitedController := cachedClient.NewRateLimitedController(cachedclient.NodeRL, nodeHandler)
 
 	addGpuFractioningVerdictWatch(cachedClient, nodeHandler)
+	addNvidiaResourceSliceWatch(cachedClient, rateLimitedController)
 
 	nodeInformer := cachedClient.GetInformer(cachedclient.NodeType)
 	_, err := nodeInformer.AddEventHandler(clientgocache.ResourceEventHandlerFuncs{
@@ -100,5 +104,34 @@ func addGpuFractioningVerdictWatch(cachedClient cachedclient.CachedClient, nodeH
 	if err != nil {
 		zap.S().Fatalf("Failed to watch %s for GPU fractioning changes, error: %s",
 			constants.ClusterInfoConfigMapName, err.Error())
+	}
+}
+
+// A node's GPU info can come from the NVIDIA DRA driver's ResourceSlices when its GFD labels are missing. The slices
+// are published after the Node object is stable, so nothing in the Node informer fires when they appear or change.
+func addNvidiaResourceSliceWatch(cachedClient cachedclient.CachedClient,
+	nodeController *cachedclient.RateLimitedController) {
+	resourceSliceInformer := cachedClient.GetInformer(cachedclient.ResourceSliceType)
+	if resourceSliceInformer == nil {
+		zap.S().Warn("ResourceSlice API is not served (DRA not installed); node GPU info is read from labels only")
+		return
+	}
+
+	resyncNode := func(obj any) {
+		resourceSlice, ok := filteredObject(obj).(*resourcev1.ResourceSlice)
+		if !ok || resourceSlice.Spec.Driver != resources.NvidiaDraDriverName || resourceSlice.Spec.NodeName == nil ||
+			*resourceSlice.Spec.NodeName == "" {
+			return
+		}
+		nodeController.AddRateLimited(client.ObjectKey{Name: *resourceSlice.Spec.NodeName})
+	}
+
+	_, err := resourceSliceInformer.AddEventHandler(clientgocache.ResourceEventHandlerFuncs{
+		AddFunc:    resyncNode,
+		UpdateFunc: func(_ any, newObj any) { resyncNode(newObj) },
+		DeleteFunc: resyncNode,
+	})
+	if err != nil {
+		zap.S().Fatalf("Failed to add event handler to resource slice informer, error: %s", err.Error())
 	}
 }

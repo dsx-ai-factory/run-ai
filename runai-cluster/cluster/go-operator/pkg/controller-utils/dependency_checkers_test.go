@@ -152,6 +152,54 @@ var _ = Describe("DependencyCheckers", func() {
 			_, err := GetDCGMExporterService(apiAccessContext, k8s)
 			Expect(err).To(HaveOccurred())
 		})
+
+		for _, labelKey := range []string{"app", "app.kubernetes.io/name"} {
+			It(fmt.Sprintf("should return the GPUCluster (DRA-only) dcgm-exporter-dra service labeled by %s", labelKey), func() {
+				Expect(k8s.Create(apiAccessContext, &v1.Service{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "nvidia-dcgm-exporter-dra",
+						Namespace: consts.GPUOperatorNamespace,
+						Labels:    map[string]string{labelKey: "nvidia-dcgm-exporter-dra"},
+					},
+				})).To(Succeed())
+
+				svc, err := GetDCGMExporterService(apiAccessContext, k8s)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(svc.Name).To(Equal("nvidia-dcgm-exporter-dra"))
+			})
+		}
+
+		It("should count a service labeled under both label keys once", func() {
+			Expect(k8s.Create(apiAccessContext, &v1.Service{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "nvidia-dcgm-exporter-dra",
+					Namespace: consts.GPUOperatorNamespace,
+					Labels: map[string]string{
+						"app":                    "nvidia-dcgm-exporter-dra",
+						"app.kubernetes.io/name": "nvidia-dcgm-exporter-dra",
+					},
+				},
+			})).To(Succeed())
+
+			svc, err := GetDCGMExporterService(apiAccessContext, k8s)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(svc.Name).To(Equal("nvidia-dcgm-exporter-dra"))
+		})
+
+		It("should fail when both the legacy and the -dra services exist", func() {
+			for _, name := range []string{"nvidia-dcgm-exporter", "nvidia-dcgm-exporter-dra"} {
+				Expect(k8s.Create(apiAccessContext, &v1.Service{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      name,
+						Namespace: consts.GPUOperatorNamespace,
+						Labels:    map[string]string{"app": name},
+					},
+				})).To(Succeed())
+			}
+
+			_, err := GetDCGMExporterService(apiAccessContext, k8s)
+			Expect(err).To(MatchError(ContainSubstring("more than one")))
+		})
 	})
 
 	Context("DCGM exporter status check", func() {
@@ -307,3 +355,14 @@ var _ = Describe("DependencyCheckers", func() {
 		})
 	})
 })
+
+var _ = DescribeTable("IsDRAOnlyDCGMExporter",
+	func(svc *v1.Service, want bool) {
+		Expect(IsDRAOnlyDCGMExporter(svc)).To(Equal(want))
+	},
+	Entry("nil service", nil, false),
+	Entry("legacy exporter", &v1.Service{ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{"app": "nvidia-dcgm-exporter"}}}, false),
+	Entry("DRA exporter by app label", &v1.Service{ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{"app": "nvidia-dcgm-exporter-dra"}}}, true),
+	Entry("DRA exporter by name label", &v1.Service{ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{"app.kubernetes.io/name": "dcgm-exporter-dra"}}}, true),
+	Entry("no labels", &v1.Service{}, false),
+)

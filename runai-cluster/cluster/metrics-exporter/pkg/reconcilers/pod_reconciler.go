@@ -19,6 +19,7 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/metrics_exporter/pkg/event_handlers"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/metrics_exporter/pkg/exporters/pod_exporter"
 )
 
 type PodReconciler struct {
@@ -26,9 +27,9 @@ type PodReconciler struct {
 	eventHandlers []event_handlers.EventHandler
 }
 
-func NewPodReconciler(client client.Client) *PodReconciler {
+func NewPodReconciler(client client.Client, draCounter pod_exporter.DRAGpuCounter) *PodReconciler {
 	eventHandlers := []event_handlers.EventHandler{
-		event_handlers.NewPodGpuInfoEventHandler(client),
+		event_handlers.NewPodGpuInfoEventHandler(client, draCounter),
 	}
 
 	return &PodReconciler{

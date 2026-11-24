@@ -18,6 +18,7 @@ import (
 	twv2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/trainingworkload/v2alpha1"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
+	resourcev1 "k8s.io/api/resource/v1"
 	clientgocache "k8s.io/client-go/tools/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -35,6 +36,7 @@ func NewFakeCachedClient(fakeClientBuilder *fake.ClientBuilder) cachedclient.Cac
 		WithIndex(&corev1.Pod{}, constants.PodByPodGroupIndexerName, cachedclient.PodByPodGroupIndexer).
 		WithIndex(&corev1.Pod{}, constants.NonRunaiPodByNodeNameIndexer, cachedclient.NonRunaiPodByNodeNameIndexer).
 		WithIndex(&corev1.Pod{}, constants.PodBySchedulerNameIndexer, cachedclient.PodBySchedulerNameIndexer).
+		WithIndex(&resourcev1.ResourceSlice{}, constants.ResourceSliceByNvidiaNodeNameIndexer, cachedclient.ResourceSliceByNvidiaNodeNameIndexer).
 		WithIndex(&twv2.TrainingWorkload{}, constants.RunaiWorkloadByUsageIndexer, cachedclient.RunaiWorkloadByUsageIndexer).
 		WithIndex(&iwv2.InteractiveWorkload{}, constants.RunaiWorkloadByUsageIndexer, cachedclient.RunaiWorkloadByUsageIndexer).
 		WithIndex(&infwv2.InferenceWorkload{}, constants.RunaiWorkloadByUsageIndexer, cachedclient.RunaiWorkloadByUsageIndexer).

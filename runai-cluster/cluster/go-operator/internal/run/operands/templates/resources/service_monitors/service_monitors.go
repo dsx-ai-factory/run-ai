@@ -72,6 +72,11 @@ func (s *ServiceMonitor) Object(ctx context.Context) (client.Object, error) {
 		return nil, err
 	}
 
+	if len(dcgmExporterService.Spec.Ports) == 0 {
+		return nil, fmt.Errorf("dcgm-exporter service %s/%s has no ports",
+			dcgmExporterService.Namespace, dcgmExporterService.Name)
+	}
+
 	serviceMonitor.Spec.Selector.MatchLabels = dcgmExporterService.Labels
 
 	serviceMonitor.Spec.NamespaceSelector = monitoringv1.NamespaceSelector{
