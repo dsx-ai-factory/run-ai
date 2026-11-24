@@ -1,0 +1,2 @@
+Temporary check-selection validation. Do not merge.
+This file is outside e2e and must not start Node checks.
