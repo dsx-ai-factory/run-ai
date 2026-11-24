@@ -109,6 +109,7 @@ import { computed, ref, watch } from "vue";
 import { SchedulingHelpTooltip } from "@/components/node-pools/scheduling-help-tooltip";
 import { EditableCellPopup } from "@/components/common/runai-table/runai-custom-table-columns/editable-cell-popup/index";
 import {
+  DEFAULT_DEPARTMENT_SCHEDULING_WEIGHT,
   recommendedDepartmentQuotaMinimum,
   departmentQuotaBudget,
   validateDepartmentEdit,
@@ -239,7 +240,8 @@ function reset() {
 async function opened() {
   active.value = true;
   nativeBadInput.value = false;
-  input.value = props.kind === EResourceEditorKind.Weight ? (props.value ?? 2) : initialInput();
+  input.value =
+    props.kind === EResourceEditorKind.Weight ? (props.value ?? DEFAULT_DEPARTMENT_SCHEDULING_WEIGHT) : initialInput();
   context.value = props.context ?? {};
   if (!props.loadContext) return;
   const version = ++request;

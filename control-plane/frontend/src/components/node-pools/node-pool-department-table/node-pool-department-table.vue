@@ -353,6 +353,7 @@ import { DepartmentResourceEditor } from "@/components/node-pools/department-res
 import {
   DEPARTMENT_PAGE_SIZE,
   schedulingTotalsWithEdits,
+  DEFAULT_DEPARTMENT_SCHEDULING_WEIGHT,
   weightPercentage,
   type SchedulingDraft,
   type IDepartmentPages,
@@ -395,36 +396,40 @@ const emit = defineEmits<{
   "close-settings": [];
   "automatic-weights": [boolean];
 }>();
-const baseline = ref<Record<string, IDepartmentSchedulingEdit>>({});
+const previewDefaultWeights = computed(
+  () =>
+    props.draft.mode === ESchedulingMode.Guaranteed &&
+    !props.draft.automaticWeights &&
+    props.draft.capabilities?.adjustableWeights === false &&
+    !props.rawWeightsAvailable,
+);
 const knownRows = ref<Record<string, DepartmentNodePoolResources>>({});
-function baselineRecord(row: DepartmentNodePoolResources): IDepartmentSchedulingEdit {
-  return {
-    id: row.orgUnitId,
-    weight: props.rawWeightsAvailable ? (row.resources.gpu?.overQuotaWeight ?? undefined) : undefined,
-    quota: row.resources.gpu?.deserved ?? undefined,
-    limit: row.resources.gpu?.limit,
-    rank: row.rank,
-  };
-}
 watch(
-  () => props.baselineRows,
-  (rows) => {
-    if (!rows) return;
-    baseline.value = Object.fromEntries(rows.map((row) => [row.orgUnitId, baselineRecord(row)]));
+  [() => props.baselineRows, () => props.rows],
+  ([snapshot, rows]) => {
+    for (const row of snapshot ?? []) knownRows.value[row.orgUnitId] = row;
     for (const row of rows) knownRows.value[row.orgUnitId] = row;
   },
   { immediate: true },
 );
-watch(
-  () => props.rows,
-  (rows) => {
-    for (const row of rows) {
-      knownRows.value[row.orgUnitId] = row;
-      if (!props.baselineRows) baseline.value[row.orgUnitId] = baselineRecord(row);
-    }
-  },
-  { immediate: true },
-);
+const baseline = computed(() => {
+  const departments: Record<string, IDepartmentSchedulingEdit> = {};
+  for (const row of props.baselineRows ?? Object.values(knownRows.value)) {
+    const gpu = row.resources.gpu;
+    departments[row.orgUnitId] = {
+      id: row.orgUnitId,
+      weight: previewDefaultWeights.value
+        ? DEFAULT_DEPARTMENT_SCHEDULING_WEIGHT
+        : props.rawWeightsAvailable
+          ? (gpu?.overQuotaWeight ?? undefined)
+          : undefined,
+      quota: gpu?.deserved ?? undefined,
+      limit: gpu?.limit,
+      rank: row.rank,
+    };
+  }
+  return departments;
+});
 const selected = ref(new Set<string>());
 const expanded = ref(new Set<string>([ENTITY_PRIORITY_DEFAULT_VALUE]));
 const showMove = ref(false);
@@ -444,9 +449,17 @@ const completeCustomWeightTotals = computed(() =>
     ? completePeerSchedulingTotals(completeEffectiveRows.value, { requireIntegerWeights: true })
     : undefined,
 );
-const totals = computed(() =>
-  schedulingTotalsWithEdits(props.aggregates, baseline.value, props.draft.departments, automatic.value),
-);
+const totals = computed(() => {
+  let aggregates = props.aggregates;
+  if (previewDefaultWeights.value && props.rankCounts) {
+    // Rank counts include departments beyond the loaded page. The saved sums still describe Automatic.
+    aggregates = { ...aggregates };
+    for (const [rank, count] of Object.entries(props.rankCounts)) {
+      aggregates[rank] = { ...aggregates[rank], rawWeightsSum: count * DEFAULT_DEPARTMENT_SCHEDULING_WEIGHT };
+    }
+  }
+  return schedulingTotalsWithEdits(aggregates, baseline.value, props.draft.departments, automatic.value);
+});
 const quotaExcess = computed(() => {
   const capacity = props.capacity;
   const assigned = totals.value.all;
@@ -666,6 +679,18 @@ const hasVisibleDepartments = computed(() => visibleDepartmentIds.value.length >
 watch([hasVisibleDepartments, () => props.loading], ([visible, loading]) => {
   if (!visible && !loading) simulation.value = false;
 });
+const simulationDraft = computed(() => {
+  if (!previewDefaultWeights.value) return props.draft;
+  const departments = { ...props.draft.departments };
+  for (const id of Object.keys(baseline.value)) {
+    departments[id] = {
+      ...departments[id],
+      id,
+      weight: departments[id]?.weight ?? DEFAULT_DEPARTMENT_SCHEDULING_WEIGHT,
+    };
+  }
+  return { ...props.draft, departments };
+});
 const scenario = computed(() =>
   simulation.value &&
   !hasMore.value &&
@@ -676,7 +701,7 @@ const scenario = computed(() =>
     ? {
         poolId: props.poolId,
         capacity: props.capacity,
-        draft: props.draft,
+        draft: simulationDraft.value,
         ids: visibleDepartmentIds.value,
         demand: demand.value,
       }

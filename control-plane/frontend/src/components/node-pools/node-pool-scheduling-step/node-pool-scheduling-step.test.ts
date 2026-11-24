@@ -19,6 +19,7 @@ import RunaiWizardLayout from "@/components/common/runai-wizard-layout/runai-wiz
 import NodePoolWizardSummary from "../node-pool-wizard-summary/node-pool-wizard-summary.vue";
 import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
 const { createNodePoolDraft } = nodePoolUtil;
+import { DepartmentResourceEditor } from "../department-resource-editor";
 import type { Nodepool } from "@/swagger-models/cluster-service-client";
 
 const saveMocks = vi.hoisted(() => ({ patchPool: vi.fn(), patchDepartments: vi.fn() }));
@@ -192,6 +193,68 @@ describe("scheduling step foundation", () => {
     } finally {
       wrapper.element.remove();
       wrapper.unmount();
+    }
+  });
+
+  it("previews Custom weights across all pages before saving an Automatic pool", async () => {
+    const savedPool = {
+      ...pool,
+      schedulingCapabilities: { quota: true, ranks: true, adjustableWeights: false, cpuQuota: false, limits: false },
+    };
+    const peers = [-1, 0, 4].map((quota, i) => ({
+      id: "resource-" + i,
+      orgUnitId: String(i),
+      orgUnitName: "Department " + i,
+      clusterId: savedPool.clusterId,
+      nodePoolId: savedPool.id,
+      nodePoolName: savedPool.name,
+      rank: "MediumLow",
+      resources: { gpu: { deserved: quota, overQuotaWeight: quota } },
+    }));
+    const wrapper = render(savedPool);
+    const table = wrapper.getComponent(Table);
+    const weights = () =>
+      table.findAllComponents(DepartmentResourceEditor).filter((cell) => cell.props("kind") === "weight");
+    const labels = () => weights().map((cell) => cell.props("displayValue"));
+    const pages = { nextOffset: 2 as number | undefined, loadingAll: false, loadNext: vi.fn(), loadAll: vi.fn() };
+    vi.stubGlobal(
+      "IntersectionObserver",
+      class {
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      },
+    );
+    pages.loadAll.mockResolvedValue(true);
+    try {
+      await wrapper.setProps({
+        canSavePool: true,
+        rows: peers.slice(0, 2),
+        baselineRows: peers.slice(0, 2),
+        departmentPages: pages,
+        ranks: ["MediumLow"],
+        rankCounts: { MediumLow: 3 },
+        aggregates: { MediumLow: { weightsSum: 4, deservedSum: -1, automaticWeightsSum: 4, rawWeightsSum: undefined } },
+      });
+      await wrapper.get('[aid="advanced-settings"]').trigger("click");
+      await wrapper.get('[aid="radio-option-Custom"]').trigger("click");
+      expect(labels()).toEqual(["33.33%", "33.33%"]);
+      expect(pages.loadAll).not.toHaveBeenCalled();
+      await wrapper.setProps({ rows: peers, baselineRows: peers, departmentPages: { ...pages, nextOffset: undefined } });
+      expect(labels()).toEqual(["33.33%", "33.33%", "33.33%"]);
+      expect(weights()[0].props("value")).toBe(2);
+      expect(weights()[0].props("previewWeightPercentage")?.(4)).toBe(50);
+      weights()[0].vm.$emit("apply", 4);
+      await wrapper.vm.$nextTick();
+      expect(labels()).toEqual(["50%", "25%", "25%"]);
+      await wrapper.get('[aid="radio-option-Automatic"]').trigger("click");
+      expect(labels()).toEqual(["0%", "0%", "100%"]);
+      await wrapper.get('[aid="radio-option-Custom"]').trigger("click");
+      expect(labels()).toEqual(["50%", "25%", "25%"]);
+      expect(table.props("draft").departments).toEqual({ "0": { id: "0", weight: 4 } });
+    } finally {
+      wrapper.unmount();
+      vi.unstubAllGlobals();
     }
   });
 

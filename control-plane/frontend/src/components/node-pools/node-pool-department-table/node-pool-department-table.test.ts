@@ -175,6 +175,31 @@ describe("simulation capacity", () => {
     expect(vi.mocked(simulateNodePool).mock.lastCall?.[1].nodePool?.capacity?.gpu).toBe(0);
   });
 
+  it("simulates Custom with the same initial and edited weights as the Guaranteed grid", async () => {
+    wrapper = renderSimulation(16);
+    const peers = [rows[0], { ...rows[0], orgUnitId: "b", orgUnitName: "Beta" }];
+    await wrapper.setProps({
+      rows: peers,
+      baselineRows: peers,
+      rawWeightsAvailable: false,
+      ranks: ["MediumLow"],
+      rankCounts: { MediumLow: 2 },
+      draft: {
+        ...draft,
+        mode: ESchedulingMode.Guaranteed,
+        capabilities: { adjustableWeights: false, quota: true },
+        departments: { b: { id: "b", weight: 0 } },
+      },
+    });
+    await wrapper.get('[aid="simulate-demand"]').trigger("click");
+    await vi.advanceTimersByTimeAsync(500);
+    const requested = vi.mocked(simulateNodePool).mock.lastCall?.[1].orgUnits;
+    expect(requested?.map(({ id, gpu }) => [id, gpu?.overQuotaWeight])).toEqual([
+      ["a", 2],
+      ["b", 0],
+    ]);
+  });
+
   it("shows a loading track until the selected mode has allocations", async () => {
     const result = {
       orgUnits: [

@@ -6,6 +6,8 @@ import { ENodePoolSchedulingMode as ESchedulingMode, isSupportedSchedulingMode }
 import { effectiveDepartmentEdit } from "@/utils/node-pool-scheduling.util/node-pool-scheduling-totals.util";
 import type { SchedulingCapabilitiesNullable } from "@/swagger-models/cluster-service-client/index";
 
+export const DEFAULT_DEPARTMENT_SCHEDULING_WEIGHT = 2;
+
 export interface IDepartmentSchedulingEdit {
   id: string;
   weight?: number;
