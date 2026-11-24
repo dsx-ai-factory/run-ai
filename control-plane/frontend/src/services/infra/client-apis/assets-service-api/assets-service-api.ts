@@ -11,7 +11,6 @@ import {
   GitApi,
   HostPathApi,
   ModelApi,
-  ModelInferenceApi,
   NFSApi,
   PVCApi,
   S3Api,
@@ -40,7 +39,6 @@ class AssetsServiceApi {
   hostPathApi: HostPathApi;
   gitApi: GitApi;
   secretApi: SecretApi;
-  modelInferenceApi: ModelInferenceApi;
   modelApi: ModelApi;
   synchronizationApi: SynchronizationApi;
   configMapApi: ConfigMapApi;
@@ -61,7 +59,6 @@ class AssetsServiceApi {
     this.hostPathApi = new HostPathApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.gitApi = new GitApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.secretApi = new SecretApi(this.configuration, this.baseUrl, authenticatedAxios);
-    this.modelInferenceApi = new ModelInferenceApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.modelApi = new ModelApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.synchronizationApi = new SynchronizationApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.configMapApi = new ConfigMapApi(this.configuration, this.baseUrl, authenticatedAxios);

@@ -24,7 +24,6 @@ import {
   type ComplianceInfoReason,
   type UnifiedPolicyInfoPerReplicaType,
 } from "@/swagger-models/workloads-client";
-import type { InferenceSpecificRunParams, PolicyInfo } from "@/swagger-models/assets-service-client";
 
 import { makeId } from "../common.util";
 import type { IUISuperWorkloadSpec, IUIWorkloadStorageFields } from "@/models/workload.model";
@@ -44,7 +43,6 @@ export const policyUtil = {
   getOptionsWithRules,
   cleanupItemizeExcludeDuplicates,
   cleanupLockedItems,
-  cleanupItemizeBeforeSubmission,
   cleanupFlatItemizeBeforeSubmission,
   isNonManageableRuleConflict,
 };
@@ -339,41 +337,6 @@ function cleanupItemizeExcludeDuplicates<T extends { exclude?: boolean | null }>
 
 function cleanupLockedItems<T>(items: T[], mainKey: keyof T, locked: string[]): T[] {
   return items.filter((item) => !locked.includes(item[mainKey] as string));
-}
-
-function cleanupItemizeBeforeSubmission<T extends InferenceSpecificRunParams>(
-  specificRunParams: T,
-  policyRules?: PolicyInfo | null,
-): T {
-  const annoNoDups = cleanupItemizeExcludeDuplicates(specificRunParams.annotations || [], "name");
-  specificRunParams.annotations = cleanupLockedItems(
-    annoNoDups || [],
-    "name",
-    policyRules?.rules?.specificRunParams?.annotations?.instances?.locked || [],
-  );
-
-  const labelNoDups = cleanupItemizeExcludeDuplicates(specificRunParams.labels || [], "name");
-  specificRunParams.labels = cleanupLockedItems(
-    labelNoDups || [],
-    "name",
-    policyRules?.rules?.specificRunParams?.labels?.instances?.locked || [],
-  );
-
-  const envVarNoDups = cleanupItemizeExcludeDuplicates(specificRunParams.environmentVariables || [], "name");
-  specificRunParams.environmentVariables = cleanupLockedItems(
-    envVarNoDups || [],
-    "name",
-    policyRules?.rules?.specificRunParams?.environmentVariables?.instances?.locked || [],
-  );
-
-  const tolNoDups = cleanupItemizeExcludeDuplicates(specificRunParams.tolerations || [], "name");
-  specificRunParams.tolerations = cleanupLockedItems(
-    tolNoDups || [],
-    "name",
-    policyRules?.rules?.specificRunParams?.tolerations?.instances?.locked || [],
-  );
-
-  return specificRunParams;
 }
 
 function cleanupFlatItemizeBeforeSubmission<T extends IUISuperWorkloadSpec>(

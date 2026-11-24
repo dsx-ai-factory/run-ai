@@ -67,7 +67,7 @@ import {
   type IAutoScaleData,
   type IAutoScaleOptions,
 } from "./auto-scale-section.model";
-import type { AutoScalingRules } from "@/swagger-models/assets-service-client";
+import type { AutoScalingRules } from "@/swagger-models/policy-service-client";
 import {
   DEFAULT_THRESHOLD_VALUE,
   METRIC_LATENCY,

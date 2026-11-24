@@ -3,16 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { IToolItem } from "@/models/workload.model";
-import type { Inference } from "@/swagger-models/assets-service-client";
-
-export enum EInferenceType {
-  RunaiModel = "runai-model",
-  HuggingFace = "hugging-face",
-  AssetsBased = "assets-based",
-  Nim = "nim",
-}
-
 export enum EInferenceArchitecture {
   Standard = "Standard",
   Distributed = "Distributed",
@@ -75,18 +65,6 @@ export type TInferenceServerSelection = EServerType.Custom | EServerType.Nim | E
 // old values
 export const OLD_LLM_ENVIRONMENT_FOR_HUGGING_FACE = "llm-server";
 export const OLD_LLM_IMAGE_FOR_HUGGING_FACE = "runai-vllm";
-
-export interface IInferenceList extends Inference {
-  connections?: Array<IToolItem>;
-  extendJobValues?: IExtendJobValues;
-}
-export interface IExtendJobValues {
-  usedMemory?: string;
-  usedCPUs?: string;
-  gpusUtilization?: string;
-  usedGpuMemory?: string;
-  currentAllocatedGPUsMemoryBytes?: number;
-}
 
 export const MIN_REPLICAS_DEFAULT_VALUE = 1;
 export const MAX_REPLICAS_DEFAULT_VALUE = 1;

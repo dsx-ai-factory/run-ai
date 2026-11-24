@@ -30,6 +30,7 @@ function copyWorkload(type: EWorkloadType, isHybridSubmissionEnabled: boolean, s
 
 describe.each([false, true])("Copy with flexible submission enabled = %s", (enabled) => {
   it.each([
+    [EWorkloadType.Inference, INFERENCE_ROUTE_NAMES.INFERENCE_FLAT_HYBRID],
     [EWorkloadType.Workspace, WORKSPACE_ROUTE_NAMES.WORKSPACE_HYBRID],
     [EWorkloadType.Training, TRAINING_ROUTE_NAMES.TRAINING_HYBRID],
     [EWorkloadType.Distributed, TRAINING_ROUTE_NAMES.DISTRIBUTED_HYBRID],
@@ -43,15 +44,6 @@ describe.each([false, true])("Copy with flexible submission enabled = %s", (enab
         projectId: assetBasedWorkload.projectId,
         clusterId: assetBasedWorkload.clusterId,
       },
-    });
-  });
-
-  it("opens the existing asset-based inference form", () => {
-    const page = copyWorkload(EWorkloadType.Inference, enabled);
-
-    expect(page.$router.push).toHaveBeenCalledExactlyOnceWith({
-      name: INFERENCE_ROUTE_NAMES.INFERENCE_ASSETS_EDIT,
-      query: { fromCopyId: assetBasedWorkload.id },
     });
   });
 

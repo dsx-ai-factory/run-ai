@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { EInferenceArchitecture, EServerType } from "@/models/inference.model";
+import { EInferenceArchitecture, EServerType } from "@/models/inference.model";
 
 export interface IInferenceNewModel {
   name: string;
@@ -12,4 +12,15 @@ export interface IInferenceNewModel {
   serverType: EServerType;
   architecture: EInferenceArchitecture;
   templateId: string | null;
+}
+
+export function getEmptyInferenceNewModel(): IInferenceNewModel {
+  return {
+    name: "",
+    clusterId: "",
+    projectId: -1,
+    serverType: EServerType.Nim,
+    architecture: EInferenceArchitecture.Standard,
+    templateId: null,
+  };
 }

@@ -9,7 +9,7 @@ import { Quasar } from "quasar";
 import type { VueWrapper } from "@vue/test-utils";
 import TerminationGracePeriodSection from "./termination-grace-period-section.vue";
 import { RunaiDurationInput } from "@/components/common/runai-duration-input";
-import type { IntegerRules } from "@/swagger-models/assets-service-client";
+import type { IntegerRules } from "@/swagger-models/policy-service-client";
 
 // Mock policy rules for testing
 const mockPolicyRules = {

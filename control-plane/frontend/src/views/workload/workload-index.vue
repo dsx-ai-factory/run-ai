@@ -1209,10 +1209,6 @@ const WorkloadIndex = defineComponent({
           routeName = WORKSPACE_ROUTE_NAMES.WORKSPACE_HYBRID;
           break;
         case EWorkloadType.Inference:
-          if (!isFlatWorkload) {
-            this.$router.push({ name: INFERENCE_ROUTE_NAMES.INFERENCE_ASSETS_EDIT, query: { fromCopyId: workload.id } });
-            return;
-          }
           routeName = INFERENCE_ROUTE_NAMES.INFERENCE_FLAT_HYBRID;
           break;
         case EWorkloadType.DistributedInference:

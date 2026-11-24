@@ -13,7 +13,6 @@ import {
   ARGS_PREFIX_FOR_VLLM,
   EHuggingFaceEnvVariableNames,
   EInferenceArchitecture,
-  EInferenceType,
   ENimEnvVariableNames,
   HF_HOME_DEFAULT_PATH,
   HOME_DEFAULT_PATH,
@@ -37,21 +36,14 @@ import {
   type IUIInferenceTemplateCreation,
   EWorkloadCategory,
 } from "@/models/workload.model";
-import type { IUIWorkloadEnvSectionModel } from "@/components/section/environment-section/environment-section.model";
-import type { IComputeSectionData } from "@/components/section/compute-resource-section/compute-resource-section.models";
-import type { Resources } from "@/swagger-models/org-unit-service-client";
 import {
-  type InferenceSpecificRunParams,
   ServingPortAccessAuthorizationTypeEnum,
   type EnvironmentAsset,
   type EnvironmentVariableOfAsset,
-  type InferenceCreationRequestV2,
-  type SpecificRunServingPortAccessServingPortAccess,
   type PvcInstance,
   type HostPathInstance,
   type NfsInstance,
   type AutoScaling,
-  type SpecificRunAutoScalingAutoScaling,
   AssetKind,
   type SupersetSpec,
   type SupersetSpecAllOfStorage,
@@ -65,7 +57,6 @@ import {
   type DistributedInferenceServingPortProtocol,
   type DistributedInferenceServingPortAccessAuthorizationTypeEnum,
   DistributedInferenceStartupPolicy,
-  type InferenceV2,
 } from "@/swagger-models/assets-service-client";
 import type {
   DistributedInference,
@@ -101,15 +92,13 @@ import type { IServingEndpointAccessData } from "@/components/section/inference/
 import type { IItemizedListItem } from "@/components/common/runai-itemized-list/runai-itemized-list.model";
 import type { IAutoScaleData } from "@/components/section/compute-resource-section/auto-scale-section";
 import { workloadUtil } from "@/utils/workload.util/workload.util";
-import type { IUIVolume, TDataSourceKinds } from "@/models/data-source.model";
+import type { TDataSourceKinds } from "@/models/data-source.model";
 import type { ClusterDependencyStatus, ClustersMinimalData } from "@/swagger-models/cluster-service-client";
 
 // utils
 import { fallbackDefaultIfNullOrUndefined, isEqual, isNumber, omit, pick } from "@/utils/common.util/common.util";
-import { workloadCreateFormUtil } from "@/utils/workload-create-form.util/workload-create-form.util";
 import { EServerType } from "@/models/inference.model";
 import { workloadHybridUtil } from "../workload-hybrid.util/workload-hybrid.util";
-import type { InferencePolicyDefaultsAndRulesV2 } from "@/swagger-models/policy-service-client";
 import { scaleDownUtil } from "@/components/section/compute-resource-section/auto-scale-section/scale-down-section/scale-down.util";
 import { is } from "quasar";
 import { thresholdMetricUtils } from "@/components/section/compute-resource-section/auto-scale-section/threshold-metric-section/threshold-metric.util";
@@ -118,15 +107,10 @@ import { ERunaiCredentialSource } from "@/components/common/runai-credential-sel
 export const inferenceWorkloadUtil = {
   getEmptyUIInferenceCreation,
   getEmptyUINimInferenceCreation,
-  getInferenceComputeResourceData,
-  getEnvironmentRunParamsData,
   getHuggingFaceTokenValue,
   getEnvironmentVariableValue,
   inferCredentialSourceFromEnvVar,
   excludeEnvironmentVariablesByName,
-  getInferenceCreationRequestV2,
-  convertInferenceToWorkloadUI,
-  getInferenceRequestV2SpecificRunParams,
   getHFInferenceWorkloadCreationRequest,
   isLatencyEnableOnCluster,
   isAutoScaleEnableOnCluster,
@@ -169,7 +153,6 @@ export const inferenceWorkloadUtil = {
   _addNimEnvironmentVariables,
   _fillDatasourceData,
   _handleHuggingFaceEnvironmentVariables,
-  normalizeAutoScaleData,
   _getFlatInferenceSpecData,
   _addNimEnvironmentVariablesIfNeeded,
   _ensureStoragePathEnvVar,
@@ -327,21 +310,6 @@ function getUIServingPortEmptyState(): IServingEndpointAccessData {
     port: SERVING_PORT_SERVER_PORT,
     protocol: "http",
   };
-}
-
-function getInferenceComputeResourceData(
-  workload: IUIWorkloadCreation,
-  projectNodepools: Array<Resources> | undefined | null = [],
-): IComputeSectionData {
-  const computeData: IComputeSectionData = workloadCreateFormUtil.getComputeResourceData(workload, projectNodepools);
-  computeData.autoScaleData = workload.specificEnv.autoScaleData;
-  return computeData;
-}
-
-function getEnvironmentRunParamsData(workload: IUIWorkloadCreation): IUIWorkloadEnvSectionModel {
-  const envSectionData: IUIWorkloadEnvSectionModel = workloadCreateFormUtil.getEnvironmentRunParamsData(workload);
-  envSectionData.servingPortAccess = workload.specificEnv.servingPortAccess;
-  return envSectionData;
 }
 
 function getHuggingFaceTokenValue(environmentVariables: Array<EnvironmentVariableOfAsset> = []): string {
@@ -668,96 +636,8 @@ function _getFlatWorkloadData(
   return workloadCreationRequest;
 }
 
-/// ---->
-function getInferenceCreationRequestV2(
-  inference: IUIWorkloadCreation,
-  supportingServingPortAccess = false,
-  workloadVolumes?: Array<string>,
-): InferenceCreationRequestV2 {
-  if (!inference.assets.environment) throw "Environment details are missing";
-  const workloadCreationRequest: InferenceCreationRequestV2 = {
-    meta: {
-      name: inference.name,
-      projectId: inference.projectId.toString(),
-      clusterId: inference.clusterId,
-    },
-    assets: workloadUtil.getWorkloadAssetsFromUIWorkloadAssets(inference.assets, workloadVolumes),
-    specificRunParams: getInferenceRequestV2SpecificRunParams(inference.specificEnv, supportingServingPortAccess),
-  };
-  return workloadCreationRequest;
-}
-
-function normalizeAutoScaleData(
-  autoScalingSpec: SpecificRunAutoScalingAutoScaling | null | undefined,
-  policy?: InferencePolicyDefaultsAndRulesV2,
-): IAutoScaleData {
-  let autoScaling: AutoScaling = {
-    minReplicas: autoScalingSpec?.minReplicas,
-    maxReplicas: autoScalingSpec?.maxReplicas,
-    metric: autoScalingSpec?.thresholdMetric,
-    metricThreshold: autoScalingSpec?.thresholdValue,
-    scaleToZeroRetentionSeconds: autoScalingSpec?.scaleToZeroRetentionSeconds,
-  };
-
-  autoScaling = getAutoScalingData(autoScaling, policy as unknown as UnifiedPolicyInfoPerReplicaType | undefined);
-  const autoScaleData: IAutoScaleData = {
-    minReplicas: autoScaling.minReplicas === null ? undefined : autoScaling.minReplicas,
-    maxReplicas: autoScaling.maxReplicas === null ? undefined : autoScaling.maxReplicas,
-    thresholdMetric: autoScaling.metric === null ? undefined : autoScaling.metric,
-    thresholdValue: autoScaling.metricThreshold === null ? undefined : autoScaling.metricThreshold,
-    scaleToZeroRetentionSeconds:
-      autoScaling.scaleToZeroRetentionSeconds === null ? undefined : autoScaling.scaleToZeroRetentionSeconds,
-  };
-
-  return autoScaleData;
-}
-
-function convertInferenceToWorkloadUI(
-  workload: InferenceV2,
-  inferenceType?: EInferenceType,
-  supportingServingPortAccess = false,
-  uiVolumes?: Array<IUIVolume>,
-  modelName?: string,
-  policy?: InferencePolicyDefaultsAndRulesV2,
-  templateId?: string,
-  architecture?: EInferenceArchitecture,
-): IUIInferenceCreation {
-  const baseWorkload: IUIWorkloadCreation = workloadUtil.convertWorkloadToWorkloadUI(workload, uiVolumes);
-  const inferenceUI: IUIInferenceCreation = {
-    ...baseWorkload,
-    inferenceType,
-    templateId,
-    architecture: EInferenceArchitecture.Standard,
-    serverType: EServerType.Custom,
-  };
-
-  if (modelName) {
-    inferenceUI.modelName = modelName;
-  }
-
-  inferenceUI.specificEnv.autoScaleData = normalizeAutoScaleData(workload.specificRunParams?.autoScaling, policy);
-
-  if (supportingServingPortAccess) {
-    inferenceUI.specificEnv.servingPortAccess = {
-      access: servingPortInternalToolInfo(workload.specificRunParams?.servingPortAccess),
-    };
-  }
-
-  // delete inferenceUI.specificEnv.allowOverQuota;
-  return {
-    ...inferenceUI,
-    inferenceType: inferenceType || EInferenceType.AssetsBased,
-    architecture: architecture || EInferenceArchitecture.Standard,
-  };
-}
-
 function servingPortInternalToolInfo(
-  servingPortAccess:
-    | SpecificRunServingPortAccessServingPortAccess
-    | ServingPort
-    | SupersetServingPort
-    | undefined
-    | null,
+  servingPortAccess: ServingPort | SupersetServingPort | undefined | null,
 ): IConnectionAccess {
   return {
     accessOption: _getServingPortAccessOption(servingPortAccess),
@@ -767,12 +647,7 @@ function servingPortInternalToolInfo(
 }
 
 function _getServingPortAccessOption(
-  servingPortAccess:
-    | SpecificRunServingPortAccessServingPortAccess
-    | ServingPort
-    | SupersetServingPort
-    | undefined
-    | null,
+  servingPortAccess: ServingPort | SupersetServingPort | undefined | null,
 ): EAccessOptions {
   let authorizationType: EAccessOptions = EAccessOptions.PUBLIC;
   if (!servingPortAccess) return authorizationType;
@@ -792,26 +667,6 @@ function _getServingPortAccessOption(
   }
 
   return authorizationType;
-}
-
-function getInferenceRequestV2SpecificRunParams(
-  specificEnv: IUIWorkloadSpecificEnv,
-  supportingServingPortAccess = false,
-): InferenceSpecificRunParams {
-  const retSpecificEnv: InferenceSpecificRunParams = workloadUtil.processCommonSpecificEnv(specificEnv, [
-    "allowOverQuota",
-    "backoffLimit",
-    "autoScaleData",
-    "servingPortAccess",
-  ]);
-
-  retSpecificEnv.autoScaling = specificEnv.autoScaleData;
-
-  if (supportingServingPortAccess && specificEnv.servingPortAccess?.access) {
-    retSpecificEnv.servingPortAccess = servingPortAccessAuthorization(specificEnv.servingPortAccess.access);
-  }
-
-  return retSpecificEnv;
 }
 
 function isLatencyEnableOnCluster(currCluster: ClustersMinimalData): boolean {
@@ -834,9 +689,7 @@ function isAutoScaleEnableOnCluster(currCluster: ClustersMinimalData): boolean {
   );
 }
 
-function servingPortAccessAuthorization(
-  servingPortAccess: IConnectionAccess | null | undefined,
-): SpecificRunServingPortAccessServingPortAccess | ServingPort {
+function servingPortAccessAuthorization(servingPortAccess: IConnectionAccess | null | undefined): ServingPort {
   return {
     authorizationType: _getAuthorizationType(servingPortAccess),
     authorizedGroups: servingPortAccess?.authorizedGroups,

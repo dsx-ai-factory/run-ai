@@ -37,15 +37,17 @@ import type { IHfInferenceSubmitFormDrawerAction } from "@/components/workload-c
 import { EHfInferenceSubmitFormDrawerActionType } from "@/components/workload-creation/inference/hf-inference-submit-form/hf-inference-submit-form.types";
 
 // models
-import { AssetKind, Scope, ScopeType, type StringOption } from "@/swagger-models/assets-service-client";
+import { AssetKind, Scope, ScopeType } from "@/swagger-models/assets-service-client";
+import type { StringOption, WorkspacePolicyDefaultsAndRulesV2 } from "@/swagger-models/policy-service-client";
 import type { ClustersMinimalData } from "@/swagger-models/cluster-service-client";
 import type {
   UnifiedPolicyInfoPerReplicaType,
   UnifiedProjectInfo,
   UnifiedWorkload,
   WorkspaceCreationRequest,
+  Inference,
+  Workload,
 } from "@/swagger-models/workloads-client";
-import type { WorkspacePolicyDefaultsAndRulesV2 } from "@/swagger-models/policy-service-client";
 import { getPolicyViewDetails, type IPolicyViewDetails } from "@/utils/policy.util/policy-view.util";
 import { clearWorkloadBlockedFields, policyUtil } from "@/utils/policy.util";
 import { WorkloadCreationDrawerEntities } from "@/models/workload-creation-drawer-model";
@@ -55,12 +57,10 @@ import type { IAssetsFilter } from "@/models/filter.model";
 import type { THybridFormState } from "@/models/workload-hybrid.model";
 import {
   EWorkloadFormType,
-  EWorkloadType,
   EWorkloadTypeSupportedInAssetsService,
   type IUIStorageFields,
 } from "@/models/workload.model";
 import type { SecretListInfo } from "@/swagger-models/k8s-objects-tracker-client";
-import type { Inference, Workload } from "@/swagger-models/workloads-client";
 import type { IScopeModel, ISelectOption } from "@/models/global.model";
 import type { IUISuperWorkloadCreationRequest } from "@/models/workload.model";
 import { LLM_IMAGE_FOR_HUGGING_FACE } from "@/models/inference.model";
@@ -446,7 +446,7 @@ const InferenceHuggingFaceBased = defineComponent({
           hfWorkload,
           this.authStore.tenant.id,
         );
-        this.workloadStore.setWorkloadAdded(workload, EWorkloadType.Inference);
+        this.workloadStore.setWorkloadAdded(workload);
         this.$q.notify(alertUtil.getSuccess(`Inference ${this.inference.name} created`));
         this.clearFormState();
         const query = { clusterId: this.inference.clusterId };

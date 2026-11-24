@@ -28,13 +28,10 @@ import type { IJobFilter } from "@/models/filter.model";
 import { eventHistoryColumns } from "@/table-models/workload.table-model";
 import type { IWorkspaceList } from "@/models/workspace.model";
 import type { ITrainingList } from "@/models/training.model";
-import type { IInferenceList } from "@/models/inference.model";
 import type { ITableColumn } from "@/models/table.model";
-import type { EWorkloadType } from "@/models/workload.model";
 import { type IYamlWorkloadFormState } from "@/models/workload.model";
 
 import { workloadLocalPhaseUpdater } from "@/services/cluster/workload.service/local-status-updater";
-import type { Inference, InferenceV2, ModelInference, ModelInferenceV2 } from "@/swagger-models/assets-service-client";
 import type { WorkloadV2 } from "@/swagger-models/workloads-manager-client";
 
 const getDefaultFilters = (): IJobFilter => {
@@ -122,22 +119,9 @@ export const useWorkloadStore = defineStore("WorkloadStore", {
       this.workloadAdded = null;
     },
     setWorkloadAdded(
-      workloadAdded:
-        | IWorkspaceList
-        | ITrainingList
-        | IInferenceList
-        | Workload
-        | Inference
-        | InferenceV2
-        | ModelInference
-        | ModelInferenceV2
-        | Training
-        | Workspace
-        | WorkloadV2
-        | DistributedWorkload,
-      workloadType?: EWorkloadType,
+      workloadAdded: IWorkspaceList | ITrainingList | Workload | Training | Workspace | WorkloadV2 | DistributedWorkload,
     ): void {
-      this.workloadAdded = workloadUtil.convertToWorkload(workloadAdded, workloadType);
+      this.workloadAdded = workloadUtil.convertToWorkload(workloadAdded);
     },
     async updateWorkloadAdded(workloads: Workload[]): Promise<void> {
       if (this.workloadAdded != null) {
