@@ -146,7 +146,6 @@
       "matchPackageNames": [
         "kube-prometheus-stack"
       ],
-      "automerge": false,
       "group": {
         "commitMessageTopic": "kube-prometheus-stack"
       }
