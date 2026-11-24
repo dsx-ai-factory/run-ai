@@ -79,7 +79,7 @@ test.describe(`CLI List Datasource - Negative Tests, tags: ${tags.resource.datas
         });
 
         // Coverage remains disabled pending revalidation of this case
-        test.skip('T5585452: List data sources with invalid type', function () {
+        test('T5585452: List data sources with invalid type', function () {
             test.step('Attempt to list with invalid type and print output', function () {
                 logger.info('Attempting to list data sources with invalid type');
 
