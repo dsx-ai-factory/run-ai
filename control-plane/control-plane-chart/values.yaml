@@ -2195,11 +2195,12 @@ clusterService:
     clusterInstallation:
       supportedVersionRange:
         # Inclusive
-        min: 2.18
+        min: 2.24
         # Inclusive
         # Defaults to the chart's app version
         max: ''
-      helmRegistryUrl: https://helm.ngc.nvidia.com/nvidia/runai-oss
+      helmRegistryUrlPublic: https://helm.ngc.nvidia.com/nvidia/runai-oss
+      helmRegistryUrl: https://helm.ngc.nvidia.com/nvidia/runai
       helmRegistryUsername: ''
       helmRegistryPasswordPlaceholder: ''
     maxWaitForClusterRemoteConfigStatusUpdate: 5m

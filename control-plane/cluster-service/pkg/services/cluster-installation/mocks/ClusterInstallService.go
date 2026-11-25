@@ -119,6 +119,69 @@ func (_c *ClusterInstallService_GetClusterSupportedVersions_Call) RunAndReturn(r
 	return _c
 }
 
+// GetHelmRepoForVersion provides a mock function for the type ClusterInstallService
+func (_mock *ClusterInstallService) GetHelmRepoForVersion(ctx context.Context, config1 *config.Installation, version string) cluster_installation.HelmRepo {
+	ret := _mock.Called(ctx, config1, version)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetHelmRepoForVersion")
+	}
+
+	var r0 cluster_installation.HelmRepo
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *config.Installation, string) cluster_installation.HelmRepo); ok {
+		r0 = returnFunc(ctx, config1, version)
+	} else {
+		r0 = ret.Get(0).(cluster_installation.HelmRepo)
+	}
+	return r0
+}
+
+// ClusterInstallService_GetHelmRepoForVersion_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetHelmRepoForVersion'
+type ClusterInstallService_GetHelmRepoForVersion_Call struct {
+	*mock.Call
+}
+
+// GetHelmRepoForVersion is a helper method to define mock.On call
+//   - ctx context.Context
+//   - config1 *config.Installation
+//   - version string
+func (_e *ClusterInstallService_Expecter) GetHelmRepoForVersion(ctx any, config1 any, version any) *ClusterInstallService_GetHelmRepoForVersion_Call {
+	return &ClusterInstallService_GetHelmRepoForVersion_Call{Call: _e.mock.On("GetHelmRepoForVersion", ctx, config1, version)}
+}
+
+func (_c *ClusterInstallService_GetHelmRepoForVersion_Call) Run(run func(ctx context.Context, config1 *config.Installation, version string)) *ClusterInstallService_GetHelmRepoForVersion_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *config.Installation
+		if args[1] != nil {
+			arg1 = args[1].(*config.Installation)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *ClusterInstallService_GetHelmRepoForVersion_Call) Return(helmRepo cluster_installation.HelmRepo) *ClusterInstallService_GetHelmRepoForVersion_Call {
+	_c.Call.Return(helmRepo)
+	return _c
+}
+
+func (_c *ClusterInstallService_GetHelmRepoForVersion_Call) RunAndReturn(run func(ctx context.Context, config1 *config.Installation, version string) cluster_installation.HelmRepo) *ClusterInstallService_GetHelmRepoForVersion_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetInstallationString provides a mock function for the type ClusterInstallService
 func (_mock *ClusterInstallService) GetInstallationString(data *cluster_installation.InstallationData) string {
 	ret := _mock.Called(data)
