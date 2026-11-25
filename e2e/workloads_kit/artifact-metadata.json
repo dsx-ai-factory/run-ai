@@ -15,6 +15,6 @@
     "dockerfile": "e2e/workloads_kit/Dockerfile"
   },
   "ngc": {
-    "guest_access": false
+    "guest_access": true
   }
 }
