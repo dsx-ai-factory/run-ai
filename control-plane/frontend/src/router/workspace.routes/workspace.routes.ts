@@ -5,9 +5,7 @@
 
 import WorkspaceNewApp from "@/views/workspace/creation/worksapce-new-app.vue";
 import WorkspaceNew from "@/views/workspace/creation/workspace-new.vue";
-import WorkloadTemplateEdit from "@/views/workspace/creation/workspace-assets-edit.vue";
 import WorkspaceHybrid from "@/views/workspace/creation/workspace-hybrid.vue";
-import WorkspaceAssetsApp from "@/views/workspace/creation/worksapce-assets-app.vue";
 
 import { WORKSPACE_ROUTE_NAMES } from "./workspace.routes.names";
 import { ResourceType, Action } from "@/swagger-models/authorization-client";
@@ -30,6 +28,7 @@ export const workspaceRoutes: RunaiRouteRecord = {
       children: [
         {
           path: "",
+          alias: "assets",
           name: WORKSPACE_ROUTE_NAMES.WORKSPACE_NEW,
           component: WorkspaceNew,
           meta: {
@@ -42,33 +41,6 @@ export const workspaceRoutes: RunaiRouteRecord = {
             requiresAuth: true,
             parentSubject: EMenuSubjectNames.WORKLOADS_MANAGER,
           },
-        },
-        {
-          path: "assets",
-          name: "workspace-assets-app",
-          component: WorkspaceAssetsApp, // router-view
-          children: [
-            {
-              path: "",
-              name: WORKSPACE_ROUTE_NAMES.WORKSPACE_ASSETS_EDIT,
-              component: WorkloadTemplateEdit,
-              meta: {
-                pageTitle: "New workspace",
-                fullWidth: true,
-                requestToLeave: true,
-                backPageName: WORKLOAD_ROUTE_NAMES.WORKLOAD_INDEX,
-                resourceType: ResourceType.Workspaces,
-                minPermittedActions: [Action.Create, Action.Update],
-                parentSubject: EMenuSubjectNames.WORKLOADS_MANAGER,
-                requiresAuth: true,
-              },
-              beforeEnter: (to, from, next) => {
-                // If the user tries to access the assets page directly, redirect to the new workspace page
-                if (from === START_LOCATION) next({ name: WORKSPACE_ROUTE_NAMES.WORKSPACE_NEW });
-                else next();
-              },
-            },
-          ],
         },
         {
           path: "hybrid",

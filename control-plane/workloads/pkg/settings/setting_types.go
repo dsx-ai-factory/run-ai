@@ -52,28 +52,6 @@ func (e *WorkloadSubmissionV2Enabled) TransformForMigration(v interface{}) inter
 	return v
 }
 
-type EnableHybridSubmission struct {
-	Enabled bool `json:"enabled"`
-}
-
-func (e *EnableHybridSubmission) Category() string { return WorkloadsCategory }
-func (e *EnableHybridSubmission) Description() string {
-	return "Enable to submit workloads via the new flexible form. Allow selecting an existing setup or starting from scratch, reviewing existing setups and understanding policy definitions."
-}
-func (e *EnableHybridSubmission) DisplayName() string { return "Flexible workload submission" }
-func (e *EnableHybridSubmission) Key() string {
-	return string(api.WORKLOADSSETTINGSKEYENUM_ENABLE_HYBRID_SUBMISSION)
-}
-func (e *EnableHybridSubmission) SetDefault()                 { e.Enabled = true }
-func (e *EnableHybridSubmission) Stage() setting_pkg.Stage    { return setting_pkg.GA }
-func (e *EnableHybridSubmission) Validate(_ interface{}) bool { return true }
-func (e *EnableHybridSubmission) TransformForMigration(v interface{}) interface{} {
-	if b, ok := v.(bool); ok {
-		return EnableHybridSubmission{Enabled: b}
-	}
-	return v
-}
-
 type GpuOverProvisioning struct {
 	Enabled bool `json:"enabled"`
 }

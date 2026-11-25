@@ -123,10 +123,6 @@ func (f *NgcApiKeyTestFactory) validateListContent(listRequest *http.Request, ex
 	tg.validateListContent(f.router, listRequest, expectedUsedBy, createdSpecs)
 }
 
-func (f *NgcApiKeyTestFactory) addToWorkloadCreationReq(request *api.WorkloadCreationRequest, assetMeta *api.AssetMeta) bool {
-	return false // NGC API Key cannot be directly used in workloads
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 //    Asset Builders
 /////////////////////////////////////////////////////////////////////////////////////////////

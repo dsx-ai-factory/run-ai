@@ -17,10 +17,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/dao"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/dbmodel"
 	dbTesting "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/testing"
-	workloadsdb "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/workloads"
 	authClient "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
@@ -121,44 +119,38 @@ var _ = Describe("Compute System Assets Migration", Ordered, func() {
 			cluster1 := uuid.NewString()
 
 			// inject a tenant A's workload that uses gpu_memory_16g, it will need to be migrated to a new compute asset
-			workloadId1, apiErr := injectWorkload(ctxTenantA, "ws1", cluster1, 1, "ns1", uuid_tensorboard_env, uuid_compute_gpu_memory_16g)
-			Expect(apiErr).To(BeNil())
+			workloadId1 := injectWorkload(ctxTenantA, "ws1", cluster1, 1, uuid_tensorboard_env, uuid_compute_gpu_memory_16g)
 			// test that it contains uuid_compute_gpu_memory_16g as a compute asset
 			computeId, err := getComputeAssetOfWorkload(ctxTenantA, workloadId1)
 			Expect(err).To(BeNil())
 			Expect(computeId).To(Equal(uuid_compute_gpu_memory_16g))
 
 			// inject a tenant A's workload that uses simple compute asset shouldn't have any affect
-			workloadId2, apiErr := injectWorkload(ctxTenantA, "ws2", cluster1, 1, "ns1", uuid_tensorboard_env, uuid_compute_assets_a)
-			Expect(apiErr).To(BeNil())
+			workloadId2 := injectWorkload(ctxTenantA, "ws2", cluster1, 1, uuid_tensorboard_env, uuid_compute_assets_a)
 			computeId, err = getComputeAssetOfWorkload(ctxTenantA, workloadId2)
 			Expect(err).To(BeNil())
 			Expect(computeId).To(Equal(uuid_compute_assets_a))
 
 			// inject a tenant A's workload that uses gpu_memory_16g, it will need to be migrated to the same as ws1 compute asset
-			workloadId3, apiErr := injectWorkload(ctxTenantA, "ws3", cluster1, 1, "ns1", uuid_tensorboard_env, uuid_compute_gpu_memory_16g)
-			Expect(apiErr).To(BeNil())
+			workloadId3 := injectWorkload(ctxTenantA, "ws3", cluster1, 1, uuid_tensorboard_env, uuid_compute_gpu_memory_16g)
 			computeId, err = getComputeAssetOfWorkload(ctxTenantA, workloadId3)
 			Expect(err).To(BeNil())
 			Expect(computeId).To(Equal(uuid_compute_gpu_memory_16g))
 
 			// inject a tenant A's workload that uses gpu_memory_20g, it will need to be migrated to a new compute asset
-			workloadId4, apiErr := injectWorkload(ctxTenantA, "ws4", cluster1, 1, "ns1", uuid_tensorboard_env, uuid_compute_gpu_memory_20g)
-			Expect(apiErr).To(BeNil())
+			workloadId4 := injectWorkload(ctxTenantA, "ws4", cluster1, 1, uuid_tensorboard_env, uuid_compute_gpu_memory_20g)
 			computeId, err = getComputeAssetOfWorkload(ctxTenantA, workloadId4)
 			Expect(err).To(BeNil())
 			Expect(computeId).To(Equal(uuid_compute_gpu_memory_20g))
 
 			// inject a tenant B's workload that uses gpu_memory_20g, it will need to be migrated to a new compute asset
-			workloadId5, apiErr := injectWorkload(ctxTenantB, "ws5", cluster1, 1, "ns1", uuid_tensorboard_env, uuid_compute_gpu_memory_20g)
-			Expect(apiErr).To(BeNil())
+			workloadId5 := injectWorkload(ctxTenantB, "ws5", cluster1, 1, uuid_tensorboard_env, uuid_compute_gpu_memory_20g)
 			computeId, err = getComputeAssetOfWorkload(ctxTenantB, workloadId5)
 			Expect(err).To(BeNil())
 			Expect(computeId).To(Equal(uuid_compute_gpu_memory_20g))
 
 			// inject a tenant A's workload that uses simple compute asset shouldn't have any affect
-			workloadId6, apiErr := injectWorkload(ctxTenantB, "ws6", cluster1, 1, "ns1", uuid_tensorboard_env, uuid_compute_assets_b)
-			Expect(apiErr).To(BeNil())
+			workloadId6 := injectWorkload(ctxTenantB, "ws6", cluster1, 1, uuid_tensorboard_env, uuid_compute_assets_b)
 			computeId, err = getComputeAssetOfWorkload(ctxTenantB, workloadId6)
 			Expect(err).To(BeNil())
 			Expect(computeId).To(Equal(uuid_compute_assets_b))
@@ -359,26 +351,23 @@ func injectEnvironmentAssets(ctx context.Context, id string, name string, kind s
 	return nil
 }
 
-func injectWorkload(ctx context.Context, name string, clusterId string, projectId int32, namespace string, environmentAssetId string, computeAssetId string) (string, *api.Error) {
-	// Load the db with workloads
-	workload1 := api.WorkloadCreationRequest{
-		Name:      name,
-		ClusterId: clusterId,
-		ProjectId: projectId,
-		Namespace: namespace,
-		Assets: api.AssetsIds{
-			Environment: environmentAssetId,
-			Compute:     utils.Ref(computeAssetId),
+func injectWorkload(ctx context.Context, name string, clusterId string, projectId int32, environmentAssetId, computeAssetId string) string {
+	GinkgoHelper()
+	id := uuid.NewString()
+	workload := dbmodel.WorkloadRec{
+		WorkloadType: "Workspace",
+		WorkloadMetaV1: api.WorkloadMetaV1{
+			Id: id, Name: name, ClusterId: clusterId, ProjectId: projectId, TenantId: auth.TenantIdOf(ctx),
 		},
 	}
-	containedAssets := []dbmodel.AssetsContainedInWorkload{
-		{AssetMetaRec: dbmodel.AssetMetaRec{AssetMeta: dbmodel.AssetMeta{Id: environmentAssetId, Kind: api.ASSETKIND_ENVIRONMENT}}},
-		{AssetMetaRec: dbmodel.AssetMetaRec{AssetMeta: dbmodel.AssetMeta{Id: computeAssetId, Kind: api.ASSETKIND_COMPUTE}}},
+	db := runaidb.DB().Actual().WithContext(ctx)
+	Expect(db.Create(&workload).Error).To(Succeed())
+	links := []dbmodel.WorkloadsAssetsRec{
+		{WorkloadId: id, AssetId: environmentAssetId, AssetKind: api.ASSETKIND_ENVIRONMENT},
+		{WorkloadId: id, AssetId: computeAssetId, AssetKind: api.ASSETKIND_COMPUTE},
 	}
-
-	id := uuid.NewString()
-	_, apiErr := workloadsdb.CreateWorkload(ctx, "Workspace", &workload1, id, containedAssets, nil, nil, nil, nil)
-	return id, apiErr
+	Expect(db.Create(&links).Error).To(Succeed())
+	return id
 }
 
 func injectTemplateContent(ctx context.Context, template_id string, asset_id string, name string) error {
@@ -432,17 +421,15 @@ func getAssetsIdOfTemplateContent(ctx context.Context, template_id string) (stri
 }
 
 func getComputeAssetOfWorkload(ctx context.Context, workloadId string) (string, error) {
-	assets, apiErr := workloadsdb.GetWorkloadAssetsByWorkloadId(ctx, []string{"Workspace"}, workloadId)
-	Expect(apiErr).To(BeNil())
-	Expect(assets).ToNot(BeNil())
-
-	for _, asset := range assets {
-		if asset.WorkloadsAssetsRec.AssetKind == api.ASSETKIND_COMPUTE {
-			return asset.WorkloadsAssetsRec.AssetId, nil
-		}
+	var link dbmodel.WorkloadsAssetsRec
+	query := runaidb.DB().Actual().WithContext(ctx).Where("workload_id = ? AND asset_kind = ?", workloadId, api.ASSETKIND_COMPUTE).Find(&link)
+	if query.Error != nil {
+		return "", query.Error
 	}
-
-	return "", fmt.Errorf("no compute asset found")
+	if query.RowsAffected == 0 {
+		return "", fmt.Errorf("no compute asset found")
+	}
+	return link.AssetId, nil
 }
 
 func migrateTo(start int, command string) {

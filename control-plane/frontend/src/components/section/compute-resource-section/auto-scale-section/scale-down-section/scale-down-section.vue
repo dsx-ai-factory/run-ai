@@ -54,7 +54,7 @@ import { RunaiSelect } from "@/components/common/runai-select";
 import { PolicyNumberInput } from "@/components/common/policy-number-input";
 
 // models
-import { type AutoScalingRules } from "@/swagger-models/assets-service-client";
+import type { AutoScalingRules } from "@/swagger-models/policy-service-client";
 import {
   CUSTOM_SCALE_DOWN_ID,
   EScaleDownSectionEvents,

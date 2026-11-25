@@ -6,7 +6,7 @@
 import { scaleDownUtil } from "./scale-down.util";
 import { SCALE_TO_ZERO_RETENTION_IN_MINUTES_DEFAULT_VALUE } from "./scale-down-section.model";
 import type { AutoScaling } from "@/swagger-models/workloads-client";
-import type { AutoScalingRules } from "@/swagger-models/assets-service-client";
+import type { AutoScalingRules } from "@/swagger-models/policy-service-client";
 import { describe, expect, it } from "vitest";
 
 describe("getScaleToZeroRetentionSecondsDefaultValue", () => {

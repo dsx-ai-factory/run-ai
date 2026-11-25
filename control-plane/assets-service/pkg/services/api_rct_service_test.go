@@ -148,13 +148,6 @@ func (c *RctTestFactory) validateListContent(listRequest *http.Request, expected
 	tg.validateListContent(c.router, listRequest, expectedUsedBy, createdSpecs)
 }
 
-// addToWorkloadCreationReq — RCT is not yet wired into workload creation.
-// Returning false makes the framework skip workload-integration sub-tests
-// (same pattern the credential kinds use).
-func (c *RctTestFactory) addToWorkloadCreationReq(_ *api.WorkloadCreationRequest, _ *api.AssetMeta) bool {
-	return false
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 //    Asset Builders
 /////////////////////////////////////////////////////////////////////////////////////////////

@@ -30,7 +30,6 @@
             <transition-group name="fade">
               <template v-if="selectedProjectId && selectedProjectId !== -1">
                 <template-section-v2
-                  v-if="isHybridSupported"
                   aid="template-section-v2"
                   :templates="flatTemplates"
                   :total-templates-count="flatTotalCount"
@@ -95,8 +94,6 @@ import { useWorkspaceStore } from "@/stores/workspace.store";
 import { useClusterStore } from "@/stores/cluster.store";
 import { useAppStore } from "@/stores/app.store";
 import { useAuthStore } from "@/stores/auth.store";
-import { useEnvironmentStore } from "@/stores/environment.store";
-import { useSettingStore } from "@/stores/setting.store";
 import { useGuidedTourStore } from "@/stores/guided-tour.store";
 
 // services
@@ -105,7 +102,6 @@ import { requestToLeave } from "@/services/infra/router.service/router.service";
 import { urlService } from "@/services/url.service/url.service";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 import { workloadService } from "@/services/cluster/workload.service/workload.service";
-import { workspaceService } from "@/services/control-plane/workspace.service/workspace.service";
 // cmps
 import { RunaiFormWrapper } from "@/components/common/runai-form-wrapper";
 import { RunaiExpansionWrapper } from "@/components/common/runai-expansion-wrapper";
@@ -116,10 +112,7 @@ import { TemplateSectionV2 } from "@/components/section/template-section-v2";
 import { RunaiClusterSection } from "@/components/common/runai-cluster-selection/runai-cluster-section";
 import { QuickSubmissionDropdown } from "@/components/workload-creation/quick-submission-dropdown";
 // models
-import { UidGidSource } from "@/swagger-models/assets-service-client";
-import type { IUIWorkloadCreation } from "@/models/workload.model";
-import type { Project, ProjectMetadata } from "@/swagger-models/org-unit-service-client";
-import { MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION } from "@/common/version.constant";
+import type { ProjectMetadata } from "@/swagger-models/org-unit-service-client";
 import { WorkloadType } from "@/swagger-models/workloads-client";
 import type { ClustersMinimalData } from "@/swagger-models/cluster-service-client";
 import type { ICardQuery } from "@/components/common/runai-card-list/runai-card-list.model";
@@ -128,8 +121,6 @@ import { WORKSPACE_ROUTE_NAMES } from "@/router/workspace.routes/workspace.route
 import { WORKLOAD_ROUTE_NAMES } from "@/router/workloads.routes/workloads.routes.names";
 
 // utils
-import { workloadUtil } from "@/utils/workload.util/workload.util";
-import { deepCopy } from "@/utils/common.util";
 import { useFlatTemplatesGallery } from "@/composables/use-flat-templates-gallery.composable";
 import { useQuickSubmission } from "@/composables/use-quick-submission.composable";
 
@@ -150,9 +141,7 @@ const WorkspaceNew = defineComponent({
       workspaceStore: useWorkspaceStore(),
       appStore: useAppStore(),
       clusterStore: useClusterStore(),
-      environmentStore: useEnvironmentStore(),
       authStore: useAuthStore(),
-      settingStore: useSettingStore(),
       guidedTourStore: useGuidedTourStore(),
 
       workspaceForm: null as HTMLFormElement | null,
@@ -161,7 +150,6 @@ const WorkspaceNew = defineComponent({
       loadingProject: false as boolean,
       loadingTemplate: false as boolean,
       submitting: false as boolean,
-      workspace: workloadUtil.getEmptyUIWorkloadCreation() as IUIWorkloadCreation,
 
       displayFormHint: false as boolean,
       timeOutId: null as ReturnType<typeof setTimeout> | null,
@@ -205,29 +193,11 @@ const WorkspaceNew = defineComponent({
 
     this.appStore.setPageLoading(false);
   },
-  async mounted() {
+  mounted() {
     this.workspaceForm = this.$refs["workspaceForm"] as HTMLFormElement;
-    const createdEntityId: string | undefined = this.$route.query.createdEntityId?.toString();
-    const savedProjectId = this.workspaceStore.workspace.projectId || -1;
-
-    const selectedDefaultProjectId = this.getDefaultProjectId(savedProjectId, createdEntityId);
-    if (selectedDefaultProjectId) {
-      await this.onSelectedProject(selectedDefaultProjectId);
-    }
   },
   computed: {
-    isHybridSupported(): boolean {
-      return (
-        this.clusterStore.isClusterVersionSufficient(
-          this.selectedClusterId,
-          MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION,
-        ) && this.settingStore.isHybridSubmissionEnabled
-      );
-    },
     showQuickSubmissionDropdown(): boolean {
-      if (!this.isHybridSupported) return false;
-
-      // show the dropdown only if an actual template is selected
       return this.selectedTemplateId !== "-1" && !!this.selectedTemplateId;
     },
     isTemplateRunnable(): boolean {
@@ -245,21 +215,9 @@ const WorkspaceNew = defineComponent({
         selectedDefaultClusterId = this.clusterStore.clusterList[0]?.uuid;
       } else if (this.$route.query.clusterId) {
         selectedDefaultClusterId = this.$route.query.clusterId.toString();
-      } else if (this.workspaceStore.workspace.clusterId) {
-        selectedDefaultClusterId = this.workspaceStore.workspace.clusterId;
       }
 
       return selectedDefaultClusterId;
-    },
-    getDefaultProjectId(savedProjectId: number, createdEntityId?: string): number | null {
-      let selectedDefaultProjectId = null;
-      if (createdEntityId && this.loadedProjects.length > 1) {
-        selectedDefaultProjectId = Number(createdEntityId);
-      } else if (savedProjectId !== -1) {
-        selectedDefaultProjectId = savedProjectId;
-      }
-
-      return selectedDefaultProjectId;
     },
     async loadProjects(): Promise<void> {
       try {
@@ -272,10 +230,11 @@ const WorkspaceNew = defineComponent({
           this.authStore.orgUnitList,
         );
 
+        const createdProjectId = this.$route.query.createdEntityId?.toString();
         if (this.loadedProjects.length === 1 && !this.guidedTourStore.isActive) {
           await this.onSelectedProject(+this.loadedProjects[0].id);
-        } else if (this.workspaceStore.workspace.projectId !== -1) {
-          await this.onSelectedProject(this.workspaceStore.workspace.projectId);
+        } else if (createdProjectId && this.loadedProjects.some((project) => project.id === createdProjectId)) {
+          await this.onSelectedProject(Number(createdProjectId));
         }
       } catch (error: unknown) {
         this.$q.notify(alertUtil.getError("Failed to load projects"));
@@ -296,28 +255,7 @@ const WorkspaceNew = defineComponent({
         console.error(error);
       }
     },
-    async loadWorkspaceModel(projectId: string): Promise<void> {
-      const workspaceModel = await workspaceService.getWorkspaceMergedWithPolicy(projectId);
-
-      this.workspaceStore.setLoadedWorkspaceModelWithDefaults(deepCopy(workspaceModel));
-      this.workspace = workloadUtil.convertWorkloadToWorkloadUI({
-        ...workspaceModel,
-        meta: {
-          ...workspaceModel.meta,
-          name: this.workspaceName,
-          clusterId: this.selectedClusterId,
-          projectId: this.selectedProjectId?.toString() || "",
-        },
-      });
-
-      this.workspaceStore.setWorkspace(this.workspace);
-    },
     async loadTemplates(applyOffset = false, amountRequired?: number): Promise<void> {
-      if (!this.isHybridSupported) {
-        this.selectedTemplateId = "-1";
-        this.setTemplates([]);
-        return;
-      }
       try {
         this.loadingTemplate = true;
         if (!this.selectedProjectId) return;
@@ -347,34 +285,7 @@ const WorkspaceNew = defineComponent({
         this.redirectToPrevRoute();
       }
     },
-    onContinue(): void {
-      this.isHybridSupported ? this.continueToHybrid() : this.continueToEdit();
-    },
-    async continueToEdit(): Promise<void> {
-      this.displayFormHint = false;
-      this.submitting = true;
-      const success = await this.validate();
-      if (!success) {
-        this.submitting = false;
-        this.showHint();
-        return;
-      }
-
-      if (!this.selectedProjectId) {
-        console.error("ProjectId is missing");
-        this.$q.notify(alertUtil.getError("Failed to create workspace"));
-        this.submitting = false;
-        return;
-      }
-
-      await this.loadWorkspaceModel(this.selectedProjectId.toString());
-
-      await this.setSpecificUserGidUidIfNeeded();
-
-      this.workspaceStore.setWorkspace(this.workspace);
-      await this.$router.push({ name: WORKSPACE_ROUTE_NAMES.WORKSPACE_ASSETS_EDIT });
-    },
-    async continueToHybrid(): Promise<void> {
+    async onContinue(): Promise<void> {
       this.displayFormHint = false;
       this.submitting = true;
       const success = await this.validate();
@@ -411,28 +322,6 @@ const WorkspaceNew = defineComponent({
     },
     isFormIncomplete(val: boolean): boolean | string {
       return !val ? true : "Please review and fix the issues in the form";
-    },
-    findProject(projectId: string): ProjectMetadata | undefined {
-      return this.loadedProjects.find((project: ProjectMetadata) => project.id === projectId);
-    },
-    async loadProjectById(projectId: string): Promise<Project | void> {
-      try {
-        const loadedProject = await orgUnitService.getProject(projectId);
-        return loadedProject;
-      } catch (error: unknown) {
-        console.error(error);
-        this.appStore.setFallback(true);
-      }
-    },
-    async setSpecificUserGidUidIfNeeded(): Promise<void> {
-      if (this.workspace.assets.environment) {
-        const relevantEnvironment = await this.environmentStore.loadById(this.workspace.assets.environment);
-        if (relevantEnvironment?.spec.uidGidSource === UidGidSource.FromIdpToken) {
-          this.workspace.specificEnv.runAsUid = this.authStore.getUID || null;
-          this.workspace.specificEnv.runAsGid = this.authStore.getGID || null;
-          this.workspace.specificEnv.supplementalGroups = this.authStore.getSupplementaryGroups;
-        }
-      }
     },
     async updateClusterId(clusterId: string, payload: { disabled: boolean }): Promise<void> {
       this.displayFormHint = false;

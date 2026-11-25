@@ -6,7 +6,6 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **EnablePolicies** | Pointer to [**GetEnablePolicies**](GetEnablePolicies.md) |  | [optional] 
 **WorkloadSubmissionV2Enabled** | Pointer to [**GetWorkloadSubmissionV2Enabled**](GetWorkloadSubmissionV2Enabled.md) |  | [optional] 
-**EnableHybridSubmission** | Pointer to [**GetEnableHybridSubmission**](GetEnableHybridSubmission.md) |  | [optional] 
 **GpuOverProvisioning** | Pointer to [**GetGpuOverProvisioning**](GetGpuOverProvisioning.md) |  | [optional] 
 **ApplicationSubmission** | Pointer to [**GetApplicationSubmission**](GetApplicationSubmission.md) |  | [optional] 
 
@@ -78,31 +77,6 @@ SetWorkloadSubmissionV2Enabled sets WorkloadSubmissionV2Enabled field to given v
 `func (o *WorkloadsSettingsGetResponse) HasWorkloadSubmissionV2Enabled() bool`
 
 HasWorkloadSubmissionV2Enabled returns a boolean if a field has been set.
-
-### GetEnableHybridSubmission
-
-`func (o *WorkloadsSettingsGetResponse) GetEnableHybridSubmission() GetEnableHybridSubmission`
-
-GetEnableHybridSubmission returns the EnableHybridSubmission field if non-nil, zero value otherwise.
-
-### GetEnableHybridSubmissionOk
-
-`func (o *WorkloadsSettingsGetResponse) GetEnableHybridSubmissionOk() (*GetEnableHybridSubmission, bool)`
-
-GetEnableHybridSubmissionOk returns a tuple with the EnableHybridSubmission field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetEnableHybridSubmission
-
-`func (o *WorkloadsSettingsGetResponse) SetEnableHybridSubmission(v GetEnableHybridSubmission)`
-
-SetEnableHybridSubmission sets EnableHybridSubmission field to given value.
-
-### HasEnableHybridSubmission
-
-`func (o *WorkloadsSettingsGetResponse) HasEnableHybridSubmission() bool`
-
-HasEnableHybridSubmission returns a boolean if a field has been set.
 
 ### GetGpuOverProvisioning
 
