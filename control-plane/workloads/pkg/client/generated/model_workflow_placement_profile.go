@@ -22,7 +22,11 @@ var _ MappedNullable = &WorkflowPlacementProfile{}
 
 // WorkflowPlacementProfile struct for WorkflowPlacementProfile
 type WorkflowPlacementProfile struct {
-	Todo *bool `json:"todo,omitempty"`
+	// The name of the profile, which tasks use to reference it. It must be unique among the profiles of its kind. (mandatory)
+	Name                 NullableString               `json:"name,omitempty" validate:"regexp=.*"`
+	NodeAffinityRequired NullableNodeAffinityRequired `json:"nodeAffinityRequired,omitempty"`
+	// Set of tolerations to apply to the workload.
+	Tolerations []Toleration `json:"tolerations,omitempty"`
 }
 
 // NewWorkflowPlacementProfile instantiates a new WorkflowPlacementProfile object
@@ -42,36 +46,123 @@ func NewWorkflowPlacementProfileWithDefaults() *WorkflowPlacementProfile {
 	return &this
 }
 
-// GetTodo returns the Todo field value if set, zero value otherwise.
-func (o *WorkflowPlacementProfile) GetTodo() bool {
-	if o == nil || IsNil(o.Todo) {
-		var ret bool
+// GetName returns the Name field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *WorkflowPlacementProfile) GetName() string {
+	if o == nil || IsNil(o.Name.Get()) {
+		var ret string
 		return ret
 	}
-	return *o.Todo
+	return *o.Name.Get()
 }
 
-// GetTodoOk returns a tuple with the Todo field value if set, nil otherwise
+// GetNameOk returns a tuple with the Name field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *WorkflowPlacementProfile) GetTodoOk() (*bool, bool) {
-	if o == nil || IsNil(o.Todo) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *WorkflowPlacementProfile) GetNameOk() (*string, bool) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Todo, true
+	return o.Name.Get(), o.Name.IsSet()
 }
 
-// HasTodo returns a boolean if a field has been set.
-func (o *WorkflowPlacementProfile) HasTodo() bool {
-	if o != nil && !IsNil(o.Todo) {
+// HasName returns a boolean if a field has been set.
+func (o *WorkflowPlacementProfile) HasName() bool {
+	if o != nil && o.Name.IsSet() {
 		return true
 	}
 
 	return false
 }
 
-// SetTodo gets a reference to the given bool and assigns it to the Todo field.
-func (o *WorkflowPlacementProfile) SetTodo(v bool) {
-	o.Todo = &v
+// SetName gets a reference to the given NullableString and assigns it to the Name field.
+func (o *WorkflowPlacementProfile) SetName(v string) {
+	o.Name.Set(&v)
+}
+
+// SetNameNil sets the value for Name to be an explicit nil
+func (o *WorkflowPlacementProfile) SetNameNil() {
+	o.Name.Set(nil)
+}
+
+// UnsetName ensures that no value is present for Name, not even an explicit nil
+func (o *WorkflowPlacementProfile) UnsetName() {
+	o.Name.Unset()
+}
+
+// GetNodeAffinityRequired returns the NodeAffinityRequired field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *WorkflowPlacementProfile) GetNodeAffinityRequired() NodeAffinityRequired {
+	if o == nil || IsNil(o.NodeAffinityRequired.Get()) {
+		var ret NodeAffinityRequired
+		return ret
+	}
+	return *o.NodeAffinityRequired.Get()
+}
+
+// GetNodeAffinityRequiredOk returns a tuple with the NodeAffinityRequired field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *WorkflowPlacementProfile) GetNodeAffinityRequiredOk() (*NodeAffinityRequired, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.NodeAffinityRequired.Get(), o.NodeAffinityRequired.IsSet()
+}
+
+// HasNodeAffinityRequired returns a boolean if a field has been set.
+func (o *WorkflowPlacementProfile) HasNodeAffinityRequired() bool {
+	if o != nil && o.NodeAffinityRequired.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetNodeAffinityRequired gets a reference to the given NullableNodeAffinityRequired and assigns it to the NodeAffinityRequired field.
+func (o *WorkflowPlacementProfile) SetNodeAffinityRequired(v NodeAffinityRequired) {
+	o.NodeAffinityRequired.Set(&v)
+}
+
+// SetNodeAffinityRequiredNil sets the value for NodeAffinityRequired to be an explicit nil
+func (o *WorkflowPlacementProfile) SetNodeAffinityRequiredNil() {
+	o.NodeAffinityRequired.Set(nil)
+}
+
+// UnsetNodeAffinityRequired ensures that no value is present for NodeAffinityRequired, not even an explicit nil
+func (o *WorkflowPlacementProfile) UnsetNodeAffinityRequired() {
+	o.NodeAffinityRequired.Unset()
+}
+
+// GetTolerations returns the Tolerations field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *WorkflowPlacementProfile) GetTolerations() []Toleration {
+	if o == nil {
+		var ret []Toleration
+		return ret
+	}
+	return o.Tolerations
+}
+
+// GetTolerationsOk returns a tuple with the Tolerations field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *WorkflowPlacementProfile) GetTolerationsOk() ([]Toleration, bool) {
+	if o == nil || IsNil(o.Tolerations) {
+		return nil, false
+	}
+	return o.Tolerations, true
+}
+
+// HasTolerations returns a boolean if a field has been set.
+func (o *WorkflowPlacementProfile) HasTolerations() bool {
+	if o != nil && !IsNil(o.Tolerations) {
+		return true
+	}
+
+	return false
+}
+
+// SetTolerations gets a reference to the given []Toleration and assigns it to the Tolerations field.
+func (o *WorkflowPlacementProfile) SetTolerations(v []Toleration) {
+	o.Tolerations = v
 }
 
 func (o WorkflowPlacementProfile) MarshalJSON() ([]byte, error) {
@@ -84,8 +175,14 @@ func (o WorkflowPlacementProfile) MarshalJSON() ([]byte, error) {
 
 func (o WorkflowPlacementProfile) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Todo) {
-		toSerialize["todo"] = o.Todo
+	if o.Name.IsSet() {
+		toSerialize["name"] = o.Name.Get()
+	}
+	if o.NodeAffinityRequired.IsSet() {
+		toSerialize["nodeAffinityRequired"] = o.NodeAffinityRequired.Get()
+	}
+	if o.Tolerations != nil {
+		toSerialize["tolerations"] = o.Tolerations
 	}
 	return toSerialize, nil
 }

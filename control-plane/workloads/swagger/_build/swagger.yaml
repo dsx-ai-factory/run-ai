@@ -13088,20 +13088,294 @@ components:
             type: string
             format: uuid
     WorkflowFields:
-      type: object
       properties:
-        todo:
+        category:
+          $ref: '#/components/schemas/Category'
+        nodePools:
+          $ref: '#/components/schemas/NodePools'
+        preemptibility:
+          $ref: '#/components/schemas/Preemptibility'
+        priorityClass:
+          $ref: '#/components/schemas/PriorityClass'
+      type: object
+    GroupName:
+      description: The name of the group. It must be unique in the workflow, and begin with a letter. (mandatory)
+      type: string
+      minLength: 1
+      maxLength: 63
+      example: hil
+      nullable: true
+      pattern: ^[a-z][-a-z0-9]{0,62}$
+    GroupDependsOn:
+      description: The names of the groups that must finish successfully before this group starts. If one of them fails, this group doesn't start.
+      type: array
+      items:
+        $ref: '#/components/schemas/GroupName'
+      maxItems: 1000
+      example:
+        - prepare
+      nullable: true
+    GroupLeader:
+      description: The name of the group's lead task. When the leader ends, the group ends with the leader's result, and the group's other tasks are stopped. Without a leader, the group ends when all its tasks have ended, and fails if any of them failed.
+      type: string
+      minLength: 1
+      maxLength: 63
+      example: train
+      nullable: true
+      pattern: ^[a-z][-a-z0-9]{0,62}$
+    SynchronizedStartPort:
+      description: The port that the tasks of the group use to reach each other before they start. It must be a port that the group's tasks don't use. (mandatory when enabled)
+      type: integer
+      format: int32
+      minimum: 1
+      maximum: 65535
+      example: 9900
+      nullable: true
+    SynchronizedStartTimeout:
+      description: How long, in seconds, each task waits for the group's other tasks. (mandatory when enabled)
+      type: integer
+      format: int32
+      minimum: 1
+      example: 600
+      nullable: true
+    SynchronizedStart:
+      description: Makes all the tasks of the group start their commands at the same moment, once all of them are ready.
+      properties:
+        enabled:
+          description: Turns on the synchronized start for the group. The default is false.
           type: boolean
+          default: false
+          example: true
+          nullable: true
+        port:
+          $ref: '#/components/schemas/SynchronizedStartPort'
+        timeoutSeconds:
+          $ref: '#/components/schemas/SynchronizedStartTimeout'
+      nullable: true
+      type: object
     WorkflowGroupFields:
-      type: object
       properties:
-        todo:
-          type: boolean
+        dependsOn:
+          $ref: '#/components/schemas/GroupDependsOn'
+        leader:
+          $ref: '#/components/schemas/GroupLeader'
+        name:
+          $ref: '#/components/schemas/GroupName'
+        nodePools:
+          $ref: '#/components/schemas/NodePools'
+        synchronizedStart:
+          $ref: '#/components/schemas/SynchronizedStart'
+      type: object
+    WorkflowProfileName:
+      description: The name of the profile, which tasks use to reference it. It must be unique among the profiles of its kind. (mandatory)
+      type: string
+      minLength: 1
+      maxLength: 63
+      example: h100
+      nullable: true
+      pattern: .*
+    TaskName:
+      description: The name of the task. It must be unique in its group, and begin with a letter. It can be omitted in a group with a single task, which then takes the group's name.
+      type: string
+      minLength: 1
+      maxLength: 63
+      example: train
+      nullable: true
+      pattern: ^[a-z][-a-z0-9]{0,62}$
+    TaskRetryLimit:
+      description: The maximum number of retries. The task is retried when it ends with one of `onExitCodes`, when it's preempted, and after an infrastructure error such as a lost node. 0 means that the task isn't retried, and fails on its first failure or preemption.
+      type: integer
+      format: int32
+      minimum: 0
+      example: 3
+      nullable: true
+    TaskExitCodeFrom:
+      description: The first exit code of the range. (mandatory)
+      type: integer
+      format: int32
+      minimum: 0
+      maximum: 255
+      example: 5
+      nullable: true
+    TaskExitCodeTo:
+      description: The last exit code of the range. (mandatory)
+      type: integer
+      format: int32
+      minimum: 0
+      maximum: 255
+      example: 7
+      nullable: true
+    TaskExitCodeRange:
+      description: A range of exit codes, including both ends.
+      properties:
+        from:
+          $ref: '#/components/schemas/TaskExitCodeFrom'
+        to:
+          $ref: '#/components/schemas/TaskExitCodeTo'
+      nullable: true
+      type: object
+    TaskRetry:
+      description: When and how many times the task is retried. Each retry runs the task again as a new attempt. Retrying a task that decides its group's result restarts the whole group.
+      properties:
+        limit:
+          $ref: '#/components/schemas/TaskRetryLimit'
+        onExitCodes:
+          description: Ranges of exit codes that retry the task.
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskExitCodeRange'
+          maxItems: 256
+          nullable: true
+      nullable: true
+      type: object
+    WorkflowStorageType:
+      description: The type of the storage. (mandatory)
+      type: string
+      enum:
+        - s3
+      example: s3
+      nullable: true
+    WorkflowS3MountPath:
+      description: The path of the folder in the task's container. (mandatory)
+      type: string
+      minLength: 1
+      maxLength: 4096
+      example: /mnt/data
+      nullable: true
+      pattern: .*
+    WorkflowStorageRefInput:
+      description: The outputs of another task that the task reads.
+      properties:
+        group:
+          $ref: '#/components/schemas/GroupName'
+        task:
+          $ref: '#/components/schemas/TaskName'
+        mountPath:
+          $ref: '#/components/schemas/WorkflowS3MountPath'
+      nullable: true
+      type: object
+    WorkflowS3StorageRef:
+      description: A storage of the workflow that the task uses.
+      properties:
+        name:
+          $ref: '#/components/schemas/WorkflowProfileName'
+        type:
+          $ref: '#/components/schemas/WorkflowStorageType'
+        inputs:
+          description: The outputs of other tasks that the task reads.
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowStorageRefInput'
+          maxItems: 1000
+          nullable: true
+        outputs:
+          description: The folder in which the task writes its outputs. Its files are kept in the storage, in a folder of the task's own.
+          properties:
+            mountPath:
+              $ref: '#/components/schemas/WorkflowS3MountPath'
+          nullable: true
+          type: object
+      nullable: true
+      type: object
+    WorkflowS3StorageRefs:
+      description: The storages of the workflow, in the workflow's `storage`, that the task uses.
+      type: array
+      items:
+        $ref: '#/components/schemas/WorkflowS3StorageRef'
+      maxItems: 1000
+      nullable: true
+    TaskSuccessExitCodes:
+      description: Ranges of exit codes that end the task as succeeded, in addition to 0. A non-zero exit code that isn't in this list or in `retry.onExitCodes` fails the task.
+      type: array
+      items:
+        $ref: '#/components/schemas/TaskExitCodeRange'
+      maxItems: 256
+      nullable: true
     WorkflowTask:
-      type: object
       properties:
-        todo:
-          type: boolean
+        annotations:
+          $ref: '#/components/schemas/Annotations'
+        args:
+          $ref: '#/components/schemas/Args'
+        command:
+          $ref: '#/components/schemas/Command'
+        computeRef:
+          $ref: '#/components/schemas/WorkflowProfileName'
+        createHomeDir:
+          $ref: '#/components/schemas/CreateHomeDir'
+        environmentVariables:
+          $ref: '#/components/schemas/EnvironmentVariables'
+        image:
+          $ref: '#/components/schemas/Image'
+        imagePullPolicy:
+          $ref: '#/components/schemas/ImagePullPolicy'
+        imagePullSecrets:
+          $ref: '#/components/schemas/ImagePullSecrets'
+        labels:
+          $ref: '#/components/schemas/Labels'
+        name:
+          $ref: '#/components/schemas/TaskName'
+        placementRef:
+          $ref: '#/components/schemas/WorkflowProfileName'
+        probes:
+          $ref: '#/components/schemas/Probes'
+        retry:
+          $ref: '#/components/schemas/TaskRetry'
+        security:
+          nullable: true
+          properties:
+            allowPrivilegeEscalation:
+              $ref: '#/components/schemas/AllowPrivilegeEscalation'
+            capabilities:
+              $ref: '#/components/schemas/Capabilities'
+            hostIpc:
+              $ref: '#/components/schemas/HostIpc'
+            hostNetwork:
+              $ref: '#/components/schemas/HostNetwork'
+            privileged:
+              allOf:
+                - $ref: '#/components/schemas/Privileged'
+              x-internal: true
+            readOnlyRootFilesystem:
+              $ref: '#/components/schemas/ReadOnlyRootFileSystem'
+            runAsGid:
+              $ref: '#/components/schemas/RunAsGid'
+            runAsNonRoot:
+              $ref: '#/components/schemas/RunAsNonRoot'
+            runAsUid:
+              $ref: '#/components/schemas/RunAsUid'
+            seccompProfileType:
+              $ref: '#/components/schemas/SeccompProfileType'
+            supplementalGroups:
+              $ref: '#/components/schemas/SupplementalGroups'
+            uidGidSource:
+              $ref: '#/components/schemas/UidGidSource'
+          type: object
+        stdin:
+          $ref: '#/components/schemas/Stdin'
+        storage:
+          nullable: true
+          properties:
+            configMapVolume:
+              $ref: '#/components/schemas/ConfigMapItems'
+            emptyDirVolume:
+              $ref: '#/components/schemas/EmptyDirItems'
+            hostPath:
+              $ref: '#/components/schemas/HostPathItems'
+            secretVolume:
+              $ref: '#/components/schemas/SecretItems'
+          type: object
+        storageRef:
+          $ref: '#/components/schemas/WorkflowS3StorageRefs'
+        successExitCodes:
+          $ref: '#/components/schemas/TaskSuccessExitCodes'
+        terminationGracePeriodSeconds:
+          $ref: '#/components/schemas/TerminationGracePeriod'
+        tty:
+          $ref: '#/components/schemas/Tty'
+        workingDir:
+          $ref: '#/components/schemas/WorkingDir'
+      type: object
     WorkflowGroups:
       description: Definitions of the workflow groups.
       type: array
@@ -13115,11 +13389,51 @@ components:
                 items:
                   $ref: '#/components/schemas/WorkflowTask'
                 maxItems: 1000
+    WorkflowEphemeralStorageRequest:
+      description: The amount of local disk space (ephemeral storage) to allocate for the task (1G, 20M, etc.), including the space of its S3 inputs and outputs. The task will not be scheduled unless a node can guarantee this amount of disk space.
+      type: string
+      pattern: ^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$
+      example: 50G
+      minLength: 1
+      maxLength: 63
+      nullable: true
     WorkflowComputeProfile:
-      type: object
       properties:
-        todo:
-          type: boolean
+        cpuCoreLimit:
+          $ref: '#/components/schemas/CpuCoreLimit'
+        cpuCoreRequest:
+          $ref: '#/components/schemas/CpuCoreRequest'
+        cpuMemoryLimit:
+          $ref: '#/components/schemas/CpuMemoryLimit'
+        cpuMemoryRequest:
+          $ref: '#/components/schemas/CpuMemoryRequest'
+        ephemeralStorageRequest:
+          $ref: '#/components/schemas/WorkflowEphemeralStorageRequest'
+        extendedResources:
+          $ref: '#/components/schemas/ExtendedResources'
+        gpuComputeMode:
+          $ref: '#/components/schemas/GpuComputeMode'
+        gpuDevicesRequest:
+          $ref: '#/components/schemas/GpuDevicesRequest'
+        gpuMemoryLimit:
+          $ref: '#/components/schemas/GpuMemoryLimit'
+        gpuMemoryPortionLimit:
+          $ref: '#/components/schemas/GpuMemoryPortionLimit'
+        gpuMemoryPortionRequest:
+          $ref: '#/components/schemas/GpuMemoryPortionRequest'
+        gpuMemoryRequest:
+          $ref: '#/components/schemas/GpuMemoryRequest'
+        gpuPortionLimit:
+          $ref: '#/components/schemas/GpuPortionLimit'
+        gpuPortionRequest:
+          $ref: '#/components/schemas/GpuPortionRequest'
+        gpuRequestType:
+          $ref: '#/components/schemas/GpuRequestType'
+        largeShmRequest:
+          $ref: '#/components/schemas/LargeShmRequest'
+        name:
+          $ref: '#/components/schemas/WorkflowProfileName'
+      type: object
     WorkflowComputeProfiles:
       description: Defines the workflow compute profiles.
       type: array
@@ -13127,29 +13441,71 @@ components:
         $ref: '#/components/schemas/WorkflowComputeProfile'
       maxItems: 100
     WorkflowPlacementProfile:
-      type: object
       properties:
-        todo:
-          type: boolean
+        name:
+          $ref: '#/components/schemas/WorkflowProfileName'
+        nodeAffinityRequired:
+          $ref: '#/components/schemas/NodeAffinityRequired'
+        tolerations:
+          $ref: '#/components/schemas/Tolerations'
+      type: object
     WorkflowPlacementProfiles:
       description: Defines the workflow placement profiles.
       type: array
       items:
         $ref: '#/components/schemas/WorkflowPlacementProfile'
       maxItems: 100
-    WorkflowStorageProfile:
-      type: object
+    WorkflowS3BucketName:
+      description: The name of the bucket. (mandatory)
+      type: string
+      minLength: 1
+      example: my-bucket
+      nullable: true
+      pattern: .*
+    WorkflowS3Url:
+      description: The url of the S3 service provider. The default is the URL of the Amazon AWS S3 service.
+      type: string
+      minLength: 1
+      example: https://s3.amazonaws.com
+      nullable: true
+      pattern: .*
+    WorkflowS3Common:
       properties:
-        todo:
-          type: boolean
+        name:
+          $ref: '#/components/schemas/WorkflowProfileName'
+        bucket:
+          $ref: '#/components/schemas/WorkflowS3BucketName'
+        url:
+          $ref: '#/components/schemas/WorkflowS3Url'
+      nullable: true
+      type: object
+    WorkflowS3Instance:
+      allOf:
+        - $ref: '#/components/schemas/WorkflowS3Common'
+        - $ref: '#/components/schemas/S3AccessKey'
+        - $ref: '#/components/schemas/ExcludeField'
+      nullable: true
+      type: object
+    WorkflowS3Items:
+      description: Set of S3 buckets that the tasks of the workflow can use.
+      type: array
+      items:
+        $ref: '#/components/schemas/WorkflowS3Instance'
+      nullable: true
+    WorkflowStorageProfile:
+      nullable: true
+      properties:
+        s3:
+          $ref: '#/components/schemas/WorkflowS3Items'
+      type: object
     WorkflowStorageProfiles:
       description: Defines the workflow storage profiles.
       type: array
       items:
         $ref: '#/components/schemas/WorkflowStorageProfile'
       maxItems: 100
-    WorkflowSpec:
-      description: The specifications of the workflow to be created.
+    WorkflowSpecSpec:
+      description: The specifications of the workflow.
       type: object
       allOf:
         - $ref: '#/components/schemas/WorkflowFields'
@@ -13163,6 +13519,12 @@ components:
               $ref: '#/components/schemas/WorkflowPlacementProfiles'
             storage:
               $ref: '#/components/schemas/WorkflowStorageProfiles'
+    WorkflowSpec:
+      description: The specifications of the workflow to be created.
+      type: object
+      properties:
+        spec:
+          $ref: '#/components/schemas/WorkflowSpecSpec'
     WorkflowCreationRequest:
       allOf:
         - $ref: '#/components/schemas/WorkloadCreationMeta'

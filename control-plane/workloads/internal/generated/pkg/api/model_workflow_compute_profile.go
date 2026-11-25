@@ -13,6 +13,10 @@
 
 package api
 
+import (
+	"errors"
+)
+
 ////////////////////////// RUNAI START (18.1) ////////////////////////////
 import runaihttp "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp"
 
@@ -22,20 +26,292 @@ var dummyWorkflowComputeProfile = runaihttp.AssertPattern
 
 type WorkflowComputeProfile struct {
 
+	// Limitations on the number of CPUs consumed by the workload (0.5, 1, .etc). The system guarantees that this workload will not be able to consume more than this amount of CPUs.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Todo bool `json:"todo,omitempty"`
-	Todo bool `json:"todo,omitempty" gorm:"not null;"`
+	//CpuCoreLimit *float64 `json:"cpuCoreLimit,omitempty"`
+	CpuCoreLimit *float64 `json:"cpuCoreLimit,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// CPU units to allocate for the created workload (0.5, 1, .etc). The workload will receive at least this amount of CPU. Note that the workload will not be scheduled unless the system can guarantee this amount of CPUs to the workload.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//CpuCoreRequest *float64 `json:"cpuCoreRequest,omitempty"`
+	CpuCoreRequest *float64 `json:"cpuCoreRequest,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Limitations on the CPU memory to allocate for this workload (1G, 20M, .etc). The system guarantees that this workload will not be able to consume more than this amount of memory. The workload will receive an error when trying to allocate more memory than this limit.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//CpuMemoryLimit *string `json:"cpuMemoryLimit,omitempty" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
+	CpuMemoryLimit *string `json:"cpuMemoryLimit,omitempty" gorm:"" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// The amount of CPU memory to allocate for this workload (1G, 20M, .etc). The workload will receive at least this amount of memory. Note that the workload will not be scheduled unless the system can guarantee this amount of memory to the workload
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//CpuMemoryRequest *string `json:"cpuMemoryRequest,omitempty" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
+	CpuMemoryRequest *string `json:"cpuMemoryRequest,omitempty" gorm:"" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// The amount of local disk space (ephemeral storage) to allocate for the task (1G, 20M, etc.), including the space of its S3 inputs and outputs. The task will not be scheduled unless a node can guarantee this amount of disk space.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//EphemeralStorageRequest *string `json:"ephemeralStorageRequest,omitempty" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
+	EphemeralStorageRequest *string `json:"ephemeralStorageRequest,omitempty" gorm:"" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Extended resources and their quantity.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//ExtendedResources *[]ExtendedResource `json:"extendedResources,omitempty"`
+	ExtendedResources *[]ExtendedResource `json:"extendedResources,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuComputeMode *GpuComputeMode `json:"gpuComputeMode,omitempty"`
+	GpuComputeMode *GpuComputeMode `json:"gpuComputeMode,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuDevicesRequest *int32 `json:"gpuDevicesRequest,omitempty"`
+	GpuDevicesRequest *int32 `json:"gpuDevicesRequest,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Limitation on the memory consumed by the workload, per GPU device. The system guarantees The gpuMemoryLimit must be no less than gpuMemoryRequest.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuMemoryLimit *string `json:"gpuMemoryLimit,omitempty" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
+	GpuMemoryLimit *string `json:"gpuMemoryLimit,omitempty" gorm:"" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuMemoryPortionLimit *float64 `json:"gpuMemoryPortionLimit,omitempty"`
+	GpuMemoryPortionLimit *float64 `json:"gpuMemoryPortionLimit,omitempty" gorm:"-"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuMemoryPortionRequest *float64 `json:"gpuMemoryPortionRequest,omitempty"`
+	GpuMemoryPortionRequest *float64 `json:"gpuMemoryPortionRequest,omitempty" gorm:"-"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuMemoryRequest *string `json:"gpuMemoryRequest,omitempty" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
+	GpuMemoryRequest *string `json:"gpuMemoryRequest,omitempty" gorm:"" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+	// Deprecated
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuPortionLimit *float64 `json:"gpuPortionLimit,omitempty"`
+	GpuPortionLimit *float64 `json:"gpuPortionLimit,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+	// Deprecated
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuPortionRequest *float64 `json:"gpuPortionRequest,omitempty"`
+	GpuPortionRequest *float64 `json:"gpuPortionRequest,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuRequestType *GpuRequestType `json:"gpuRequestType,omitempty"`
+	GpuRequestType *GpuRequestType `json:"gpuRequestType,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// A large /dev/shm device to mount into a container running the created workload. An shm is a shared file system mounted on RAM.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//LargeShmRequest *bool `json:"largeShmRequest,omitempty"`
+	LargeShmRequest *bool `json:"largeShmRequest,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// The name of the profile, which tasks use to reference it. It must be unique among the profiles of its kind. (mandatory)
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Name *string `json:"name,omitempty" validate:"regexp=.*"`
+	Name *string `json:"name,omitempty" gorm:"" validate:"regexp=.*"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertWorkflowComputeProfileRequired checks if the required fields are not zero-ed
 func AssertWorkflowComputeProfileRequired(obj WorkflowComputeProfile) error {
+	if obj.ExtendedResources != nil {
+		for _, el := range *obj.ExtendedResources {
+			if err := AssertExtendedResourceRequired(el); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 
 // AssertWorkflowComputeProfileConstraints checks if the values respects the defined constraints
 func AssertWorkflowComputeProfileConstraints(obj WorkflowComputeProfile) error {
+	if obj.CpuCoreLimit != nil && *obj.CpuCoreLimit < 0 {
+		return &ParsingError{Param: "CpuCoreLimit", Err: errors.New(errMsgMinValueConstraint)}
+	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.CpuCoreRequest != nil && *obj.CpuCoreRequest < 0 {
+		return &ParsingError{Param: "CpuCoreRequest", Err: errors.New(errMsgMinValueConstraint)}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if patternErr := runaihttp.AssertPattern(obj.CpuMemoryLimit, "CpuMemoryLimit", "/^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$/"); patternErr != nil {
+		return &ParsingError{Param: "CpuMemoryLimit", Err: patternErr}
+	}
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.CpuMemoryLimit, "CpuMemoryLimit", 63); maxLengthErr != nil {
+		return &ParsingError{Param: "CpuMemoryLimit", Err: maxLengthErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if patternErr := runaihttp.AssertPattern(obj.CpuMemoryRequest, "CpuMemoryRequest", "/^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$/"); patternErr != nil {
+		return &ParsingError{Param: "CpuMemoryRequest", Err: patternErr}
+	}
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.CpuMemoryRequest, "CpuMemoryRequest", 63); maxLengthErr != nil {
+		return &ParsingError{Param: "CpuMemoryRequest", Err: maxLengthErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if patternErr := runaihttp.AssertPattern(obj.EphemeralStorageRequest, "EphemeralStorageRequest", "/^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$/"); patternErr != nil {
+		return &ParsingError{Param: "EphemeralStorageRequest", Err: patternErr}
+	}
+	if minLengthErr := runaihttp.AssertMinLength(obj.EphemeralStorageRequest, "EphemeralStorageRequest", 1); minLengthErr != nil {
+		return &ParsingError{Param: "EphemeralStorageRequest", Err: minLengthErr}
+	}
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.EphemeralStorageRequest, "EphemeralStorageRequest", 63); maxLengthErr != nil {
+		return &ParsingError{Param: "EphemeralStorageRequest", Err: maxLengthErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if maxItemsErr := runaihttp.AssertMaxItems(obj.ExtendedResources, "ExtendedResources", 1000); maxItemsErr != nil {
+		return &ParsingError{Param: "ExtendedResources", Err: maxItemsErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.ExtendedResources != nil {
+		for _, el := range *obj.ExtendedResources {
+			if err := AssertExtendedResourceConstraints(el); err != nil {
+				return err
+			}
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	if obj.GpuComputeMode != nil {
+		if okValue := obj.GpuComputeMode.IsValid(); !okValue {
+			return &UnsupportedValueError{Field: "GpuComputeMode", Value: string(*obj.GpuComputeMode)}
+		}
+	}
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.GpuDevicesRequest != nil && *obj.GpuDevicesRequest < 0 {
+		return &ParsingError{Param: "GpuDevicesRequest", Err: errors.New(errMsgMinValueConstraint)}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if patternErr := runaihttp.AssertPattern(obj.GpuMemoryLimit, "GpuMemoryLimit", "/^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$/"); patternErr != nil {
+		return &ParsingError{Param: "GpuMemoryLimit", Err: patternErr}
+	}
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.GpuMemoryLimit, "GpuMemoryLimit", 63); maxLengthErr != nil {
+		return &ParsingError{Param: "GpuMemoryLimit", Err: maxLengthErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.GpuMemoryPortionLimit != nil && *obj.GpuMemoryPortionLimit < 0 {
+		return &ParsingError{Param: "GpuMemoryPortionLimit", Err: errors.New(errMsgMinValueConstraint)}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.GpuMemoryPortionRequest != nil && *obj.GpuMemoryPortionRequest < 0 {
+		return &ParsingError{Param: "GpuMemoryPortionRequest", Err: errors.New(errMsgMinValueConstraint)}
+	}
+	if obj.GpuMemoryPortionRequest != nil && *obj.GpuMemoryPortionRequest > 1 {
+		return &ParsingError{Param: "GpuMemoryPortionRequest", Err: errors.New(errMsgMaxValueConstraint)}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if patternErr := runaihttp.AssertPattern(obj.GpuMemoryRequest, "GpuMemoryRequest", "/^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$/"); patternErr != nil {
+		return &ParsingError{Param: "GpuMemoryRequest", Err: patternErr}
+	}
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.GpuMemoryRequest, "GpuMemoryRequest", 63); maxLengthErr != nil {
+		return &ParsingError{Param: "GpuMemoryRequest", Err: maxLengthErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.GpuPortionLimit != nil && *obj.GpuPortionLimit < 0 {
+		return &ParsingError{Param: "GpuPortionLimit", Err: errors.New(errMsgMinValueConstraint)}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.GpuPortionRequest != nil && *obj.GpuPortionRequest < 0 {
+		return &ParsingError{Param: "GpuPortionRequest", Err: errors.New(errMsgMinValueConstraint)}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	if obj.GpuRequestType != nil {
+		if okValue := obj.GpuRequestType.IsValid(); !okValue {
+			return &UnsupportedValueError{Field: "GpuRequestType", Value: string(*obj.GpuRequestType)}
+		}
+	}
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if patternErr := runaihttp.AssertPattern(obj.Name, "Name", "/.*/"); patternErr != nil {
+		return &ParsingError{Param: "Name", Err: patternErr}
+	}
+	if minLengthErr := runaihttp.AssertMinLength(obj.Name, "Name", 1); minLengthErr != nil {
+		return &ParsingError{Param: "Name", Err: minLengthErr}
+	}
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.Name, "Name", 63); maxLengthErr != nil {
+		return &ParsingError{Param: "Name", Err: maxLengthErr}
+	}
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 

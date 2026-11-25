@@ -22,7 +22,8 @@ var _ MappedNullable = &WorkflowStorageProfile{}
 
 // WorkflowStorageProfile struct for WorkflowStorageProfile
 type WorkflowStorageProfile struct {
-	Todo *bool `json:"todo,omitempty"`
+	// Set of S3 buckets that the tasks of the workflow can use.
+	S3 []WorkflowS3Instance `json:"s3,omitempty"`
 }
 
 // NewWorkflowStorageProfile instantiates a new WorkflowStorageProfile object
@@ -42,36 +43,37 @@ func NewWorkflowStorageProfileWithDefaults() *WorkflowStorageProfile {
 	return &this
 }
 
-// GetTodo returns the Todo field value if set, zero value otherwise.
-func (o *WorkflowStorageProfile) GetTodo() bool {
-	if o == nil || IsNil(o.Todo) {
-		var ret bool
+// GetS3 returns the S3 field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *WorkflowStorageProfile) GetS3() []WorkflowS3Instance {
+	if o == nil {
+		var ret []WorkflowS3Instance
 		return ret
 	}
-	return *o.Todo
+	return o.S3
 }
 
-// GetTodoOk returns a tuple with the Todo field value if set, nil otherwise
+// GetS3Ok returns a tuple with the S3 field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *WorkflowStorageProfile) GetTodoOk() (*bool, bool) {
-	if o == nil || IsNil(o.Todo) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *WorkflowStorageProfile) GetS3Ok() ([]WorkflowS3Instance, bool) {
+	if o == nil || IsNil(o.S3) {
 		return nil, false
 	}
-	return o.Todo, true
+	return o.S3, true
 }
 
-// HasTodo returns a boolean if a field has been set.
-func (o *WorkflowStorageProfile) HasTodo() bool {
-	if o != nil && !IsNil(o.Todo) {
+// HasS3 returns a boolean if a field has been set.
+func (o *WorkflowStorageProfile) HasS3() bool {
+	if o != nil && !IsNil(o.S3) {
 		return true
 	}
 
 	return false
 }
 
-// SetTodo gets a reference to the given bool and assigns it to the Todo field.
-func (o *WorkflowStorageProfile) SetTodo(v bool) {
-	o.Todo = &v
+// SetS3 gets a reference to the given []WorkflowS3Instance and assigns it to the S3 field.
+func (o *WorkflowStorageProfile) SetS3(v []WorkflowS3Instance) {
+	o.S3 = v
 }
 
 func (o WorkflowStorageProfile) MarshalJSON() ([]byte, error) {
@@ -84,8 +86,8 @@ func (o WorkflowStorageProfile) MarshalJSON() ([]byte, error) {
 
 func (o WorkflowStorageProfile) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Todo) {
-		toSerialize["todo"] = o.Todo
+	if o.S3 != nil {
+		toSerialize["s3"] = o.S3
 	}
 	return toSerialize, nil
 }

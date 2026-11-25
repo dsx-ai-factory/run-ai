@@ -31,16 +31,8 @@ type WorkflowCreationRequest struct {
 	// The id of the project.
 	ProjectId string `json:"projectId" validate:"regexp=.*"`
 	// The id of the cluster.
-	ClusterId string `json:"clusterId"`
-	Todo      *bool  `json:"todo,omitempty"`
-	// Definitions of the workflow groups.
-	Groups []WorkflowGroupsInner `json:"groups,omitempty"`
-	// Defines the workflow compute profiles.
-	Compute []WorkflowComputeProfile `json:"compute,omitempty"`
-	// Defines the workflow placement profiles.
-	Placement []WorkflowPlacementProfile `json:"placement,omitempty"`
-	// Defines the workflow storage profiles.
-	Storage []WorkflowStorageProfile `json:"storage,omitempty"`
+	ClusterId string            `json:"clusterId"`
+	Spec      *WorkflowSpecSpec `json:"spec,omitempty"`
 }
 
 type _WorkflowCreationRequest WorkflowCreationRequest
@@ -173,164 +165,36 @@ func (o *WorkflowCreationRequest) SetClusterId(v string) {
 	o.ClusterId = v
 }
 
-// GetTodo returns the Todo field value if set, zero value otherwise.
-func (o *WorkflowCreationRequest) GetTodo() bool {
-	if o == nil || IsNil(o.Todo) {
-		var ret bool
+// GetSpec returns the Spec field value if set, zero value otherwise.
+func (o *WorkflowCreationRequest) GetSpec() WorkflowSpecSpec {
+	if o == nil || IsNil(o.Spec) {
+		var ret WorkflowSpecSpec
 		return ret
 	}
-	return *o.Todo
+	return *o.Spec
 }
 
-// GetTodoOk returns a tuple with the Todo field value if set, nil otherwise
+// GetSpecOk returns a tuple with the Spec field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *WorkflowCreationRequest) GetTodoOk() (*bool, bool) {
-	if o == nil || IsNil(o.Todo) {
+func (o *WorkflowCreationRequest) GetSpecOk() (*WorkflowSpecSpec, bool) {
+	if o == nil || IsNil(o.Spec) {
 		return nil, false
 	}
-	return o.Todo, true
+	return o.Spec, true
 }
 
-// HasTodo returns a boolean if a field has been set.
-func (o *WorkflowCreationRequest) HasTodo() bool {
-	if o != nil && !IsNil(o.Todo) {
+// HasSpec returns a boolean if a field has been set.
+func (o *WorkflowCreationRequest) HasSpec() bool {
+	if o != nil && !IsNil(o.Spec) {
 		return true
 	}
 
 	return false
 }
 
-// SetTodo gets a reference to the given bool and assigns it to the Todo field.
-func (o *WorkflowCreationRequest) SetTodo(v bool) {
-	o.Todo = &v
-}
-
-// GetGroups returns the Groups field value if set, zero value otherwise.
-func (o *WorkflowCreationRequest) GetGroups() []WorkflowGroupsInner {
-	if o == nil || IsNil(o.Groups) {
-		var ret []WorkflowGroupsInner
-		return ret
-	}
-	return o.Groups
-}
-
-// GetGroupsOk returns a tuple with the Groups field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *WorkflowCreationRequest) GetGroupsOk() ([]WorkflowGroupsInner, bool) {
-	if o == nil || IsNil(o.Groups) {
-		return nil, false
-	}
-	return o.Groups, true
-}
-
-// HasGroups returns a boolean if a field has been set.
-func (o *WorkflowCreationRequest) HasGroups() bool {
-	if o != nil && !IsNil(o.Groups) {
-		return true
-	}
-
-	return false
-}
-
-// SetGroups gets a reference to the given []WorkflowGroupsInner and assigns it to the Groups field.
-func (o *WorkflowCreationRequest) SetGroups(v []WorkflowGroupsInner) {
-	o.Groups = v
-}
-
-// GetCompute returns the Compute field value if set, zero value otherwise.
-func (o *WorkflowCreationRequest) GetCompute() []WorkflowComputeProfile {
-	if o == nil || IsNil(o.Compute) {
-		var ret []WorkflowComputeProfile
-		return ret
-	}
-	return o.Compute
-}
-
-// GetComputeOk returns a tuple with the Compute field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *WorkflowCreationRequest) GetComputeOk() ([]WorkflowComputeProfile, bool) {
-	if o == nil || IsNil(o.Compute) {
-		return nil, false
-	}
-	return o.Compute, true
-}
-
-// HasCompute returns a boolean if a field has been set.
-func (o *WorkflowCreationRequest) HasCompute() bool {
-	if o != nil && !IsNil(o.Compute) {
-		return true
-	}
-
-	return false
-}
-
-// SetCompute gets a reference to the given []WorkflowComputeProfile and assigns it to the Compute field.
-func (o *WorkflowCreationRequest) SetCompute(v []WorkflowComputeProfile) {
-	o.Compute = v
-}
-
-// GetPlacement returns the Placement field value if set, zero value otherwise.
-func (o *WorkflowCreationRequest) GetPlacement() []WorkflowPlacementProfile {
-	if o == nil || IsNil(o.Placement) {
-		var ret []WorkflowPlacementProfile
-		return ret
-	}
-	return o.Placement
-}
-
-// GetPlacementOk returns a tuple with the Placement field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *WorkflowCreationRequest) GetPlacementOk() ([]WorkflowPlacementProfile, bool) {
-	if o == nil || IsNil(o.Placement) {
-		return nil, false
-	}
-	return o.Placement, true
-}
-
-// HasPlacement returns a boolean if a field has been set.
-func (o *WorkflowCreationRequest) HasPlacement() bool {
-	if o != nil && !IsNil(o.Placement) {
-		return true
-	}
-
-	return false
-}
-
-// SetPlacement gets a reference to the given []WorkflowPlacementProfile and assigns it to the Placement field.
-func (o *WorkflowCreationRequest) SetPlacement(v []WorkflowPlacementProfile) {
-	o.Placement = v
-}
-
-// GetStorage returns the Storage field value if set, zero value otherwise.
-func (o *WorkflowCreationRequest) GetStorage() []WorkflowStorageProfile {
-	if o == nil || IsNil(o.Storage) {
-		var ret []WorkflowStorageProfile
-		return ret
-	}
-	return o.Storage
-}
-
-// GetStorageOk returns a tuple with the Storage field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *WorkflowCreationRequest) GetStorageOk() ([]WorkflowStorageProfile, bool) {
-	if o == nil || IsNil(o.Storage) {
-		return nil, false
-	}
-	return o.Storage, true
-}
-
-// HasStorage returns a boolean if a field has been set.
-func (o *WorkflowCreationRequest) HasStorage() bool {
-	if o != nil && !IsNil(o.Storage) {
-		return true
-	}
-
-	return false
-}
-
-// SetStorage gets a reference to the given []WorkflowStorageProfile and assigns it to the Storage field.
-func (o *WorkflowCreationRequest) SetStorage(v []WorkflowStorageProfile) {
-	o.Storage = v
+// SetSpec gets a reference to the given WorkflowSpecSpec and assigns it to the Spec field.
+func (o *WorkflowCreationRequest) SetSpec(v WorkflowSpecSpec) {
+	o.Spec = &v
 }
 
 func (o WorkflowCreationRequest) MarshalJSON() ([]byte, error) {
@@ -349,20 +213,8 @@ func (o WorkflowCreationRequest) ToMap() (map[string]interface{}, error) {
 	}
 	toSerialize["projectId"] = o.ProjectId
 	toSerialize["clusterId"] = o.ClusterId
-	if !IsNil(o.Todo) {
-		toSerialize["todo"] = o.Todo
-	}
-	if !IsNil(o.Groups) {
-		toSerialize["groups"] = o.Groups
-	}
-	if !IsNil(o.Compute) {
-		toSerialize["compute"] = o.Compute
-	}
-	if !IsNil(o.Placement) {
-		toSerialize["placement"] = o.Placement
-	}
-	if !IsNil(o.Storage) {
-		toSerialize["storage"] = o.Storage
+	if !IsNil(o.Spec) {
+		toSerialize["spec"] = o.Spec
 	}
 	return toSerialize, nil
 }

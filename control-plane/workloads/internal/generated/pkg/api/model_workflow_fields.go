@@ -22,9 +22,27 @@ var dummyWorkflowFields = runaihttp.AssertPattern
 
 type WorkflowFields struct {
 
+	// Specify the workload category assigned to the workload. Categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Todo bool `json:"todo,omitempty"`
-	Todo bool `json:"todo,omitempty" gorm:"not null;"`
+	//Category *string `json:"category,omitempty" validate:"regexp=.*"`
+	Category *string `json:"category,omitempty" gorm:"" validate:"regexp=.*"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//NodePools *[]string `json:"nodePools,omitempty"`
+	NodePools *[]string `json:"nodePools,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Preemptibility *Preemptibility `json:"preemptibility,omitempty"`
+	Preemptibility *Preemptibility `json:"preemptibility,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Specifies the priority class for the workload, which determines its scheduling behavior. Valid values are: very-low, low, medium-low, medium, medium-high, high, and very-high. Each workload type has a default priority. To view the default priority for each workload type, use the GET /workload-types endpoint. Once you change the priority from the default value defined for that workload type, the preemptibility field is not automatically updated. Make sure to set the desired preemptibility value.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//PriorityClass *string `json:"priorityClass,omitempty" validate:"regexp=.*"`
+	PriorityClass *string `json:"priorityClass,omitempty" gorm:"" validate:"regexp=.*"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
@@ -36,6 +54,36 @@ func AssertWorkflowFieldsRequired(obj WorkflowFields) error {
 // AssertWorkflowFieldsConstraints checks if the values respects the defined constraints
 func AssertWorkflowFieldsConstraints(obj WorkflowFields) error {
 	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if patternErr := runaihttp.AssertPattern(obj.Category, "Category", "/.*/"); patternErr != nil {
+		return &ParsingError{Param: "Category", Err: patternErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if maxItemsErr := runaihttp.AssertMaxItems(obj.NodePools, "NodePools", 1000); maxItemsErr != nil {
+		return &ParsingError{Param: "NodePools", Err: maxItemsErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	if obj.Preemptibility != nil {
+		if okValue := obj.Preemptibility.IsValid(); !okValue {
+			return &UnsupportedValueError{Field: "Preemptibility", Value: string(*obj.Preemptibility)}
+		}
+	}
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if patternErr := runaihttp.AssertPattern(obj.PriorityClass, "PriorityClass", "/.*/"); patternErr != nil {
+		return &ParsingError{Param: "PriorityClass", Err: patternErr}
+	}
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 

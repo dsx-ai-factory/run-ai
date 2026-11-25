@@ -22,8 +22,16 @@ var _ MappedNullable = &WorkflowGroupsInner{}
 
 // WorkflowGroupsInner struct for WorkflowGroupsInner
 type WorkflowGroupsInner struct {
-	Todo  *bool          `json:"todo,omitempty"`
-	Tasks []WorkflowTask `json:"tasks,omitempty"`
+	// The names of the groups that must finish successfully before this group starts. If one of them fails, this group doesn't start.
+	DependsOn []*string `json:"dependsOn,omitempty"`
+	// The name of the group's lead task. When the leader ends, the group ends with the leader's result, and the group's other tasks are stopped. Without a leader, the group ends when all its tasks have ended, and fails if any of them failed.
+	Leader NullableString `json:"leader,omitempty" validate:"regexp=^[a-z][-a-z0-9]{0,62}$"`
+	// The name of the group. It must be unique in the workflow, and begin with a letter. (mandatory)
+	Name NullableString `json:"name,omitempty" validate:"regexp=^[a-z][-a-z0-9]{0,62}$"`
+	// A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
+	NodePools         []string                  `json:"nodePools,omitempty"`
+	SynchronizedStart NullableSynchronizedStart `json:"synchronizedStart,omitempty"`
+	Tasks             []WorkflowTask            `json:"tasks,omitempty"`
 }
 
 // NewWorkflowGroupsInner instantiates a new WorkflowGroupsInner object
@@ -43,36 +51,199 @@ func NewWorkflowGroupsInnerWithDefaults() *WorkflowGroupsInner {
 	return &this
 }
 
-// GetTodo returns the Todo field value if set, zero value otherwise.
-func (o *WorkflowGroupsInner) GetTodo() bool {
-	if o == nil || IsNil(o.Todo) {
-		var ret bool
+// GetDependsOn returns the DependsOn field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *WorkflowGroupsInner) GetDependsOn() []*string {
+	if o == nil {
+		var ret []*string
 		return ret
 	}
-	return *o.Todo
+	return o.DependsOn
 }
 
-// GetTodoOk returns a tuple with the Todo field value if set, nil otherwise
+// GetDependsOnOk returns a tuple with the DependsOn field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *WorkflowGroupsInner) GetTodoOk() (*bool, bool) {
-	if o == nil || IsNil(o.Todo) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *WorkflowGroupsInner) GetDependsOnOk() ([]*string, bool) {
+	if o == nil || IsNil(o.DependsOn) {
 		return nil, false
 	}
-	return o.Todo, true
+	return o.DependsOn, true
 }
 
-// HasTodo returns a boolean if a field has been set.
-func (o *WorkflowGroupsInner) HasTodo() bool {
-	if o != nil && !IsNil(o.Todo) {
+// HasDependsOn returns a boolean if a field has been set.
+func (o *WorkflowGroupsInner) HasDependsOn() bool {
+	if o != nil && !IsNil(o.DependsOn) {
 		return true
 	}
 
 	return false
 }
 
-// SetTodo gets a reference to the given bool and assigns it to the Todo field.
-func (o *WorkflowGroupsInner) SetTodo(v bool) {
-	o.Todo = &v
+// SetDependsOn gets a reference to the given []*string and assigns it to the DependsOn field.
+func (o *WorkflowGroupsInner) SetDependsOn(v []*string) {
+	o.DependsOn = v
+}
+
+// GetLeader returns the Leader field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *WorkflowGroupsInner) GetLeader() string {
+	if o == nil || IsNil(o.Leader.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.Leader.Get()
+}
+
+// GetLeaderOk returns a tuple with the Leader field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *WorkflowGroupsInner) GetLeaderOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Leader.Get(), o.Leader.IsSet()
+}
+
+// HasLeader returns a boolean if a field has been set.
+func (o *WorkflowGroupsInner) HasLeader() bool {
+	if o != nil && o.Leader.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetLeader gets a reference to the given NullableString and assigns it to the Leader field.
+func (o *WorkflowGroupsInner) SetLeader(v string) {
+	o.Leader.Set(&v)
+}
+
+// SetLeaderNil sets the value for Leader to be an explicit nil
+func (o *WorkflowGroupsInner) SetLeaderNil() {
+	o.Leader.Set(nil)
+}
+
+// UnsetLeader ensures that no value is present for Leader, not even an explicit nil
+func (o *WorkflowGroupsInner) UnsetLeader() {
+	o.Leader.Unset()
+}
+
+// GetName returns the Name field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *WorkflowGroupsInner) GetName() string {
+	if o == nil || IsNil(o.Name.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.Name.Get()
+}
+
+// GetNameOk returns a tuple with the Name field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *WorkflowGroupsInner) GetNameOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Name.Get(), o.Name.IsSet()
+}
+
+// HasName returns a boolean if a field has been set.
+func (o *WorkflowGroupsInner) HasName() bool {
+	if o != nil && o.Name.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetName gets a reference to the given NullableString and assigns it to the Name field.
+func (o *WorkflowGroupsInner) SetName(v string) {
+	o.Name.Set(&v)
+}
+
+// SetNameNil sets the value for Name to be an explicit nil
+func (o *WorkflowGroupsInner) SetNameNil() {
+	o.Name.Set(nil)
+}
+
+// UnsetName ensures that no value is present for Name, not even an explicit nil
+func (o *WorkflowGroupsInner) UnsetName() {
+	o.Name.Unset()
+}
+
+// GetNodePools returns the NodePools field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *WorkflowGroupsInner) GetNodePools() []string {
+	if o == nil {
+		var ret []string
+		return ret
+	}
+	return o.NodePools
+}
+
+// GetNodePoolsOk returns a tuple with the NodePools field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *WorkflowGroupsInner) GetNodePoolsOk() ([]string, bool) {
+	if o == nil || IsNil(o.NodePools) {
+		return nil, false
+	}
+	return o.NodePools, true
+}
+
+// HasNodePools returns a boolean if a field has been set.
+func (o *WorkflowGroupsInner) HasNodePools() bool {
+	if o != nil && !IsNil(o.NodePools) {
+		return true
+	}
+
+	return false
+}
+
+// SetNodePools gets a reference to the given []string and assigns it to the NodePools field.
+func (o *WorkflowGroupsInner) SetNodePools(v []string) {
+	o.NodePools = v
+}
+
+// GetSynchronizedStart returns the SynchronizedStart field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *WorkflowGroupsInner) GetSynchronizedStart() SynchronizedStart {
+	if o == nil || IsNil(o.SynchronizedStart.Get()) {
+		var ret SynchronizedStart
+		return ret
+	}
+	return *o.SynchronizedStart.Get()
+}
+
+// GetSynchronizedStartOk returns a tuple with the SynchronizedStart field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *WorkflowGroupsInner) GetSynchronizedStartOk() (*SynchronizedStart, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.SynchronizedStart.Get(), o.SynchronizedStart.IsSet()
+}
+
+// HasSynchronizedStart returns a boolean if a field has been set.
+func (o *WorkflowGroupsInner) HasSynchronizedStart() bool {
+	if o != nil && o.SynchronizedStart.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetSynchronizedStart gets a reference to the given NullableSynchronizedStart and assigns it to the SynchronizedStart field.
+func (o *WorkflowGroupsInner) SetSynchronizedStart(v SynchronizedStart) {
+	o.SynchronizedStart.Set(&v)
+}
+
+// SetSynchronizedStartNil sets the value for SynchronizedStart to be an explicit nil
+func (o *WorkflowGroupsInner) SetSynchronizedStartNil() {
+	o.SynchronizedStart.Set(nil)
+}
+
+// UnsetSynchronizedStart ensures that no value is present for SynchronizedStart, not even an explicit nil
+func (o *WorkflowGroupsInner) UnsetSynchronizedStart() {
+	o.SynchronizedStart.Unset()
 }
 
 // GetTasks returns the Tasks field value if set, zero value otherwise.
@@ -117,8 +288,20 @@ func (o WorkflowGroupsInner) MarshalJSON() ([]byte, error) {
 
 func (o WorkflowGroupsInner) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Todo) {
-		toSerialize["todo"] = o.Todo
+	if o.DependsOn != nil {
+		toSerialize["dependsOn"] = o.DependsOn
+	}
+	if o.Leader.IsSet() {
+		toSerialize["leader"] = o.Leader.Get()
+	}
+	if o.Name.IsSet() {
+		toSerialize["name"] = o.Name.Get()
+	}
+	if o.NodePools != nil {
+		toSerialize["nodePools"] = o.NodePools
+	}
+	if o.SynchronizedStart.IsSet() {
+		toSerialize["synchronizedStart"] = o.SynchronizedStart.Get()
 	}
 	if !IsNil(o.Tasks) {
 		toSerialize["tasks"] = o.Tasks

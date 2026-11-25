@@ -13,6 +13,10 @@
 
 package api
 
+import (
+	"errors"
+)
+
 ////////////////////////// RUNAI START (18.1) ////////////////////////////
 import runaihttp "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp"
 
@@ -22,20 +26,461 @@ var dummyWorkflowTask = runaihttp.AssertPattern
 
 type WorkflowTask struct {
 
+	// Set of annotations to populate into the container running the workload.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Todo bool `json:"todo,omitempty"`
-	Todo bool `json:"todo,omitempty" gorm:"not null;"`
+	//Annotations *[]Annotation `json:"annotations,omitempty"`
+	Annotations *[]Annotation `json:"annotations,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Arguments to the command that the container running the workload executes.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Args *string `json:"args,omitempty" validate:"regexp=.*"`
+	Args *string `json:"args,omitempty" gorm:"" validate:"regexp=.*"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// A command to the server as the entry point of the container running the workload.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Command *string `json:"command,omitempty" validate:"regexp=.*"`
+	Command *string `json:"command,omitempty" gorm:"" validate:"regexp=.*"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// The name of the profile, which tasks use to reference it. It must be unique among the profiles of its kind. (mandatory)
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//ComputeRef *string `json:"computeRef,omitempty" validate:"regexp=.*"`
+	ComputeRef *string `json:"computeRef,omitempty" gorm:"" validate:"regexp=.*"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// When set to `true`, creates a home directory for the container.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//CreateHomeDir *bool `json:"createHomeDir,omitempty"`
+	CreateHomeDir *bool `json:"createHomeDir,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Set of environment variables to populate into the container running the workload.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//EnvironmentVariables *[]EnvironmentVariable `json:"environmentVariables,omitempty"`
+	EnvironmentVariables *[]EnvironmentVariable `json:"environmentVariables,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Image *string `json:"image,omitempty" validate:"regexp=.*"`
+	Image *string `json:"image,omitempty" gorm:"" validate:"regexp=.*"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//ImagePullPolicy *ImagePullPolicy `json:"imagePullPolicy,omitempty"`
+	ImagePullPolicy *ImagePullPolicy `json:"imagePullPolicy,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// A list of references to Kubernetes secrets in the same namespace used for pulling container images.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//ImagePullSecrets *[]ImagePullSecret `json:"imagePullSecrets,omitempty"`
+	ImagePullSecrets *[]ImagePullSecret `json:"imagePullSecrets,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Set of labels to populate into the container running the workload.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Labels *[]Label `json:"labels,omitempty"`
+	Labels *[]Label `json:"labels,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// The name of the task. It must be unique in its group, and begin with a letter. It can be omitted in a group with a single task, which then takes the group's name.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Name *string `json:"name,omitempty" validate:"regexp=^[a-z][-a-z0-9]{0,62}$"`
+	Name *string `json:"name,omitempty" gorm:"" validate:"regexp=^[a-z][-a-z0-9]{0,62}$"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// The name of the profile, which tasks use to reference it. It must be unique among the profiles of its kind. (mandatory)
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//PlacementRef *string `json:"placementRef,omitempty" validate:"regexp=.*"`
+	PlacementRef *string `json:"placementRef,omitempty" gorm:"" validate:"regexp=.*"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Probes *Probes `json:"probes,omitempty"`
+	Probes *Probes `json:"probes,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Retry *TaskRetry `json:"retry,omitempty"`
+	Retry *TaskRetry `json:"retry,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Security *WorkspaceSpecSpecAllOfSecurity `json:"security,omitempty"`
+	Security *WorkspaceSpecSpecAllOfSecurity `json:"security,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Whether this container should allocate a buffer for stdin in the container runtime. If this is not set, reads from stdin in the container will always result in EOF
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Stdin *bool `json:"stdin,omitempty"`
+	Stdin *bool `json:"stdin,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Storage *WorkflowTaskStorage `json:"storage,omitempty"`
+	Storage *WorkflowTaskStorage `json:"storage,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// The storages of the workflow, in the workflow's `storage`, that the task uses.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//StorageRef *[]WorkflowS3StorageRef `json:"storageRef,omitempty"`
+	StorageRef *[]WorkflowS3StorageRef `json:"storageRef,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Ranges of exit codes that end the task as succeeded, in addition to 0. A non-zero exit code that isn't in this list or in `retry.onExitCodes` fails the task.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//SuccessExitCodes *[]TaskExitCodeRange `json:"successExitCodes,omitempty"`
+	SuccessExitCodes *[]TaskExitCodeRange `json:"successExitCodes,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Duration in seconds the pod needs to terminate gracefully upon probe failure. The grace period is the duration in seconds after the processes running in the pod are sent a termination signal and the time when the processes are forcibly halted with a kill signal. Set this value longer than the expected cleanup time for your process. Value must be non-negative integer. The value zero indicates stop immediately via the kill signal (no opportunity to shut down).
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//TerminationGracePeriodSeconds *int64 `json:"terminationGracePeriodSeconds,omitempty"`
+	TerminationGracePeriodSeconds *int64 `json:"terminationGracePeriodSeconds,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Whether this container should allocate a TTY for itself, also requires 'stdin' to be true.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Tty *bool `json:"tty,omitempty"`
+	Tty *bool `json:"tty,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Container's working directory. If not specified, the container runtime default will be used. This may be configured in the container image.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//WorkingDir *string `json:"workingDir,omitempty" validate:"regexp=.*"`
+	WorkingDir *string `json:"workingDir,omitempty" gorm:"" validate:"regexp=.*"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertWorkflowTaskRequired checks if the required fields are not zero-ed
 func AssertWorkflowTaskRequired(obj WorkflowTask) error {
+	if obj.Annotations != nil {
+		for _, el := range *obj.Annotations {
+			if err := AssertAnnotationRequired(el); err != nil {
+				return err
+			}
+		}
+	}
+	if obj.EnvironmentVariables != nil {
+		for _, el := range *obj.EnvironmentVariables {
+			if err := AssertEnvironmentVariableRequired(el); err != nil {
+				return err
+			}
+		}
+	}
+	if obj.ImagePullSecrets != nil {
+		for _, el := range *obj.ImagePullSecrets {
+			if err := AssertImagePullSecretRequired(el); err != nil {
+				return err
+			}
+		}
+	}
+	if obj.Labels != nil {
+		for _, el := range *obj.Labels {
+			if err := AssertLabelRequired(el); err != nil {
+				return err
+			}
+		}
+	}
+	if obj.Probes != nil {
+		if err := AssertProbesRequired(*obj.Probes); err != nil {
+			return err
+		}
+	}
+	if obj.Retry != nil {
+		if err := AssertTaskRetryRequired(*obj.Retry); err != nil {
+			return err
+		}
+	}
+	if obj.Security != nil {
+		if err := AssertWorkspaceSpecSpecAllOfSecurityRequired(*obj.Security); err != nil {
+			return err
+		}
+	}
+	if obj.Storage != nil {
+		if err := AssertWorkflowTaskStorageRequired(*obj.Storage); err != nil {
+			return err
+		}
+	}
+	if obj.StorageRef != nil {
+		for _, el := range *obj.StorageRef {
+			if err := AssertWorkflowS3StorageRefRequired(el); err != nil {
+				return err
+			}
+		}
+	}
+	if obj.SuccessExitCodes != nil {
+		for _, el := range *obj.SuccessExitCodes {
+			if err := AssertTaskExitCodeRangeRequired(el); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 
 // AssertWorkflowTaskConstraints checks if the values respects the defined constraints
 func AssertWorkflowTaskConstraints(obj WorkflowTask) error {
 	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if maxItemsErr := runaihttp.AssertMaxItems(obj.Annotations, "Annotations", 1000); maxItemsErr != nil {
+		return &ParsingError{Param: "Annotations", Err: maxItemsErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.Annotations != nil {
+		for _, el := range *obj.Annotations {
+			if err := AssertAnnotationConstraints(el); err != nil {
+				return err
+			}
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if patternErr := runaihttp.AssertPattern(obj.Args, "Args", "/.*/"); patternErr != nil {
+		return &ParsingError{Param: "Args", Err: patternErr}
+	}
+	if minLengthErr := runaihttp.AssertMinLength(obj.Args, "Args", 1); minLengthErr != nil {
+		return &ParsingError{Param: "Args", Err: minLengthErr}
+	}
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.Args, "Args", 10000); maxLengthErr != nil {
+		return &ParsingError{Param: "Args", Err: maxLengthErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if patternErr := runaihttp.AssertPattern(obj.Command, "Command", "/.*/"); patternErr != nil {
+		return &ParsingError{Param: "Command", Err: patternErr}
+	}
+	if minLengthErr := runaihttp.AssertMinLength(obj.Command, "Command", 1); minLengthErr != nil {
+		return &ParsingError{Param: "Command", Err: minLengthErr}
+	}
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.Command, "Command", 10000); maxLengthErr != nil {
+		return &ParsingError{Param: "Command", Err: maxLengthErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if patternErr := runaihttp.AssertPattern(obj.ComputeRef, "ComputeRef", "/.*/"); patternErr != nil {
+		return &ParsingError{Param: "ComputeRef", Err: patternErr}
+	}
+	if minLengthErr := runaihttp.AssertMinLength(obj.ComputeRef, "ComputeRef", 1); minLengthErr != nil {
+		return &ParsingError{Param: "ComputeRef", Err: minLengthErr}
+	}
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.ComputeRef, "ComputeRef", 63); maxLengthErr != nil {
+		return &ParsingError{Param: "ComputeRef", Err: maxLengthErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if maxItemsErr := runaihttp.AssertMaxItems(obj.EnvironmentVariables, "EnvironmentVariables", 1000); maxItemsErr != nil {
+		return &ParsingError{Param: "EnvironmentVariables", Err: maxItemsErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.EnvironmentVariables != nil {
+		for _, el := range *obj.EnvironmentVariables {
+			if err := AssertEnvironmentVariableConstraints(el); err != nil {
+				return err
+			}
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if patternErr := runaihttp.AssertPattern(obj.Image, "Image", "/.*/"); patternErr != nil {
+		return &ParsingError{Param: "Image", Err: patternErr}
+	}
+	if minLengthErr := runaihttp.AssertMinLength(obj.Image, "Image", 1); minLengthErr != nil {
+		return &ParsingError{Param: "Image", Err: minLengthErr}
+	}
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.Image, "Image", 253); maxLengthErr != nil {
+		return &ParsingError{Param: "Image", Err: maxLengthErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	if obj.ImagePullPolicy != nil {
+		if okValue := obj.ImagePullPolicy.IsValid(); !okValue {
+			return &UnsupportedValueError{Field: "ImagePullPolicy", Value: string(*obj.ImagePullPolicy)}
+		}
+	}
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if maxItemsErr := runaihttp.AssertMaxItems(obj.ImagePullSecrets, "ImagePullSecrets", 1000); maxItemsErr != nil {
+		return &ParsingError{Param: "ImagePullSecrets", Err: maxItemsErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.ImagePullSecrets != nil {
+		for _, el := range *obj.ImagePullSecrets {
+			if err := AssertImagePullSecretConstraints(el); err != nil {
+				return err
+			}
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if maxItemsErr := runaihttp.AssertMaxItems(obj.Labels, "Labels", 1000); maxItemsErr != nil {
+		return &ParsingError{Param: "Labels", Err: maxItemsErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.Labels != nil {
+		for _, el := range *obj.Labels {
+			if err := AssertLabelConstraints(el); err != nil {
+				return err
+			}
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if patternErr := runaihttp.AssertPattern(obj.Name, "Name", "/^[a-z][-a-z0-9]{0,62}$/"); patternErr != nil {
+		return &ParsingError{Param: "Name", Err: patternErr}
+	}
+	if minLengthErr := runaihttp.AssertMinLength(obj.Name, "Name", 1); minLengthErr != nil {
+		return &ParsingError{Param: "Name", Err: minLengthErr}
+	}
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.Name, "Name", 63); maxLengthErr != nil {
+		return &ParsingError{Param: "Name", Err: maxLengthErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if patternErr := runaihttp.AssertPattern(obj.PlacementRef, "PlacementRef", "/.*/"); patternErr != nil {
+		return &ParsingError{Param: "PlacementRef", Err: patternErr}
+	}
+	if minLengthErr := runaihttp.AssertMinLength(obj.PlacementRef, "PlacementRef", 1); minLengthErr != nil {
+		return &ParsingError{Param: "PlacementRef", Err: minLengthErr}
+	}
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.PlacementRef, "PlacementRef", 63); maxLengthErr != nil {
+		return &ParsingError{Param: "PlacementRef", Err: maxLengthErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.Probes != nil {
+		if err := AssertProbesConstraints(*obj.Probes); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.Retry != nil {
+		if err := AssertTaskRetryConstraints(*obj.Retry); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.Security != nil {
+		if err := AssertWorkspaceSpecSpecAllOfSecurityConstraints(*obj.Security); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.Storage != nil {
+		if err := AssertWorkflowTaskStorageConstraints(*obj.Storage); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if maxItemsErr := runaihttp.AssertMaxItems(obj.StorageRef, "StorageRef", 1000); maxItemsErr != nil {
+		return &ParsingError{Param: "StorageRef", Err: maxItemsErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.StorageRef != nil {
+		for _, el := range *obj.StorageRef {
+			if err := AssertWorkflowS3StorageRefConstraints(el); err != nil {
+				return err
+			}
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if maxItemsErr := runaihttp.AssertMaxItems(obj.SuccessExitCodes, "SuccessExitCodes", 256); maxItemsErr != nil {
+		return &ParsingError{Param: "SuccessExitCodes", Err: maxItemsErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.SuccessExitCodes != nil {
+		for _, el := range *obj.SuccessExitCodes {
+			if err := AssertTaskExitCodeRangeConstraints(el); err != nil {
+				return err
+			}
+		}
+	}
+	if obj.TerminationGracePeriodSeconds != nil && *obj.TerminationGracePeriodSeconds < 0 {
+		return &ParsingError{Param: "TerminationGracePeriodSeconds", Err: errors.New(errMsgMinValueConstraint)}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if patternErr := runaihttp.AssertPattern(obj.WorkingDir, "WorkingDir", "/.*/"); patternErr != nil {
+		return &ParsingError{Param: "WorkingDir", Err: patternErr}
+	}
+	if minLengthErr := runaihttp.AssertMinLength(obj.WorkingDir, "WorkingDir", 1); minLengthErr != nil {
+		return &ParsingError{Param: "WorkingDir", Err: minLengthErr}
+	}
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.WorkingDir, "WorkingDir", 4096); maxLengthErr != nil {
+		return &ParsingError{Param: "WorkingDir", Err: maxLengthErr}
+	}
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 

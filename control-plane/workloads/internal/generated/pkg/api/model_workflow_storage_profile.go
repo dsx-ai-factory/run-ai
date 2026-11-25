@@ -22,14 +22,22 @@ var dummyWorkflowStorageProfile = runaihttp.AssertPattern
 
 type WorkflowStorageProfile struct {
 
+	// Set of S3 buckets that the tasks of the workflow can use.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Todo bool `json:"todo,omitempty"`
-	Todo bool `json:"todo,omitempty" gorm:"not null;"`
+	//S3 *[]WorkflowS3Instance `json:"s3,omitempty"`
+	S3 *[]WorkflowS3Instance `json:"s3,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertWorkflowStorageProfileRequired checks if the required fields are not zero-ed
 func AssertWorkflowStorageProfileRequired(obj WorkflowStorageProfile) error {
+	if obj.S3 != nil {
+		for _, el := range *obj.S3 {
+			if err := AssertWorkflowS3InstanceRequired(el); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 
@@ -40,5 +48,12 @@ func AssertWorkflowStorageProfileConstraints(obj WorkflowStorageProfile) error {
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
+	if obj.S3 != nil {
+		for _, el := range *obj.S3 {
+			if err := AssertWorkflowS3InstanceConstraints(el); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }

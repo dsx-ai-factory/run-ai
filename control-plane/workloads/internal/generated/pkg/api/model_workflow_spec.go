@@ -24,56 +24,15 @@ var dummyWorkflowSpec = runaihttp.AssertPattern
 type WorkflowSpec struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Todo bool `json:"todo,omitempty"`
-	Todo bool `json:"todo,omitempty" gorm:"not null;"`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	// Definitions of the workflow groups.
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Groups []WorkflowGroupsInner `json:"groups,omitempty"`
-	Groups []WorkflowGroupsInner `json:"groups,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	// Defines the workflow compute profiles.
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Compute []WorkflowComputeProfile `json:"compute,omitempty"`
-	Compute []WorkflowComputeProfile `json:"compute,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	// Defines the workflow placement profiles.
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Placement []WorkflowPlacementProfile `json:"placement,omitempty"`
-	Placement []WorkflowPlacementProfile `json:"placement,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	// Defines the workflow storage profiles.
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Storage []WorkflowStorageProfile `json:"storage,omitempty"`
-	Storage []WorkflowStorageProfile `json:"storage,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
+	//Spec WorkflowSpecSpec `json:"spec,omitempty"`
+	Spec WorkflowSpecSpec `json:"spec,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertWorkflowSpecRequired checks if the required fields are not zero-ed
 func AssertWorkflowSpecRequired(obj WorkflowSpec) error {
-	for _, el := range obj.Groups {
-		if err := AssertWorkflowGroupsInnerRequired(el); err != nil {
-			return err
-		}
-	}
-	for _, el := range obj.Compute {
-		if err := AssertWorkflowComputeProfileRequired(el); err != nil {
-			return err
-		}
-	}
-	for _, el := range obj.Placement {
-		if err := AssertWorkflowPlacementProfileRequired(el); err != nil {
-			return err
-		}
-	}
-	for _, el := range obj.Storage {
-		if err := AssertWorkflowStorageProfileRequired(el); err != nil {
-			return err
-		}
+	if err := AssertWorkflowSpecSpecRequired(obj.Spec); err != nil {
+		return err
 	}
 	return nil
 }
@@ -85,54 +44,8 @@ func AssertWorkflowSpecConstraints(obj WorkflowSpec) error {
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
-	for _, el := range obj.Groups {
-		if err := AssertWorkflowGroupsInnerConstraints(el); err != nil {
-			return err
-		}
-	}
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	if maxItemsErr := runaihttp.AssertMaxItems(obj.Compute, "Compute", 100); maxItemsErr != nil {
-		return &ParsingError{Param: "Compute", Err: maxItemsErr}
-	}
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
-	for _, el := range obj.Compute {
-		if err := AssertWorkflowComputeProfileConstraints(el); err != nil {
-			return err
-		}
-	}
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	if maxItemsErr := runaihttp.AssertMaxItems(obj.Placement, "Placement", 100); maxItemsErr != nil {
-		return &ParsingError{Param: "Placement", Err: maxItemsErr}
-	}
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
-	for _, el := range obj.Placement {
-		if err := AssertWorkflowPlacementProfileConstraints(el); err != nil {
-			return err
-		}
-	}
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	if maxItemsErr := runaihttp.AssertMaxItems(obj.Storage, "Storage", 100); maxItemsErr != nil {
-		return &ParsingError{Param: "Storage", Err: maxItemsErr}
-	}
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
-	for _, el := range obj.Storage {
-		if err := AssertWorkflowStorageProfileConstraints(el); err != nil {
-			return err
-		}
+	if err := AssertWorkflowSpecSpecConstraints(obj.Spec); err != nil {
+		return err
 	}
 	return nil
 }

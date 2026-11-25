@@ -22,7 +22,13 @@ var _ MappedNullable = &WorkflowFields{}
 
 // WorkflowFields struct for WorkflowFields
 type WorkflowFields struct {
-	Todo *bool `json:"todo,omitempty"`
+	// Specify the workload category assigned to the workload. Categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform.
+	Category NullableString `json:"category,omitempty" validate:"regexp=.*"`
+	// A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
+	NodePools      []string               `json:"nodePools,omitempty"`
+	Preemptibility NullablePreemptibility `json:"preemptibility,omitempty"`
+	// Specifies the priority class for the workload, which determines its scheduling behavior. Valid values are: very-low, low, medium-low, medium, medium-high, high, and very-high. Each workload type has a default priority. To view the default priority for each workload type, use the GET /workload-types endpoint. Once you change the priority from the default value defined for that workload type, the preemptibility field is not automatically updated. Make sure to set the desired preemptibility value.
+	PriorityClass NullableString `json:"priorityClass,omitempty" validate:"regexp=.*"`
 }
 
 // NewWorkflowFields instantiates a new WorkflowFields object
@@ -42,36 +48,166 @@ func NewWorkflowFieldsWithDefaults() *WorkflowFields {
 	return &this
 }
 
-// GetTodo returns the Todo field value if set, zero value otherwise.
-func (o *WorkflowFields) GetTodo() bool {
-	if o == nil || IsNil(o.Todo) {
-		var ret bool
+// GetCategory returns the Category field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *WorkflowFields) GetCategory() string {
+	if o == nil || IsNil(o.Category.Get()) {
+		var ret string
 		return ret
 	}
-	return *o.Todo
+	return *o.Category.Get()
 }
 
-// GetTodoOk returns a tuple with the Todo field value if set, nil otherwise
+// GetCategoryOk returns a tuple with the Category field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *WorkflowFields) GetTodoOk() (*bool, bool) {
-	if o == nil || IsNil(o.Todo) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *WorkflowFields) GetCategoryOk() (*string, bool) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Todo, true
+	return o.Category.Get(), o.Category.IsSet()
 }
 
-// HasTodo returns a boolean if a field has been set.
-func (o *WorkflowFields) HasTodo() bool {
-	if o != nil && !IsNil(o.Todo) {
+// HasCategory returns a boolean if a field has been set.
+func (o *WorkflowFields) HasCategory() bool {
+	if o != nil && o.Category.IsSet() {
 		return true
 	}
 
 	return false
 }
 
-// SetTodo gets a reference to the given bool and assigns it to the Todo field.
-func (o *WorkflowFields) SetTodo(v bool) {
-	o.Todo = &v
+// SetCategory gets a reference to the given NullableString and assigns it to the Category field.
+func (o *WorkflowFields) SetCategory(v string) {
+	o.Category.Set(&v)
+}
+
+// SetCategoryNil sets the value for Category to be an explicit nil
+func (o *WorkflowFields) SetCategoryNil() {
+	o.Category.Set(nil)
+}
+
+// UnsetCategory ensures that no value is present for Category, not even an explicit nil
+func (o *WorkflowFields) UnsetCategory() {
+	o.Category.Unset()
+}
+
+// GetNodePools returns the NodePools field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *WorkflowFields) GetNodePools() []string {
+	if o == nil {
+		var ret []string
+		return ret
+	}
+	return o.NodePools
+}
+
+// GetNodePoolsOk returns a tuple with the NodePools field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *WorkflowFields) GetNodePoolsOk() ([]string, bool) {
+	if o == nil || IsNil(o.NodePools) {
+		return nil, false
+	}
+	return o.NodePools, true
+}
+
+// HasNodePools returns a boolean if a field has been set.
+func (o *WorkflowFields) HasNodePools() bool {
+	if o != nil && !IsNil(o.NodePools) {
+		return true
+	}
+
+	return false
+}
+
+// SetNodePools gets a reference to the given []string and assigns it to the NodePools field.
+func (o *WorkflowFields) SetNodePools(v []string) {
+	o.NodePools = v
+}
+
+// GetPreemptibility returns the Preemptibility field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *WorkflowFields) GetPreemptibility() Preemptibility {
+	if o == nil || IsNil(o.Preemptibility.Get()) {
+		var ret Preemptibility
+		return ret
+	}
+	return *o.Preemptibility.Get()
+}
+
+// GetPreemptibilityOk returns a tuple with the Preemptibility field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *WorkflowFields) GetPreemptibilityOk() (*Preemptibility, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Preemptibility.Get(), o.Preemptibility.IsSet()
+}
+
+// HasPreemptibility returns a boolean if a field has been set.
+func (o *WorkflowFields) HasPreemptibility() bool {
+	if o != nil && o.Preemptibility.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetPreemptibility gets a reference to the given NullablePreemptibility and assigns it to the Preemptibility field.
+func (o *WorkflowFields) SetPreemptibility(v Preemptibility) {
+	o.Preemptibility.Set(&v)
+}
+
+// SetPreemptibilityNil sets the value for Preemptibility to be an explicit nil
+func (o *WorkflowFields) SetPreemptibilityNil() {
+	o.Preemptibility.Set(nil)
+}
+
+// UnsetPreemptibility ensures that no value is present for Preemptibility, not even an explicit nil
+func (o *WorkflowFields) UnsetPreemptibility() {
+	o.Preemptibility.Unset()
+}
+
+// GetPriorityClass returns the PriorityClass field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *WorkflowFields) GetPriorityClass() string {
+	if o == nil || IsNil(o.PriorityClass.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.PriorityClass.Get()
+}
+
+// GetPriorityClassOk returns a tuple with the PriorityClass field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *WorkflowFields) GetPriorityClassOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.PriorityClass.Get(), o.PriorityClass.IsSet()
+}
+
+// HasPriorityClass returns a boolean if a field has been set.
+func (o *WorkflowFields) HasPriorityClass() bool {
+	if o != nil && o.PriorityClass.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetPriorityClass gets a reference to the given NullableString and assigns it to the PriorityClass field.
+func (o *WorkflowFields) SetPriorityClass(v string) {
+	o.PriorityClass.Set(&v)
+}
+
+// SetPriorityClassNil sets the value for PriorityClass to be an explicit nil
+func (o *WorkflowFields) SetPriorityClassNil() {
+	o.PriorityClass.Set(nil)
+}
+
+// UnsetPriorityClass ensures that no value is present for PriorityClass, not even an explicit nil
+func (o *WorkflowFields) UnsetPriorityClass() {
+	o.PriorityClass.Unset()
 }
 
 func (o WorkflowFields) MarshalJSON() ([]byte, error) {
@@ -84,8 +220,17 @@ func (o WorkflowFields) MarshalJSON() ([]byte, error) {
 
 func (o WorkflowFields) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Todo) {
-		toSerialize["todo"] = o.Todo
+	if o.Category.IsSet() {
+		toSerialize["category"] = o.Category.Get()
+	}
+	if o.NodePools != nil {
+		toSerialize["nodePools"] = o.NodePools
+	}
+	if o.Preemptibility.IsSet() {
+		toSerialize["preemptibility"] = o.Preemptibility.Get()
+	}
+	if o.PriorityClass.IsSet() {
+		toSerialize["priorityClass"] = o.PriorityClass.Get()
 	}
 	return toSerialize, nil
 }
