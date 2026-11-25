@@ -26,7 +26,6 @@ type WorkloadsSettingsKey =
     | 'enablePolicies'
     | 'workloadSubmissionV2Enabled'
     | 'enableTemplatesV2'
-    | 'enableHybridSubmission'
     | 'gpuOverProvisioning';
 
 type DatavolumesSettingsKey = 'enableDataVolumes';
@@ -87,10 +86,6 @@ export class ApiUtils {
         request: UpdateWorkloadsSettingRequest
     ): Promise<void> {
         await this.updateBooleanServiceSetting('/api/v1/catalog/settings', key, request);
-    }
-
-    private async setHybridSubmissionFeature(enabled: boolean): Promise<void> {
-        await this.updateWorkloadsSetting('enableHybridSubmission', { enabled });
     }
 
     private async setPoliciesFeature(enabled: boolean): Promise<void> {
@@ -200,11 +195,7 @@ export class ApiUtils {
     }
 
 
-    async enableHybridSubmission(): Promise<void> {
-        await this.setHybridSubmissionFeature(true);
-
-        // Older backends also disable templates when hybrid submission is disabled.
-        // Newer backends no longer expose the templates setting.
+    async enableTemplatesIfSupported(): Promise<void> {
         let templatesEnabled: boolean | undefined;
         try {
             const { data } = await axios.get<{
@@ -220,7 +211,7 @@ export class ApiUtils {
         } catch (error) {
             throw new UtilsError(
                 new Error(
-                    `Failed to read workloads settings when restoring hybrid submission: ${
+                    `Failed to read the workload templates setting: ${
                         error?.response?.status ?? 'request failed'
                     }`
                 )
@@ -230,14 +221,6 @@ export class ApiUtils {
         if (templatesEnabled === false) {
             await this.updateWorkloadsSetting('enableTemplatesV2', { enabled: true });
         }
-    }
-
-    /**
-     * @deprecated **Do NOT disable this feature** in the parallel suite as it may cause test instability
-     * and unexpected behavior in parallel test environments.
-     */
-    async disableHybridSubmission(): Promise<void> {
-        await this.setHybridSubmissionFeature(false);
     }
 
     // setNodePoolSetting toggles a cluster-service node-pool setting via its public API

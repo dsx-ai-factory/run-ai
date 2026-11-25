@@ -6,7 +6,6 @@
 import { BrowserEngine } from '../../../../../../../modules/ui/runaiV2/pages/BrowserEngine';
 import { AuthPage } from '../../../../../../../modules/ui/runaiV2/pages/AuthPage';
 import {
-    apiUtils,
     flowRootState,
     logger,
     nodePoolUtils,
@@ -99,7 +98,6 @@ test.describe(`Inferences Policy based on distributed UI, tags: ${tags.tool.ui} 
 
         backendClusterApi.nodePoolsApi.accessToken = flowRootState.users.system_administrator.accessToken;
 
-        await apiUtils.enableHybridSubmission();
         // Create node pool for tests that reference it in policies
         nodePoolName = objectGenerator.generateShortNameByPrefix('np');
         const nodePoolLabelKeyValue = nodePoolUtils.generateKeyValueLabels();

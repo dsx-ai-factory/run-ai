@@ -258,6 +258,23 @@ describe("role-permission.vue", () => {
       expect(trainingsElement.exists()).toBe(true);
       expect(trainingsElement.text()).eql("Trainings");
     });
+    test("should display the Cluster configuration permission", async () => {
+      mountComponent({ role: systemAdmin });
+      const clusterConfigElement = wrapper.find(`[aid="${ResourceType.ClusterConfig}"]`);
+
+      expect(clusterConfigElement.exists()).toBe(true);
+      expect(clusterConfigElement.text()).eql("Cluster configuration");
+    });
+    test("should still hide the Access keys permission", async () => {
+      mountComponent({
+        role: {
+          ...systemAdmin,
+          permissions: [...systemAdmin.permissions, { resourceType: ResourceType.AccessKeys, actions: ["read"] }],
+        },
+      });
+
+      expect(wrapper.find(`[aid="${ResourceType.AccessKeys}"]`).exists()).toBe(false);
+    });
     test("should keep a row whose group and display name are unknown, last and labeled by resource type", async () => {
       // Registries is not in the seeded permission store, so it has no group.
       mountComponent({

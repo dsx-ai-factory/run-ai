@@ -56,8 +56,87 @@ reviews:
         relevant events (auth failure, access denied, tenant violation) with no log at all.
         A10 SSRF: outbound HTTP/URL/host built from user input without allowlist validation;
         flag http.Get/http.NewRequest/url.Parse fed unvalidated request data.
+        FAIL CLOSED: an authorization or scope helper that returns nil/allowed when a lookup
+        fails, when scopes are empty or unparseable, or on a swallowed error (for example
+        `if getErr != nil { return err }` where err is nil) is critical.
+        NON-SQL INJECTION: values interpolated with fmt.Sprintf into PromQL label matchers,
+        email/SMTP headers (reject \r and \n), CSV cells (prefix ' to cells starting with
+        = + - @), or file paths (filepath.Join with names from an API or user; use
+        filepath.Base and reject "..").
+        SECRETS AND KEYS: passwords, tokens and encryption keys must come from crypto/rand per
+        installation. Flag string-literal credentials and keys derived from non-secret values
+        (cluster UUID, tenant ID, hash of an ID). Flag files that hold credentials written with
+        mode wider than 0600. Flag string(intValue) conversions used as map or cache keys.
+        AVAILABILITY: single-value type assertions x.(T) on data from events, JSON or maps
+        (use v, ok := x.(T)); slice index after a length check on a different variable;
+        maps shared between goroutines without sync.Mutex or sync.Map; loops that follow
+        ownerReferences or parent links without a visited set or depth cap; per-event
+        goroutines without recover().
     - path: "runai-cluster/**/*.go"
       instructions: *owasp_go
+    - path: "runai-installer/**/*.go"
+      instructions: *owasp_go
+    - path: "runai-installer/{installer,provisioner-service}/**/*.go"
+      instructions: |
+        Flag any HTTP route in the installer or provisioner-service that has no
+        authentication middleware. Flag installer inputs that hold credentials (passwords,
+        client secrets, tokens) saved to a Secret or file without deletion after install.
+    - path: "control-plane/**/services/**/*.go"
+      instructions: |
+        CLUSTER-SYNC AND AGENT ENDPOINTS (Sync*, *Internal, Update*Status, Delete* called by
+        the cluster agent): a cluster-scoped credential must only read or write data of its
+        own cluster. Flag as critical when clusterId, tenantId or projectId comes from the
+        path, query or body (including per-item fields in a batch) and is used without a
+        check against the permitted scopes in the context (ValidatePermittedScope,
+        ValidatePermittedClusterScope or the service's equivalent). Each item in a batch must
+        be checked. Delete and purge queries must filter by the validated clusterId. A
+        handler that returns decrypted credentials must check that the requested cluster is
+        the caller's cluster. Shared caches must only be served after IsEligibleForCachedData
+        or an equal scope guard.
+        CREATE/UPDATE PARITY: if a create path runs policy validation, RBAC, or a privilege
+        check, the update, patch, migrate and delete paths for the same resource must run it
+        too. Flag a new code path that writes the resource and skips the check.
+        READ SCOPING: list/get endpoints that return tenant-wide data when the caller has only
+        project- or department-scoped permissions are an IDOR (A01).
+    - path: "control-plane/{authorization,identity-manager}/**/*.go"
+      instructions: |
+        PRIVILEGE CONTAINMENT: every path that creates, updates, migrates or deletes access
+        rules, roles, users or service accounts, or regenerates their secrets, must call the
+        privilege-containment check (validateCurrentUserHasPrivilege or equivalent). The check
+        must include group-derived permissions of the target user and must not skip "global"
+        or tenant-wide resource types. The check and the write must run in one transaction
+        with a row lock, or the write must re-validate, to avoid TOCTOU.
+        SECRETS: client secrets of service accounts must never be returned by list/get
+        endpoints, only once at creation or regeneration.
+        IDENTITY ATTRIBUTES: user-profile attributes that drive pod security (UID, GID,
+        SUPPLEMENTARYGROUPS, GROUPS) must not be self-service editable.
+        OAUTH: redirect URIs must be exact-match; flag wildcards and parent-domain suffix
+        matches. Flag redirect or tenant targets derived from Host or X-Forwarded-Host.
+        Flag IdP flows that auto-link external identities to local accounts by email.
+        Token endpoints must authenticate the client before redeeming codes.
+    - path: "control-plane/{catalog-service,assets-service}/**/*.go"
+      instructions: |
+        REGISTRY SSRF (A10): registry and helm-repo URLs are attacker-controlled. Flag any
+        outbound request to such a URL unless it: allows only https, resolves the host and
+        rejects private, loopback and link-local IPs, pins the validated IP in a custom
+        DialContext (no second DNS lookup), disables redirects or re-validates each hop, and
+        does not copy the upstream response body into API errors. Flag tenant credentials
+        (NGC API key, decrypted registry secrets) attached to a host that is not on a fixed
+        allowlist. Validate the URL when the registry is created or updated, not only on use.
+    - path: "control-plane/gateway-hub/**/*.go"
+      instructions: |
+        Redirect targets must be an exact-match allowlist of hosts. Flag suffix or
+        parent-domain matching as the only redirect control.
+    - path: "runai-cluster/**/admission-controller/**/*.go"
+      instructions: |
+        Flag mutations driven by pod or workload annotations and labels that users can set
+        (for example run.ai/patch-*): they must not add volumes (especially hostPath),
+        privileges or capabilities unless the source is verified against the owner object.
+    - path: "runai-cluster/**/validator/**/*.go"
+      instructions: |
+        Service-account identity checks must compare the full
+        system:serviceaccount:<namespace>:<name> string for equality. Flag HasPrefix,
+        Contains or regex matching on UserInfo.Username.
     - path: "**/*.{yaml,yml,tf,tpl}"
       instructions: |
         A05 / K01 INSECURE WORKLOAD CONFIGURATIONS: Flag any container spec missing all of:
@@ -132,6 +211,8 @@ reviews:
         TENANT ISOLATION: This is a multi-tenant system. Verify that queries filtering
         data always include a tenant_id condition. Queries that return data without
         filtering by tenant_id risk leaking one customer's data to another.
+        SHARED CACHES: a DAO that returns rows from a cache shared across callers must call
+        IsEligibleForCachedData (or filter the cached rows by the caller's scope) first.
     - path: "control-plane/**/database/**/*.go"
       instructions: |
         Check for SQL injection in GORM queries. All user-supplied or dynamic values
@@ -148,6 +229,11 @@ reviews:
       instructions: |
         Review OpenAPI specs for proper authentication requirements on endpoints,
         input validation schemas (maxLength, pattern, enum), and sensitive data exposure.
+        Authorization middleware is generated from the x-authorize extension. Flag as critical
+        any new or changed operation, including /internal/ and sync routes, that has no
+        x-authorize block, or whose action does not match the HTTP method (read for GET).
+        Flag enum-like string parameters (scopeType, sort, filter fields) without an enum.
+        Flag numeric quota or size fields without a minimum.
     - path: "**/*_test.go"
       instructions: |
         Even in tests, use parameterized queries (? placeholders) with GORM to maintain
@@ -166,12 +252,32 @@ reviews:
         tokens, passwords, or PII should be flagged — prefer httpOnly cookies or in-memory state.
         OPEN REDIRECT: window.location assignments or router.push() calls that use
         unvalidated external input should be flagged.
+        WINDOW.OPEN: flag window.open() with a URL from API data or user input. Use the
+        openNewWindow() helper, which allows only http(s) and sets noopener,noreferrer.
         PROTOTYPE POLLUTION: lodash merge/set/assign with user-controlled keys, or direct
         bracket-notation assignment on objects with user-controlled keys, should be flagged.
         DEPENDENCY INJECTION: dynamic import() with a user-controlled path should be flagged.
         INFORMATIONAL — note but do not block:
         Object injection: bracket-notation property access on plain objects with external
         keys (already caught by eslint-plugin-security, note only if pattern is high-risk).
+    - path: "control-plane/keycloak-extensions/**/*.{ftl,js,html,css}"
+      instructions: |
+        Keycloak theme templates run in the login origin. Flag innerHTML, outerHTML or
+        document.write with values from window.location, URLSearchParams or other URL data;
+        use textContent or server-side kcSanitize. Flag forms that auto-submit on load or
+        CSS that hides a confirmation step (logout, consent): this enables CSRF.
+    - path: ".github/workflows/**/*.{yml,yaml}"
+      instructions: |
+        Flag ${{ }} expressions with attacker-controlled data (github.event.pull_request.*,
+        github.head_ref, branch names, PR titles, step outputs derived from them) inside run:
+        or actions/github-script script bodies. Pass them through env: and read the env var.
+        Flag approval, auto-merge or secret use gated on branch-name prefixes; gate on
+        github.actor or the PR author instead. Flag pull_request_target or workflow_run jobs
+        that check out PR head code. Flag missing top-level permissions: blocks.
+    - path: ".github/scripts/**"
+      instructions: |
+        Flag TLS verification disabled (verify=False, InsecureSkipVerify, curl -k) on requests
+        that carry passwords, tokens or secrets.
 
 chat:
   art: false

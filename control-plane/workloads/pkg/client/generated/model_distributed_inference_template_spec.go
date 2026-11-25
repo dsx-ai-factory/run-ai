@@ -24,7 +24,7 @@ var _ MappedNullable = &DistributedInferenceTemplateSpec{}
 type DistributedInferenceTemplateSpec struct {
 	// Specify the workload category assigned to the workload. Categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform.
 	Category NullableString `json:"category,omitempty" validate:"regexp=.*"`
-	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
 	LoadAwareRouting NullableBool `json:"loadAwareRouting,omitempty"`
 	// A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
 	NodePools      []string               `json:"nodePools,omitempty"`
@@ -50,8 +50,6 @@ type DistributedInferenceTemplateSpec struct {
 // will change when the set of required properties is changed
 func NewDistributedInferenceTemplateSpec() *DistributedInferenceTemplateSpec {
 	this := DistributedInferenceTemplateSpec{}
-	var loadAwareRouting bool = false
-	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var restartPolicy DistributedInferenceRestartPolicy = DISTRIBUTEDINFERENCERESTARTPOLICY_RECREATE_GROUP_ON_POD_RESTART
 	this.RestartPolicy = *NewNullableDistributedInferenceRestartPolicy(&restartPolicy)
 	var startupPolicy DistributedInferenceStartupPolicy = DISTRIBUTEDINFERENCESTARTUPPOLICY_LEADER_CREATED
@@ -68,8 +66,6 @@ func NewDistributedInferenceTemplateSpec() *DistributedInferenceTemplateSpec {
 // but it doesn't guarantee that properties required by API are set
 func NewDistributedInferenceTemplateSpecWithDefaults() *DistributedInferenceTemplateSpec {
 	this := DistributedInferenceTemplateSpec{}
-	var loadAwareRouting bool = false
-	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var restartPolicy DistributedInferenceRestartPolicy = DISTRIBUTEDINFERENCERESTARTPOLICY_RECREATE_GROUP_ON_POD_RESTART
 	this.RestartPolicy = *NewNullableDistributedInferenceRestartPolicy(&restartPolicy)
 	var startupPolicy DistributedInferenceStartupPolicy = DISTRIBUTEDINFERENCESTARTUPPOLICY_LEADER_CREATED

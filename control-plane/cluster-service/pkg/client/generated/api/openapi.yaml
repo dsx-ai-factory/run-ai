@@ -7004,6 +7004,7 @@ components:
             \ must also be checked before enabling new workloads."
           nullable: true
           type: string
+          x-internal: true
         workloadOwnershipProtection:
           description: indicates if the cluster workload ownership protection is enabled
           example: false

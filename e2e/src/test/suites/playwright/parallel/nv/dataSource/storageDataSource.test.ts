@@ -133,13 +133,15 @@ test.describe(`Storage data sources E2E Tests, tags: ${tags.tool.ui} ${tags.reso
             await browserEngine.stopAndArchive(testInfo, videoName);
         });
 
-        async function checkStorageNotVisible(): Promise<void> {
+        async function expectSharedVolumeHidden(volumeName: string): Promise<void> {
             await hybridForm.page.waitForLoadState('load');
             await hybridForm.openDataSourcesSection();
             await hybridForm.openDataSourcesDrawer();
-            // TO-DO temp workaround: Eslint and Prettier rules have a conflict with single quote in a string
-            await expect(hybridForm.locator('text=Looks like you don')).toBeVisible();
-            await expect(hybridForm.locator('text=have any setups yet')).toBeVisible();
+            await hybridForm.fillSeachInputInDrawer(volumeName);
+            await expect(
+                hybridForm.page.getByText('No setups match your filter', { exact: true }),
+                `The storage drawer should have no match for shared volume ${volumeName}`
+            ).toBeVisible();
             await hybridForm.closeDrawer();
             await hybridForm.closeWorkloadForm();
         }
@@ -345,27 +347,13 @@ test.describe(`Storage data sources E2E Tests, tags: ${tags.tool.ui} ${tags.reso
                         });
 
                         await test.step('verify not able to see shared data volume out of scope under department 2', async () => {
-                            await trainingPage.fillFirstNewTrainingPage(
-                                projectNameList[2],
-                                trainingNames[2],
-                                false,
-                                undefined,
-                                undefined,
-                                true
-                            );
-                            await checkStorageNotVisible();
+                            await trainingPage.fillFlexTrainingFirstPage(projectNameList[2], trainingNames[2]);
+                            await expectSharedVolumeHidden(dataVolumeName);
                         });
 
                         await test.step('verify not able to see shared data volume out of scope under the default department', async () => {
-                            await trainingPage.fillFirstNewTrainingPage(
-                                projectNameList[4],
-                                trainingNames[4],
-                                false,
-                                undefined,
-                                undefined,
-                                true
-                            );
-                            await checkStorageNotVisible();
+                            await trainingPage.fillFlexTrainingFirstPage(projectNameList[4], trainingNames[4]);
+                            await expectSharedVolumeHidden(dataVolumeName);
                         });
 
                         await test.step('verify pvc volume for training0 is R/W', async () => {

@@ -31,7 +31,7 @@ import {
 } from '../../../../../../modules/api/apis/clusterApi';
 import { Project } from '../../../../../../modules/api/apis/orgUnitApi/generated/model/project';
 import { kubeCli } from '../../../../../../modules/cli';
-import { Phase } from '../../../../../../modules/api/apis/assetsApi';
+import { Phase } from '../../../../../../modules/api/apis/workloadsApi/generated/model/phase';
 import { StatusCodes } from 'http-status-codes';
 import { WorkloadType } from '../../../../../../modules/helpers/utils/WorkloadsCrudUtils';
 import { skipPlaywrightTest } from '../../../../../../modules/helpers/utils/SkippedTestUtils';

@@ -4,17 +4,10 @@
  */
 
 import { assetsApi } from '../../../../../../modules/api';
-import {
-    AssetKind,
-    AssetSyncStatusEnum,
-    PVCAsset,
-    PVCCreationRequest,
-    Scope,
-    WorkspaceCreationRequestV2
-} from '../../../../../../modules/api/apis/assetsApi';
+import { AssetSyncStatusEnum, PVCAsset, PVCCreationRequest, Scope } from '../../../../../../modules/api/apis/assetsApi';
+import { WorkspaceCreationRequest } from '../../../../../../modules/api/apis/workloadsApi/generated/api';
 import { Project } from '../../../../../../modules/api/apis/projectsDepartmentsApi';
 import {
-    assetsApiV2Utils,
     computeResourceUtils,
     dataSourcesUtils,
     environmentUtils,
@@ -65,23 +58,16 @@ pvcScopes.forEach((pvcScope) => {
     async function getWorkloadCreationPayloadWithPvc(
         workloadName: string,
         pvcId: string
-    ): Promise<WorkspaceCreationRequestV2> {
+    ): Promise<WorkspaceCreationRequest> {
         return {
-            meta: {
-                name: workloadName,
-                useGivenNameAsPrefix: true,
-                projectId: project.id.toString(),
-                clusterId: flowRootState.cluster.uuid
-            },
+            name: workloadName,
+            useGivenNameAsPrefix: true,
+            projectId: project.id.toString(),
+            clusterId: flowRootState.cluster.uuid,
             assets: {
                 environment: await environmentUtils.getId('tensorboard'),
                 compute: await computeResourceUtils.getId('cpu-only'),
-                datasources: [
-                    {
-                        id: pvcId,
-                        kind: AssetKind.Pvc
-                    }
-                ]
+                datasources: [pvcId]
             }
         };
     }
@@ -90,7 +76,7 @@ pvcScopes.forEach((pvcScope) => {
         test.beforeAll('creating project', async function () {
             project = await projectResourcesUtils.createProjectAndNamespace('project');
             workloadsCrudUtils.accessToken = flowRootState.users.system_administrator.accessToken;
-            assetsApiV2Utils.accessToken = flowRootState.users.system_administrator.accessToken;
+
             assetsApi.pVCApi.accessToken = flowRootState.users.system_administrator.accessToken;
         });
 
@@ -148,10 +134,10 @@ pvcScopes.forEach((pvcScope) => {
             await test.step('Create workloads', async () => {
                 addInfo();
                 let payload = await getWorkloadCreationPayloadWithPvc(workloadName1, pvcId);
-                workloadId1 = (await assetsApiV2Utils.createWorkspace(payload)).body.meta.workloadId;
+                workloadId1 = (await workloadsCrudUtils.submitWorkspace(payload)).body.workloadId;
 
                 payload = await getWorkloadCreationPayloadWithPvc(workloadName2, pvcId);
-                workloadId2 = (await assetsApiV2Utils.createWorkspace(payload)).body.meta.workloadId;
+                workloadId2 = (await workloadsCrudUtils.submitWorkspace(payload)).body.workloadId;
 
                 logger.info(`Workloads ${workloadName1} and ${workloadName2} created successfully`);
             });

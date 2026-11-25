@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TrainingCreationRequestV2, TrainingV2 } from '../../../../../../modules/api/apis/assetsApi';
 import { Project } from '../../../../../../modules/api/apis/projectsDepartmentsApi';
 import {
     computeResourceUtils,
@@ -43,34 +42,6 @@ test.describe(`Bulk Deletion UI ${tags.teams.loong} ${tags.tool.ui} ${tags.resou
 
             let environmentId: string;
             let computeResourceId: string;
-
-            function getTrainingWorkloadPayload(name: string): TrainingCreationRequestV2 {
-                return {
-                    meta: {
-                        projectId: project.id.toString(),
-                        name: name,
-                        clusterId: project.clusterUuid
-                    },
-                    assets: {
-                        environment: environmentId,
-                        compute: computeResourceId
-                    }
-                };
-            }
-
-            async function createTrainingWorkloads(
-                amount: number,
-                accessToken?: string
-            ): Promise<TrainingV2[]> {
-                const trainingWorkloads = [];
-                for (let i = 0; i < amount; i++) {
-                    const name = objectGenerator.generateShortNameByPrefix(`training-workload-${i}`);
-                    const workloadPayload = getTrainingWorkloadPayload(name);
-                    await trainingUtils.createTraining(workloadPayload, accessToken);
-                    trainingWorkloads.push(workloadPayload);
-                }
-                return trainingWorkloads;
-            }
 
             test.beforeAll(async function () {
                 browserEngine = new BrowserEngine();
@@ -133,26 +104,31 @@ test.describe(`Bulk Deletion UI ${tags.teams.loong} ${tags.tool.ui} ${tags.resou
 
                     test(`T4040413: ${username} should be able to select multiple workloads and delete them`, async function () {
                         videoName = 'select-multiple-workloads-and-delete-them';
-                        const workloads = await createTrainingWorkloads(
-                            3,
+                        const workloadNames = [0, 1, 2].map((i) =>
+                            objectGenerator.generateShortNameByPrefix(`training-workload-${i}`)
+                        );
+                        await trainingUtils.createTrainingWorkloads(
+                            workloadNames,
+                            project,
+                            { assets: { environment: environmentId, compute: computeResourceId } },
                             flowRootState.users.l1_researcher.accessToken
                         );
                         await workloadPage.navigateToWorkloads();
 
                         // wait for workloads to appear on UI
-                        for (const workload of workloads) {
-                            await workloadPage.waitForWorkloadToAppear(workload.meta.name);
+                        for (const name of workloadNames) {
+                            await workloadPage.waitForWorkloadToAppear(name);
                         }
 
                         // The deleteWorkloads function only works when all workloads are visible in the UI,
                         // due to the last change made in the toggleWorkload function in Workload Page
-                        await workloadPage.deleteWorkloads(workloads.map((workload) => workload.meta.name));
+                        await workloadPage.deleteWorkloads(workloadNames);
 
                         await Promise.all(
-                            workloads.map(async (workload) => {
+                            workloadNames.map(async (name) => {
                                 await waitUtils.waitForElementToNotExist(
                                     workloadPage,
-                                    `td:has-text("${workload.meta.name}")`,
+                                    `td:has-text("${name}")`,
                                     120
                                 );
                             })

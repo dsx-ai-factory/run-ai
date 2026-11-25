@@ -1554,11 +1554,11 @@ export interface DistributedInferenceCommonDefaultsV2 {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * 
      * @type {boolean}
      * @memberof DistributedInferenceCommonDefaultsV2
      */
-    'loadAwareRouting'?: boolean | null;
+    'loadAwareRouting'?: boolean;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -1621,11 +1621,11 @@ export interface DistributedInferenceCommonDefaultsV2AllOf {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * 
      * @type {boolean}
      * @memberof DistributedInferenceCommonDefaultsV2AllOf
      */
-    'loadAwareRouting'?: boolean | null;
+    'loadAwareRouting'?: boolean;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -1674,7 +1674,7 @@ export interface DistributedInferenceCommonRulesV2 {
      * @type {BooleanRules}
      * @memberof DistributedInferenceCommonRulesV2
      */
-    'loadAwareRouting'?: BooleanRules | null;
+    'loadAwareRouting'?: BooleanRules;
     /**
      * 
      * @type {ArrayRules}
@@ -1741,7 +1741,7 @@ export interface DistributedInferenceCommonRulesV2AllOf {
      * @type {BooleanRules}
      * @memberof DistributedInferenceCommonRulesV2AllOf
      */
-    'loadAwareRouting'?: BooleanRules | null;
+    'loadAwareRouting'?: BooleanRules;
     /**
      * 
      * @type {ArrayRules}
@@ -1786,11 +1786,11 @@ export interface DistributedInferenceDefaultsV2 {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * 
      * @type {boolean}
      * @memberof DistributedInferenceDefaultsV2
      */
-    'loadAwareRouting'?: boolean | null;
+    'loadAwareRouting'?: boolean;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -2693,11 +2693,11 @@ export interface DistributedInferencePolicyDefaultsAndRulesV2Defaults {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * 
      * @type {boolean}
      * @memberof DistributedInferencePolicyDefaultsAndRulesV2Defaults
      */
-    'loadAwareRouting'?: boolean | null;
+    'loadAwareRouting'?: boolean;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -2776,7 +2776,7 @@ export interface DistributedInferencePolicyDefaultsAndRulesV2Rules {
      * @type {BooleanRules}
      * @memberof DistributedInferencePolicyDefaultsAndRulesV2Rules
      */
-    'loadAwareRouting'?: BooleanRules | null;
+    'loadAwareRouting'?: BooleanRules;
     /**
      * 
      * @type {ArrayRules}
@@ -3014,7 +3014,7 @@ export interface DistributedInferenceRulesV2 {
      * @type {BooleanRules}
      * @memberof DistributedInferenceRulesV2
      */
-    'loadAwareRouting'?: BooleanRules | null;
+    'loadAwareRouting'?: BooleanRules;
     /**
      * 
      * @type {ArrayRules}
@@ -5223,11 +5223,11 @@ export interface FallbackPolicyDefaultsAndRulesDefaults {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * 
      * @type {boolean}
      * @memberof FallbackPolicyDefaultsAndRulesDefaults
      */
-    'loadAwareRouting'?: boolean | null;
+    'loadAwareRouting'?: boolean;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -5541,7 +5541,7 @@ export interface FallbackPolicyDefaultsAndRulesRules {
      * @type {BooleanRules}
      * @memberof FallbackPolicyDefaultsAndRulesRules
      */
-    'loadAwareRouting'?: BooleanRules | null;
+    'loadAwareRouting'?: BooleanRules;
     /**
      * 
      * @type {ArrayRules}
@@ -9722,11 +9722,11 @@ export interface NimServiceDefaults {
      */
     'labels'?: LabelsDefaults | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * 
      * @type {boolean}
      * @memberof NimServiceDefaults
      */
-    'loadAwareRouting'?: boolean | null;
+    'loadAwareRouting'?: boolean;
     /**
      * 
      * @type {NimServiceDefaultsAllOfModelStore}
@@ -9855,11 +9855,11 @@ export interface NimServiceDefaultsAllOf {
      */
     'labels'?: LabelsDefaults | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * 
      * @type {boolean}
      * @memberof NimServiceDefaultsAllOf
      */
-    'loadAwareRouting'?: boolean | null;
+    'loadAwareRouting'?: boolean;
     /**
      * 
      * @type {NimServiceDefaultsAllOfModelStore}
@@ -10263,11 +10263,11 @@ export interface NimServicePolicyDefaultsAndRulesDefaults {
      */
     'labels'?: LabelsDefaults | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * 
      * @type {boolean}
      * @memberof NimServicePolicyDefaultsAndRulesDefaults
      */
-    'loadAwareRouting'?: boolean | null;
+    'loadAwareRouting'?: boolean;
     /**
      * 
      * @type {NimServiceDefaultsAllOfModelStore}
@@ -10400,7 +10400,7 @@ export interface NimServicePolicyDefaultsAndRulesRules {
      * @type {BooleanRules}
      * @memberof NimServicePolicyDefaultsAndRulesRules
      */
-    'loadAwareRouting'?: BooleanRules | null;
+    'loadAwareRouting'?: BooleanRules;
     /**
      * 
      * @type {NimServiceRulesAllOfModelStore}
@@ -10583,7 +10583,7 @@ export interface NimServiceRules {
      * @type {BooleanRules}
      * @memberof NimServiceRules
      */
-    'loadAwareRouting'?: BooleanRules | null;
+    'loadAwareRouting'?: BooleanRules;
     /**
      * 
      * @type {NimServiceRulesAllOfModelStore}
@@ -10716,7 +10716,7 @@ export interface NimServiceRulesAllOf {
      * @type {BooleanRules}
      * @memberof NimServiceRulesAllOf
      */
-    'loadAwareRouting'?: BooleanRules | null;
+    'loadAwareRouting'?: BooleanRules;
     /**
      * 
      * @type {NimServiceRulesAllOfModelStore}
@@ -15300,11 +15300,11 @@ export interface SupersetDefaults {
      */
     'category'?: string | null;
     /**
-     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * 
      * @type {boolean}
      * @memberof SupersetDefaults
      */
-    'loadAwareRouting'?: boolean | null;
+    'loadAwareRouting'?: boolean;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -16142,7 +16142,7 @@ export interface SupersetRules {
      * @type {BooleanRules}
      * @memberof SupersetRules
      */
-    'loadAwareRouting'?: BooleanRules | null;
+    'loadAwareRouting'?: BooleanRules;
     /**
      * 
      * @type {ArrayRules}
