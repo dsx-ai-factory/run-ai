@@ -51,7 +51,7 @@ When installing NVIDIA Run:ai, you automatically get the templates created by NV
 | Template | Image | Description |
 | --- | --- | --- |
 | bio-nemo-four-gpus | `nvcr.io/nvidia/clara/bionemo-framework:2.6.3` | This template is designed for training workloads using NVIDIA’s BioNeMo framework. It runs the `nvcr.io/nvidia/clara/bionemo-framework:2.6.3` image and requests 4 GPUs, making it suitable for large-scale biomolecular modeling tasks. |
-| jupyter-lab-one-gpu | `jupyter/scipy-notebook` | This template provides a preemptible workspace environment based on the JupyterLab SciPy notebook image (`jupyter/scipy-notebook`). It is configured to run with 1 GPU, giving users an interactive environment for experimentation and development. |
+| jupyter-lab-one-gpu | `quay.io/jupyter/scipy-notebook` | This template provides a preemptible workspace environment based on the JupyterLab SciPy notebook image (`quay.io/jupyter/scipy-notebook`). It is configured to run with 1 GPU, giving users an interactive environment for experimentation and development. |
 | nemo-four-gpus | `nvcr.io/nvidia/nemo:25.07` | A training template for NVIDIA NeMo, a framework for training and deploying LLMs and generative AI. It uses the `nvcr.io/nvidia/nemo:25.07` image with 4 GPUs, making it suitable for advanced AI model development. |
 | pytorch-one-gpu | `nvcr.io/nvidia/pytorch:25.06-py3` | This template supports training workloads using PyTorch. It runs the `nvcr.io/nvidia/pytorch:25.06-py3` image and requests 1 GPU, making it well-suited for single-GPU model development and testing. |
 

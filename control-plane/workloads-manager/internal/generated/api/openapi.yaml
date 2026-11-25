@@ -2160,7 +2160,9 @@ components:
     LoadAwareRouting:
       default: false
       description: "Route requests to the serving port through the endpoint picker,\
-        \ which picks a Pod by load. It can be set only when the workload is created."
+        \ which picks a Pod by load. It can be set only when the workload is created.\
+        \ Requires cluster version 3.1.0 or later, with the inference endpoint controller\
+        \ enabled and an administrator-enabled Gateway on the cluster."
       nullable: true
       type: boolean
     WorkloadV2ConfigurationInferenceRouting:
@@ -2176,7 +2178,9 @@ components:
         loadAwareRouting:
           default: false
           description: "Route requests to the serving port through the endpoint picker,\
-            \ which picks a Pod by load. It can be set only when the workload is created."
+            \ which picks a Pod by load. It can be set only when the workload is created.\
+            \ Requires cluster version 3.1.0 or later, with the inference endpoint\
+            \ controller enabled and an administrator-enabled Gateway on the cluster."
           nullable: true
           type: boolean
       type: object
@@ -6474,7 +6478,9 @@ components:
           labels:
             $ref: '#/components/schemas/Labels'
           loadAwareRouting:
-            $ref: '#/components/schemas/LoadAwareRouting'
+            allOf:
+            - $ref: '#/components/schemas/LoadAwareRouting'
+            x-internal: true
           modelStore:
             $ref: '#/components/schemas/NimServiceSpec_allOf_modelStore'
           multiNode:
@@ -6549,7 +6555,7 @@ components:
         - name: billing
           exclude: false
           value: my-billing-unit
-        loadAwareRouting: null
+        loadAwareRouting: ""
         priorityClass: null
         labels:
         - name: stage
@@ -6807,7 +6813,7 @@ components:
           - name: billing
             exclude: false
             value: my-billing-unit
-          loadAwareRouting: null
+          loadAwareRouting: ""
           priorityClass: null
           labels:
           - name: stage
@@ -7413,7 +7419,7 @@ components:
           - name: billing
             exclude: false
             value: my-billing-unit
-          loadAwareRouting: null
+          loadAwareRouting: ""
           priorityClass: null
           labels:
           - name: stage
@@ -7738,7 +7744,7 @@ components:
           - name: billing
             exclude: false
             value: my-billing-unit
-          loadAwareRouting: null
+          loadAwareRouting: ""
           priorityClass: null
           labels:
           - name: stage

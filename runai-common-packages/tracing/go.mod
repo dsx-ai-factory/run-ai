@@ -3,8 +3,8 @@ module github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing
 go 1.27.4
 
 require (
-	github.com/redis/go-redis/extra/redisotel/v9 v9.23.0
-	github.com/redis/go-redis/v9 v9.23.0
+	github.com/redis/go-redis/extra/redisotel/v9 v9.24.0
+	github.com/redis/go-redis/v9 v9.24.0
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0
@@ -48,7 +48,7 @@ require (
 	github.com/paulmach/orb v0.14.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
 	github.com/pierrec/lz4/v4 v4.1.34 // indirect
-	github.com/redis/go-redis/extra/rediscmd/v9 v9.23.0 // indirect
+	github.com/redis/go-redis/extra/rediscmd/v9 v9.24.0 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/shopspring/decimal v1.6.0 // indirect

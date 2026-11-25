@@ -11,6 +11,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/pkg/constants"
 	v1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
@@ -19,6 +20,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/fields"
 	apiruntime "k8s.io/apimachinery/pkg/runtime"
@@ -37,6 +39,24 @@ var kindsToDrop = map[schema.GroupKind]bool{
 	{Group: "run.ai", Kind: "InferenceWorkload"}:            true,
 	{Group: "run.ai", Kind: "DistributedInferenceWorkload"}: true,
 	{Group: "run.ai", Kind: "DistributedWorkload"}:          true,
+}
+
+// labelsToDrop - labels that Run:ai puts on the objects it creates for a workload that is already reported through
+// its own object. An object that carries one, or is owned by an object that carries one, is part of that workload,
+// so it must not get an ExternalWorkload of its own.
+var labelsToDrop = []string{
+	endpoints.InferenceEndpointLabel,
+}
+
+// ShouldDropByLabel returns true if the object carries a label from labelsToDrop.
+func ShouldDropByLabel(obj metav1.Object) bool {
+	objLabels := obj.GetLabels()
+	for _, label := range labelsToDrop {
+		if _, found := objLabels[label]; found {
+			return true
+		}
+	}
+	return false
 }
 
 type CachedClient interface {

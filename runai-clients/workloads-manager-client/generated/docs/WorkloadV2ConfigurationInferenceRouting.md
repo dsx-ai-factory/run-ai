@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**LoadAwareRouting** | Pointer to **NullableBool** | Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. | [optional] [default to false]
+**LoadAwareRouting** | Pointer to **NullableBool** | Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster. | [optional] [default to false]
 
 ## Methods
 
