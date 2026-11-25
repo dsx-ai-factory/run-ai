@@ -119,7 +119,7 @@ Dependencies
 | `k8s.io/kube-openapi/pkg/validation/errors` | v0.0.0-20260721132016-d427ff9ee9ad | Apache-2.0 | https://pkg.go.dev/k8s.io/kube-openapi@v0.0.0-20260721132016-d427ff9ee9ad?tab=licenses |
 | `k8s.io/kube-openapi/pkg/validation/spec` | v0.0.0-20260721132016-d427ff9ee9ad | Apache-2.0 | https://pkg.go.dev/k8s.io/kube-openapi@v0.0.0-20260721132016-d427ff9ee9ad?tab=licenses |
 | `k8s.io/kube-openapi/pkg/validation/strfmt` | v0.0.0-20260721132016-d427ff9ee9ad | Apache-2.0 | https://pkg.go.dev/k8s.io/kube-openapi@v0.0.0-20260721132016-d427ff9ee9ad?tab=licenses |
-| `k8s.io/streaming/pkg` | v0.37.2 | Apache-2.0 | https://pkg.go.dev/k8s.io/streaming@v0.37.2?tab=licenses |
+| `k8s.io/streaming/pkg` | v0.37.3 | Apache-2.0 | https://pkg.go.dev/k8s.io/streaming@v0.37.3?tab=licenses |
 | `k8s.io/utils` | v0.0.0-20261023123148-ca04ba58ecab | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20261023123148-ca04ba58ecab?tab=licenses |
 | `k8s.io/utils/internal/third_party/forked/golang` | v0.0.0-20261023123148-ca04ba58ecab | BSD-3-Clause | https://pkg.go.dev/k8s.io/utils@v0.0.0-20261023123148-ca04ba58ecab?tab=licenses |
 | `k8s.io/utils/third_party/forked/golang/btree` | v0.0.0-20261023123148-ca04ba58ecab | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20261023123148-ca04ba58ecab?tab=licenses |
