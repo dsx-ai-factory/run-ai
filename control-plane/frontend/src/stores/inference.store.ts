@@ -88,7 +88,6 @@ export const useInferenceStore = defineStore("Inference", {
   getters: {
     isHuggingFaceOrNimModel(): boolean {
       return (
-        this.inferenceFormUIState.modelBasedOn === EServerType.TGI ||
         this.inferenceFormUIState.modelBasedOn === EServerType.VLLM ||
         this.inferenceFormUIState.modelBasedOn === EServerType.Nim
       );

@@ -20,7 +20,7 @@ var dummyFairShareSimulationRequest = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// FairShareSimulationRequest - A scenario to simulate: the node pool as it is in the form and the org units the form shows, with their unsaved changes. Every org unit without a demand asks for half the node pool's capacity, capped by its limit. For departments, every department competes; the node pool and department forms both send departments. For projects, the other departments ask for nothing, and the parent asks for the sum of its projects' demand, capped by its limit.
+// FairShareSimulationRequest - A scenario to simulate: the node pool and the org units to return, with their unsaved changes. Every org unit without a demand asks for half the node pool's capacity, capped by its limit. For departments, every department competes. For projects, the other departments ask for nothing, and the parent asks for the sum of its projects' demand, capped by its limit.
 type FairShareSimulationRequest struct {
 
 	// Required; null is rejected.
@@ -41,7 +41,7 @@ type FairShareSimulationRequest struct {
 	Parent *FairShareSimulationParent `json:"parent,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// The org units to return, with their unsaved changes. Send the rows the screen shows and every edited row: an edit that isn't sent is lost.
+	// The org units to return, with their unsaved changes. Every org unit with an unsaved change must be sent: a change that isn't sent isn't simulated.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//OrgUnits []FairShareSimulationOrgUnit `json:"orgUnits"`
 	OrgUnits []FairShareSimulationOrgUnit `json:"orgUnits" gorm:"serializer:json; type:jsonb;not null;"`

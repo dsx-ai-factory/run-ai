@@ -523,8 +523,6 @@ export default defineComponent({
         this.$router.push({ name: INFERENCE_ROUTE_NAMES.INFERENCE_NIM_EDIT });
       } else if (this.inferenceStore.inferenceFormUIState.modelBasedOn === EServerType.VLLM) {
         this.$router.push({ name: INFERENCE_ROUTE_NAMES.INFERENCE_VLLM_EDIT });
-      } else if (this.inferenceStore.inferenceFormUIState.modelBasedOn === EServerType.TGI) {
-        this.$router.push({ name: INFERENCE_ROUTE_NAMES.INFERENCE_TGI_EDIT });
       } else {
         console.error(`No model based on ${this.inferenceStore.inferenceFormUIState.modelBasedOn} found`);
       }

@@ -165,6 +165,7 @@ import { defineComponent, type PropType } from "vue";
 
 // Utils
 import { isNotEmpty, isValidUrl } from "@/common/form.validators";
+import { urlService } from "@/services/url.service/url.service";
 
 // Models
 import { InternalConnectionType, ToolType } from "@/swagger-models/assets-service-client";
@@ -499,7 +500,10 @@ export default defineComponent({
     },
     isUrl(val: string): boolean | string {
       if (!val) return true;
-      return isValidUrl(val) || errorMessages.INVALID_URL;
+      if (!isValidUrl(val)) return errorMessages.INVALID_URL;
+      return (
+        !urlService.isControlPlaneRouteUrl(val, this.$router.getRoutes()) || errorMessages.URL_RESERVED_FOR_CONTROL_PLANE
+      );
     },
     validPort(val: number): boolean | string {
       return !!val || errorMessages.ENTER_A_PORT;

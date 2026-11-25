@@ -57,6 +57,13 @@ func runaiProjectRoleBindings(runaiConfig *runaiv1.RunaiConfig) []kaiv1alpha1.Pr
 			ClusterRoleName:    "runai-anyworkload-controller-project",
 			ServiceAccountName: "anyworkload-controller",
 		},
+		// Child-object writes stay out of the cluster-wide role so the controller
+		// can only render into project namespaces.
+		{
+			Name:               operands.RunaiInferenceEndpointControllerName,
+			ClusterRoleName:    "runai-inference-endpoint-controller-project",
+			ServiceAccountName: operands.RunaiInferenceEndpointControllerName,
+		},
 	}
 
 	// The per-project LimitRange binding is not listed: KRM ships its own builtin

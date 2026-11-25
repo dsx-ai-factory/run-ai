@@ -54,10 +54,10 @@ require (
 	golang.org/x/time v0.16.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.36.2
-	k8s.io/apiextensions-apiserver v0.35.4
+	k8s.io/apiextensions-apiserver v0.36.0
 	k8s.io/apimachinery v0.36.2
 	k8s.io/client-go v1.5.2
-	k8s.io/code-generator v0.35.4
+	k8s.io/code-generator v0.36.0
 	k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab
 	knative.dev/pkg v0.0.0-20260120122510-4a022ed9999a
 	knative.dev/serving v0.48.1
@@ -101,7 +101,7 @@ require (
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
-	github.com/fxamacker/cbor/v2 v2.9.0 // indirect
+	github.com/fxamacker/cbor/v2 v2.9.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
 	github.com/go-chi/chi/v5 v5.3.2 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
@@ -216,10 +216,10 @@ require (
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gorm.io/gorm v1.31.2 // indirect
-	k8s.io/apiserver v0.35.4 // indirect
+	k8s.io/apiserver v0.36.0 // indirect
 	k8s.io/autoscaler/vertical-pod-autoscaler v1.5.1 // indirect
 	k8s.io/cloud-provider v0.35.4 // indirect
-	k8s.io/component-base v0.35.4 // indirect
+	k8s.io/component-base v0.36.0 // indirect
 	k8s.io/component-helpers v0.35.4 // indirect
 	k8s.io/controller-manager v0.35.4 // indirect
 	k8s.io/cri-api v0.35.4 // indirect
@@ -228,7 +228,7 @@ require (
 	k8s.io/dynamic-resource-allocation v0.35.4 // indirect
 	k8s.io/gengo/v2 v2.0.0-20250922181213-ec3ebc5fd46b // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
-	k8s.io/kube-openapi v0.0.0-20260317180543-43fb72c5454a // indirect
+	k8s.io/kube-openapi v0.0.0-20260427204847-8949caaa1199 // indirect
 	k8s.io/kube-scheduler v0.35.4 // indirect
 	k8s.io/kubelet v0.35.4 // indirect
 	k8s.io/kubernetes v1.35.4 // indirect
@@ -237,7 +237,7 @@ require (
 	sigs.k8s.io/gateway-api v1.5.1 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
-	sigs.k8s.io/structured-merge-diff/v6 v6.3.2 // indirect
+	sigs.k8s.io/structured-merge-diff/v6 v6.4.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
@@ -329,3 +329,10 @@ replace k8s.io/apimachinery => k8s.io/apimachinery v0.35.4
 replace k8s.io/apiserver => k8s.io/apiserver v0.35.4
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1 => ../dromos/api/v1alpha1
+
+// keda v2.20.0 requires the k8s.io v0.36 line for these modules, which does not
+// work with the k8s.io v0.35.4 pins in this file. Keep them on the same line.
+replace (
+	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.35.4
+	k8s.io/component-base => k8s.io/component-base v0.35.4
+)

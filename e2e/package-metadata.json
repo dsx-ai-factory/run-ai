@@ -1,0 +1,8 @@
+{
+  "name": "e2e",
+  "path": "e2e/",
+  "env-in-a-click": {
+    "enabled": true
+  }
+}
+

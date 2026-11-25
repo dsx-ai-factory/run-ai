@@ -7,7 +7,7 @@ Name | Type | Description | Notes
 **Id** | **string** |  | 
 **Rank** | Pointer to [**NullableFairShareSimulationRank**](FairShareSimulationRank.md) | An unsaved rank. Only while ranks is on. Omitted or null keeps the stored rank. | [optional] 
 **Gpu** | Pointer to [**NullableFairShareSimulationGpuSettings**](FairShareSimulationGpuSettings.md) |  | [optional] 
-**Demand** | Pointer to [**NullableFairShareSimulationResources**](FairShareSimulationResources.md) | The dragged slider, capped by the limit. Omitted or null asks for half the capacity. | [optional] 
+**Demand** | Pointer to [**NullableFairShareSimulationResources**](FairShareSimulationResources.md) | The GPUs the org unit asks for, capped by its limit. Omitted or null asks for half the capacity. | [optional] 
 
 ## Methods
 
