@@ -55,7 +55,7 @@ export class HooksUtils {
     async enableFeatureFlags(): Promise<void> {
         await Promise.all([
             policyUtils.enableClusterPolicySync(),
-            apiUtils.enableHybridSubmission(),
+            apiUtils.enableTemplatesIfSupported(),
             apiUtils.enableModelCatalog()
         ]);
     }

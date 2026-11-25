@@ -19,7 +19,7 @@ import { Project } from '../../../../../../../modules/api/apis/projectsDepartmen
 import { runaiCliV2 } from '../../../../../../../modules/cli';
 import { isOCP } from '../../../../../../../modules/helpers';
 import { skipPlaywrightTest } from '../../../../../../../modules/helpers/utils/SkippedTestUtils';
-import { Phase } from '../../../../../../../modules/api/apis/assetsApi';
+import { Phase } from '../../../../../../../modules/api/apis/workloadsApi/generated/model/phase';
 import {
     cliLoginAsSystemAdmin,
     cliV2workloadNoun,

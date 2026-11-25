@@ -36,9 +36,8 @@ import {
 import { Project } from '../../../../../../modules/api/apis/orgUnitApi';
 import { kubeCli } from '../../../../../../modules/cli';
 import { DistributedFramework, ServingPortProtocol } from '../../../../../../modules/api/apis/policyApi';
-import { Phase } from '../../../../../../modules/api/apis/assetsApi';
 import { StatusCodes } from 'http-status-codes';
-import { DistributedInferenceSpecSpec } from '../../../../../../modules/api/apis/workloadsApi/generated/api';
+import { Phase, DistributedInferenceSpecSpec } from '../../../../../../modules/api/apis/workloadsApi/generated/api';
 import { getBaseWorkloadSpec } from '../../../parallel/viper/inference/distributed/dinfUtils';
 import { createDistributedInference } from '../../../parallel/viper/inference/inferenceUtils.js';
 import { workloadsCrudService } from '../../../../../../modules/api';

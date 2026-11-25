@@ -19,7 +19,6 @@ test.describe(`General Settings Toggles UI, tags: ${tags.tool.ui} ${tags.teams.p
     let videoName: string;
     let originalDataVolumesValue: boolean;
     let originalLimitQuotaValue: boolean;
-    let originalHybridSubmissionValue: boolean;
     let originalModelCatalogValue: boolean;
 
     test.beforeEach('init browsers and classes', async function () {
@@ -48,14 +47,6 @@ test.describe(`General Settings Toggles UI, tags: ${tags.tool.ui} ${tags.teams.p
                 name: EFeatureFlagsNames.ENABLE_LIMIT_OQ_SUBSCRIPTION,
                 value: originalLimitQuotaValue,
                 clear: () => { originalLimitQuotaValue = undefined; }
-            });
-        }
-        if (originalHybridSubmissionValue !== undefined) {
-            restores.push({
-                key: EFeatureFlagsKeys.WORKLOAD_HYBRID_SUBMISSION,
-                name: EFeatureFlagsNames.WORKLOAD_HYBRID_SUBMISSION,
-                value: originalHybridSubmissionValue,
-                clear: () => { originalHybridSubmissionValue = undefined; }
             });
         }
         if (originalModelCatalogValue !== undefined) {
@@ -88,10 +79,6 @@ test.describe(`General Settings Toggles UI, tags: ${tags.tool.ui} ${tags.teams.p
     supportedFrom(SupportedVersions.V2_23)(function () {
         test('should display all workload setting toggles in the workloads section', async function () {
             videoName = 'shouldDisplayAllWorkloadSettingToggles';
-            const isHybridSubmissionEnabled = (await apiUtils.getFeatureValue(
-                EFeatureFlagsKeys.WORKLOAD_HYBRID_SUBMISSION,
-                EFeatureFlagsNames.WORKLOAD_HYBRID_SUBMISSION
-            )) as boolean;
             const isModelCatalogEnabled = (await apiUtils.getFeatureValue(
                 EFeatureFlagsKeys.MODEL_CATALOG,
                 EFeatureFlagsNames.MODEL_CATALOG
@@ -99,7 +86,7 @@ test.describe(`General Settings Toggles UI, tags: ${tags.tool.ui} ${tags.teams.p
 
             await generalSettings.navigateToGeneralSettingsWorkloads();
             const alwaysVisible = [
-                generalSettings.flexWorkloadSubmissionToggle,
+                generalSettings.dataVolumeToggle,
                 generalSettings.newPolicyToggle,
                 generalSettings.modelCatalogToggle,
                 generalSettings.nimToggle,
@@ -111,15 +98,6 @@ test.describe(`General Settings Toggles UI, tags: ${tags.tool.ui} ${tags.teams.p
                     await generalSettings.page.locator(toggle).isVisible(),
                     `Toggle ${toggle} should be visible`
                 ).to.be.true;
-            }
-
-            if (isHybridSubmissionEnabled) {
-                expect(
-                    await generalSettings.page.locator(generalSettings.dataVolumeToggle).isVisible(),
-                    'Data volumes toggle should be visible when hybrid submission is enabled'
-                ).to.be.true;
-            } else {
-                logger.info('Hybrid submission is disabled — skipping data volumes toggle visibility check');
             }
 
             if (isModelCatalogEnabled) {
@@ -209,45 +187,6 @@ test.describe(`General Settings Toggles UI, tags: ${tags.tool.ui} ${tags.teams.p
         expect(ngcSetting?.stage, 'NGC catalog setting should have stage Beta').to.equal('Beta');
     });
 
-
-    test('should hide the data volumes toggle when flexible workload submission is disabled', async function () {
-        videoName = 'shouldHideDataVolumesWhenHybridSubmissionDisabled';
-        originalHybridSubmissionValue = (await apiUtils.getFeatureValue(
-            EFeatureFlagsKeys.WORKLOAD_HYBRID_SUBMISSION,
-            EFeatureFlagsNames.WORKLOAD_HYBRID_SUBMISSION
-        )) as boolean;
-
-        await apiUtils.setFeatureValue(
-            EFeatureFlagsKeys.WORKLOAD_HYBRID_SUBMISSION,
-            EFeatureFlagsNames.WORKLOAD_HYBRID_SUBMISSION,
-            false
-        );
-        await generalSettings.hardNavigateToGeneralSettings();
-        await generalSettings.page.locator(generalSettings.workloadsSection).click({ timeout: 10000 });
-        expect(
-            await generalSettings.page.locator(generalSettings.dataVolumeToggle).isVisible(),
-            'Data volumes toggle should be hidden when hybrid submission is disabled'
-        ).to.be.false;
-    });
-
-    test('should show the data volumes toggle when flexible workload submission is enabled', async function () {
-        videoName = 'shouldShowDataVolumesWhenHybridSubmissionEnabled';
-        originalHybridSubmissionValue = (await apiUtils.getFeatureValue(
-            EFeatureFlagsKeys.WORKLOAD_HYBRID_SUBMISSION,
-            EFeatureFlagsNames.WORKLOAD_HYBRID_SUBMISSION
-        )) as boolean;
-        await apiUtils.setFeatureValue(
-            EFeatureFlagsKeys.WORKLOAD_HYBRID_SUBMISSION,
-            EFeatureFlagsNames.WORKLOAD_HYBRID_SUBMISSION,
-            true
-        );
-        await generalSettings.hardNavigateToGeneralSettings();
-        await generalSettings.page.locator(generalSettings.workloadsSection).click({ timeout: 10000 });
-        expect(
-            await generalSettings.page.locator(generalSettings.dataVolumeToggle).isVisible(),
-            'Data volumes toggle should be visible when hybrid submission is enabled'
-        ).to.be.true;
-    });
 
     test('should show GPT2 model toggle only when model catalog is enabled', async function () {
         videoName = 'shouldShowGPT2WhenModelCatalogEnabled';
