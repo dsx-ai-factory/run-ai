@@ -121,6 +121,7 @@ export const workloadUtil = {
   convertWorkloadTypesToString,
   isWorkloadSourceCli,
   getWorkloadConnectionsForGrid,
+  getUnclaimedServingUrl,
   mapEndpointsToConnections,
   applyUserCreatedWorkloadsFilter,
   convertEnvVarToEnvVarUI,
@@ -997,29 +998,48 @@ function _getWorkloadConnectionsForInference(
   );
 
   if (!servingPortConnection && workload.urls && workload.urls.length > connections.length) {
-    const connectionMap = new Set(connections.map((c: Connection) => c.url));
-    workload.urls?.forEach((url: string) => {
-      if (connectionMap.has(url)) return;
+    const servingUrl = getUnclaimedServingUrl(workload.urls, connections);
+    if (servingUrl) {
       currConnections.push({
-        url: url,
+        url: servingUrl,
         name: "Serving Endpoint",
         toolType: "custom",
         connectionType: InternalConnectionType.ServingPort,
       });
-    });
+    }
   }
 
   if (clusterDomain) {
-    currConnections = connections.map((c: Connection) => {
+    currConnections = currConnections.map((c: Connection) => {
       if (c.connectionType !== InternalConnectionType.ExternalUrl) return c;
       const workloadName = workload.name;
       const projectName = workload.projectName;
-      c.url = `${clusterDomain}/${projectName}/${workloadName}`;
-      return c;
+      return { ...c, url: `${clusterDomain}/${projectName}/${workloadName}` };
     });
   }
 
   return currConnections;
+}
+
+/**
+ * Clusters may report the ServingPort connection without a URL. The serving URL is then the only
+ * entry of `urls` that no connection (and none of `knownUrls`, e.g. the spec's exposed URLs) claims.
+ * The order of `urls` differs between workload types, so when none or several entries are unclaimed
+ * this returns undefined rather than guessing, to avoid showing a tool URL as the serving endpoint.
+ *
+ * @param urls - the workload URLs
+ * @param connections - the workload connections
+ * @param knownUrls - other URLs that belong to known connections
+ * @returns string | undefined - the serving URL, if it can be identified
+ */
+function getUnclaimedServingUrl(
+  urls: string[] | null | undefined,
+  connections: Connection[],
+  knownUrls: Array<string | null | undefined> = [],
+): string | undefined {
+  const claimedUrls = new Set([...connections.map((c: Connection) => c.url), ...knownUrls].filter(Boolean));
+  const unclaimedUrls = (urls ?? []).filter((url: string) => !claimedUrls.has(url));
+  return unclaimedUrls.length === 1 ? unclaimedUrls[0] : undefined;
 }
 /**
  *
