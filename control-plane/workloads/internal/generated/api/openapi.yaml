@@ -55189,13 +55189,11 @@ components:
         gpuMemoryRequest: 10M
         ephemeralStorageRequest: 50G
         gpuMemoryPortionLimit: 0.5
-        gpuPortionRequest: 0.5
         gpuComputeMode: time-slicing
         gpuMemoryPortionRequest: 0.5
         name: h100
         largeShmRequest: false
         cpuCoreRequest: 0.5
-        gpuPortionLimit: 0.5
       properties:
         cpuCoreLimit:
           description: "Limitations on the number of CPUs consumed by the workload\
@@ -55303,27 +55301,6 @@ components:
           nullable: true
           pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
           type: string
-        gpuPortionLimit:
-          deprecated: true
-          description: "Deprecated. Use gpuMemoryPortionLimit instead. Limitations\
-            \ on the portion consumed by the workload, per GPU device. The system\
-            \ guarantees The gpuPotionLimit must be no less than the gpuPortionRequest."
-          example: 0.5
-          format: double
-          minimum: 0
-          nullable: true
-          type: number
-        gpuPortionRequest:
-          deprecated: true
-          description: "Deprecated. Use gpuMemoryPortionRequest instead. Required\
-            \ if and only if gpuRequestType is portion. States the portion of the\
-            \ GPU to allocate for the created workload, per GPU device, between 0\
-            \ and 1. The default is no allocated GPUs."
-          example: 0.5
-          format: double
-          minimum: 0
-          nullable: true
-          type: number
         gpuRequestType:
           $ref: '#/components/schemas/GpuRequestType'
         largeShmRequest:
@@ -55761,13 +55738,11 @@ components:
           gpuMemoryRequest: 10M
           ephemeralStorageRequest: 50G
           gpuMemoryPortionLimit: 0.5
-          gpuPortionRequest: 0.5
           gpuComputeMode: time-slicing
           gpuMemoryPortionRequest: 0.5
           name: h100
           largeShmRequest: false
           cpuCoreRequest: 0.5
-          gpuPortionLimit: 0.5
         - cpuMemoryLimit: 30M
           extendedResources:
           - quantity: "2"
@@ -55793,13 +55768,11 @@ components:
           gpuMemoryRequest: 10M
           ephemeralStorageRequest: 50G
           gpuMemoryPortionLimit: 0.5
-          gpuPortionRequest: 0.5
           gpuComputeMode: time-slicing
           gpuMemoryPortionRequest: 0.5
           name: h100
           largeShmRequest: false
           cpuCoreRequest: 0.5
-          gpuPortionLimit: 0.5
         - cpuMemoryLimit: 30M
           extendedResources:
           - quantity: "2"
@@ -55825,13 +55798,11 @@ components:
           gpuMemoryRequest: 10M
           ephemeralStorageRequest: 50G
           gpuMemoryPortionLimit: 0.5
-          gpuPortionRequest: 0.5
           gpuComputeMode: time-slicing
           gpuMemoryPortionRequest: 0.5
           name: h100
           largeShmRequest: false
           cpuCoreRequest: 0.5
-          gpuPortionLimit: 0.5
         - cpuMemoryLimit: 30M
           extendedResources:
           - quantity: "2"
@@ -55857,13 +55828,11 @@ components:
           gpuMemoryRequest: 10M
           ephemeralStorageRequest: 50G
           gpuMemoryPortionLimit: 0.5
-          gpuPortionRequest: 0.5
           gpuComputeMode: time-slicing
           gpuMemoryPortionRequest: 0.5
           name: h100
           largeShmRequest: false
           cpuCoreRequest: 0.5
-          gpuPortionLimit: 0.5
         - cpuMemoryLimit: 30M
           extendedResources:
           - quantity: "2"
@@ -55889,13 +55858,11 @@ components:
           gpuMemoryRequest: 10M
           ephemeralStorageRequest: 50G
           gpuMemoryPortionLimit: 0.5
-          gpuPortionRequest: 0.5
           gpuComputeMode: time-slicing
           gpuMemoryPortionRequest: 0.5
           name: h100
           largeShmRequest: false
           cpuCoreRequest: 0.5
-          gpuPortionLimit: 0.5
         groups:
         - synchronizedStart:
             port: 9900
@@ -61167,13 +61134,11 @@ components:
             gpuMemoryRequest: 10M
             ephemeralStorageRequest: 50G
             gpuMemoryPortionLimit: 0.5
-            gpuPortionRequest: 0.5
             gpuComputeMode: time-slicing
             gpuMemoryPortionRequest: 0.5
             name: h100
             largeShmRequest: false
             cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
           - cpuMemoryLimit: 30M
             extendedResources:
             - quantity: "2"
@@ -61199,13 +61164,11 @@ components:
             gpuMemoryRequest: 10M
             ephemeralStorageRequest: 50G
             gpuMemoryPortionLimit: 0.5
-            gpuPortionRequest: 0.5
             gpuComputeMode: time-slicing
             gpuMemoryPortionRequest: 0.5
             name: h100
             largeShmRequest: false
             cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
           - cpuMemoryLimit: 30M
             extendedResources:
             - quantity: "2"
@@ -61231,13 +61194,11 @@ components:
             gpuMemoryRequest: 10M
             ephemeralStorageRequest: 50G
             gpuMemoryPortionLimit: 0.5
-            gpuPortionRequest: 0.5
             gpuComputeMode: time-slicing
             gpuMemoryPortionRequest: 0.5
             name: h100
             largeShmRequest: false
             cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
           - cpuMemoryLimit: 30M
             extendedResources:
             - quantity: "2"
@@ -61263,13 +61224,11 @@ components:
             gpuMemoryRequest: 10M
             ephemeralStorageRequest: 50G
             gpuMemoryPortionLimit: 0.5
-            gpuPortionRequest: 0.5
             gpuComputeMode: time-slicing
             gpuMemoryPortionRequest: 0.5
             name: h100
             largeShmRequest: false
             cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
           - cpuMemoryLimit: 30M
             extendedResources:
             - quantity: "2"
@@ -61295,13 +61254,11 @@ components:
             gpuMemoryRequest: 10M
             ephemeralStorageRequest: 50G
             gpuMemoryPortionLimit: 0.5
-            gpuPortionRequest: 0.5
             gpuComputeMode: time-slicing
             gpuMemoryPortionRequest: 0.5
             name: h100
             largeShmRequest: false
             cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
           groups:
           - synchronizedStart:
               port: 9900
@@ -66573,13 +66530,11 @@ components:
             gpuMemoryRequest: 10M
             ephemeralStorageRequest: 50G
             gpuMemoryPortionLimit: 0.5
-            gpuPortionRequest: 0.5
             gpuComputeMode: time-slicing
             gpuMemoryPortionRequest: 0.5
             name: h100
             largeShmRequest: false
             cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
           - cpuMemoryLimit: 30M
             extendedResources:
             - quantity: "2"
@@ -66605,13 +66560,11 @@ components:
             gpuMemoryRequest: 10M
             ephemeralStorageRequest: 50G
             gpuMemoryPortionLimit: 0.5
-            gpuPortionRequest: 0.5
             gpuComputeMode: time-slicing
             gpuMemoryPortionRequest: 0.5
             name: h100
             largeShmRequest: false
             cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
           - cpuMemoryLimit: 30M
             extendedResources:
             - quantity: "2"
@@ -66637,13 +66590,11 @@ components:
             gpuMemoryRequest: 10M
             ephemeralStorageRequest: 50G
             gpuMemoryPortionLimit: 0.5
-            gpuPortionRequest: 0.5
             gpuComputeMode: time-slicing
             gpuMemoryPortionRequest: 0.5
             name: h100
             largeShmRequest: false
             cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
           - cpuMemoryLimit: 30M
             extendedResources:
             - quantity: "2"
@@ -66669,13 +66620,11 @@ components:
             gpuMemoryRequest: 10M
             ephemeralStorageRequest: 50G
             gpuMemoryPortionLimit: 0.5
-            gpuPortionRequest: 0.5
             gpuComputeMode: time-slicing
             gpuMemoryPortionRequest: 0.5
             name: h100
             largeShmRequest: false
             cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
           - cpuMemoryLimit: 30M
             extendedResources:
             - quantity: "2"
@@ -66701,13 +66650,11 @@ components:
             gpuMemoryRequest: 10M
             ephemeralStorageRequest: 50G
             gpuMemoryPortionLimit: 0.5
-            gpuPortionRequest: 0.5
             gpuComputeMode: time-slicing
             gpuMemoryPortionRequest: 0.5
             name: h100
             largeShmRequest: false
             cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
           groups:
           - synchronizedStart:
               port: 9900

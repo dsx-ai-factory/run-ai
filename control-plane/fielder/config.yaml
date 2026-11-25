@@ -2056,7 +2056,6 @@ fields:
           - DinfLeaderWorkerTemplateSpec
           - DinfLeaderWorkerDefaults
           - AssetsComputeSpec
-          - WorkflowComputeProfileSpec
       - deprecated: true
         rules: ../policy_rules/NumberRules.yaml
         targets:
@@ -2134,7 +2133,6 @@ fields:
           - DinfLeaderWorkerTemplateSpec
           - DinfLeaderWorkerDefaults
           - AssetsComputeSpec
-          - WorkflowComputeProfileSpec
       - deprecated: true
         rules: ../policy_rules/NumberRules.yaml
         targets:

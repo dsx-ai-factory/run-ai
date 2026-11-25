@@ -16,8 +16,6 @@ Name | Type | Description | Notes
 **GpuMemoryPortionLimit** | Pointer to **NullableFloat64** | Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest. | [optional] 
 **GpuMemoryPortionRequest** | Pointer to **NullableFloat64** | GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion. | [optional] 
 **GpuMemoryRequest** | Pointer to **NullableString** | Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload. | [optional] 
-**GpuPortionLimit** | Pointer to **NullableFloat64** | Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest. | [optional] 
-**GpuPortionRequest** | Pointer to **NullableFloat64** | Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs. | [optional] 
 **GpuRequestType** | Pointer to [**NullableGpuRequestType**](GpuRequestType.md) |  | [optional] 
 **LargeShmRequest** | Pointer to **NullableBool** | A large /dev/shm device to mount into a container running the created workload. An shm is a shared file system mounted on RAM. | [optional] 
 **Name** | Pointer to **NullableString** | The name of the profile, which tasks use to reference it. It must be unique among the profiles of its kind. (mandatory) | [optional] 
@@ -461,76 +459,6 @@ HasGpuMemoryRequest returns a boolean if a field has been set.
 `func (o *WorkflowComputeProfile) UnsetGpuMemoryRequest()`
 
 UnsetGpuMemoryRequest ensures that no value is present for GpuMemoryRequest, not even an explicit nil
-### GetGpuPortionLimit
-
-`func (o *WorkflowComputeProfile) GetGpuPortionLimit() float64`
-
-GetGpuPortionLimit returns the GpuPortionLimit field if non-nil, zero value otherwise.
-
-### GetGpuPortionLimitOk
-
-`func (o *WorkflowComputeProfile) GetGpuPortionLimitOk() (*float64, bool)`
-
-GetGpuPortionLimitOk returns a tuple with the GpuPortionLimit field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetGpuPortionLimit
-
-`func (o *WorkflowComputeProfile) SetGpuPortionLimit(v float64)`
-
-SetGpuPortionLimit sets GpuPortionLimit field to given value.
-
-### HasGpuPortionLimit
-
-`func (o *WorkflowComputeProfile) HasGpuPortionLimit() bool`
-
-HasGpuPortionLimit returns a boolean if a field has been set.
-
-### SetGpuPortionLimitNil
-
-`func (o *WorkflowComputeProfile) SetGpuPortionLimitNil(b bool)`
-
- SetGpuPortionLimitNil sets the value for GpuPortionLimit to be an explicit nil
-
-### UnsetGpuPortionLimit
-`func (o *WorkflowComputeProfile) UnsetGpuPortionLimit()`
-
-UnsetGpuPortionLimit ensures that no value is present for GpuPortionLimit, not even an explicit nil
-### GetGpuPortionRequest
-
-`func (o *WorkflowComputeProfile) GetGpuPortionRequest() float64`
-
-GetGpuPortionRequest returns the GpuPortionRequest field if non-nil, zero value otherwise.
-
-### GetGpuPortionRequestOk
-
-`func (o *WorkflowComputeProfile) GetGpuPortionRequestOk() (*float64, bool)`
-
-GetGpuPortionRequestOk returns a tuple with the GpuPortionRequest field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetGpuPortionRequest
-
-`func (o *WorkflowComputeProfile) SetGpuPortionRequest(v float64)`
-
-SetGpuPortionRequest sets GpuPortionRequest field to given value.
-
-### HasGpuPortionRequest
-
-`func (o *WorkflowComputeProfile) HasGpuPortionRequest() bool`
-
-HasGpuPortionRequest returns a boolean if a field has been set.
-
-### SetGpuPortionRequestNil
-
-`func (o *WorkflowComputeProfile) SetGpuPortionRequestNil(b bool)`
-
- SetGpuPortionRequestNil sets the value for GpuPortionRequest to be an explicit nil
-
-### UnsetGpuPortionRequest
-`func (o *WorkflowComputeProfile) UnsetGpuPortionRequest()`
-
-UnsetGpuPortionRequest ensures that no value is present for GpuPortionRequest, not even an explicit nil
 ### GetGpuRequestType
 
 `func (o *WorkflowComputeProfile) GetGpuRequestType() GpuRequestType`

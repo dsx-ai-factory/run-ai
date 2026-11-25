@@ -97,20 +97,6 @@ type WorkflowComputeProfile struct {
 	GpuMemoryRequest *string `json:"gpuMemoryRequest,omitempty" gorm:"" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
-	// Deprecated
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//GpuPortionLimit *float64 `json:"gpuPortionLimit,omitempty"`
-	GpuPortionLimit *float64 `json:"gpuPortionLimit,omitempty" gorm:""`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	// Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
-	// Deprecated
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//GpuPortionRequest *float64 `json:"gpuPortionRequest,omitempty"`
-	GpuPortionRequest *float64 `json:"gpuPortionRequest,omitempty" gorm:""`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//GpuRequestType *GpuRequestType `json:"gpuRequestType,omitempty"`
 	GpuRequestType *GpuRequestType `json:"gpuRequestType,omitempty" gorm:""`
@@ -266,22 +252,6 @@ func AssertWorkflowComputeProfileConstraints(obj WorkflowComputeProfile) error {
 	if maxLengthErr := runaihttp.AssertMaxLength(obj.GpuMemoryRequest, "GpuMemoryRequest", 63); maxLengthErr != nil {
 		return &ParsingError{Param: "GpuMemoryRequest", Err: maxLengthErr}
 	}
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
-	if obj.GpuPortionLimit != nil && *obj.GpuPortionLimit < 0 {
-		return &ParsingError{Param: "GpuPortionLimit", Err: errors.New(errMsgMinValueConstraint)}
-	}
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
-	if obj.GpuPortionRequest != nil && *obj.GpuPortionRequest < 0 {
-		return &ParsingError{Param: "GpuPortionRequest", Err: errors.New(errMsgMinValueConstraint)}
-	}
-	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 

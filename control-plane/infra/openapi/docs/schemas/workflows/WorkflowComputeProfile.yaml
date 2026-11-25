@@ -27,10 +27,6 @@ properties:
     $ref: ../workloads_spec/compute/GpuMemoryPortionRequest.yaml
   gpuMemoryRequest:
     $ref: ../workloads_spec/compute/GpuMemoryRequest.yaml
-  gpuPortionLimit:
-    $ref: ../workloads_spec/compute/GpuPortionLimit.yaml
-  gpuPortionRequest:
-    $ref: ../workloads_spec/compute/GpuPortionRequest.yaml
   gpuRequestType:
     $ref: ../workloads_spec/compute/GpuRequestType.yaml
   largeShmRequest:

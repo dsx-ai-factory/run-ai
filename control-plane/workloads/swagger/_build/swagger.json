@@ -19505,12 +19505,6 @@
           "gpuMemoryRequest": {
             "$ref": "#/components/schemas/GpuMemoryRequest"
           },
-          "gpuPortionLimit": {
-            "$ref": "#/components/schemas/GpuPortionLimit"
-          },
-          "gpuPortionRequest": {
-            "$ref": "#/components/schemas/GpuPortionRequest"
-          },
           "gpuRequestType": {
             "$ref": "#/components/schemas/GpuRequestType"
           },

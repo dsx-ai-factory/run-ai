@@ -44,14 +44,8 @@ type WorkflowComputeProfile struct {
 	// GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.
 	GpuMemoryPortionRequest NullableFloat64 `json:"gpuMemoryPortionRequest,omitempty"`
 	// Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload.
-	GpuMemoryRequest NullableString `json:"gpuMemoryRequest,omitempty" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
-	// Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
-	// Deprecated
-	GpuPortionLimit NullableFloat64 `json:"gpuPortionLimit,omitempty"`
-	// Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
-	// Deprecated
-	GpuPortionRequest NullableFloat64        `json:"gpuPortionRequest,omitempty"`
-	GpuRequestType    NullableGpuRequestType `json:"gpuRequestType,omitempty"`
+	GpuMemoryRequest NullableString         `json:"gpuMemoryRequest,omitempty" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
+	GpuRequestType   NullableGpuRequestType `json:"gpuRequestType,omitempty"`
 	// A large /dev/shm device to mount into a container running the created workload. An shm is a shared file system mounted on RAM.
 	LargeShmRequest NullableBool `json:"largeShmRequest,omitempty"`
 	// The name of the profile, which tasks use to reference it. It must be unique among the profiles of its kind. (mandatory)
@@ -581,98 +575,6 @@ func (o *WorkflowComputeProfile) UnsetGpuMemoryRequest() {
 	o.GpuMemoryRequest.Unset()
 }
 
-// GetGpuPortionLimit returns the GpuPortionLimit field value if set, zero value otherwise (both if not set or set to explicit null).
-// Deprecated
-func (o *WorkflowComputeProfile) GetGpuPortionLimit() float64 {
-	if o == nil || IsNil(o.GpuPortionLimit.Get()) {
-		var ret float64
-		return ret
-	}
-	return *o.GpuPortionLimit.Get()
-}
-
-// GetGpuPortionLimitOk returns a tuple with the GpuPortionLimit field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-// Deprecated
-func (o *WorkflowComputeProfile) GetGpuPortionLimitOk() (*float64, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return o.GpuPortionLimit.Get(), o.GpuPortionLimit.IsSet()
-}
-
-// HasGpuPortionLimit returns a boolean if a field has been set.
-func (o *WorkflowComputeProfile) HasGpuPortionLimit() bool {
-	if o != nil && o.GpuPortionLimit.IsSet() {
-		return true
-	}
-
-	return false
-}
-
-// SetGpuPortionLimit gets a reference to the given NullableFloat64 and assigns it to the GpuPortionLimit field.
-// Deprecated
-func (o *WorkflowComputeProfile) SetGpuPortionLimit(v float64) {
-	o.GpuPortionLimit.Set(&v)
-}
-
-// SetGpuPortionLimitNil sets the value for GpuPortionLimit to be an explicit nil
-func (o *WorkflowComputeProfile) SetGpuPortionLimitNil() {
-	o.GpuPortionLimit.Set(nil)
-}
-
-// UnsetGpuPortionLimit ensures that no value is present for GpuPortionLimit, not even an explicit nil
-func (o *WorkflowComputeProfile) UnsetGpuPortionLimit() {
-	o.GpuPortionLimit.Unset()
-}
-
-// GetGpuPortionRequest returns the GpuPortionRequest field value if set, zero value otherwise (both if not set or set to explicit null).
-// Deprecated
-func (o *WorkflowComputeProfile) GetGpuPortionRequest() float64 {
-	if o == nil || IsNil(o.GpuPortionRequest.Get()) {
-		var ret float64
-		return ret
-	}
-	return *o.GpuPortionRequest.Get()
-}
-
-// GetGpuPortionRequestOk returns a tuple with the GpuPortionRequest field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-// Deprecated
-func (o *WorkflowComputeProfile) GetGpuPortionRequestOk() (*float64, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return o.GpuPortionRequest.Get(), o.GpuPortionRequest.IsSet()
-}
-
-// HasGpuPortionRequest returns a boolean if a field has been set.
-func (o *WorkflowComputeProfile) HasGpuPortionRequest() bool {
-	if o != nil && o.GpuPortionRequest.IsSet() {
-		return true
-	}
-
-	return false
-}
-
-// SetGpuPortionRequest gets a reference to the given NullableFloat64 and assigns it to the GpuPortionRequest field.
-// Deprecated
-func (o *WorkflowComputeProfile) SetGpuPortionRequest(v float64) {
-	o.GpuPortionRequest.Set(&v)
-}
-
-// SetGpuPortionRequestNil sets the value for GpuPortionRequest to be an explicit nil
-func (o *WorkflowComputeProfile) SetGpuPortionRequestNil() {
-	o.GpuPortionRequest.Set(nil)
-}
-
-// UnsetGpuPortionRequest ensures that no value is present for GpuPortionRequest, not even an explicit nil
-func (o *WorkflowComputeProfile) UnsetGpuPortionRequest() {
-	o.GpuPortionRequest.Unset()
-}
-
 // GetGpuRequestType returns the GpuRequestType field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *WorkflowComputeProfile) GetGpuRequestType() GpuRequestType {
 	if o == nil || IsNil(o.GpuRequestType.Get()) {
@@ -847,12 +749,6 @@ func (o WorkflowComputeProfile) ToMap() (map[string]interface{}, error) {
 	}
 	if o.GpuMemoryRequest.IsSet() {
 		toSerialize["gpuMemoryRequest"] = o.GpuMemoryRequest.Get()
-	}
-	if o.GpuPortionLimit.IsSet() {
-		toSerialize["gpuPortionLimit"] = o.GpuPortionLimit.Get()
-	}
-	if o.GpuPortionRequest.IsSet() {
-		toSerialize["gpuPortionRequest"] = o.GpuPortionRequest.Get()
 	}
 	if o.GpuRequestType.IsSet() {
 		toSerialize["gpuRequestType"] = o.GpuRequestType.Get()
