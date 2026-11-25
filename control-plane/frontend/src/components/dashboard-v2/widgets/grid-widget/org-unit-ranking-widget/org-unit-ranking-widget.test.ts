@@ -162,9 +162,20 @@ describe("org-unit-ranking-widget", () => {
   });
 
   it.each([
-    { change: "entity", apply: () => (wrapper.vm.selectedEntityOption = ORG_UNIT_RANKING_ENTITY_SELECT_OPTIONS[1]) },
-    { change: "metric", apply: () => (wrapper.vm.selectedMetricOption = ORG_UNIT_RANKING_METRIC_SELECT_OPTIONS[2]) },
-  ])("resets to the first page when the $change changes", async ({ apply }) => {
+    {
+      change: "entity",
+      apply: () => (wrapper.vm.selectedEntityOption = ORG_UNIT_RANKING_ENTITY_SELECT_OPTIONS[1]),
+      expectedPage: 1,
+    },
+    { change: "node pool", apply: () => wrapper.setProps({ nodePoolName: "pool-b" }), expectedPage: 1 },
+    { change: "cluster", apply: () => wrapper.setProps({ clusterId: "other-cluster" }), expectedPage: 1 },
+    {
+      change: "metric",
+      apply: () => (wrapper.vm.selectedMetricOption = ORG_UNIT_RANKING_METRIC_SELECT_OPTIONS[2]),
+      expectedPage: 2,
+    },
+    { change: "timeframe", apply: () => wrapper.vm.onRankingTimeframeChanged("7d"), expectedPage: 2 },
+  ])("sets the page to $expectedPage when the $change changes", async ({ apply, expectedPage }) => {
     vi.mocked(orgUnitService.countDepartments).mockResolvedValue(2);
     vi.mocked(orgUnitService.getProjectsRanking).mockResolvedValue(MOCK_PROJECTS_RANKING_RECORDS);
     vi.mocked(orgUnitService.getDepartmentsRanking).mockResolvedValue([]);
@@ -172,10 +183,10 @@ describe("org-unit-ranking-widget", () => {
     await flushPromises();
     wrapper.vm.filterBy.page = 2;
 
-    apply();
+    await apply();
     await flushPromises();
 
-    expect(wrapper.vm.filterBy.page).toBe(1);
+    expect(wrapper.vm.filterBy.page).toBe(expectedPage);
   });
 
   it("links to projects filtered by allocated GPUs for the allocation metric", async () => {
