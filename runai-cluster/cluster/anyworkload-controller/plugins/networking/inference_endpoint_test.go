@@ -269,6 +269,47 @@ var _ = Describe("Inference routing (endpoints path)", func() {
 		Expect(access.Message).To(HaveSuffix(", url: https://" + testInferenceHost + "/"))
 	})
 
+	It("does not route a protected endpoint to an auth proxy Service it does not own", func() {
+		runner = runnerFromEndpoints(inferenceEndpointConfig(true, 8000, inferenceTestBlock()))
+		runner.Generation = 2
+		foreignProxy := func() *corev1.Service {
+			return &corev1.Service{ObjectMeta: metav1.ObjectMeta{
+				Namespace: testNamespace, Name: "llama-chat-leader-auth-proxy",
+			}}
+		}
+		// A settled ownership denial is reported as a plugin issue, not returned.
+		expectDenied := func() {
+			ExpectWithOffset(1, state.PluginIssues(plugin)).To(ContainElement(WithTransform(
+				func(i issue.Issue) string { return i.Error() },
+				ContainSubstring("auth proxy service "+testNamespace+"/llama-chat-leader-auth-proxy is not owned by WorkloadRunner"),
+			)))
+		}
+
+		By("refusing to create the InferenceEndpoint while a foreign Service has the proxy name")
+		Expect(k8sClient.Create(ctx, foreignProxy())).To(Succeed())
+		Expect(reconcileRunner()).To(Succeed())
+		expectDenied()
+		_, err := getInferenceEndpoint()
+		Expect(apierrors.IsNotFound(err)).To(BeTrue(), "no InferenceEndpoint routes to the foreign Service")
+		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(foreignProxy()), &corev1.Service{})).To(Succeed())
+
+		By("deleting the InferenceEndpoint once a foreign Service replaces the proxy")
+		Expect(k8sClient.Delete(ctx, foreignProxy())).To(Succeed())
+		state = reconcile.New()
+		Expect(reconcileRunner()).To(Succeed())
+		Expect(state.PluginIssues(plugin)).To(BeEmpty())
+		expectInferenceAuthProxy("llama-chat-leader-auth-proxy")
+		Expect(k8sClient.Delete(ctx, foreignProxy())).To(Succeed())
+		Expect(k8sClient.Create(ctx, foreignProxy())).To(Succeed())
+		state = reconcile.New()
+		Expect(reconcileRunner()).To(Succeed())
+		expectDenied()
+		_, err = getInferenceEndpoint()
+		Expect(apierrors.IsNotFound(err)).To(BeTrue(), "the InferenceEndpoint no longer routes to the foreign Service")
+		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(foreignProxy()), &corev1.Service{})).To(Succeed())
+		Expect(httpRoutes()).To(BeEmpty())
+	})
+
 	It("switches between the composed HTTPRoute and the InferenceEndpoint when inference is added or removed", func() {
 		setRunnerEndpoints(runner, inferenceEndpointConfig(false, 8000, nil))
 		Expect(reconcileRunner()).To(Succeed())

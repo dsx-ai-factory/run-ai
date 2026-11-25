@@ -69,7 +69,9 @@ container (`envoyproxy/envoy:distroless-v1.33.2`, the image of the GIE v1.5.0 st
 on port 8081, exposed on the `<endpoint>-epp` Service: Envoy asks the EPP for a Pod over ext_proc
 on localhost and forwards the request to that Pod. The creator of the endpoint runs the proxy and
 sets its upstream to `http://<endpoint>-epp.<namespace>.svc.cluster.local:8081`. The NetworkPolicy
-admits 8081 only from the Pods that `authProxy.podSelector` selects, so no request skips the proxy.
+admits 8081 only from the Pods that `authProxy.podSelector` selects. NetworkPolicies are additive:
+another policy that selects the EPP Pod and allows 8081 lets other Pods skip the proxy, so review
+the policies that select the EPP Pod in the endpoint's namespace.
 
 Use `config/samples/inference_v1alpha1_inferenceendpoint.yaml` for the baseline
 API and `_tuned.yaml` for scorer weights. The API group remains `inference.platform.run.ai/v1alpha1`.
