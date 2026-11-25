@@ -119,7 +119,12 @@
 <script lang="ts">
 import type { IGpuRequestModel } from "@/models/compute-resource.model";
 import { type ISelectOption, EMemoryUnitValue } from "@/models/global.model";
-import type { NumberRules } from "@/swagger-models/assets-service-client";
+import type {
+  NumberRules,
+  SupersetDefaultsAllOfCompute,
+  SupersetRulesAllOfCompute,
+  GpuRequestOptionsOptionsInner,
+} from "@/swagger-models/policy-service-client";
 import { GpuRequestType } from "@/swagger-models/assets-service-client";
 import { defineComponent, type PropType } from "vue";
 import { RunaiSelect } from "@/components/common/runai-select";
@@ -127,11 +132,6 @@ import { gpuRequestTypeOptions } from "@/models/compute-resource.model";
 import { errorMessages } from "@/common/error-message.constant";
 import { useSettingStore } from "@/stores/setting.store";
 import { ComputeResourceBox } from "../compute-resource-box";
-import type {
-  SupersetDefaultsAllOfCompute,
-  SupersetRulesAllOfCompute,
-  GpuRequestOptionsOptionsInner,
-} from "@/swagger-models/policy-service-client";
 import type { IGenericSelectPolicyRules } from "@/models/policy.model";
 import { PolicyNumberInput } from "@/components/common/policy-number-input";
 import { PolicyQuantityInput } from "@/components/common/policy-quantity-input";

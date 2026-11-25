@@ -124,19 +124,6 @@ func (c *S3TestFactory) validateListContent(listRequest *http.Request, expectedU
 	tg.validateListContent(c.router, listRequest, expectedUsedBy, createdSpecs)
 }
 
-func (c *S3TestFactory) addToWorkloadCreationReq(request *api.WorkloadCreationRequest, assetMeta *api.AssetMeta) bool {
-	if request.Assets.Datasources == nil {
-		request.Assets.Datasources = make([]api.AssetIdAndKind, 0)
-	}
-	request.Assets.Datasources = []api.AssetIdAndKind{
-		{
-			Id:   assetMeta.Id,
-			Kind: api.ASSETKIND_S3,
-		},
-	}
-	return true
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 //    Asset Builders
 /////////////////////////////////////////////////////////////////////////////////////////////

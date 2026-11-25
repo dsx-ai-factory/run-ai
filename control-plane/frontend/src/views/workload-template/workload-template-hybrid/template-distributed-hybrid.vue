@@ -121,14 +121,14 @@ import DistributedHybridMaster from "@/views/training/distributed-hybrid/distrib
 import DistributedHybridWorker from "@/views/training/distributed-hybrid/distributed-hybrid-worker.vue";
 import DistributedHybridSetup from "@/views/training/distributed-hybrid/distributed-hybrid-setup.vue";
 import { alertUtil } from "@/utils/alert.util";
-import { ScopeType } from "@/swagger-models/workloads-client";
-import { CleanPodPolicy, type UnifiedProjectInfo } from "@/swagger-models/workloads-client";
+import { ScopeType, CleanPodPolicy, type UnifiedProjectInfo } from "@/swagger-models/workloads-client";
 import { workloadHybridUtil } from "@/utils/workload-hybrid.util/workload-hybrid.util";
 import type { IHideSpecificSections, THybridFormState } from "@/models/workload-hybrid.model";
 import { useClusterStore } from "@/stores/cluster.store";
 import { useTrainingStore } from "@/stores/training.store";
 import { useAuthStore } from "@/stores/auth.store";
-import { DistributedFramework, Scope, type StringOption } from "@/swagger-models/assets-service-client";
+import { DistributedFramework, Scope } from "@/swagger-models/assets-service-client";
+import type { StringOption } from "@/swagger-models/policy-service-client";
 import { useEnvironmentVariablesSection } from "@/composables/use-environment-variables-section.composable";
 import { deepCopy } from "@/utils/common.util";
 import { workloadService } from "@/services/cluster/workload.service/workload.service";

@@ -80,8 +80,6 @@ type APIClient struct {
 
 	ModelAPI ModelAPI
 
-	ModelInferenceAPI ModelInferenceAPI
-
 	NFSAPI NFSAPI
 
 	PVCAPI PVCAPI
@@ -131,7 +129,6 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.HostPathAPI = (*HostPathAPIService)(&c.common)
 	c.InferencesAPI = (*InferencesAPIService)(&c.common)
 	c.ModelAPI = (*ModelAPIService)(&c.common)
-	c.ModelInferenceAPI = (*ModelInferenceAPIService)(&c.common)
 	c.NFSAPI = (*NFSAPIService)(&c.common)
 	c.PVCAPI = (*PVCAPIService)(&c.common)
 	c.RegistryAPI = (*RegistryAPIService)(&c.common)

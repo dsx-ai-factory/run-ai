@@ -33,11 +33,6 @@ type WorkloadsSettingsGetResponse struct {
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//EnableHybridSubmission GetEnableHybridSubmission `json:"enableHybridSubmission,omitempty"`
-	EnableHybridSubmission GetEnableHybridSubmission `json:"enableHybridSubmission,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//GpuOverProvisioning GetGpuOverProvisioning `json:"gpuOverProvisioning,omitempty"`
 	GpuOverProvisioning GetGpuOverProvisioning `json:"gpuOverProvisioning,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
@@ -54,9 +49,6 @@ func AssertWorkloadsSettingsGetResponseRequired(obj WorkloadsSettingsGetResponse
 		return err
 	}
 	if err := AssertGetWorkloadSubmissionV2EnabledRequired(obj.WorkloadSubmissionV2Enabled); err != nil {
-		return err
-	}
-	if err := AssertGetEnableHybridSubmissionRequired(obj.EnableHybridSubmission); err != nil {
 		return err
 	}
 	if err := AssertGetGpuOverProvisioningRequired(obj.GpuOverProvisioning); err != nil {
@@ -84,14 +76,6 @@ func AssertWorkloadsSettingsGetResponseConstraints(obj WorkloadsSettingsGetRespo
 
 	//////////////////////// RUNAI END //////////////////////////
 	if err := AssertGetWorkloadSubmissionV2EnabledConstraints(obj.WorkloadSubmissionV2Enabled); err != nil {
-		return err
-	}
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
-	if err := AssertGetEnableHybridSubmissionConstraints(obj.EnableHybridSubmission); err != nil {
 		return err
 	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////

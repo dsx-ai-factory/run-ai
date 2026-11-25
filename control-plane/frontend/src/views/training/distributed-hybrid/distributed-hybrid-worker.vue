@@ -180,7 +180,8 @@ import { useSettingStore } from "@/stores/setting.store";
 import { requestToLeave } from "@/services/infra/router.service/router.service";
 import { deepCopy } from "@/utils/common.util";
 // Models
-import { AssetKind, type StringOption } from "@/swagger-models/assets-service-client";
+import { AssetKind } from "@/swagger-models/assets-service-client";
+import type { StringOption } from "@/swagger-models/policy-service-client";
 import { EDistributedReplicaType, EWorkloadTypeSupportedInAssetsService } from "@/models/workload.model";
 import { type IPolicyViewDetails } from "@/utils/policy.util/policy-view.util";
 import { EWorkloadFormType } from "@/models/workload.model";

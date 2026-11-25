@@ -254,6 +254,19 @@ describe("workload-page-actions - runBtnTooltip", () => {
 });
 
 describe("workload-page-actions - copy action", () => {
+  it.each([
+    EWorkloadType.Workspace,
+    EWorkloadType.Training,
+    EWorkloadType.Distributed,
+    EWorkloadType.Inference,
+    EWorkloadType.DistributedInference,
+  ])("allows copying a flat %s", (type) => {
+    const workload = makeWorkload({ source: Source.ControlPlane, type: type as Workload["type"] });
+    const wrapper = mountComponent(workload);
+
+    expect(wrapper.vm.isCopyWorkloadDisabled).toBe(false);
+  });
+
   it("allows copying a WorkloadsV2 workload translated from a native workload", () => {
     const workload = makeWorkload({
       source: Source.ControlPlane as Workload["source"],

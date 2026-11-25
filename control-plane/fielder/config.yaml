@@ -13,12 +13,10 @@ fields:
           - WorkspaceTemplateSpec
           - WorkspaceDefaults
           - WorkspaceRules
-          - WorkspaceRunParamsSpec
           - TrainingSpec
           - TrainingTemplateSpec
           - TrainingDefaults
           - TrainingRules
-          - TrainingRunParamsSpec
           - DistributedSpec
           - DistributedTemplateSpec
           - MasterSpec
@@ -30,13 +28,11 @@ fields:
           - InferenceUpdateSpec
           - InferenceDefaults
           - InferenceRules
-          - InferenceRunParamsSpec
           - DinfLeaderWorkerSpec
           - DinfLeaderWorkerTemplateSpec
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
           - AssetsEnvSpecAndRunParams
           - WorkflowTaskSpec
   args:
@@ -54,12 +50,10 @@ fields:
           - WorkspaceTemplateSpec
           - WorkspaceDefaults
           - WorkspaceRules
-          - WorkspaceRunParamsSpec
           - TrainingSpec
           - TrainingTemplateSpec
           - TrainingDefaults
           - TrainingRules
-          - TrainingRunParamsSpec
           - DistributedSpec
           - DistributedTemplateSpec
           - MasterSpec
@@ -71,13 +65,11 @@ fields:
           - InferenceUpdateSpec
           - InferenceDefaults
           - InferenceRules
-          - InferenceRunParamsSpec
           - DinfLeaderWorkerSpec
           - DinfLeaderWorkerTemplateSpec
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
           - AssetsEnvSpecAndRunParams
           - WorkflowTaskSpec
   image:
@@ -193,15 +185,11 @@ fields:
           - DinfLeaderWorkerTemplateSpec
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
-          - SpecificRunParamsRules
           - WorkflowTaskSpec
       - spec: ../../../../../assets-service/swagger/source/schemas/Common/EnvironmentVariablesOfAsset.yaml
         name: assets
         targets:
           - SpecificRunParamsSpec
-          - WorkspaceRunParamsSpec
-          - TrainingRunParamsSpec
-          - InferenceRunParamsSpec
           - AssetsEnvSpecAndRunParams
   workingDir:
     name: "workingDir"
@@ -377,12 +365,10 @@ fields:
           - WorkspaceTemplateSpec
           - WorkspaceDefaults
           - WorkspaceRules
-          - WorkspaceRunParamsSpec
           - TrainingSpec
           - TrainingTemplateSpec
           - TrainingDefaults
           - TrainingRules
-          - TrainingRunParamsSpec
           - DistributedSpec
           - DistributedTemplateSpec
           - MasterSpec
@@ -394,13 +380,11 @@ fields:
           - InferenceUpdateSpec
           - InferenceDefaults
           - InferenceRules
-          - InferenceRunParamsSpec
           - DinfLeaderWorkerSpec
           - DinfLeaderWorkerTemplateSpec
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
   nodePools:
     name: "nodePools"
     variants:
@@ -415,12 +399,10 @@ fields:
           - WorkspaceTemplateSpec
           - WorkspaceDefaults
           - WorkspaceRules
-          - WorkspaceRunParamsSpec
           - TrainingSpec
           - TrainingTemplateSpec
           - TrainingDefaults
           - TrainingRules
-          - TrainingRunParamsSpec
           - DistributedSpec
           - DistributedTemplateSpec
           - MasterSpec
@@ -432,7 +414,6 @@ fields:
           - InferenceUpdateSpec
           - InferenceDefaults
           - InferenceRules
-          - InferenceRunParamsSpec
           - NimServiceSpec
           - NimServiceDefaults
           - NimServiceRules
@@ -440,7 +421,6 @@ fields:
           - DinfCommonDefaults
           - DinfCommonRules
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
           - WorkflowGroupFieldsSpec
           - WorkflowFieldsSpec
   nodeAffinityRequired:
@@ -457,8 +437,6 @@ fields:
           - WorkspaceTemplateSpec
           - WorkspaceDefaults
           - WorkspaceRules
-          - WorkspaceRunParamsSpec
-          - TrainingRunParamsSpec
           - TrainingSpec
           - TrainingTemplateSpec
           - TrainingDefaults
@@ -474,13 +452,11 @@ fields:
           - InferenceUpdateSpec
           - InferenceDefaults
           - InferenceRules
-          - InferenceRunParamsSpec
           - DinfLeaderWorkerSpec
           - DinfLeaderWorkerTemplateSpec
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
           - WorkflowPlacementProfileSpec
   podAffinity:
     name: "podAffinity"
@@ -496,12 +472,10 @@ fields:
           - WorkspaceTemplateSpec
           - WorkspaceDefaults
           - WorkspaceRules
-          - WorkspaceRunParamsSpec
           - TrainingSpec
           - TrainingTemplateSpec
           - TrainingDefaults
           - TrainingRules
-          - TrainingRunParamsSpec
           - DistributedSpec
           - DistributedTemplateSpec
           - MasterSpec
@@ -513,13 +487,11 @@ fields:
           - InferenceUpdateSpec
           - InferenceDefaults
           - InferenceRules
-          - InferenceRunParamsSpec
           - DinfLeaderWorkerSpec
           - DinfLeaderWorkerTemplateSpec
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
   category:
     name: "category"
     variants:
@@ -534,12 +506,10 @@ fields:
           - WorkspaceTemplateSpec
           - WorkspaceDefaults
           - WorkspaceRules
-          - WorkspaceRunParamsSpec
           - TrainingSpec
           - TrainingTemplateSpec
           - TrainingDefaults
           - TrainingRules
-          - TrainingRunParamsSpec
           - DistributedSpec
           - DistributedTemplateSpec
           - MasterSpec
@@ -551,7 +521,6 @@ fields:
           - InferenceUpdateSpec
           - InferenceDefaults
           - InferenceRules
-          - InferenceRunParamsSpec
           - DinfCommonSpec
           - DinfCommonDefaults
           - DinfCommonRules
@@ -559,7 +528,6 @@ fields:
           - NimServiceDefaults
           - NimServiceRules
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
           - WorkflowFieldsSpec
   preemptibility:
     name: "preemptibility"
@@ -575,12 +543,10 @@ fields:
           - WorkspaceTemplateSpec
           - WorkspaceDefaults
           - WorkspaceRules
-          - WorkspaceRunParamsSpec
           - TrainingSpec
           - TrainingTemplateSpec
           - TrainingDefaults
           - TrainingRules
-          - TrainingRunParamsSpec
           - DistributedSpec
           - DistributedTemplateSpec
           - MasterSpec
@@ -592,7 +558,6 @@ fields:
           - InferenceUpdateSpec
           - InferenceDefaults
           - InferenceRules
-          - InferenceRunParamsSpec
           - DinfCommonSpec
           - DinfCommonDefaults
           - DinfCommonRules
@@ -600,7 +565,6 @@ fields:
           - NimServiceDefaults
           - NimServiceRules
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
           - WorkflowFieldsSpec
   priorityClass:
     name: "priorityClass"
@@ -617,12 +581,10 @@ fields:
           - WorkspaceTemplateSpec
           - WorkspaceDefaults
           - WorkspaceRules
-          - WorkspaceRunParamsSpec
           - TrainingSpec
           - TrainingTemplateSpec
           - TrainingDefaults
           - TrainingRules
-          - TrainingRunParamsSpec
           - DistributedSpec
           - DistributedTemplateSpec
           - ReplicaDefaults
@@ -632,7 +594,6 @@ fields:
           - InferenceUpdateSpec
           - InferenceDefaults
           - InferenceRules
-          - InferenceRunParamsSpec
           - DinfCommonSpec
           - DinfCommonDefaults
           - DinfCommonRules
@@ -640,7 +601,6 @@ fields:
           - NimServiceDefaults
           - NimServiceRules
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
           - WorkflowFieldsSpec
       - name: masterPriorityClass
         spec: resources/PriorityClassMaster.yaml
@@ -663,21 +623,17 @@ fields:
           - WorkspaceTemplateSpec
           - WorkspaceDefaults
           - WorkspaceRules
-          - WorkspaceRunParamsSpec
           - TrainingSpec
           - TrainingTemplateSpec
           - TrainingDefaults
           - TrainingRules
-          - TrainingRunParamsSpec
           - DistributedSpec
           - DistributedTemplateSpec
           - MasterSpec
           - MasterTemplateSpec
           - ReplicaDefaults
           - ReplicaRules
-          - InferenceRunParamsSpec
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
   autoDeletionTimeAfterCompletion:
     name: autoDeletionTimeAfterCompletionSeconds
     variants:
@@ -693,19 +649,15 @@ fields:
           - WorkspaceTemplateSpec
           - WorkspaceDefaults
           - WorkspaceRules
-          - WorkspaceRunParamsSpec
           - TrainingSpec
           - TrainingTemplateSpec
           - TrainingDefaults
           - TrainingRules
-          - TrainingRunParamsSpec
           - DistributedSpec
           - DistributedTemplateSpec
           - ReplicaDefaults
           - ReplicaRules
-          - InferenceRunParamsSpec
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
       - name: masterAutoDeletionTimeAfterCompletion
         spec: advanced/AutoDeletionTimeAfterPreemptionMaster.yaml
         defaults: advanced/AutoDeletionTimeAfterPreemption.yaml
@@ -728,19 +680,15 @@ fields:
           - WorkspaceTemplateSpec
           - WorkspaceDefaults
           - WorkspaceRules
-          - WorkspaceRunParamsSpec
           - TrainingSpec
           - TrainingTemplateSpec
           - TrainingDefaults
           - TrainingRules
-          - TrainingRunParamsSpec
           - DistributedSpec
           - DistributedTemplateSpec
           - ReplicaDefaults
           - ReplicaRules
-          - InferenceRunParamsSpec
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
           - WorkflowTaskSpec
       - name: masterTerminationGracePeriod
         spec: advanced/TerminationGracePeriodMaster.yaml
@@ -763,12 +711,10 @@ fields:
           - TrainingTemplateSpec
           - TrainingDefaults
           - TrainingRules
-          - TrainingRunParamsSpec
           - WorkspaceSpec
           - WorkspaceTemplateSpec
           - WorkspaceDefaults
           - WorkspaceRules
-          - WorkspaceRunParamsSpec
           - DistributedSpec
           - DistributedTemplateSpec
           - MasterSpec
@@ -779,7 +725,6 @@ fields:
           - InferenceTemplateSpec
           - InferenceDefaults
           - InferenceRules
-          - InferenceRunParamsSpec
           - NimServiceSpec
           - NimServiceDefaults
           - NimServiceRules
@@ -788,7 +733,6 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
           - WorkflowTaskSpec
   labels:
     name: labels
@@ -804,12 +748,10 @@ fields:
           - TrainingTemplateSpec
           - TrainingDefaults
           - TrainingRules
-          - TrainingRunParamsSpec
           - WorkspaceSpec
           - WorkspaceTemplateSpec
           - WorkspaceDefaults
           - WorkspaceRules
-          - WorkspaceRunParamsSpec
           - DistributedSpec
           - DistributedTemplateSpec
           - MasterSpec
@@ -823,13 +765,11 @@ fields:
           - NimServiceSpec
           - NimServiceDefaults
           - NimServiceRules
-          - InferenceRunParamsSpec
           - DinfLeaderWorkerSpec
           - DinfLeaderWorkerTemplateSpec
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
           - WorkflowTaskSpec
   imagePullSecrets:
     name: imagePullSecrets
@@ -844,11 +784,9 @@ fields:
           - TrainingSpec
           - TrainingDefaults
           - TrainingRules
-          - TrainingRunParamsSpec
           - WorkspaceSpec
           - WorkspaceDefaults
           - WorkspaceRules
-          - WorkspaceRunParamsSpec
           - DistributedSpec
           - MasterSpec
           - ReplicaDefaults
@@ -857,7 +795,6 @@ fields:
           - InferenceUpdateSpec
           - InferenceDefaults
           - InferenceRules
-          - InferenceRunParamsSpec
           - NimServiceSpec
           - NimServiceDefaults
           - NimServiceRules
@@ -865,7 +802,6 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
           - WorkflowTaskSpec
   tolerations:
     name: tolerations
@@ -881,12 +817,10 @@ fields:
           - TrainingTemplateSpec
           - TrainingDefaults
           - TrainingRules
-          - TrainingRunParamsSpec
           - WorkspaceSpec
           - WorkspaceTemplateSpec
           - WorkspaceDefaults
           - WorkspaceRules
-          - WorkspaceRunParamsSpec
           - DistributedSpec
           - DistributedTemplateSpec
           - MasterSpec
@@ -897,7 +831,6 @@ fields:
           - InferenceTemplateSpec
           - InferenceDefaults
           - InferenceRules
-          - InferenceRunParamsSpec
           - NimServiceSpec
           - NimServiceDefaults
           - NimServiceRules
@@ -906,7 +839,6 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
           - WorkflowPlacementProfileSpec
 
   backoffLimit:
@@ -924,19 +856,15 @@ fields:
           - WorkspaceTemplateSpec
           - WorkspaceDefaults
           - WorkspaceRules
-          - WorkspaceRunParamsSpec
           - TrainingSpec
           - TrainingTemplateSpec
           - TrainingDefaults
           - TrainingRules
-          - TrainingRunParamsSpec
           - DistributedSpec
           - DistributedTemplateSpec
           - ReplicaDefaults
           - ReplicaRules
-          - InferenceRunParamsSpec
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
       - name: masterBackoffLimit
         spec: advanced/BackoffLimitMaster.yaml
         defaults: advanced/BackoffLimit.yaml
@@ -958,9 +886,7 @@ fields:
           - TrainingTemplateSpec
           - TrainingDefaults
           - TrainingRules
-          - TrainingRunParamsSpec
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
   parallelism:
     name: "parallelism"
     variants:
@@ -975,9 +901,7 @@ fields:
           - TrainingTemplateSpec
           - TrainingDefaults
           - TrainingRules
-          - TrainingRunParamsSpec
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
   restartPolicy:
     name: "restartPolicy"
     variants:
@@ -989,21 +913,17 @@ fields:
           - TrainingTemplateSpec
           - TrainingDefaults
           - TrainingRules
-          - TrainingRunParamsSpec
           - WorkspaceSpec
           - WorkspaceTemplateSpec
           - WorkspaceDefaults
           - WorkspaceRules
-          - WorkspaceRunParamsSpec
           - DistributedSpec
           - DistributedTemplateSpec
           - MasterSpec
           - MasterTemplateSpec
           - ReplicaDefaults
           - ReplicaRules
-          - InferenceRunParamsSpec
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
       - name: dinf
         spec: distributed_inferences/DistributedInferenceRestartPolicy.yaml
         defaults: distributed_inferences/DistributedInferenceRestartPolicy.yaml
@@ -1664,11 +1584,7 @@ fields:
           - DinfLeaderWorkerTemplateSpec
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
-          - TrainingRunParamsSpec
-          - WorkspaceRunParamsSpec
-          - InferenceRunParamsSpec
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
           - AssetsEnvSpecAndRunParams
           - WorkflowTaskSpec
   runAsGid:
@@ -1706,11 +1622,7 @@ fields:
           - DinfLeaderWorkerTemplateSpec
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
-          - TrainingRunParamsSpec
-          - WorkspaceRunParamsSpec
-          - InferenceRunParamsSpec
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
           - AssetsEnvSpecAndRunParams
           - WorkflowTaskSpec
   supplementalGroups:
@@ -1745,11 +1657,7 @@ fields:
           - DinfLeaderWorkerTemplateSpec
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
-          - TrainingRunParamsSpec
-          - WorkspaceRunParamsSpec
-          - InferenceRunParamsSpec
           - SpecificRunParamsSpec
-          - SpecificRunParamsRules
           - AssetsEnvSpecAndRunParams
           - WorkflowTaskSpec
   hostIpc:
@@ -2829,13 +2737,6 @@ targets:
         refFile: compute/SupersetRulesAllOfCompute.yaml
       security:
         refFile: security/SupersetRulesAllOfSecurity.yaml
-  TrainingRunParamsSpec:
-    type: spec
-    skeleton: TrainingSpecificRunParams.yaml
-    path: assets-service/swagger/source/schemas/Training/TrainingSpecificRunParams.yaml
-    nameChange:
-      # in specific run params, no need for the section itself
-      security: {}
   WorkspaceSpec:
     type: spec
     skeleton: Empty.yaml
@@ -2862,13 +2763,6 @@ targets:
         refFile: compute/SupersetRulesAllOfCompute.yaml
       security:
         refFile: security/SupersetRulesAllOfSecurity.yaml
-  WorkspaceRunParamsSpec:
-    type: spec
-    skeleton: WorkspaceSpecificRunParams.yaml
-    path: assets-service/swagger/source/schemas/Workspace/WorkspaceSpecificRunParams.yaml
-    nameChange:
-      # in specific run params, no need for the section itself
-      security: {}
   InferenceSpec:
     type: spec
     skeleton: InferenceSpecSpec.yaml
@@ -2897,13 +2791,6 @@ targets:
     extractFields:
       compute:
         refFile: compute/SupersetRulesAllOfCompute.yaml
-  InferenceRunParamsSpec:
-    type: spec
-    skeleton: InferenceSpecificRunParams.yaml
-    path: assets-service/swagger/source/schemas/Inference/InferenceSpecificRunParams.yaml
-    nameChange:
-      # in specific run params, no need for the section itself
-      security: {}
   DinfCommonSpec:
     type: spec
     skeleton: DistributedInferenceCommonSpec.yaml
@@ -2963,13 +2850,6 @@ targets:
     type: spec
     skeleton: SpecificRunParams.yaml
     path: assets-service/swagger/source/schemas/Workload/SpecificRunParams.yaml
-    nameChange:
-      # in specific run params, no need for the section itself
-      security: {}
-  SpecificRunParamsRules:
-    type: rules
-    skeleton: SpecificRunParamsRules.yaml
-    path: assets-service/swagger/source/schemas/Workload/SpecificRunParamsRules.yaml
     nameChange:
       # in specific run params, no need for the section itself
       security: {}

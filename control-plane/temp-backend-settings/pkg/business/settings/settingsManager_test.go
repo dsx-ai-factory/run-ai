@@ -294,3 +294,22 @@ func TestFetchProviderOverrides_NilValueNotWrittenToAllSettings(t *testing.T) {
 	_, exists := allSettings["key1"]
 	assert.False(t, exists)
 }
+
+func TestUnregisteredSettingPreservesDataVolumes(t *testing.T) {
+	const removedKey = "tenant.enable_hybrid_submission"
+	m := NewSettingsManager(nil, nil, false, &OnSetDeps{})
+	err := m.SetSetting(context.Background(), 1, removedKey, false, nil)
+	assert.ErrorContains(t, err, "unknown setting key")
+	for _, preference := range []bool{false, true} {
+		stored := map[string]interface{}{removedKey: false, SettingKeyEnableDataVolumes: preference}
+		result := m.buildSettingsResponse(stored, nil, nil, TenantStaticData{}, false)
+		values := make(map[string]interface{})
+		for _, setting := range result {
+			if setting.Value != nil {
+				values[setting.Key] = *setting.Value
+			}
+		}
+		assert.NotContains(t, values, removedKey)
+		assert.Equal(t, preference, values[SettingKeyEnableDataVolumes])
+	}
+}

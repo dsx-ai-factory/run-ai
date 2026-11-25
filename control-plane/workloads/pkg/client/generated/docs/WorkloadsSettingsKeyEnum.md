@@ -7,8 +7,6 @@
 
 * `WORKLOAD_SUBMISSION_V2_ENABLED` (value: `"workloadSubmissionV2Enabled"`)
 
-* `ENABLE_HYBRID_SUBMISSION` (value: `"enableHybridSubmission"`)
-
 * `GPU_OVER_PROVISIONING` (value: `"gpuOverProvisioning"`)
 
 * `APPLICATION_SUBMISSION` (value: `"applicationSubmission"`)

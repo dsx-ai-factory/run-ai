@@ -11,6 +11,5 @@
 // So I moved the names out of the route file, which fix this error.
 export const WORKSPACE_ROUTE_NAMES = {
   WORKSPACE_NEW: "workspace-new",
-  WORKSPACE_ASSETS_EDIT: "workspace-assets-edit",
   WORKSPACE_HYBRID: "workspace-hybrid",
 };

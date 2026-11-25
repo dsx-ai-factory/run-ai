@@ -15,42 +15,18 @@ import {
   WorkloadSortFilterFields,
 } from "@/swagger-models/workloads-client";
 import {
-  type Annotation,
-  type AssetIdAndKind,
-  type AssetsIds,
-  type AssetsRef,
-  type DatasourceRef,
   type DisplayedJob,
-  type DistributedParams,
-  type Inference,
-  type InferenceV2,
   InternalConnectionType,
-  type Label,
-  type SpecificRunConnectionInfo,
-  type SpecificRunParams,
   type ToolType,
-  type TrainingCreationRequestV2,
-  type TrainingV2,
-  type WorkloadMeta,
   type WorkloadSupportedTypes,
-  type WorkspaceCreationRequestV2,
-  type WorkspaceV2,
-  type ModelInference,
-  type ModelInferenceV2,
-  type DistributedData,
-  type AssetsRefOptional,
   type EnvironmentVariableOfAsset,
 } from "@/swagger-models/assets-service-client";
 import type { EWorkloadEntity } from "@/models/workload.model";
 import {
   EWorkloadAction,
   EWorkloadName,
-  type IUIDistributed,
-  type IUIDistributedMaster,
-  type IUIWorkloadAssets,
   type IUIWorkloadCreation,
   type IUIWorkloadSpecificEnv,
-  type IWorkloadMeta,
   WorkloadPhaseMap,
   type WorkloadServicePod,
   EWorkloadType,
@@ -58,8 +34,6 @@ import {
   type IToolItem,
   EWorkloadCategory,
 } from "@/models/workload.model";
-import type { IInferenceList } from "@/models/inference.model";
-import type { IUIVolume } from "@/models/data-source.model";
 import {
   EHuggingFaceEnvVariableNames,
   NIM_IMAGE_PREFIX,
@@ -68,7 +42,7 @@ import {
   VLLM_WORKLOAD_LABEL,
 } from "@/models/inference.model";
 import type { IItemizedListItem } from "@/components/common/runai-itemized-list";
-import { deepCopy, fallbackDefaultIfNullOrUndefined, omit, pick } from "@/utils/common.util";
+import { deepCopy } from "@/utils/common.util";
 import { tableUtil } from "@/utils/table.util";
 import { ETableFilters, type IStatusColOptions } from "@/models/table.model";
 import { allWorkloadsIconsMap, GENERIC_WORKLOAD_ICON } from "@/common/icons.constant";
@@ -81,7 +55,6 @@ import type { IAdvancedFilterModel, IEnumBasedFilterModel } from "@/models/filte
 import { EColumnFilterType, EFilterOperator } from "@/models/filter.model";
 import type { ITrainingList } from "@/models/training.model";
 
-import type { IWorkloadSpecificRunParams, SpecificRunParamsKeys } from "./workload.util.models";
 import { storageUtil } from "@/utils/storage.util";
 import { ENVIRONMENT_ROUTE_NAMES } from "@/router/environment.routes/environment.routes.names";
 import { COMPUTE_RESOURCE_ROUTE_NAMES } from "@/router/compute-resource.routes/compute-resource.routes.names";
@@ -89,21 +62,8 @@ import { DATA_SOURCE_CREATION_ROUTE_MAP } from "@/router/data-source.routes/data
 import type { Field } from "@/models/workload-phase-messages.model";
 import { stringUtil } from "@/utils/string.util";
 
-export interface IUIDistributedUISetup {
-  distributedData: DistributedData | null;
-  enableEditingMaster?: boolean;
-  noMaster?: boolean;
-}
-
 export const workloadUtil = {
   getEmptyUIWorkloadCreation,
-  getUIWorkloadSpecificEnv,
-  getUIWorkloadAssets,
-  getWorkloadAssetsFromUIWorkloadAssets,
-  getWorkloadSpecificEnvFromUIWorkloadSpecificEnv,
-  getWorkspaceCreationRequestV2,
-  getTrainingCreationRequestV2,
-  convertWorkloadToWorkloadUI,
   getDisabledToolTipText,
   getConnectivityMessage,
   getMissingDomainMessage,
@@ -131,8 +91,6 @@ export const workloadUtil = {
   isRunaiWorkload,
   isWorkloadSubmittedByV2,
   getSupportedRoutes,
-  processCommonSpecificEnv,
-  _getWorkloadUI,
   _getWorkloadConnectionsForInference,
   _getNimInferenceIcon,
   flattenWorkloadPhaseIssues,
@@ -186,78 +144,6 @@ function getEmptyUIWorkloadCreation(specificEnv?: IUIWorkloadSpecificEnv): IUIWo
   };
 }
 
-function getUIWorkloadAssets(assets: AssetsIds | undefined, uiVolumes?: Array<IUIVolume>): IUIWorkloadAssets {
-  return {
-    environment: assets?.environment || null,
-    compute: assets?.compute || null,
-    datasources: assets?.datasources,
-    uiVolumes,
-  };
-}
-
-function getUIWorkloadAssetsRef(
-  assets: AssetsRef | AssetsRefOptional | undefined | null,
-  uiVolumes?: Array<IUIVolume>,
-): IUIWorkloadAssets {
-  return {
-    environment: assets?.environment?.id || null,
-    compute: assets?.compute?.id || null,
-    datasources: assets?.datasources?.map((dataSource: DatasourceRef) => {
-      const dsAsset: AssetIdAndKind = { id: dataSource.id, kind: dataSource.kind };
-      if (dataSource.overrides) dsAsset.overrides = dataSource.overrides;
-      return dsAsset;
-    }),
-    uiVolumes,
-  };
-}
-
-function getUIWorkloadSpecificEnv(specificEnv: SpecificRunParams | undefined = {}): IUIWorkloadSpecificEnv {
-  const workloadSpecificEnv: IUIWorkloadSpecificEnv = {
-    args: specificEnv.args,
-    command: specificEnv.command,
-    runAsUid: specificEnv.runAsUid || null,
-    runAsGid: specificEnv.runAsGid || null,
-    supplementalGroups: specificEnv.supplementalGroups,
-    nodeType: specificEnv.nodeType || null,
-    allowOverQuota: specificEnv.allowOverQuota || null,
-    nodePools: specificEnv.nodePools ? specificEnv.nodePools : null,
-    autoDeletionTimeAfterCompletionSeconds: fallbackDefaultIfNullOrUndefined(
-      specificEnv.autoDeletionTimeAfterCompletionSeconds,
-      null,
-    ),
-    connections: specificEnv.connections,
-    environmentVariables: specificEnv.environmentVariables || undefined,
-    annotations: specificEnv.annotations?.map((ann: Annotation) => {
-      const itemized: IItemizedListItem = {
-        ...ann,
-        name: ann.name || "",
-        value: ann.value || "",
-        exclude: ann.exclude || undefined,
-      };
-
-      return itemized;
-    }),
-    labels: specificEnv.labels?.map((lbl: Label) => {
-      const itemized: IItemizedListItem = {
-        ...lbl,
-        name: lbl.name || "",
-        value: lbl.value || "",
-        exclude: lbl.exclude || undefined,
-      };
-
-      return itemized;
-    }),
-    backoffLimit: Number.isInteger(specificEnv.backoffLimit) ? specificEnv.backoffLimit : 6,
-    tolerations: specificEnv.tolerations,
-    podAffinity: specificEnv.podAffinity,
-    parallelism: specificEnv.parallelism,
-    completions: specificEnv.completions,
-    terminationGracePeriodSeconds: specificEnv.terminationGracePeriodSeconds,
-  };
-
-  return workloadSpecificEnv;
-}
-
 function convertEnvVarToEnvVarUI(environmentVariables: Array<EnvironmentVariableOfAsset>): Array<IItemizedListItem> {
   return environmentVariables.map((env: EnvironmentVariableOfAsset) => {
     return {
@@ -266,254 +152,6 @@ function convertEnvVarToEnvVarUI(environmentVariables: Array<EnvironmentVariable
       value: env.value || "",
       exclude: env.exclude || undefined,
     };
-  });
-}
-
-function getWorkloadAssetsFromUIWorkloadAssets(assets: IUIWorkloadAssets, workloadVolumes?: Array<string>): AssetsIds {
-  if (!assets.environment) throw new Error("assets.environment is required");
-
-  const retAssets: AssetsIds = {
-    environment: assets.environment,
-    compute: assets.compute,
-  };
-
-  if (assets.datasources) {
-    retAssets.datasources = assets.datasources;
-  }
-
-  if (workloadVolumes) {
-    retAssets.workloadVolumes = workloadVolumes;
-  }
-
-  return retAssets;
-}
-
-function getWorkloadSpecificEnvFromUIWorkloadSpecificEnv(specificEnv: IUIWorkloadSpecificEnv): SpecificRunParams {
-  const retSpecificEnv = processCommonSpecificEnv(specificEnv, ["autoScaleData", "servingPortAccess"]);
-  return retSpecificEnv;
-}
-
-function getWorkspaceCreationRequestV2(
-  workspace: IUIWorkloadCreation,
-  workloadVolumes?: Array<string>,
-): WorkspaceCreationRequestV2 {
-  if (!workspace.assets.environment) throw "Environment details are missing";
-  const workloadCreationRequest: WorkspaceCreationRequestV2 = {
-    meta: {
-      name: workspace.name,
-      projectId: workspace.projectId?.toString(),
-      clusterId: workspace.clusterId,
-    },
-    assets: getWorkloadAssetsFromUIWorkloadAssets(workspace.assets, workloadVolumes),
-    specificRunParams: getWorkloadV2RequestSpecificRunParams(workspace.specificEnv),
-  };
-  return workloadCreationRequest;
-}
-
-function getTrainingCreationRequestV2(
-  training: IUIWorkloadCreation,
-  workloadVolumes?: Array<string>,
-  masterWorkloadVolumes?: Array<string>,
-): TrainingCreationRequestV2 {
-  if (!training.assets.environment) throw "Environment details are missing";
-  const workloadCreationRequest: TrainingCreationRequestV2 = {
-    meta: {
-      name: training.name,
-      projectId: training.projectId?.toString(),
-      clusterId: training.clusterId,
-    },
-    assets: getWorkloadAssetsFromUIWorkloadAssets(training.assets, workloadVolumes),
-    specificRunParams: getWorkloadV2RequestSpecificRunParams(training.specificEnv),
-  };
-
-  if (training.distributed) {
-    workloadCreationRequest.distributed = _getDistributedObjectForTrainingV2Request(
-      training.distributed,
-      masterWorkloadVolumes,
-      !training.enableEditingMaster,
-    );
-  }
-
-  return workloadCreationRequest;
-}
-
-function processCommonSpecificEnv(
-  specificEnv: IUIWorkloadSpecificEnv,
-  omitFields: SpecificRunParamsKeys,
-): SpecificRunParams {
-  const retSpecificEnv: SpecificRunParams = {
-    ...omit(specificEnv, [...omitFields, "environmentVariables", "annotations", "labels"]),
-  };
-
-  retSpecificEnv.args ||= null;
-  retSpecificEnv.command ||= null;
-  retSpecificEnv.runAsUid = retSpecificEnv.runAsUid ? +retSpecificEnv.runAsUid : undefined;
-  retSpecificEnv.runAsGid = retSpecificEnv.runAsGid ? +retSpecificEnv.runAsGid : undefined;
-  retSpecificEnv.supplementalGroups = Array.isArray(retSpecificEnv.supplementalGroups)
-    ? retSpecificEnv.supplementalGroups.join(",")
-    : retSpecificEnv.supplementalGroups;
-
-  if (specificEnv.environmentVariables) {
-    retSpecificEnv.environmentVariables = specificEnv.environmentVariables;
-  }
-
-  if (specificEnv.annotations) {
-    retSpecificEnv.annotations = specificEnv.annotations.map((env: IItemizedListItem) =>
-      pick(env, "name", "value", "exclude"),
-    );
-  }
-
-  if (specificEnv.labels) {
-    retSpecificEnv.labels = specificEnv.labels.map((env: IItemizedListItem) => pick(env, "name", "value", "exclude"));
-  }
-
-  return retSpecificEnv;
-}
-
-function getWorkloadV2RequestSpecificRunParams(specificEnv: IUIWorkloadSpecificEnv): IWorkloadSpecificRunParams {
-  const retSpecificEnv = processCommonSpecificEnv(specificEnv, ["autoScaleData"]);
-
-  return retSpecificEnv;
-}
-
-function _getDistributedObjectForTrainingV2Request(
-  distInfo: IUIDistributed,
-  masterWorkloadVolumes?: Array<string>,
-  sameAsWorker?: boolean,
-): DistributedParams {
-  if (distInfo.master && !distInfo.noMaster && !distInfo.master.assets.environment)
-    throw "Environment details are missing";
-  const distParams: DistributedParams = {
-    numWorkers: distInfo.numWorkers || 0,
-    framework: distInfo.distFramework,
-    master: null,
-    // if there is no master (only workers) -> do not send master at all
-  };
-
-  if (distInfo.master && !distInfo.noMaster) {
-    if (sameAsWorker) {
-      // if master and worker are equal we only send "sameAsWorker: true"
-      distParams.master = { sameAsWorker: true };
-      return distParams;
-    }
-    // master details should only be sent if it is different than the worker (i.e sameAsWorker is falsey)
-    distParams.master = {
-      assets: getWorkloadAssetsFromUIWorkloadAssets(distInfo.master.assets, masterWorkloadVolumes),
-      specificRunParams: getWorkloadV2RequestSpecificRunParams(distInfo.master.specificEnv),
-    };
-  }
-
-  return distParams;
-}
-
-export type TWorkloadsToConvert = WorkspaceV2 & TrainingV2 & InferenceV2;
-
-function convertWorkloadToWorkloadUI(workload: TWorkloadsToConvert, uiVolumes?: Array<IUIVolume>): IUIWorkloadCreation {
-  const workloadMeta: IWorkloadMeta = {
-    name: workload.meta.name,
-    projectId: +workload.meta.projectId,
-    namespace: "",
-    clusterId: workload.meta.clusterId,
-  };
-
-  const dataSources: AssetIdAndKind[] =
-    workload.assets.datasources?.map((ds: DatasourceRef): AssetIdAndKind => {
-      const dsAsset: AssetIdAndKind = {
-        id: ds.id,
-        kind: ds.kind,
-      };
-      if (ds.overrides) dsAsset.overrides = ds.overrides;
-      return dsAsset;
-    }) || [];
-
-  const assets = {
-    environment: workload.assets.environment.id,
-    compute: workload.assets.compute?.id || null,
-    datasources: dataSources,
-  };
-
-  // For copied workload we need to reset the connection
-  const specificEnv: SpecificRunParams = workload.specificRunParams ? deepCopy(workload.specificRunParams) : {};
-  if (specificEnv.connections) {
-    specificEnv.connections = _emptyConnectionsCustomInfo(specificEnv.connections);
-  }
-
-  let distributedSetup: IUIDistributedUISetup | undefined;
-
-  if (workload.distributed) {
-    distributedSetup = { distributedData: workload.distributed };
-    if (workload.distributed.master && Object.keys(workload.distributed.master).length) {
-      if (
-        workload.distributed.master.sameAsWorker ||
-        !Object.keys(workload.distributed.master.specificRunParams || {}).length
-      ) {
-        distributedSetup.enableEditingMaster = false;
-      } else {
-        // if we have data which is specific for master we make enableEditingMaster true by default
-        distributedSetup.enableEditingMaster = true;
-      }
-    } else {
-      distributedSetup.noMaster = true;
-    }
-  }
-
-  return _getWorkloadUI(workloadMeta, assets, specificEnv, uiVolumes, distributedSetup);
-}
-
-function _getWorkloadUI(
-  meta: IWorkloadMeta,
-  assets: AssetsIds,
-  specificEnv: SpecificRunParams = {},
-  uiVolumes?: Array<IUIVolume>,
-  distributedSetup?: IUIDistributedUISetup,
-): IUIWorkloadCreation {
-  const workloadUI: IUIWorkloadCreation = {
-    name: meta.name,
-    namespace: meta.namespace,
-    clusterId: meta.clusterId,
-    projectId: meta.projectId,
-    assets: getUIWorkloadAssets(assets, uiVolumes),
-    specificEnv: getUIWorkloadSpecificEnv(specificEnv),
-  };
-
-  if (distributedSetup?.distributedData) {
-    let master: IUIDistributedMaster | null;
-    if (!distributedSetup.distributedData.master || distributedSetup.noMaster) {
-      master = null;
-    } else {
-      master = {
-        assets: getUIWorkloadAssetsRef(distributedSetup.distributedData.master?.assets),
-        specificEnv: getUIWorkloadSpecificEnv(distributedSetup.distributedData.master?.specificRunParams || {}),
-      };
-    }
-
-    workloadUI.distributed = {
-      numWorkers: distributedSetup.distributedData.numWorkers,
-      distFramework: distributedSetup.distributedData.framework,
-      master,
-      noMaster: distributedSetup.noMaster,
-    };
-
-    workloadUI.enableEditingMaster = distributedSetup.enableEditingMaster;
-  }
-
-  return workloadUI;
-}
-
-function _emptyConnectionsCustomInfo(connections: Array<SpecificRunConnectionInfo>): Array<SpecificRunConnectionInfo> {
-  return connections.map((connection: SpecificRunConnectionInfo) => {
-    if (connection.nodePort) {
-      return {
-        ...connection,
-        nodePort: null,
-      };
-    } else if (connection.externalUrl) {
-      return {
-        ...connection,
-        externalUrl: null,
-      };
-    }
-    return connection;
   });
 }
 
@@ -642,21 +280,6 @@ function _isTrainingList(workload: any): workload is ITrainingList {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function _isWorkspaceV2(workload: any): workload is WorkspaceV2 {
-  return workload.meta.workloadId !== undefined;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function _isTrainingV2(workload: any): workload is TrainingV2 {
-  return workload.meta.workloadId !== undefined;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function _isInferenceV2(workload: any): workload is InferenceV2 | ModelInferenceV2 {
-  return workload.meta.workloadId !== undefined;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function _isHybridWorkload(workload: any): workload is Workspace | Training {
   return workload.workloadId !== undefined;
 }
@@ -666,21 +289,7 @@ function isPhaseUpdateRecordType(historyRecord: HistoryRecord): boolean {
 }
 
 function convertToWorkload(
-  workload:
-    | Workload
-    | IWorkspaceList
-    | ITrainingList
-    | WorkspaceV2
-    | TrainingV2
-    | IInferenceList
-    | Inference
-    | InferenceV2
-    | ModelInference
-    | ModelInferenceV2
-    | Workspace
-    | Training
-    | WorkloadV2,
-  workloadType?: EWorkloadType,
+  workload: Workload | IWorkspaceList | ITrainingList | Workspace | Training | WorkloadV2,
 ): Workload {
   if (_isHybridWorkload(workload)) {
     return _convertHybridToWorkload(workload);
@@ -688,46 +297,11 @@ function convertToWorkload(
     return workload;
   } else if (_isWorkloadV2(workload)) {
     return _convertWorkloadV2ToWorkload(workload);
-  } else if (workloadType === EWorkloadType.Inference) {
-    return _isInferenceV2(workload)
-      ? _convertWorkloadMetaToWorkload(workload.meta)
-      : _convertInferenceV1WorkloadToWorkload(workload as Inference | ModelInference);
-  } else if (_isWorkspaceV2(workload) || _isTrainingV2(workload) || _isInferenceV2(workload)) {
-    return _convertWorkloadMetaToWorkload(workload.meta);
   } else if (_isTrainingList(workload) || _isWorkspaceList(workload)) {
     return _convertDisplayedJobToWorkload(workload.job as DisplayedJob);
   } else {
     throw new Error(`Failed to convert workload to Workload ${workload}`);
   }
-}
-
-function _convertInferenceV1WorkloadToWorkload(workload: Inference | ModelInference): Workload {
-  return {
-    category: EWorkloadCategory.Inference,
-    priority: null,
-    source: Source.ControlPlane,
-    conditions: [{ status: "", type: "", lastTransitionTime: null }],
-    priorityClassName: "",
-    type: String(EWorkloadType.Inference),
-    name: workload.meta.name,
-    id: workload.meta.id,
-    clusterId: workload.meta.clusterId,
-    projectName: "",
-    projectId: String(workload.meta.projectId),
-    departmentName: "",
-    departmentId: "",
-    namespace: "",
-    createdAt: "",
-    phase: Phase.Creating,
-    k8sPhase: "",
-    tenantId: 0,
-    runningPods: 0,
-    phaseUpdatedAt: "",
-    k8sPhaseUpdatedAt: "",
-    updatedAt: "",
-    deletedAt: null,
-    submittedBy: workload.meta.createdBy,
-  };
 }
 
 function _isWorkloadV2(workload: unknown): workload is WorkloadV2 {
@@ -790,35 +364,6 @@ function _convertDisplayedJobToWorkload(displayedJob: DisplayedJob): Workload {
     updatedAt: "",
     deletedAt: null,
     submittedBy: displayedJob.user,
-  };
-}
-
-function _convertWorkloadMetaToWorkload(workloadMeta: WorkloadMeta): Workload {
-  return {
-    category: EWorkloadCategory.Workspace,
-    priority: null,
-    phase: Phase.Creating,
-    id: workloadMeta.workloadId,
-    name: workloadMeta.name,
-    clusterId: workloadMeta.clusterId,
-    createdAt: workloadMeta.createdAt,
-    departmentId: workloadMeta.departmentId || "",
-    projectId: workloadMeta.projectId,
-    submittedBy: workloadMeta.createdBy,
-    conditions: [],
-    deletedAt: null,
-    departmentName: "",
-    k8sPhase: "",
-    k8sPhaseUpdatedAt: "",
-    namespace: "",
-    phaseUpdatedAt: "",
-    priorityClassName: "",
-    projectName: "",
-    runningPods: 0,
-    source: Source.ControlPlane,
-    tenantId: 0,
-    type: "",
-    updatedAt: "",
   };
 }
 
