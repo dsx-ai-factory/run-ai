@@ -70,12 +70,13 @@ func TestNonSSOMappersWithExistsClients(t *testing.T) {
 	reconcilerHelperMock.On("ReconcileClient", context.Background(), mock.Anything, mock.Anything).Return(nil)
 	reconcilerHelperMock.On("DeleteClientIfExists", context.Background(), realmName, utils.RUNAI_CLIENT_ID).Return(nil)
 	reconcilerHelperMock.On("DisableClientIfExists", context.Background(), realmName, utils.KEYCLOAK_ADMIN_CLI_CLIENT_ID).Return(nil)
+	reconcilerHelperMock.On("DeleteClientIfExists", context.Background(), realmName, utils.RUNAI_CLI_CLIENT_ID).Return(nil)
 
 	err := testSubject.Reconcile(context.Background(), realmName, true)
 	assert.Nil(t, err)
 	tenantResolverMock.AssertNumberOfCalls(t, "GetRealmTenantId", 1)
 	reconcilerHelperMock.AssertNumberOfCalls(t, "ReconcileClient", len(clients))
-	reconcilerHelperMock.AssertNumberOfCalls(t, "DeleteClientIfExists", 1)
+	reconcilerHelperMock.AssertNumberOfCalls(t, "DeleteClientIfExists", 2)
 }
 
 func TestNonSSOMappersWithoutPreCreatedTenantIdMapper(t *testing.T) {
@@ -95,13 +96,14 @@ func TestSSOMappersWithExistsClients(t *testing.T) {
 	reconcilerHelperMock.On("ReconcileClient", context.Background(), mock.Anything, mock.Anything).Return(nil)
 	reconcilerHelperMock.On("DeleteClientIfExists", context.Background(), realmName, utils.RUNAI_CLIENT_ID).Return(nil)
 	reconcilerHelperMock.On("DisableClientIfExists", context.Background(), realmName, utils.KEYCLOAK_ADMIN_CLI_CLIENT_ID).Return(nil)
+	reconcilerHelperMock.On("DeleteClientIfExists", context.Background(), realmName, utils.RUNAI_CLI_CLIENT_ID).Return(nil)
 
 	err := testSubject.Reconcile(context.Background(), realmName, true)
 	assert.Nil(t, err)
 
 	tenantResolverMock.AssertNumberOfCalls(t, "GetRealmTenantId", 1)
 	reconcilerHelperMock.AssertNumberOfCalls(t, "ReconcileClient", len(clients))
-	reconcilerHelperMock.AssertNumberOfCalls(t, "DeleteClientIfExists", 1)
+	reconcilerHelperMock.AssertNumberOfCalls(t, "DeleteClientIfExists", 2)
 }
 
 func TestReconcileDefaultClients_DeleteClientIfExistsError(t *testing.T) {
@@ -126,6 +128,7 @@ func TestReconcileDoesNotManageSharedInstallerClient(t *testing.T) {
 	reconcilerHelperMock.On("ReconcileClient", context.Background(), mock.Anything, mock.Anything).Return(nil)
 	reconcilerHelperMock.On("DeleteClientIfExists", context.Background(), realmName, utils.RUNAI_CLIENT_ID).Return(nil)
 	reconcilerHelperMock.On("DisableClientIfExists", context.Background(), realmName, utils.KEYCLOAK_ADMIN_CLI_CLIENT_ID).Return(nil)
+	reconcilerHelperMock.On("DeleteClientIfExists", context.Background(), realmName, utils.RUNAI_CLI_CLIENT_ID).Return(nil)
 
 	err := testSubject.Reconcile(context.Background(), realmName, true)
 	assert.Nil(t, err)
@@ -147,6 +150,7 @@ func TestReconcileDisablesAdminCliClient(t *testing.T) {
 	defaultTenantResolverMockSetup(tenantResolverMock, TenantId)
 	reconcilerHelperMock.On("ReconcileClient", context.Background(), mock.Anything, mock.Anything).Return(nil)
 	reconcilerHelperMock.On("DeleteClientIfExists", context.Background(), realmName, utils.RUNAI_CLIENT_ID).Return(nil)
+	reconcilerHelperMock.On("DeleteClientIfExists", context.Background(), realmName, utils.RUNAI_CLI_CLIENT_ID).Return(nil)
 	reconcilerHelperMock.On("DisableClientIfExists", context.Background(), realmName, utils.KEYCLOAK_ADMIN_CLI_CLIENT_ID).Return(nil)
 
 	err := testSubject.Reconcile(context.Background(), realmName, true)
@@ -162,6 +166,7 @@ func TestReconcileAdminCliDisableFailureDoesNotFailReconcile(t *testing.T) {
 	defaultTenantResolverMockSetup(tenantResolverMock, TenantId)
 	reconcilerHelperMock.On("ReconcileClient", context.Background(), mock.Anything, mock.Anything).Return(nil)
 	reconcilerHelperMock.On("DeleteClientIfExists", context.Background(), realmName, utils.RUNAI_CLIENT_ID).Return(nil)
+	reconcilerHelperMock.On("DeleteClientIfExists", context.Background(), realmName, utils.RUNAI_CLI_CLIENT_ID).Return(nil)
 	reconcilerHelperMock.On("DisableClientIfExists", context.Background(), realmName, utils.KEYCLOAK_ADMIN_CLI_CLIENT_ID).Return(errors.New("disable failed"))
 
 	err := testSubject.Reconcile(context.Background(), realmName, true)
@@ -175,6 +180,7 @@ func TestReconcileNeverDisablesAdminCliInMasterRealm(t *testing.T) {
 	defaultTenantResolverMockSetup(tenantResolverMock, TenantId)
 	reconcilerHelperMock.On("ReconcileClient", context.Background(), mock.Anything, mock.Anything).Return(nil)
 	reconcilerHelperMock.On("DeleteClientIfExists", context.Background(), utils.MASTER_REALM, utils.RUNAI_CLIENT_ID).Return(nil)
+	reconcilerHelperMock.On("DeleteClientIfExists", context.Background(), utils.MASTER_REALM, utils.RUNAI_CLI_CLIENT_ID).Return(nil)
 
 	err := testSubject.Reconcile(context.Background(), utils.MASTER_REALM, true)
 	assert.Nil(t, err)
