@@ -269,6 +269,45 @@ var _ = Describe("Inference routing (endpoints path)", func() {
 		Expect(access.Message).To(HaveSuffix(", url: https://" + testInferenceHost + "/"))
 	})
 
+	It("keeps a protected endpoint unchanged on the next reconcile", func() {
+		runner = runnerFromEndpoints(inferenceEndpointConfig(true, 8000, inferenceTestBlock()))
+		runner.Generation = 2
+		Expect(reconcileRunner()).To(Succeed())
+		obj, err := getInferenceEndpoint()
+		Expect(err).NotTo(HaveOccurred())
+		rv := obj.GetResourceVersion()
+
+		// The proxy's ownership check now passes through the InferenceEndpoint on
+		// every reconcile; a failure there would delete the endpoint.
+		state = reconcile.New()
+		Expect(reconcileRunner()).To(Succeed())
+		Expect(state.PluginIssues(plugin)).To(BeEmpty())
+		again, err := getInferenceEndpoint()
+		Expect(err).NotTo(HaveOccurred())
+		Expect(again.GetResourceVersion()).To(Equal(rv))
+		expectInferenceAuthProxy("llama-chat-leader-auth-proxy")
+	})
+
+	It("adds and removes the auth proxy on the InferenceEndpoint when auth changes", func() {
+		authProxy := func() map[string]any {
+			obj, err := getInferenceEndpoint()
+			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+			proxy, _, err := unstructured.NestedMap(obj.Object, "spec", "routing", "authProxy")
+			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+			return proxy
+		}
+		Expect(reconcileRunner()).To(Succeed())
+		Expect(authProxy()).To(BeNil())
+
+		setRunnerEndpoints(runner, inferenceEndpointConfig(true, 8000, inferenceTestBlock()))
+		Expect(reconcileRunner()).To(Succeed())
+		expectInferenceAuthProxy("llama-chat-leader-auth-proxy")
+
+		setRunnerEndpoints(runner, inferenceEndpointConfig(false, 8000, inferenceTestBlock()))
+		Expect(reconcileRunner()).To(Succeed())
+		Expect(authProxy()).To(BeNil(), "the route goes back to the InferencePool")
+	})
+
 	It("does not route a protected endpoint to an auth proxy Service it does not own", func() {
 		runner = runnerFromEndpoints(inferenceEndpointConfig(true, 8000, inferenceTestBlock()))
 		runner.Generation = 2
