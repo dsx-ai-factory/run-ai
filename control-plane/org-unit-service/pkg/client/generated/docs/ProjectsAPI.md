@@ -12,7 +12,6 @@ Method | HTTP request | Description
 [**DeleteProject**](ProjectsAPI.md#DeleteProject) | **Delete** /api/v1/org-unit/projects/{projectId} | Delete project
 [**GetInternalProjectsTelemetry**](ProjectsAPI.md#GetInternalProjectsTelemetry) | **Get** /internal/org-unit/projects/telemetry | Get internal projects telemetry
 [**GetProject**](ProjectsAPI.md#GetProject) | **Get** /api/v1/org-unit/projects/{projectId} | Get project
-[**GetProjectAccelerators**](ProjectsAPI.md#GetProjectAccelerators) | **Get** /api/v1/org-unit/projects/{projectId}/accelerators | List accelerator resources and models accessible to a project
 [**GetProjectAncestors**](ProjectsAPI.md#GetProjectAncestors) | **Get** /internal/org-unit/projects/{projectId}/ancestors | Get project ancestors
 [**GetProjectMetrics**](ProjectsAPI.md#GetProjectMetrics) | **Get** /api/v1/org-unit/projects/{projectId}/metrics | Get project metrics data.
 [**GetProjectNodePoolResources**](ProjectsAPI.md#GetProjectNodePoolResources) | **Get** /api/v1/org-unit/projects/node-pool-resources | Get projects node pool resources
@@ -186,7 +185,7 @@ import (
 )
 
 func main() {
-	filterBy := []string{"Inner_example"} // []string | Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!=-1 matches only org units with a GPU limit. (optional)
+	filterBy := []string{"Inner_example"} // []string | Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=. gpuAccessible==true selects pools where the project and its parent department allow GPU use. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!=-1 matches only org units with a GPU limit. (optional)
 	search := "test project" // string | Filter results by a free text search. (optional)
 
 	configuration := openapiclient.NewConfiguration()
@@ -212,7 +211,7 @@ Other parameters are passed through a pointer to a apiCountProjectNodePoolResour
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **filterBy** | **[]string** | Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit. | 
+ **filterBy** | **[]string** | Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuAccessible&#x3D;&#x3D;true selects pools where the project and its parent department allow GPU use. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit. |
  **search** | **string** | Filter results by a free text search. | 
 
 ### Return type
@@ -587,82 +586,6 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
-## GetProjectAccelerators
-
-> ProjectAccelerators GetProjectAccelerators(ctx, projectId).ResourceName(resourceName).DeviceLabelKey(deviceLabelKey).GpuType(gpuType).Execute()
-
-List accelerator resources and models accessible to a project
-
-
-
-### Example
-
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"os"
-	openapiclient "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
-)
-
-func main() {
-	projectId := "575c19e8-c7c3-45b0-8290-2f47397a8383" // string | The project id
-	resourceName := "resourceName_example" // string | With deviceLabelKey and gpuType, check only this exact accelerator selection. (optional)
-	deviceLabelKey := "deviceLabelKey_example" // string | Exact node label key to check, including administrator-defined keys. (optional)
-	gpuType := "gpuType_example" // string | Exact device label value to check. Supply all three parameters for an exact lookup. (optional)
-
-	configuration := openapiclient.NewConfiguration()
-	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.ProjectsAPI.GetProjectAccelerators(context.Background(), projectId).ResourceName(resourceName).DeviceLabelKey(deviceLabelKey).GpuType(gpuType).Execute()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `ProjectsAPI.GetProjectAccelerators``: %v\n", err)
-		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
-	}
-	// response from `GetProjectAccelerators`: ProjectAccelerators
-	fmt.Fprintf(os.Stdout, "Response from `ProjectsAPI.GetProjectAccelerators`: %v\n", resp)
-}
-```
-
-### Path Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**projectId** | **string** | The project id | 
-
-### Other Parameters
-
-Other parameters are passed through a pointer to a apiGetProjectAcceleratorsRequest struct via the builder pattern
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-
- **resourceName** | **string** | With deviceLabelKey and gpuType, check only this exact accelerator selection. | 
- **deviceLabelKey** | **string** | Exact node label key to check, including administrator-defined keys. | 
- **gpuType** | **string** | Exact device label value to check. Supply all three parameters for an exact lookup. | 
-
-### Return type
-
-[**ProjectAccelerators**](ProjectAccelerators.md)
-
-### Authorization
-
-[bearerAuth](../README.md#bearerAuth)
-
-### HTTP request headers
-
-- **Content-Type**: Not defined
-- **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
 ## GetProjectAncestors
 
 > Ancestors GetProjectAncestors(ctx, projectId).Execute()
@@ -835,7 +758,7 @@ import (
 )
 
 func main() {
-	filterBy := []string{"Inner_example"} // []string | Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!=-1 matches only org units with a GPU limit. (optional)
+	filterBy := []string{"Inner_example"} // []string | Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=. gpuAccessible==true selects pools where the project and its parent department allow GPU use. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!=-1 matches only org units with a GPU limit. (optional)
 	sortBy := openapiclient.ProjectNodePoolResourcesFilterSortFields("nodePoolName") // ProjectNodePoolResourcesFilterSortFields | Sort results by a parameters. (optional)
 	sortOrder := "sortOrder_example" // string | Sort results in descending or ascending order. (optional) (default to "asc")
 	offset := int32(100) // int32 | The offset of the first item returned in the collection. (optional)
@@ -865,7 +788,7 @@ Other parameters are passed through a pointer to a apiGetProjectNodePoolResource
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **filterBy** | **[]string** | Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit. | 
+ **filterBy** | **[]string** | Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuAccessible&#x3D;&#x3D;true selects pools where the project and its parent department allow GPU use. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit. |
  **sortBy** | [**ProjectNodePoolResourcesFilterSortFields**](ProjectNodePoolResourcesFilterSortFields.md) | Sort results by a parameters. | 
  **sortOrder** | **string** | Sort results in descending or ascending order. | [default to &quot;asc&quot;]
  **offset** | **int32** | The offset of the first item returned in the collection. | 

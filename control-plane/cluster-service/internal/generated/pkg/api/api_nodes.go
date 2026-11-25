@@ -262,14 +262,14 @@ func (c *NodesAPIController) Routes() Routes {
 			),
 			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
 		},
-		"GetNodePoolAccelerators": Route{
+		"MatchGpuPlacement": Route{
 			strings.ToUpper("Post"),
-			"/internal/clusters/{clusterUuid}/accelerators",
+			"/internal/clusters/{clusterUuid}/gpu-placement/match",
 			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
 			BuildHandlerChain(
 				func(next http.HandlerFunc) http.HandlerFunc {
 					////////////////////////////// RUNAI END (11.4) ///////////////////////////////
-					return c.GetNodePoolAccelerators
+					return c.MatchGpuPlacement
 					////////////////////////////// RUNAI START (11.5) ///////////////////////////////
 				},
 			),
@@ -875,14 +875,14 @@ func (c *NodesAPIController) SyncNumaNodes(w http.ResponseWriter, r *http.Reques
 
 }
 
-// GetNodePoolAccelerators - Get accelerator inventory for the supplied node pools
-func (c *NodesAPIController) GetNodePoolAccelerators(w http.ResponseWriter, r *http.Request) {
+// MatchGpuPlacement - Check whether any node in the supplied pools matches the placement labels
+func (c *NodesAPIController) MatchGpuPlacement(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
 		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
-	var nodePoolAcceleratorsRequestParam NodePoolAcceleratorsRequest
+	var gpuPlacementMatchParam GpuPlacementMatch
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
 	// payloadBody is a per-request local slice, never a shared controller field,
 	// so concurrent requests on the singleton controller cannot race on it.
@@ -897,19 +897,19 @@ func (c *NodesAPIController) GetNodePoolAccelerators(w http.ResponseWriter, r *h
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
-	if err := d.Decode(&nodePoolAcceleratorsRequestParam); err != nil {
+	if err := d.Decode(&gpuPlacementMatchParam); err != nil {
 		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
-	if err := AssertNodePoolAcceleratorsRequestRequired(nodePoolAcceleratorsRequestParam); err != nil {
+	if err := AssertGpuPlacementMatchRequired(gpuPlacementMatchParam); err != nil {
 		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
-	if err := AssertNodePoolAcceleratorsRequestConstraints(nodePoolAcceleratorsRequestParam); err != nil {
+	if err := AssertGpuPlacementMatchConstraints(gpuPlacementMatchParam); err != nil {
 		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
-	result, err := c.service.GetNodePoolAccelerators(r.Context(), clusterUuidParam, nodePoolAcceleratorsRequestParam)
+	result, err := c.service.MatchGpuPlacement(r.Context(), clusterUuidParam, gpuPlacementMatchParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)

@@ -968,10 +968,11 @@ paths:
           $ref: '#/components/responses/403Forbidden'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
-  /internal/clusters/{clusterUuid}/accelerators:
+  /internal/clusters/{clusterUuid}/gpu-placement/match:
     x-internal: true
     post:
-      summary: Get accelerator inventory for the supplied node pools
+      summary: Check whether any node in the supplied pools matches the placement labels
+      operationId: match_gpu_placement
       x-internal: true
       x-no-authorization: true
       x-service: cluster-service
@@ -979,7 +980,6 @@ paths:
         - control-plane/cluster-service/pkg/services/api_nodepools_gpu_types_test.go
       tags:
         - Nodes
-      operationId: get_node_pool_accelerators
       parameters:
         - $ref: '#/components/parameters/ClusterUuid'
       requestBody:
@@ -987,14 +987,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NodePoolAcceleratorsRequest'
+              $ref: '#/components/schemas/GpuPlacementMatch'
       responses:
         '200':
-          description: Accelerator inventory for the requested pools
+          description: Whether a node matches all requested labels
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectAccelerators'
+                type: boolean
         '400':
           $ref: '#/components/responses/400BadRequest'
         '500':
@@ -3790,12 +3790,6 @@ components:
         - nodePool
         - createdAt
       properties:
-        acceleratorResources:
-          writeOnly: true
-          type: array
-          description: Positive Kubernetes extended resources used to match project accelerator selections.
-          items:
-            type: string
         labels:
           writeOnly: true
           type: object
@@ -4775,70 +4769,21 @@ components:
           $ref: '#/components/schemas/SchedulingCapabilities'
         gpuTypes:
           $ref: '#/components/schemas/NodepoolGpuTypes'
-    AcceleratorSelection:
-      type: object
-      nullable: true
-      required:
-        - resourceName
-        - deviceLabelKey
-        - gpuType
-      properties:
-        resourceName:
-          type: string
-          minLength: 1
-        deviceLabelKey:
-          type: string
-          minLength: 1
-        gpuType:
-          type: string
-          minLength: 1
-    NodePoolAcceleratorsRequest:
+    GpuPlacementMatch:
       type: object
       required:
         - nodePoolIds
+        - labels
       properties:
         nodePoolIds:
           type: array
-          description: IDs of node pools assigned to the project.
           items:
             type: string
-        selection:
-          $ref: '#/components/schemas/AcceleratorSelection'
-    AcceleratorDevice:
-      type: object
-      required:
-        - key
-        - value
-      properties:
-        key:
-          type: string
-          description: Exact Kubernetes node label key for this device model.
-        value:
-          type: string
-          description: Exact Kubernetes node label value for this device model.
-    AcceleratorOption:
-      type: object
-      required:
-        - resourceName
-        - devices
-      properties:
-        resourceName:
-          type: string
-          description: Allocatable Kubernetes extended resource name.
-        devices:
-          type: array
-          description: Model selectors observed alongside this resource on the same node.
-          items:
-            $ref: '#/components/schemas/AcceleratorDevice'
-    ProjectAccelerators:
-      type: object
-      required:
-        - items
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/AcceleratorOption'
+        labels:
+          type: object
+          minProperties: 1
+          additionalProperties:
+            type: string
     NetworkTopologyLabelValuesOptional:
       type: array
       items:

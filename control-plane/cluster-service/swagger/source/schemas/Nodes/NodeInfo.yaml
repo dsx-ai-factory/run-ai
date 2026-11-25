@@ -4,12 +4,6 @@ required:
   - nodePool
   - createdAt
 properties:
-  acceleratorResources:
-    writeOnly: true
-    type: array
-    description: Positive Kubernetes extended resources used to match project accelerator selections.
-    items:
-      type: string
   labels:
     writeOnly: true
     type: object

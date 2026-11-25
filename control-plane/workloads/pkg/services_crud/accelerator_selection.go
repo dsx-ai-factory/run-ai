@@ -10,10 +10,11 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 
-	orgapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/clusterservice"
 	orgunit "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/org_unit"
 	clusterconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 )
@@ -28,11 +29,10 @@ type acceleratorSpec interface {
 	GetGpuTypeOk() (*string, bool)
 	UnsetGpuType()
 	GetAcceleratorOk() (*workloadsApi.AcceleratorSelection, bool)
-	SetAccelerator(workloadsApi.AcceleratorSelection)
 	UnsetAccelerator()
 }
 
-func resolveWorkloadAccelerators(ctx context.Context, projectID string, spec *workloadsApi.SupersetSpec, master *workloadsApi.MasterSpec) ([]workloadsApi.SubmissionWarning, *workloadsApi.SubmissionErrorV2) {
+func resolveWorkloadAccelerators(ctx context.Context, projectID, clusterID string, spec *workloadsApi.SupersetSpec, master *workloadsApi.MasterSpec) ([]workloadsApi.SubmissionWarning, *workloadsApi.SubmissionErrorV2) {
 	if spec == nil {
 		return nil, nil
 	}
@@ -51,8 +51,9 @@ func resolveWorkloadAccelerators(ctx context.Context, projectID string, spec *wo
 		roles = append(roles, roleSpec{"spec.worker", worker})
 	}
 	var warnings []workloadsApi.SubmissionWarning
-	var inventory *orgapi.ProjectAccelerators
-	loaded := false
+	getPools := sync.OnceValues(func() ([]string, error) {
+		return orgunit.Get().GetProjectGPUPoolIDs(ctx, projectID)
+	})
 	for _, role := range roles {
 		model := ""
 		if value, _ := role.spec.GetGpuTypeOk(); value != nil {
@@ -63,7 +64,7 @@ func resolveWorkloadAccelerators(ctx context.Context, projectID string, spec *wo
 		}
 		selection, _ := role.spec.GetAcceleratorOk()
 		if selection != nil {
-			// Validate explicit fields before an omitted model or an inferred key can replace them.
+			// Validate explicit fields before clearing an unused model key.
 			if _, _, err := composer.ResolveGPUSelection(nil, selection); err != nil {
 				return nil, workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, role.field+"."+err.Message)
 			}
@@ -79,128 +80,39 @@ func resolveWorkloadAccelerators(ctx context.Context, projectID string, spec *wo
 			}
 			selection.UnsetDeviceLabelKey()
 		}
-		if !loaded {
-			var inventoryErr *orgapi.Error
-			inventory, inventoryErr = orgunit.Get().GetProjectAccelerators(ctx, projectID)
-			if inventoryErr != nil {
-				inventory = nil
-			}
-			loaded = true
+		var modelValue *string
+		if model != "" {
+			modelValue = &model
 		}
-		warning, err := resolveAccelerator(role.field, role.spec, selection, model, inventory)
-		if err != nil {
-			return nil, workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, err.Error())
+		resource, requirement, validationErr := composer.ResolveGPUSelection(modelValue, selection)
+		if validationErr != nil {
+			return nil, workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, role.field+"."+validationErr.Message)
 		}
-		if warning == nil {
-			continue
+		labels := map[string]string{clusterconstants.AcceleratorResourceNodeLabel(resource): "true"}
+		warning := workloadsApi.SubmissionWarning{Field: role.field + ".accelerator.resourceName", Code: gpuTypeNotFound,
+			Message: fmt.Sprintf("Resource %s was not found in the project's accessible pools.", resource)}
+		if requirement != nil {
+			warning.Field = role.field + ".gpuType"
+			warning.Message = fmt.Sprintf("No %s with label %s=%s was found in the project's accessible pools.", resource, requirement.Key, model)
+			if existing, ok := labels[requirement.Key]; ok && existing != model {
+				warnings = append(warnings, warning)
+				continue
+			}
+			labels[requirement.Key] = model
 		}
-		// The picker only lists identifiable GPUs. An explicit selection may
-		// refer to a different extended resource or a custom model label.
-		if warning.Code == gpuTypeNotFound && selection != nil && (model == "" || selection.GetDeviceLabelKey() != "") {
-			resource := selection.GetResourceName()
-			if resource == "" {
-				resource = composer.NvidiaResourceName
-			}
-			key, value := selection.GetDeviceLabelKey(), model
-			if model == "" {
-				key, value = clusterconstants.AcceleratorResourceNodeLabel(resource), "true"
-			}
-			match, lookupErr := orgunit.Get().MatchProjectAccelerator(ctx, projectID, resource, key, value)
-			if lookupErr != nil {
-				warning.Code = gpuInventoryUnavailable
-				warning.Message = unavailableInventoryMessage
-			} else if match {
+		pools, err := getPools()
+		if err == nil && len(pools) != 0 {
+			var matches bool
+			matches, err = clusterservice.Get().MatchGPUPlacement(ctx, clusterID, pools, labels)
+			if err == nil && matches {
 				continue
 			}
 		}
-		warnings = append(warnings, *warning)
+		if err != nil {
+			warning.Code = gpuInventoryUnavailable
+			warning.Message = unavailableInventoryMessage
+		}
+		warnings = append(warnings, warning)
 	}
 	return warnings, nil
-}
-
-func resolveAccelerator(field string, spec acceleratorSpec, selection *workloadsApi.AcceleratorSelection, model string, inventory *orgapi.ProjectAccelerators) (*workloadsApi.SubmissionWarning, error) {
-	resourceName := composer.NvidiaResourceName
-	if selection != nil && selection.ResourceName.Get() != nil {
-		resourceName = selection.GetResourceName()
-	}
-	key := selection.GetDeviceLabelKey()
-	var option *orgapi.AcceleratorOption
-	if inventory != nil {
-		for i := range inventory.Items {
-			if inventory.Items[i].ResourceName == resourceName {
-				option = &inventory.Items[i]
-				break
-			}
-		}
-	}
-	if model != "" && key == "" && resourceName != composer.NvidiaResourceName {
-		key = discoveredDeviceLabelKey(option, model)
-		if key == "" {
-			return nil, fmt.Errorf("%s.accelerator.deviceLabelKey is required because the label key for %q on %s cannot be determined", field, model, resourceName)
-		}
-		selection.SetDeviceLabelKey(key)
-		spec.SetAccelerator(*selection)
-	}
-	var modelValue *string
-	if model != "" {
-		modelValue = &model
-	}
-	_, predicate, validationErr := composer.ResolveGPUSelection(modelValue, selection)
-	if validationErr != nil {
-		return nil, fmt.Errorf("%s: %s", field, validationErr.Message)
-	}
-	modelSeen := false
-	if predicate != nil {
-		key = predicate.Key
-		if option != nil {
-			for _, device := range option.Devices {
-				if device.Key == key && device.Value == model {
-					modelSeen = true
-					break
-				}
-			}
-		}
-	}
-	warning := workloadsApi.SubmissionWarning{Field: field + ".accelerator.resourceName"}
-	if model != "" {
-		warning.Field = field + ".gpuType"
-	}
-	switch {
-	case inventory == nil:
-		warning.Code = gpuInventoryUnavailable
-		warning.Message = unavailableInventoryMessage
-	case option == nil || model != "" && !modelSeen:
-		warning.Code = gpuTypeNotFound
-		warning.Message = fmt.Sprintf("Resource %s was not found in the project's accessible pools.", resourceName)
-		if model != "" {
-			warning.Message = fmt.Sprintf("No %s with label %s=%s was found in the project's accessible pools.", resourceName, key, model)
-		}
-	default:
-		return nil, nil
-	}
-	return &warning, nil
-}
-
-// Prefer evidence for the exact model. A resource with one observed product label
-// also provides an unambiguous key for a model that has not appeared in inventory yet.
-func discoveredDeviceLabelKey(option *orgapi.AcceleratorOption, model string) string {
-	if option == nil {
-		return ""
-	}
-	all, matching := map[string]bool{}, map[string]bool{}
-	for _, device := range option.Devices {
-		all[device.Key] = true
-		if device.Value == model {
-			matching[device.Key] = true
-		}
-	}
-	if len(matching) > 0 {
-		all = matching
-	}
-	if len(all) == 1 {
-		for key := range all {
-			return key
-		}
-	}
-	return ""
 }

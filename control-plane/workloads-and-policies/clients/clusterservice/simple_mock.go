@@ -236,3 +236,7 @@ func (smc *SimpleMock) WithNodeNetworkTopologyLabelValues(clusterUuid string, no
 	smc.nodeNetworkTopologyLabelValues[clusterUuid][nodeName] = labels
 	return smc
 }
+
+func (smc *SimpleMock) MatchGPUPlacement(ctx context.Context, clusterID string, poolIDs []string, labels map[string]string) (bool, error) {
+	return false, nil
+}

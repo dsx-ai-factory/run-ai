@@ -1,9 +1,0 @@
-type: object
-required: [key, value]
-properties:
-  key:
-    type: string
-    description: Exact Kubernetes node label key for this device model.
-  value:
-    type: string
-    description: Exact Kubernetes node label value for this device model.

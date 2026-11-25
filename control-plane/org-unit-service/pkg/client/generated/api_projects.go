@@ -143,21 +143,6 @@ type ProjectsAPI interface {
 	GetProjectExecute(r ApiGetProjectRequest) (*Project, *http.Response, error)
 
 	/*
-		GetProjectAccelerators List accelerator resources and models accessible to a project
-
-		List observed accelerator resources and model selectors across the project's assigned node pools. Includes busy devices.
-
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param projectId The project id
-		@return ApiGetProjectAcceleratorsRequest
-	*/
-	GetProjectAccelerators(ctx context.Context, projectId string) ApiGetProjectAcceleratorsRequest
-
-	// GetProjectAcceleratorsExecute executes the request
-	//  @return ProjectAccelerators
-	GetProjectAcceleratorsExecute(r ApiGetProjectAcceleratorsRequest) (*ProjectAccelerators, *http.Response, error)
-
-	/*
 		GetProjectAncestors Get project ancestors
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -701,7 +686,7 @@ type ApiCountProjectNodePoolResourcesRequest struct {
 	search     *string
 }
 
-// Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
+// Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuAccessible&#x3D;&#x3D;true selects pools where the project and its parent department allow GPU use. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
 func (r ApiCountProjectNodePoolResourcesRequest) FilterBy(filterBy []string) ApiCountProjectNodePoolResourcesRequest {
 	r.filterBy = &filterBy
 	return r
@@ -1731,195 +1716,6 @@ func (a *ProjectsAPIService) GetProjectExecute(r ApiGetProjectRequest) (*Project
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiGetProjectAcceleratorsRequest struct {
-	ctx            context.Context
-	ApiService     ProjectsAPI
-	projectId      string
-	resourceName   *string
-	deviceLabelKey *string
-	gpuType        *string
-}
-
-// With deviceLabelKey and gpuType, check only this exact accelerator selection.
-func (r ApiGetProjectAcceleratorsRequest) ResourceName(resourceName string) ApiGetProjectAcceleratorsRequest {
-	r.resourceName = &resourceName
-	return r
-}
-
-// Exact node label key to check, including administrator-defined keys.
-func (r ApiGetProjectAcceleratorsRequest) DeviceLabelKey(deviceLabelKey string) ApiGetProjectAcceleratorsRequest {
-	r.deviceLabelKey = &deviceLabelKey
-	return r
-}
-
-// Exact device label value to check. Supply all three parameters for an exact lookup.
-func (r ApiGetProjectAcceleratorsRequest) GpuType(gpuType string) ApiGetProjectAcceleratorsRequest {
-	r.gpuType = &gpuType
-	return r
-}
-
-func (r ApiGetProjectAcceleratorsRequest) Execute() (*ProjectAccelerators, *http.Response, error) {
-	return r.ApiService.GetProjectAcceleratorsExecute(r)
-}
-
-/*
-GetProjectAccelerators List accelerator resources and models accessible to a project
-
-List observed accelerator resources and model selectors across the project's assigned node pools. Includes busy devices.
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param projectId The project id
-	@return ApiGetProjectAcceleratorsRequest
-*/
-func (a *ProjectsAPIService) GetProjectAccelerators(ctx context.Context, projectId string) ApiGetProjectAcceleratorsRequest {
-	return ApiGetProjectAcceleratorsRequest{
-		ApiService: a,
-		ctx:        ctx,
-		projectId:  projectId,
-	}
-}
-
-// Execute executes the request
-//  @return ProjectAccelerators
-///////// RUNAI (remove isResponseFile filter on pointer)//////////
-func (a *ProjectsAPIService) GetProjectAcceleratorsExecute(r ApiGetProjectAcceleratorsRequest) (*ProjectAccelerators, *http.Response, error) {
-	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ProjectAccelerators
-	)
-	///////////////////////////
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProjectsAPIService.GetProjectAccelerators")
-	if err != nil {
-		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/api/v1/org-unit/projects/{projectId}/accelerators"
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-
-	if r.resourceName != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "resourceName", r.resourceName, "form", "")
-	}
-	if r.deviceLabelKey != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "deviceLabelKey", r.deviceLabelKey, "form", "")
-	}
-	if r.gpuType != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "gpuType", r.gpuType, "form", "")
-	}
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 401 {
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 403 {
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 404 {
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 503 {
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-			newErr.model = v
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
-}
-
 type ApiGetProjectAncestorsRequest struct {
 	ctx        context.Context
 	ApiService ProjectsAPI
@@ -2305,7 +2101,7 @@ type ApiGetProjectNodePoolResourcesRequest struct {
 	search     *string
 }
 
-// Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
+// Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuAccessible&#x3D;&#x3D;true selects pools where the project and its parent department allow GPU use. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
 func (r ApiGetProjectNodePoolResourcesRequest) FilterBy(filterBy []string) ApiGetProjectNodePoolResourcesRequest {
 	r.filterBy = &filterBy
 	return r

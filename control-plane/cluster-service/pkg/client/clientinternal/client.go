@@ -370,16 +370,14 @@ func (client *ClusterClient) GetNodeInternal(ctx context.Context, clusterUuid st
 	return client.ApiClient.NodesAPI.GetNodeInternal(ctx, clusterUuid, nodeName).Execute()
 }
 
-func (client *ClusterClient) GetNodePoolAccelerators(ctx context.Context, clusterID string, request openapi.NodePoolAcceleratorsRequest) (*openapi.ProjectAccelerators, error) {
-	result, resp, err := client.ApiClient.NodesAPI.GetNodePoolAccelerators(ctx, clusterID).NodePoolAcceleratorsRequest(request).Execute()
+func (client *ClusterClient) MatchGPUPlacement(ctx context.Context, clusterID string, poolIDs []string, labels map[string]string) (bool, error) {
+	placement := openapi.NewGpuPlacementMatch(poolIDs, labels)
+	matches, resp, err := client.ApiClient.NodesAPI.MatchGpuPlacement(ctx, clusterID).GpuPlacementMatch(*placement).Execute()
 	if resp != nil && resp.Body != nil {
-		defer resp.Body.Close()
+		resp.Body.Close()
 	}
 	if err != nil {
-		return nil, fmt.Errorf("get node pool accelerators: %w", err)
+		return false, err
 	}
-	if result == nil {
-		return nil, errors.New("empty node pool accelerator response")
-	}
-	return result, nil
+	return matches, nil
 }

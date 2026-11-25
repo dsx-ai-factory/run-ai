@@ -330,9 +330,7 @@ To create a new workload:
 
 ### Selecting a GPU model with the API
 
-For typed workspace, training, and inference submissions, list the accelerator resources and model labels available to your project with `GET /api/v1/org-unit/projects/{projectId}/accelerators`. The list includes devices that are currently busy.
-
-To request two H100 GPUs, include the following fields in your workload spec. Use the exact model value from your project’s inventory.
+For typed workspace, training, and inference submissions, use the exact model value from the node pool’s `gpuTypes`. To request two H100 GPUs, include these fields in the workload spec:
 
 ```json
 {
@@ -341,9 +339,9 @@ To request two H100 GPUs, include the following fields in your workload spec. Us
 }
 ```
 
-The default accelerator is `nvidia.com/gpu` and its model label key is `nvidia.com/gpu.product`. Omitting the model allows any model of the requested resource. To clear a previous model on a supported update, set `gpuType` to `any`.
+The default resource is `nvidia.com/gpu` and the default NVIDIA model label is `nvidia.com/gpu.product`. Omit the model to allow any model. On a supported update, set `gpuType` to `any` to clear a previous model.
 
-For another whole-device resource, set `accelerator.resourceName`. When selecting a model, you can supply its node label key with `accelerator.deviceLabelKey`. This is required when project inventory cannot identify a unique key for that model and resource.
+To use a different whole-device resource, set `accelerator.resourceName`, for example `amd.com/gpu`. To select a model on that resource, also set `accelerator.deviceLabelKey` to the node label your cluster uses for that model.
 
 If inventory lacks a requested model and the label key is known, submission returns a warning and preserves the placement requirement. The workload stays Pending until a node with the requested resource, model, and capacity can run it.
 

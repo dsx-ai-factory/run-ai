@@ -2316,9 +2316,9 @@ paths:
       x-test-coverage:
       - e2e/src/test/suites/playwright/serial/regression/node-pools/advancedNodePoolsApi.test.ts
     x-internal: true
-  /internal/clusters/{clusterUuid}/accelerators:
+  /internal/clusters/{clusterUuid}/gpu-placement/match:
     post:
-      operationId: get_node_pool_accelerators
+      operationId: match_gpu_placement
       parameters:
       - description: The Universally Unique Identifier (UUID) of the cluster.
         explode: false
@@ -2335,15 +2335,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NodePoolAcceleratorsRequest'
+              $ref: '#/components/schemas/GpuPlacementMatch'
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectAccelerators'
-          description: Accelerator inventory for the requested pools
+                type: boolean
+          description: Whether a node matches all requested labels
         "400":
           content:
             application/json:
@@ -2362,7 +2362,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: unexpected error
-      summary: Get accelerator inventory for the supplied node pools
+      summary: Check whether any node in the supplied pools matches the placement
+        labels
       tags:
       - Nodes
       x-no-authorization: true
@@ -7486,9 +7487,6 @@ components:
         - reason: KubeletNotReady
           type: type
           message: container runtime status check may not have completed yet
-        acceleratorResources:
-        - acceleratorResources
-        - acceleratorResources
         gpuInfo:
           gpuMemoryBytes: 85899345920
           gpuCount: 0
@@ -7499,12 +7497,6 @@ components:
           key: labels
         status: Ready
       properties:
-        acceleratorResources:
-          description: Positive Kubernetes extended resources used to match project accelerator selections.
-          items:
-            type: string
-          type: array
-          writeOnly: true
         labels:
           additionalProperties:
             type: string
@@ -7610,9 +7602,6 @@ components:
           - reason: KubeletNotReady
             type: type
             message: container runtime status check may not have completed yet
-          acceleratorResources:
-          - acceleratorResources
-          - acceleratorResources
           gpuInfo:
             gpuMemoryBytes: 85899345920
             gpuCount: 0
@@ -7651,9 +7640,6 @@ components:
             - reason: KubeletNotReady
               type: type
               message: container runtime status check may not have completed yet
-            acceleratorResources:
-            - acceleratorResources
-            - acceleratorResources
             gpuInfo:
               gpuMemoryBytes: 85899345920
               gpuCount: 0
@@ -7688,9 +7674,6 @@ components:
             - reason: KubeletNotReady
               type: type
               message: container runtime status check may not have completed yet
-            acceleratorResources:
-            - acceleratorResources
-            - acceleratorResources
             gpuInfo:
               gpuMemoryBytes: 85899345920
               gpuCount: 0
@@ -9006,106 +8989,26 @@ components:
       - id
       - name
       type: object
-    AcceleratorSelection:
-      example:
-        resourceName: resourceName
-        deviceLabelKey: deviceLabelKey
-        gpuType: gpuType
-      nullable: true
-      properties:
-        resourceName:
-          minLength: 1
-          type: string
-        deviceLabelKey:
-          minLength: 1
-          type: string
-        gpuType:
-          minLength: 1
-          type: string
-      required:
-      - deviceLabelKey
-      - gpuType
-      - resourceName
-      type: object
-    NodePoolAcceleratorsRequest:
+    GpuPlacementMatch:
       example:
         nodePoolIds:
         - nodePoolIds
         - nodePoolIds
-        selection:
-          resourceName: resourceName
-          deviceLabelKey: deviceLabelKey
-          gpuType: gpuType
+        labels:
+          key: labels
       properties:
         nodePoolIds:
-          description: IDs of node pools assigned to the project.
           items:
             type: string
           type: array
-        selection:
-          $ref: '#/components/schemas/AcceleratorSelection'
+        labels:
+          additionalProperties:
+            type: string
+          minProperties: 1
+          type: object
       required:
+      - labels
       - nodePoolIds
-      type: object
-    AcceleratorDevice:
-      example:
-        value: value
-        key: key
-      properties:
-        key:
-          description: Exact Kubernetes node label key for this device model.
-          type: string
-        value:
-          description: Exact Kubernetes node label value for this device model.
-          type: string
-      required:
-      - key
-      - value
-      type: object
-    AcceleratorOption:
-      example:
-        devices:
-        - value: value
-          key: key
-        - value: value
-          key: key
-        resourceName: resourceName
-      properties:
-        resourceName:
-          description: Allocatable Kubernetes extended resource name.
-          type: string
-        devices:
-          description: Model selectors observed alongside this resource on the same
-            node.
-          items:
-            $ref: '#/components/schemas/AcceleratorDevice'
-          type: array
-      required:
-      - devices
-      - resourceName
-      type: object
-    ProjectAccelerators:
-      example:
-        items:
-        - devices:
-          - value: value
-            key: key
-          - value: value
-            key: key
-          resourceName: resourceName
-        - devices:
-          - value: value
-            key: key
-          - value: value
-            key: key
-          resourceName: resourceName
-      properties:
-        items:
-          items:
-            $ref: '#/components/schemas/AcceleratorOption'
-          type: array
-      required:
-      - items
       type: object
     NetworkTopologyLabelValuesOptional:
       description: The topology levels of node (node address) according to nodepool
@@ -9950,9 +9853,6 @@ components:
         - reason: KubeletNotReady
           type: type
           message: container runtime status check may not have completed yet
-        acceleratorResources:
-        - acceleratorResources
-        - acceleratorResources
         nvLinkDomainUid: nvlink-domain-uid
         status: Ready
         updatedAt: 2000-01-23T04:56:07.000+00:00
@@ -9993,9 +9893,6 @@ components:
           - reason: KubeletNotReady
             type: type
             message: container runtime status check may not have completed yet
-          acceleratorResources:
-          - acceleratorResources
-          - acceleratorResources
           nvLinkDomainUid: nvlink-domain-uid
           status: Ready
           updatedAt: 2000-01-23T04:56:07.000+00:00
@@ -10032,9 +9929,6 @@ components:
           - reason: KubeletNotReady
             type: type
             message: container runtime status check may not have completed yet
-          acceleratorResources:
-          - acceleratorResources
-          - acceleratorResources
           nvLinkDomainUid: nvlink-domain-uid
           status: Ready
           updatedAt: 2000-01-23T04:56:07.000+00:00
@@ -10135,9 +10029,6 @@ components:
         - reason: KubeletNotReady
           type: type
           message: container runtime status check may not have completed yet
-        acceleratorResources:
-        - acceleratorResources
-        - acceleratorResources
         nvLinkDomainUid: nvlink-domain-uid
         status: Ready
         updatedAt: 2000-01-23T04:56:07.000+00:00

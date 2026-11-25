@@ -3469,110 +3469,6 @@ paths:
         action: update
         resource-id: projectId
       x-audit: true
-  /api/v1/org-unit/projects/{projectId}/accelerators:
-    get:
-      description: List observed accelerator resources and model selectors across
-        the project's assigned node pools. Includes busy devices.
-      operationId: get_project_accelerators
-      parameters:
-      - description: The project id
-        example: 575c19e8-c7c3-45b0-8290-2f47397a8383
-        explode: false
-        in: path
-        name: projectId
-        required: true
-        schema:
-          type: string
-        style: simple
-      - description: "With deviceLabelKey and gpuType, check only this exact accelerator\
-          \ selection."
-        explode: true
-        in: query
-        name: resourceName
-        required: false
-        schema:
-          type: string
-        style: form
-      - description: "Exact node label key to check, including administrator-defined\
-          \ keys."
-        explode: true
-        in: query
-        name: deviceLabelKey
-        required: false
-        schema:
-          type: string
-        style: form
-      - description: Exact device label value to check. Supply all three parameters
-          for an exact lookup.
-        explode: true
-        in: query
-        name: gpuType
-        required: false
-        schema:
-          type: string
-        style: form
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProjectAccelerators'
-          description: Project accelerator inventory
-        "400":
-          content:
-            application/json:
-              example:
-                code: 400
-                message: Required parameter is missing
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Bad request.
-        "401":
-          content:
-            application/json:
-              example:
-                code: 401
-                message: Issuer is not familiar.
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              example:
-                code: 403
-                message: You do not have sufficient permissions.
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              example:
-                code: 404
-                message: Resource id not found.
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: The specified resource was not found
-        "503":
-          content:
-            application/json:
-              example:
-                code: 503
-                message: Please try again in few minutes.
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: unexpected error
-      summary: List accelerator resources and models accessible to a project
-      tags:
-      - Projects
-      x-service: org-unit-service
-      x-test-coverage:
-      - control-plane/org-unit-service/pkg/test/project_api_test.go
-      x-authorize:
-        resource-type: project
-        action: read
-        resource-id: projectId
   /api/v1/org-unit/projects/{projectId}/resources:
     patch:
       description: "Updates the resources of the node pools in the request. Node pools\
@@ -5555,8 +5451,10 @@ paths:
           \ value. Operators are == Equals, != Not equals, <= Less than or equal,\
           \ >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts\
           \ with and =$ Ends with. Dates are in ISO 8601 timestamp format and available\
-          \ for operators ==, !=, <= and >=. gpuLimit treats a missing limit as -1\
-          \ (unlimited), so gpuLimit!=-1 matches only org units with a GPU limit."
+          \ for operators ==, !=, <= and >=. gpuAccessible==true selects pools where\
+          \ the project and its parent department allow GPU use. gpuLimit treats a\
+          \ missing limit as -1 (unlimited), so gpuLimit!=-1 matches only org units\
+          \ with a GPU limit."
         explode: false
         in: query
         name: filterBy
@@ -5566,7 +5464,7 @@ paths:
           - nodePoolName!=some-name
           - gpuLimit!=-1
           items:
-            pattern: ^(nodePoolName|nodePoolId|parentId|orgUnitId|orgUnitName|rank|clusterId|gpuLimit)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            pattern: ^(nodePoolName|nodePoolId|parentId|orgUnitId|orgUnitName|rank|clusterId|gpuLimit|gpuAccessible)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
             type: string
           maxItems: 10
           type: array
@@ -5683,8 +5581,10 @@ paths:
           \ value. Operators are == Equals, != Not equals, <= Less than or equal,\
           \ >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts\
           \ with and =$ Ends with. Dates are in ISO 8601 timestamp format and available\
-          \ for operators ==, !=, <= and >=. gpuLimit treats a missing limit as -1\
-          \ (unlimited), so gpuLimit!=-1 matches only org units with a GPU limit."
+          \ for operators ==, !=, <= and >=. gpuAccessible==true selects pools where\
+          \ the project and its parent department allow GPU use. gpuLimit treats a\
+          \ missing limit as -1 (unlimited), so gpuLimit!=-1 matches only org units\
+          \ with a GPU limit."
         explode: false
         in: query
         name: filterBy
@@ -5694,7 +5594,7 @@ paths:
           - nodePoolName!=some-name
           - gpuLimit!=-1
           items:
-            pattern: ^(nodePoolName|nodePoolId|parentId|orgUnitId|orgUnitName|rank|clusterId|gpuLimit)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            pattern: ^(nodePoolName|nodePoolId|parentId|orgUnitId|orgUnitName|rank|clusterId|gpuLimit|gpuAccessible)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
             type: string
           maxItems: 10
           type: array
@@ -7461,8 +7361,10 @@ components:
         \ value. Operators are == Equals, != Not equals, <= Less than or equal, >=\
         \ Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with\
         \ and =$ Ends with. Dates are in ISO 8601 timestamp format and available for\
-        \ operators ==, !=, <= and >=. gpuLimit treats a missing limit as -1 (unlimited),\
-        \ so gpuLimit!=-1 matches only org units with a GPU limit."
+        \ operators ==, !=, <= and >=. gpuAccessible==true selects pools where the\
+        \ project and its parent department allow GPU use. gpuLimit treats a missing\
+        \ limit as -1 (unlimited), so gpuLimit!=-1 matches only org units with a GPU\
+        \ limit."
       explode: false
       in: query
       name: filterBy
@@ -7472,7 +7374,7 @@ components:
         - nodePoolName!=some-name
         - gpuLimit!=-1
         items:
-          pattern: ^(nodePoolName|nodePoolId|parentId|orgUnitId|orgUnitName|rank|clusterId|gpuLimit)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+          pattern: ^(nodePoolName|nodePoolId|parentId|orgUnitId|orgUnitName|rank|clusterId|gpuLimit|gpuAccessible)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
           type: string
         maxItems: 10
         type: array
@@ -10104,66 +10006,6 @@ components:
           - training
           - training
           - training
-    AcceleratorDevice:
-      example:
-        value: value
-        key: key
-      properties:
-        key:
-          description: Exact Kubernetes node label key for this device model.
-          type: string
-        value:
-          description: Exact Kubernetes node label value for this device model.
-          type: string
-      required:
-      - key
-      - value
-      type: object
-    AcceleratorOption:
-      example:
-        devices:
-        - value: value
-          key: key
-        - value: value
-          key: key
-        resourceName: resourceName
-      properties:
-        resourceName:
-          description: Allocatable Kubernetes extended resource name.
-          type: string
-        devices:
-          description: Model selectors observed alongside this resource on the same
-            node.
-          items:
-            $ref: '#/components/schemas/AcceleratorDevice'
-          type: array
-      required:
-      - devices
-      - resourceName
-      type: object
-    ProjectAccelerators:
-      example:
-        items:
-        - devices:
-          - value: value
-            key: key
-          - value: value
-            key: key
-          resourceName: resourceName
-        - devices:
-          - value: value
-            key: key
-          - value: value
-            key: key
-          resourceName: resourceName
-      properties:
-        items:
-          items:
-            $ref: '#/components/schemas/AcceleratorOption'
-          type: array
-      required:
-      - items
-      type: object
     ProjectStatusUpdateRequest:
       description: status update fields
       example:

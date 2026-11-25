@@ -14,6 +14,7 @@ import (
 )
 
 type ClientInterface interface {
+	MatchGPUPlacement(ctx context.Context, clusterID string, poolIDs []string, labels map[string]string) (bool, error)
 	GetNodePoolsInternalByCluster(ctx context.Context, clusterUUID string) (*openapi.GetNodepoolsInternal200Response, error)
 	GetNodePoolsMinimalByCluster(ctx context.Context, clusterUUID string) (*openapi.GetNodepoolsMinimal200Response, error)
 	GetNetworkTopologies(ctx context.Context, filterBy []string) (*openapi.GetNetworkTopologies200Response, error)

@@ -1065,133 +1065,6 @@ func (_c *NodesAPI_GetNodeMetricsExecute_Call) RunAndReturn(run func(r openapi.A
 	return _c
 }
 
-// GetNodePoolAccelerators provides a mock function for the type NodesAPI
-func (_mock *NodesAPI) GetNodePoolAccelerators(ctx context.Context, clusterUuid string) openapi.ApiGetNodePoolAcceleratorsRequest {
-	ret := _mock.Called(ctx, clusterUuid)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetNodePoolAccelerators")
-	}
-
-	var r0 openapi.ApiGetNodePoolAcceleratorsRequest
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) openapi.ApiGetNodePoolAcceleratorsRequest); ok {
-		r0 = returnFunc(ctx, clusterUuid)
-	} else {
-		r0 = ret.Get(0).(openapi.ApiGetNodePoolAcceleratorsRequest)
-	}
-	return r0
-}
-
-// NodesAPI_GetNodePoolAccelerators_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetNodePoolAccelerators'
-type NodesAPI_GetNodePoolAccelerators_Call struct {
-	*mock.Call
-}
-
-// GetNodePoolAccelerators is a helper method to define mock.On call
-//   - ctx context.Context
-//   - clusterUuid string
-func (_e *NodesAPI_Expecter) GetNodePoolAccelerators(ctx any, clusterUuid any) *NodesAPI_GetNodePoolAccelerators_Call {
-	return &NodesAPI_GetNodePoolAccelerators_Call{Call: _e.mock.On("GetNodePoolAccelerators", ctx, clusterUuid)}
-}
-
-func (_c *NodesAPI_GetNodePoolAccelerators_Call) Run(run func(ctx context.Context, clusterUuid string)) *NodesAPI_GetNodePoolAccelerators_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		run(
-			arg0,
-			arg1,
-		)
-	})
-	return _c
-}
-
-func (_c *NodesAPI_GetNodePoolAccelerators_Call) Return(apiGetNodePoolAcceleratorsRequest openapi.ApiGetNodePoolAcceleratorsRequest) *NodesAPI_GetNodePoolAccelerators_Call {
-	_c.Call.Return(apiGetNodePoolAcceleratorsRequest)
-	return _c
-}
-
-func (_c *NodesAPI_GetNodePoolAccelerators_Call) RunAndReturn(run func(ctx context.Context, clusterUuid string) openapi.ApiGetNodePoolAcceleratorsRequest) *NodesAPI_GetNodePoolAccelerators_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GetNodePoolAcceleratorsExecute provides a mock function for the type NodesAPI
-func (_mock *NodesAPI) GetNodePoolAcceleratorsExecute(r openapi.ApiGetNodePoolAcceleratorsRequest) (*openapi.ProjectAccelerators, *http.Response, error) {
-	ret := _mock.Called(r)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetNodePoolAcceleratorsExecute")
-	}
-
-	var r0 *openapi.ProjectAccelerators
-	var r1 *http.Response
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(openapi.ApiGetNodePoolAcceleratorsRequest) (*openapi.ProjectAccelerators, *http.Response, error)); ok {
-		return returnFunc(r)
-	}
-	if returnFunc, ok := ret.Get(0).(func(openapi.ApiGetNodePoolAcceleratorsRequest) *openapi.ProjectAccelerators); ok {
-		r0 = returnFunc(r)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*openapi.ProjectAccelerators)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(openapi.ApiGetNodePoolAcceleratorsRequest) *http.Response); ok {
-		r1 = returnFunc(r)
-	} else {
-		if ret.Get(1) != nil {
-			r1 = ret.Get(1).(*http.Response)
-		}
-	}
-	if returnFunc, ok := ret.Get(2).(func(openapi.ApiGetNodePoolAcceleratorsRequest) error); ok {
-		r2 = returnFunc(r)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// NodesAPI_GetNodePoolAcceleratorsExecute_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetNodePoolAcceleratorsExecute'
-type NodesAPI_GetNodePoolAcceleratorsExecute_Call struct {
-	*mock.Call
-}
-
-// GetNodePoolAcceleratorsExecute is a helper method to define mock.On call
-//   - r openapi.ApiGetNodePoolAcceleratorsRequest
-func (_e *NodesAPI_Expecter) GetNodePoolAcceleratorsExecute(r any) *NodesAPI_GetNodePoolAcceleratorsExecute_Call {
-	return &NodesAPI_GetNodePoolAcceleratorsExecute_Call{Call: _e.mock.On("GetNodePoolAcceleratorsExecute", r)}
-}
-
-func (_c *NodesAPI_GetNodePoolAcceleratorsExecute_Call) Run(run func(r openapi.ApiGetNodePoolAcceleratorsRequest)) *NodesAPI_GetNodePoolAcceleratorsExecute_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 openapi.ApiGetNodePoolAcceleratorsRequest
-		if args[0] != nil {
-			arg0 = args[0].(openapi.ApiGetNodePoolAcceleratorsRequest)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *NodesAPI_GetNodePoolAcceleratorsExecute_Call) Return(projectAccelerators *openapi.ProjectAccelerators, response *http.Response, err error) *NodesAPI_GetNodePoolAcceleratorsExecute_Call {
-	_c.Call.Return(projectAccelerators, response, err)
-	return _c
-}
-
-func (_c *NodesAPI_GetNodePoolAcceleratorsExecute_Call) RunAndReturn(run func(r openapi.ApiGetNodePoolAcceleratorsRequest) (*openapi.ProjectAccelerators, *http.Response, error)) *NodesAPI_GetNodePoolAcceleratorsExecute_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // GetNodeTelemetry provides a mock function for the type NodesAPI
 func (_mock *NodesAPI) GetNodeTelemetry(ctx context.Context) openapi.ApiGetNodeTelemetryRequest {
 	ret := _mock.Called(ctx)
@@ -1430,6 +1303,131 @@ func (_c *NodesAPI_GetTenantNodesExecute_Call) Return(nodes *openapi.Nodes, resp
 }
 
 func (_c *NodesAPI_GetTenantNodesExecute_Call) RunAndReturn(run func(r openapi.ApiGetTenantNodesRequest) (*openapi.Nodes, *http.Response, error)) *NodesAPI_GetTenantNodesExecute_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// MatchGpuPlacement provides a mock function for the type NodesAPI
+func (_mock *NodesAPI) MatchGpuPlacement(ctx context.Context, clusterUuid string) openapi.ApiMatchGpuPlacementRequest {
+	ret := _mock.Called(ctx, clusterUuid)
+
+	if len(ret) == 0 {
+		panic("no return value specified for MatchGpuPlacement")
+	}
+
+	var r0 openapi.ApiMatchGpuPlacementRequest
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) openapi.ApiMatchGpuPlacementRequest); ok {
+		r0 = returnFunc(ctx, clusterUuid)
+	} else {
+		r0 = ret.Get(0).(openapi.ApiMatchGpuPlacementRequest)
+	}
+	return r0
+}
+
+// NodesAPI_MatchGpuPlacement_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'MatchGpuPlacement'
+type NodesAPI_MatchGpuPlacement_Call struct {
+	*mock.Call
+}
+
+// MatchGpuPlacement is a helper method to define mock.On call
+//   - ctx context.Context
+//   - clusterUuid string
+func (_e *NodesAPI_Expecter) MatchGpuPlacement(ctx any, clusterUuid any) *NodesAPI_MatchGpuPlacement_Call {
+	return &NodesAPI_MatchGpuPlacement_Call{Call: _e.mock.On("MatchGpuPlacement", ctx, clusterUuid)}
+}
+
+func (_c *NodesAPI_MatchGpuPlacement_Call) Run(run func(ctx context.Context, clusterUuid string)) *NodesAPI_MatchGpuPlacement_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *NodesAPI_MatchGpuPlacement_Call) Return(apiMatchGpuPlacementRequest openapi.ApiMatchGpuPlacementRequest) *NodesAPI_MatchGpuPlacement_Call {
+	_c.Call.Return(apiMatchGpuPlacementRequest)
+	return _c
+}
+
+func (_c *NodesAPI_MatchGpuPlacement_Call) RunAndReturn(run func(ctx context.Context, clusterUuid string) openapi.ApiMatchGpuPlacementRequest) *NodesAPI_MatchGpuPlacement_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// MatchGpuPlacementExecute provides a mock function for the type NodesAPI
+func (_mock *NodesAPI) MatchGpuPlacementExecute(r openapi.ApiMatchGpuPlacementRequest) (bool, *http.Response, error) {
+	ret := _mock.Called(r)
+
+	if len(ret) == 0 {
+		panic("no return value specified for MatchGpuPlacementExecute")
+	}
+
+	var r0 bool
+	var r1 *http.Response
+	var r2 error
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiMatchGpuPlacementRequest) (bool, *http.Response, error)); ok {
+		return returnFunc(r)
+	}
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiMatchGpuPlacementRequest) bool); ok {
+		r0 = returnFunc(r)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+	if returnFunc, ok := ret.Get(1).(func(openapi.ApiMatchGpuPlacementRequest) *http.Response); ok {
+		r1 = returnFunc(r)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*http.Response)
+		}
+	}
+	if returnFunc, ok := ret.Get(2).(func(openapi.ApiMatchGpuPlacementRequest) error); ok {
+		r2 = returnFunc(r)
+	} else {
+		r2 = ret.Error(2)
+	}
+	return r0, r1, r2
+}
+
+// NodesAPI_MatchGpuPlacementExecute_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'MatchGpuPlacementExecute'
+type NodesAPI_MatchGpuPlacementExecute_Call struct {
+	*mock.Call
+}
+
+// MatchGpuPlacementExecute is a helper method to define mock.On call
+//   - r openapi.ApiMatchGpuPlacementRequest
+func (_e *NodesAPI_Expecter) MatchGpuPlacementExecute(r any) *NodesAPI_MatchGpuPlacementExecute_Call {
+	return &NodesAPI_MatchGpuPlacementExecute_Call{Call: _e.mock.On("MatchGpuPlacementExecute", r)}
+}
+
+func (_c *NodesAPI_MatchGpuPlacementExecute_Call) Run(run func(r openapi.ApiMatchGpuPlacementRequest)) *NodesAPI_MatchGpuPlacementExecute_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 openapi.ApiMatchGpuPlacementRequest
+		if args[0] != nil {
+			arg0 = args[0].(openapi.ApiMatchGpuPlacementRequest)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *NodesAPI_MatchGpuPlacementExecute_Call) Return(b bool, response *http.Response, err error) *NodesAPI_MatchGpuPlacementExecute_Call {
+	_c.Call.Return(b, response, err)
+	return _c
+}
+
+func (_c *NodesAPI_MatchGpuPlacementExecute_Call) RunAndReturn(run func(r openapi.ApiMatchGpuPlacementRequest) (bool, *http.Response, error)) *NodesAPI_MatchGpuPlacementExecute_Call {
 	_c.Call.Return(run)
 	return _c
 }

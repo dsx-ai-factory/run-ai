@@ -141,9 +141,9 @@ Class | Method | HTTP request | Description
 *NodesAPI* | [**GetNodeLabelKeys**](docs/NodesAPI.md#getnodelabelkeys) | **Get** /api/v1/clusters/{clusterUuid}/nodes/labels/keys | Get node label keys.
 *NodesAPI* | [**GetNodeLabelValues**](docs/NodesAPI.md#getnodelabelvalues) | **Get** /api/v1/clusters/{clusterUuid}/nodes/labels/values | Get node label values.
 *NodesAPI* | [**GetNodeMetrics**](docs/NodesAPI.md#getnodemetrics) | **Get** /api/v1/nodes/{nodeId}/metrics | Get the node metrics data.
-*NodesAPI* | [**GetNodePoolAccelerators**](docs/NodesAPI.md#getnodepoolaccelerators) | **Post** /internal/clusters/{clusterUuid}/accelerators | Get accelerator inventory for the supplied node pools
 *NodesAPI* | [**GetNodeTelemetry**](docs/NodesAPI.md#getnodetelemetry) | **Get** /api/v1/nodes/telemetry | Get node telemetry data.
 *NodesAPI* | [**GetTenantNodes**](docs/NodesAPI.md#gettenantnodes) | **Get** /api/v1/nodes | Get a list of nodes.
+*NodesAPI* | [**MatchGpuPlacement**](docs/NodesAPI.md#matchgpuplacement) | **Post** /internal/clusters/{clusterUuid}/gpu-placement/match | Check whether any node in the supplied pools matches the placement labels
 *NodesAPI* | [**SyncNodes**](docs/NodesAPI.md#syncnodes) | **Post** /api/v1/clusters/{clusterUuid}/nodes/sync | Sync the nodes in the cluster.
 *NodesAPI* | [**SyncNumaNodes**](docs/NodesAPI.md#syncnumanodes) | **Post** /api/v1/clusters/{clusterUuid}/nodes/numa/sync | Sync NUMA nodes in a cluster.
 *NodesAPI* | [**UpsertNode**](docs/NodesAPI.md#upsertnode) | **Put** /api/v1/clusters/{clusterUuid}/nodes/{nodeName} | Update node details.
@@ -157,9 +157,6 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
- - [AcceleratorDevice](docs/AcceleratorDevice.md)
- - [AcceleratorOption](docs/AcceleratorOption.md)
- - [AcceleratorSelection](docs/AcceleratorSelection.md)
  - [Ancestors](docs/Ancestors.md)
  - [ClusterConfigStatus](docs/ClusterConfigStatus.md)
  - [ClusterControlPlaneConfig](docs/ClusterControlPlaneConfig.md)
@@ -222,6 +219,7 @@ Class | Method | HTTP request | Description
  - [GetNodepoolsMinimalInternal200Response](docs/GetNodepoolsMinimalInternal200Response.md)
  - [GetPutPatchClusterConfigResponse](docs/GetPutPatchClusterConfigResponse.md)
  - [GpuInfo](docs/GpuInfo.md)
+ - [GpuPlacementMatch](docs/GpuPlacementMatch.md)
  - [GpuPodsPlacementStrategy](docs/GpuPodsPlacementStrategy.md)
  - [GroupedMeasurementGroup](docs/GroupedMeasurementGroup.md)
  - [GroupedMeasurementResponse](docs/GroupedMeasurementResponse.md)
@@ -261,7 +259,6 @@ Class | Method | HTTP request | Description
  - [NodeInternal](docs/NodeInternal.md)
  - [NodeMetricType](docs/NodeMetricType.md)
  - [NodeNumaForSync](docs/NodeNumaForSync.md)
- - [NodePoolAcceleratorsRequest](docs/NodePoolAcceleratorsRequest.md)
  - [NodePoolSetting](docs/NodePoolSetting.md)
  - [NodePoolSettingsGetResponse](docs/NodePoolSettingsGetResponse.md)
  - [NodePoolSettingsKeyEnum](docs/NodePoolSettingsKeyEnum.md)
@@ -296,7 +293,6 @@ Class | Method | HTTP request | Description
  - [OpenshiftRouteTerminationPolicy](docs/OpenshiftRouteTerminationPolicy.md)
  - [PatchClusterConfigRequest](docs/PatchClusterConfigRequest.md)
  - [PlacementStrategy](docs/PlacementStrategy.md)
- - [ProjectAccelerators](docs/ProjectAccelerators.md)
  - [PutClusterConfigRequest](docs/PutClusterConfigRequest.md)
  - [PutClusterConfigStatusRequest](docs/PutClusterConfigStatusRequest.md)
  - [PutClusterConfigStatusRequestStatus](docs/PutClusterConfigStatusRequestStatus.md)

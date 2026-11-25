@@ -32,7 +32,7 @@ func RequestedAccelerator(model *string, accelerator *workloadsApi.AcceleratorSe
 	return accelerator
 }
 
-// ResolveGPUSelection accepts the effective model label key resolved by discovery.
+// ResolveGPUSelection uses the NVIDIA defaults unless the caller overrides them.
 // Unavailable label values are valid placement requirements.
 func ResolveGPUSelection(model *string, accelerator *workloadsApi.AcceleratorSelection) (string, *corev1.NodeSelectorRequirement, *workloadsApi.Error) {
 	resourceName := NvidiaResourceName
@@ -56,7 +56,7 @@ func ResolveGPUSelection(model *string, accelerator *workloadsApi.AcceleratorSel
 	}
 	if labelKey == nil {
 		if resourceName != NvidiaResourceName {
-			return "", nil, workloadsApi.NewError(http.StatusBadRequest, "accelerator.deviceLabelKey is required when the GPU model label key cannot be determined")
+			return "", nil, workloadsApi.NewError(http.StatusBadRequest, "accelerator.deviceLabelKey is required when selecting a model for a non-NVIDIA resource")
 		}
 		labelKey = convutils.Ref(NvidiaProductLabel)
 	}

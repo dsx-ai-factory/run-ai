@@ -100,8 +100,6 @@ paths:
     $ref: "./requests/projects/ProjectsMetadata.yaml"
   /api/v1/org-unit/projects/{projectId}:
     $ref: "./requests/projects/ProjectById.yaml"
-  /api/v1/org-unit/projects/{projectId}/accelerators:
-    $ref: "./requests/projects/ProjectAccelerators.yaml"
   /api/v1/org-unit/projects/{projectId}/resources:
     $ref: "./requests/projects/ProjectResources.yaml"
   /api/v1/org-unit/projects/{projectId}/metrics:

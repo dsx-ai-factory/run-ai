@@ -1,0 +1,12 @@
+type: object
+required: [nodePoolIds, labels]
+properties:
+  nodePoolIds:
+    type: array
+    items:
+      type: string
+  labels:
+    type: object
+    minProperties: 1
+    additionalProperties:
+      type: string

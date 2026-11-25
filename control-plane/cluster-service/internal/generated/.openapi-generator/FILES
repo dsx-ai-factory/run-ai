@@ -24,9 +24,6 @@ pkg/api/error.go
 pkg/api/helpers.go
 pkg/api/impl.go
 pkg/api/logger.go
-pkg/api/model_accelerator_device.go
-pkg/api/model_accelerator_option.go
-pkg/api/model_accelerator_selection.go
 pkg/api/model_ancestors.go
 pkg/api/model_cluster_config_status.go
 pkg/api/model_cluster_control_plane_config.go
@@ -88,6 +85,7 @@ pkg/api/model_get_nodepools_minimal_200_response.go
 pkg/api/model_get_nodepools_minimal_internal_200_response.go
 pkg/api/model_get_put_patch_cluster_config_response.go
 pkg/api/model_gpu_info.go
+pkg/api/model_gpu_placement_match.go
 pkg/api/model_gpu_pods_placement_strategy.go
 pkg/api/model_gpu_resource_optimization.go
 pkg/api/model_grouped_measurement_group.go
@@ -128,7 +126,6 @@ pkg/api/model_node_info.go
 pkg/api/model_node_internal.go
 pkg/api/model_node_metric_type.go
 pkg/api/model_node_numa_for_sync.go
-pkg/api/model_node_pool_accelerators_request.go
 pkg/api/model_node_pool_setting.go
 pkg/api/model_node_pool_settings_get_response.go
 pkg/api/model_node_pool_settings_key_enum.go
@@ -163,7 +160,6 @@ pkg/api/model_numa_nodes_sync_request.go
 pkg/api/model_openshift_route_termination_policy.go
 pkg/api/model_patch_cluster_config_request.go
 pkg/api/model_placement_strategy.go
-pkg/api/model_project_accelerators.go
 pkg/api/model_put_cluster_config_request.go
 pkg/api/model_put_cluster_config_status_request.go
 pkg/api/model_put_cluster_config_status_request_status.go

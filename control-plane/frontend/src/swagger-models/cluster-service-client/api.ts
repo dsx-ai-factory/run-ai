@@ -25,69 +25,6 @@ import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObj
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError } from './base';
 
 /**
- * 
- * @export
- * @interface AcceleratorDevice
- */
-export interface AcceleratorDevice {
-    /**
-     * Exact Kubernetes node label key for this device model.
-     * @type {string}
-     * @memberof AcceleratorDevice
-     */
-    'key': string;
-    /**
-     * Exact Kubernetes node label value for this device model.
-     * @type {string}
-     * @memberof AcceleratorDevice
-     */
-    'value': string;
-}
-/**
- * 
- * @export
- * @interface AcceleratorOption
- */
-export interface AcceleratorOption {
-    /**
-     * Allocatable Kubernetes extended resource name.
-     * @type {string}
-     * @memberof AcceleratorOption
-     */
-    'resourceName': string;
-    /**
-     * Model selectors observed alongside this resource on the same node.
-     * @type {Array<AcceleratorDevice>}
-     * @memberof AcceleratorOption
-     */
-    'devices': Array<AcceleratorDevice>;
-}
-/**
- * 
- * @export
- * @interface AcceleratorSelection
- */
-export interface AcceleratorSelection {
-    /**
-     * 
-     * @type {string}
-     * @memberof AcceleratorSelection
-     */
-    'resourceName': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AcceleratorSelection
-     */
-    'deviceLabelKey': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AcceleratorSelection
-     */
-    'gpuType': string;
-}
-/**
  * The ancestors of an org unit.
  * @export
  * @interface Ancestors
@@ -2021,6 +1958,25 @@ export interface GpuInfo {
     'gpuMemoryBytes'?: number;
 }
 /**
+ * 
+ * @export
+ * @interface GpuPlacementMatch
+ */
+export interface GpuPlacementMatch {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof GpuPlacementMatch
+     */
+    'nodePoolIds': Array<string>;
+    /**
+     * 
+     * @type {{ [key: string]: string; }}
+     * @memberof GpuPlacementMatch
+     */
+    'labels': { [key: string]: string; };
+}
+/**
  * Defines the placement strategy for GPU pods within the node pool.
  * @export
  * @interface GpuPodsPlacementStrategy
@@ -3071,12 +3027,6 @@ export interface NetworkTopologyUpdateFields {
  */
 export interface Node {
     /**
-     * GPU resource names advertised by the node\'s allocatable resources.
-     * @type {Array<string>}
-     * @memberof Node
-     */
-    'acceleratorResources'?: Array<string>;
-    /**
      * Labels assigned to the node.
      * @type {{ [key: string]: string; }}
      * @memberof Node
@@ -3221,12 +3171,6 @@ export interface NodeAdditionalReadFields {
  * @interface NodeExtended
  */
 export interface NodeExtended {
-    /**
-     * GPU resource names advertised by the node\'s allocatable resources.
-     * @type {Array<string>}
-     * @memberof NodeExtended
-     */
-    'acceleratorResources'?: Array<string>;
     /**
      * Labels assigned to the node.
      * @type {{ [key: string]: string; }}
@@ -3399,12 +3343,6 @@ export interface NodeForSyncAllOf {
  */
 export interface NodeInfo {
     /**
-     * GPU resource names advertised by the node\'s allocatable resources.
-     * @type {Array<string>}
-     * @memberof NodeInfo
-     */
-    'acceleratorResources'?: Array<string>;
-    /**
      * Labels assigned to the node.
      * @type {{ [key: string]: string; }}
      * @memberof NodeInfo
@@ -3566,25 +3504,6 @@ export interface NodeNumaForSync {
      * @memberof NodeNumaForSync
      */
     'numaNodes': Array<NumaNodeDetails>;
-}
-/**
- * 
- * @export
- * @interface NodePoolAcceleratorsRequest
- */
-export interface NodePoolAcceleratorsRequest {
-    /**
-     * IDs of node pools assigned to the project.
-     * @type {Array<string>}
-     * @memberof NodePoolAcceleratorsRequest
-     */
-    'nodePoolIds': Array<string>;
-    /**
-     * 
-     * @type {AcceleratorSelection}
-     * @memberof NodePoolAcceleratorsRequest
-     */
-    'selection'?: AcceleratorSelection | null;
 }
 /**
  * 
@@ -4823,19 +4742,6 @@ export const PlacementStrategy = {
 export type PlacementStrategy = typeof PlacementStrategy[keyof typeof PlacementStrategy];
 
 
-/**
- * 
- * @export
- * @interface ProjectAccelerators
- */
-export interface ProjectAccelerators {
-    /**
-     * 
-     * @type {Array<AcceleratorOption>}
-     * @memberof ProjectAccelerators
-     */
-    'items': Array<AcceleratorOption>;
-}
 /**
  * PUT Cluster Configuration Request
  * @export
@@ -10264,50 +10170,6 @@ export const NodesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
-         * 
-         * @summary Get accelerator inventory for the supplied node pools
-         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-         * @param {NodePoolAcceleratorsRequest} nodePoolAcceleratorsRequest 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getNodePoolAccelerators: async (clusterUuid: string, nodePoolAcceleratorsRequest: NodePoolAcceleratorsRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'clusterUuid' is not null or undefined
-            assertParamExists('getNodePoolAccelerators', 'clusterUuid', clusterUuid)
-            // verify required parameter 'nodePoolAcceleratorsRequest' is not null or undefined
-            assertParamExists('getNodePoolAccelerators', 'nodePoolAcceleratorsRequest', nodePoolAcceleratorsRequest)
-            const localVarPath = `/internal/clusters/{clusterUuid}/accelerators`
-                .replace(`{${"clusterUuid"}}`, encodeURIComponent(String(clusterUuid)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(nodePoolAcceleratorsRequest, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
          * Retrieve node telemetry data for use in analysis applications.
          * @summary Get node telemetry data.
          * @param {NodeTelemetryType} telemetryType specifies what data to request
@@ -10426,6 +10288,50 @@ export const NodesApiAxiosParamCreator = function (configuration?: Configuration
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Check whether any node in the supplied pools matches the placement labels
+         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+         * @param {GpuPlacementMatch} gpuPlacementMatch 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        matchGpuPlacement: async (clusterUuid: string, gpuPlacementMatch: GpuPlacementMatch, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'clusterUuid' is not null or undefined
+            assertParamExists('matchGpuPlacement', 'clusterUuid', clusterUuid)
+            // verify required parameter 'gpuPlacementMatch' is not null or undefined
+            assertParamExists('matchGpuPlacement', 'gpuPlacementMatch', gpuPlacementMatch)
+            const localVarPath = `/internal/clusters/{clusterUuid}/gpu-placement/match`
+                .replace(`{${"clusterUuid"}}`, encodeURIComponent(String(clusterUuid)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(gpuPlacementMatch, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -10683,18 +10589,6 @@ export const NodesApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * 
-         * @summary Get accelerator inventory for the supplied node pools
-         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-         * @param {NodePoolAcceleratorsRequest} nodePoolAcceleratorsRequest 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getNodePoolAccelerators(clusterUuid: string, nodePoolAcceleratorsRequest: NodePoolAcceleratorsRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProjectAccelerators>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getNodePoolAccelerators(clusterUuid, nodePoolAcceleratorsRequest, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
          * Retrieve node telemetry data for use in analysis applications.
          * @summary Get node telemetry data.
          * @param {NodeTelemetryType} telemetryType specifies what data to request
@@ -10723,6 +10617,18 @@ export const NodesApiFp = function(configuration?: Configuration) {
          */
         async getTenantNodes(filterBy?: Array<string>, sortBy?: NodeFilterSortFields, sortOrder?: 'asc' | 'desc', offset?: number, limit?: number, search?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Nodes>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getTenantNodes(filterBy, sortBy, sortOrder, offset, limit, search, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Check whether any node in the supplied pools matches the placement labels
+         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+         * @param {GpuPlacementMatch} gpuPlacementMatch 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async matchGpuPlacement(clusterUuid: string, gpuPlacementMatch: GpuPlacementMatch, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.matchGpuPlacement(clusterUuid, gpuPlacementMatch, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -10869,17 +10775,6 @@ export const NodesApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.getNodeMetrics(nodeId, metricType, start, end, numberOfSamples, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Get accelerator inventory for the supplied node pools
-         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-         * @param {NodePoolAcceleratorsRequest} nodePoolAcceleratorsRequest 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getNodePoolAccelerators(clusterUuid: string, nodePoolAcceleratorsRequest: NodePoolAcceleratorsRequest, options?: any): AxiosPromise<ProjectAccelerators> {
-            return localVarFp.getNodePoolAccelerators(clusterUuid, nodePoolAcceleratorsRequest, options).then((request) => request(axios, basePath));
-        },
-        /**
          * Retrieve node telemetry data for use in analysis applications.
          * @summary Get node telemetry data.
          * @param {NodeTelemetryType} telemetryType specifies what data to request
@@ -10907,6 +10802,17 @@ export const NodesApiFactory = function (configuration?: Configuration, basePath
          */
         getTenantNodes(filterBy?: Array<string>, sortBy?: NodeFilterSortFields, sortOrder?: 'asc' | 'desc', offset?: number, limit?: number, search?: string, options?: any): AxiosPromise<Nodes> {
             return localVarFp.getTenantNodes(filterBy, sortBy, sortOrder, offset, limit, search, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Check whether any node in the supplied pools matches the placement labels
+         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+         * @param {GpuPlacementMatch} gpuPlacementMatch 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        matchGpuPlacement(clusterUuid: string, gpuPlacementMatch: GpuPlacementMatch, options?: any): AxiosPromise<boolean> {
+            return localVarFp.matchGpuPlacement(clusterUuid, gpuPlacementMatch, options).then((request) => request(axios, basePath));
         },
         /**
          * Use to sync the nodes in the cluster
@@ -11065,19 +10971,6 @@ export class NodesApi extends BaseAPI {
     }
 
     /**
-     * 
-     * @summary Get accelerator inventory for the supplied node pools
-     * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-     * @param {NodePoolAcceleratorsRequest} nodePoolAcceleratorsRequest 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof NodesApi
-     */
-    public getNodePoolAccelerators(clusterUuid: string, nodePoolAcceleratorsRequest: NodePoolAcceleratorsRequest, options?: AxiosRequestConfig) {
-        return NodesApiFp(this.configuration).getNodePoolAccelerators(clusterUuid, nodePoolAcceleratorsRequest, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
      * Retrieve node telemetry data for use in analysis applications.
      * @summary Get node telemetry data.
      * @param {NodeTelemetryType} telemetryType specifies what data to request
@@ -11108,6 +11001,19 @@ export class NodesApi extends BaseAPI {
      */
     public getTenantNodes(filterBy?: Array<string>, sortBy?: NodeFilterSortFields, sortOrder?: 'asc' | 'desc', offset?: number, limit?: number, search?: string, options?: AxiosRequestConfig) {
         return NodesApiFp(this.configuration).getTenantNodes(filterBy, sortBy, sortOrder, offset, limit, search, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Check whether any node in the supplied pools matches the placement labels
+     * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+     * @param {GpuPlacementMatch} gpuPlacementMatch 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof NodesApi
+     */
+    public matchGpuPlacement(clusterUuid: string, gpuPlacementMatch: GpuPlacementMatch, options?: AxiosRequestConfig) {
+        return NodesApiFp(this.configuration).matchGpuPlacement(clusterUuid, gpuPlacementMatch, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

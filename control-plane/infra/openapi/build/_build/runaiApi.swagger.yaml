@@ -2167,47 +2167,6 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v1/org-unit/projects/{projectId}/accelerators:
-    get:
-      summary: List accelerator resources and models accessible to a project
-      operationId: get_project_accelerators
-      description: List observed accelerator resources and model selectors across the project's assigned node pools. Includes busy devices.
-      tags:
-        - Projects
-      parameters:
-        - $ref: '#/components/parameters/ProjectId'
-        - in: query
-          name: resourceName
-          description: With deviceLabelKey and gpuType, check only this exact accelerator selection.
-          schema:
-            type: string
-        - in: query
-          name: deviceLabelKey
-          description: Exact node label key to check, including administrator-defined keys.
-          schema:
-            type: string
-        - in: query
-          name: gpuType
-          description: Exact device label value to check. Supply all three parameters for an exact lookup.
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Project accelerator inventory
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProjectAccelerators'
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '404':
-          $ref: '#/components/responses/404NotFound'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/org-unit/projects/{projectId}/resources:
     put:
       summary: Update project resources
@@ -13675,12 +13634,6 @@ components:
         - nodePool
         - createdAt
       properties:
-        acceleratorResources:
-          writeOnly: true
-          type: array
-          description: Positive Kubernetes extended resources used to match project accelerator selections.
-          items:
-            type: string
         labels:
           writeOnly: true
           type: object
@@ -14437,41 +14390,6 @@ components:
         gpuNetworkAccelerationDetected:
           type: boolean
           description: Signals to all relevant parties about GPUNetworkAcceleration being detected in some nodepool's nodes
-    AcceleratorDevice:
-      type: object
-      required:
-        - key
-        - value
-      properties:
-        key:
-          type: string
-          description: Exact Kubernetes node label key for this device model.
-        value:
-          type: string
-          description: Exact Kubernetes node label value for this device model.
-    AcceleratorOption:
-      type: object
-      required:
-        - resourceName
-        - devices
-      properties:
-        resourceName:
-          type: string
-          description: Allocatable Kubernetes extended resource name.
-        devices:
-          type: array
-          description: Model selectors observed alongside this resource on the same node.
-          items:
-            $ref: '#/components/schemas/AcceleratorDevice'
-    ProjectAccelerators:
-      type: object
-      required:
-        - items
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/AcceleratorOption'
     NodepoolSortFilterFields:
       type: string
       enum:
@@ -19955,7 +19873,7 @@ components:
           nullable: true
       nullable: true
       type: object
-    AcceleratorSelection1:
+    AcceleratorSelection:
       description: Accelerator resource and optional device model label key for workload placement.
       type: object
       nullable: true
@@ -20481,7 +20399,7 @@ components:
         - nullable: true
           properties:
             accelerator:
-              $ref: '#/components/schemas/AcceleratorSelection1'
+              $ref: '#/components/schemas/AcceleratorSelection'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -20731,7 +20649,7 @@ components:
         - nullable: true
           properties:
             accelerator:
-              $ref: '#/components/schemas/AcceleratorSelection1'
+              $ref: '#/components/schemas/AcceleratorSelection'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -21611,7 +21529,7 @@ components:
         - nullable: true
           properties:
             accelerator:
-              $ref: '#/components/schemas/AcceleratorSelection1'
+              $ref: '#/components/schemas/AcceleratorSelection'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -21678,7 +21596,7 @@ components:
         - nullable: true
           properties:
             accelerator:
-              $ref: '#/components/schemas/AcceleratorSelection1'
+              $ref: '#/components/schemas/AcceleratorSelection'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -22033,6 +21951,14 @@ components:
       items:
         $ref: '#/components/schemas/SecretInstance'
       nullable: true
+    DistributedInferenceLeaderSpecFields:
+      properties:
+        leader:
+          description: Defines the pod specification for the leader. Must always be provided, regardless of the number of workers.
+          allOf:
+            - $ref: '#/components/schemas/DistributedInferenceLeaderWorkerSpec1'
+          nullable: true
+          type: object
     DistributedInferenceWorkerSpecFields:
       properties:
         worker:
@@ -22666,14 +22592,14 @@ components:
       nullable: true
     SupersetSpec:
       allOf:
-        - $ref: '#/components/schemas/DistributedInferenceLeaderSpecFields1'
+        - $ref: '#/components/schemas/DistributedInferenceLeaderSpecFields'
         - $ref: '#/components/schemas/DistributedInferenceWorkerSpecFields'
         - $ref: '#/components/schemas/DistributedInferenceCommonSpec'
         - $ref: '#/components/schemas/InferenceFields'
         - nullable: true
           properties:
             accelerator:
-              $ref: '#/components/schemas/AcceleratorSelection3'
+              $ref: '#/components/schemas/AcceleratorSelection'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -22873,7 +22799,7 @@ components:
       nullable: true
       properties:
         accelerator:
-          $ref: '#/components/schemas/AcceleratorSelection3'
+          $ref: '#/components/schemas/AcceleratorSelection'
         annotations:
           $ref: '#/components/schemas/Annotations'
         args:
@@ -23194,21 +23120,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PolicyListEntry'
-    AcceleratorSelection2:
-      description: Accelerator resource and optional device model label key for workload placement.
-      type: object
-      nullable: true
-      properties:
-        resourceName:
-          description: Kubernetes extended resource name. Defaults to nvidia.com/gpu.
-          type: string
-          nullable: true
-          example: nvidia.com/gpu
-        deviceLabelKey:
-          description: Node label key for gpuType. Defaults to nvidia.com/gpu.product for NVIDIA.
-          type: string
-          nullable: true
-          example: nvidia.com/gpu.product
     AnnotationsDefaults:
       properties:
         instances:
@@ -23352,7 +23263,7 @@ components:
     DistributedInferenceLeaderWorkerDefaultsV2:
       properties:
         accelerator:
-          $ref: '#/components/schemas/AcceleratorSelection2'
+          $ref: '#/components/schemas/AcceleratorSelection'
         annotations:
           $ref: '#/components/schemas/AnnotationsDefaults'
         args:
@@ -23402,6 +23313,14 @@ components:
         workingDir:
           $ref: '#/components/schemas/WorkingDir'
       type: object
+    DistributedInferenceLeaderDefaultsFields:
+      properties:
+        leader:
+          description: Defines the pod specification for the leader. Must always be provided, regardless of the number of workers.
+          allOf:
+            - $ref: '#/components/schemas/DistributedInferenceLeaderWorkerDefaultsV21'
+          nullable: true
+          type: object
     DistributedInferenceWorkerDefaultsFields:
       properties:
         worker:
@@ -23526,13 +23445,13 @@ components:
     SupersetDefaults:
       allOf:
         - $ref: '#/components/schemas/InferenceFields'
-        - $ref: '#/components/schemas/DistributedInferenceLeaderDefaultsFields1'
+        - $ref: '#/components/schemas/DistributedInferenceLeaderDefaultsFields'
         - $ref: '#/components/schemas/DistributedInferenceWorkerDefaultsFields'
         - $ref: '#/components/schemas/DistributedInferenceCommonDefaultsV2'
         - nullable: true
           properties:
             accelerator:
-              $ref: '#/components/schemas/AcceleratorSelection3'
+              $ref: '#/components/schemas/AcceleratorSelection'
             annotations:
               $ref: '#/components/schemas/AnnotationsDefaults'
             args:
@@ -24454,7 +24373,7 @@ components:
         - nullable: true
           properties:
             accelerator:
-              $ref: '#/components/schemas/AcceleratorSelection2'
+              $ref: '#/components/schemas/AcceleratorSelection'
             annotations:
               $ref: '#/components/schemas/AnnotationsDefaults'
             args:
@@ -24693,7 +24612,7 @@ components:
       nullable: true
       properties:
         accelerator:
-          $ref: '#/components/schemas/AcceleratorSelection2'
+          $ref: '#/components/schemas/AcceleratorSelection'
         annotations:
           $ref: '#/components/schemas/AnnotationsDefaults'
         args:
@@ -24958,7 +24877,7 @@ components:
         - nullable: true
           properties:
             accelerator:
-              $ref: '#/components/schemas/AcceleratorSelection2'
+              $ref: '#/components/schemas/AcceleratorSelection'
             annotations:
               $ref: '#/components/schemas/AnnotationsDefaults'
             args:
@@ -25237,7 +25156,7 @@ components:
         - nullable: true
           properties:
             accelerator:
-              $ref: '#/components/schemas/AcceleratorSelection2'
+              $ref: '#/components/schemas/AcceleratorSelection'
             annotations:
               $ref: '#/components/schemas/AnnotationsDefaults'
             args:
@@ -30652,21 +30571,6 @@ components:
           format: uuid
           example: 550e8400-e29b-41d4-a716-446655440000
           nullable: true
-    AcceleratorSelection3:
-      description: Accelerator resource and optional device model label key for workload placement.
-      type: object
-      nullable: true
-      properties:
-        resourceName:
-          description: Kubernetes extended resource name. Defaults to nvidia.com/gpu.
-          type: string
-          nullable: true
-          example: nvidia.com/gpu
-        deviceLabelKey:
-          description: Node label key for gpuType. Defaults to nvidia.com/gpu.product for NVIDIA.
-          type: string
-          nullable: true
-          example: nvidia.com/gpu.product
     NodeType3:
       deprecated: true
       description: 'Deprecated: use a workload policy node selector to target node types instead. Nodes (machines), or a group of nodes on which the workload will run. To use this feature, your Administrator will need to label nodes. For more information, see [Group Nodes](https://docs.run.ai/latest/admin/researcher-setup/limit-to-node-group). When using this flag with with Project-based affinity, it refines the list of allowable node groups set in the Project. For more information, see [Projects](https://docshub.run.ai/guides/platform-management/aiinitiatives/organization/projects).'
@@ -30680,7 +30584,7 @@ components:
         - nullable: true
           properties:
             accelerator:
-              $ref: '#/components/schemas/AcceleratorSelection3'
+              $ref: '#/components/schemas/AcceleratorSelection'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -30841,7 +30745,7 @@ components:
     DistributedInferenceLeaderWorkerSpec1:
       properties:
         accelerator:
-          $ref: '#/components/schemas/AcceleratorSelection3'
+          $ref: '#/components/schemas/AcceleratorSelection'
         annotations:
           $ref: '#/components/schemas/Annotations'
         args:
@@ -30923,14 +30827,6 @@ components:
         workingDir:
           $ref: '#/components/schemas/WorkingDir'
       type: object
-    DistributedInferenceLeaderSpecFields1:
-      properties:
-        leader:
-          description: Defines the pod specification for the leader. Must always be provided, regardless of the number of workers.
-          allOf:
-            - $ref: '#/components/schemas/DistributedInferenceLeaderWorkerSpec1'
-          nullable: true
-          type: object
     MasterSpecSameAsWorker:
       description: used for distributed workloads to indicate that the master spec should be the same as the worker spec. in this case, masterSpec should not be specified.
       type: boolean
@@ -30951,7 +30847,7 @@ components:
         - nullable: true
           properties:
             accelerator:
-              $ref: '#/components/schemas/AcceleratorSelection3'
+              $ref: '#/components/schemas/AcceleratorSelection'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -31118,7 +31014,7 @@ components:
         - nullable: true
           properties:
             accelerator:
-              $ref: '#/components/schemas/AcceleratorSelection3'
+              $ref: '#/components/schemas/AcceleratorSelection'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -31306,7 +31202,7 @@ components:
     DistributedInferenceSpecSpec:
       allOf:
         - $ref: '#/components/schemas/DistributedInferenceCommonSpec'
-        - $ref: '#/components/schemas/DistributedInferenceLeaderSpecFields1'
+        - $ref: '#/components/schemas/DistributedInferenceLeaderSpecFields'
         - $ref: '#/components/schemas/DistributedInferenceWorkerSpecFields'
     DistributedInferenceSpec:
       description: The specifications of the distributed inference to be created.
@@ -31346,7 +31242,7 @@ components:
       allOf:
         - properties:
             accelerator:
-              $ref: '#/components/schemas/AcceleratorSelection3'
+              $ref: '#/components/schemas/AcceleratorSelection'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -31505,7 +31401,7 @@ components:
             - nullable: true
               properties:
                 accelerator:
-                  $ref: '#/components/schemas/AcceleratorSelection3'
+                  $ref: '#/components/schemas/AcceleratorSelection'
                 args:
                   $ref: '#/components/schemas/Args'
                 category:
@@ -31789,7 +31685,7 @@ components:
       nullable: true
       properties:
         accelerator:
-          $ref: '#/components/schemas/AcceleratorSelection3'
+          $ref: '#/components/schemas/AcceleratorSelection'
         annotations:
           $ref: '#/components/schemas/Annotations'
         args:
@@ -31996,7 +31892,7 @@ components:
         - nullable: true
           properties:
             accelerator:
-              $ref: '#/components/schemas/AcceleratorSelection3'
+              $ref: '#/components/schemas/AcceleratorSelection'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -32259,7 +32155,7 @@ components:
         - nullable: true
           properties:
             accelerator:
-              $ref: '#/components/schemas/AcceleratorSelection3'
+              $ref: '#/components/schemas/AcceleratorSelection'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -32457,7 +32353,7 @@ components:
         - nullable: true
           properties:
             accelerator:
-              $ref: '#/components/schemas/AcceleratorSelection3'
+              $ref: '#/components/schemas/AcceleratorSelection'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -32696,7 +32592,7 @@ components:
       allOf:
         - properties:
             accelerator:
-              $ref: '#/components/schemas/AcceleratorSelection3'
+              $ref: '#/components/schemas/AcceleratorSelection'
             annotations:
               $ref: '#/components/schemas/Annotations'
             args:
@@ -32878,7 +32774,7 @@ components:
     DistributedInferenceLeaderWorkerTemplateSpec:
       properties:
         accelerator:
-          $ref: '#/components/schemas/AcceleratorSelection3'
+          $ref: '#/components/schemas/AcceleratorSelection'
         annotations:
           $ref: '#/components/schemas/Annotations'
         args:
@@ -33022,7 +32918,7 @@ components:
     DistributedInferenceLeaderWorkerDefaultsV21:
       properties:
         accelerator:
-          $ref: '#/components/schemas/AcceleratorSelection3'
+          $ref: '#/components/schemas/AcceleratorSelection'
         annotations:
           $ref: '#/components/schemas/AnnotationsDefaults'
         args:
@@ -33072,14 +32968,6 @@ components:
         workingDir:
           $ref: '#/components/schemas/WorkingDir'
       type: object
-    DistributedInferenceLeaderDefaultsFields1:
-      properties:
-        leader:
-          description: Defines the pod specification for the leader. Must always be provided, regardless of the number of workers.
-          allOf:
-            - $ref: '#/components/schemas/DistributedInferenceLeaderWorkerDefaultsV21'
-          nullable: true
-          type: object
     Action1:
       type: string
       description: The action to perform on the list of ids.
@@ -36734,13 +36622,13 @@ components:
       name: filterBy
       in: query
       required: false
-      description: Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!=-1 matches only org units with a GPU limit.
+      description: Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=. gpuAccessible==true selects pools where the project and its parent department allow GPU use. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!=-1 matches only org units with a GPU limit.
       schema:
         type: array
         maxItems: 10
         items:
           type: string
-          pattern: ^(nodePoolName|nodePoolId|parentId|orgUnitId|orgUnitName|rank|clusterId|gpuLimit)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+          pattern: ^(nodePoolName|nodePoolId|parentId|orgUnitId|orgUnitName|rank|clusterId|gpuLimit|gpuAccessible)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
         example:
           - nodePoolName!=some-name
           - gpuLimit!=-1

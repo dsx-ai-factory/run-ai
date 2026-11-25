@@ -14,9 +14,6 @@ api_nodes.go
 api_settings.go
 client.go
 configuration.go
-docs/AcceleratorDevice.md
-docs/AcceleratorOption.md
-docs/AcceleratorSelection.md
 docs/Ancestors.md
 docs/ClusterConfigAPI.md
 docs/ClusterConfigStatus.md
@@ -82,6 +79,7 @@ docs/GetNodepoolsMinimal200Response.md
 docs/GetNodepoolsMinimalInternal200Response.md
 docs/GetPutPatchClusterConfigResponse.md
 docs/GpuInfo.md
+docs/GpuPlacementMatch.md
 docs/GpuPodsPlacementStrategy.md
 docs/GroupedMeasurementGroup.md
 docs/GroupedMeasurementResponse.md
@@ -124,7 +122,6 @@ docs/NodeInfo.md
 docs/NodeInternal.md
 docs/NodeMetricType.md
 docs/NodeNumaForSync.md
-docs/NodePoolAcceleratorsRequest.md
 docs/NodePoolSetting.md
 docs/NodePoolSettingsGetResponse.md
 docs/NodePoolSettingsKeyEnum.md
@@ -161,7 +158,6 @@ docs/NumaNodesSyncRequest.md
 docs/OpenshiftRouteTerminationPolicy.md
 docs/PatchClusterConfigRequest.md
 docs/PlacementStrategy.md
-docs/ProjectAccelerators.md
 docs/PutClusterConfigRequest.md
 docs/PutClusterConfigStatusRequest.md
 docs/PutClusterConfigStatusRequestStatus.md
@@ -184,9 +180,6 @@ docs/UpdateNodePoolSettingByKeyRequest.md
 git_push.sh
 go.mod
 go.sum
-model_accelerator_device.go
-model_accelerator_option.go
-model_accelerator_selection.go
 model_ancestors.go
 model_cluster_config_status.go
 model_cluster_control_plane_config.go
@@ -248,6 +241,7 @@ model_get_nodepools_minimal_200_response.go
 model_get_nodepools_minimal_internal_200_response.go
 model_get_put_patch_cluster_config_response.go
 model_gpu_info.go
+model_gpu_placement_match.go
 model_gpu_pods_placement_strategy.go
 model_gpu_resource_optimization.go
 model_grouped_measurement_group.go
@@ -288,7 +282,6 @@ model_node_info.go
 model_node_internal.go
 model_node_metric_type.go
 model_node_numa_for_sync.go
-model_node_pool_accelerators_request.go
 model_node_pool_setting.go
 model_node_pool_settings_get_response.go
 model_node_pool_settings_key_enum.go
@@ -323,7 +316,6 @@ model_numa_nodes_sync_request.go
 model_openshift_route_termination_policy.go
 model_patch_cluster_config_request.go
 model_placement_strategy.go
-model_project_accelerators.go
 model_put_cluster_config_request.go
 model_put_cluster_config_status_request.go
 model_put_cluster_config_status_request_status.go

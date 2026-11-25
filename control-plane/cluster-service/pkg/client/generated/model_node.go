@@ -24,8 +24,6 @@ var _ MappedNullable = &Node{}
 
 // Node struct for Node
 type Node struct {
-	// Positive Kubernetes extended resources used to match project accelerator selections.
-	AcceleratorResources []string `json:"acceleratorResources,omitempty"`
 	// Labels assigned to the node.
 	Labels *map[string]string `json:"labels,omitempty"`
 	// The calculated status of the node.
@@ -75,38 +73,6 @@ func NewNode(status string, nodePool string, createdAt time.Time, name string, c
 func NewNodeWithDefaults() *Node {
 	this := Node{}
 	return &this
-}
-
-// GetAcceleratorResources returns the AcceleratorResources field value if set, zero value otherwise.
-func (o *Node) GetAcceleratorResources() []string {
-	if o == nil || IsNil(o.AcceleratorResources) {
-		var ret []string
-		return ret
-	}
-	return o.AcceleratorResources
-}
-
-// GetAcceleratorResourcesOk returns a tuple with the AcceleratorResources field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *Node) GetAcceleratorResourcesOk() ([]string, bool) {
-	if o == nil || IsNil(o.AcceleratorResources) {
-		return nil, false
-	}
-	return o.AcceleratorResources, true
-}
-
-// HasAcceleratorResources returns a boolean if a field has been set.
-func (o *Node) HasAcceleratorResources() bool {
-	if o != nil && !IsNil(o.AcceleratorResources) {
-		return true
-	}
-
-	return false
-}
-
-// SetAcceleratorResources gets a reference to the given []string and assigns it to the AcceleratorResources field.
-func (o *Node) SetAcceleratorResources(v []string) {
-	o.AcceleratorResources = v
 }
 
 // GetLabels returns the Labels field value if set, zero value otherwise.
@@ -596,9 +562,6 @@ func (o Node) MarshalJSON() ([]byte, error) {
 
 func (o Node) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.AcceleratorResources) {
-		toSerialize["acceleratorResources"] = o.AcceleratorResources
-	}
 	if !IsNil(o.Labels) {
 		toSerialize["labels"] = o.Labels
 	}

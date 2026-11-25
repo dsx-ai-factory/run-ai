@@ -234,7 +234,7 @@ func UpdateInferenceSpec(ctx context.Context, workloadId string, tenantSettingsC
 	var warnings []workloadsApi.SubmissionWarning
 	if request.Spec.GpuType != nil || request.Spec.Accelerator != nil {
 		var selectionErr *workloadsApi.SubmissionErrorV2
-		warnings, selectionErr = resolveWorkloadAccelerators(ctx, mergedWorkload.ProjectId, mergedWorkload.Spec, nil)
+		warnings, selectionErr = resolveWorkloadAccelerators(ctx, mergedWorkload.ProjectId, mergedWorkload.ClusterId, mergedWorkload.Spec, nil)
 		if selectionErr != nil {
 			return api.Response(int(selectionErr.Code), selectionErr), nil
 		}

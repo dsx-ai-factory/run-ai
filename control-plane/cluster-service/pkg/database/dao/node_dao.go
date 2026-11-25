@@ -7,6 +7,7 @@ package dao
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -61,7 +62,7 @@ func prepareNodeForUpsert(node *models.Node) []any {
 		node.GpuType, node.GpuCount, node.GpuMemoryBytes, node.CreatedAt, node.UpdatedAt,
 		node.NvLinkDomainUid, node.NvLinkCliqueId,
 		node.NetworkTopologyLabelValues, networkTopologyLabelsJSON,
-		node.TopologyManagerPolicy, node.Labels, node.AcceleratorResources,
+		node.TopologyManagerPolicy, node.Labels,
 	}
 }
 
@@ -720,49 +721,24 @@ func readNodeLabelOptions(query orm.DB) ([]string, *api.Error) {
 	return options, nil
 }
 
-func GetNodePoolAccelerators(ctx context.Context, tenantID int32, clusterID string, request api.NodePoolAcceleratorsRequest) (api.ProjectAccelerators, *api.Error) {
-	result := api.ProjectAccelerators{Items: []api.AcceleratorOption{}}
-	if len(request.NodePoolIds) == 0 {
-		return result, nil
+// Match the same labels used by Pod admission on one node, including busy nodes.
+func MatchGPUPlacement(ctx context.Context, tenantID int32, clusterID string, placement api.GpuPlacementMatch) (bool, *api.Error) {
+	if len(placement.NodePoolIds) == 0 || len(placement.Labels) == 0 {
+		return false, nil
 	}
-	var rows []struct{ ResourceName, DeviceKey, DeviceValue string }
-	// Restrict by tenant, cluster, and current pool IDs before combining results.
-	const nodes = `
- FROM node n
- JOIN nodepools np ON np.tenant_id = n.tenant_id AND np.cluster_id::text = n.cluster_uuid AND np.name = n.node_pool
- CROSS JOIN LATERAL unnest(n.accelerator_resources) AS resource(resource_name)`
-	const permitted = `
- WHERE n.tenant_id = ? AND n.cluster_uuid = ? AND np.deleted_at IS NULL AND np.id::text = ANY(?)`
-	var err error
-	db := runaidb.DB().WithContext(ctx)
-	pools := pq.Array(request.NodePoolIds)
-	if sel := request.Selection; sel != nil {
-		// Exact probes expose only the label/value already supplied by the caller.
-		const exact = `SELECT DISTINCT resource_name, ?::text AS device_key, ?::text AS device_value` + nodes + permitted +
-			` AND resource_name = ? AND n.labels->>? = ?`
-		_, err = db.Raw(exact, sel.DeviceLabelKey, sel.GpuType, tenantID, clusterID, pools, sel.ResourceName, sel.DeviceLabelKey, sel.GpuType).Scan(&rows)
-	} else {
-		// Match only labels specific to each allocatable resource on that same node.
-		const discover = `SELECT DISTINCT resource_name, COALESCE(product.key, '') AS device_key, COALESCE(product.value, '') AS device_value` + nodes +
-			` LEFT JOIN LATERAL (
-      SELECT key, n.labels->>key AS value FROM unnest(ARRAY[resource_name || '.product', resource_name || '.product-name']) AS k(key)
-      WHERE n.labels->>key <> ''
-    ) product ON TRUE` + permitted + `
-    AND (right(resource_name, 4) = '/gpu' OR product.key IS NOT NULL)
-    ORDER BY resource_name, device_key, device_value`
-		_, err = db.Raw(discover, tenantID, clusterID, pools).Scan(&rows)
-	}
+	labels, err := json.Marshal(placement.Labels)
 	if err != nil {
-		return result, api.NewError(http.StatusInternalServerError, "Failed to retrieve accelerator inventory", err)
+		return false, api.NewError(http.StatusBadRequest, "Invalid placement labels", err)
 	}
-	for _, row := range rows {
-		if len(result.Items) == 0 || result.Items[len(result.Items)-1].ResourceName != row.ResourceName {
-			result.Items = append(result.Items, api.AcceleratorOption{ResourceName: row.ResourceName, Devices: []api.AcceleratorDevice{}})
-		}
-		if row.DeviceKey != "" {
-			option := &result.Items[len(result.Items)-1]
-			option.Devices = append(option.Devices, api.AcceleratorDevice{Key: row.DeviceKey, Value: row.DeviceValue})
-		}
+	const query = `SELECT EXISTS (
+      SELECT 1 FROM node n JOIN nodepools np
+        ON np.tenant_id = n.tenant_id AND np.cluster_id::text = n.cluster_uuid AND np.name = n.node_pool
+      WHERE n.tenant_id = ? AND n.cluster_uuid = ? AND np.deleted_at IS NULL
+        AND np.id::text = ANY(?) AND n.labels::jsonb @> ?::jsonb
+    )`
+	var matches bool
+	if _, err := runaidb.DB().WithContext(ctx).Raw(query, tenantID, clusterID, pq.Array(placement.NodePoolIds), string(labels)).Scan(&matches); err != nil {
+		return false, api.NewError(http.StatusInternalServerError, "Failed to check GPU placement", err)
 	}
-	return result, nil
+	return matches, nil
 }

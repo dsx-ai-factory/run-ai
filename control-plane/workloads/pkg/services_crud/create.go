@@ -267,7 +267,7 @@ func createWorkload(ctx context.Context, backendClient clients.TenantSettingsCli
 		return rebuildErr
 	}
 
-	warnings, selectionErr := resolveWorkloadAccelerators(ctx, params.Response.ProjectId, responseSpec, responseMasterSpec)
+	warnings, selectionErr := resolveWorkloadAccelerators(ctx, params.Response.ProjectId, params.Response.ClusterId, responseSpec, responseMasterSpec)
 	if selectionErr != nil {
 		return selectionErr
 	}
