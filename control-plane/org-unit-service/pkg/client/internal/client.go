@@ -9,7 +9,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/projectresources"
 	"net/http"
 	"time"
 
@@ -415,8 +414,4 @@ func (client *OrgUnitClient) GetInternalDeletedOrgUnits(ctx context.Context, del
 		return []openapi.DeletedOrgUnit{}, openapi.NewError(http.StatusServiceUnavailable, "failed to get response of get deleted org units")
 	}
 	return response.OrgUnits, nil
-}
-
-func (client *OrgUnitClient) GetProjectGPUPoolIDs(ctx context.Context, projectID string) ([]string, error) {
-	return projectresources.GPUEnabledPoolIDs(ctx, client.ApiClient.ProjectsAPI, projectID)
 }

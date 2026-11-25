@@ -17,12 +17,14 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
 
 	authorization_client "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v1/runai_workloads"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/workloadutils"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	clients "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/backend"
+	orgUnit "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/org_unit"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/dao_crud"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/models_crud"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services_utils"
@@ -232,9 +234,13 @@ func UpdateInferenceSpec(ctx context.Context, workloadId string, tenantSettingsC
 		return api.Response(int(policyErr.Code), policyErr), nil
 	}
 	var warnings []workloadsApi.SubmissionWarning
-	if request.Spec.GpuType != nil || request.Spec.Accelerator != nil {
+	if request.Spec.GpuType != nil || request.Spec.Accelerator != nil || request.Spec.NodePools != nil {
 		var selectionErr *workloadsApi.SubmissionErrorV2
-		warnings, selectionErr = resolveWorkloadAccelerators(ctx, mergedWorkload.ProjectId, mergedWorkload.ClusterId, mergedWorkload.Spec, nil)
+		getProject := func() *orgUnitApi.Project {
+			project, _ := orgUnit.Get().GetProjectById(ctx, mergedWorkload.ProjectId)
+			return project
+		}
+		warnings, selectionErr = resolveWorkloadAccelerators(ctx, getProject, mergedWorkload.ClusterId, mergedWorkload.Spec, nil)
 		if selectionErr != nil {
 			return api.Response(int(selectionErr.Code), selectionErr), nil
 		}

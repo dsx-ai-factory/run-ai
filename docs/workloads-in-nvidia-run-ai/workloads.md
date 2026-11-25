@@ -343,7 +343,7 @@ The default resource is `nvidia.com/gpu` and the default NVIDIA model label is `
 
 To use a different whole-device resource, set `accelerator.resourceName`, for example `amd.com/gpu`. To select a model on that resource, also set `accelerator.deviceLabelKey` to the node label your cluster uses for that model.
 
-If inventory lacks a requested model and the label key is known, submission returns a warning and preserves the placement requirement. The workload stays Pending until a node with the requested resource, model, and capacity can run it.
+The inventory check looks for the requested hardware in the selected project node pools, including pools with a GPU limit of zero. When the workload omits the pool list, the check uses the project defaults. If the hardware is missing, submission returns a warning and preserves the placement requirement. The workload stays Pending until a node with the requested resource, model, and capacity can run it.
 
 ## Stopping a Workload
 

@@ -1868,68 +1868,6 @@ var _ = Describe("Project API tests", Ordered, func() {
 			projectApiService = projects.NewProjectApiService(projectDeletionService, &clusterServiceClient, nil)
 		})
 
-		DescribeTable("filters project node pools by effective GPU access", func(parentLimit, projectLimit *float64, unparented, firstPoolVisible, secondPoolVisible bool) {
-			department := getDepartmentCreateRequest(createDepartmentName(), clusterId)
-			department.Resources[0].Gpu = api.ResourcesNullableGpu{Deserved: ptr.To(0.0), Limit: parentLimit}
-			secondPool := api.ResourcesNullable{
-				NodePool: &api.ResourcesNodePool{Id: fmt.Sprint(nodePoolId), Name: nodePoolName},
-				Gpu:      api.ResourcesNullableGpu{Deserved: ptr.To(0.0), Limit: ptr.To(1.0)},
-			}
-			department.Resources = append(department.Resources, secondPool)
-			resp, err := departmentApiService.CreateDepartment(ctx, department)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(resp.Code).To(Equal(http.StatusCreated))
-			parentID := resp.Body.(api.Department).Id
-			DeferCleanup(func() {
-				result, err := departmentApiService.DeleteDepartment(ctx, parentID)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(result.Code).To(Equal(http.StatusNoContent))
-			})
-
-			name := createProjectName()
-			project := getProjectCreateRequest(name, name, parentID, clusterId)
-			project.Resources[0].Gpu = api.ResourcesNullableGpu{Deserved: ptr.To(0.0), Limit: projectLimit}
-			expectedPools := []string{}
-			if firstPoolVisible {
-				expectedPools = append(expectedPools, project.Resources[0].NodePool.Id)
-			}
-			if secondPoolVisible {
-				expectedPools = append(expectedPools, secondPool.NodePool.Id)
-			} else {
-				secondPool.Gpu.Limit = ptr.To(0.0)
-			}
-			project.Resources = append(project.Resources, secondPool)
-			resp, err = projectApiService.CreateProject(ctx, project)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(resp.Code).To(Equal(http.StatusCreated))
-			id := resp.Body.(api.Project).Id
-			projectIds = append(projectIds, id)
-			if unparented {
-				// Modern creation assigns a default department. Reproduce the existing legacy database shape.
-				db := runaidb.DB().Actual()
-				Expect(db.Exec("UPDATE project SET parent_id = NULL WHERE id = ?", id).Error).To(Succeed())
-				defer func() {
-					Expect(db.Exec("UPDATE project SET parent_id = ? WHERE id = ?", parentID, id).Error).To(Succeed())
-				}()
-			}
-
-			result, err := projectApiService.GetProjectNodePoolResources(ctx, []string{"orgUnitId==" + id, "gpuAccessible==true"}, "", "", 0, 100, "")
-			Expect(err).NotTo(HaveOccurred())
-			Expect(result.Code).To(Equal(http.StatusOK))
-			var ids []string
-			for _, pool := range result.Body.(api.GetProjectNodePoolResources200Response).NodePoolResources {
-				ids = append(ids, pool.NodePoolId)
-			}
-			Expect(ids).To(ConsistOf(expectedPools))
-		},
-			Entry("project hard zero", ptr.To(2.0), ptr.To(0.0), false, false, false),
-			Entry("department hard zero", ptr.To(0.0), ptr.To(1.0), false, false, false),
-			Entry("department hard zero on one of two otherwise enabled pools", ptr.To(0.0), ptr.To(1.0), false, false, true),
-			Entry("unset department and unlimited project", (*float64)(nil), ptr.To(-1.0), false, true, false),
-			Entry("unlimited department and unset project", ptr.To(-1.0), (*float64)(nil), false, true, false),
-			Entry("legacy project without a department", ptr.To(0.0), ptr.To(1.0), true, true, false),
-		)
-
 		It("test update project resources ok status", func() {
 			name := createProjectName()
 			request := getProjectCreateRequest(name, name, departmentId, clusterId)

@@ -25,7 +25,6 @@ import (
 
 // ClientInterface lists the org unit services that the workloads service needs
 type ClientInterface interface {
-	GetProjectGPUPoolIDs(ctx context.Context, projectID string) ([]string, error)
 	GetProjectById(ctx context.Context, projectId string) (*orgUnitApi.Project, *orgUnitApi.Error)
 	GetProjectsMetadataByDepartment(ctx context.Context, departmentId string) ([]orgUnitApi.ProjectMetadata, *orgUnitApi.Error)
 	GetAncestorsOfScope(ctx context.Context, scopeType orgUnitApi.ScopeType, scopeId string) (*orgUnitApi.Ancestors, *orgUnitApi.Error)
@@ -152,8 +151,4 @@ func tenantIdFromContext(ctx context.Context) string {
 		return *t
 	}
 	return ""
-}
-
-func (c *cacheClient) GetProjectGPUPoolIDs(ctx context.Context, projectID string) ([]string, error) {
-	return c.client.GetProjectGPUPoolIDs(ctx, projectID)
 }

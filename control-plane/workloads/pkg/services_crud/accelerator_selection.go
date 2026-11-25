@@ -9,13 +9,13 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
-	"sync"
 
+	orgapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/clusterservice"
-	orgunit "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/org_unit"
 	clusterconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 )
 
@@ -32,28 +32,26 @@ type acceleratorSpec interface {
 	UnsetAccelerator()
 }
 
-func resolveWorkloadAccelerators(ctx context.Context, projectID, clusterID string, spec *workloadsApi.SupersetSpec, master *workloadsApi.MasterSpec) ([]workloadsApi.SubmissionWarning, *workloadsApi.SubmissionErrorV2) {
+func resolveWorkloadAccelerators(ctx context.Context, getProject func() *orgapi.Project, clusterID string, spec *workloadsApi.SupersetSpec, master *workloadsApi.MasterSpec) ([]workloadsApi.SubmissionWarning, *workloadsApi.SubmissionErrorV2) {
 	if spec == nil {
 		return nil, nil
 	}
 	type roleSpec struct {
 		field string
 		spec  acceleratorSpec
+		pools []string
 	}
-	roles := []roleSpec{{"spec", spec}}
+	roles := []roleSpec{{"spec", spec, spec.NodePools}}
 	if master != nil {
-		roles = append(roles, roleSpec{"masterSpec", master})
+		roles = append(roles, roleSpec{"masterSpec", master, master.NodePools})
 	}
 	if leader := spec.Leader.Get(); leader != nil {
-		roles = append(roles, roleSpec{"spec.leader", leader})
+		roles = append(roles, roleSpec{"spec.leader", leader, spec.NodePools})
 	}
 	if worker := spec.Worker.Get(); worker != nil {
-		roles = append(roles, roleSpec{"spec.worker", worker})
+		roles = append(roles, roleSpec{"spec.worker", worker, spec.NodePools})
 	}
 	var warnings []workloadsApi.SubmissionWarning
-	getPools := sync.OnceValues(func() ([]string, error) {
-		return orgunit.Get().GetProjectGPUPoolIDs(ctx, projectID)
-	})
 	for _, role := range roles {
 		model := ""
 		if value, _ := role.spec.GetGpuTypeOk(); value != nil {
@@ -90,29 +88,44 @@ func resolveWorkloadAccelerators(ctx context.Context, projectID, clusterID strin
 		}
 		labels := map[string]string{clusterconstants.AcceleratorResourceNodeLabel(resource): "true"}
 		warning := workloadsApi.SubmissionWarning{Field: role.field + ".accelerator.resourceName", Code: gpuTypeNotFound,
-			Message: fmt.Sprintf("Resource %s was not found in the project's accessible pools.", resource)}
+			Message: fmt.Sprintf("Resource %s was not found in the selected project pools.", resource)}
 		if requirement != nil {
 			warning.Field = role.field + ".gpuType"
-			warning.Message = fmt.Sprintf("No %s with label %s=%s was found in the project's accessible pools.", resource, requirement.Key, model)
+			warning.Message = fmt.Sprintf("No %s with label %s=%s was found in the selected project pools.", resource, requirement.Key, model)
 			if existing, ok := labels[requirement.Key]; ok && existing != model {
 				warnings = append(warnings, warning)
 				continue
 			}
 			labels[requirement.Key] = model
 		}
-		pools, err := getPools()
-		if err == nil && len(pools) != 0 {
-			var matches bool
-			matches, err = clusterservice.Get().MatchGPUPlacement(ctx, clusterID, pools, labels)
-			if err == nil && matches {
-				continue
-			}
-		}
-		if err != nil {
+		project := getProject()
+		if project == nil {
 			warning.Code = gpuInventoryUnavailable
 			warning.Message = unavailableInventoryMessage
+		} else if pools := selectedGPUPoolIDs(project, role.pools); len(pools) > 0 {
+			matches, err := clusterservice.Get().MatchGPUPlacement(ctx, clusterID, pools, labels)
+			if err != nil {
+				warning.Code = gpuInventoryUnavailable
+				warning.Message = unavailableInventoryMessage
+			} else if matches {
+				continue
+			}
 		}
 		warnings = append(warnings, warning)
 	}
 	return warnings, nil
+}
+
+func selectedGPUPoolIDs(project *orgapi.Project, names []string) []string {
+	if len(names) == 0 {
+		names = getDefaultNodepools(project)
+	}
+	var ids []string
+	for _, resource := range project.Resources {
+		pool := resource.NodePool.Get()
+		if pool != nil && pool.Id != "" && slices.Contains(names, pool.GetName()) {
+			ids = append(ids, pool.Id)
+		}
+	}
+	return ids
 }

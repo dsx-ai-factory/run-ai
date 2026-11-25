@@ -56,7 +56,7 @@ func TestAcceleratorClearWithoutNewInventoryDependency(t *testing.T) {
 	spec := workloadsApi.SupersetSpec{}
 	spec.SetGpuType("H100")
 	require.Nil(t, mergeUpdateSpecIntoFullSpec(context.Background(), &spec, map[string]interface{}{"gpuType": "any"}))
-	warnings, err := resolveWorkloadAccelerators(context.Background(), "project", "cluster", &spec, nil)
+	warnings, err := resolveWorkloadAccelerators(context.Background(), nil, "cluster", &spec, nil)
 	require.Nil(t, err)
 	require.Empty(t, warnings)
 	require.False(t, spec.HasGpuType())
@@ -66,7 +66,7 @@ func TestAcceleratorClearWithoutNewInventoryDependency(t *testing.T) {
 func TestAcceleratorRejectsExplicitEmptyModel(t *testing.T) {
 	var spec workloadsApi.SupersetSpec
 	spec.SetGpuType("")
-	_, err := resolveWorkloadAccelerators(context.Background(), "project", "cluster", &spec, nil)
+	_, err := resolveWorkloadAccelerators(context.Background(), nil, "cluster", &spec, nil)
 	require.NotNil(t, err)
 	require.EqualValues(t, 400, err.Code)
 }

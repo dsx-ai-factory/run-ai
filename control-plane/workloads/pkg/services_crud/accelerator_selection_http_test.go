@@ -8,11 +8,13 @@ package services_crud
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"strings"
 
-	"errors"
+	orgapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/authorization"
 	clusterMock "github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/clusterservice"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/orgunit"
@@ -35,7 +37,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	"slices"
 )
 
 type gpuManifestRecorder struct {
@@ -71,7 +72,7 @@ func (c placementLookup) MatchGPUPlacement(_ context.Context, clusterID string, 
 	if c.err != nil {
 		return false, c.err
 	}
-	if clusterID != c.clusterID || !slices.Equal(pools, []string{"eligible"}) {
+	if clusterID != c.clusterID || !slices.Contains(pools, "eligible") {
 		return false, nil
 	}
 	for _, node := range c.nodes {
@@ -113,15 +114,23 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 		cluster := workloadtest.BuildDisplayedCluster(project.ClusterId, "3.1.0", nil)
 		checkerCluster.SetMock(checkerCluster.NewSimpleMockClient().WithCluster(project.ClusterId, cluster))
 		checker.InitClusterCapabilitiesChecker("", workloadtest.GetDefaultClustersCacheConfig(), "")
-		clusterservice.SetMock(placementLookup{ClientInterface: clusterMock.NewSimpleMock().WithDefaultNodePool(project.ClusterId).WithCluster(project.ClusterId, &cluster),
+		clusterservice.SetMock(placementLookup{ClientInterface: clusterMock.NewSimpleMock().WithDefaultNodePool(project.ClusterId).WithNodePools(project.ClusterId, "h100", "cpu").WithCluster(project.ClusterId, &cluster),
 			clusterID: project.ClusterId, nodes: []map[string]string{
 				{clusterconstants.AcceleratorResourceNodeLabel(nvidia): "true", nvidiaLabel: "H100"},
 				{clusterconstants.AcceleratorResourceNodeLabel(amd): "true", amdLabel: "MI300X"},
 				{clusterconstants.AcceleratorResourceNodeLabel("gpu.intel.com/i915"): "true", "hardware.example.com/model": "Flex170"},
 			}})
-		org := org_unit.NewSimpleMock().WithRandoms(project).WithProject(project.ProjectIdStr, GetProjectResponse(*project))
-		org.GPUPoolIDsByProject = map[string][]string{project.ProjectIdStr: {"eligible"}}
-		org_unit.SetMock(org)
+		projectInfo := GetProjectResponse(*project)
+		projectInfo.DefaultNodePools = []string{"h100"}
+		for _, pool := range []struct{ name, id string }{{"h100", "eligible"}, {"cpu", "other"}} {
+			resource := orgapi.Resources{}
+			nodePool := orgapi.NewResourcesNodePool(pool.id)
+			nodePool.SetName(pool.name)
+			resource.SetNodePool(*nodePool)
+			resource.Gpu.SetLimit(0)
+			projectInfo.Resources = append(projectInfo.Resources, resource)
+		}
+		org_unit.SetMock(org_unit.NewSimpleMock().WithRandoms(project).WithProject(project.ProjectIdStr, projectInfo))
 		recorder = &gpuManifestRecorder{workloadsMgrMock: workloadsMgrMock{createResponse: &manager.WorkloadV2{
 			Metadata:     manager.WorkloadV2Metadata{ProjectId: project.ProjectIdStr, ProjectName: GetProjectResponse(*project).Name, TenantId: int32(project.TenantId), ClusterId: project.ClusterId, DepartmentId: project.DepartmentId, CreatedBy: workloadtest.TestUser},
 			DesiredPhase: manager.DESIREDPHASE_RUNNING,
@@ -207,6 +216,27 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 		Entry("empty key without a model", amd, "", ""),
 		Entry("malformed key with Any", amd, "any", "invalid key"),
 		Entry("malformed key without a resource or model", "", "", "invalid key"),
+	)
+
+	DescribeTable("checks H100 in selected or default pools even when the project GPU limit is zero",
+		func(selected []string, expectWarning bool) {
+			spec := map[string]any{"image": "ubuntu", "compute": map[string]int{"gpuDevicesRequest": 1}, "gpuType": "H100"}
+			if selected != nil {
+				spec["nodePools"] = selected
+			}
+			created := submit("trainings", "h100-placement", spec)
+			Expect(created.Spec.GetGpuType()).To(Equal("H100"))
+			if expectWarning {
+				Expect(created.Warnings).To(HaveLen(1))
+				Expect(created.Warnings[0].Code).To(Equal(gpuTypeNotFound))
+			} else {
+				Expect(created.Warnings).To(BeEmpty())
+			}
+		},
+		Entry("selected zero-limit H100 pool", []string{"h100"}, false),
+		Entry("H100 in the second selected pool", []string{"cpu", "h100"}, false),
+		Entry("implicit project default is the zero-limit H100 pool", []string(nil), false),
+		Entry("H100 exists only outside the selected pool", []string{"cpu"}, true),
 	)
 
 	It("warns when the model contradicts the resource presence label", func() {
@@ -347,5 +377,19 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 		Expect(updated.Spec.GetGpuType()).To(Equal("MI300X"))
 		Expect(updated.Spec.Accelerator.Get().GetDeviceLabelKey()).To(Equal(amdLabel))
 		assertPlacement(amd, amdLabel, "MI300X")
+	})
+
+	It("checks the saved GPU type when only the inference node pools change", func() {
+		created := submit("inferences", "update-pools", map[string]any{
+			"image": "ubuntu", "servingPort": map[string]any{"container": 8080},
+			"compute": map[string]int{"gpuDevicesRequest": 1}, "gpuType": "H100",
+		})
+		Expect(created.Warnings).To(BeEmpty())
+		raw := request(http.MethodPatch, "/api/v1/workloads/inferences/"+created.WorkloadId,
+			map[string]any{"spec": map[string]any{"nodePools": []string{"cpu"}}}, http.StatusAccepted)
+		var updated workloadsapi.SupersetWorkload
+		Expect(json.Unmarshal(raw, &updated)).To(Succeed())
+		Expect(updated.Warnings).To(HaveLen(1))
+		Expect(updated.Warnings[0].Code).To(Equal(gpuTypeNotFound))
 	})
 })

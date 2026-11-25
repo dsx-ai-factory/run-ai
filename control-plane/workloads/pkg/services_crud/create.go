@@ -267,12 +267,6 @@ func createWorkload(ctx context.Context, backendClient clients.TenantSettingsCli
 		return rebuildErr
 	}
 
-	warnings, selectionErr := resolveWorkloadAccelerators(ctx, params.Response.ProjectId, params.Response.ClusterId, responseSpec, responseMasterSpec)
-	if selectionErr != nil {
-		return selectionErr
-	}
-	params.Response.Warnings = warnings
-
 	responseSpec, priorityClassError := applyPriorityClassLabelWorkaround(ctx, responseSpec, workloadType, params.Response.ClusterId)
 	if priorityClassError != nil {
 		return workloadsApi.NewSubmissionErrorV2(priorityClassError.Code, priorityClassError.Message)
@@ -371,6 +365,12 @@ func createWorkload(ctx context.Context, backendClient clients.TenantSettingsCli
 	}
 
 	setDefaultNodepoolsIfNecessary(ctx, &params.Response, project)
+
+	warnings, selectionErr := resolveWorkloadAccelerators(ctx, func() *orgUnitApi.Project { return project }, params.Response.ClusterId, responseSpec, responseMasterSpec)
+	if selectionErr != nil {
+		return selectionErr
+	}
+	params.Response.Warnings = warnings
 
 	clusterCapabilityChecker := checker.NewClusterCapabilitiesChecker(params.Response.ClusterId)
 	segmentRouting := segmentedDistributedRoutingDecision{}

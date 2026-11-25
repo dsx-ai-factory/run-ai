@@ -16,7 +16,6 @@ import (
 )
 
 type SimpleMock struct {
-	GPUPoolIDsByProject map[string][]string
 	ProjectInfoById     map[string]orgUnitApi.Project
 	DepartmentNamesById map[string]string
 	Randoms             *testutils.RandomValues
@@ -87,8 +86,4 @@ func (smc *SimpleMock) GetDepartmentName(_ context.Context, departmentId string)
 		return name, nil
 	}
 	return "", nil
-}
-
-func (smc *SimpleMock) GetProjectGPUPoolIDs(ctx context.Context, projectID string) ([]string, error) {
-	return smc.GPUPoolIDsByProject[projectID], nil
 }
