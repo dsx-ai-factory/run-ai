@@ -38,27 +38,6 @@ export const inferenceRoutes: RunaiRouteRecord = {
       },
     },
     {
-      path: "assets",
-      name: INFERENCE_ROUTE_NAMES.INFERENCE_ASSETS_EDIT,
-      component: () => import("@/views/inference/creation/inference-assets-based.vue"),
-      meta: {
-        pageTitle: "New inference",
-        fullWidth: true,
-        requestToLeave: true,
-        resourceType: ResourceType.Inferences,
-        minPermittedActions: [Action.Create, Action.Update],
-        requiresAuth: true,
-        parentSubject: EMenuSubjectNames.WORKLOADS_MANAGER,
-        backPageName: WORKLOAD_ROUTE_NAMES.WORKLOAD_INDEX,
-      },
-      beforeEnter: (to, from, next) => {
-        // If the user tries to access the assets page directly, redirect to the new training page
-        if (from === START_LOCATION) next({ name: INFERENCE_ROUTE_NAMES.INFERENCE_NEW });
-        else next();
-      },
-    },
-
-    {
       path: "hybrid",
       name: INFERENCE_ROUTE_NAMES.INFERENCE_FLAT_HYBRID,
       component: () => import("@/views/inference/creation/inference-hybrid.vue"),
@@ -73,7 +52,7 @@ export const inferenceRoutes: RunaiRouteRecord = {
         backPageName: WORKLOAD_ROUTE_NAMES.WORKLOAD_INDEX,
       },
       beforeEnter: (to, from, next) => {
-        // If the user tries to access the assets page directly, redirect to the new training page
+        // Direct entry needs the project and cluster selection from the first step.
         if (from === START_LOCATION) next({ name: INFERENCE_ROUTE_NAMES.INFERENCE_NEW });
         else next();
       },

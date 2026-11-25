@@ -344,6 +344,10 @@ export default defineComponent({
       ].includes(selectedMetricOption.value.value),
     );
 
+    watch([selectedEntityOption, () => props.nodePoolName, () => props.clusterId], () => {
+      filterBy.value.page = 1;
+    });
+
     watch(
       [selectedEntityOption, rankingTimeframe, selectedMetricOption, () => props.nodePoolName, () => props.clusterId],
       async () => {

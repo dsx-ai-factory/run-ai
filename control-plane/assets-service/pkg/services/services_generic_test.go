@@ -57,11 +57,6 @@ type AssetTestFactory interface {
 	// test the usage info, i.e. the set of workloads which depend on all the assets included in the response
 	// (we do not test each asset separately, it checks all the assets included in the response together).
 	validateListContent(listRequest *http.Request, expectedUsedBy datastructs.Set[string], assetSpec ...[]byte)
-
-	// add the asset id to a workload creation request. if the asset is o a kind that does not take part
-	// in workspaces (for example: s3 secret which cannot be included in a workspace directly) the function
-	// should leave the output workload without changing it and return false.
-	addToWorkloadCreationReq(request *api.WorkloadCreationRequest, assetMeta *api.AssetMeta) bool
 }
 
 // AssetFilterStyle labels how an asset's list endpoint exposes filtering.

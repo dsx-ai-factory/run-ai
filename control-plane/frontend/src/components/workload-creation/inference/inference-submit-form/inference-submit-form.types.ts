@@ -10,7 +10,8 @@ import type {
 } from "@/swagger-models/workloads-client";
 import type { IPolicyViewDetails } from "@/utils/policy.util/policy-view.util";
 import type { THybridFormState } from "@/models/workload-hybrid.model";
-import type { StringOption, AssetKind } from "@/swagger-models/assets-service-client";
+import type { AssetKind } from "@/swagger-models/assets-service-client";
+import type { StringOption } from "@/swagger-models/policy-service-client";
 import type { IAutoScaleOptions } from "@/components/section/compute-resource-section/auto-scale-section/auto-scale-section.model";
 
 import type { SecretListInfo } from "@/swagger-models/k8s-objects-tracker-client";

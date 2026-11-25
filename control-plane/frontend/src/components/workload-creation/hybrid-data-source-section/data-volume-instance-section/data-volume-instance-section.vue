@@ -39,7 +39,7 @@ import { defineComponent, type PropType } from "vue";
 import { PolicyStringField } from "@/components/common/policy-string-field";
 // Models
 import type { IUIDataVolumeInstance } from "@/models/workload.model";
-import type { DataVolumeRules } from "@/swagger-models/assets-service-client";
+import type { DataVolumeRules } from "@/swagger-models/policy-service-client";
 // Constants
 import { assetsUtil } from "@/utils/assets.util/assets.util";
 import { validationRules } from "@/common/validation-rules";

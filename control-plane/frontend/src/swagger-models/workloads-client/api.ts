@@ -7804,19 +7804,6 @@ export interface EmptyDirsRules {
 /**
  * 
  * @export
- * @interface EnableHybridSubmissionSetting
- */
-export interface EnableHybridSubmissionSetting {
-    /**
-     * 
-     * @type {boolean}
-     * @memberof EnableHybridSubmissionSetting
-     */
-    'enabled'?: boolean;
-}
-/**
- * 
- * @export
  * @interface EnablePoliciesSetting
  */
 export interface EnablePoliciesSetting {
@@ -8555,37 +8542,6 @@ export interface GetAvailablePrioritiesAndCategories200Response {
      * @memberof GetAvailablePrioritiesAndCategories200Response
      */
     'categories': Array<WorkloadCategory>;
-}
-/**
- * 
- * @export
- * @interface GetEnableHybridSubmission
- */
-export interface GetEnableHybridSubmission {
-    /**
-     * 
-     * @type {GetEnableSettingsValue}
-     * @memberof GetEnableHybridSubmission
-     */
-    'value'?: GetEnableSettingsValue;
-    /**
-     * 
-     * @type {string}
-     * @memberof GetEnableHybridSubmission
-     */
-    'displayName'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof GetEnableHybridSubmission
-     */
-    'description'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof GetEnableHybridSubmission
-     */
-    'stage'?: string;
 }
 /**
  * 
@@ -26642,12 +26598,6 @@ export interface WorkloadsSettingsGetResponse {
     'workloadSubmissionV2Enabled'?: GetWorkloadSubmissionV2Enabled;
     /**
      * 
-     * @type {GetEnableHybridSubmission}
-     * @memberof WorkloadsSettingsGetResponse
-     */
-    'enableHybridSubmission'?: GetEnableHybridSubmission;
-    /**
-     * 
      * @type {GetGpuOverProvisioning}
      * @memberof WorkloadsSettingsGetResponse
      */
@@ -26668,7 +26618,6 @@ export interface WorkloadsSettingsGetResponse {
 export const WorkloadsSettingsKeyEnum = {
     EnablePolicies: 'enablePolicies',
     WorkloadSubmissionV2Enabled: 'workloadSubmissionV2Enabled',
-    EnableHybridSubmission: 'enableHybridSubmission',
     GpuOverProvisioning: 'gpuOverProvisioning',
     ApplicationSubmission: 'applicationSubmission'
 } as const;

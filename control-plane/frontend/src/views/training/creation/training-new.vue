@@ -32,62 +32,51 @@
 
             <transition-group name="fade">
               <template v-if="selectedProjectId && selectedProjectId !== -1">
-                <template v-if="isHybridSupported">
-                  <runai-expansion-item
-                    disable-closing
-                    class="multi-node-section"
-                    aid="multi-node-section"
-                    label="Workload architecture"
-                  >
-                    <workload-architecture-select
-                      :is-distributed="!!selectedDistributedDetails"
-                      :form-type="EDistributedFormType.TRAINING"
-                      @update="setDistributedDetails"
-                    />
-                  </runai-expansion-item>
-                  <template-section-v2
-                    aid="template-section-v2"
-                    :templates="flatTemplates"
-                    :total-templates-count="flatTotalCount"
-                    :loading="loadingTemplate"
-                    :list-query="flatTemplatesListQuery"
-                    :template-id="selectedTemplateId || null"
-                    @template-changed="onSelectedTemplate"
-                    @query-changed="onTemplatesListQueryChanged"
-                    @get-next-batch="onGetNextTemplatesBatch"
+                <runai-expansion-item
+                  disable-closing
+                  class="multi-node-section"
+                  aid="multi-node-section"
+                  label="Workload architecture"
+                >
+                  <workload-architecture-select
+                    :is-distributed="!!selectedDistributedDetails"
+                    :form-type="EDistributedFormType.TRAINING"
+                    @update="setDistributedDetails"
                   />
+                </runai-expansion-item>
+                <template-section-v2
+                  aid="template-section-v2"
+                  :templates="flatTemplates"
+                  :total-templates-count="flatTotalCount"
+                  :loading="loadingTemplate"
+                  :list-query="flatTemplatesListQuery"
+                  :template-id="selectedTemplateId || null"
+                  @template-changed="onSelectedTemplate"
+                  @query-changed="onTemplatesListQueryChanged"
+                  @get-next-batch="onGetNextTemplatesBatch"
+                />
 
-                  <runai-expansion-item
-                    v-if="selectedDistributedDetails"
-                    disable-closing
-                    class="framework-and-configuration-section"
-                    aid="framework-and-configuration-section"
-                    label="Framework"
-                  >
-                    <distributed-framework-selection-section
-                      :disable-selection="disableFrameworkSection"
-                      disabled-tooltip="This is automatically set based on the selected template. To modify it select a different template or start from scratch"
-                      :dist-framework="selectedDistributedDetails.distFramework || null"
-                      :cluster-id="selectedClusterId"
-                      @update="setDistributedFramework"
-                    />
-
-                    <distributed-replica-configuration
-                      v-if="showMasterConfigurationSection"
-                      :model-value="selectedDistributedDetails.noMaster || false"
-                      @update:model-value="selectedDistributedDetails.noMaster = $event"
-                    />
-                  </runai-expansion-item>
-                </template>
-                <template v-else>
-                  <multi-node-section
-                    v-if="isClusterVersionSupportDistributedTraining"
-                    :is-selectable="true"
-                    :multi-node-section-model="selectedDistributedDetails"
-                    @update-multi-node-section-model="updateMultiNodeSection"
+                <runai-expansion-item
+                  v-if="selectedDistributedDetails"
+                  disable-closing
+                  class="framework-and-configuration-section"
+                  aid="framework-and-configuration-section"
+                  label="Framework"
+                >
+                  <distributed-framework-selection-section
+                    :disable-selection="disableFrameworkSection"
+                    disabled-tooltip="This is automatically set based on the selected template. To modify it select a different template or start from scratch"
+                    :dist-framework="selectedDistributedDetails.distFramework || null"
                     :cluster-id="selectedClusterId"
+                    @update="setDistributedFramework"
                   />
-                </template>
+
+                  <distributed-replica-configuration
+                    v-if="showMasterConfigurationSection"
+                    :model-value="selectedDistributedDetails.noMaster || false"
+                    @update:model-value="selectedDistributedDetails.noMaster = $event"
+                  />
+                </runai-expansion-item>
                 <workload-name-section
                   entity-type="training"
                   aid="training-name-section"
@@ -148,15 +137,12 @@ import { defineComponent, type DefineComponent } from "vue";
 import { useTrainingStore } from "@/stores/training.store";
 import { useClusterStore } from "@/stores/cluster.store";
 import { useAppStore } from "@/stores/app.store";
-import { useSettingStore } from "@/stores/setting.store";
-import { useEnvironmentStore } from "@/stores/environment.store";
 import { useAuthStore } from "@/stores/auth.store";
 
 // services
 import { alertUtil } from "@/utils/alert.util";
 import { requestToLeave } from "@/services/infra/router.service/router.service";
 import { urlService } from "@/services/url.service/url.service";
-import { trainingService } from "@/services/control-plane/training.service/training.service";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 
 // cmps
@@ -164,33 +150,22 @@ import { RunaiFormWrapper } from "@/components/common/runai-form-wrapper";
 import { RunaiExpansionWrapper } from "@/components/common/runai-expansion-wrapper";
 import { WorkloadNameSection } from "@/components/section/workload-name-section";
 import { ProjectSection } from "@/components/section/project-section";
-import { MultiNodeSection } from "@/components/section/multi-node-section";
 import { RunaiClusterSection } from "@/components/common/runai-cluster-selection/runai-cluster-section";
 import { RunaiBtn } from "@/components/common/runai-btn";
 import { TemplateSectionV2 } from "@/components/section/template-section-v2";
 import { RunaiExpansionItem } from "@/components/common/runai-expansion-item";
 import { QuickSubmissionDropdown } from "@/components/workload-creation/quick-submission-dropdown";
 // models
-import { UidGidSource, DistributedFramework } from "@/swagger-models/assets-service-client";
-import type { IUIDistributed, IUIWorkloadCreation } from "@/models/workload.model";
-import type { Project, ProjectMetadata } from "@/swagger-models/org-unit-service-client";
+import { DistributedFramework } from "@/swagger-models/assets-service-client";
+import type { IUIDistributed } from "@/models/workload.model";
+import type { ProjectMetadata } from "@/swagger-models/org-unit-service-client";
 import type { ICardQuery } from "@/components/common/runai-card-list/runai-card-list.model";
-// constant
-import { errorMessages } from "@/common/error-message.constant";
-// common
-import { required } from "@/common/form.validators";
 
 // route
 import { TRAINING_ROUTE_NAMES } from "@/router/training.routes/training.routes.names";
 
 // utils
-import { workloadUtil } from "@/utils/workload.util/workload.util";
 import { WORKLOAD_ROUTE_NAMES } from "@/router/workloads.routes/workloads.routes.names";
-import { deepCopy } from "@/utils/common.util";
-import {
-  MIN_CLUSTER_VERSION_FOR_COMPLETIONS_AND_PARALLELISM,
-  MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION,
-} from "@/common/version.constant";
 import type { LocationQueryRaw } from "vue-router";
 import type { ClustersMinimalData } from "@/swagger-models/cluster-service-client";
 import { workloadService } from "@/services/cluster/workload.service/workload.service";
@@ -211,7 +186,6 @@ const TrainingNew = defineComponent({
     RunaiFormWrapper,
     ProjectSection,
     WorkloadNameSection,
-    MultiNodeSection,
     RunaiBtn,
     TemplateSectionV2,
     RunaiExpansionItem,
@@ -225,14 +199,11 @@ const TrainingNew = defineComponent({
       trainingStore: useTrainingStore(),
       appStore: useAppStore(),
       clusterStore: useClusterStore(),
-      settingStore: useSettingStore(),
-      environmentStore: useEnvironmentStore(),
       authStore: useAuthStore(),
       loadingProject: false as boolean,
       loadingTemplate: false as boolean,
       trainingForm: null as HTMLFormElement | null,
       loadedProjects: [] as Array<ProjectMetadata>,
-      training: workloadUtil.getEmptyUIWorkloadCreation() as IUIWorkloadCreation,
 
       submitting: false as boolean,
       displayFormHint: false as boolean,
@@ -278,28 +249,10 @@ const TrainingNew = defineComponent({
     await this.handleClusterDependencies(selectedDefaultClusterId);
     this.appStore.setPageLoading(false);
   },
-  async mounted() {
+  mounted() {
     this.trainingForm = this.$refs["trainingForm"] as HTMLFormElement;
-    const createdEntityId: string | undefined = this.$route.query.createdEntityId?.toString();
-    const savedProjectId = this.trainingStore.training.projectId || -1;
-
-    const selectedDefaultProjectId = this.getDefaultProjectId(savedProjectId, createdEntityId);
-    if (selectedDefaultProjectId) {
-      await this.onSelectedProject(selectedDefaultProjectId);
-    }
   },
   computed: {
-    isClusterVersionSupportDistributedTraining(): boolean {
-      return this.clusterStore.isVersionSupportDistributedTraining(this.selectedClusterId);
-    },
-    isHybridSupported(): boolean {
-      return (
-        this.clusterStore.isClusterVersionSufficient(
-          this.selectedClusterId,
-          MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION,
-        ) && this.settingStore.isHybridSubmissionEnabled
-      );
-    },
     showMasterConfigurationSection(): boolean {
       return (
         !!this.selectedDistributedDetails &&
@@ -313,9 +266,6 @@ const TrainingNew = defineComponent({
       return !!(template as DistributedTemplate)?.spec?.distributedFramework;
     },
     showQuickSubmissionDropdown(): boolean {
-      if (!this.isHybridSupported) return false;
-
-      // show the dropdown only if an actual template is selected
       return this.selectedTemplateId !== "-1" && !!this.selectedTemplateId;
     },
     isTemplateRunnable(): boolean {
@@ -333,21 +283,9 @@ const TrainingNew = defineComponent({
         selectedDefaultClusterId = this.clusterStore.clusterList[0].uuid;
       } else if (this.$route.query.clusterId) {
         selectedDefaultClusterId = this.$route.query.clusterId.toString();
-      } else if (this.trainingStore.training.clusterId) {
-        selectedDefaultClusterId = this.trainingStore.training.clusterId;
       }
 
       return selectedDefaultClusterId;
-    },
-    getDefaultProjectId(savedProjectId: number, createdEntityId?: string): number | null {
-      let selectedDefaultProjectId = null;
-      if (createdEntityId && this.loadedProjects.length > 1) {
-        selectedDefaultProjectId = Number(createdEntityId);
-      } else if (savedProjectId !== -1) {
-        selectedDefaultProjectId = savedProjectId;
-      }
-
-      return selectedDefaultProjectId;
     },
     async loadProjects(): Promise<void> {
       try {
@@ -360,10 +298,11 @@ const TrainingNew = defineComponent({
           this.authStore.orgUnitList,
         );
 
+        const createdProjectId = this.$route.query.createdEntityId?.toString();
         if (this.loadedProjects.length === 1) {
           await this.onSelectedProject(+this.loadedProjects[0].id);
-        } else if (this.trainingStore.training.projectId !== -1) {
-          await this.onSelectedProject(this.trainingStore.training.projectId);
+        } else if (createdProjectId && this.loadedProjects.some((project) => project.id === createdProjectId)) {
+          await this.onSelectedProject(Number(createdProjectId));
         }
       } catch (error: unknown) {
         this.$q.notify(alertUtil.getError("Failed to load projects"));
@@ -374,11 +313,6 @@ const TrainingNew = defineComponent({
       }
     },
     async loadTemplates(applyOffset = false, amountRequired?: number): Promise<void> {
-      if (!this.isHybridSupported) {
-        this.selectedTemplateId = "-1";
-        this.setTemplates([]);
-        return;
-      }
       try {
         this.loadingTemplate = true;
         if (!this.selectedProjectId) return;
@@ -406,34 +340,13 @@ const TrainingNew = defineComponent({
         console.error(error);
       }
     },
-    async loadTrainingModel(projectId: string, isDistributed?: boolean): Promise<void> {
-      const trainingModel = await trainingService.getTrainingMergedWithPolicy(projectId, undefined, isDistributed);
-      this.trainingStore.setLoadedTrainingModelWithDefaults(deepCopy(trainingModel));
-      this.training = workloadUtil.convertWorkloadToWorkloadUI({
-        ...trainingModel,
-        meta: {
-          ...trainingModel.meta,
-          name: this.trainingName,
-          clusterId: this.selectedClusterId,
-          projectId: this.selectedProjectId?.toString() || "",
-        },
-      });
-
-      this.setFormDefaultsIfNeeded();
-      this.trainingStore.setTraining(this.training);
-    },
     onSelectedTemplate(templateId: string | null): void {
       this.selectedTemplateId = templateId;
-      if (this.isHybridSupported && !!this.selectedDistributedDetails) {
+      if (this.selectedDistributedDetails) {
         const template = this.flatTemplates.find((template) => template.meta.id === templateId);
         const distFramework = (template as DistributedTemplate)?.spec?.distributedFramework || null;
         this.setDistributedFramework(distFramework);
       }
-    },
-    updateMultiNodeSection(distributed: IUIDistributed): void {
-      this.selectedDistributedDetails = distributed || null;
-      this.selectedTemplateId = null;
-      this.loadTemplates();
     },
     redirectToPrevRoute(): void {
       this.trainingStore.clearDistributedMasterFlatFormState();
@@ -451,39 +364,7 @@ const TrainingNew = defineComponent({
         }
       } else this.redirectToPrevRoute();
     },
-    onContinue(): void {
-      this.isHybridSupported ? this.continueToHybrid() : this.continueToEdit();
-    },
-    async continueToEdit(): Promise<void> {
-      this.displayFormHint = false;
-      this.submitting = true;
-      const success = await this.validate();
-      if (!success) {
-        this.submitting = false;
-        this.showHint();
-        return;
-      }
-
-      if (!this.selectedProjectId) {
-        console.error("ProjectId is missing");
-        this.$q.notify(alertUtil.getError("Failed to create training"));
-        this.submitting = false;
-        return;
-      }
-
-      await this.loadTrainingModel(this.selectedProjectId.toString(), !!this.selectedDistributedDetails);
-
-      await this.setSpecificUserGidUidIfNeeded();
-
-      this.trainingStore.setTraining(this.training);
-
-      const routeName = this.training.distributed
-        ? TRAINING_ROUTE_NAMES.DISTRIBUTED_ASSETS_EDIT
-        : TRAINING_ROUTE_NAMES.TRAINING_ASSETS_EDIT;
-
-      await this.$router.push({ name: routeName });
-    },
-    async continueToHybrid(): Promise<void> {
+    async onContinue(): Promise<void> {
       this.displayFormHint = false;
       this.submitting = true;
       const success = await this.validate();
@@ -523,9 +404,6 @@ const TrainingNew = defineComponent({
     validate(): Promise<boolean> {
       return (this.trainingForm as HTMLFormElement).validate();
     },
-    isRequiredTemplate(val: string): boolean | string {
-      return required(val) || errorMessages.SELECT_TEMPLATE;
-    },
     showHint(): void {
       this.displayFormHint = true;
       this.timeOutId && clearTimeout(this.timeOutId);
@@ -533,28 +411,6 @@ const TrainingNew = defineComponent({
     },
     isFormIncomplete(val: boolean): boolean | string {
       return !val ? true : "Please review and fix the issues in the form";
-    },
-    findProject(projectId: string): ProjectMetadata | undefined {
-      return this.loadedProjects.find((project: ProjectMetadata) => project.id === projectId);
-    },
-    async loadProjectById(projectId: string): Promise<Project | void> {
-      try {
-        const loadedProject = await orgUnitService.getProject(projectId);
-        return loadedProject;
-      } catch (error: unknown) {
-        console.error(error);
-        this.appStore.setFallback(true);
-      }
-    },
-    async setSpecificUserGidUidIfNeeded(): Promise<void> {
-      if (this.training.assets.environment) {
-        const relevantEnvironment = await this.environmentStore.loadById(this.training.assets.environment);
-        if (relevantEnvironment?.spec.uidGidSource === UidGidSource.FromIdpToken) {
-          this.training.specificEnv.runAsUid = this.authStore.getUID || null;
-          this.training.specificEnv.runAsGid = this.authStore.getGID || null;
-          this.training.specificEnv.supplementalGroups = this.authStore.getSupplementaryGroups;
-        }
-      }
     },
     async updateClusterId(clusterId: string, payload: { disabled: boolean }): Promise<void> {
       this.displayFormHint = false;
@@ -564,24 +420,6 @@ const TrainingNew = defineComponent({
       urlService.updateQueryParams({ clusterId, createdEntityId: null });
       if (this.isClusterSectionValid) {
         await this.loadProjects();
-      }
-    },
-    // Setting form defaults for specific fields as defined by product
-    setFormDefaultsIfNeeded(): void {
-      const supportRunsAndParallelism = this.clusterStore.isClusterVersionSufficient(
-        this.training.clusterId,
-        MIN_CLUSTER_VERSION_FOR_COMPLETIONS_AND_PARALLELISM,
-      );
-
-      if (supportRunsAndParallelism && !this.training.specificEnv?.completions && !this.training.distributed) {
-        this.training.specificEnv.completions = 1;
-        this.training.specificEnv.parallelism = null;
-      }
-
-      if (this.training.distributed) {
-        this.training.distributed.distFramework = this.selectedDistributedDetails?.distFramework;
-        this.training.distributed.numWorkers ||= 1;
-        this.training.distributed.noMaster = this.selectedDistributedDetails?.noMaster;
       }
     },
     findClusterById(clusterId: string): ClustersMinimalData | undefined {

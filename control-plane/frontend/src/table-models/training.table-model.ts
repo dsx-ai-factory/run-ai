@@ -11,7 +11,7 @@ import {
 } from "@/models/table.model";
 import type { ITrainingList } from "@/models/training.model";
 import { EWorkloadNodeArchitecture } from "@/models/workload.model";
-import type { AssetRef, DisplayedJob, Distributed } from "@/swagger-models/assets-service-client";
+import type { AssetRef, DisplayedJob } from "@/swagger-models/assets-service-client";
 import { dateUtil } from "@/utils/date.util";
 import { memoryFormat } from "@/utils/format.util";
 import { tableNumberFormat } from "@/utils/table-format.util";
@@ -73,7 +73,7 @@ export const allTrainingColumnsMap: Record<string, ITableColumn> = {
     field: (row: ITrainingList) => row.spec.distributed,
     sortable: true,
     align: "left",
-    format: (val: Distributed | undefined) =>
+    format: (val: ITrainingList["spec"]["distributed"]) =>
       val ? EWorkloadNodeArchitecture.Distributed : EWorkloadNodeArchitecture.Standard,
   },
   imageName: {
