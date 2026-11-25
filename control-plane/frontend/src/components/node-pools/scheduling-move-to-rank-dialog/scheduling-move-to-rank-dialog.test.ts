@@ -9,8 +9,8 @@ import MoveModal from "@/components/node-pools/scheduling-move-to-rank-dialog/sc
 import type { ISelectOption } from "@/models/global.model";
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog/index";
 import { RunaiSelect } from "@/components/common/runai-select/index";
-describe("move-to-rank unsupported option", () => {
-  it("leaves Destination rank empty when an unsupported option is displayed", async () => {
+describe("move-to-rank destinations", () => {
+  it("omits No over quota from the available destinations", async () => {
     const wrapper = mount(MoveModal, {
       props: { selectedCount: 2 },
       global: { plugins: [Quasar] },
@@ -23,10 +23,7 @@ describe("move-to-rank unsupported option", () => {
         (option): option is ISelectOption =>
           typeof option === "object" && option !== null && option.label === "No over quota",
       );
-    if (!unsupported) throw new Error("Unsupported rank explanation is missing");
-    expect(unsupported.disable).toBe(true);
-    expect(unsupported.value).not.toBe(select.props("modelValue"));
-    expect(document.querySelector(".q-field__native")?.textContent).not.toContain("No over quota");
+    expect(unsupported).toBeUndefined();
     wrapper.unmount();
   });
   it("orders ranks highest first, disables the current rank and retains local dialog layout", async () => {
@@ -46,7 +43,6 @@ describe("move-to-rank unsupported option", () => {
       "Low",
       "VeryLow",
       "Lowest",
-      "__unsupported_no_over_quota__",
     ]);
     expect(options.find((option) => typeof option === "object" && option?.value === "Medium")).toMatchObject({
       disable: true,

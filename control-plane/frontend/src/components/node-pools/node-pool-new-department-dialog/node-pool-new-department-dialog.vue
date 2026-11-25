@@ -145,7 +145,9 @@ const permissionStore = usePermissionStore();
 const canCreateDepartment = computed(() => permissionStore.hasPermission(ResourceType.Department, Action.Create));
 const authStore = useAuthStore();
 const subjectOptions = computed(() => (authStore.isSSO ? subjectTypeOptionsWithSSO : subjectTypeOptions));
-const subject = ref<ISelectOption | null>(null);
+const subject = ref<ISelectOption | null>(
+  subjectOptions.value.find((option) => option.value === SubjectTypeExtended.User) ?? null,
+);
 const subjects = ref<ISelectOption[]>([]);
 const { roleOptions, canAssignRoles, loadRoles, validateRole, loading: rolesLoading } = useAccessRuleRoles();
 const role = ref<ISelectOption | null>(null);
@@ -313,9 +315,6 @@ async function createDepartment() {
 }
 .scheduling-new-department .scheduling-department-name-fields .q-field__native {
   line-height: 21px;
-}
-.scheduling-new-department .scheduling-department-name-fields .q-textarea .q-field__control-container {
-  padding: 0;
 }
 .scheduling-new-department .scheduling-department-name-fields textarea.q-field__native {
   overflow-y: auto !important;

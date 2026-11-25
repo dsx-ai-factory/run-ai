@@ -18,7 +18,8 @@
     "
     :disabled="disabled"
     :disabled-tooltip="disabledTooltip"
-    :is-submit-disabled="applyDisabled"
+    :is-submit-disabled="kind === EResourceEditorKind.Weight ? loading || unchangedInheritedWeight : applyDisabled"
+    :can-apply="canApply"
     @before-show="opened"
     @reset="reset"
     @apply="apply"
@@ -34,7 +35,7 @@
           :tooltip-text="weightHelp"
           anchor="center right"
           self="center left"
-          :offset="rankedWeight ? [120, 0] : [180, 0]"
+          :offset="[8, 0]"
           ><template #content
             ><span class="node-pool-weight-help"
               ><strong>Weight</strong> determines a department’s share relative to the other departments{{
@@ -273,6 +274,9 @@ const applyDisabled = computed(
     unchangedInheritedWeight.value ||
     validation.value.errors.length > 0,
 );
+function canApply() {
+  return !applyDisabled.value;
+}
 function apply() {
   if (!applyDisabled.value) emit("apply", parsedValue());
 }
@@ -341,6 +345,9 @@ p {
   width: 200px;
   border-radius: 5px;
   box-shadow: none;
+}
+.scheduling-resource-popup--weight .popup-card [aria-label="Close editor"] {
+  color: var(--icon-default);
 }
 .scheduling-resource-popup--weight .popup-card {
   width: 274px;

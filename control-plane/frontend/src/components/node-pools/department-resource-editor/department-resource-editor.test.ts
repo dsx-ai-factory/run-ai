@@ -119,6 +119,32 @@ describe("department resource editor", () => {
     wrapper.unmount();
   });
 
+  it("keeps Apply available for an invalid weight and lets the user correct it", async () => {
+    const wrapper = mount(Editor, {
+      props: { id: "a", kind: EResourceEditorKind.Weight, value: 2 },
+      global: { plugins: [Quasar] },
+      attachTo: document.body,
+    });
+    try {
+      await wrapper.get(".cell-trigger").trigger("click");
+      await flushPromises();
+      const input = wrapper.getComponent(QInput).get("input");
+      await input.setValue("400");
+      const apply = wrapper.findAllComponents(QBtn).find((btn) => btn.props("label") === "APPLY");
+      if (!apply) throw new Error("Missing weight Apply button");
+      expect(apply.attributes("disabled")).toBeUndefined();
+      await apply.trigger("click");
+      expect(wrapper.getComponent(QMenu).props("modelValue")).toBe(true);
+      expect(wrapper.emitted("apply")).toBeUndefined();
+      await input.setValue("4");
+      await apply.trigger("click");
+      expect(wrapper.emitted("apply")).toEqual([[4]]);
+      expect(wrapper.getComponent(QMenu).props("modelValue")).toBe(false);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
   it("applies a numeric zero maximum and reserves Unlimited for an empty input", async () => {
     const wrapper = mount(Editor, {
       props: { id: "a", kind: EResourceEditorKind.Limit, value: -1, quota: 0 },

@@ -68,7 +68,7 @@
       </runai-expansion-wrapper>
     </runai-form-wrapper>
     <template #content-footer>
-      <div class="row justify-end q-gutter-md q-mt-lg">
+      <div class="identity-footer row justify-end">
         <runai-btn
           aid="identity-save-close"
           label="Save & close"
@@ -143,7 +143,10 @@ const sections = computed(() => [
   },
   {
     title: "Label",
-    instruction: "Set the label for the nodes that belong to this node pool",
+    instruction:
+      pool.value?.isDefault && !pool.value.labelKey
+        ? "No label selector. The default pool includes nodes that do not match another pool."
+        : "Set the label for the nodes that belong to this node pool",
     fields: [
       { label: "Key", value: pool.value?.labelKey, size: "label-field" },
       { label: "Value", value: pool.value?.labelValue, size: "label-field" },
@@ -208,5 +211,9 @@ async function save(destination: "close" | "continue") {
 .label-field {
   max-width: 380px;
   margin-top: 26px;
+}
+.identity-footer {
+  margin-top: 30px;
+  gap: 16px;
 }
 </style>

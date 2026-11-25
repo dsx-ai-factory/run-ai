@@ -20,7 +20,7 @@ const NODE_POOL_WIZARD_STEPS = [
   { name: "topology", title: "Topology & placement" },
 ] as const;
 
-export const NODE_POOL_IMMUTABLE_TOOLTIP = "This can’t be modified once a node pool has been created.";
+export const NODE_POOL_IMMUTABLE_TOOLTIP = "This can’t be modified once a node pool has been created";
 
 export function getNodePoolWizardSteps(active: (typeof NODE_POOL_WIZARD_STEPS)[number]["name"], creating = false) {
   const current = NODE_POOL_WIZARD_STEPS.findIndex((step) => step.name === active);

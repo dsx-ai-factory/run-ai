@@ -420,6 +420,7 @@ function confirmDisable() {
 </script>
 <style scoped lang="scss">
 .scheduling-settings {
+  height: 100%;
   width: 100%;
   min-width: 0;
   border-left: 1px solid var(--border-subtle);

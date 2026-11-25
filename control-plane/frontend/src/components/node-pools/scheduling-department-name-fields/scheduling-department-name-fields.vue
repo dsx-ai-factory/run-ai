@@ -9,8 +9,7 @@
       class="department-name-input"
       aid="department-name-input"
       auto-focus
-      label=""
-      placeholder="Name"
+      label="Name"
       aria-label="Name"
       :model-value="departmentName"
       @update:model-value="emit('update:departmentName', $event)"
@@ -23,7 +22,7 @@
       @update:model-value="emit('update:description', String($event ?? ''))"
       :maxlength="250"
       counter
-      placeholder="Description"
+      label="Description"
       aria-label="Description"
       autogrow
     />
@@ -77,25 +76,13 @@ const nameRules: ValidationRule[] = [
 .department-description-input {
   margin-top: 26px;
 }
-.scheduling-department-name-fields :deep(.q-field__control) {
-  height: auto;
-  min-height: 31px;
-}
-.scheduling-department-name-fields :deep(.q-field__marginal) {
-  height: 31px;
-}
-.scheduling-department-name-fields :deep(.q-field__native) {
-  min-height: 0;
+.scheduling-department-name-fields :deep(.q-field__label) {
   font-size: 14px;
-  line-height: 21px;
-  padding: 0 0 10px;
+  line-height: 19.5px;
 }
-.scheduling-department-name-fields :deep(.q-field__native::placeholder) {
-  color: var(--b-text-sub);
-  opacity: 1;
-}
-.scheduling-department-name-fields :deep(.q-field--error .q-field__native::placeholder) {
-  color: var(--q-negative);
+.scheduling-department-name-fields :deep(.q-field--float .q-field__label) {
+  font-size: 16px;
+  line-height: 22.4px;
 }
 .scheduling-department-name-fields :deep(.q-field--with-bottom) {
   padding-bottom: 0;

@@ -79,6 +79,35 @@ async function render(realStep = false, access?: "editor" | "pool-only") {
 }
 beforeEach(() => vi.clearAllMocks());
 describe("scheduling route", () => {
+  it("resets the draft and filters to the saved scheduling state without writing", async () => {
+    const proportional = {
+      ...pool,
+      schedulingCapabilities: { quota: false, ranks: false, cpuQuota: false, limits: false, adjustableWeights: true },
+    };
+    vi.mocked(clusterService.getNodepool).mockResolvedValue(proportional);
+    const { wrapper } = await render(true, "editor");
+    try {
+      await flushPromises();
+      await wrapper.get('[aid="mode-ranked"]').trigger("click");
+      const step = wrapper.getComponent(Step);
+      step.vm.$emit("search", "department");
+      step.vm.$emit("filter-rank", "Low");
+      await wrapper.vm.$nextTick();
+      expect(step.props("searchTerm")).toBe("department");
+      await wrapper.get('[aid="reset-scheduling"]').trigger("click");
+      await flushPromises();
+      const restored = wrapper.getComponent(Step);
+      expect(restored.props("searchTerm")).toBe("");
+      expect(restored.props("rankFilter")).toBeUndefined();
+      expect(wrapper.get('[aid="mode-proportional"]').attributes("aria-checked")).toBe("true");
+      expect(clusterService.patchNodepool).not.toHaveBeenCalled();
+      expect(orgUnitService.batchPatchDepartmentNodePoolResources).not.toHaveBeenCalled();
+      expect(await requestToLeave()).toBe(true);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
   it("uses the shared page loader while fetching the pool and keeps Close available", async () => {
     let resolvePool!: (value: Nodepool) => void;
     vi.mocked(clusterService.getNodepool).mockImplementationOnce(

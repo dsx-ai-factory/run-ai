@@ -379,7 +379,7 @@ async function save() {
 }
 .topology-footer {
   flex-wrap: wrap;
-  padding: 40px 0 8px;
+  padding: 30px 0 8px;
   display: flex;
   justify-content: flex-end;
   gap: 20px;

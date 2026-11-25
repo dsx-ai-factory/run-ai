@@ -144,7 +144,7 @@
                   @edit="applyEdit"
                   @search="emit('search', $event)"
                   @filter-rank="emit('filter-rank', $event)"
-                  @refresh="emit('refresh')"
+                  @reset="emit('reset')"
                   @automatic-weights="draft.automaticWeights = $event"
                   @advanced-settings="showSettings = !showSettings"
                   @close-settings="showSettings = false"
@@ -301,6 +301,7 @@ const emit = defineEmits<{
   "open-identity": [];
   saving: [boolean];
   refresh: [];
+  reset: [];
   search: [string];
   "filter-rank": [string | undefined];
 }>();
@@ -590,10 +591,6 @@ async function save(destination: "close" | "continue" = "close") {
 .node-pool-scheduling-wizard :deep(.wizard-step--disabled .wizard-step-title) {
   color: var(--text-disabled) !important;
 }
-.node-pool-scheduling-wizard :deep(.wizard-step--completed .wizard-step-indicator),
-.node-pool-scheduling-wizard :deep(.wizard-step--selected .wizard-step-indicator) {
-  background-color: var(--feedback-success) !important;
-}
 .node-pool-scheduling-wizard :deep(.wizard-step--default.wizard-step--disabled .wizard-step-indicator) {
   background-color: var(--text-disabled) !important;
 }
@@ -613,19 +610,19 @@ async function save(destination: "close" | "continue" = "close") {
 }
 .scheduling-overview {
   container-type: inline-size;
-  padding: 18px 20px 40px;
+  padding: 18px 20px 20px;
 }
 .capacity-label {
   color: var(--b-text-sub);
 }
 .capacity {
   display: flex;
-  align-items: flex-end;
-  gap: 10px;
-  margin-top: 2px;
+  align-items: baseline;
+  gap: 5px;
+  margin-top: 16px;
 }
 .mode-selector {
-  margin-top: 40px;
+  margin-top: 30px;
   margin-bottom: 0;
 }
 .scheduling-mode-section :deep(> .q-expansion-item__container) {
@@ -642,7 +639,7 @@ async function save(destination: "close" | "continue" = "close") {
 }
 .mode-selector :deep(.runai-section-title) {
   margin-right: -3px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   margin-left: -3px;
 }
 .capacity-number {
@@ -656,7 +653,6 @@ async function save(destination: "close" | "continue" = "close") {
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
-  height: 22px;
   letter-spacing: -0.1504px;
 }
 .mode-hover-target {
@@ -741,7 +737,7 @@ async function save(destination: "close" | "continue" = "close") {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 40px 0 8px;
+  padding: 30px 0 8px;
 }
 .scheduling-footer > .row {
   margin-left: auto;

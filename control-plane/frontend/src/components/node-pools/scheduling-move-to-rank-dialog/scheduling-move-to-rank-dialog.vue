@@ -38,10 +38,7 @@ defineEmits<{
   (e: "move", rank: string): void;
 }>();
 
-const rankOptions: ISelectOption[] = [
-  ...[...ENTITY_PRIORITY_SELECT_OPTIONS].reverse(),
-  { label: "No over quota", value: "__unsupported_no_over_quota__", disable: true },
-];
+const rankOptions: ISelectOption[] = [...ENTITY_PRIORITY_SELECT_OPTIONS].reverse();
 </script>
 
 <style lang="scss">

@@ -106,7 +106,7 @@ describe("scheduling step foundation", () => {
       await wrapper.setProps({ canEditDepartments: true });
       const enabledOptions = wrapper.findComponent(RunaiSegmentedButton).props("options");
       expect(enabledOptions[0].disabledTooltip).toBe(
-        saved.quota ? "This can’t be modified once a node pool has been created." : undefined,
+        saved.quota ? "This can’t be modified once a node pool has been created" : undefined,
       );
     } finally {
       wrapper.unmount();

@@ -15,6 +15,7 @@
         <runai-tooltip
           size="xs"
           class="resources-help"
+          width="min(340px, calc(100vw - 20px))"
           tooltip-text="All the resources available for matching labeled nodes within the node pool"
           aria-label="About node pool resources"
         />

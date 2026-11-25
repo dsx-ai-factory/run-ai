@@ -24,12 +24,11 @@
       hide-columns-btn
       hide-export-csv
       :show-search="canView"
-      :support-refresh="canView"
+      :support-refresh="false"
       :primary-btn-disable="readonly"
       :selected-rows-amount="ranked ? selected.size : 0"
       :disable-actions="readonly"
       @filters-changed="updateFilters"
-      @refresh-data="emit('refresh')"
       @selected-actions-close="selected = new Set()"
     >
       <template #filters>
@@ -47,8 +46,18 @@
       <template #selected-rows-actions
         ><runai-action-button btn-action="moveToRank" aid="move-departments" @click="showMove = true"
       /></template>
-      <template #right-actions
-        ><q-btn
+      <template #right-actions>
+        <q-btn
+          v-if="canView"
+          aid="reset-scheduling"
+          flat
+          stack
+          size="sm"
+          icon="ph-bold ph-arrow-counter-clockwise"
+          label="Reset"
+          :disable="readonly || loading"
+          @click="emit('reset')" />
+        <q-btn
           v-if="canView"
           ref="settingsTrigger"
           aid="advanced-settings"
@@ -97,15 +106,10 @@
             ><q-tr>
               <q-th v-for="col in cols" :key="col.name" :class="`column-${col.name}`">
                 <template v-if="col.name === 'selection'">
-                  <q-checkbox
-                    v-if="ranked && selected.size"
-                    :model-value="allSelected"
-                    :disable="readonly"
-                    aria-label="Select all departments"
-                    @update:model-value="selectAll"
-                  />
-                  <q-icon v-else name="ph-fill ph-question" size="20px"
-                    ><q-tooltip>{{ headerTooltips.selection }}</q-tooltip></q-icon
+                  <q-icon name="ph-fill ph-question" size="20px"
+                    ><q-tooltip class="scheduling-help-popup" max-width="340px">{{
+                      headerTooltips.selection
+                    }}</q-tooltip></q-icon
                   >
                 </template>
                 <template v-else>
@@ -113,7 +117,9 @@
                   <div class="column-label">
                     {{ col.label }}
                     <q-icon v-if="col.name !== 'department' || ranked" name="ph-bold ph-question" size="16px"
-                      ><q-tooltip max-width="340px">{{ headerTooltips[col.name] }}</q-tooltip></q-icon
+                      ><q-tooltip class="scheduling-help-popup" max-width="340px">{{
+                        headerTooltips[col.name]
+                      }}</q-tooltip></q-icon
                     >
                   </div>
                   <template v-if="col.name === 'result'">
@@ -216,7 +222,12 @@
                 @apply="emit('edit', { id: row.id, limit: $event })"
               />
               <q-td class="result-cell">
-                <div
+                <scheduling-result-hover
+                  :vertical-offset="simulation ? 30 : 8"
+                  :focus-fraction="
+                    simulation && capacity ? sliderDemand(row) / capacity : (rowWeightPercentage(row) ?? 50) / 100
+                  "
+                  :tabindex="simulation ? undefined : 0"
                   class="result-bar"
                   :class="{ 'simulation-bar': simulation }"
                   :aria-busy="simulation && simulationStatus === 'loading'"
@@ -249,7 +260,7 @@
                       }"
                     />
                   </div>
-                  <q-tooltip class="tooltip-dark scheduling-result-tooltip" max-width="380px">
+                  <template #tooltip>
                     <div class="result-tooltip-title">{{ row.name }}</div>
                     <div class="result-tooltip-legend">
                       <div v-for="entry in resultLegend(row)" :key="entry.label" class="result-tooltip-entry">
@@ -266,7 +277,7 @@
                         >
                       </div>
                     </div>
-                  </q-tooltip>
+                  </template>
                   <input
                     v-if="simulation"
                     @input="previewDemand(row, $event)"
@@ -291,7 +302,7 @@
                     <strong>{{ sliderDemand(row) }}</strong
                     >{{ sliderDemand(row) === 1 ? " GPU" : " GPUs" }}
                   </q-chip>
-                </div>
+                </scheduling-result-hover>
               </q-td>
             </q-tr>
           </template>
@@ -328,6 +339,7 @@ import { EResourceEditorKind } from "@/models/node-pool-scheduling.model";
 import { ENodePoolSchedulingMode as ESchedulingMode, isSupportedSchedulingMode } from "@/models/node-pool.model";
 
 import { NotificationAlertBar, ENotificationBarVariant } from "@/components/common/notification-alert-bar/index";
+import SchedulingResultHover from "./scheduling-result-hover.vue";
 import { SimulationResultBar } from "@/components/node-pools/simulation-result-bar";
 import { SchedulingFilters } from "@/components/node-pools/scheduling-filters";
 import { computed, nextTick, ref, useId, watch } from "vue";
@@ -396,7 +408,7 @@ const emit = defineEmits<{
   edit: [IDepartmentSchedulingEdit];
   search: [string];
   "filter-rank": [string | undefined];
-  refresh: [];
+  reset: [];
   "new-department": [];
   "advanced-settings": [];
   "close-settings": [];
@@ -525,22 +537,6 @@ const currentRank = computed(() => {
   const ranks = new Set([...selected.value].map((id) => props.draft.departments[id]?.rank ?? baseline.value[id]?.rank));
   return ranks.size === 1 ? [...ranks][0] : undefined;
 });
-const allSelected = computed(
-  () =>
-    !hasMore.value && effectiveRows.value.length > 0 && effectiveRows.value.every((row) => selected.value.has(row.id)),
-);
-async function selectAll(value: boolean) {
-  if (hasMore.value && !(await props.departmentPages?.loadAll())) return;
-  await nextTick();
-  if (props.readonly) return;
-  const next = new Set(selected.value);
-  for (const row of effectiveRows.value) {
-    if (props.canEditDepartment?.(row.id) === false) continue;
-    if (value) next.add(row.id);
-    else next.delete(row.id);
-  }
-  selected.value = next;
-}
 const headerTooltips = computed<Record<string, string>>(() => ({
   selection: "The numbers indicate the order in which the Scheduler considers resource allocation in real time.",
   quota:
@@ -882,7 +878,7 @@ async function quotaContext(row: IDepartmentSchedulingEdit) {
 }
 .department-settings-panel {
   grid-area: 1 / 1;
-  place-self: start end;
+  place-self: stretch end;
   width: min(380px, 100%);
   z-index: 1;
   background: var(--bg-primary-default);
@@ -937,7 +933,7 @@ async function quotaContext(row: IDepartmentSchedulingEdit) {
 .scheduling-actions :deep(.runai-general-search .icon-container span) {
   font-size: 10px;
   line-height: 14px;
-  color: var(--text-sub);
+  color: var(--b-text-sub);
 }
 .scheduling-actions :deep(.runai-general-search:not(.focus):not(.filled)) {
   width: 59px;
@@ -962,7 +958,7 @@ async function quotaContext(row: IDepartmentSchedulingEdit) {
   min-height: 40px;
   padding: 0 10px;
   line-height: 14px;
-  color: var(--text-sub);
+  color: var(--b-text-sub);
 }
 .scheduling-actions :deep(.right-actions-container > .q-btn .q-btn__content) {
   gap: 3px;
@@ -976,7 +972,7 @@ async function quotaContext(row: IDepartmentSchedulingEdit) {
   font-size: 10px;
   line-height: 14px;
 }
-.scheduling-actions :deep([aid="refresh-data-button"]) {
+.scheduling-actions :deep([aid="reset-scheduling"]) {
   margin-inline: 16px;
   width: 63px;
 }
@@ -1042,7 +1038,7 @@ async function quotaContext(row: IDepartmentSchedulingEdit) {
 .scheduling-table :deep(.column-selection) {
   width: var(--selection-width);
   padding: 0 10px;
-  color: var(--text-sub);
+  color: var(--b-text-sub);
 }
 .scheduling-table :deep(.column-department) {
   width: var(--department-width);
@@ -1083,7 +1079,7 @@ async function quotaContext(row: IDepartmentSchedulingEdit) {
   min-height: 21px;
 }
 .column-label .q-icon {
-  color: var(--text-sub);
+  color: var(--b-text-sub);
 }
 .simulation-control {
   display: flex;

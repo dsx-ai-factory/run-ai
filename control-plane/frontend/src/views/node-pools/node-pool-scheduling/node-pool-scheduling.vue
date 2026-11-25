@@ -29,6 +29,7 @@
     :quota-policy="quotaPolicy"
     :load-quota-context="loadQuotaContext"
     @refresh="refresh"
+    @reset="resetScheduling"
     @search="search = $event"
     @filter-rank="rank = $event"
     @leave-approved="leaveApproved = true"
@@ -77,6 +78,11 @@ const {
   loadChildQuotaSum,
 } = useNodePoolSchedulingData(poolId);
 const { saving, leaveApproved, openStep, finish } = useNodePoolWizardNavigation(pool);
+function resetScheduling() {
+  // A failed batch save may already have persisted some department edits.
+  pool.value = undefined;
+  void refresh();
+}
 const ranks = computed(() => ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => option.value).reverse());
 async function loadQuotaContext(id: string) {
   if (!pool.value || quotaPolicy.value === undefined)

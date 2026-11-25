@@ -66,7 +66,10 @@
               /></template>
             </q-banner>
             <q-select
-              v-model="draft.labelKey"
+              :model-value="draft.labelKey"
+              @update:model-value="draft.labelKey = $event ?? ''"
+              clearable
+              clear-icon="ph-bold ph-x"
               class="label-field"
               aid="node-pool-label-key"
               dense
@@ -100,8 +103,11 @@
             </q-select>
             <q-select
               v-if="draft.labelKey"
-              v-model="draft.labelValue"
-              class="label-field q-mt-lg"
+              :model-value="draft.labelValue"
+              @update:model-value="draft.labelValue = $event ?? ''"
+              clearable
+              clear-icon="ph-bold ph-x"
+              class="label-field"
               aid="node-pool-label-value"
               dense
               label="Value"
@@ -138,26 +144,24 @@
         </runai-expansion-wrapper>
       </runai-form-wrapper>
       <template #content-footer>
-        <div class="creation-footer">
-          <div class="row justify-end q-gutter-md">
-            <runai-btn
-              aid="create-node-pool-close"
-              :label="created ? 'Close' : 'Create node pool & close'"
-              flat
-              color="primary"
-              :loading="submitting && destination === ENodePoolFormDestination.Close"
-              :disable="busy"
-              @click="close"
-            />
-            <runai-btn
-              aid="create-node-pool-continue"
-              label="Create node pool & continue"
-              color="primary"
-              :loading="submitting && destination === ENodePoolFormDestination.Continue"
-              :disable="busy"
-              @click="submit(ENodePoolFormDestination.Continue)"
-            />
-          </div>
+        <div class="creation-footer row justify-end">
+          <runai-btn
+            aid="create-node-pool-close"
+            :label="created ? 'Close' : 'Create node pool & close'"
+            flat
+            color="primary"
+            :loading="submitting && destination === ENodePoolFormDestination.Close"
+            :disable="busy"
+            @click="close"
+          />
+          <runai-btn
+            aid="create-node-pool-continue"
+            label="Create node pool & continue"
+            color="primary"
+            :loading="submitting && destination === ENodePoolFormDestination.Continue"
+            :disable="busy"
+            @click="submit(ENodePoolFormDestination.Continue)"
+          />
         </div>
       </template>
       <template #right-sidebar>
@@ -361,7 +365,25 @@ async function submit(target: ENodePoolFormDestination) {
   margin-top: 26px;
 }
 .creation-footer {
+  gap: 16px;
   width: 100%;
-  margin-top: 40px;
+  margin-top: 30px;
+}
+
+.label-field + .label-field {
+  margin-top: 30px;
+}
+.label-field.q-field--error {
+  padding-bottom: 0;
+}
+.label-field.q-field--error :deep(.q-field__bottom) {
+  position: static;
+  transform: none;
+  padding: 7px 0 0;
+}
+.label-field.q-field--error :deep(.q-field__messages),
+.label-field.q-field--error :deep(.q-field__messages > div) {
+  font-size: 12px;
+  line-height: 16.8px;
 }
 </style>
