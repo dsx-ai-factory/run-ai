@@ -14,11 +14,7 @@ import type { RouteLocationNormalized } from "vue-router";
 // stores
 import { useAuthStore } from "@/stores/auth.store";
 
-// models
-import { STORAGE_KEYS } from "@/models/storage.model";
-
-// utils
-import { storageUtil } from "@/utils/storage.util";
+import { rememberLoginLocation } from "./login-return-location";
 
 export default defineComponent({
   data() {
@@ -27,9 +23,7 @@ export default defineComponent({
     };
   },
   beforeRouteEnter(to: RouteLocationNormalized, from: RouteLocationNormalized) {
-    if (from.name) {
-      storageUtil.save(STORAGE_KEYS.LOCATION, from.name);
-    }
+    rememberLoginLocation(from);
   },
   async created() {
     this.authStore.login();

@@ -14,10 +14,12 @@ import { NodePoolDepartmentTable as Table } from "@/components/node-pools/node-p
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
 import { RunaiSegmentedButton } from "@/components/common/runai-segmented-button";
 import NodePoolSchedulingStep from "./node-pool-scheduling-step.vue";
+import { NodePoolNewDepartmentDialog as NewDepartment } from "@/components/node-pools/node-pool-new-department-dialog";
 import RunaiWizardLayout from "@/components/common/runai-wizard-layout/runai-wizard-layout.vue";
 import NodePoolWizardSummary from "../node-pool-wizard-summary/node-pool-wizard-summary.vue";
 import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
 const { createNodePoolDraft } = nodePoolUtil;
+import { DepartmentResourceEditor } from "../department-resource-editor";
 import type { Nodepool } from "@/swagger-models/cluster-service-client";
 
 const saveMocks = vi.hoisted(() => ({ patchPool: vi.fn(), patchDepartments: vi.fn() }));
@@ -41,17 +43,49 @@ const pool = {
   networkTopologyName: "Existing fabric",
 } as Nodepool;
 
-function render(input = pool) {
+function render(input = pool, stubs = {}) {
   return mount(NodePoolSchedulingStep, {
     props: { pool: input },
     global: {
       plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
       directives: { "click-outside": {}, permission: {} },
+      stubs,
     },
   });
 }
 
 describe("scheduling step foundation", () => {
+  it.each(["canEditDepartments", "canViewDepartments"] as const)(
+    "finishes a pending department request when %s is revoked",
+    async (permission) => {
+      const wrapper = render(pool, {
+        NodePoolNewDepartmentDialog: {
+          emits: ["saving"],
+          template: "<div />",
+        },
+      });
+      try {
+        await wrapper.setProps({ canSavePool: true });
+        wrapper.findComponent(Table).vm.$emit("new-department");
+        await flushPromises();
+        const department = wrapper.findComponent(NewDepartment);
+        department.vm.$emit("saving", true);
+        await flushPromises();
+        expect(await requestToLeave()).toBe(false);
+        await wrapper.setProps({ [permission]: false });
+        expect(wrapper.findComponent(NewDepartment).exists()).toBe(true);
+        department.vm.$emit("saving", false);
+        await flushPromises();
+        expect(wrapper.emitted("saving")?.at(-1)).toEqual([false]);
+        expect(wrapper.findComponent(NewDepartment).exists()).toBe(false);
+        await wrapper.setProps({ [permission]: true });
+        expect(wrapper.get('[aid="scheduling-save-continue"]').attributes("disabled")).toBeUndefined();
+      } finally {
+        wrapper.unmount();
+      }
+    },
+  );
+
   it.each([
     { quota: false, ranks: false },
     { quota: false, ranks: true },
@@ -72,7 +106,7 @@ describe("scheduling step foundation", () => {
       await wrapper.setProps({ canEditDepartments: true });
       const enabledOptions = wrapper.findComponent(RunaiSegmentedButton).props("options");
       expect(enabledOptions[0].disabledTooltip).toBe(
-        saved.quota ? "An existing Guaranteed quota pool cannot switch to a lower scheduling mode." : undefined,
+        saved.quota ? "This can’t be modified once a node pool has been created" : undefined,
       );
     } finally {
       wrapper.unmount();
@@ -108,21 +142,183 @@ describe("scheduling step foundation", () => {
     },
   );
 
-  it("allows Ranked to Proportional when the pool already uses adjustable weights without quota", async () => {
+  it("keeps saved GPU limits when switching from Ranked to Proportional without reset permission", async () => {
     const wrapper = render({
       ...pool,
-      schedulingCapabilities: { quota: false, ranks: true, adjustableWeights: true, cpuQuota: false, limits: false },
+      schedulingCapabilities: { quota: false, ranks: true, adjustableWeights: true, cpuQuota: false, limits: true },
     });
     try {
       await wrapper.setProps({ canSavePool: true, canResetResources: false });
+      const table = wrapper.findComponent(Table);
+      const summary = wrapper.findComponent(NodePoolWizardSummary);
+      expect(table.props("draft").maxAllocation).toBe(true);
+      expect(summary.text()).toContain("Ranked");
       await wrapper.get('[aid="mode-proportional"]').trigger("click");
+      expect(table.props("draft").maxAllocation).toBe(true);
+      expect(summary.text()).toContain("Proportional");
+      expect(summary.props("pool").schedulingCapabilities?.limits).toBe(true);
       expect(wrapper.get('[aid="scheduling-save-close"]').attributes("disabled")).toBeUndefined();
     } finally {
       wrapper.unmount();
     }
   });
 
-  it("allows turning on custom weights while Guaranteed quota stays enabled", async () => {
+  it("keeps all table columns when Advanced settings opens and returns focus after Escape or Close", async () => {
+    const wrapper = render({
+      ...pool,
+      schedulingCapabilities: { quota: true, ranks: true, adjustableWeights: false, cpuQuota: false, limits: true },
+    });
+    document.body.appendChild(wrapper.element);
+    try {
+      const trigger = wrapper.get('[aid="advanced-settings"]');
+      await trigger.trigger("click");
+      const panel = wrapper.get(".table-settings-layout .scheduling-settings");
+      expect(trigger.attributes("aria-expanded")).toBe("true");
+      expect(panel.element.parentElement?.id).toBe(trigger.attributes("aria-controls"));
+      expect(wrapper.find(".column-result").exists()).toBe(true);
+      expect(wrapper.find(".column-limit").exists()).toBe(true);
+      expect(wrapper.find(".column-weight").exists()).toBe(true);
+      const close = panel.get('[aria-label="Hide Advanced settings"]');
+      expect(document.activeElement).toBe(close.element);
+      await close.trigger("keydown", { key: "Escape" });
+      expect(wrapper.find(".scheduling-settings").exists()).toBe(false);
+      expect(wrapper.find(".column-result").exists()).toBe(true);
+      expect(wrapper.find(".column-limit").exists()).toBe(true);
+      expect(document.activeElement).toBe(trigger.element);
+
+      await trigger.trigger("click");
+      await wrapper.get('[aria-label="Hide Advanced settings"]').trigger("click");
+      expect(trigger.attributes("aria-expanded")).toBe("false");
+      expect(document.activeElement).toBe(trigger.element);
+    } finally {
+      wrapper.element.remove();
+      wrapper.unmount();
+    }
+  });
+
+  it("reveals a table control covered by Advanced settings when it receives focus", async () => {
+    const wrapper = render();
+    document.body.appendChild(wrapper.element);
+    try {
+      await wrapper.setProps({
+        resources: { gpus: 8 },
+        rows: [
+          {
+            id: "resource-1",
+            orgUnitId: "1",
+            orgUnitName: "Research",
+            rank: "MediumLow",
+            resources: { gpu: { overQuotaWeight: 2 } },
+            clusterId: pool.clusterId,
+            nodePoolId: pool.id,
+            nodePoolName: pool.name,
+          },
+        ],
+      });
+      await wrapper.get('[aid="advanced-settings"]').trigger("click");
+      const panel = wrapper.get(".department-settings-panel").element;
+      const toggle = wrapper.get<HTMLElement>('[aid="simulate-demand"]').element;
+      vi.spyOn(panel, "getBoundingClientRect").mockReturnValue(new DOMRect(620, 0, 380, 400));
+      vi.spyOn(toggle, "getBoundingClientRect").mockReturnValue(new DOMRect(800, 20, 30, 30));
+      toggle.focus();
+      await flushPromises();
+      expect(wrapper.find(".department-settings-panel").exists()).toBe(false);
+      expect(document.activeElement).toBe(toggle);
+    } finally {
+      wrapper.element.remove();
+      wrapper.unmount();
+    }
+  });
+
+  it("previews Custom weights across all pages before saving an Automatic pool", async () => {
+    const savedPool = {
+      ...pool,
+      schedulingCapabilities: { quota: true, ranks: true, adjustableWeights: false, cpuQuota: false, limits: false },
+    };
+    const peers = [-1, 0, 4].map((quota, i) => ({
+      id: "resource-" + i,
+      orgUnitId: String(i),
+      orgUnitName: "Department " + i,
+      clusterId: savedPool.clusterId,
+      nodePoolId: savedPool.id,
+      nodePoolName: savedPool.name,
+      rank: "MediumLow",
+      resources: { gpu: { deserved: quota, overQuotaWeight: quota } },
+    }));
+    const wrapper = render(savedPool);
+    const table = wrapper.getComponent(Table);
+    const weights = () =>
+      table.findAllComponents(DepartmentResourceEditor).filter((cell) => cell.props("kind") === "weight");
+    const labels = () => weights().map((cell) => cell.props("displayValue"));
+    const pages = { nextOffset: 2 as number | undefined, loadingAll: false, loadNext: vi.fn(), loadAll: vi.fn() };
+    vi.stubGlobal(
+      "IntersectionObserver",
+      class {
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      },
+    );
+    pages.loadAll.mockResolvedValue(true);
+    try {
+      await wrapper.setProps({
+        canSavePool: true,
+        rows: peers.slice(0, 2),
+        baselineRows: peers.slice(0, 2),
+        departmentPages: pages,
+        ranks: ["MediumLow"],
+        rankCounts: { MediumLow: 3 },
+        aggregates: { MediumLow: { weightsSum: 4, deservedSum: -1, automaticWeightsSum: 4, rawWeightsSum: undefined } },
+      });
+      await wrapper.get('[aid="advanced-settings"]').trigger("click");
+      await wrapper.get('[aid="radio-option-Custom"]').trigger("click");
+      expect(labels()).toEqual(["Unknown", "Unknown"]);
+      expect(pages.loadAll).toHaveBeenCalledOnce();
+      await wrapper.setProps({ rows: peers, baselineRows: peers, departmentPages: { ...pages, nextOffset: undefined } });
+      expect(labels()).toEqual(["33.28%", "0.17%", "66.56%"]);
+      expect(weights()[0].props("value")).toBe(2);
+      expect(weights()[0].props("previewWeightPercentage")?.(4)).toBeCloseTo(49.94);
+      weights()[0].vm.$emit("apply", 4);
+      await wrapper.vm.$nextTick();
+      expect(labels()).toEqual(["49.94%", "0.12%", "49.94%"]);
+      await wrapper.get('[aid="radio-option-Automatic"]').trigger("click");
+      expect(labels()).toEqual(["0%", "0.2%", "99.8%"]);
+      await wrapper.get('[aid="radio-option-Custom"]').trigger("click");
+      expect(labels()).toEqual(["33.28%", "0.17%", "66.56%"]);
+      expect(table.props("draft").departments["0"]?.weight).toBeUndefined();
+    } finally {
+      wrapper.unmount();
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("seeds pending Automatic quotas as weights and preserves subsequent manual edits", async () => {
+    const wrapper = render({
+      ...pool,
+      schedulingCapabilities: { quota: true, ranks: true, adjustableWeights: false, cpuQuota: false, limits: false },
+    });
+    try {
+      await wrapper.setProps({
+        canSavePool: true,
+        canResetResources: true,
+        canViewDepartments: true,
+        canEditDepartments: true,
+      });
+      const table = wrapper.findComponent(Table);
+      table.vm.$emit("edit", { id: "a", quota: 24.5 });
+      await wrapper.get('[aid="advanced-settings"]').trigger("click");
+      wrapper.findComponent(Settings).vm.$emit("patch", { automaticWeights: false });
+      await wrapper.vm.$nextTick();
+      expect(table.props("draft").departments.a).toMatchObject({ weight: 24.5, weightFromQuota: true });
+      expect(wrapper.get('[aid="scheduling-save-close"]').attributes("disabled")).toBeUndefined();
+      table.vm.$emit("edit", { id: "a", weight: 6 });
+      await wrapper.vm.$nextTick();
+      expect(table.props("draft").departments.a).toEqual({ id: "a", quota: 24.5, weight: 6 });
+    } finally {
+      wrapper.unmount();
+    }
+  });
+  it("requires cluster-wide permission to initialize custom weights in Guaranteed mode", async () => {
     const wrapper = render({
       ...pool,
       schedulingCapabilities: { quota: true, ranks: true, adjustableWeights: false, cpuQuota: false, limits: false },
@@ -135,6 +331,9 @@ describe("scheduling step foundation", () => {
       expect(wrapper.findComponent(NodePoolWizardSummary).props("pool").schedulingCapabilities?.adjustableWeights).toBe(
         true,
       );
+      expect(wrapper.get('[aid="scheduling-save-close"]').attributes("disabled")).toBeDefined();
+      expect(wrapper.get('[role="alert"]').text()).toContain("Switching weights to Custom requires update permission");
+      await wrapper.setProps({ canResetResources: true });
       expect(wrapper.get('[aid="scheduling-save-close"]').attributes("disabled")).toBeUndefined();
     } finally {
       wrapper.unmount();
@@ -372,10 +571,15 @@ describe("scheduling step foundation", () => {
     wrapper.unmount();
   });
 
-  it("distinguishes unknown capacity from a measured zero", async () => {
+  it("distinguishes an empty pool, an unknown capacity, and a measured zero with nodes", async () => {
     const wrapper = render();
     expect(wrapper.get('[aid="pool-gpu-capacity"]').text()).toBe("Unknown");
-    await wrapper.setProps({ resources: { gpus: 0 } });
+    await wrapper.setProps({ resources: { nodes: 2 } });
+    expect(wrapper.get('[aid="pool-gpu-capacity"]').text()).toBe("Unknown");
+    await wrapper.setProps({ resources: { nodes: 0, gpus: 0 } });
+    expect(wrapper.get('[aid="pool-gpu-capacity"]').text()).toBe("Empty");
+    expect(wrapper.getComponent(Table).props("capacity")).toBe(0);
+    await wrapper.setProps({ resources: { nodes: 2, gpus: 0 } });
     expect(wrapper.get('[aid="pool-gpu-capacity"]').text()).toBe("0 GPUs");
     wrapper.unmount();
   });
@@ -391,7 +595,7 @@ describe("scheduling step foundation", () => {
     expect(wrapper.emitted("saved")).toHaveLength(1);
     wrapper.unmount();
   });
-  it("supports keyboard mode selection and keeps unfinished save actions disabled", async () => {
+  it("supports keyboard mode selection and keeps save actions disabled without pool permission", async () => {
     const wrapper = render();
     await wrapper.get('[aid="mode-proportional"]').trigger("keydown", { key: "ArrowRight" });
     expect(wrapper.get('[aid="mode-ranked"]').attributes("aria-checked")).toBe("true");
@@ -408,6 +612,102 @@ describe("scheduling step foundation", () => {
     await flushPromises();
     wrapper.unmount();
   });
+  it("continues only after the pool and department changes finish saving", async () => {
+    const wrapper = render();
+    await wrapper.setProps({ canSavePool: true });
+    let finishDepartments!: (value: unknown) => void;
+    saveMocks.patchPool.mockReset().mockImplementation(async (_id, payload) => ({ ...pool, ...payload }));
+    saveMocks.patchDepartments.mockReset().mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          finishDepartments = resolve;
+        }),
+    );
+    wrapper.findComponent(Table).vm.$emit("edit", { id: "a", weight: 5 });
+    await wrapper.get('[aid="scheduling-save-continue"]').trigger("click");
+    await flushPromises();
+    expect(wrapper.emitted("saved")).toBeUndefined();
+    expect(wrapper.get('[aid="scheduling-save-continue"]').attributes("disabled")).toBeDefined();
+    await wrapper.get('[aid="wizard-step-item-topology"]').trigger("click");
+    expect(wrapper.emitted("open-topology")).toBeUndefined();
+    finishDepartments({ succeeded: [{ orgUnitId: "a", nodePoolId: "pool-1" }], failed: [], totalFailed: 0 });
+    await flushPromises();
+    expect(wrapper.emitted("saved")?.[0]?.[1]).toBe("continue");
+    wrapper.unmount();
+  });
+
+  it("stays on scheduling when the pool save fails before continuing", async () => {
+    const wrapper = render();
+    await wrapper.setProps({ canSavePool: true });
+    saveMocks.patchPool.mockReset().mockRejectedValue(new Error("pool update failed"));
+    saveMocks.patchDepartments.mockReset();
+    await wrapper.get('[aid="mode-ranked"]').trigger("click");
+    await wrapper.get('[aid="scheduling-save-continue"]').trigger("click");
+    await flushPromises();
+    expect(wrapper.emitted("saved")).toBeUndefined();
+    expect(wrapper.emitted("pool-saved")).toBeUndefined();
+    expect(saveMocks.patchDepartments).not.toHaveBeenCalled();
+    expect(wrapper.get('[role="alert"]').text()).toContain("pool update failed");
+    expect(wrapper.get('[aid="mode-ranked"]').attributes("aria-checked")).toBe("true");
+    wrapper.unmount();
+  });
+
+  it("keeps the scheduling draft after partial failure and continues only when retry completes", async () => {
+    const wrapper = render();
+    await wrapper.setProps({ canSavePool: true });
+    saveMocks.patchPool.mockReset().mockImplementation(async (_id, payload) => ({ ...pool, ...payload }));
+    saveMocks.patchDepartments
+      .mockReset()
+      .mockResolvedValueOnce({ succeeded: [], failed: [{ message: "department conflict" }], totalFailed: 1 })
+      .mockResolvedValueOnce({ succeeded: [{ orgUnitId: "a", nodePoolId: "pool-1" }], failed: [], totalFailed: 0 });
+    wrapper.findComponent(Table).vm.$emit("edit", { id: "a", weight: 5 });
+    await wrapper.get('[aid="scheduling-save-continue"]').trigger("click");
+    await flushPromises();
+    expect(wrapper.emitted("saved")).toBeUndefined();
+    expect(wrapper.get('[role="alert"]').text()).toContain("remain unsaved");
+    expect(wrapper.findComponent(Table).props("draft").departments.a.weight).toBe(5);
+    await wrapper.get('[aid="scheduling-save-continue"]').trigger("click");
+    await flushPromises();
+    expect(wrapper.emitted("saved")?.[0]?.[1]).toBe("continue");
+    expect(saveMocks.patchPool).toHaveBeenCalledTimes(1);
+    wrapper.unmount();
+  });
+
+  it.each(["canEditDepartments", "canViewDepartments"] as const)(
+    "lets a pool editor continue without writing when %s is missing",
+    async (permission) => {
+      const wrapper = render();
+      await wrapper.setProps({ canSavePool: true, [permission]: false });
+      saveMocks.patchPool.mockClear();
+      saveMocks.patchDepartments.mockClear();
+      const next = wrapper.get('[aid="scheduling-continue"]');
+      expect(next.text()).toBe("Continue");
+      await next.trigger("click");
+      expect(wrapper.emitted("open-topology")).toHaveLength(1);
+      expect(saveMocks.patchPool).not.toHaveBeenCalled();
+      expect(saveMocks.patchDepartments).not.toHaveBeenCalled();
+      wrapper.unmount();
+    },
+  );
+
+  it("navigates through the stepper without saving a dirty or invalid draft", async () => {
+    const wrapper = render();
+    await wrapper.setProps({ canSavePool: true });
+    saveMocks.patchPool.mockClear();
+    saveMocks.patchDepartments.mockClear();
+    wrapper.findComponent(Table).vm.$emit("edit", { id: "a", weight: 1.5 });
+    await wrapper.vm.$nextTick();
+    expect(wrapper.get('[aid="scheduling-save-continue"]').attributes("disabled")).toBeDefined();
+    await wrapper.get('[aid="wizard-step-item-identity"]').trigger("click");
+    expect(wrapper.emitted("open-identity")).toHaveLength(1);
+    expect(wrapper.emitted("open-topology")).toBeUndefined();
+    await wrapper.get('[aid="wizard-step-item-topology"]').trigger("click");
+    expect(wrapper.emitted("open-topology")).toHaveLength(1);
+    expect(saveMocks.patchPool).not.toHaveBeenCalled();
+    expect(saveMocks.patchDepartments).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
   it("preserves applied edits when changing mode without a discard dialog", async () => {
     const wrapper = render();
     const tableUid = wrapper.findComponent(Table).vm.$.uid;

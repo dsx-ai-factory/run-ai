@@ -13,6 +13,10 @@ import RunaiDescriptionInput from "@/components/common/runai-description-input/r
 import NodePoolEditFormV2 from "./node-pool-edit-form-v2.vue";
 import { BadRequestError } from "@/models/http-response.model";
 import { ENABLE_NODE_POOL_CREATE_FLOW } from "@/constants/node-pool.constants";
+import { requestToLeave } from "@/services/infra/router.service/router.service";
+import { eventEmitter } from "@/services/infra/event-emitter.service/event-emitter.service";
+import { NAVIGATION_EVENTS } from "@/common/event.constant";
+import type { Nodepool } from "@/swagger-models/cluster-service-client";
 vi.mock("@/services/control-plane/cluster.service/cluster.service", () => ({
   clusterService: { getNodepools: vi.fn().mockResolvedValue([]), createNodepool: vi.fn() },
 }));
@@ -118,7 +122,7 @@ describe("Step 1 form", () => {
     expect(wrapper.text()).toContain("Select a value");
     wrapper.unmount();
   });
-  it("shows the backend error detail, preserves input and clears the error on successful retry", async () => {
+  it("shows a single failure toast and preserves the input for a successful retry", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     vi.mocked(clusterService.createNodepool)
       .mockRejectedValueOnce(new BadRequestError("This label is reserved by the cluster administrator"))
@@ -140,9 +144,10 @@ describe("Step 1 form", () => {
     await flushPromises();
     await wrapper.find('[aid="create-node-pool-continue"]').trigger("click");
     await flushPromises();
-    expect(wrapper.get('[role="alert"]').text()).toContain("This label is reserved by the cluster administrator");
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    expect(notify).toHaveBeenCalledTimes(1);
     expect(notify).toHaveBeenCalledWith(
-      expect.objectContaining({ message: "Node pool valid-pool couldn't be created" }),
+      expect.objectContaining({ type: "negative", message: "Node pool valid-pool couldn't be created" }),
     );
     expect(wrapper.findComponent(RunaiNameValidation).props("modelValue")).toBe("valid-pool");
     expect(wrapper.findComponent(RunaiDescriptionInput).props("modelValue")).toBe("Keep this description");
@@ -172,5 +177,49 @@ describe("Step 1 form", () => {
     }
     expect(clusterService.createNodepool).not.toHaveBeenCalled();
     wrapper.unmount();
+  });
+  it("refuses header Close while creation is pending without queuing a leave dialog", async () => {
+    let finish!: (value: Nodepool) => void;
+    vi.mocked(clusterService.getNodepools).mockResolvedValue([]);
+    vi.mocked(clusterService.createNodepool)
+      .mockReset()
+      .mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            finish = resolve;
+          }),
+      );
+    const wrapper = renderForm("cluster");
+    vi.spyOn(wrapper.vm.$q, "notify").mockImplementation(() => () => {});
+    try {
+      await flushPromises();
+      wrapper.findComponent(RunaiNameValidation).vm.$emit("update:modelValue", "pending-pool");
+      wrapper
+        .findAllComponents(QSelect)
+        .find((input) => input.props("label") === "Key")
+        ?.vm.$emit("update:modelValue", "night.test/pool");
+      await flushPromises();
+      wrapper
+        .findAllComponents(QSelect)
+        .find((input) => input.props("label") === "Value")
+        ?.vm.$emit("update:modelValue", "pending");
+      await flushPromises();
+      await wrapper.get('[aid="create-node-pool-continue"]').trigger("click");
+      await flushPromises();
+      expect(clusterService.createNodepool).toHaveBeenCalledTimes(1);
+      let allowed: boolean | undefined;
+      void requestToLeave().then((value) => {
+        allowed = value;
+      });
+      await flushPromises();
+      expect(allowed).toBe(false);
+      expect(document.querySelector('[aid="leave-page-modal-cancel-btn"]')).toBeNull();
+      expect(wrapper.emitted("leave-approved")).toBeUndefined();
+    } finally {
+      eventEmitter.emit(NAVIGATION_EVENTS.LEAVE_PAGE_STATUS, { allowToLeave: false });
+      finish?.({ id: "created", name: "pending-pool", clusterId: "cluster" } as Nodepool);
+      await flushPromises();
+      wrapper.unmount();
+    }
   });
 });

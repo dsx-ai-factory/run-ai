@@ -81,8 +81,6 @@ export function previewDepartmentWeightPercentage(
     return weightPercentage(weight, total - row.weight + weight);
   if (!completePeers) return undefined;
   const key = ranked ? (row.rank ?? "") : "all";
-  const otherWeights = completePeerSchedulingTotals(completePeers, { excludeId: row.id, requireIntegerWeights: true })[
-    key
-  ]?.rawWeightsSum;
+  const otherWeights = completePeerSchedulingTotals(completePeers, { excludeId: row.id })[key]?.rawWeightsSum;
   return otherWeights == null ? undefined : weightPercentage(weight, otherWeights + weight);
 }

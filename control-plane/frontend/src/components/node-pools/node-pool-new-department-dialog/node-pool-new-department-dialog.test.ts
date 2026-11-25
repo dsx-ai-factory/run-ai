@@ -104,16 +104,25 @@ describe("new department creation", () => {
     expect(wrapper.emitted("created")?.[0][0]).toMatchObject({ id: "new" });
     expect(wrapper.emitted("close")).toHaveLength(1);
   });
-  it("preserves the form on creation failure", async () => {
-    vi.mocked(orgUnitService.createDepartment).mockRejectedValue(new Error("Creation failed"));
+  it("shows a named failure toast and keeps the form available to retry", async () => {
+    vi.mocked(orgUnitService.createDepartment).mockRejectedValueOnce(new Error("Creation failed"));
     const name = await render();
+    const notify = vi.spyOn(wrapper.vm.$q, "notify").mockImplementation(() => () => {});
     await name.setValue("department-preview");
     await new Promise((resolve) => setTimeout(resolve, 350));
     (document.querySelector('[aid="create-department"]') as HTMLButtonElement).click();
     await flushPromises();
     expect(wrapper.emitted("close")).toBeUndefined();
     expect((name.element as HTMLInputElement).value).toBe("department-preview");
-    expect(document.querySelector(".department-save-error")?.textContent).toContain("Creation failed");
+    expect(document.querySelector(".department-save-error")).toBeNull();
+    expect(notify).toHaveBeenCalledTimes(1);
+    expect(notify).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "negative", message: "Department department-preview couldn't be created" }),
+    );
+    (document.querySelector('[aid="create-department"]') as HTMLButtonElement).click();
+    await flushPromises();
+    expect(wrapper.emitted("created")).toHaveLength(1);
+    expect(wrapper.emitted("close")).toHaveLength(1);
   });
   it("retries only incomplete role assignments without creating another department", async () => {
     const name = await render();

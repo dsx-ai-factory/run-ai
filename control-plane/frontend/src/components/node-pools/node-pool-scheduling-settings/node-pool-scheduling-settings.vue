@@ -3,14 +3,18 @@
   SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-  <aside
-    class="scheduling-settings"
-    :class="{ 'scheduling-settings--compact': draft.mode === ESchedulingMode.Proportional }"
-    aria-label="Advanced settings"
-  >
+  <aside class="scheduling-settings" aria-label="Advanced settings">
     <header>
       <span>Advanced settings</span
-      ><q-btn flat round dense icon="ph-bold ph-x" aria-label="Hide Advanced settings" @click="emit('close')">
+      ><q-btn
+        ref="closeButton"
+        flat
+        round
+        dense
+        icon="ph-bold ph-x"
+        aria-label="Hide Advanced settings"
+        @click="emit('close')"
+      >
         <q-tooltip class="node-pool-settings-hide-help">Hide Advanced settings</q-tooltip>
       </q-btn>
     </header>
@@ -53,7 +57,7 @@
           </template>
         </q-option-group>
       </section>
-      <section v-if="draft.mode === ESchedulingMode.Guaranteed" class="toggle-section">
+      <section v-if="isSupportedSchedulingMode(draft.mode)" class="toggle-section">
         <scheduling-section-title title="Max GPU allocation" tooltip-icon="ph-bold ph-info" :tooltip-text="maxHelp">
           <template #tooltip-content>
             <span class="node-pool-settings-help node-pool-settings-help--standard">{{ maxHelp }}</span>
@@ -61,11 +65,12 @@
         </scheduling-section-title>
         <runai-toggle
           :model-value="!!draft.maxAllocation"
-          :disable="readonly || (!canResetResources && (savedMaxAllocation ?? draft.maxAllocation))"
+          :disable="readonly || checkingLimits || (!canResetResources && (savedMaxAllocation ?? draft.maxAllocation))"
           aid="max-allocation-toggle"
           @update:model-value="setMax"
         />
       </section>
+      <p v-if="maxAllocationError" role="alert" class="text-negative q-mt-sm">{{ maxAllocationError }}</p>
       <section>
         <div class="toggle-section">
           <scheduling-section-title
@@ -245,12 +250,14 @@
       @close="confirmation = undefined"
     >
       <template #header>{{
-        confirmation === "maxAllocation" ? "Disable Max GPU Allocation?" : "Disable CPU Quota?"
+        confirmation === "cpuQuota" ? "Disable CPU Quota?" : "Disable Max GPU Allocation?"
       }}</template>
       <template #body>{{
         confirmation === "maxAllocation"
           ? 'Disabling this will reset the max GPU allocation of all departments in this node pool to "Unlimited"'
-          : "The CPU compute and CPU memory quotas of departments and projects in this node pool will be removed. Their limit will be set to Auto, and workloads can use up to the node pool’s maximum available CPU resources. Running workloads are not affected."
+          : confirmation === "unsavedLimits"
+            ? "You have unsaved changes. If you disable max GPU allocation, they will be lost."
+            : "The CPU compute and CPU memory quotas of departments and projects in this node pool will be removed. Their limit will be set to Auto, and workloads can use up to the node pool’s maximum available CPU resources. Running workloads are not affected."
       }}</template>
       <template #footer
         ><runai-btn
@@ -268,10 +275,12 @@
   </aside>
 </template>
 <script setup lang="ts">
-import { ENodePoolSchedulingMode as ESchedulingMode } from "@/models/node-pool.model";
+import { ENodePoolSchedulingMode as ESchedulingMode, isSupportedSchedulingMode } from "@/models/node-pool.model";
 
 import { numericKeydown, numericPaste, numericBeforeInput } from "@/utils/numeric-input.util/numeric-input.util";
-import { ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { QBtn } from "quasar";
+import { extractErrorMessages } from "@/utils/error-alert.util";
 import { DOCS } from "@/constants/docs/index";
 import { SchedulingSectionTitle } from "@/components/node-pools/scheduling-section-title";
 import { SchedulingHelpTooltip } from "@/components/node-pools/scheduling-help-tooltip";
@@ -283,10 +292,13 @@ const props = defineProps<{
   draft: SchedulingDraft;
   readonly?: boolean;
   canResetResources?: boolean;
+  loadHasGpuLimits?: () => Promise<boolean>;
   savedMaxAllocation?: boolean;
   savedCpuQuota?: boolean;
 }>();
 const emit = defineEmits<{ close: []; patch: [Partial<SchedulingDraft>] }>();
+const closeButton = ref<QBtn>();
+onMounted(() => closeButton.value?.$el.focus({ preventScroll: true }));
 const weightOptions = [
   {
     label: "Automatic",
@@ -300,15 +312,18 @@ const weightOptions = [
     toolTip: "Set the proportion of unused resources a project or department can get on top of its quota.",
   },
 ];
-const maxHelp =
-  'When enabled, the maximum GPU device allocation each department and project can get from this node pool, representing the maximum sum of assigned quota and over-quota GPUs, can be set. When disabled, the maximum is "unlimited."';
+const maxHelp = computed(() =>
+  props.draft.mode === ESchedulingMode.Guaranteed
+    ? 'When enabled, the maximum GPU device allocation each department and project can get from this node pool, representing the maximum sum of assigned quota and over-quota GPUs, can be set. When disabled, the maximum is "unlimited."'
+    : "Set the maximum number of GPUs each department and project can use from this node pool. When disabled, the maximum is unlimited.",
+);
 const runtimeHelp =
   "This defines the minimum time a preemptible workload is guaranteed to run once it is scheduled in this node pool, before it can be preempted and its resources reallocated to other workloads.";
 const windowHelp =
   "This defines the duration of the sliding window used to calculate historical resource usage. At any given moment, the system looks only at usage within this duration from the current time. As time passes, the window slides forward continuously, including new usage and dropping old usage that falls outside the window.";
 const runtimeUnits = ["Days", "Hours", "Minutes", "Seconds"];
 const windowUnits = ["Days", "Hours", "Minutes"];
-const confirmation = ref<"maxAllocation" | "cpuQuota">();
+const confirmation = ref<"maxAllocation" | "unsavedLimits" | "cpuQuota">();
 function patch(value: Partial<SchedulingDraft>) {
   if (!props.readonly) emit("patch", value);
 }
@@ -326,15 +341,61 @@ function number(value: string | number | null, key: string) {
 function setDuration(field: "historicalWindow" | "minimumRuntime", unit: string, value: string | number | null) {
   patch({ [field]: { ...props.draft[field], [unit]: number(value, `${field}.${unit}`) } });
 }
-function setMax(value: boolean) {
+const checkingLimits = ref(false);
+const maxAllocationError = ref("");
+let limitCheckVersion = 0;
+function invalidateLimitCheck() {
+  limitCheckVersion++;
+  checkingLimits.value = false;
+  maxAllocationError.value = "";
+}
+watch(
+  [() => props.draft.mode, () => props.draft.maxAllocation, () => props.readonly, () => props.canResetResources],
+  () => {
+    invalidateLimitCheck();
+    if (confirmation.value !== "cpuQuota") confirmation.value = undefined;
+  },
+);
+onBeforeUnmount(invalidateLimitCheck);
+function disableWithoutSavedLimits() {
+  if (Object.values(props.draft.departments).some((edit) => edit.limit !== undefined)) {
+    confirmation.value = "unsavedLimits";
+  } else patch({ maxAllocation: false });
+}
+async function setMax(value: boolean) {
   if (
-    props.draft.mode !== ESchedulingMode.Guaranteed ||
+    !isSupportedSchedulingMode(props.draft.mode) ||
     props.readonly ||
+    checkingLimits.value ||
     (!value && (props.savedMaxAllocation ?? props.draft.maxAllocation) && !props.canResetResources)
   )
     return;
-  if (!value && (props.savedMaxAllocation ?? props.draft.maxAllocation)) confirmation.value = "maxAllocation";
-  else patch({ maxAllocation: value });
+  maxAllocationError.value = "";
+  if (value) {
+    patch({ maxAllocation: true });
+    return;
+  }
+  if (!(props.savedMaxAllocation ?? props.draft.maxAllocation)) {
+    disableWithoutSavedLimits();
+    return;
+  }
+  const version = ++limitCheckVersion;
+  checkingLimits.value = true;
+  try {
+    if (!props.loadHasGpuLimits) throw new Error("Failed to check GPU allocation limits. Try again.");
+    const hasLimits = await props.loadHasGpuLimits();
+    if (version !== limitCheckVersion) return;
+    if (hasLimits) confirmation.value = "maxAllocation";
+    else disableWithoutSavedLimits();
+  } catch (error) {
+    if (version === limitCheckVersion) {
+      maxAllocationError.value = extractErrorMessages(error, "Failed to check GPU allocation limits. Try again.").join(
+        " ",
+      );
+    }
+  } finally {
+    if (version === limitCheckVersion) checkingLimits.value = false;
+  }
 }
 function setCpu(value: boolean) {
   if (props.readonly || (!value && (props.savedCpuQuota ?? props.draft.cpuQuota) && !props.canResetResources)) return;
@@ -342,23 +403,27 @@ function setCpu(value: boolean) {
   else patch({ cpuQuota: value });
 }
 function confirmDisable() {
-  if (confirmation.value === "maxAllocation") {
-    // The backend resets stored limits on save. Keep inactive draft limits so
-    // switching the toggle back on restores the user's unsaved values.
-    patch({ maxAllocation: false });
-  } else patch({ cpuQuota: false });
+  if (confirmation.value === "cpuQuota") patch({ cpuQuota: false });
+  else {
+    const departments = { ...props.draft.departments };
+    for (const [id, edit] of Object.entries(departments)) {
+      if (edit.limit === undefined) continue;
+      const remaining = { ...edit };
+      delete remaining.limit;
+      if (Object.keys(remaining).length === 1) delete departments[id];
+      else departments[id] = remaining;
+    }
+    patch({ maxAllocation: false, departments });
+  }
   confirmation.value = undefined;
 }
 </script>
 <style scoped lang="scss">
 .scheduling-settings {
+  height: 100%;
   width: 100%;
   min-width: 0;
-  flex: 0 1 auto;
   border-left: 1px solid var(--border-subtle);
-}
-.scheduling-settings--compact {
-  align-self: flex-start;
   box-shadow: inset 0 -1px var(--border-subtle);
 }
 header {
@@ -597,14 +662,13 @@ header :deep(.q-icon) {
 }
 </style>
 <style lang="scss">
-.scheduling-settings-popup {
-  width: 420px;
-  max-width: calc(100vw - 32px) !important;
-  scrollbar-gutter: stable;
-}
 .historical-weight-help {
   margin: 0;
-  padding-left: 20px;
+  padding-inline-start: 20px;
+
+  > li {
+    list-style-type: disc;
+  }
 }
 .scheduling-confirm {
   width: 500px !important;

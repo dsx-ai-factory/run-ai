@@ -13,6 +13,44 @@ const popup = {
   emits: ["apply", "reset", "before-show"],
 };
 describe("resource editor opening transition", () => {
+  it("waits for project quotas before showing the pool capacity warning", async () => {
+    let finishLoading!: () => void;
+    const pending = new Promise<void>((resolve) => {
+      finishLoading = resolve;
+    });
+    const wrapper = mount(Editor, {
+      props: {
+        id: "a",
+        kind: EResourceEditorKind.Quota,
+        value: 1,
+        loadContext: async () => {
+          await pending;
+          return { childQuotaSum: 0, capacity: 0 };
+        },
+      },
+      global: { plugins: [Quasar], stubs: { EditableCellPopup: popup } },
+    });
+    try {
+      const menu = wrapper.getComponent(popup);
+      menu.vm.$emit("before-show");
+      await wrapper.vm.$nextTick();
+      expect(wrapper.find('[aria-label="Loading project quotas"]').exists()).toBe(true);
+      expect(menu.props("isSubmitDisabled")).toBe(true);
+      expect(wrapper.getComponent(QInput).props("error")).toBe(false);
+      expect(wrapper.text()).not.toContain("Project quota totals are unavailable.");
+      expect(wrapper.find(".text-warning").exists()).toBe(false);
+
+      finishLoading();
+      await flushPromises();
+      expect(wrapper.find('[aria-label="Loading project quotas"]').exists()).toBe(false);
+      expect(wrapper.get("p.text-warning").text()).toContain("exceeds the node pool’s total");
+      expect(wrapper.getComponent(QInput).props("error")).toBe(false);
+      expect(menu.props("isSubmitDisabled")).toBe(false);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
   it("does not overwrite input entered while the popup is opening", async () => {
     const wrapper = mount(Editor, {
       props: { id: "a", kind: EResourceEditorKind.Weight, value: 2 },
@@ -33,6 +71,28 @@ describe("resource editor opening transition", () => {
   });
 });
 describe("department resource editor", () => {
+  it("displays an inherited weight outside the manual range until the user changes it", async () => {
+    const wrapper = mount(Editor, {
+      props: { id: "a", kind: EResourceEditorKind.Weight, value: 20.5, previewWeightPercentage: () => 75 },
+      global: { plugins: [Quasar], stubs: { EditableCellPopup: popup } },
+    });
+    try {
+      const menu = wrapper.getComponent(popup);
+      menu.vm.$emit("before-show");
+      await wrapper.vm.$nextTick();
+      expect(wrapper.get("input").element.value).toBe("20.5");
+      expect(wrapper.get(".weight-percentage").text()).toBe("(75%)");
+      expect(wrapper.getComponent(QInput).props("error")).toBe(false);
+      expect(menu.props("isSubmitDisabled")).toBe(true);
+      await wrapper.get("input").setValue("20.1");
+      expect(wrapper.getComponent(QInput).props("error")).toBe(true);
+      await wrapper.get("input").setValue("20");
+      expect(menu.props("isSubmitDisabled")).toBe(false);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
   it("keeps scheduling cell validation feedback local while blocking invalid Apply", async () => {
     const wrapper = mount(Editor, {
       props: {
@@ -57,6 +117,32 @@ describe("department resource editor", () => {
     await apply.trigger("click");
     expect(wrapper.emitted("apply")).toBeUndefined();
     wrapper.unmount();
+  });
+
+  it("keeps Apply available for an invalid weight and lets the user correct it", async () => {
+    const wrapper = mount(Editor, {
+      props: { id: "a", kind: EResourceEditorKind.Weight, value: 2 },
+      global: { plugins: [Quasar] },
+      attachTo: document.body,
+    });
+    try {
+      await wrapper.get(".cell-trigger").trigger("click");
+      await flushPromises();
+      const input = wrapper.getComponent(QInput).get("input");
+      await input.setValue("400");
+      const apply = wrapper.findAllComponents(QBtn).find((btn) => btn.props("label") === "APPLY");
+      if (!apply) throw new Error("Missing weight Apply button");
+      expect(apply.attributes("disabled")).toBeUndefined();
+      await apply.trigger("click");
+      expect(wrapper.getComponent(QMenu).props("modelValue")).toBe(true);
+      expect(wrapper.emitted("apply")).toBeUndefined();
+      await input.setValue("4");
+      await apply.trigger("click");
+      expect(wrapper.emitted("apply")).toEqual([[4]]);
+      expect(wrapper.getComponent(QMenu).props("modelValue")).toBe(false);
+    } finally {
+      wrapper.unmount();
+    }
   });
 
   it("applies a numeric zero maximum and reserves Unlimited for an empty input", async () => {
@@ -182,6 +268,40 @@ describe("department resource editor", () => {
     expect(wrapper.emitted("apply")).toEqual([[6]]);
     wrapper.unmount();
   });
+  it("opens a saved unlimited quota without errors and validates a numeric replacement", async () => {
+    const wrapper = mount(Editor, {
+      props: {
+        value: -1,
+        kind: EResourceEditorKind.Quota,
+        id: "default",
+        context: { childQuotaSum: 4, enforceChildQuota: true },
+      },
+      global: { plugins: [Quasar], stubs: { EditableCellPopup: popup } },
+    });
+    const menu = wrapper.getComponent(popup);
+    menu.vm.$emit("before-show");
+    await wrapper.vm.$nextTick();
+    const input = wrapper.get("input");
+    expect(input.element.value).toBe("");
+    expect(input.attributes("placeholder")).toBe("Unlimited");
+    expect(wrapper.getComponent(QInput).props("error")).toBe(false);
+    expect(wrapper.find(".text-warning").exists()).toBe(false);
+    expect(menu.props("isSubmitDisabled")).toBe(true);
+    menu.vm.$emit("apply");
+    expect(wrapper.emitted("apply")).toBeUndefined();
+
+    await input.setValue("-1");
+    expect(wrapper.text()).toContain("Enter a value equal to or above 0");
+    await input.setValue("3");
+    expect(wrapper.text()).toContain("equal to or above 4 GPUs");
+    expect(menu.props("isSubmitDisabled")).toBe(true);
+    await input.setValue("4");
+    expect(menu.props("isSubmitDisabled")).toBe(false);
+    menu.vm.$emit("apply");
+    expect(wrapper.emitted("apply")).toEqual([[4]]);
+    wrapper.unmount();
+  });
+
   it("renders the saved unlimited quota sentinel as Unlimited", () => {
     const wrapper = mount(Editor, {
       props: { value: -1, kind: EResourceEditorKind.Quota, id: "default" },

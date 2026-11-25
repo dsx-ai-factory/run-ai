@@ -55,11 +55,11 @@ describe("node pool creation fields", () => {
       { label: "H100 (new value)", value: "H100", disable: false },
     ]);
   });
-  it("does not classify a pool with limits enabled as Proportional", () => {
-    expect(isProportional({ ...PROPORTIONAL_CAPABILITIES, limits: true })).toBe(false);
+  it("recognizes Proportional with limits enabled or disabled", () => {
+    expect(isProportional({ ...PROPORTIONAL_CAPABILITIES, limits: true })).toBe(true);
     expect(isProportional(PROPORTIONAL_CAPABILITIES)).toBe(true);
   });
-  it("defines Proportional as weights only", () => {
+  it("defaults new Proportional pools to weights only", () => {
     expect(PROPORTIONAL_CAPABILITIES).toEqual({
       adjustableWeights: true,
       quota: false,

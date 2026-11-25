@@ -10,11 +10,15 @@ import { fileService } from "@/services/file.service/file.service";
 import { MetricsType } from "@/swagger-models/cluster-service-client";
 
 const getNetworkTopologies = vi.fn();
+const getNodepool = vi.fn();
 const patchNodepool = vi.fn();
 
 vi.mock("@/services/infra/client-apis/cluster-service-api/cluster-service-api", () => ({
   clusterServiceApi: {
-    nodePoolsApi: { patchNodepool: (...args: unknown[]) => patchNodepool(...args) },
+    nodePoolsApi: {
+      getNodepool: (...args: unknown[]) => getNodepool(...args),
+      patchNodepool: (...args: unknown[]) => patchNodepool(...args),
+    },
     networkTopologiesApi: {
       getNetworkTopologies: (...args: unknown[]) => getNetworkTopologies(...args),
     },
@@ -79,12 +83,37 @@ describe("clusterService.getNodepoolMetricsCsv", () => {
 });
 
 describe("clusterService.patchNodepool", () => {
-  it("patches only supplied fields and returns the updated pool", async () => {
-    patchNodepool.mockResolvedValue({ data: { id: "p", name: "pool" } });
-    await expect(clusterService.patchNodepool("p", { schedulingCapabilities: { quota: true } })).resolves.toEqual({
-      id: "p",
-      name: "pool",
-    });
-    expect(patchNodepool).toHaveBeenCalledWith("p", { schedulingCapabilities: { quota: true } });
+  beforeEach(() => {
+    setActivePinia(createPinia());
+    getNodepool.mockReset();
+    patchNodepool.mockReset();
+  });
+
+  it.each(["topology-from-another-tab", null, undefined])(
+    "preserves the latest topology (%s) when saving unrelated changes",
+    async (networkTopologyId) => {
+      const edits = { schedulingCapabilities: { quota: true } };
+      getNodepool.mockResolvedValue({ data: { id: "p", networkTopologyId } });
+      const saved = { id: "p", networkTopologyId, ...edits };
+      patchNodepool.mockResolvedValue({ data: saved });
+
+      await expect(clusterService.patchNodepool("p", edits)).resolves.toEqual(saved);
+      expect(getNodepool).toHaveBeenCalledWith("p");
+      expect(patchNodepool).toHaveBeenCalledWith("p", { ...edits, networkTopologyId: networkTopologyId ?? null });
+    },
+  );
+
+  it.each(["chosen-topology", null])("sends an explicit topology edit (%s) directly", async (networkTopologyId) => {
+    patchNodepool.mockResolvedValue({ data: { id: "p", networkTopologyId } });
+    await clusterService.patchNodepool("p", { networkTopologyId });
+    expect(getNodepool).not.toHaveBeenCalled();
+    expect(patchNodepool).toHaveBeenCalledWith("p", { networkTopologyId });
+  });
+
+  it("stops before writing if the current topology cannot be read", async () => {
+    getNodepool.mockRejectedValue(new Error("network error"));
+    await expect(clusterService.patchNodepool("p", { schedulingCapabilities: { quota: true } })).rejects.toThrow();
+    expect(getNodepool).toHaveBeenCalledWith("p");
+    expect(patchNodepool).not.toHaveBeenCalled();
   });
 });

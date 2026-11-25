@@ -18,7 +18,8 @@
     "
     :disabled="disabled"
     :disabled-tooltip="disabledTooltip"
-    :is-submit-disabled="loading || validation.errors.length > 0"
+    :is-submit-disabled="kind === EResourceEditorKind.Weight ? loading || unchangedInheritedWeight : applyDisabled"
+    :can-apply="canApply"
     @before-show="opened"
     @reset="reset"
     @apply="apply"
@@ -34,7 +35,7 @@
           :tooltip-text="weightHelp"
           anchor="center right"
           self="center left"
-          :offset="rankedWeight ? [120, 0] : [180, 0]"
+          :offset="[8, 0]"
           ><template #content
             ><span class="node-pool-weight-help"
               ><strong>Weight</strong> determines a department’s share relative to the other departments{{
@@ -65,7 +66,7 @@
           :aria-label="editorTitle"
           :max="kind === EResourceEditorKind.Weight ? 20 : undefined"
           :step="kind === EResourceEditorKind.Weight ? 1 : 'any'"
-          :placeholder="kind === EResourceEditorKind.Limit ? 'Unlimited' : undefined"
+          :placeholder="kind === EResourceEditorKind.Limit || savedUnlimitedQuota ? 'Unlimited' : undefined"
           :error="validation.errors.length > 0"
           :color="!validation.errors.length && validation.warnings.length ? 'warning' : 'primary'"
           :class="{
@@ -109,6 +110,7 @@ import { computed, ref, watch } from "vue";
 import { SchedulingHelpTooltip } from "@/components/node-pools/scheduling-help-tooltip";
 import { EditableCellPopup } from "@/components/common/runai-table/runai-custom-table-columns/editable-cell-popup/index";
 import {
+  DEFAULT_DEPARTMENT_SCHEDULING_WEIGHT,
   recommendedDepartmentQuotaMinimum,
   departmentQuotaBudget,
   validateDepartmentEdit,
@@ -145,8 +147,11 @@ const weightHelp = computed(
   () =>
     `Weight determines a department’s share relative to the other departments${rankedWeight.value ? " in the same rank" : ""}. A higher weight means a larger portion of the resources. The weight is expressed as a percentage, calculated as the weight divided by the total weight of all departments${rankedWeight.value ? " in the rank" : ""}. For example, a department with a weight of 2${rankedWeight.value ? " in a rank" : ""} where the weights total 20 receives 10%.`,
 );
+const savedUnlimitedQuota = computed(() => props.kind === EResourceEditorKind.Quota && props.value === -1);
 const initialInput = () =>
-  props.kind === EResourceEditorKind.Limit && (props.value == null || props.value === -1) ? "" : (props.value ?? "");
+  savedUnlimitedQuota.value || (props.kind === EResourceEditorKind.Limit && props.value === -1)
+    ? ""
+    : (props.value ?? "");
 const nativeBadInput = ref(false);
 function updateNativeValidity(event: Event) {
   if (event.target instanceof HTMLInputElement) nativeBadInput.value = event.target.validity.badInput;
@@ -159,10 +164,20 @@ const parsedValue = () =>
       : String(input.value).trim() === ""
         ? NaN
         : Number(input.value);
-const input = ref<string | number>(props.value ?? "");
+const input = ref<string | number>(initialInput());
+const unchangedUnlimitedQuota = computed(() => savedUnlimitedQuota.value && input.value === "" && !nativeBadInput.value);
+const unchangedInheritedWeight = computed(
+  () =>
+    props.kind === EResourceEditorKind.Weight &&
+    props.value != null &&
+    Number.isFinite(props.value) &&
+    props.value >= 0 &&
+    !isValidSchedulingWeight(props.value) &&
+    parsedValue() === props.value,
+);
 const proposedWeightPercentage = computed(() => {
   const value = parsedValue();
-  if (!isValidSchedulingWeight(value)) return "Unknown";
+  if (!unchangedInheritedWeight.value && !isValidSchedulingWeight(value)) return "Unknown";
   const percentage = props.previewWeightPercentage?.(value);
   return percentage == null || !Number.isFinite(percentage) ? "Unknown" : `${roundToDecimal(percentage)}%`;
 });
@@ -195,6 +210,9 @@ const active = ref(false);
 const loadError = ref("");
 let request = 0;
 const validation = computed(() => {
+  if (loading.value) return { errors: [], warnings: [] };
+  if (unchangedUnlimitedQuota.value || unchangedInheritedWeight.value)
+    return { errors: loadError.value ? [loadError.value] : [], warnings: [] };
   const value = parsedValue();
   const result = validateDepartmentEdit(
     {
@@ -233,7 +251,8 @@ function reset() {
 async function opened() {
   active.value = true;
   nativeBadInput.value = false;
-  input.value = props.kind === EResourceEditorKind.Weight ? (props.value ?? 2) : initialInput();
+  input.value =
+    props.kind === EResourceEditorKind.Weight ? (props.value ?? DEFAULT_DEPARTMENT_SCHEDULING_WEIGHT) : initialInput();
   context.value = props.context ?? {};
   if (!props.loadContext) return;
   const version = ++request;
@@ -243,13 +262,23 @@ async function opened() {
     const result = await props.loadContext();
     if (version === request) context.value = result;
   } catch {
-    if (version === request) loadError.value = "Validation data is unavailable. Close and reopen to retry.";
+    if (version === request) loadError.value = "Validation data is unavailable.";
   } finally {
     if (version === request) loading.value = false;
   }
 }
+const applyDisabled = computed(
+  () =>
+    loading.value ||
+    unchangedUnlimitedQuota.value ||
+    unchangedInheritedWeight.value ||
+    validation.value.errors.length > 0,
+);
+function canApply() {
+  return !applyDisabled.value;
+}
 function apply() {
-  if (!loading.value && !validation.value.errors.length) emit("apply", parsedValue());
+  if (!applyDisabled.value) emit("apply", parsedValue());
 }
 watch(() => props.value, reset);
 </script>
@@ -316,6 +345,9 @@ p {
   width: 200px;
   border-radius: 5px;
   box-shadow: none;
+}
+.scheduling-resource-popup--weight .popup-card [aria-label="Close editor"] {
+  color: var(--icon-default);
 }
 .scheduling-resource-popup--weight .popup-card {
   width: 274px;

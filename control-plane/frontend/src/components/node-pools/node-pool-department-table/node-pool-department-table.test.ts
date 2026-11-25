@@ -4,7 +4,7 @@
  */
 import { ENodePoolSchedulingMode as ESchedulingMode } from "@/models/node-pool.model";
 import { flushPromises, mount } from "@vue/test-utils";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestingPinia } from "@pinia/testing";
 import { QCheckbox, QToggle, QResizeObserver, Quasar } from "quasar";
 import type { SchedulingDraft } from "@/models/node-pool-scheduling.model";
@@ -106,6 +106,273 @@ const draft: SchedulingDraft = {
   cpuQuota: false,
   departments: {},
 };
+
+function renderSimulation(capacity?: number) {
+  return mount(Table, {
+    props: {
+      poolId: "17",
+      rows,
+      draft,
+      capacity,
+      aggregates: { all: { weightsSum: 2, deservedSum: 3 } },
+      ranks: [],
+      readonly: true,
+      loading: false,
+    },
+    global: {
+      plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+      directives: { "click-outside": {}, permission: {} },
+    },
+  });
+}
+
+describe("simulation capacity", () => {
+  const hint = "Simulation needs the node pool’s GPU capacity.";
+  let wrapper: ReturnType<typeof renderSimulation>;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.mocked(simulateNodePool).mockReset().mockResolvedValue({ orgUnits: [] });
+  });
+  afterEach(() => {
+    wrapper.unmount();
+    vi.useRealTimers();
+  });
+
+  it("explains the disabled switch when capacity is unknown and skips simulation requests", async () => {
+    wrapper = renderSimulation();
+    const toggle = wrapper.get('[role="switch"]');
+    expect(toggle.isVisible()).toBe(true);
+    expect(toggle.attributes("aria-checked")).toBe("false");
+    expect(toggle.attributes("aria-disabled")).toBe("true");
+    const description = wrapper.get(`[id="${toggle.attributes("aria-describedby")}"]`);
+    expect(description.text()).toBe(hint);
+    expect(description.isVisible()).toBe(true);
+    expect(toggle.element.closest("th")?.contains(description.element)).toBe(true);
+    await toggle.trigger("click");
+    await vi.advanceTimersByTimeAsync(500);
+    expect(wrapper.find(".demand-slider").exists()).toBe(false);
+    expect(simulateNodePool).not.toHaveBeenCalled();
+  });
+
+  it("enables simulation for a confirmed zero only with department read permission", async () => {
+    wrapper = renderSimulation();
+    await wrapper.setProps({ capacity: 0, canView: false });
+    const toggle = wrapper.get('[role="switch"]');
+    expect(toggle.attributes("aria-disabled")).toBe("true");
+    expect(toggle.attributes("aria-describedby")).toBeUndefined();
+    expect(wrapper.text()).not.toContain(hint);
+    await toggle.trigger("click");
+    await vi.advanceTimersByTimeAsync(500);
+    expect(simulateNodePool).not.toHaveBeenCalled();
+
+    await wrapper.setProps({ canView: true });
+    expect(toggle.attributes("aria-disabled")).toBeUndefined();
+    expect(toggle.attributes("aria-checked")).toBe("false");
+    await toggle.trigger("click");
+    await vi.advanceTimersByTimeAsync(500);
+    expect(toggle.attributes("aria-checked")).toBe("true");
+    expect(vi.mocked(simulateNodePool).mock.lastCall?.[1].nodePool?.capacity?.gpu).toBe(0);
+  });
+
+  it("simulates Custom with the same initial and edited weights as the Guaranteed grid", async () => {
+    wrapper = renderSimulation(16);
+    const peers = [
+      { ...rows[0], resources: { gpu: { deserved: 21.5 } } },
+      { ...rows[0], orgUnitId: "b", orgUnitName: "Beta" },
+      { ...rows[0], orgUnitId: "c", orgUnitName: "Gamma", resources: { gpu: { deserved: 0 } } },
+    ];
+    await wrapper.setProps({
+      rows: peers,
+      baselineRows: peers,
+      rawWeightsAvailable: false,
+      ranks: ["MediumLow"],
+      rankCounts: { MediumLow: 3 },
+      draft: {
+        ...draft,
+        mode: ESchedulingMode.Guaranteed,
+        capabilities: { adjustableWeights: false, quota: true },
+        departments: { b: { id: "b", weight: 0 } },
+      },
+    });
+    await wrapper.get('[aid="simulate-demand"]').trigger("click");
+    await vi.advanceTimersByTimeAsync(500);
+    const requested = vi.mocked(simulateNodePool).mock.lastCall?.[1].orgUnits;
+    expect(requested?.map(({ id, gpu }) => [id, gpu?.overQuotaWeight])).toEqual([
+      ["a", 21.5],
+      ["b", 0],
+      ["c", 0.01],
+    ]);
+  });
+
+  it("shows a loading track until the selected mode has allocations", async () => {
+    const result = {
+      orgUnits: [
+        {
+          id: "a",
+          fairShare: { gpu: 4 },
+          guaranteed: { gpu: 0 },
+          overQuota: { gpu: 4 },
+          unmet: { gpu: 6 },
+          demand: { gpu: 10 },
+          weightShareInRank: 1,
+        },
+      ],
+    };
+    vi.mocked(simulateNodePool).mockResolvedValue(result);
+    wrapper = renderSimulation(40);
+    await wrapper.get('[role="switch"]').trigger("click");
+    await vi.advanceTimersByTimeAsync(300);
+    expect(wrapper.find(".simulation-values").exists()).toBe(true);
+    await wrapper.setProps({ draft: { ...draft, mode: ESchedulingMode.Ranked } });
+    expect(wrapper.find('.result-bar[aria-busy="true"] .q-skeleton').exists()).toBe(true);
+    expect(wrapper.find(".simulation-values").exists()).toBe(false);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(wrapper.find(".simulation-values").exists()).toBe(true);
+    await wrapper.setProps({ draft });
+    expect(wrapper.find(".q-skeleton").exists()).toBe(false);
+    expect(wrapper.find('.result-bar[aria-busy="true"] .simulation-values').exists()).toBe(true);
+  });
+
+  it("loads the next page when the expanded rank's last row enters the viewport", async () => {
+    const intersections = new Map<Element, (visible: boolean) => void>();
+    class ScrollObserver {
+      constructor(private callback: (entries: Partial<IntersectionObserverEntry>[]) => void) {}
+      observe(element: Element) {
+        intersections.set(element, (isIntersecting) => this.callback([{ isIntersecting }]));
+      }
+      disconnect() {}
+    }
+    vi.stubGlobal("IntersectionObserver", ScrollObserver);
+    try {
+      wrapper = renderSimulation(40);
+      const members = Array.from({ length: 51 }, (_, i) => ({
+        ...rows[0],
+        orgUnitId: String(i),
+        orgUnitName: `demo-${i}`,
+        rank: "Medium",
+      }));
+      const pages = { nextOffset: 50, loadingAll: false, loadNext: vi.fn().mockResolvedValue(true), loadAll: vi.fn() };
+      await wrapper.setProps({
+        rows: [rows[0]],
+        departmentPages: pages,
+        rankCounts: { Medium: 51, MediumLow: 1 },
+        ranks: ["Medium", "MediumLow"],
+        draft: { ...draft, mode: ESchedulingMode.Ranked },
+      });
+      // The first page has no matching members. The group must still have a scroll target.
+      await wrapper.get('[aid="rank-MediumLow"]').trigger("click");
+      await wrapper.get('[aid="rank-Medium"]').trigger("click");
+      expect(wrapper.findAll(".department-name")).toHaveLength(0);
+      expect(wrapper.text()).toContain("Medium (51 departments)");
+      const trigger = (visible: boolean) => {
+        const target = wrapper.get(".department-page-end div").element;
+        const intersect = intersections.get(target);
+        if (!intersect) throw new Error("The scroll target was not observed.");
+        intersect(visible);
+      };
+      trigger(false);
+      expect(pages.loadNext).not.toHaveBeenCalled();
+      trigger(true);
+      expect(pages.loadNext).toHaveBeenCalledTimes(1);
+      await wrapper.setProps({
+        rows: [...members.slice(0, 50), rows[0]],
+        departmentPages: { ...pages, nextOffset: 100 },
+      });
+      expect(wrapper.findAll(".department-name")).toHaveLength(50);
+      trigger(true);
+      expect(pages.loadNext).toHaveBeenCalledTimes(2);
+      await wrapper.setProps({ rows: [...members, rows[0]], departmentPages: { ...pages, nextOffset: undefined } });
+      expect(wrapper.findAll(".department-name")).toHaveLength(51);
+      expect(wrapper.find(".department-page-end").exists()).toBe(false);
+      expect(wrapper.text()).not.toContain("Load more");
+      expect(pages.loadAll).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("waits for matching peers across pages before reporting no results or sending a simulation", async () => {
+    wrapper = renderSimulation(40);
+    const pages = { nextOffset: 50, loadingAll: false, loadNext: vi.fn(), loadAll: vi.fn().mockResolvedValue(true) };
+    await wrapper.setProps({ departmentPages: pages, searchTerm: "Beta" });
+    expect(pages.loadAll).toHaveBeenCalledOnce();
+    expect(wrapper.text()).not.toContain("No departments match");
+    const beta = { ...rows[0], orgUnitId: "b", orgUnitName: "Beta" };
+    await wrapper.setProps({ rows: [...rows, beta], departmentPages: { ...pages, nextOffset: undefined } });
+    expect(wrapper.findAll(".department-name").map((name) => name.text())).toEqual(["Beta"]);
+
+    // A paged simulation must keep the same requested competitors as the full table.
+    await wrapper.setProps({ searchTerm: "", rows, departmentPages: { ...pages, loadingAll: true } });
+    await wrapper.get('[role="switch"]').trigger("click");
+    await vi.advanceTimersByTimeAsync(500);
+    expect(simulateNodePool).not.toHaveBeenCalled();
+    await wrapper.setProps({ rows: [...rows, beta], departmentPages: { ...pages, nextOffset: undefined } });
+    await vi.advanceTimersByTimeAsync(500);
+    expect(vi.mocked(simulateNodePool).mock.lastCall?.[1].orgUnits.map((row) => row.id)).toEqual(["a", "b"]);
+  });
+
+  it("turns simulation off when all ranks collapse or a search hides every department", async () => {
+    wrapper = renderSimulation(40);
+    await wrapper.setProps({ draft: { ...draft, mode: ESchedulingMode.Ranked } });
+    const toggle = wrapper.get('[role="switch"]');
+    await toggle.trigger("click");
+    await wrapper.get('[aid="rank-MediumLow"]').trigger("click");
+    expect(toggle.attributes("aria-disabled")).toBe("true");
+    expect(toggle.attributes("aria-checked")).toBe("false");
+    await wrapper.get('[aid="rank-MediumLow"]').trigger("click");
+    await toggle.trigger("click");
+    await wrapper.setProps({ searchTerm: "no match" });
+    expect(toggle.attributes("aria-disabled")).toBe("true");
+    expect(toggle.attributes("aria-checked")).toBe("false");
+    expect(wrapper.find(".simulation-notice").exists()).toBe(false);
+    await vi.advanceTimersByTimeAsync(500);
+    expect(simulateNodePool).not.toHaveBeenCalled();
+  });
+
+  it("cancels a queued simulation if capacity disappears before the request is sent", async () => {
+    wrapper = renderSimulation(8);
+    await wrapper.get('[role="switch"]').trigger("click");
+    expect(wrapper.find(".demand-slider").exists()).toBe(true);
+    await wrapper.setProps({ capacity: undefined });
+    await vi.advanceTimersByTimeAsync(500);
+    expect(simulateNodePool).not.toHaveBeenCalled();
+  });
+
+  it("restores the normal Result view on capacity loss and keeps demand for an explicit restart", async () => {
+    wrapper = renderSimulation(40);
+    const toggle = wrapper.get('[role="switch"]');
+    await toggle.trigger("click");
+    await wrapper.get('input[aria-label="Simulated GPU demand for Alpha"]').setValue("13");
+    await vi.advanceTimersByTimeAsync(500);
+    expect(simulateNodePool).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(simulateNodePool).mock.lastCall?.[1].orgUnits[0].demand?.gpu).toBe(13);
+
+    await wrapper.setProps({ capacity: undefined });
+    expect(toggle.attributes("aria-checked")).toBe("false");
+    expect(toggle.attributes("aria-disabled")).toBe("true");
+    expect(wrapper.get(`[id="${toggle.attributes("aria-describedby")}"]`).text()).toBe(hint);
+    expect(wrapper.find(".demand-slider").exists()).toBe(false);
+    expect(wrapper.get(".result-bar").classes()).not.toContain("simulation-bar");
+    expect(wrapper.find(".quota-marker").exists()).toBe(true);
+    await vi.advanceTimersByTimeAsync(500);
+    expect(simulateNodePool).toHaveBeenCalledTimes(1);
+
+    await wrapper.setProps({ capacity: 32 });
+    expect(toggle.attributes("aria-checked")).toBe("false");
+    expect(toggle.attributes("aria-disabled")).toBeUndefined();
+    expect(toggle.attributes("aria-describedby")).toBeUndefined();
+    expect(wrapper.text()).not.toContain(hint);
+    await vi.advanceTimersByTimeAsync(500);
+    expect(simulateNodePool).toHaveBeenCalledTimes(1);
+    await toggle.trigger("click");
+    expect((wrapper.get(".demand-slider").element as HTMLInputElement).value).toBe("13");
+    await vi.advanceTimersByTimeAsync(500);
+    expect(vi.mocked(simulateNodePool).mock.lastCall?.[1].orgUnits[0].demand?.gpu).toBe(13);
+    expect(simulateNodePool).toHaveBeenCalledTimes(2);
+  });
+});
+
 describe("scheduling department table", () => {
   it("shows rank filters and row selection only for ranked scheduling modes", async () => {
     const wrapper = mount(Table, {
@@ -220,9 +487,18 @@ describe("scheduling department table", () => {
       expect(input.attributes("max")).toBe("65");
       expect(input.attributes("aria-valuemax")).toBe("40");
       expect((input.element as HTMLInputElement).value).toBe("33");
+      const chip = wrapper.get(".demand-chip");
+      expect(chip.text()).toBe("33 GPUs");
+      (input.element as HTMLInputElement).value = "0";
+      await input.trigger("input");
+      expect(chip.text()).toBe("0 GPUs");
+      (input.element as HTMLInputElement).value = "1";
+      await input.trigger("input");
+      expect(chip.text()).toBe("1 GPU");
       (input.element as HTMLInputElement).value = "45.7";
       await input.trigger("input");
       expect((input.element as HTMLInputElement).value).toBe("40");
+      expect(chip.text()).toBe("40 GPUs");
       await vi.advanceTimersByTimeAsync(600);
       expect(transport).toHaveBeenCalledTimes(1);
       await input.trigger("change");
@@ -302,6 +578,22 @@ describe("scheduling department table", () => {
         "Unmet GPU demand 2",
         "Simulated real-time GPU demand 3",
       ]);
+      const allocationMarkers = () =>
+        wrapper
+          .findAll(".result-tooltip-entry")
+          .filter((entry) => entry.text().includes("GPU allocation") && !entry.text().startsWith("Max"));
+      for (const entry of allocationMarkers()) {
+        expect(entry.get(".result-tooltip-swatch").classes()).toContain(
+          entry.text().includes("over-quota") ? "swatch-over-quota" : "swatch-guaranteed",
+        );
+      }
+      for (const mode of [ESchedulingMode.Proportional, ESchedulingMode.Ranked]) {
+        await wrapper.setProps({ draft: { ...draft, mode } });
+        await vi.advanceTimersByTimeAsync(300);
+        const [expected] = allocationMarkers();
+        expect(expected.text()).toContain("Expected GPU allocation");
+        expect(expected.get(".result-tooltip-swatch").classes()).toContain("swatch-guaranteed");
+      }
     } finally {
       wrapper.unmount();
       vi.useRealTimers();
@@ -309,7 +601,7 @@ describe("scheduling department table", () => {
   });
   it.each([
     { value: 0.001, automatic: true, display: "<0.1%", marker: "0.01%" },
-    { value: 0, automatic: true, display: "0%", marker: "0%" },
+    { value: 0, automatic: true, display: "<0.1%", marker: "0.0999001%" },
     { value: 4.996, automatic: true, display: "50%", marker: "49.96%" },
     { value: 4.996, automatic: false, display: "49.96%", marker: "49.96%" },
   ])(
@@ -319,7 +611,10 @@ describe("scheduling department table", () => {
       const wrapper = mount(Table, {
         props: {
           rows: [tiny],
-          baselineRows: [tiny],
+          baselineRows: [
+            tiny,
+            { ...tiny, orgUnitId: "hidden", resources: { gpu: { deserved: 10 - value, overQuotaWeight: 10 - value } } },
+          ],
           draft: { ...draft, mode: ESchedulingMode.Guaranteed, automaticWeights: automatic },
           aggregates: { MediumLow: { weightsSum: 10, automaticWeightsSum: 10, deservedSum: 10 } },
           ranks: ["MediumLow"],
@@ -349,12 +644,12 @@ describe("scheduling department table", () => {
     emits: ["apply", "reset", "before-show"],
   };
   it.each([ESchedulingMode.Proportional, ESchedulingMode.Ranked] as const)(
-    "never shows maximum-allocation columns or editors in %s with stale draft limits",
+    "hides maximum-allocation columns and editors in %s while the setting is off",
     (mode) => {
       const wrapper = mount(Table, {
         props: {
           rows,
-          draft: { ...draft, mode, maxAllocation: true, departments: { a: { id: "a", limit: 7 } } },
+          draft: { ...draft, mode, maxAllocation: false, departments: { a: { id: "a", limit: 7 } } },
           aggregates: {},
           ranks: ["MediumLow"],
           readonly: false,
@@ -565,7 +860,7 @@ describe("scheduling department table", () => {
     wrapper.unmount();
   });
   it.each([ESchedulingMode.Proportional, ESchedulingMode.Ranked] as const)(
-    "enforces maximum allocation only while Guaranteed quota is active, starting from %s",
+    "validates an active maximum against quota only in Guaranteed mode, starting from %s",
     async (mode) => {
       const resourcePopup = { template: '<td><slot name="input" /></td>', emits: ["apply", "reset", "before-show"] };
       const currentDraft: SchedulingDraft = {
@@ -589,9 +884,14 @@ describe("scheduling department table", () => {
           stubs: { EditableCellPopup: resourcePopup },
         },
       });
-      expect(
-        wrapper.findAllComponents(DepartmentResourceEditor).some((editor) => editor.props("kind") === "limit"),
-      ).toBe(false);
+      expect(wrapper.get("thead").text()).toContain("Max GPU allocation");
+      const initial = wrapper
+        .findAllComponents(DepartmentResourceEditor)
+        .find((editor) => editor.props("kind") === "limit");
+      if (!initial) throw new Error("Maximum allocation editor is unavailable.");
+      await initial.get("input").setValue("10");
+      initial.findComponent(resourcePopup).vm.$emit("apply");
+      expect(wrapper.emitted("edit")).toEqual([[{ id: "a", limit: 10 }]]);
       await wrapper.setProps({ draft: { ...currentDraft, mode: ESchedulingMode.Guaranteed } });
       const maximum = wrapper
         .findAllComponents(DepartmentResourceEditor)
@@ -599,14 +899,14 @@ describe("scheduling department table", () => {
       if (!maximum) throw new Error("Maximum allocation editor is unavailable.");
       await maximum.get("input").setValue("10");
       maximum.findComponent(resourcePopup).vm.$emit("apply");
-      expect(wrapper.emitted("edit")).toBeUndefined();
+      expect(wrapper.emitted("edit")).toHaveLength(1);
       await maximum.get("input").setValue("25");
       maximum.findComponent(resourcePopup).vm.$emit("apply");
-      expect(wrapper.emitted("edit")).toEqual([[{ id: "a", limit: 25 }]]);
+      expect(wrapper.emitted("edit")).toEqual([[{ id: "a", limit: 10 }], [{ id: "a", limit: 25 }]]);
       await wrapper.setProps({ draft: currentDraft });
       expect(
         wrapper.findAllComponents(DepartmentResourceEditor).some((editor) => editor.props("kind") === "limit"),
-      ).toBe(false);
+      ).toBe(true);
       expect(wrapper.props("draft").departments.a.quota).toBe(20);
       wrapper.unmount();
     },
@@ -702,7 +1002,7 @@ describe("scheduling department table", () => {
     expect(displayedWeights()).toEqual(["Unknown"]);
     wrapper.unmount();
   });
-  it("counts draft rank moves before offering to load more departments", async () => {
+  it("counts draft rank moves and shows all matching departments", async () => {
     const wrapper = mount(Table, {
       props: {
         rows: [...rows, { ...rows[0], id: "resource-b", orgUnitId: "b", orgUnitName: "Beta", rank: "High" }],
@@ -723,10 +1023,6 @@ describe("scheduling department table", () => {
     expect(wrapper.text()).toContain("Alpha");
     expect(wrapper.text()).toContain("Beta");
     expect(wrapper.find('[aid="load-rank-High"]').exists()).toBe(false);
-    await wrapper.setProps({ rankCounts: { High: 3, MediumLow: 1 } });
-    expect(wrapper.text()).toContain("High (4 departments)");
-    await wrapper.get('[aid="load-rank-High"]').trigger("click");
-    expect(wrapper.emitted("load-rank")).toEqual([["High"], ["High"]]);
     wrapper.unmount();
   });
   it("uses the reference zero-state copy and uses Show settings during search, including matching rows", async () => {
@@ -738,6 +1034,9 @@ describe("scheduling department table", () => {
       },
     });
     expect(wrapper.get(".scheduling-empty").text()).toBe("No departments yet");
+    await wrapper.setProps({ hasError: true });
+    expect(wrapper.find(".scheduling-empty").exists()).toBe(false);
+    await wrapper.setProps({ hasError: false });
     expect(wrapper.get('[aid="advanced-settings"]').text()).toBe("Advanced settings");
     await wrapper.setProps({ searchTerm: "missing" });
     expect(wrapper.get(".scheduling-empty").text()).toBe("No departments match your filters");
@@ -788,7 +1087,8 @@ describe("scheduling department table", () => {
     await wrapper.setProps({ draft: { ...draft, departments: { a: { id: "a", weight: 8 } } } });
     await vi.advanceTimersByTimeAsync(300);
     expect(wrapper.find(".allocated").exists()).toBe(false);
-    expect(wrapper.text()).toContain("Simulation failed. Your changes are preserved. Try again.");
+    expect(wrapper.get(".simulation-notice").text()).toContain("Simulation failed.");
+    expect(wrapper.text()).not.toContain("Your changes are preserved");
     expect(wrapper.props("draft").departments.a.weight).toBe(8);
     wrapper.unmount();
     vi.useRealTimers();
@@ -885,6 +1185,52 @@ describe("scheduling department table", () => {
     expect(wrapper.find('[aria-disabled="true"]').exists()).toBe(true);
     wrapper.unmount();
   });
+  it("retains the quota split and full rank denominator when switching to Custom", async () => {
+    const saved = {
+      ...draft,
+      mode: ESchedulingMode.Guaranteed,
+      automaticWeights: true,
+      capabilities: { adjustableWeights: false, quota: true },
+    };
+    const peers = [2, 6].map((quota, i) => ({
+      ...rows[0],
+      orgUnitId: String(i),
+      orgUnitName: ["Alpha", "Beta"][i],
+      resources: { gpu: { deserved: quota } },
+    }));
+    const wrapper = mount(Table, {
+      props: {
+        rows: peers,
+        baselineRows: peers,
+        draft: saved,
+        rawWeightsAvailable: false,
+        ranks: ["MediumLow"],
+        rankCounts: { MediumLow: 2 },
+        aggregates: { MediumLow: { weightsSum: 8, deservedSum: 8, rawWeightsSum: undefined, automaticWeightsSum: 8 } },
+        readonly: false,
+        loading: false,
+      },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+      },
+    });
+    const weights = () =>
+      wrapper.findAllComponents(DepartmentResourceEditor).filter((cell) => cell.props("kind") === "weight");
+    try {
+      expect(weights().map((cell) => cell.props("displayValue"))).toEqual(["25%", "75%"]);
+      expect(weights().every((cell) => cell.props("disabled"))).toBe(true);
+      await wrapper.setProps({ draft: { ...saved, automaticWeights: false } });
+      expect(weights().map((cell) => cell.props("displayValue"))).toEqual(["25%", "75%"]);
+      expect(weights().map((cell) => cell.props("value"))).toEqual([2, 6]);
+      expect(weights().every((cell) => !cell.props("disabled"))).toBe(true);
+      await wrapper.setProps({ rows: [peers[1]], searchTerm: "Beta" });
+      expect(weights().map((cell) => cell.props("displayValue"))).toEqual(["75%"]);
+      expect(weights()[0].props("previewWeightPercentage")?.(2)).toBe(50);
+    } finally {
+      wrapper.unmount();
+    }
+  });
   it("filters ranks through shared controls and hides percentages for restricted visibility", async () => {
     const wrapper = mount(Table, {
       props: {
@@ -928,27 +1274,6 @@ describe("scheduling department table", () => {
     expect(wrapper.text()).not.toContain("Raw weights are unavailable");
     expect(wrapper.text()).toContain("Unknown");
     expect(wrapper.findComponent({ name: "EditableCellPopup" }).props("displayValue")).toBe("Unknown");
-    wrapper.unmount();
-  });
-  it("does not prefetch the default rank under another active rank filter", () => {
-    const wrapper = mount(Table, {
-      props: {
-        rows: [],
-        draft: { ...draft, mode: ESchedulingMode.Ranked },
-        aggregates: {},
-        ranks: ["High", "MediumLow"],
-        rankCounts: { High: 60, MediumLow: 10 },
-        rankFilter: "High",
-        searchTerm: "match",
-        readonly: false,
-        loading: false,
-      },
-      global: {
-        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
-        directives: { "click-outside": {}, permission: {} },
-      },
-    });
-    expect(wrapper.emitted("load-rank")).toBeUndefined();
     wrapper.unmount();
   });
   it("rebases hidden edits from the same complete snapshot as refreshed totals", async () => {

@@ -42,21 +42,21 @@ describe("responsive panel layout", () => {
     return wrapper;
   }
 
-  it("hides the right panel below 1280 without collapsing the node pool steps", async () => {
-    Screen.width = 1280;
-    const wrapper = render({ hideRightOnSmallScreen: true });
-    expect(wrapper.get(".panel-right").isVisible()).toBe(true);
-    Screen.width = 1279;
+  it.each([
+    { width: 1229, compact: true, summary: false },
+    { width: 1230, compact: false, summary: false },
+    { width: 1459, compact: false, summary: false },
+    { width: 1460, compact: false, summary: true },
+  ])("uses compact=$compact and summary=$summary at $width px", async ({ width, compact, summary }) => {
+    const wrapper = render({ hideRightOnSmallScreen: true, collapseLeftOnSmallScreen: true });
+    Screen.width = width;
     await nextTick();
-    expect(wrapper.get(".panel-right").isVisible()).toBe(false);
-    expect(wrapper.get(".panel-left").text()).toBe("Step title");
-    Screen.width = 1280;
-    await nextTick();
-    expect(wrapper.get(".panel-right").isVisible()).toBe(true);
+    expect(wrapper.get(".panel-left").text()).toBe(compact ? "Icon" : "Step title");
+    expect(wrapper.get(".panel-right").isVisible()).toBe(summary);
   });
 
   it("collapses independently of right panel visibility and expands on hover", async () => {
-    Screen.width = 1279;
+    Screen.width = 1229;
     const wrapper = render({ collapseLeftOnSmallScreen: true });
     expect(wrapper.get(".panel-left").text()).toBe("Icon");
     expect(wrapper.get(".panel-right").isVisible()).toBe(true);
@@ -93,7 +93,7 @@ describe("responsive panel layout", () => {
   });
 
   it("keeps step status and disabled navigation in the wizard's mini rail", async () => {
-    Screen.width = 1279;
+    Screen.width = 1229;
     const wrapper = mount(RunaiWizardLayout, {
       attachTo: document.body,
       props: {
@@ -150,7 +150,7 @@ describe("responsive panel layout", () => {
     expect(wrapper.emitted("step-click")).toBeUndefined();
     await rail.trigger("focusout");
     expect(wrapper.find(".panel-left .runai-panel-container--transparent").exists()).toBe(true);
-    Screen.width = 1280;
+    Screen.width = 1230;
     await nextTick();
     expect(rail.attributes("tabindex")).toBeUndefined();
     expect(wrapper.find(".panel-left .runai-panel-container--transparent").exists()).toBe(true);

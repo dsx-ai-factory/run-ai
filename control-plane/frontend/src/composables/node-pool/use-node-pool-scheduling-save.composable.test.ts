@@ -31,12 +31,84 @@ const draft = (): SchedulingDraft => ({
 });
 const success = (ids: string[]) => ({
   id: "batch",
-  succeeded: ids.map((orgUnitId) => ({ orgUnitId, nodePoolId: "17" })),
+  succeeded: ids.map((orgUnitId) => ({
+    id: orgUnitId,
+    orgUnitId,
+    orgUnitName: orgUnitId,
+    clusterId: "cluster",
+    nodePoolId: "17",
+    nodePoolName: "pool",
+    rank: "High",
+    resources: {},
+  })),
   totalRequested: ids.length,
   totalSuccessful: ids.length,
   totalFailed: 0,
 });
 describe("scheduling persistence", () => {
+  it("resumes the project reset after a failure and applies explicit edits last", async () => {
+    const automatic = {
+      ...pool,
+      clusterId: "cluster",
+      schedulingCapabilities: { ranks: true, limits: false, cpuQuota: false, quota: true, adjustableWeights: false },
+    };
+    const input = { ...draft(), mode: ESchedulingMode.Guaranteed, departments: { a: { id: "a", weight: 6 } } };
+    const patchPool = vi.fn(async (_id, update) => ({ ...automatic, ...update }));
+    const resetDepartments = vi.spyOn(orgUnitService, "resetDepartmentResources").mockResolvedValue(undefined);
+    const resetProjects = vi
+      .spyOn(orgUnitService, "resetProjectResources")
+      .mockRejectedValueOnce(new Error("try again"))
+      .mockResolvedValue(undefined);
+    const readDepartments = vi
+      .spyOn(orgUnitService, "getDepartmentNodePoolResources")
+      .mockResolvedValue({ nodePoolResources: [] });
+    const projectRows = ["unlimited", "zero", "positive"].map((orgUnitId, i) => ({
+      ...success([orgUnitId]).succeeded[0],
+      parentId: "a",
+      resources: { gpu: { deserved: [-1, 0, 6][i], overQuotaWeight: [-1, 0, 6][i] } },
+    }));
+    const readProjects = vi
+      .spyOn(orgUnitService, "getProjectNodePoolResources")
+      .mockResolvedValueOnce({ nodePoolResources: [projectRows[0]], next: 1 })
+      .mockResolvedValueOnce({ nodePoolResources: projectRows.slice(1) });
+    const patchProjects = vi
+      .spyOn(orgUnitService, "batchPatchProjectNodePoolResources")
+      .mockImplementation(async ({ patchRequests }) => ({
+        ...success([]),
+        succeeded: [],
+        totalSuccessful: patchRequests.length,
+      }));
+    const patchDepartments = vi.fn(async () => success(["a"]));
+    const saver = createSchedulingSaver({ patchPool, patchDepartments });
+    await expect(saver.save(automatic, input)).rejects.toThrow("try again");
+    expect(patchDepartments).not.toHaveBeenCalled();
+    expect(saver.resetPending).toBe(true);
+    await saver.save(saver.savedPool!, input);
+    const request = { clusterId: "cluster", nodePoolIds: ["17"], action: "WEIGHTS_TO_DESERVED" };
+    expect(resetDepartments).toHaveBeenCalledExactlyOnceWith(request);
+    expect(resetProjects).toHaveBeenCalledTimes(2);
+    expect(resetProjects).toHaveBeenLastCalledWith(request);
+    expect(patchPool).toHaveBeenCalledTimes(1);
+    expect(saver.resetPending).toBe(false);
+    expect(patchDepartments).toHaveBeenCalledExactlyOnceWith({
+      patchRequests: [{ orgUnitId: "a", nodePoolId: "17", resources: { gpu: { overQuotaWeight: 6 } } }],
+    });
+    expect(patchProjects.mock.calls.map(([batch]) => batch.patchRequests)).toEqual([
+      [{ orgUnitId: "unlimited", nodePoolId: "17", resources: { gpu: { overQuotaWeight: 2 } } }],
+      [{ orgUnitId: "zero", nodePoolId: "17", resources: { gpu: { overQuotaWeight: 0.01 } } }],
+    ]);
+    readProjects.mockRestore();
+    readDepartments.mockRestore();
+    patchProjects.mockRestore();
+    resetDepartments.mockRestore();
+    resetProjects.mockRestore();
+  });
+  it.each(["saved-topology", null, undefined])(
+    "omits topology from a scheduling-only PATCH even when the form loaded %s",
+    (networkTopologyId) => {
+      expect(buildSchedulingSave({ ...pool, networkTopologyId }, draft()).pool).not.toHaveProperty("networkTopologyId");
+    },
+  );
   it.each([ESchedulingMode.Unknown, ESchedulingMode.Custom])("does not save unsupported mode %s", (mode) => {
     expect(() => buildSchedulingSave(pool, { ...draft(), mode })).toThrow(/supported scheduling mode/);
   });
@@ -48,10 +120,25 @@ describe("scheduling persistence", () => {
     expect(result.pool.schedulingConfiguration).not.toHaveProperty("gpuPodsPlacementStrategy");
     expect(result.pool).not.toHaveProperty("labelKey");
   });
-  it("omits inactive limits and rejects downgrade or invalid durations before any writes", () => {
-    const inactive = buildSchedulingSave(pool, { ...draft(), maxAllocation: true });
-    expect(inactive.pool.schedulingCapabilities?.limits).toBe(false);
-    expect(inactive.departments[0].resources?.gpu).not.toHaveProperty("limit");
+  it.each([ESchedulingMode.Proportional, ESchedulingMode.Ranked])(
+    "saves active limits independently of quota in %s",
+    (mode) => {
+      const input = {
+        ...draft(),
+        mode,
+        cpuQuota: true,
+        maxAllocation: true,
+        departments: { a: { id: "a", quota: 8, limit: 2 }, b: { id: "b", limit: null } },
+      };
+      const active = buildSchedulingSave(pool, input);
+      expect(active.pool.schedulingCapabilities).toMatchObject({ limits: true, quota: false, cpuQuota: false });
+      expect(active.departments.map((department) => department.resources?.gpu)).toEqual([{ limit: 2 }, { limit: -1 }]);
+      const inactive = buildSchedulingSave(pool, { ...input, maxAllocation: false });
+      expect(inactive.pool.schedulingCapabilities?.limits).toBe(false);
+      expect(inactive.departments).toEqual([]);
+    },
+  );
+  it("rejects downgrade or invalid durations before any writes", () => {
     expect(() =>
       buildSchedulingSave(
         {

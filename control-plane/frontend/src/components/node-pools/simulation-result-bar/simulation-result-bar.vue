@@ -3,7 +3,12 @@
   SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-  <div class="simulation-values" :class="{ 'simulation-values-outside': outside }">
+  <div
+    class="simulation-values"
+    :class="{ 'hide-segment-values': hideSegmentValues }"
+    role="img"
+    :aria-label="`Allocated ${display.allocated}, unmet ${display.unmet}`"
+  >
     <q-resize-observer @resize="measure" />
     <div class="simulation-segments" @transitionend="measure">
       <span
@@ -11,20 +16,12 @@
         class="allocated"
         :style="{ width: `${width(allocated)}%`, '--guaranteed-share': `${guaranteedShare}%` }"
       >
-        <span ref="allocatedLabel" class="segment-value" :aria-hidden="outside">{{ display.allocated }}</span>
+        <span ref="allocatedLabel" class="segment-value">{{ display.allocated }}</span>
       </span>
       <span ref="unmetSegment" class="unmet" :style="{ width: `${width(unmet)}%` }">
-        <span ref="unmetLabel" class="segment-value" :aria-hidden="outside">{{ display.unmet }}</span>
+        <span ref="unmetLabel" class="segment-value">{{ display.unmet }}</span>
       </span>
       <span class="allocation-marker" aria-hidden="true" :style="{ left: `${width(allocated)}%` }" />
-    </div>
-    <div v-if="outside" class="simulation-outside-labels">
-      <span
-        >Allocated <strong>{{ display.allocated }}</strong></span
-      >
-      <span
-        >Unmet <strong>{{ display.unmet }}</strong></span
-      >
     </div>
   </div>
 </template>
@@ -36,7 +33,7 @@ const allocatedSegment = ref<HTMLElement>();
 const unmetSegment = ref<HTMLElement>();
 const allocatedLabel = ref<HTMLElement>();
 const unmetLabel = ref<HTMLElement>();
-const outside = ref(false);
+const hideSegmentValues = ref(false);
 const display = computed(() => integerSimulationValues(props));
 const guaranteedShare = computed(() =>
   props.allocated > 0 ? Math.min(100, Math.max(0, (props.guaranteed / props.allocated) * 100)) : 100,
@@ -45,7 +42,7 @@ const width = (value: number) => Math.min(100, Math.max(0, (value / (props.capac
 function measure() {
   if (!allocatedSegment.value?.parentElement?.clientWidth) return;
   const barWidth = allocatedSegment.value.parentElement.clientWidth;
-  outside.value = [
+  hideSegmentValues.value = [
     { segment: allocatedSegment.value, label: allocatedLabel.value, value: props.allocated },
     { segment: unmetSegment.value, label: unmetLabel.value, value: props.unmet },
   ].some(
@@ -101,21 +98,8 @@ onMounted(() => {
   display: inline-block;
   white-space: nowrap;
 }
-.simulation-values-outside .segment-value {
+.hide-segment-values .segment-value {
   visibility: hidden;
-}
-.simulation-outside-labels {
-  position: absolute;
-  top: calc(100% + 12px);
-  left: 0;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 11px;
-  line-height: 16px;
-  white-space: nowrap;
-  pointer-events: none;
 }
 .allocation-marker {
   position: absolute;

@@ -12,10 +12,14 @@
     margin-top="26px"
     left-width="200px"
     right-width="200px"
+    collapse-left-on-small-screen
     hide-right-on-small-screen
+    :disable-navigation="navigationDisabled"
+    @step-click="onStepClick"
   >
     <runai-form-wrapper
       :form-state="{ pool: previewPool, scheduling: draft, saving }"
+      :prevent-leave="saving || creatingDepartment"
       full-width
       @leave-page="emit('leave-approved')"
     >
@@ -30,14 +34,15 @@
           >
             <template #header
               ><span>Scheduling mode</span
-              ><span v-if="!canEditDepartments || !canViewDepartments" class="view-only"
+              ><span v-if="departmentsReadOnly" class="view-only"
                 ><q-icon name="ph-fill ph-eye" /> View only</span
               ></template
             >
             <div class="scheduling-overview">
               <div class="capacity-label text-b-subtitle1">Total node pool capacity</div>
               <div class="capacity" aid="pool-gpu-capacity">
-                <template v-if="resources?.gpus != null">
+                <span v-if="resources?.nodes === 0" class="capacity-number">Empty</span>
+                <template v-else-if="resources?.gpus != null">
                   <span class="capacity-number">{{ resources.gpus }}</span> <span class="capacity-unit">GPUs</span>
                 </template>
                 <span v-else class="capacity-number">Unknown</span>
@@ -63,7 +68,7 @@
                     class="mode-cards"
                     :class="{ 'mode-cards--expanded': modeHelpExpanded, 'mode-cards--notice': showGuaranteedNotice }"
                     spread
-                    :disable="saving || !canEditDepartments || !canViewDepartments"
+                    :disable="saving || departmentsReadOnly"
                     aria-label="Scheduling mode"
                     aid="scheduling-mode-options"
                     @keydown.esc.stop="modeHelpDismissed = true"
@@ -96,7 +101,7 @@
                         </q-slide-transition>
                       </div>
                       <q-icon
-                        v-if="selected || option.disable || saving || !canEditDepartments || !canViewDepartments"
+                        v-if="selected || option.disable || saving || departmentsReadOnly"
                         name="ph-bold ph-check"
                         size="16px"
                         class="mode-check"
@@ -114,10 +119,10 @@
                 }}<template #action
                   ><runai-btn aid="retry-departments" flat label="Retry" @click="emit('refresh')" /></template
               ></q-banner>
-              <p v-if="telemetryError" class="q-px-md text-b-subtitle2" role="status">{{ telemetryError }}</p>
               <div class="scheduling-content">
                 <node-pool-department-table
                   :pool-id="pool.id"
+                  :department-pages="departmentPages"
                   :rows="rows"
                   :baseline-rows="baselineRows"
                   :draft="draft"
@@ -125,14 +130,13 @@
                   :ranks="ranks"
                   :rank-counts="rankCounts"
                   :capacity="resources?.gpus"
-                  :readonly="saving || !canEditDepartments || !canViewDepartments"
+                  :readonly="saving || departmentsReadOnly"
                   :can-view="canViewDepartments"
                   :settings-open="showSettings"
                   :totals-complete="totalsComplete"
                   :raw-weights-available="pool.schedulingCapabilities?.adjustableWeights === true"
                   :can-edit-department="canEditDepartment"
                   :loading="!!loading"
-                  :has-more="hasMore"
                   :has-error="!!loadError"
                   :search-term="searchTerm"
                   :rank-filter="rankFilter"
@@ -140,9 +144,7 @@
                   @edit="applyEdit"
                   @search="emit('search', $event)"
                   @filter-rank="emit('filter-rank', $event)"
-                  @load-more="emit('load-more')"
-                  @load-rank="emit('load-rank', $event)"
-                  @refresh="emit('refresh')"
+                  @reset="emit('reset')"
                   @automatic-weights="draft.automaticWeights = $event"
                   @advanced-settings="showSettings = !showSettings"
                   @close-settings="showSettings = false"
@@ -152,8 +154,9 @@
                     ><node-pool-scheduling-settings
                       v-if="showSettings"
                       :draft="draft"
-                      :readonly="saving || !canEditDepartments"
+                      :readonly="saving || departmentsReadOnly"
                       :can-reset-resources="canResetResources"
+                      :load-has-gpu-limits="loadHasGpuLimits"
                       :saved-max-allocation="!!pool.schedulingCapabilities?.limits"
                       :saved-cpu-quota="!!pool.schedulingCapabilities?.cpuQuota"
                       @close="showSettings = false"
@@ -162,12 +165,12 @@
                 </node-pool-department-table>
               </div>
               <node-pool-new-department-dialog
-                v-if="showNewDepartment && canEditDepartments && canViewDepartments"
+                v-if="showNewDepartment && ((canEditDepartments && canViewDepartments) || creatingDepartment)"
                 :cluster-id="pool.clusterId"
                 :cluster-name="pool.clusterName"
                 @close="showNewDepartment = false"
                 @created="emit('refresh')"
-                @saving="emit('saving', $event)"
+                @saving="onDepartmentSaving"
               />
             </div>
           </runai-expansion-item>
@@ -179,30 +182,55 @@
         <p v-if="saveError || validationError" class="text-negative" role="alert">{{ saveError || validationError }}</p>
         <div class="row justify-end q-gutter-md">
           <runai-btn
+            v-if="!departmentsReadOnly"
             aid="scheduling-save-close"
             label="Save & close"
             flat
             color="primary"
             :loading="saving"
-            :disable="saving || loading || !canSavePool || !canEditDepartments || !!validationError"
-            @click="save"
+            :disable="saveDisabled"
+            @click="save('close')"
           />
-          <runai-btn aid="scheduling-save-continue" label="Save & continue" color="primary" :disable="true" />
+          <runai-btn
+            v-if="departmentsReadOnly"
+            aid="scheduling-continue"
+            label="Continue"
+            color="primary"
+            :disable="navigationDisabled"
+            @click="openTopology"
+          />
+          <runai-btn
+            v-else
+            aid="scheduling-save-continue"
+            label="Save & continue"
+            color="primary"
+            :loading="saving"
+            :disable="saveDisabled"
+            @click="save('continue')"
+          />
         </div>
       </div>
     </template>
     <template #right-sidebar>
-      <node-pool-wizard-summary scheduling :pool="previewPool" :resources="resources" />
+      <node-pool-wizard-summary :pool="previewPool" :resources="resources" :supports="topologySupport" />
     </template>
   </runai-wizard-layout>
 </template>
 
 <script setup lang="ts">
-import { ENodePoolSchedulingMode as ESchedulingMode } from "@/models/node-pool.model";
+import { useNodePoolTopologySupport } from "@/composables/node-pool/use-node-pool-topology-support.composable";
+import {
+  NODE_POOL_IMMUTABLE_TOOLTIP,
+  getNodePoolWizardSteps,
+  ENodePoolSchedulingMode as ESchedulingMode,
+} from "@/models/node-pool.model";
 
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { buildSchedulingSave } from "@/utils/node-pool-scheduling.util/node-pool-scheduling-save.util";
-import { useNodePoolSchedulingSave } from "@/composables/node-pool/use-node-pool-scheduling-save.composable";
+import {
+  switchingToCustomWeights,
+  useNodePoolSchedulingSave,
+} from "@/composables/node-pool/use-node-pool-scheduling-save.composable";
 import { extractErrorMessages } from "@/utils/error-alert.util";
 import { schedulingDurationToFields } from "@/utils/node-pool-scheduling.util/scheduling-duration.util";
 import NotificationAlertBar from "@/components/common/notification-alert-bar/notification-alert-bar.vue";
@@ -213,7 +241,9 @@ import { NodePoolNewDepartmentDialog } from "@/components/node-pools/node-pool-n
 import { useNodePoolSchedulingDraft } from "@/composables/node-pool/use-node-pool-scheduling-draft.composable";
 import {
   toSchedulingCapabilities,
+  weightFromGuaranteedQuota,
   isDepartmentLimitBelowQuota,
+  type IDepartmentPages,
   type IDepartmentSchedulingEdit,
   type ISchedulingTotals,
   type IDepartmentValidationContext,
@@ -235,6 +265,7 @@ const props = withDefaults(
     pool: Nodepool;
     resources?: INodePoolSummaryResources;
     rows?: DepartmentNodePoolResources[];
+    departmentPages?: IDepartmentPages;
     baselineRows?: DepartmentNodePoolResources[];
     aggregates?: Record<string, ISchedulingTotals>;
     ranks?: string[];
@@ -243,12 +274,11 @@ const props = withDefaults(
     canEditDepartments?: boolean;
     canSavePool?: boolean;
     canResetResources?: boolean;
+    loadHasGpuLimits?: () => Promise<boolean>;
     totalsComplete?: boolean;
     canEditDepartment?: (id: string) => boolean;
     loading?: boolean;
     loadError?: string;
-    telemetryError?: string;
-    hasMore?: boolean;
     searchTerm?: string;
     rankFilter?: string;
     quotaPolicy?: boolean;
@@ -265,14 +295,15 @@ const props = withDefaults(
 );
 const emit = defineEmits<{
   "leave-approved": [];
-  saved: [Nodepool];
+  saved: [pool: Nodepool, destination?: "close" | "continue"];
   "pool-saved": [Nodepool];
+  "open-topology": [];
+  "open-identity": [];
   saving: [boolean];
   refresh: [];
+  reset: [];
   search: [string];
   "filter-rank": [string | undefined];
-  "load-more": [];
-  "load-rank": [string];
 }>();
 const showSettings = ref(false);
 const showNewDepartment = ref(false);
@@ -284,16 +315,16 @@ const modeExplanations: Record<string, string> = {
   [ESchedulingMode.Guaranteed]:
     "Each department has a guaranteed GPU quota. Any unused quota is redistributed by rank and weight.",
 };
-const steps = [
-  {
-    name: "identity",
-    title: "Cluster & name",
-    done: true,
-    disabled: true,
-  },
-  { name: "scheduling", title: "Scheduling mode", done: false },
-  { name: "topology", title: "Topology & placement", done: false, disabled: true },
-];
+const steps = getNodePoolWizardSteps("scheduling");
+const topologySupport = useNodePoolTopologySupport(() => props.pool.clusterId);
+const departmentsReadOnly = computed(() => !props.canViewDepartments || !props.canEditDepartments);
+function onStepClick({ name }: { name: string }) {
+  if (!navigationDisabled.value && name === "identity") emit("open-identity");
+  if (name === "topology") openTopology();
+}
+function openTopology() {
+  if (!navigationDisabled.value) emit("open-topology");
+}
 const modePermissionTooltip = computed(() =>
   !props.canViewDepartments
     ? "You do not have permission to view departments."
@@ -307,9 +338,7 @@ const options = computed(() => [
     disable: props.pool.schedulingCapabilities?.quota === true,
     disabledTooltip:
       modePermissionTooltip.value ??
-      (props.pool.schedulingCapabilities?.quota
-        ? "An existing Guaranteed quota pool cannot switch to a lower scheduling mode."
-        : undefined),
+      (props.pool.schedulingCapabilities?.quota ? NODE_POOL_IMMUTABLE_TOOLTIP : undefined),
     label: "Proportional",
     description: "Weight-based distribution",
     aid: "mode-proportional",
@@ -319,9 +348,7 @@ const options = computed(() => [
     disable: props.pool.schedulingCapabilities?.quota === true,
     disabledTooltip:
       modePermissionTooltip.value ??
-      (props.pool.schedulingCapabilities?.quota
-        ? "An existing Guaranteed quota pool cannot switch to a lower scheduling mode."
-        : undefined),
+      (props.pool.schedulingCapabilities?.quota ? NODE_POOL_IMMUTABLE_TOOLTIP : undefined),
     label: "Ranked",
     description: "Rank-based distribution",
     aid: "mode-ranked",
@@ -363,6 +390,22 @@ watch(
     if (mode === ESchedulingMode.Proportional && previous && previous !== ESchedulingMode.Proportional)
       emit("filter-rank", undefined);
   },
+);
+watch(
+  () => draft.value.automaticWeights,
+  (automatic) => {
+    if (!draft.value.capabilities?.quota || draft.value.capabilities.adjustableWeights !== false) return;
+    for (const edit of Object.values(draft.value.departments)) {
+      if (automatic) {
+        delete edit.weight;
+        delete edit.weightFromQuota;
+      } else if (edit.quota !== undefined) {
+        edit.weight = weightFromGuaranteedQuota(edit.quota);
+        edit.weightFromQuota = true;
+      }
+    }
+  },
+  { flush: "sync" },
 );
 const selectedMode = computed(() => draft.value.mode ?? null);
 const modeCardsHovered = ref(false);
@@ -418,11 +461,23 @@ function selectMode(value: string | number | boolean | null) {
     requestMode(value);
 }
 function applyEdit(edit: IDepartmentSchedulingEdit) {
-  if (saving.value || !props.canEditDepartments) return;
-  draft.value.departments[edit.id] = { ...draft.value.departments[edit.id], ...edit };
+  if (saving.value || departmentsReadOnly.value) return;
+  const next = { ...draft.value.departments[edit.id], ...edit };
+  if (edit.weight !== undefined) delete next.weightFromQuota;
+  if (edit.limit !== undefined) {
+    const saved = (props.baselineRows ?? props.rows).find((row) => row.orgUnitId === edit.id);
+    if (saved && (edit.limit ?? -1) === (saved.resources.gpu?.limit ?? -1)) delete next.limit;
+  }
+  if (Object.keys(next).length === 1) delete draft.value.departments[edit.id];
+  else draft.value.departments[edit.id] = next;
 }
 
 const saving = ref(false);
+const creatingDepartment = ref(false);
+function onDepartmentSaving(value: boolean) {
+  creatingDepartment.value = value;
+  emit("saving", saving.value || value);
+}
 const saveError = ref("");
 const saver = useNodePoolSchedulingSave();
 function usesWeightsWithoutQuota(capabilities?: SchedulingCapabilitiesNullable): boolean {
@@ -434,6 +489,11 @@ const validationError = computed(() => {
     const capabilities = toSchedulingCapabilities(draft.value);
     if (!props.canResetResources) {
       const saved = props.pool.schedulingCapabilities;
+      if (
+        switchingToCustomWeights(saved, capabilities) ||
+        (saver.resetPending && capabilities.quota && capabilities.adjustableWeights)
+      )
+        return "Switching weights to Custom requires update permission for all departments and projects in this cluster.";
       if ((saved?.cpuQuota && !capabilities.cpuQuota) || (saved?.limits && !capabilities.limits))
         return "Turning off CPU quota or Max GPU allocation requires update permission for all departments and projects in this cluster.";
       if (usesWeightsWithoutQuota(capabilities) && !usesWeightsWithoutQuota(saved))
@@ -460,8 +520,24 @@ watch(
   },
   { deep: true },
 );
-async function save() {
-  if (saving.value || props.loading || !props.canSavePool || !props.canEditDepartments || validationError.value) return;
+const navigationDisabled = computed(() => saving.value || creatingDepartment.value || !props.canSavePool);
+const editedRowsPending = computed(
+  () =>
+    props.departmentPages?.nextOffset != null &&
+    Object.keys(draft.value.departments).some(
+      (id) => !(props.baselineRows ?? props.rows).some((row) => row.orgUnitId === id),
+    ),
+);
+const saveDisabled = computed(
+  () =>
+    navigationDisabled.value ||
+    props.loading ||
+    departmentsReadOnly.value ||
+    editedRowsPending.value ||
+    !!validationError.value,
+);
+async function save(destination: "close" | "continue" = "close") {
+  if (saveDisabled.value) return;
   saving.value = true;
   emit("saving", true);
   saveError.value = "";
@@ -478,15 +554,17 @@ async function save() {
     const pool = await saver.save(props.pool, draft.value);
     saving.value = false;
     emit("saving", false);
-    emit("saved", pool);
+    emit("saved", pool, destination);
   } catch (error) {
     if (saver.savedPool) emit("pool-saved", saver.savedPool);
     saveError.value =
-      (saver.poolSettingsSaved
-        ? "Pool settings were saved, but some department changes remain unsaved. "
-        : saver.savedPool
-          ? "Current pool settings were not saved. Some changes were saved in an earlier attempt. "
-          : "") + extractErrorMessages(error, "Could not save scheduling. Your changes are preserved.").join("; ");
+      (saver.resetPending
+        ? "Pool settings were saved. Retry to finish initializing weights for departments and projects. "
+        : saver.poolSettingsSaved
+          ? "Pool settings were saved, but some department changes remain unsaved. "
+          : saver.savedPool
+            ? "Current pool settings were not saved. Some changes were saved in an earlier attempt. "
+            : "") + extractErrorMessages(error, "Could not save scheduling.").join("; ");
   } finally {
     saving.value = false;
     emit("saving", false);
@@ -513,13 +591,6 @@ async function save() {
 .node-pool-scheduling-wizard :deep(.wizard-step--disabled .wizard-step-title) {
   color: var(--text-disabled) !important;
 }
-.node-pool-scheduling-wizard :deep([aria-current="step"] .wizard-step-title) {
-  color: var(--b-text-main) !important;
-}
-.node-pool-scheduling-wizard :deep(.wizard-step--completed .wizard-step-indicator),
-.node-pool-scheduling-wizard :deep(.wizard-step--selected .wizard-step-indicator) {
-  background-color: var(--feedback-success) !important;
-}
 .node-pool-scheduling-wizard :deep(.wizard-step--default.wizard-step--disabled .wizard-step-indicator) {
   background-color: var(--text-disabled) !important;
 }
@@ -539,19 +610,19 @@ async function save() {
 }
 .scheduling-overview {
   container-type: inline-size;
-  padding: 18px 20px 40px;
+  padding: 18px 20px 20px;
 }
 .capacity-label {
   color: var(--b-text-sub);
 }
 .capacity {
   display: flex;
-  align-items: flex-end;
-  gap: 10px;
-  margin-top: 2px;
+  align-items: baseline;
+  gap: 5px;
+  margin-top: 16px;
 }
 .mode-selector {
-  margin-top: 40px;
+  margin-top: 30px;
   margin-bottom: 0;
 }
 .scheduling-mode-section :deep(> .q-expansion-item__container) {
@@ -568,7 +639,7 @@ async function save() {
 }
 .mode-selector :deep(.runai-section-title) {
   margin-right: -3px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   margin-left: -3px;
 }
 .capacity-number {
@@ -582,7 +653,6 @@ async function save() {
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
-  height: 22px;
   letter-spacing: -0.1504px;
 }
 .mode-hover-target {
@@ -667,7 +737,7 @@ async function save() {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 40px 0 8px;
+  padding: 30px 0 8px;
 }
 .scheduling-footer > .row {
   margin-left: auto;

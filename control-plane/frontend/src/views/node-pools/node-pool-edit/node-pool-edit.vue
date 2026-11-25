@@ -4,7 +4,9 @@
 -->
 
 <template>
-  <node-pool-scheduling v-if="schedulingFlowEnabled" />
+  <node-pool-topology v-if="editStep === 'topology'" />
+  <node-pool-scheduling v-else-if="editStep === 'scheduling'" />
+  <node-pool-identity v-else-if="editStep === 'identity'" />
   <node-pool-edit-form-v2
     v-else-if="newFlowEnabled"
     :initial-cluster-id="initialClusterId"
@@ -59,6 +61,8 @@ export default defineComponent({
   components: {
     NodePoolEditForm,
     NodePoolEditFormV2,
+    NodePoolTopology: defineAsyncComponent(() => import("../node-pool-topology/node-pool-topology.vue")),
+    NodePoolIdentity: defineAsyncComponent(() => import("../node-pool-identity/node-pool-identity.vue")),
     NodePoolScheduling: defineAsyncComponent(() => import("../node-pool-scheduling/node-pool-scheduling.vue")),
   },
   data() {
@@ -82,12 +86,11 @@ export default defineComponent({
     const newFlowEnabled = computed(
       () => ENABLE_NODE_POOL_CREATE_FLOW && route.name === NODE_POOL_ROUTE_NAMES.NODE_POOL_NEW,
     );
-    const schedulingFlowEnabled = computed(
-      () =>
-        ENABLE_NODE_POOL_CREATE_FLOW &&
-        route.name === NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT &&
-        route.query.stepName === "scheduling",
-    );
+    const editStep = computed(() => {
+      if (!ENABLE_NODE_POOL_CREATE_FLOW || route.name !== NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT) return;
+      const step = route.query.stepName;
+      return step === "scheduling" || step === "topology" ? step : "identity";
+    });
     const initialClusterId = typeof route.query.clusterId === "string" ? route.query.clusterId : "";
     onBeforeRouteLeave(() => {
       if (!newFlowEnabled.value) return true;
@@ -109,10 +112,17 @@ export default defineComponent({
           : { name: NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT, params: { id: pool.id }, query: { stepName: "scheduling" } },
       );
     }
-    return { schedulingFlowEnabled, newFlowEnabled, initialClusterId, onCreatedV2, savingV2, leaveApproved };
+    return {
+      editStep,
+      newFlowEnabled,
+      initialClusterId,
+      onCreatedV2,
+      savingV2,
+      leaveApproved,
+    };
   },
   async created() {
-    if (this.newFlowEnabled || this.schedulingFlowEnabled) {
+    if (this.newFlowEnabled || this.editStep) {
       this.appStore.setPageLoading(false);
       return;
     }
@@ -237,11 +247,6 @@ export default defineComponent({
       } finally {
         this.loading = false;
       }
-    },
-  },
-  watch: {
-    schedulingFlowEnabled(enabled: boolean) {
-      if (!enabled && !this.newFlowEnabled && !this.nodePool) void this.loadNodePool();
     },
   },
   unmounted() {

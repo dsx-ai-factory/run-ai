@@ -32,7 +32,14 @@
           <div class="text-weight-medium">
             <slot name="title">{{ title }}</slot>
           </div>
-          <q-btn flat icon="ph-bold ph-x" class="q-pa-xs runai-icon-btn--default" round v-close-popup />
+          <q-btn
+            flat
+            aria-label="Close editor"
+            icon="ph-bold ph-x"
+            class="q-pa-xs runai-icon-btn--default"
+            round
+            v-close-popup
+          />
         </q-card-section>
 
         <q-card-section class="q-py-sm q-px-md">
@@ -40,14 +47,7 @@
         </q-card-section>
 
         <q-card-section class="row justify-end q-py-sm">
-          <q-btn
-            flat
-            color="primary"
-            label="APPLY"
-            :disable="isSubmitDisabled"
-            @click="handleApplyClick"
-            v-close-popup="!isSubmitDisabled"
-          />
+          <q-btn flat color="primary" label="APPLY" :disable="isSubmitDisabled" @click="handleApplyClick" />
         </q-card-section>
       </q-card>
     </q-menu>
@@ -65,6 +65,7 @@ const props = withDefaults(
   defineProps<{
     title: string;
     popupClass?: string;
+    canApply?: () => boolean;
     displayValue?: string | number;
     state?: EditableCellState;
     isSubmitDisabled?: boolean; // Disables the Apply/Submit button (e.g., when validation fails)
@@ -105,7 +106,7 @@ const handleMenuHide = () => {
 };
 
 const handleApplyClick = () => {
-  if (props.isSubmitDisabled) return;
+  if (props.isSubmitDisabled || props.canApply?.() === false) return;
   emit("apply");
   isOpen.value = false;
 };

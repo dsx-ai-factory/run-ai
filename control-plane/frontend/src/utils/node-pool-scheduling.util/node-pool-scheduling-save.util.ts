@@ -65,7 +65,8 @@ export function buildSchedulingSave(pool: Nodepool, draft: SchedulingDraft) {
       ...(capabilities.quota ? { quota: edit.quota } : {}),
       ...(capabilities.limits ? { limit: edit.limit } : {}),
     };
-    const errors = validateDepartmentValues(active);
+    // The editor limits manual weights; an inherited quota can be fractional or exceed 20.
+    const errors = validateDepartmentValues(edit.weightFromQuota ? { ...active, weight: undefined } : active);
     if (errors.length) throw new Error(errors[0]);
     if (active.weight !== undefined) gpu.overQuotaWeight = active.weight;
     if (active.quota !== undefined) gpu.deserved = active.quota;

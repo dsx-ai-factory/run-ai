@@ -19,6 +19,7 @@ export interface ISimulationScenario {
   draft: SchedulingDraft;
   ids: string[];
   demand: Record<string, number>;
+  initialWeights?: Record<string, number | undefined>;
 }
 // Initial slider position only. The backend owns the default demand and limit cap.
 export const defaultSimulationDemand = (capacity: number) => capacity / 2;
@@ -29,9 +30,15 @@ export function buildSimulationRequest(scenario: ISimulationScenario): FairShare
   const capabilities = toSchedulingCapabilities(draft);
   // orgUnits serves both as requested rows and scenario overrides. Include all
   // off-screen edits; splitting requests would silently change the competition.
-  const ids = [...new Set([...scenario.ids, ...Object.keys(draft.departments), ...Object.keys(demand)])];
-  if (!ids.length || ids.length > 500)
-    throw new Error("Simulation supports 1–500 departments including off-screen edits. Your draft is preserved.");
+  const ids = [
+    ...new Set([
+      ...scenario.ids,
+      ...Object.keys(draft.departments),
+      ...Object.keys(demand),
+      ...Object.keys(scenario.initialWeights ?? {}),
+    ]),
+  ];
+  if (!ids.length || ids.length > 500) throw new Error("Simulation supports 1–500 departments.");
   return {
     nodePool: {
       capacity: { gpu: capacity },
@@ -48,14 +55,16 @@ export function buildSimulationRequest(scenario: ISimulationScenario): FairShare
       const rank = capabilities.ranks ? edit?.rank : undefined;
       if (rank !== undefined && !Object.values(FairShareSimulationRank).some((value) => value === rank))
         throw new Error("Select a valid rank to simulate.");
+      const weight = edit?.weight ?? scenario.initialWeights?.[id];
       const gpu = {
         ...(capabilities.quota && edit?.quota !== undefined ? { deserved: edit.quota } : {}),
         ...(capabilities.limits && edit?.limit !== undefined ? { limit: edit.limit ?? -1 } : {}),
-        ...(capabilities.adjustableWeights && edit?.weight !== undefined ? { overQuotaWeight: edit.weight } : {}),
+        ...(capabilities.adjustableWeights && weight !== undefined ? { overQuotaWeight: weight } : {}),
       };
       const errors = validateDepartmentValues({
         id,
-        weight: gpu.overQuotaWeight,
+        // Inherited quotas may be fractional or above the editor's maximum.
+        weight: capabilities.adjustableWeights && !edit?.weightFromQuota ? edit?.weight : undefined,
         quota: gpu.deserved,
         limit: gpu.limit,
       });

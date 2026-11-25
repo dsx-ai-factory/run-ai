@@ -3,83 +3,63 @@
   SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-  <runai-form-wrapper v-if="!pool" :form-state="{}" full-width>
-    <div v-if="loading" class="q-pa-lg">
-      <q-spinner color="primary" role="progressbar" aria-label="Loading node pool" />
-    </div>
-    <q-banner v-else-if="loadError" class="bg-red-1 text-negative q-ma-lg" role="alert">
-      {{ loadError }}
-      <template #action
-        ><runai-btn aid="retry-scheduling-pool" label="Retry" flat color="primary" @click="refresh"
-      /></template>
-    </q-banner>
-  </runai-form-wrapper>
+  <node-pool-wizard-load-state v-if="!pool" step="scheduling" :loading="loading" :error="loadError" @retry="refresh" />
   <node-pool-scheduling-step
     v-else
     :key="pool.id"
     :pool="pool"
     :resources="resources"
-    :rows="pages"
+    :department-pages="departmentPages"
+    :rows="baselineRows"
     :baseline-rows="baselineRows"
     :aggregates="aggregates"
     :ranks="ranks"
     :rank-counts="rankCounts"
     :loading="loading"
     :load-error="loadError"
-    :telemetry-error="telemetryError"
     :can-view-departments="permissions.view"
     :can-edit-departments="permissions.edit"
     :can-save-pool="canSavePool"
     :can-reset-resources="canResetResources"
+    :load-has-gpu-limits="loadHasGpuLimits"
     :totals-complete="totalsComplete"
     :can-edit-department="canEditDepartment"
-    :has-more="hasMore"
     :search-term="search"
     :rank-filter="rank"
     :quota-policy="quotaPolicy"
     :load-quota-context="loadQuotaContext"
     @refresh="refresh"
+    @reset="resetScheduling"
     @search="search = $event"
     @filter-rank="rank = $event"
-    @load-more="loadMore"
-    @load-rank="loadRank"
     @leave-approved="leaveApproved = true"
     @saving="saving = $event"
     @pool-saved="pool = $event"
-    @saved="onSaved"
+    @open-identity="openStep('identity')"
+    @open-topology="openStep('topology')"
+    @saved="finish"
   />
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from "vue";
-import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
+import { computed } from "vue";
+import { useRoute } from "vue-router";
 import { NodePoolSchedulingStep } from "@/components/node-pools/node-pool-scheduling-step";
-import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
-import RunaiFormWrapper from "@/components/common/runai-form-wrapper/runai-form-wrapper.vue";
+import { NodePoolWizardLoadState } from "@/components/node-pools/node-pool-wizard-load-state";
 import { useNodePoolSchedulingData } from "@/composables/node-pool/use-node-pool-scheduling-data.composable";
+import { useNodePoolWizardNavigation } from "@/composables/node-pool/use-node-pool-wizard-navigation.composable";
 import { ENTITY_PRIORITY_SELECT_OPTIONS } from "@/models/org-unit.model";
-import { useAppStore } from "@/stores/app.store";
-import { requestToLeave } from "@/services/infra/router.service/router.service";
-
 import { usePermissionStore } from "@/stores/permissions.store";
 import { Action, ResourceType } from "@/swagger-models/authorization-client";
-import { NODE_POOL_ROUTE_NAMES } from "@/router/node-pool.routes/node-pool.routes.names";
+
 const route = useRoute();
-const router = useRouter();
 const permissionStore = usePermissionStore();
 const canSavePool = computed(() => permissionStore.hasPermission(ResourceType.Nodepools, Action.Update));
-const saving = ref(false);
-async function onSaved() {
-  leaveApproved.value = true;
-  await router.push({ name: NODE_POOL_ROUTE_NAMES.NODE_POOL_INDEX });
-}
-const appStore = useAppStore();
 const poolId = computed(() => (typeof route.params.id === "string" ? route.params.id : ""));
 const {
   snapshot: pool,
-  pages,
   baselineRows,
-  hasMore,
+  departmentPages,
   aggregates,
   rankCounts,
   resources,
@@ -87,19 +67,22 @@ const {
   totalsComplete,
   canEditDepartment,
   canResetResources,
+  loadHasGpuLimits,
   quotaPolicy,
   policyError,
   loadError,
-  telemetryError,
   loading,
   search,
   rank,
   refresh,
-  loadMore,
-  loadRank,
   loadChildQuotaSum,
 } = useNodePoolSchedulingData(poolId);
-const leaveApproved = ref(false);
+const { saving, leaveApproved, openStep, finish } = useNodePoolWizardNavigation(pool);
+function resetScheduling() {
+  // A failed batch save may already have persisted some department edits.
+  pool.value = undefined;
+  void refresh();
+}
 const ranks = computed(() => ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => option.value).reverse());
 async function loadQuotaContext(id: string) {
   if (!pool.value || quotaPolicy.value === undefined)
@@ -107,24 +90,4 @@ async function loadQuotaContext(id: string) {
   const childQuotaSum = await loadChildQuotaSum(id);
   return { childQuotaSum, enforceChildQuota: quotaPolicy.value };
 }
-watch(
-  pool,
-  (value) => {
-    appStore.setPageLoading(false);
-    appStore.setPageTitleOverride(value ? `Edit node pool: ${value.name}` : null);
-  },
-  { immediate: true },
-);
-watch(poolId, () => {
-  leaveApproved.value = false;
-});
-function canLeave() {
-  if (saving.value) return false;
-  return leaveApproved.value || !pool.value || requestToLeave();
-}
-onBeforeRouteLeave(canLeave);
-onBeforeRouteUpdate(canLeave);
-onBeforeUnmount(() => {
-  appStore.setPageTitleOverride(null);
-});
 </script>

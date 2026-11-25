@@ -12,9 +12,17 @@
       margin-top="26px"
       left-width="200px"
       right-width="200px"
+      collapse-left-on-small-screen
       hide-right-on-small-screen
     >
-      <runai-form-wrapper ref="form" :form-state="draft" full-width greedy @leave-page="emit('leave-approved')">
+      <runai-form-wrapper
+        ref="form"
+        :form-state="draft"
+        :prevent-leave="validating || submitting"
+        full-width
+        greedy
+        @leave-page="emit('leave-approved')"
+      >
         <runai-expansion-wrapper no-first-top-padding>
           <runai-expansion-item label="Cluster" default-opened disable-closing>
             <runai-section-title title="Select the cluster under which to create this node pool" />
@@ -58,7 +66,10 @@
               /></template>
             </q-banner>
             <q-select
-              v-model="draft.labelKey"
+              :model-value="draft.labelKey"
+              @update:model-value="draft.labelKey = $event ?? ''"
+              clearable
+              clear-icon="ph-bold ph-x"
               class="label-field"
               aid="node-pool-label-key"
               dense
@@ -92,8 +103,11 @@
             </q-select>
             <q-select
               v-if="draft.labelKey"
-              v-model="draft.labelValue"
-              class="label-field q-mt-lg"
+              :model-value="draft.labelValue"
+              @update:model-value="draft.labelValue = $event ?? ''"
+              clearable
+              clear-icon="ph-bold ph-x"
+              class="label-field"
               aid="node-pool-label-value"
               dense
               label="Value"
@@ -130,33 +144,28 @@
         </runai-expansion-wrapper>
       </runai-form-wrapper>
       <template #content-footer>
-        <q-banner v-if="submitError" class="bg-red-1 text-negative q-mt-md" role="alert">
-          {{ submitError }}
-        </q-banner>
-        <div class="creation-footer">
-          <div class="row justify-end q-gutter-md">
-            <runai-btn
-              aid="create-node-pool-close"
-              :label="created ? 'Close' : 'Create node pool & close'"
-              flat
-              color="primary"
-              :loading="submitting && destination === ENodePoolFormDestination.Close"
-              :disable="busy"
-              @click="close"
-            />
-            <runai-btn
-              aid="create-node-pool-continue"
-              label="Create node pool & continue"
-              color="primary"
-              :loading="submitting && destination === ENodePoolFormDestination.Continue"
-              :disable="busy"
-              @click="submit(ENodePoolFormDestination.Continue)"
-            />
-          </div>
+        <div class="creation-footer row justify-end">
+          <runai-btn
+            aid="create-node-pool-close"
+            :label="created ? 'Close' : 'Create node pool & close'"
+            flat
+            color="primary"
+            :loading="submitting && destination === ENodePoolFormDestination.Close"
+            :disable="busy"
+            @click="close"
+          />
+          <runai-btn
+            aid="create-node-pool-continue"
+            label="Create node pool & continue"
+            color="primary"
+            :loading="submitting && destination === ENodePoolFormDestination.Continue"
+            :disable="busy"
+            @click="submit(ENodePoolFormDestination.Continue)"
+          />
         </div>
       </template>
       <template #right-sidebar>
-        <node-pool-wizard-summary :pool="created ?? draft" :cluster-name="clusterName" />
+        <node-pool-wizard-summary :pool="created ?? draft" :cluster-name="clusterName" :supports="topologySupport" />
       </template>
     </runai-wizard-layout>
     <unsaved-changes-dialog
@@ -189,9 +198,10 @@ import type { Nodepool } from "@/swagger-models/cluster-service-client";
 import { useNodePoolForm } from "@/composables/node-pool/use-node-pool-form.composable";
 import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
 import { errorMessages } from "@/common/error-message.constant";
-import type { INodePoolFormDraft } from "@/models/node-pool.model";
+import { getNodePoolWizardSteps, type INodePoolFormDraft } from "@/models/node-pool.model";
 
 import { ENodePoolFormDestination } from "./node-pool-edit-form-v2.model";
+import { useNodePoolTopologySupport } from "@/composables/node-pool/use-node-pool-topology-support.composable";
 import { useNodeLabelOptions } from "@/composables/node-pool/use-node-label-options.composable";
 import { useWizardLayout } from "@/composables/use-wizard-layout.composable";
 import { provideUnsavedChangesGuard } from "@/composables/org-unit/use-unsaved-changes-guard.composable";
@@ -219,13 +229,10 @@ watch(
   (value) => emit("busy-change", value),
   { flush: "sync" },
 );
+const topologySupport = useNodePoolTopologySupport(() => (created.value ?? draft).clusterId);
 const clusterName = computed(() => clusterStore.clusterList.find((c) => c.uuid === draft.clusterId)?.name);
 const { steps, activeStep, handleStepClick, markStepComplete } = useWizardLayout(
-  [
-    { name: "identity", title: "Cluster & name", done: false },
-    { name: "scheduling", title: "Scheduling mode", done: false, disabled: true },
-    { name: "topology", title: "Topology & placement", done: false, disabled: true },
-  ],
+  getNodePoolWizardSteps("identity", true),
   "identity",
 );
 watch(created, (pool) => {
@@ -340,10 +347,6 @@ async function submit(target: ENodePoolFormDestination) {
 }
 </script>
 <style scoped lang="scss">
-:deep([aria-current="step"] .wizard-step-title) {
-  font-weight: 700;
-}
-
 .node-pool-edit-form-v2 {
   padding: 0 20px 26px;
 }
@@ -362,7 +365,25 @@ async function submit(target: ENodePoolFormDestination) {
   margin-top: 26px;
 }
 .creation-footer {
+  gap: 16px;
   width: 100%;
-  margin-top: 40px;
+  margin-top: 30px;
+}
+
+.label-field + .label-field {
+  margin-top: 30px;
+}
+.label-field.q-field--error {
+  padding-bottom: 0;
+}
+.label-field.q-field--error :deep(.q-field__bottom) {
+  position: static;
+  transform: none;
+  padding: 7px 0 0;
+}
+.label-field.q-field--error :deep(.q-field__messages),
+.label-field.q-field--error :deep(.q-field__messages > div) {
+  font-size: 12px;
+  line-height: 16.8px;
 }
 </style>

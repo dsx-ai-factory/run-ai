@@ -79,9 +79,8 @@ const stickyTop = computed(() => {
 });
 
 const $q = useQuasar();
-const smallScreen = computed(() => $q.screen.width < 1280);
-const hideRight = computed(() => props.hideRightOnSmallScreen && smallScreen.value);
-const collapseLeft = computed(() => props.collapseLeftOnSmallScreen && smallScreen.value);
+const hideRight = computed(() => props.hideRightOnSmallScreen && $q.screen.width < 1460);
+const collapseLeft = computed(() => props.collapseLeftOnSmallScreen && $q.screen.width < 1230);
 const leftHovered = ref(false);
 const leftFocused = ref(false);
 const expandLeft = computed(() => collapseLeft.value && (leftHovered.value || leftFocused.value));

@@ -81,7 +81,7 @@ describe("simulation contract", () => {
     });
     expect(JSON.stringify(input)).toBe(before);
   });
-  it("maps Guaranteed limits and omits inactive limits in other modes", () => {
+  it("maps Guaranteed limits with quota and rank", () => {
     const input = scenario();
     input.draft.mode = ESchedulingMode.Guaranteed;
     input.draft.maxAllocation = true;
@@ -91,11 +91,23 @@ describe("simulation contract", () => {
       rank: "High",
       gpu: { deserved: 4, limit: 12, overQuotaWeight: 9 },
     });
-    input.draft.mode = ESchedulingMode.Ranked;
-    expect(buildSimulationRequest(input).nodePool?.schedulingCapabilities?.limits).toBe(false);
-    expect(buildSimulationRequest(input).orgUnits[1].gpu).not.toHaveProperty("limit");
-    expect(input.draft.departments.hidden.limit).toBe(12);
   });
+  it.each([ESchedulingMode.Proportional, ESchedulingMode.Ranked])(
+    "sends only active limits and omits quota in %s",
+    (mode) => {
+      const input = scenario();
+      input.draft.mode = mode;
+      input.draft.maxAllocation = true;
+      input.draft.departments.hidden.quota = 15;
+      const active = buildSimulationRequest(input);
+      expect(active.nodePool?.schedulingCapabilities).toMatchObject({ quota: false, limits: true });
+      expect(active.orgUnits[1].gpu).toEqual({ overQuotaWeight: 9, limit: 12 });
+      input.draft.maxAllocation = false;
+      expect(buildSimulationRequest(input).nodePool?.schedulingCapabilities?.limits).toBe(false);
+      expect(buildSimulationRequest(input).orgUnits[1].gpu).not.toHaveProperty("limit");
+      expect(input.draft.departments.hidden.limit).toBe(12);
+    },
+  );
   it("debounces rapid edits, aborts outstanding work, and reports ordinary errors", async () => {
     vi.useFakeTimers();
     const source = ref(scenario());
@@ -351,6 +363,33 @@ describe("simulation contract", () => {
       },
     });
   });
+  it("starts mode switches immediately and restores only matching results while refreshing", async () => {
+    vi.useFakeTimers();
+    const source = ref(scenario());
+    const transport = vi.fn().mockResolvedValue(response);
+    const scope = effectScope();
+    const state = scope.run(() => useNodePoolSimulation(source, transport));
+    if (!state) throw new Error("Simulation test scope is inactive.");
+    await vi.advanceTimersByTimeAsync(0);
+    expect(state.results.value?.visible.allocated).toBe(12);
+
+    transport.mockResolvedValue({ orgUnits: [{ ...response.orgUnits[0], fairShare: { gpu: 20 } }] });
+    source.value.draft.mode = ESchedulingMode.Ranked;
+    expect(state.results.value).toBeUndefined();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(state.results.value?.visible.allocated).toBe(20);
+
+    source.value.draft.mode = ESchedulingMode.Proportional;
+    expect(state.status.value).toBe("loading");
+    expect(state.results.value?.visible.allocated).toBe(12);
+    source.value.demand.dragged++;
+    source.value.draft.mode = ESchedulingMode.Ranked;
+    expect(state.results.value).toBeUndefined();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(transport).toHaveBeenCalledTimes(3);
+    scope.stop();
+  });
+
   it("keeps the previous result throughout debounce and request, then replaces it", async () => {
     vi.useFakeTimers();
     let resolveNext!: (value: typeof response) => void;
@@ -398,37 +437,42 @@ describe("simulation contract", () => {
       scope.stop();
     },
   );
-  it.each([400, 401, 403, 404, 500, 501, undefined])(
-    "clears stale results on failure %s and retries the same draft",
-    async (code) => {
-      vi.useFakeTimers();
-      const source = ref(scenario());
-      const before = JSON.stringify(source.value);
-      const transport = vi
-        .fn()
-        .mockResolvedValueOnce(response)
-        .mockRejectedValueOnce(code === undefined ? new Error("network down") : { response: { status: code } })
-        .mockResolvedValueOnce(response);
-      const scope = effectScope();
-      const state = scope.run(() => useNodePoolSimulation(source, transport));
-      if (!state) throw new Error("Simulation test scope is inactive.");
-      await vi.advanceTimersByTimeAsync(300);
-      expect(state.results.value?.visible.allocated).toBe(12);
-      state.retry();
-      expect(state.results.value?.visible.allocated).toBe(12);
-      await vi.advanceTimersByTimeAsync(300);
-      expect(state.results.value).toBeUndefined();
-      expect(state.status.value).toBe(code === 404 ? "unavailable" : "error");
-      expect(state.message.value).toMatch(/preserved/);
-      state.retry();
-      await vi.advanceTimersByTimeAsync(300);
-      expect(state.status.value).toBe("ready");
-      expect(state.message.value).toBe("");
-      expect(state.results.value?.visible.allocated).toBe(12);
-      expect(JSON.stringify(source.value)).toBe(before);
-      scope.stop();
-    },
-  );
+  it.each([
+    [400, "Simulation inputs are invalid."],
+    [401, "Simulation failed."],
+    [403, "You’re missing permissions to simulate GPU allocation."],
+    [404, "Simulation is unavailable."],
+    [500, "Simulation failed."],
+    [501, "Simulation failed."],
+    [undefined, "Simulation failed."],
+  ] as const)("clears stale results on failure %s and retries the same draft", async (code, message) => {
+    vi.useFakeTimers();
+    const source = ref(scenario());
+    const before = JSON.stringify(source.value);
+    const transport = vi
+      .fn()
+      .mockResolvedValueOnce(response)
+      .mockRejectedValueOnce(code === undefined ? new Error("network down") : { response: { status: code } })
+      .mockResolvedValueOnce(response);
+    const scope = effectScope();
+    const state = scope.run(() => useNodePoolSimulation(source, transport));
+    if (!state) throw new Error("Simulation test scope is inactive.");
+    await vi.advanceTimersByTimeAsync(300);
+    expect(state.results.value?.visible.allocated).toBe(12);
+    state.retry();
+    expect(state.results.value?.visible.allocated).toBe(12);
+    await vi.advanceTimersByTimeAsync(300);
+    expect(state.results.value).toBeUndefined();
+    expect(state.status.value).toBe(code === 404 ? "unavailable" : "error");
+    expect(state.message.value).toBe(message);
+    state.retry();
+    await vi.advanceTimersByTimeAsync(300);
+    expect(state.status.value).toBe("ready");
+    expect(state.message.value).toBe("");
+    expect(state.results.value?.visible.allocated).toBe(12);
+    expect(JSON.stringify(source.value)).toBe(before);
+    scope.stop();
+  });
   it("ignores an obsolete rejection after the replacement request succeeds", async () => {
     vi.useFakeTimers();
     let rejectOld!: (reason: unknown) => void;

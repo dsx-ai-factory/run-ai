@@ -113,7 +113,8 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useAccessRuleRoles } from "@/composables/node-pool/use-access-rule-roles.composable";
 import { useAuthStore } from "@/stores/auth.store/index";
 import { errorMessages } from "@/common/error-message.constant";
-import { QForm } from "quasar";
+import { QForm, useQuasar } from "quasar";
+import { alertUtil } from "@/utils/alert.util";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 import { accessRuleService } from "@/services/control-plane/rbac/access-rule.service/access-rule.service";
 import { usePermissionStore } from "@/stores/permissions.store/index";
@@ -132,6 +133,7 @@ import { SubjectTypeExtended } from "@/swagger-models/authorization-client/index
 import type { ISelectOption } from "@/models/global.model";
 const props = defineProps<{ clusterId: string; clusterName?: string }>();
 const emit = defineEmits<{ close: []; created: [department: Department]; saving: [value: boolean] }>();
+const $q = useQuasar();
 const name = ref(""),
   description = ref(""),
   administrator = ref(false);
@@ -143,7 +145,9 @@ const permissionStore = usePermissionStore();
 const canCreateDepartment = computed(() => permissionStore.hasPermission(ResourceType.Department, Action.Create));
 const authStore = useAuthStore();
 const subjectOptions = computed(() => (authStore.isSSO ? subjectTypeOptionsWithSSO : subjectTypeOptions));
-const subject = ref<ISelectOption | null>(null);
+const subject = ref<ISelectOption | null>(
+  subjectOptions.value.find((option) => option.value === SubjectTypeExtended.User) ?? null,
+);
 const subjects = ref<ISelectOption[]>([]);
 const { roleOptions, canAssignRoles, loadRoles, validateRole, loading: rolesLoading } = useAccessRuleRoles();
 const role = ref<ISelectOption | null>(null);
@@ -219,10 +223,12 @@ async function createDepartment() {
     }
     emit("close");
   } catch (error) {
-    const message = extractErrorMessages(error, "Could not complete department creation.").join(" ");
-    saveError.value = createdDepartment.value
-      ? `Department created, but role assignments are incomplete. Retry to finish. ${message}`
-      : message;
+    if (createdDepartment.value) {
+      const message = extractErrorMessages(error, "Could not complete department creation.").join(" ");
+      saveError.value = `Department created, but role assignments are incomplete. Retry to finish. ${message}`;
+    } else {
+      $q.notify(alertUtil.getError(`Department ${name.value.trim()} couldn't be created`));
+    }
   } finally {
     saving.value = false;
     emit("saving", false);
@@ -309,9 +315,6 @@ async function createDepartment() {
 }
 .scheduling-new-department .scheduling-department-name-fields .q-field__native {
   line-height: 21px;
-}
-.scheduling-new-department .scheduling-department-name-fields .q-textarea .q-field__control-container {
-  padding: 0;
 }
 .scheduling-new-department .scheduling-department-name-fields textarea.q-field__native {
   overflow-y: auto !important;
@@ -452,6 +455,9 @@ async function createDepartment() {
 .scheduling-new-department .administrator-rule .role-select {
   width: 250px;
 }
+.scheduling-new-department .subject-select + .role-select {
+  margin-block-start: 40px;
+}
 .scheduling-new-department .administrator-rule .subject-addable-multi-select {
   width: 100%;
 }
@@ -464,15 +470,10 @@ async function createDepartment() {
   min-height: 38px;
   padding: 10px;
   border-radius: 3px;
-  box-shadow: var(--shadow-s);
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
   letter-spacing: 0;
-}
-.scheduling-new-department .runai-base-dialog-footer .footer .q-btn:before,
-.scheduling-new-department .add-administrator:before {
-  box-shadow: none;
 }
 .scheduling-new-department .runai-base-dialog-footer .footer .q-btn + .q-btn {
   margin-left: 0;
@@ -483,6 +484,11 @@ async function createDepartment() {
 }
 .q-card.scheduling-new-department .runai-base-dialog-footer .footer [aid="create-department"] {
   min-width: 164px;
+  box-shadow: var(--shadow-s);
+
+  &::before {
+    box-shadow: none;
+  }
 }
 .scheduling-new-department .add-administrator {
   min-width: 160px;

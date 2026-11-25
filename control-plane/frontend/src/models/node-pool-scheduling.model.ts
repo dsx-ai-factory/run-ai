@@ -2,17 +2,36 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { ENodePoolSchedulingMode as ESchedulingMode } from "@/models/node-pool.model";
-import { effectiveDepartmentEdit } from "@/utils/node-pool-scheduling.util/node-pool-scheduling-totals.util";
+import { ENodePoolSchedulingMode as ESchedulingMode, isSupportedSchedulingMode } from "@/models/node-pool.model";
 import type { SchedulingCapabilitiesNullable } from "@/swagger-models/cluster-service-client/index";
 
-import { PROPORTIONAL_CAPABILITIES, isSupportedSchedulingMode } from "@/models/node-pool.model";
+export const DEFAULT_DEPARTMENT_SCHEDULING_WEIGHT = 2;
+
+export function weightFromGuaranteedQuota(quota: number): number {
+  if (quota === -1) return DEFAULT_DEPARTMENT_SCHEDULING_WEIGHT;
+  // The scheduler assigns a minimum over-quota weight to an explicit zero quota.
+  return quota === 0 ? 0.01 : quota;
+}
+
+export function automaticWeightFromQuota(quota: number | undefined): number {
+  if (quota == null) return 1;
+  return quota === -1 ? 0 : weightFromGuaranteedQuota(quota);
+}
+
 export interface IDepartmentSchedulingEdit {
   id: string;
   weight?: number;
+  weightFromQuota?: boolean;
   quota?: number;
   limit?: number | null;
   rank?: string;
+}
+export function effectiveDepartmentEdit(
+  baseline: Record<string, IDepartmentSchedulingEdit>,
+  edits: Record<string, IDepartmentSchedulingEdit>,
+  id: string,
+): IDepartmentSchedulingEdit {
+  return { ...baseline[id], ...edits[id], id };
 }
 export interface ISchedulingSnapshot {
   mode?: ESchedulingMode;
@@ -32,12 +51,11 @@ export function createSchedulingDraft(snapshot: ISchedulingSnapshot): Scheduling
 }
 export function toSchedulingCapabilities(draft: SchedulingDraft): SchedulingCapabilitiesNullable {
   if (!isSupportedSchedulingMode(draft.mode)) return { ...draft.capabilities };
-  if (draft.mode === ESchedulingMode.Proportional) return { ...PROPORTIONAL_CAPABILITIES };
   return {
     adjustableWeights: draft.mode !== ESchedulingMode.Guaranteed || !draft.automaticWeights,
     quota: draft.mode === ESchedulingMode.Guaranteed,
-    ranks: true,
-    limits: draft.mode === ESchedulingMode.Guaranteed && !!draft.maxAllocation,
+    ranks: draft.mode !== ESchedulingMode.Proportional,
+    limits: !!draft.maxAllocation,
     cpuQuota: draft.mode === ESchedulingMode.Guaranteed && draft.cpuQuota,
   };
 }
@@ -159,8 +177,8 @@ export function schedulingTotalsWithEdits(
     const original = baseline[id];
     if (!original) continue;
     const merged = effectiveDepartmentEdit(baseline, edits, id);
-    const beforeWeight = automatic ? Math.max(0, original.quota ?? 0) : original.weight;
-    const afterWeight = automatic ? Math.max(0, merged.quota ?? 0) : merged.weight;
+    const beforeWeight = automatic ? automaticWeightFromQuota(original.quota) : original.weight;
+    const afterWeight = automatic ? automaticWeightFromQuota(merged.quota) : merged.weight;
     for (const [key, total] of Object.entries(totals)) {
       const before = key === "all" || key === original.rank;
       const after = key === "all" || key === merged.rank;
@@ -191,6 +209,14 @@ export enum EResourceEditorKind {
   Weight = "weight",
   Quota = "quota",
   Limit = "limit",
+}
+
+export const DEPARTMENT_PAGE_SIZE = 50;
+export interface IDepartmentPages {
+  nextOffset?: number;
+  loadingAll: boolean;
+  loadNext: () => Promise<boolean>;
+  loadAll: () => Promise<boolean>;
 }
 
 export interface ISchedulingScope {

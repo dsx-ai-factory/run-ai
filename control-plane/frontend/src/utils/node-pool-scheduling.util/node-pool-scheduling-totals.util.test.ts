@@ -1,8 +1,6 @@
+import { effectiveDepartmentEdit } from "@/models/node-pool-scheduling.model";
 import { describe, expect, it } from "vitest";
-import {
-  completePeerSchedulingTotals,
-  effectiveDepartmentEdit,
-} from "@/utils/node-pool-scheduling.util/node-pool-scheduling-totals.util";
+import { completePeerSchedulingTotals } from "@/utils/node-pool-scheduling.util/node-pool-scheduling-totals.util";
 
 describe("complete department peer totals", () => {
   const rows = [
@@ -13,7 +11,7 @@ describe("complete department peer totals", () => {
   it("keeps server snapshot quota and independent automatic/custom weights", () => {
     expect(completePeerSchedulingTotals(rows).all).toEqual({
       rawWeightsSum: 6,
-      automaticWeightsSum: 3,
+      automaticWeightsSum: 3.01,
       finiteQuotaSum: 3,
       unlimitedQuotaCount: 1,
       deservedSum: -1,
@@ -26,10 +24,9 @@ describe("complete department peer totals", () => {
     expect(completePeerSchedulingTotals(unknown, { excludeId: "hidden" }).all.rawWeightsSum).toBe(2);
     expect(completePeerSchedulingTotals(rows, { rawWeightsAvailable: false }).all.rawWeightsSum).toBeUndefined();
   });
-  it("keeps server values separate from integer-only custom recovery", () => {
+  it("counts stored fractional weights on reopened custom pools", () => {
     const peers = [{ id: "a", weight: 1.5 }];
     expect(completePeerSchedulingTotals(peers).all.rawWeightsSum).toBe(1.5);
-    expect(completePeerSchedulingTotals(peers, { requireIntegerWeights: true }).all.rawWeightsSum).toBeUndefined();
   });
   it("merges sparse edits before rank and weight recovery", () => {
     const baseline = Object.fromEntries(rows.map((row) => [row.id, row]));
