@@ -29,10 +29,12 @@ type NimServiceDefaults struct {
 	Compute              NullableNimServiceDefaultsAllOfCompute `json:"compute,omitempty"`
 	EnvironmentVariables NullableEnvironmentVariablesDefaults   `json:"environmentVariables,omitempty"`
 	// Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
-	Image            NullableString                            `json:"image,omitempty" validate:"regexp=.*"`
-	ImagePullPolicy  NullableImagePullPolicy                   `json:"imagePullPolicy,omitempty"`
-	ImagePullSecrets NullableImagePullSecretsDefaults          `json:"imagePullSecrets,omitempty"`
-	Labels           NullableLabelsDefaults                    `json:"labels,omitempty"`
+	Image            NullableString                   `json:"image,omitempty" validate:"regexp=.*"`
+	ImagePullPolicy  NullableImagePullPolicy          `json:"imagePullPolicy,omitempty"`
+	ImagePullSecrets NullableImagePullSecretsDefaults `json:"imagePullSecrets,omitempty"`
+	Labels           NullableLabelsDefaults           `json:"labels,omitempty"`
+	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
+	LoadAwareRouting NullableBool                              `json:"loadAwareRouting,omitempty"`
 	ModelStore       NullableNimServiceDefaultsAllOfModelStore `json:"modelStore,omitempty"`
 	MultiNode        NullableNimServiceMultiNode               `json:"multiNode,omitempty"`
 	// The name of a Kubernetes secret containing the NGC access credentials. The secret must contain a key named NGC_API_KEY with the API key as the value.
@@ -456,6 +458,49 @@ func (o *NimServiceDefaults) SetLabelsNil() {
 // UnsetLabels ensures that no value is present for Labels, not even an explicit nil
 func (o *NimServiceDefaults) UnsetLabels() {
 	o.Labels.Unset()
+}
+
+// GetLoadAwareRouting returns the LoadAwareRouting field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *NimServiceDefaults) GetLoadAwareRouting() bool {
+	if o == nil || IsNil(o.LoadAwareRouting.Get()) {
+		var ret bool
+		return ret
+	}
+	return *o.LoadAwareRouting.Get()
+}
+
+// GetLoadAwareRoutingOk returns a tuple with the LoadAwareRouting field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *NimServiceDefaults) GetLoadAwareRoutingOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.LoadAwareRouting.Get(), o.LoadAwareRouting.IsSet()
+}
+
+// HasLoadAwareRouting returns a boolean if a field has been set.
+func (o *NimServiceDefaults) HasLoadAwareRouting() bool {
+	if o != nil && o.LoadAwareRouting.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetLoadAwareRouting gets a reference to the given NullableBool and assigns it to the LoadAwareRouting field.
+func (o *NimServiceDefaults) SetLoadAwareRouting(v bool) {
+	o.LoadAwareRouting.Set(&v)
+}
+
+// SetLoadAwareRoutingNil sets the value for LoadAwareRouting to be an explicit nil
+func (o *NimServiceDefaults) SetLoadAwareRoutingNil() {
+	o.LoadAwareRouting.Set(nil)
+}
+
+// UnsetLoadAwareRouting ensures that no value is present for LoadAwareRouting, not even an explicit nil
+func (o *NimServiceDefaults) UnsetLoadAwareRouting() {
+	o.LoadAwareRouting.Unset()
 }
 
 // GetModelStore returns the ModelStore field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -957,6 +1002,9 @@ func (o NimServiceDefaults) ToMap() (map[string]interface{}, error) {
 	}
 	if o.Labels.IsSet() {
 		toSerialize["labels"] = o.Labels.Get()
+	}
+	if o.LoadAwareRouting.IsSet() {
+		toSerialize["loadAwareRouting"] = o.LoadAwareRouting.Get()
 	}
 	if o.ModelStore.IsSet() {
 		toSerialize["modelStore"] = o.ModelStore.Get()

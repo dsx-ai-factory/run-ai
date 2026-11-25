@@ -6,9 +6,6 @@ name: E2E public checks
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths:
-      - 'e2e/**'
-      - '.github/workflows/e2e-checks.yaml'
 
 permissions:
   contents: read
@@ -35,21 +32,44 @@ jobs:
       - uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6
         with:
           persist-credentials: false
+          fetch-depth: 2
 
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - name: Check for E2E changes
+        id: changes
+        working-directory: .
+        shell: bash
+        run: |
+          # The first parent of the PR merge commit is the target branch.
+          if git diff --quiet HEAD^1 HEAD -- e2e/ .github/workflows/e2e-checks.yaml; then
+            echo "required=false" >> "$GITHUB_OUTPUT"
+            echo "No E2E changes. Checks are not needed."
+          else
+            status=$?
+            if [ "$status" -ne 1 ]; then
+              exit "$status"
+            fi
+            echo "required=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.changes.outputs.required == 'true'
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
           cache: npm
           cache-dependency-path: e2e/package-lock.json
 
       - name: Install dependencies
+        if: steps.changes.outputs.required == 'true'
         run: npm ci --ignore-scripts
 
       - name: Lint
+        if: steps.changes.outputs.required == 'true'
         run: ./node_modules/.bin/eslint . --ignore-path .eslintignore --ext .ts --quiet
 
       - name: Type-check
+        if: steps.changes.outputs.required == 'true'
         run: npm run typecheck
 
       - name: Run offline tests
+        if: steps.changes.outputs.required == 'true'
         run: npm run test:unit

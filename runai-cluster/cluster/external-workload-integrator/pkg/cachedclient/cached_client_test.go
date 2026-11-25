@@ -12,6 +12,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints"
 	runv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -137,6 +138,21 @@ var _ = Describe("ExternalWorkloadsCachedClient", func() {
 			}
 			obj := makeUnstructured(makeGVK("example.com", "v1", "Foo"))
 			Expect(ShouldDropWorkload(obj)).To(BeFalse())
+		})
+
+		It("ShouldDropByLabel matches objects labeled by the InferenceEndpoint controller", func() {
+			obj := makeUnstructured(makeGVK("apps", "v1", "Deployment"))
+			obj.SetLabels(map[string]string{endpoints.InferenceEndpointLabel: "llama3"})
+			Expect(ShouldDropByLabel(obj)).To(BeTrue())
+		})
+
+		It("ShouldDropByLabel ignores objects without the label", func() {
+			plain := makeUnstructured(makeGVK("apps", "v1", "Deployment"))
+			Expect(ShouldDropByLabel(plain)).To(BeFalse())
+
+			other := makeUnstructured(makeGVK("apps", "v1", "Deployment"))
+			other.SetLabels(map[string]string{"app": "llama3"})
+			Expect(ShouldDropByLabel(other)).To(BeFalse())
 		})
 
 		It("AdditionalGroupKind counter increments and decrements correctly", func() {

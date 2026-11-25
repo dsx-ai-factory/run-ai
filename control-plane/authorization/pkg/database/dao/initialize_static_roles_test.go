@@ -445,3 +445,22 @@ var _ = Describe("System administrator cluster-config under CSP", func() {
 		Expect(found).To(BeTrue(), "Cluster config read should grant a cluster-config permission")
 	})
 })
+
+var _ = Describe("Installer service account role", func() {
+	// The installer service account is limited to reading cluster config (#5520).
+	It("holds only the Cluster config read permission set", func() {
+		Expect(static_roles.InstallerServiceAccount.PermissionSets).NotTo(BeNil())
+		Expect(*static_roles.InstallerServiceAccount.PermissionSets).To(HaveLen(1))
+		Expect((*static_roles.InstallerServiceAccount.PermissionSets)[0].Name).To(Equal(static_permission_sets.ClusterConfigRead.Name))
+	})
+
+	It("only references registered permission sets", func() {
+		registered := map[string]bool{}
+		for _, ps := range PermissionSets {
+			registered[ps.Name] = true
+		}
+		for _, ps := range *static_roles.InstallerServiceAccount.PermissionSets {
+			Expect(registered[ps.Name]).To(BeTrue(), "permission set %q must be registered", ps.Name)
+		}
+	})
+})
