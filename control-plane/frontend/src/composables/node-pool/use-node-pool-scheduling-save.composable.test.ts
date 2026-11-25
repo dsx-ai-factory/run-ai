@@ -31,12 +31,52 @@ const draft = (): SchedulingDraft => ({
 });
 const success = (ids: string[]) => ({
   id: "batch",
-  succeeded: ids.map((orgUnitId) => ({ orgUnitId, nodePoolId: "17" })),
+  succeeded: ids.map((orgUnitId) => ({
+    id: orgUnitId,
+    orgUnitId,
+    orgUnitName: orgUnitId,
+    clusterId: "cluster",
+    nodePoolId: "17",
+    nodePoolName: "pool",
+    rank: "High",
+    resources: {},
+  })),
   totalRequested: ids.length,
   totalSuccessful: ids.length,
   totalFailed: 0,
 });
 describe("scheduling persistence", () => {
+  it("resumes the project reset after a failure and applies explicit edits last", async () => {
+    const automatic = {
+      ...pool,
+      clusterId: "cluster",
+      schedulingCapabilities: { ranks: true, limits: false, cpuQuota: false, quota: true, adjustableWeights: false },
+    };
+    const input = { ...draft(), mode: ESchedulingMode.Guaranteed, departments: { a: { id: "a", weight: 6 } } };
+    const patchPool = vi.fn(async (_id, update) => ({ ...automatic, ...update }));
+    const resetDepartments = vi.spyOn(orgUnitService, "resetDepartmentResources").mockResolvedValue(undefined);
+    const resetProjects = vi
+      .spyOn(orgUnitService, "resetProjectResources")
+      .mockRejectedValueOnce(new Error("try again"))
+      .mockResolvedValue(undefined);
+    const patchDepartments = vi.fn(async () => success(["a"]));
+    const saver = createSchedulingSaver({ patchPool, patchDepartments });
+    await expect(saver.save(automatic, input)).rejects.toThrow("try again");
+    expect(patchDepartments).not.toHaveBeenCalled();
+    expect(saver.resetPending).toBe(true);
+    await saver.save(saver.savedPool!, input);
+    const request = { clusterId: "cluster", nodePoolIds: ["17"], action: "WEIGHTS_TO_DESERVED" };
+    expect(resetDepartments).toHaveBeenCalledExactlyOnceWith(request);
+    expect(resetProjects).toHaveBeenCalledTimes(2);
+    expect(resetProjects).toHaveBeenLastCalledWith(request);
+    expect(patchPool).toHaveBeenCalledTimes(1);
+    expect(saver.resetPending).toBe(false);
+    expect(patchDepartments).toHaveBeenCalledExactlyOnceWith({
+      patchRequests: [{ orgUnitId: "a", nodePoolId: "17", resources: { gpu: { overQuotaWeight: 6 } } }],
+    });
+    resetDepartments.mockRestore();
+    resetProjects.mockRestore();
+  });
   it.each(["saved-topology", null, undefined])(
     "omits topology from a scheduling-only PATCH even when the form loaded %s",
     (networkTopologyId) => {

@@ -360,7 +360,8 @@ import { DepartmentResourceEditor } from "@/components/node-pools/department-res
 import {
   DEPARTMENT_PAGE_SIZE,
   schedulingTotalsWithEdits,
-  DEFAULT_DEPARTMENT_SCHEDULING_WEIGHT,
+  automaticWeightFromQuota,
+  weightFromGuaranteedQuota,
   weightPercentage,
   type SchedulingDraft,
   type IDepartmentPages,
@@ -403,7 +404,7 @@ const emit = defineEmits<{
   "close-settings": [];
   "automatic-weights": [boolean];
 }>();
-const previewDefaultWeights = computed(
+const initializingCustomWeights = computed(
   () =>
     props.draft.mode === ESchedulingMode.Guaranteed &&
     !props.draft.automaticWeights &&
@@ -425,8 +426,10 @@ const baseline = computed(() => {
     const gpu = row.resources.gpu;
     departments[row.orgUnitId] = {
       id: row.orgUnitId,
-      weight: previewDefaultWeights.value
-        ? DEFAULT_DEPARTMENT_SCHEDULING_WEIGHT
+      weight: initializingCustomWeights.value
+        ? gpu?.deserved == null
+          ? undefined
+          : weightFromGuaranteedQuota(gpu.deserved)
         : props.rawWeightsAvailable
           ? (gpu?.overQuotaWeight ?? undefined)
           : undefined,
@@ -453,17 +456,25 @@ const completeEffectiveRows = computed(() =>
 );
 const completeCustomWeightTotals = computed(() =>
   !automatic.value && props.totalsComplete !== false && completeEffectiveRows.value
-    ? completePeerSchedulingTotals(completeEffectiveRows.value, { requireIntegerWeights: true })
+    ? completePeerSchedulingTotals(completeEffectiveRows.value)
     : undefined,
 );
 const totals = computed(() => {
+  // Server quota sums exclude the scheduler's zero-quota floor. Use the unfiltered
+  // snapshot for Automatic and newly initialized Custom weights, including hidden ranks.
   let aggregates = props.aggregates;
-  if (previewDefaultWeights.value && props.rankCounts) {
-    // Rank counts include departments beyond the loaded page. The saved sums still describe Automatic.
-    aggregates = { ...aggregates };
-    for (const [rank, count] of Object.entries(props.rankCounts)) {
-      aggregates[rank] = { ...aggregates[rank], rawWeightsSum: count * DEFAULT_DEPARTMENT_SCHEDULING_WEIGHT };
-    }
+  if ((automatic.value || initializingCustomWeights.value) && !hasMore.value && props.baselineRows) {
+    const peers = completePeerSchedulingTotals(Object.values(baseline.value));
+    aggregates = Object.fromEntries(
+      Object.entries(aggregates).map(([rank, total]) => [
+        rank,
+        {
+          ...total,
+          automaticWeightsSum: peers[rank]?.automaticWeightsSum ?? 0,
+          rawWeightsSum: initializingCustomWeights.value ? peers[rank]?.rawWeightsSum : total.rawWeightsSum,
+        },
+      ]),
+    );
   }
   return schedulingTotalsWithEdits(aggregates, baseline.value, props.draft.departments, automatic.value);
 });
@@ -670,7 +681,7 @@ watch(
     !props.hasError &&
     (filtering.value ||
       simulation.value ||
-      (automatic.value && props.rawWeightsAvailable && props.aggregates.all?.deservedSum < 0) ||
+      ((automatic.value || initializingCustomWeights.value) && props.totalsComplete) ||
       Object.keys(props.draft.departments).some((id) => !baseline.value[id])),
   (needsAll) => {
     if (needsAll) void props.departmentPages?.loadAll();
@@ -697,18 +708,11 @@ const hasVisibleDepartments = computed(() => visibleDepartmentIds.value.length >
 watch([hasVisibleDepartments, () => props.loading], ([visible, loading]) => {
   if (!visible && !loading) simulation.value = false;
 });
-const simulationDraft = computed(() => {
-  if (!previewDefaultWeights.value) return props.draft;
-  const departments = { ...props.draft.departments };
-  for (const id of Object.keys(baseline.value)) {
-    departments[id] = {
-      ...departments[id],
-      id,
-      weight: departments[id]?.weight ?? DEFAULT_DEPARTMENT_SCHEDULING_WEIGHT,
-    };
-  }
-  return { ...props.draft, departments };
-});
+const initialSimulationWeights = computed(() =>
+  initializingCustomWeights.value
+    ? Object.fromEntries(Object.values(baseline.value).map((row) => [row.id, row.weight]))
+    : undefined,
+);
 const scenario = computed(() =>
   simulation.value &&
   !hasMore.value &&
@@ -719,7 +723,8 @@ const scenario = computed(() =>
     ? {
         poolId: props.poolId,
         capacity: props.capacity,
-        draft: simulationDraft.value,
+        draft: props.draft,
+        initialWeights: initialSimulationWeights.value,
         ids: visibleDepartmentIds.value,
         demand: demand.value,
       }
@@ -784,6 +789,7 @@ function resultLegend(row: IDepartmentSchedulingEdit) {
   }));
 }
 function weightTotal(row: IDepartmentSchedulingEdit) {
+  if ((automatic.value || initializingCustomWeights.value) && hasMore.value) return undefined;
   const key = ranked.value ? (row.rank ?? "") : "all";
   return totals.value[key]?.weightsSum ?? completeCustomWeightTotals.value?.[key]?.rawWeightsSum;
 }
@@ -799,7 +805,7 @@ function rowWeightPercentage(row: IDepartmentSchedulingEdit): number | undefined
   const simulated = simulation.value ? simulationResults.value?.[row.id] : undefined;
   if (simulated) return simulated.weightPercentage;
   if (props.totalsComplete === false) return undefined;
-  const value = automatic.value ? Math.max(0, row.quota ?? 0) : row.weight;
+  const value = automatic.value ? automaticWeightFromQuota(row.quota) : row.weight;
   return value == null ? undefined : weightPercentage(value, weightTotal(row));
 }
 function percentage(row: IDepartmentSchedulingEdit) {

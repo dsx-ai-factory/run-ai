@@ -21,6 +21,8 @@ import {
   type DeletionTypes,
   type Department,
   type DepartmentCreationRequest,
+  type DepartmentsResourcesResetRequest,
+  type ProjectsResourcesResetRequest,
   type DepartmentUpdateRequest,
   type OrgUnitTelemetryType,
   type Project,
@@ -92,6 +94,8 @@ export const orgUnitService = {
   sumProjectNodePoolResources,
   countProjectsNodePoolResources,
   batchPatchDepartmentNodePoolResources,
+  resetDepartmentResources,
+  resetProjectResources,
   getDepartmentNodePoolResources,
   countDepartmentNodePoolResources,
   getDepartmentMetrics,
@@ -624,6 +628,22 @@ async function createNodeType(name: string, clusterId: string): Promise<NodeType
  *  Project and Department Node Pool Resources APIs - mainly for org unit forms v2
  * ============================================
  */
+
+async function resetDepartmentResources(request: DepartmentsResourcesResetRequest): Promise<void> {
+  try {
+    await orgUnitServiceApi.departmentsApi.departmentsResetResources(request);
+  } catch (err: unknown) {
+    throw httpService.handleHttpError(err);
+  }
+}
+
+async function resetProjectResources(request: ProjectsResourcesResetRequest): Promise<void> {
+  try {
+    await orgUnitServiceApi.projectsApi.projectsResetResources(request);
+  } catch (err: unknown) {
+    throw httpService.handleHttpError(err);
+  }
+}
 
 async function batchPatchDepartmentNodePoolResources(
   batchPatchDepartmentResourcesRequest: BatchPatchNodePoolResourcesRequest,

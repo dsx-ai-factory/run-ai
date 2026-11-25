@@ -71,6 +71,28 @@ describe("resource editor opening transition", () => {
   });
 });
 describe("department resource editor", () => {
+  it("displays an inherited weight outside the manual range until the user changes it", async () => {
+    const wrapper = mount(Editor, {
+      props: { id: "a", kind: EResourceEditorKind.Weight, value: 20.5, previewWeightPercentage: () => 75 },
+      global: { plugins: [Quasar], stubs: { EditableCellPopup: popup } },
+    });
+    try {
+      const menu = wrapper.getComponent(popup);
+      menu.vm.$emit("before-show");
+      await wrapper.vm.$nextTick();
+      expect(wrapper.get("input").element.value).toBe("20.5");
+      expect(wrapper.get(".weight-percentage").text()).toBe("(75%)");
+      expect(wrapper.getComponent(QInput).props("error")).toBe(false);
+      expect(menu.props("isSubmitDisabled")).toBe(true);
+      await wrapper.get("input").setValue("20.1");
+      expect(wrapper.getComponent(QInput).props("error")).toBe(true);
+      await wrapper.get("input").setValue("20");
+      expect(menu.props("isSubmitDisabled")).toBe(false);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
   it("keeps scheduling cell validation feedback local while blocking invalid Apply", async () => {
     const wrapper = mount(Editor, {
       props: {

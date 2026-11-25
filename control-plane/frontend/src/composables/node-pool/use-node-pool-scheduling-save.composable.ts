@@ -4,16 +4,27 @@
  */
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
-import type { Nodepool } from "@/swagger-models/cluster-service-client/index";
+import { ResourcesResetAction } from "@/swagger-models/org-unit-service-client";
+import type { Nodepool, SchedulingCapabilitiesNullable } from "@/swagger-models/cluster-service-client/index";
 import type { SchedulingDraft } from "@/models/node-pool-scheduling.model";
 import { buildSchedulingSave } from "@/utils/node-pool-scheduling.util/node-pool-scheduling-save.util";
+export function switchingToCustomWeights(saved?: SchedulingCapabilitiesNullable, next?: SchedulingCapabilitiesNullable) {
+  return (
+    saved?.quota === true && saved.adjustableWeights === false && next?.quota === true && next.adjustableWeights === true
+  );
+}
+
 export function useNodePoolSchedulingSave() {
   let busy = false;
   let poolKey = "";
   let savedPool: Nodepool | undefined;
   let poolSettingsSaved = false;
+  let pendingReset: "departments" | "projects" | undefined;
   const completed = new Map<string, string>();
   return {
+    get resetPending() {
+      return pendingReset !== undefined;
+    },
     get savedPool() {
       return savedPool;
     },
@@ -41,11 +52,32 @@ export function useNodePoolSchedulingSave() {
             throw new Error(
               "The backend did not apply the requested scheduling capabilities. Department changes were not sent.",
             );
+          if (switchingToCustomWeights(latest.schedulingCapabilities, updated.schedulingCapabilities))
+            pendingReset = "departments";
+          else if (
+            savedPool?.id !== pool.id ||
+            !updated.schedulingCapabilities?.adjustableWeights ||
+            !updated.schedulingCapabilities.quota
+          )
+            pendingReset = undefined;
           savedPool = updated;
           poolKey = key;
           completed.clear();
         }
         poolSettingsSaved = true;
+        if (pendingReset) {
+          const request = {
+            clusterId: pool.clusterId,
+            nodePoolIds: [pool.id],
+            action: ResourcesResetAction.WeightsToDeserved,
+          };
+          if (pendingReset === "departments") {
+            await orgUnitService.resetDepartmentResources(request);
+            pendingReset = "projects";
+          }
+          await orgUnitService.resetProjectResources(request);
+          pendingReset = undefined;
+        }
         const pending = plan.departments.filter((row) => completed.get(row.orgUnitId) !== JSON.stringify(row));
         for (let start = 0; start < pending.length; start += 100) {
           const batch = pending.slice(start, start + 100);

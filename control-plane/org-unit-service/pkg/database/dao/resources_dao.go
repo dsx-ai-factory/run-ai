@@ -201,14 +201,18 @@ func getResetResourcesResourcesQuery(projects bool, action ResetResourcesAction,
 					 memory_over_quota_weight <> %f)`,
 			models.DefaultOverQuotaWeight, models.DefaultOverQuotaWeight, models.DefaultOverQuotaWeight)
 	case WeightsToDeserved:
-		// set gpu_over_quota_weight to gpu_deserved always, set cpu_over_quota_weight and memory_over_quota_weight to cpu_deserved/memory_deserved only if not null
-		setQuery = `gpu_over_quota_weight = gpu_deserved, 
-					 cpu_over_quota_weight = cpu_deserved, 
-					 memory_over_quota_weight = memory_deserved, 
-					 updated_at=now()`
-		conditionQuery = `(gpu_over_quota_weight IS DISTINCT FROM gpu_deserved OR
-					 cpu_over_quota_weight IS DISTINCT FROM cpu_deserved OR
-					 memory_over_quota_weight IS DISTINCT FROM memory_deserved)`
+		// Unlimited quota has no numeric weight. Seed it with the default when switching to custom weights.
+		var assignments, differences []string
+		for _, resource := range []string{"gpu", "cpu", "memory"} {
+			weight := resource + "_over_quota_weight"
+			deserved := resource + "_deserved"
+			target := fmt.Sprintf("CASE %s WHEN -1 THEN %g WHEN 0 THEN %g ELSE %s END",
+				deserved, models.DefaultOverQuotaWeight, models.MinOverQuotaWeight, deserved)
+			assignments = append(assignments, weight+" = "+target)
+			differences = append(differences, weight+" IS DISTINCT FROM "+target)
+		}
+		setQuery = strings.Join(assignments, ", ") + ", updated_at=now()"
+		conditionQuery = "(" + strings.Join(differences, " OR ") + ")"
 	case CpuQuotasToDefault:
 		setQuery = disableCpuQuotaQuerySet
 		conditionQuery = disableCpuQuotaQueryCondition

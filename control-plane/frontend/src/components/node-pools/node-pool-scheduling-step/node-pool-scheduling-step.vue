@@ -227,7 +227,10 @@ import {
 
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { buildSchedulingSave } from "@/utils/node-pool-scheduling.util/node-pool-scheduling-save.util";
-import { useNodePoolSchedulingSave } from "@/composables/node-pool/use-node-pool-scheduling-save.composable";
+import {
+  switchingToCustomWeights,
+  useNodePoolSchedulingSave,
+} from "@/composables/node-pool/use-node-pool-scheduling-save.composable";
 import { extractErrorMessages } from "@/utils/error-alert.util";
 import { schedulingDurationToFields } from "@/utils/node-pool-scheduling.util/scheduling-duration.util";
 import NotificationAlertBar from "@/components/common/notification-alert-bar/notification-alert-bar.vue";
@@ -238,6 +241,7 @@ import { NodePoolNewDepartmentDialog } from "@/components/node-pools/node-pool-n
 import { useNodePoolSchedulingDraft } from "@/composables/node-pool/use-node-pool-scheduling-draft.composable";
 import {
   toSchedulingCapabilities,
+  weightFromGuaranteedQuota,
   isDepartmentLimitBelowQuota,
   type IDepartmentPages,
   type IDepartmentSchedulingEdit,
@@ -386,6 +390,22 @@ watch(
       emit("filter-rank", undefined);
   },
 );
+watch(
+  () => draft.value.automaticWeights,
+  (automatic) => {
+    if (!draft.value.capabilities?.quota || draft.value.capabilities.adjustableWeights !== false) return;
+    for (const edit of Object.values(draft.value.departments)) {
+      if (automatic) {
+        delete edit.weight;
+        delete edit.weightFromQuota;
+      } else if (edit.quota !== undefined) {
+        edit.weight = weightFromGuaranteedQuota(edit.quota);
+        edit.weightFromQuota = true;
+      }
+    }
+  },
+  { flush: "sync" },
+);
 const selectedMode = computed(() => draft.value.mode ?? null);
 const modeCardsHovered = ref(false);
 const modeCardsFocused = ref(false);
@@ -442,6 +462,7 @@ function selectMode(value: string | number | boolean | null) {
 function applyEdit(edit: IDepartmentSchedulingEdit) {
   if (saving.value || departmentsReadOnly.value) return;
   const next = { ...draft.value.departments[edit.id], ...edit };
+  if (edit.weight !== undefined) delete next.weightFromQuota;
   if (edit.limit !== undefined) {
     const saved = (props.baselineRows ?? props.rows).find((row) => row.orgUnitId === edit.id);
     if (saved && (edit.limit ?? -1) === (saved.resources.gpu?.limit ?? -1)) delete next.limit;
@@ -467,6 +488,11 @@ const validationError = computed(() => {
     const capabilities = toSchedulingCapabilities(draft.value);
     if (!props.canResetResources) {
       const saved = props.pool.schedulingCapabilities;
+      if (
+        switchingToCustomWeights(saved, capabilities) ||
+        (saver.resetPending && capabilities.quota && capabilities.adjustableWeights)
+      )
+        return "Switching weights to Custom requires update permission for all departments and projects in this cluster.";
       if ((saved?.cpuQuota && !capabilities.cpuQuota) || (saved?.limits && !capabilities.limits))
         return "Turning off CPU quota or Max GPU allocation requires update permission for all departments and projects in this cluster.";
       if (usesWeightsWithoutQuota(capabilities) && !usesWeightsWithoutQuota(saved))
@@ -531,11 +557,13 @@ async function save(destination: "close" | "continue" = "close") {
   } catch (error) {
     if (saver.savedPool) emit("pool-saved", saver.savedPool);
     saveError.value =
-      (saver.poolSettingsSaved
-        ? "Pool settings were saved, but some department changes remain unsaved. "
-        : saver.savedPool
-          ? "Current pool settings were not saved. Some changes were saved in an earlier attempt. "
-          : "") + extractErrorMessages(error, "Could not save scheduling.").join("; ");
+      (saver.resetPending
+        ? "Pool settings were saved. Retry to finish initializing weights for departments and projects. "
+        : saver.poolSettingsSaved
+          ? "Pool settings were saved, but some department changes remain unsaved. "
+          : saver.savedPool
+            ? "Current pool settings were not saved. Some changes were saved in an earlier attempt. "
+            : "") + extractErrorMessages(error, "Could not save scheduling.").join("; ");
   } finally {
     saving.value = false;
     emit("saving", false);

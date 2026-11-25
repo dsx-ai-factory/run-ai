@@ -177,13 +177,17 @@ describe("simulation capacity", () => {
 
   it("simulates Custom with the same initial and edited weights as the Guaranteed grid", async () => {
     wrapper = renderSimulation(16);
-    const peers = [rows[0], { ...rows[0], orgUnitId: "b", orgUnitName: "Beta" }];
+    const peers = [
+      { ...rows[0], resources: { gpu: { deserved: 21.5 } } },
+      { ...rows[0], orgUnitId: "b", orgUnitName: "Beta" },
+      { ...rows[0], orgUnitId: "c", orgUnitName: "Gamma", resources: { gpu: { deserved: 0 } } },
+    ];
     await wrapper.setProps({
       rows: peers,
       baselineRows: peers,
       rawWeightsAvailable: false,
       ranks: ["MediumLow"],
-      rankCounts: { MediumLow: 2 },
+      rankCounts: { MediumLow: 3 },
       draft: {
         ...draft,
         mode: ESchedulingMode.Guaranteed,
@@ -195,8 +199,9 @@ describe("simulation capacity", () => {
     await vi.advanceTimersByTimeAsync(500);
     const requested = vi.mocked(simulateNodePool).mock.lastCall?.[1].orgUnits;
     expect(requested?.map(({ id, gpu }) => [id, gpu?.overQuotaWeight])).toEqual([
-      ["a", 2],
+      ["a", 21.5],
       ["b", 0],
+      ["c", 0.01],
     ]);
   });
 
@@ -596,7 +601,7 @@ describe("scheduling department table", () => {
   });
   it.each([
     { value: 0.001, automatic: true, display: "<0.1%", marker: "0.01%" },
-    { value: 0, automatic: true, display: "0%", marker: "0%" },
+    { value: 0, automatic: true, display: "<0.1%", marker: "0.0999001%" },
     { value: 4.996, automatic: true, display: "50%", marker: "49.96%" },
     { value: 4.996, automatic: false, display: "49.96%", marker: "49.96%" },
   ])(
@@ -606,7 +611,10 @@ describe("scheduling department table", () => {
       const wrapper = mount(Table, {
         props: {
           rows: [tiny],
-          baselineRows: [tiny],
+          baselineRows: [
+            tiny,
+            { ...tiny, orgUnitId: "hidden", resources: { gpu: { deserved: 10 - value, overQuotaWeight: 10 - value } } },
+          ],
           draft: { ...draft, mode: ESchedulingMode.Guaranteed, automaticWeights: automatic },
           aggregates: { MediumLow: { weightsSum: 10, automaticWeightsSum: 10, deservedSum: 10 } },
           ranks: ["MediumLow"],
@@ -1176,6 +1184,52 @@ describe("scheduling department table", () => {
     expect(wrapper.text()).toContain("25%");
     expect(wrapper.find('[aria-disabled="true"]').exists()).toBe(true);
     wrapper.unmount();
+  });
+  it("retains the quota split and full rank denominator when switching to Custom", async () => {
+    const saved = {
+      ...draft,
+      mode: ESchedulingMode.Guaranteed,
+      automaticWeights: true,
+      capabilities: { adjustableWeights: false },
+    };
+    const peers = [2, 6].map((quota, i) => ({
+      ...rows[0],
+      orgUnitId: String(i),
+      orgUnitName: ["Alpha", "Beta"][i],
+      resources: { gpu: { deserved: quota } },
+    }));
+    const wrapper = mount(Table, {
+      props: {
+        rows: peers,
+        baselineRows: peers,
+        draft: saved,
+        rawWeightsAvailable: false,
+        ranks: ["MediumLow"],
+        rankCounts: { MediumLow: 2 },
+        aggregates: { MediumLow: { weightsSum: 8, deservedSum: 8, rawWeightsSum: undefined, automaticWeightsSum: 8 } },
+        readonly: false,
+        loading: false,
+      },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+      },
+    });
+    const weights = () =>
+      wrapper.findAllComponents(DepartmentResourceEditor).filter((cell) => cell.props("kind") === "weight");
+    try {
+      expect(weights().map((cell) => cell.props("displayValue"))).toEqual(["25%", "75%"]);
+      expect(weights().every((cell) => cell.props("disabled"))).toBe(true);
+      await wrapper.setProps({ draft: { ...saved, automaticWeights: false } });
+      expect(weights().map((cell) => cell.props("displayValue"))).toEqual(["25%", "75%"]);
+      expect(weights().map((cell) => cell.props("value"))).toEqual([2, 6]);
+      expect(weights().every((cell) => !cell.props("disabled"))).toBe(true);
+      await wrapper.setProps({ rows: [peers[1]], searchTerm: "Beta" });
+      expect(weights().map((cell) => cell.props("displayValue"))).toEqual(["75%"]);
+      expect(weights()[0].props("previewWeightPercentage")?.(2)).toBe(50);
+    } finally {
+      wrapper.unmount();
+    }
   });
   it("filters ranks through shared controls and hides percentages for restricted visibility", async () => {
     const wrapper = mount(Table, {

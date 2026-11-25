@@ -8,9 +8,20 @@ import type { SchedulingCapabilitiesNullable } from "@/swagger-models/cluster-se
 
 export const DEFAULT_DEPARTMENT_SCHEDULING_WEIGHT = 2;
 
+export function weightFromGuaranteedQuota(quota: number): number {
+  if (quota === -1) return DEFAULT_DEPARTMENT_SCHEDULING_WEIGHT;
+  return quota === 0 ? 0.01 : quota;
+}
+
+export function automaticWeightFromQuota(quota: number | undefined): number {
+  if (quota == null) return 1;
+  return quota === -1 ? 0 : weightFromGuaranteedQuota(quota);
+}
+
 export interface IDepartmentSchedulingEdit {
   id: string;
   weight?: number;
+  weightFromQuota?: boolean;
   quota?: number;
   limit?: number | null;
   rank?: string;
@@ -159,8 +170,8 @@ export function schedulingTotalsWithEdits(
     const original = baseline[id];
     if (!original) continue;
     const merged = effectiveDepartmentEdit(baseline, edits, id);
-    const beforeWeight = automatic ? Math.max(0, original.quota ?? 0) : original.weight;
-    const afterWeight = automatic ? Math.max(0, merged.quota ?? 0) : merged.weight;
+    const beforeWeight = automatic ? automaticWeightFromQuota(original.quota) : original.weight;
+    const afterWeight = automatic ? automaticWeightFromQuota(merged.quota) : merged.weight;
     for (const [key, total] of Object.entries(totals)) {
       const before = key === "all" || key === original.rank;
       const after = key === "all" || key === merged.rank;

@@ -272,27 +272,53 @@ describe("scheduling step foundation", () => {
       });
       await wrapper.get('[aid="advanced-settings"]').trigger("click");
       await wrapper.get('[aid="radio-option-Custom"]').trigger("click");
-      expect(labels()).toEqual(["33.33%", "33.33%"]);
-      expect(pages.loadAll).not.toHaveBeenCalled();
+      expect(labels()).toEqual(["Unknown", "Unknown"]);
+      expect(pages.loadAll).toHaveBeenCalledOnce();
       await wrapper.setProps({ rows: peers, baselineRows: peers, departmentPages: { ...pages, nextOffset: undefined } });
-      expect(labels()).toEqual(["33.33%", "33.33%", "33.33%"]);
+      expect(labels()).toEqual(["33.28%", "0.17%", "66.56%"]);
       expect(weights()[0].props("value")).toBe(2);
-      expect(weights()[0].props("previewWeightPercentage")?.(4)).toBe(50);
+      expect(weights()[0].props("previewWeightPercentage")?.(4)).toBeCloseTo(49.94);
       weights()[0].vm.$emit("apply", 4);
       await wrapper.vm.$nextTick();
-      expect(labels()).toEqual(["50%", "25%", "25%"]);
+      expect(labels()).toEqual(["49.94%", "0.12%", "49.94%"]);
       await wrapper.get('[aid="radio-option-Automatic"]').trigger("click");
-      expect(labels()).toEqual(["0%", "0%", "100%"]);
+      expect(labels()).toEqual(["0%", "0.2%", "99.8%"]);
       await wrapper.get('[aid="radio-option-Custom"]').trigger("click");
-      expect(labels()).toEqual(["50%", "25%", "25%"]);
-      expect(table.props("draft").departments).toEqual({ "0": { id: "0", weight: 4 } });
+      expect(labels()).toEqual(["33.28%", "0.17%", "66.56%"]);
+      expect(table.props("draft").departments["0"]?.weight).toBeUndefined();
     } finally {
       wrapper.unmount();
       vi.unstubAllGlobals();
     }
   });
 
-  it("allows turning on custom weights while Guaranteed quota stays enabled", async () => {
+  it("seeds pending Automatic quotas as weights and preserves subsequent manual edits", async () => {
+    const wrapper = render({
+      ...pool,
+      schedulingCapabilities: { quota: true, ranks: true, adjustableWeights: false, cpuQuota: false, limits: false },
+    });
+    try {
+      await wrapper.setProps({
+        canSavePool: true,
+        canResetResources: true,
+        canViewDepartments: true,
+        canEditDepartments: true,
+      });
+      const table = wrapper.findComponent(Table);
+      table.vm.$emit("edit", { id: "a", quota: 24.5 });
+      await wrapper.get('[aid="advanced-settings"]').trigger("click");
+      wrapper.findComponent(Settings).vm.$emit("patch", { automaticWeights: false });
+      await wrapper.vm.$nextTick();
+      expect(table.props("draft").departments.a).toMatchObject({ weight: 24.5, weightFromQuota: true });
+      expect(wrapper.get('[aid="scheduling-save-close"]').attributes("disabled")).toBeUndefined();
+      table.vm.$emit("edit", { id: "a", weight: 6 });
+      await wrapper.vm.$nextTick();
+      expect(table.props("draft").departments.a).toEqual({ id: "a", quota: 24.5, weight: 6 });
+    } finally {
+      wrapper.unmount();
+    }
+  });
+  it("requires cluster-wide permission to initialize custom weights in Guaranteed mode", async () => {
     const wrapper = render({
       ...pool,
       schedulingCapabilities: { quota: true, ranks: true, adjustableWeights: false, cpuQuota: false, limits: false },
@@ -305,6 +331,9 @@ describe("scheduling step foundation", () => {
       expect(wrapper.findComponent(NodePoolWizardSummary).props("pool").schedulingCapabilities?.adjustableWeights).toBe(
         true,
       );
+      expect(wrapper.get('[aid="scheduling-save-close"]').attributes("disabled")).toBeDefined();
+      expect(wrapper.get('[role="alert"]').text()).toContain("Switching weights to Custom requires update permission");
+      await wrapper.setProps({ canResetResources: true });
       expect(wrapper.get('[aid="scheduling-save-close"]').attributes("disabled")).toBeUndefined();
     } finally {
       wrapper.unmount();

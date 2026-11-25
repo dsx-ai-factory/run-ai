@@ -165,9 +165,18 @@ const parsedValue = () =>
         : Number(input.value);
 const input = ref<string | number>(initialInput());
 const unchangedUnlimitedQuota = computed(() => savedUnlimitedQuota.value && input.value === "" && !nativeBadInput.value);
+const unchangedInheritedWeight = computed(
+  () =>
+    props.kind === EResourceEditorKind.Weight &&
+    props.value != null &&
+    Number.isFinite(props.value) &&
+    props.value >= 0 &&
+    !isValidSchedulingWeight(props.value) &&
+    parsedValue() === props.value,
+);
 const proposedWeightPercentage = computed(() => {
   const value = parsedValue();
-  if (!isValidSchedulingWeight(value)) return "Unknown";
+  if (!unchangedInheritedWeight.value && !isValidSchedulingWeight(value)) return "Unknown";
   const percentage = props.previewWeightPercentage?.(value);
   return percentage == null || !Number.isFinite(percentage) ? "Unknown" : `${roundToDecimal(percentage)}%`;
 });
@@ -201,7 +210,8 @@ const loadError = ref("");
 let request = 0;
 const validation = computed(() => {
   if (loading.value) return { errors: [], warnings: [] };
-  if (unchangedUnlimitedQuota.value) return { errors: loadError.value ? [loadError.value] : [], warnings: [] };
+  if (unchangedUnlimitedQuota.value || unchangedInheritedWeight.value)
+    return { errors: loadError.value ? [loadError.value] : [], warnings: [] };
   const value = parsedValue();
   const result = validateDepartmentEdit(
     {
@@ -257,7 +267,11 @@ async function opened() {
   }
 }
 const applyDisabled = computed(
-  () => loading.value || unchangedUnlimitedQuota.value || validation.value.errors.length > 0,
+  () =>
+    loading.value ||
+    unchangedUnlimitedQuota.value ||
+    unchangedInheritedWeight.value ||
+    validation.value.errors.length > 0,
 );
 function apply() {
   if (!applyDisabled.value) emit("apply", parsedValue());
