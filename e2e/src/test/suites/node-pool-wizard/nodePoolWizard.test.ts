@@ -6,7 +6,7 @@
 import { expect } from '@playwright/test';
 import { createPool, editFromGrid, expectTooltip, test } from './wizardFixtures';
 
-const lockedMessage = 'This can’t be modified once a node pool has been created';
+const lockedMessage = 'This can’t be modified once a node pool has been created.';
 
 test.describe('Node pool wizard', () => {
     test('creation keeps later steps locked until the identity is saved', async ({ wizard: page }) => {
@@ -32,7 +32,7 @@ test.describe('Node pool wizard', () => {
         await expect(name).toHaveValue('unsaved-wizard-draft');
         await exit.click();
         await page.getByRole('button', { name: 'Leave', exact: true }).click();
-        await expect(page).toHaveURL(/\/node-pools$/);
+        await expect(page).toHaveURL((url) => url.pathname === '/node-pools');
     });
 
     test('create and continue saves ranked scheduling and GPU placement', async ({
