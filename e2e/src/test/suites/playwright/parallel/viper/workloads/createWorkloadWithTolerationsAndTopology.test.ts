@@ -5,7 +5,6 @@
 
 import { Project } from '../../../../../../modules/api/apis/projectsDepartmentsApi';
 import {
-    assetsApiV2Utils,
     computeResourceUtils,
     crds,
     environmentUtils,
@@ -17,12 +16,8 @@ import {
     waitUtils,
     workloadsCrudUtils
 } from '../../../../../../modules/helpers';
-import {
-    PodAffinityType,
-    TolerationEffect,
-    TolerationOperator,
-    WorkspaceCreationRequestV2
-} from '../../../../../../modules/api/apis/assetsApi';
+import { PodAffinityType, TolerationEffect, TolerationOperator } from '../../../../../../modules/api/apis/assetsApi';
+import { WorkspaceCreationRequest } from '../../../../../../modules/api/apis/workloadsApi/generated/api';
 import { kubeCli } from '../../../../../../modules/cli';
 import { expect } from 'chai';
 import { description, tag } from 'allure-js-commons';
@@ -35,18 +30,16 @@ import {
 test.describe(`Workload with tolerations and topology, tags: ${tags.teams.viper}`, () => {
     let project: Project;
 
-    async function getWorkloadCreationPayload(workloadName: string): Promise<WorkspaceCreationRequestV2> {
+    async function getWorkloadCreationPayload(workloadName: string): Promise<WorkspaceCreationRequest> {
         return {
-            meta: {
-                name: workloadName,
-                projectId: project.id.toString(),
-                clusterId: flowRootState.cluster.uuid
-            },
+            name: workloadName,
+            projectId: project.id.toString(),
+            clusterId: flowRootState.cluster.uuid,
             assets: {
                 environment: await environmentUtils.getId('tensorboard'),
                 compute: await computeResourceUtils.getId('cpu-only')
             },
-            specificRunParams: {
+            spec: {
                 tolerations: [
                     {
                         key: 'key-1',
@@ -71,7 +64,7 @@ test.describe(`Workload with tolerations and topology, tags: ${tags.teams.viper}
     test.beforeAll('creating project', async function () {
         project = await projectResourcesUtils.createProjectAndNamespace('project');
         workloadsCrudUtils.accessToken = flowRootState.users.system_administrator.accessToken;
-        assetsApiV2Utils.accessToken = flowRootState.users.system_administrator.accessToken;
+
     });
     test.afterAll('deleting project', async function () {
         try {
@@ -97,7 +90,7 @@ test.describe(`Workload with tolerations and topology, tags: ${tags.teams.viper}
 
         await test.step('Create a workload with tolerations and topology', async function () {
             const workloadCreationPayload = await getWorkloadCreationPayload(workloadName);
-            await assetsApiV2Utils.createWorkspace(workloadCreationPayload);
+            await workloadsCrudUtils.submitWorkspace(workloadCreationPayload);
         });
 
         await test.step('Check workload yaml', async () => {

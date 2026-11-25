@@ -26,7 +26,7 @@ import {
 } from '../../../../../../../../../modules/cli/tools/RunaiCliV2.constants';
 
 import { submitWorkload, deleteWorkload } from '../../submitTestUtils';
-import { Phase } from '../../../../../../../../../modules/api/apis/assetsApi';
+import { Phase } from '../../../../../../../../../modules/api/apis/workloadsApi/generated/model/phase';
 
 const ENV_MY_CREDENTIALS_TYPES: {
     type: MyCredentialType;

@@ -15,7 +15,6 @@ export enum EFeatureFlagsKeys {
     WORKLOAD_SUBMISSION_V2 = 'tenant.workload_submission_v2_enabled',
     CLI_V2 = 'tenant.is_new_cli_installer_enabled',
     ENABLE_NODE_POOLS = 'tenant.enable_node_pools',
-    WORKLOAD_HYBRID_SUBMISSION = 'tenant.enable_hybrid_submission',
     ENABLE_DATA_VOLUMES = 'tenant.enable_data_volumes',
     ENABLE_RESOURCE_OPTIMIZATION = 'tenant.gpu_over_provisioning',
     ENABLE_NGC_INTEGRATION = 'tenant.enable_ngc_integration'
@@ -36,7 +35,6 @@ export enum EFeatureFlagsNames {
     CLI_V2 = 'CLI V2',
     CSP_MANAGED = 'CSP Managed or DGXC Roles',
     ENABLE_NODE_POOLS = 'node pools',
-    WORKLOAD_HYBRID_SUBMISSION = 'workload hybrid submission',
     ENABLE_DATA_VOLUMES = 'Enable data volumes',
     RESOURCE_OPTIMIZATION = 'Resource optimization',
     ENABLE_NGC_INTEGRATION = 'NGC integration'
