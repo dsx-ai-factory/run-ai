@@ -42,6 +42,7 @@
         "./playwright-config/runai-workloads-kit.config.ts",
         "./playwright-config/runai-workloads-kit-global-setup.ts",
         "./playwright-config/runai-workloads-kit-global-teardown.ts",
+        "./playwright-config/node-pool-wizard.config.ts",
         "./playwright-config/unit.config.ts"
     ],
     "exclude": [

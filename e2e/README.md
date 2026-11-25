@@ -99,6 +99,16 @@ npx playwright test -g "department"
 
 The runner uses the current kubeconfig context unless `KUBECONFIG_PATH` / `KUBECONFIG_CLUSTER_NAME` override it.
 
+### Node pool wizard
+
+Run the wizard tests against a frontend built with `ENABLE_NODE_POOL_CREATE_FLOW` enabled. Set `CONTROL_PLANE_URL`, the admin credentials above, and `CLUSTER_NAME_PREFIX` to the cluster name shown in the form. From `e2e/` run:
+
+```bash
+npx playwright test --config playwright-config/node-pool-wizard.config.ts
+```
+
+The suite creates uniquely named empty pools and deletes them after each test. The standard regression run continues to exercise the legacy form.
+
 ## Layout
 
 ```
