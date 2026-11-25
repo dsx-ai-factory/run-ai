@@ -2200,7 +2200,7 @@ clusterService:
     clusterInstallation:
       supportedVersionRange:
         # Inclusive
-        min: 2.18
+        min: 2.24
         # Inclusive
         # Defaults to the chart's app version
         max: ''

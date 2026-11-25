@@ -9,6 +9,8 @@ import (
 	"bytes"
 	"context"
 	"slices"
+	"strings"
+	"sync"
 	"text/template"
 	"time"
 
@@ -58,13 +60,41 @@ type HelmRepo struct {
 	PasswordPlaceholder string
 }
 
+const ngcHelmHost = "https://helm.ngc.nvidia.com"
+
+func isNgcUrl(url string) bool {
+	return url == ngcHelmHost || strings.HasPrefix(url, ngcHelmHost+"/")
+}
+
+// publicRepoEnabled reports whether the public repo may be used at all. It is off when no public URL is
+// configured and for air-gapped installs (installation type "airgap", or the legacy URL blanked, which is how
+// the air-gap values signal that nothing outside the mirror is reachable), so those keep the old behavior.
+func publicRepoEnabled(installationConfig *config.Installation) bool {
+	return installationConfig.HelmRegistryUrlPublic != "" &&
+		installationConfig.HelmRegistryUrl != "" &&
+		installationConfig.InstallationType != "airgap"
+}
+
+// legacyRepoUsable reports whether the legacy repo can serve requests. When the public repo is also in play,
+// the legacy URL is the private NGC repo, which cannot be used without credentials, so it is skipped instead of
+// producing a failing command. In single-URL mode the configured URL is always used, as before.
+func legacyRepoUsable(installationConfig *config.Installation) bool {
+	if installationConfig.HelmRegistryUrl == "" {
+		return false
+	}
+	if !publicRepoEnabled(installationConfig) {
+		return true
+	}
+	return !isNgcUrl(installationConfig.HelmRegistryUrl) || installationConfig.HelmRegistryUsername != ""
+}
+
 func SelectHelmRepoForVersion(installationConfig *config.Installation, version string) HelmRepo {
 	legacy := HelmRepo{
 		URL:                 installationConfig.HelmRegistryUrl,
 		Username:            installationConfig.HelmRegistryUsername,
 		PasswordPlaceholder: installationConfig.HelmRegistryPasswordPlaceholder,
 	}
-	if installationConfig.HelmRegistryUrlPublic == "" {
+	if !publicRepoEnabled(installationConfig) {
 		return legacy
 	}
 	minVer, err := semver.NewVersion(minVersionForPublicRepo)
@@ -76,7 +106,7 @@ func SelectHelmRepoForVersion(installationConfig *config.Installation, version s
 	if err != nil {
 		return public
 	}
-	if ver.LessThan(minVer) {
+	if ver.LessThan(minVer) && legacyRepoUsable(installationConfig) {
 		return legacy
 	}
 	return public
@@ -163,19 +193,33 @@ func (v *ClusterInstallServiceImpl) GetClusterSupportedVersions(ctx context.Cont
 		return defaultResponse, nil
 	}
 
+	// Repos are fetched concurrently so an unreachable one (e.g. a blocked OSS endpoint) costs one timeout,
+	// not one per repo. Results are merged in urls order to stay deterministic.
+	lists := make([]VersionsList, len(urls))
+	errs := make([]error, len(urls))
+	var wg sync.WaitGroup
+	for i, url := range urls {
+		wg.Add(1)
+		go func(i int, url string) {
+			defer wg.Done()
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("GetClusterVersions - trying to get versions list from %s ", url)
+			lists[i], errs[i] = v.helmAction.GetVersionListFromHelm(ctx, url)
+		}(i, url)
+	}
+	wg.Wait()
+
 	var versionList VersionsList
-	var fetchErrs []string
-	for _, url := range urls {
-		logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("GetClusterVersions - trying to get versions list from %s ", url)
-		list, err := v.helmAction.GetVersionListFromHelm(ctx, url)
-		if err != nil {
-			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("GetClusterVersions - Failed to get versions list from %s - %s", url, err.Error())
-			fetchErrs = append(fetchErrs, err.Error())
+	failed := 0
+	for i, url := range urls {
+		if errs[i] != nil {
+			failed++
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("GetClusterVersions - Failed to get versions list from %s - %s", url, errs[i].Error())
 			continue
 		}
-		versionList = append(versionList, list...)
+		versionList = append(versionList, lists[i]...)
 	}
-	if len(fetchErrs) == len(urls) {
+	if failed == len(urls) {
+		// every repo failed (e.g. no credentials, or no outbound access): return the current version
 		return getCurrentVersionAsVersionList(curVersion, minVersion, maxVersion), nil
 	}
 
@@ -186,10 +230,11 @@ func (v *ClusterInstallServiceImpl) GetClusterSupportedVersions(ctx context.Cont
 
 func registryUrls(installationConfig *config.Installation) []string {
 	var urls []string
-	for _, u := range []string{installationConfig.HelmRegistryUrlPublic, installationConfig.HelmRegistryUrl} {
-		if u != "" && !slices.Contains(urls, u) {
-			urls = append(urls, u)
-		}
+	if publicRepoEnabled(installationConfig) {
+		urls = append(urls, installationConfig.HelmRegistryUrlPublic)
+	}
+	if legacyRepoUsable(installationConfig) && !slices.Contains(urls, installationConfig.HelmRegistryUrl) {
+		urls = append(urls, installationConfig.HelmRegistryUrl)
 	}
 	return urls
 }

@@ -48,6 +48,36 @@ var _ = Describe("SelectHelmRepoForVersion", func() {
 		Entry("development means latest and uses the public repo", "development", publicUrl, false),
 	)
 
+	It("uses the public repo for old versions when no private credentials are configured", func() {
+		cfg := *installationConfig
+		cfg.HelmRegistryUsername = ""
+		cfg.HelmRegistryPasswordPlaceholder = ""
+		repo := clusterinstallation.SelectHelmRepoForVersion(&cfg, "2.26.1")
+		Expect(repo.URL).To(Equal(publicUrl))
+		Expect(repo.Username).To(BeEmpty())
+		Expect(repo.PasswordPlaceholder).To(BeEmpty())
+	})
+
+	It("keeps a custom legacy registry for old versions even without credentials", func() {
+		cfg := *installationConfig
+		cfg.HelmRegistryUrl = "https://charts.example.com"
+		cfg.HelmRegistryUsername = ""
+		repo := clusterinstallation.SelectHelmRepoForVersion(&cfg, "2.26.1")
+		Expect(repo.URL).To(Equal("https://charts.example.com"))
+	})
+
+	It("ignores the public repo for air-gapped installs", func() {
+		cfg := *installationConfig
+		cfg.InstallationType = "airgap"
+		Expect(clusterinstallation.SelectHelmRepoForVersion(&cfg, "3.1.0").URL).To(Equal(privateUrl))
+	})
+
+	It("ignores the public repo when the legacy URL is blanked, as the air-gap values do", func() {
+		cfg := *installationConfig
+		cfg.HelmRegistryUrl = ""
+		Expect(clusterinstallation.SelectHelmRepoForVersion(&cfg, "3.1.0").URL).To(BeEmpty())
+	})
+
 	It("uses the legacy repo for every version when no public repo is configured", func() {
 		cfg := *installationConfig
 		cfg.HelmRegistryUrlPublic = ""
@@ -101,5 +131,60 @@ var _ = Describe("ClusterVersionList with two repositories", func() {
 
 		Expect(err).To(BeNil())
 		Expect(versions).To(Equal(map[string]string{"3.1": "3.1.0"}))
+	})
+
+	It("skips the private NGC repo when no credentials are configured", func() {
+		helmActions := mocks.NewHelmActions(GinkgoT())
+		helmActions.On("GetVersionListFromHelm", mock.Anything, "https://helm.ngc.nvidia.com/nvidia/runai-oss").
+			Return(clusterinstallation.VersionsList{{"3.0.2"}, {"3.1.0"}}, nil)
+		service := clusterinstallation.NewClusterInstallService(helmActions)
+		cfg := newConfig()
+		cfg.HelmRegistryUrl = "https://helm.ngc.nvidia.com/nvidia/runai"
+		cfg.HelmRegistryUrlPublic = "https://helm.ngc.nvidia.com/nvidia/runai-oss"
+
+		versions, err := service.GetClusterSupportedVersions(context.Background(), cfg)
+
+		Expect(err).To(BeNil())
+		Expect(versions).To(Equal(map[string]string{"3.0": "3.0.2", "3.1": "3.1.0"}))
+		helmActions.AssertNotCalled(GinkgoT(), "GetVersionListFromHelm", mock.Anything, "https://helm.ngc.nvidia.com/nvidia/runai")
+	})
+
+	It("keeps the private repo's versions when the public repo is unreachable", func() {
+		helmActions := mocks.NewHelmActions(GinkgoT())
+		helmActions.On("GetVersionListFromHelm", mock.Anything, publicUrl).Return(nil, errors.New("dial tcp: i/o timeout"))
+		helmActions.On("GetVersionListFromHelm", mock.Anything, privateUrl).Return(clusterinstallation.VersionsList{{"2.25.3"}}, nil)
+		service := clusterinstallation.NewClusterInstallService(helmActions)
+
+		versions, err := service.GetClusterSupportedVersions(context.Background(), newConfig())
+
+		Expect(err).To(BeNil())
+		Expect(versions).To(Equal(map[string]string{"2.25": "2.25.3"}))
+	})
+
+	It("never contacts the public repository for air-gapped installs", func() {
+		helmActions := mocks.NewHelmActions(GinkgoT())
+		helmActions.On("GetVersionListFromHelm", mock.Anything, privateUrl).Return(clusterinstallation.VersionsList{{"3.1.0"}}, nil)
+		service := clusterinstallation.NewClusterInstallService(helmActions)
+		cfg := newConfig()
+		cfg.InstallationType = "airgap"
+
+		versions, err := service.GetClusterSupportedVersions(context.Background(), cfg)
+
+		Expect(err).To(BeNil())
+		Expect(versions).To(Equal(map[string]string{"3.1": "3.1.0"}))
+		helmActions.AssertNotCalled(GinkgoT(), "GetVersionListFromHelm", mock.Anything, publicUrl)
+	})
+
+	It("does not contact any repository when the legacy URL is blanked", func() {
+		helmActions := mocks.NewHelmActions(GinkgoT())
+		service := clusterinstallation.NewClusterInstallService(helmActions)
+		cfg := newConfig()
+		cfg.HelmRegistryUrl = ""
+
+		versions, err := service.GetClusterSupportedVersions(context.Background(), cfg)
+
+		Expect(err).To(BeNil())
+		Expect(versions).To(Equal(map[string]string{"3.1": "3.1.0"}))
+		helmActions.AssertNotCalled(GinkgoT(), "GetVersionListFromHelm", mock.Anything, mock.Anything)
 	})
 })
