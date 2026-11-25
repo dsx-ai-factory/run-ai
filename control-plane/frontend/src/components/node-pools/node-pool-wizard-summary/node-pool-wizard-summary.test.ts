@@ -34,7 +34,7 @@ describe("node pool wizard summary", () => {
   it("shows initial configuration and unknown resources without claiming zero capacity", () => {
     const wrapper = render();
     expect(wrapper.text()).toContain("Tokyo");
-    expect(wrapper.text()).toContain("Proportional");
+    expect(wrapper.text()).toContain("Guaranteed quota");
     expect(summaryValues(wrapper)).toMatchObject({
       Nodes: "None",
       MNNVL: "Auto detect",

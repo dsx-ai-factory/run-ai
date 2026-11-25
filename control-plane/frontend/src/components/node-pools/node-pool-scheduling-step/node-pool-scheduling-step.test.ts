@@ -6,7 +6,9 @@ import type { orgUnitService } from "@/services/control-plane/org-unit.service/o
 import type { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { mount, flushPromises } from "@vue/test-utils";
 import { Quasar } from "quasar";
-import { describe, expect, it, vi } from "vitest";
+import * as nodePoolFlags from "@/constants/node-pool.constants";
+import { PROPORTIONAL_CAPABILITIES } from "@/models/node-pool.model";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestingPinia } from "@pinia/testing";
 import { requestToLeave } from "@/services/infra/router.service/router.service";
 import { NodePoolSchedulingSettings as Settings } from "@/components/node-pools/node-pool-scheduling-settings";
@@ -37,6 +39,7 @@ vi.mock("@/services/control-plane/org-unit.service/org-unit.service", async (ori
 
 const pool = {
   ...createNodePoolDraft("cluster"),
+  schedulingCapabilities: { ...PROPORTIONAL_CAPABILITIES },
   id: "pool-1",
   name: "training",
   clusterName: "Tokyo",
@@ -54,7 +57,31 @@ function render(input = pool, stubs = {}) {
   });
 }
 
-describe("scheduling step foundation", () => {
+describe("temporarily restricted scheduling modes", () => {
+  it.each([false, true])("only allows Guaranteed quota for a saved non-quota pool (ranks=%s)", async (ranks) => {
+    const wrapper = render({ ...pool, schedulingCapabilities: { ...PROPORTIONAL_CAPABILITIES, ranks } });
+    try {
+      await wrapper.setProps({ canSavePool: true });
+      for (const mode of ["proportional", "ranked"]) {
+        expect(wrapper.get('[aid="mode-' + mode + '"]').attributes("disabled")).toBeDefined();
+      }
+      expect(wrapper.get('[aid="mode-' + (ranks ? "ranked" : "proportional") + '"]').attributes("aria-checked")).toBe(
+        "true",
+      );
+      expect(wrapper.get('[aid="scheduling-save-close"]').attributes("disabled")).toBeDefined();
+      await wrapper.get('[aid="mode-guaranteed"]').trigger("click");
+      expect(wrapper.get('[aid="mode-guaranteed"]').attributes("aria-checked")).toBe("true");
+      expect(wrapper.get('[aid="scheduling-save-close"]').attributes("disabled")).toBeUndefined();
+    } finally {
+      wrapper.unmount();
+    }
+  });
+});
+describe("scheduling step with all modes enabled", () => {
+  beforeEach(() => {
+    const flag = vi.spyOn(nodePoolFlags, "ENABLE_NON_QUOTA_SCHEDULING_MODES", "get").mockReturnValue(true);
+    return () => flag.mockRestore();
+  });
   it.each(["canEditDepartments", "canViewDepartments"] as const)(
     "finishes a pending department request when %s is revoked",
     async (permission) => {

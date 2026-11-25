@@ -13,8 +13,8 @@ describe("node pool creation fields", () => {
     expect(first.gpuNetworkAccelerationDetection).toBeUndefined();
     expect(first.schedulingConfiguration?.numaAwareScheduling).toBeUndefined();
     expect(first.schedulingConfiguration?.gpuPodsPlacementStrategy?.device).toBeUndefined();
-    if (first.schedulingCapabilities) first.schedulingCapabilities.quota = true;
-    expect(second.schedulingCapabilities?.quota).toBe(false);
+    if (first.schedulingCapabilities) first.schedulingCapabilities.quota = false;
+    expect(second.schedulingCapabilities).toMatchObject({ quota: true, ranks: true, adjustableWeights: false });
   });
   it("matches the backend UTF-8 description limit", () => {
     expect(nodePoolUtil.validateDescription("")).toBe(true);

@@ -218,6 +218,7 @@
 </template>
 
 <script setup lang="ts">
+import { ENABLE_NON_QUOTA_SCHEDULING_MODES } from "@/constants/node-pool.constants";
 import { useNodePoolTopologySupport } from "@/composables/node-pool/use-node-pool-topology-support.composable";
 import {
   NODE_POOL_IMMUTABLE_TOOLTIP,
@@ -332,23 +333,31 @@ const modePermissionTooltip = computed(() =>
       ? "You do not have permission to edit departments."
       : undefined,
 );
+const nonQuotaModesDisabled = computed(
+  () => !ENABLE_NON_QUOTA_SCHEDULING_MODES || props.pool.schedulingCapabilities?.quota === true,
+);
+const nonQuotaModeTooltip = computed(
+  () =>
+    modePermissionTooltip.value ??
+    (props.pool.schedulingCapabilities?.quota
+      ? NODE_POOL_IMMUTABLE_TOOLTIP
+      : !ENABLE_NON_QUOTA_SCHEDULING_MODES
+        ? "Only Guaranteed quota is currently available."
+        : undefined),
+);
 const options = computed(() => [
   {
     value: ESchedulingMode.Proportional,
-    disable: props.pool.schedulingCapabilities?.quota === true,
-    disabledTooltip:
-      modePermissionTooltip.value ??
-      (props.pool.schedulingCapabilities?.quota ? NODE_POOL_IMMUTABLE_TOOLTIP : undefined),
+    disable: nonQuotaModesDisabled.value,
+    disabledTooltip: nonQuotaModeTooltip.value,
     label: "Proportional",
     description: "Weight-based distribution",
     aid: "mode-proportional",
   },
   {
     value: ESchedulingMode.Ranked,
-    disable: props.pool.schedulingCapabilities?.quota === true,
-    disabledTooltip:
-      modePermissionTooltip.value ??
-      (props.pool.schedulingCapabilities?.quota ? NODE_POOL_IMMUTABLE_TOOLTIP : undefined),
+    disable: nonQuotaModesDisabled.value,
+    disabledTooltip: nonQuotaModeTooltip.value,
     label: "Ranked",
     description: "Rank-based distribution",
     aid: "mode-ranked",
@@ -456,7 +465,7 @@ const previewPool = computed(() => ({
   schedulingCapabilities: draft.value.mode ? toSchedulingCapabilities(draft.value) : draft.value.capabilities,
 }));
 function selectMode(value: string | number | boolean | null) {
-  if (saving.value || (props.pool.schedulingCapabilities?.quota && value !== ESchedulingMode.Guaranteed)) return;
+  if (saving.value || (nonQuotaModesDisabled.value && value !== ESchedulingMode.Guaranteed)) return;
   if (value === ESchedulingMode.Proportional || value === ESchedulingMode.Ranked || value === ESchedulingMode.Guaranteed)
     requestMode(value);
 }
@@ -484,6 +493,11 @@ function usesWeightsWithoutQuota(capabilities?: SchedulingCapabilitiesNullable):
   return capabilities?.adjustableWeights === true && capabilities.quota === false;
 }
 const validationError = computed(() => {
+  if (
+    !ENABLE_NON_QUOTA_SCHEDULING_MODES &&
+    (draft.value.mode === ESchedulingMode.Proportional || draft.value.mode === ESchedulingMode.Ranked)
+  )
+    return "Select Guaranteed quota to save scheduling changes.";
   try {
     buildSchedulingSave(props.pool, draft.value);
     const capabilities = toSchedulingCapabilities(draft.value);

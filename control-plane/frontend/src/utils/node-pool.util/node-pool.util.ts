@@ -3,12 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ENABLE_NON_QUOTA_SCHEDULING_MODES } from "@/constants/node-pool.constants";
 import {
   type INodePoolFormDraft,
   binPackLabel,
   spreadLabel,
   NODE_POOL_LABEL_REGEX,
   PROPORTIONAL_CAPABILITIES,
+  GUARANTEED_QUOTA_CAPABILITIES,
   NODE_POOL_CONFIGURATION_DEFAULTS,
   EMPTY_PRIORITY_LABEL,
   NodePoolPhaseMap,
@@ -245,7 +247,9 @@ function createNodePoolDraft(clusterId = ""): INodePoolFormDraft {
   return {
     ...pool,
     description: "",
-    schedulingCapabilities: { ...PROPORTIONAL_CAPABILITIES },
+    schedulingCapabilities: {
+      ...(ENABLE_NON_QUOTA_SCHEDULING_MODES ? PROPORTIONAL_CAPABILITIES : GUARANTEED_QUOTA_CAPABILITIES),
+    },
     schedulingConfiguration: {
       ...pool.schedulingConfiguration,
       gpuPodsPlacementStrategy: { node: NODE_POOL_CONFIGURATION_DEFAULTS.gpuNodePlacement },

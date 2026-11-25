@@ -13,6 +13,7 @@ import { clusterService } from "@/services/control-plane/cluster.service/cluster
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
 const { createNodePoolDraft } = nodePoolUtil;
+import { PROPORTIONAL_CAPABILITIES } from "@/models/node-pool.model";
 import type { Nodepool } from "@/swagger-models/cluster-service-client";
 import { ForbiddenError, NotFoundError } from "@/models/http-response.model";
 import { requestToLeave } from "@/services/infra/router.service/router.service";
@@ -47,6 +48,7 @@ vi.mock("@/services/authorization/permission.service/permission.service", () => 
   },
 }));
 const pool = { ...createNodePoolDraft("cluster"), id: "one", name: "training", clusterName: "Tokyo" } as Nodepool;
+const proportionalPool = { ...pool, schedulingCapabilities: { ...PROPORTIONAL_CAPABILITIES } };
 async function render(realStep = false, access?: "editor" | "pool-only") {
   const router = createRouter({
     history: createMemoryHistory(),
@@ -80,15 +82,11 @@ async function render(realStep = false, access?: "editor" | "pool-only") {
 beforeEach(() => vi.clearAllMocks());
 describe("scheduling route", () => {
   it("resets the draft and filters to the saved scheduling state without writing", async () => {
-    const proportional = {
-      ...pool,
-      schedulingCapabilities: { quota: false, ranks: false, cpuQuota: false, limits: false, adjustableWeights: true },
-    };
-    vi.mocked(clusterService.getNodepool).mockResolvedValue(proportional);
+    vi.mocked(clusterService.getNodepool).mockResolvedValue(proportionalPool);
     const { wrapper } = await render(true, "editor");
     try {
       await flushPromises();
-      await wrapper.get('[aid="mode-ranked"]').trigger("click");
+      await wrapper.get('[aid="mode-guaranteed"]').trigger("click");
       const step = wrapper.getComponent(Step);
       step.vm.$emit("search", "department");
       step.vm.$emit("filter-rank", "Low");
@@ -146,10 +144,10 @@ describe("scheduling route", () => {
   });
 
   it("uses header leave approval once without asking again during navigation", async () => {
-    vi.mocked(clusterService.getNodepool).mockResolvedValue(pool);
-    const { wrapper, router } = await render(true);
+    vi.mocked(clusterService.getNodepool).mockResolvedValue(proportionalPool);
+    const { wrapper, router } = await render(true, "editor");
     await flushPromises();
-    await wrapper.get('[aid="mode-ranked"]').trigger("click");
+    await wrapper.get('[aid="mode-guaranteed"]').trigger("click");
     const approved = requestToLeave();
     await flushPromises();
     (document.querySelector('[aid="leave-page-modal-cancel-btn"]') as HTMLButtonElement).click();
@@ -177,17 +175,17 @@ describe("scheduling route", () => {
   });
 
   it("asks before leaving a dirty scheduling draft and navigates without saving on discard", async () => {
-    vi.mocked(clusterService.getNodepool).mockResolvedValue(pool);
+    vi.mocked(clusterService.getNodepool).mockResolvedValue(proportionalPool);
     const { wrapper, router } = await render(true, "editor");
     await flushPromises();
-    await wrapper.get('[aid="mode-ranked"]').trigger("click");
+    await wrapper.get('[aid="mode-guaranteed"]').trigger("click");
     const topology = wrapper.get('[aid="wizard-step-item-topology"]');
     await topology.trigger("click");
     await flushPromises();
     (document.querySelector('[aid="leave-page-modal-stay-btn"]') as HTMLButtonElement).click();
     await flushPromises();
     expect(router.currentRoute.value.name).toBe(NODE_POOL_ROUTE_NAMES.NODE_POOL_SCHEDULING);
-    expect(wrapper.get('[aid="mode-ranked"]').attributes("aria-checked")).toBe("true");
+    expect(wrapper.get('[aid="mode-guaranteed"]').attributes("aria-checked")).toBe("true");
     await topology.trigger("click");
     await flushPromises();
     (document.querySelector('[aid="leave-page-modal-cancel-btn"]') as HTMLButtonElement).click();

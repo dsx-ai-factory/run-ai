@@ -8,7 +8,7 @@ import { effectScope, nextTick } from "vue";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { useNodePoolForm } from "./use-node-pool-form.composable";
-import { PROPORTIONAL_CAPABILITIES } from "@/models/node-pool.model";
+import { GUARANTEED_QUOTA_CAPABILITIES } from "@/models/node-pool.model";
 vi.mock("@/services/control-plane/cluster.service/cluster.service", () => ({
   clusterService: {
     getNodepools: vi.fn(),
@@ -99,18 +99,18 @@ describe("node pool creation", () => {
     expect(state.loadError.value).toBeTruthy();
     expect(clusterService.createNodepool).not.toHaveBeenCalled();
   });
-  it("sends description and explicit Proportional capabilities when creating a pool", async () => {
+  it("sends description and explicit Guaranteed quota capabilities when creating a pool", async () => {
     const state = setup();
     state.draft.clusterId = "cluster";
     await flushPromises();
     Object.assign(state.draft, { name: "pool", description: "My pool", labelKey: "type", labelValue: "gpu" });
     vi.mocked(clusterService.createNodepool).mockResolvedValue({
       id: "123",
-      schedulingCapabilities: PROPORTIONAL_CAPABILITIES,
+      schedulingCapabilities: GUARANTEED_QUOTA_CAPABILITIES,
     } as never);
     await state.create();
     expect(clusterService.createNodepool).toHaveBeenCalledWith(
-      expect.objectContaining({ description: "My pool", schedulingCapabilities: PROPORTIONAL_CAPABILITIES }),
+      expect.objectContaining({ description: "My pool", schedulingCapabilities: GUARANTEED_QUOTA_CAPABILITIES }),
     );
     expect(state.draft.description).toBe("My pool");
     expect(state.created.value?.id).toBe("123");
@@ -123,7 +123,7 @@ describe("node pool creation", () => {
     await flushPromises();
     vi.mocked(clusterService.createNodepool).mockResolvedValue({
       id: "123",
-      schedulingCapabilities: PROPORTIONAL_CAPABILITIES,
+      schedulingCapabilities: GUARANTEED_QUOTA_CAPABILITIES,
     } as never);
     expect((await state.create())?.id).toBe("123");
     expect(clusterService.createNodepool).toHaveBeenCalledTimes(1);

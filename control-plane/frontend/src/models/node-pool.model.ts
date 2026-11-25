@@ -218,6 +218,14 @@ export const NODE_POOL_NETWORK_DISCOVERY_OPTIONS: ISelectOption[] = [
 
 export const EMPTY_PRIORITY_LABEL = "empty";
 
+export const GUARANTEED_QUOTA_CAPABILITIES = Object.freeze({
+  limits: false,
+  adjustableWeights: false,
+  quota: true,
+  ranks: true,
+  cpuQuota: false,
+} satisfies SchedulingCapabilitiesNullable);
+
 export const PROPORTIONAL_CAPABILITIES = Object.freeze({
   limits: false,
   adjustableWeights: true,
