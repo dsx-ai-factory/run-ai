@@ -319,15 +319,6 @@ openapi-generate-public-spec:
 	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Generating public spec for runai control-plane to ${OPENAPI_PUBLIC_SPEC_PATH}" ${BASE_CONSOLE}
 	${DOCKER_NODEJS_COMMAND} /bin/sh -c 'cd ${OPENAPI_BUILD_PATH}/scripts/cli && npm --cache /tmp/.npm install \
 	&& ./node_modules/.bin/openapi-merge-cli --config ../../config/merge-config.json' || ${FAILURE_MESSAGE_HANDLER}
-	@# Keep the published Workloads operation IDs and inference response model name after removing legacy Assets routes.
-	${DOCKER_LINUX_COMMAND} sed -i \
-		-e '\|^  /api/v1/workloads/workspaces:$$|,/^  [^ ]/s/^      operationId: create_workspace$$/      operationId: create_workspace1/' \
-		-e '\|^  /api/v1/workloads/trainings:$$|,/^  [^ ]/s/^      operationId: create_training$$/      operationId: create_training1/' \
-		-e '\|^  /api/v1/workloads/inferences:$$|,/^  [^ ]/s/^      operationId: create_inference$$/      operationId: create_inference1/' \
-		-e 's/^    Inference:$$/    Inference1:/' \
-		-e "s|#/components/schemas/Inference'|#/components/schemas/Inference1'|g" \
-		${OPENAPI_PUBLIC_SPEC_BUILD_PATH} || ${FAILURE_MESSAGE_HANDLER}
-	${DOCKER_YQ_COMMAND} e -e '(.paths."/api/v1/workloads/workspaces".post.operationId == "create_workspace1") and (.paths."/api/v1/workloads/trainings".post.operationId == "create_training1") and (.paths."/api/v1/workloads/inferences".post.operationId == "create_inference1") and (.components.schemas.Inference1 != null) and (.paths."/api/v1/workloads/inferences".post.responses."202".content."application/json".schema."$$ref" == "#/components/schemas/Inference1")' ${OPENAPI_PUBLIC_SPEC_BUILD_PATH} > /dev/null || { echo "Public workload submission contract changed"; ${FAILURE_MESSAGE_HANDLER}; }
 	${SUCCESS_MESSAGE_HANDLER}
 
 	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Store raw swagger for runai control-plane to ${OPENAPI_PUBLIC_SPEC_PATH}" ${BASE_CONSOLE}

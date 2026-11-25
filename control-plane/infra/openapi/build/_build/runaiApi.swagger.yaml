@@ -8513,7 +8513,7 @@ paths:
   /api/v1/workloads/workspaces:
     post:
       summary: Create a workspace.
-      operationId: create_workspace1
+      operationId: create_workspace
       description: Create a new workspace in a specific project in the cluster.
       tags:
         - Workspaces
@@ -8631,7 +8631,7 @@ paths:
   /api/v1/workloads/trainings:
     post:
       summary: Create a training.
-      operationId: create_training1
+      operationId: create_training
       description: Create a training workload using container related fields.
       tags:
         - Trainings
@@ -8971,7 +8971,7 @@ paths:
   /api/v1/workloads/inferences:
     post:
       summary: Create an inference.
-      operationId: create_inference1
+      operationId: create_inference
       description: Create an inference using container related fields.
       tags:
         - Inferences
@@ -8986,7 +8986,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Inference1'
+                $ref: '#/components/schemas/Inference'
         '400':
           $ref: '#/components/responses/400BadRequest'
         '401':
@@ -9031,7 +9031,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Inference1'
+                $ref: '#/components/schemas/Inference'
         '401':
           $ref: '#/components/responses/401Unauthorized'
         '403':
@@ -9061,7 +9061,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Inference1'
+                $ref: '#/components/schemas/Inference'
         '401':
           $ref: '#/components/responses/401Unauthorized'
         '403':
@@ -30961,7 +30961,7 @@ components:
         - $ref: '#/components/schemas/WorkloadCreationMeta'
         - $ref: '#/components/schemas/SubmitWithTemplateId'
         - $ref: '#/components/schemas/InferenceSpec'
-    Inference1:
+    Inference:
       allOf:
         - $ref: '#/components/schemas/WorkloadMeta'
         - $ref: '#/components/schemas/InferenceSpec'
