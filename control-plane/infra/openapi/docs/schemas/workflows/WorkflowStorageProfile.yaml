@@ -1,4 +1,9 @@
-type: object
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+nullable: true
 properties:
-  todo:
-    type: boolean
+  s3:
+    $ref: ../workloads_spec/workflows/WorkflowS3Items.yaml
+type: object

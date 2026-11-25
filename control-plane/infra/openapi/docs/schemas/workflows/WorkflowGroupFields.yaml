@@ -1,4 +1,16 @@
-type: object
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
 properties:
-  todo:
-    type: boolean
+  dependsOn:
+    $ref: ../workloads_spec/workflows/GroupDependsOn.yaml
+  leader:
+    $ref: ../workloads_spec/workflows/GroupLeader.yaml
+  name:
+    $ref: ../workloads_spec/workflows/GroupName.yaml
+  nodePools:
+    $ref: ../workloads_spec/resources/NodePools.yaml
+  synchronizedStart:
+    $ref: ../workloads_spec/workflows/SynchronizedStart.yaml
+type: object

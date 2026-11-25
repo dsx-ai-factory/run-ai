@@ -1,4 +1,88 @@
-type: object
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
 properties:
-  todo:
-    type: boolean
+  annotations:
+    $ref: ../workloads_spec/advanced/Annotations.yaml
+  args:
+    $ref: ../workloads_spec/container/Args.yaml
+  command:
+    $ref: ../workloads_spec/container/Command.yaml
+  computeRef:
+    $ref: ../workloads_spec/workflows/WorkflowProfileName.yaml
+  createHomeDir:
+    $ref: ../workloads_spec/container/CreateHomeDir.yaml
+  environmentVariables:
+    $ref: ../workloads_spec/container/EnvironmentVariables.yaml
+  image:
+    $ref: ../workloads_spec/container/Image.yaml
+  imagePullPolicy:
+    $ref: ../workloads_spec/container/ImagePullPolicy.yaml
+  imagePullSecrets:
+    $ref: ../workloads_spec/advanced/ImagePullSecrets.yaml
+  labels:
+    $ref: ../workloads_spec/advanced/Labels.yaml
+  name:
+    $ref: ../workloads_spec/workflows/TaskName.yaml
+  placementRef:
+    $ref: ../workloads_spec/workflows/WorkflowProfileName.yaml
+  probes:
+    $ref: ../workloads_spec/container/Probes.yaml
+  retry:
+    $ref: ../workloads_spec/workflows/TaskRetry.yaml
+  security:
+    nullable: true
+    properties:
+      allowPrivilegeEscalation:
+        $ref: ../workloads_spec/security/AllowPrivilegeEscalation.yaml
+      capabilities:
+        $ref: ../workloads_spec/security/Capabilities.yaml
+      hostIpc:
+        $ref: ../workloads_spec/security/HostIpc.yaml
+      hostNetwork:
+        $ref: ../workloads_spec/security/HostNetwork.yaml
+      privileged:
+        allOf:
+        - $ref: ../workloads_spec/security/Privileged.yaml
+        x-internal: true
+      readOnlyRootFilesystem:
+        $ref: ../workloads_spec/security/ReadOnlyRootFileSystem.yaml
+      runAsGid:
+        $ref: ../workloads_spec/security/RunAsGid.yaml
+      runAsNonRoot:
+        $ref: ../workloads_spec/security/RunAsNonRoot.yaml
+      runAsUid:
+        $ref: ../workloads_spec/security/RunAsUid.yaml
+      seccompProfileType:
+        $ref: ../workloads_spec/security/SeccompProfileType.yaml
+      supplementalGroups:
+        $ref: ../workloads_spec/security/SupplementalGroups.yaml
+      uidGidSource:
+        $ref: ../workloads_spec/security/UidGidSource.yaml
+    type: object
+  stdin:
+    $ref: ../workloads_spec/container/Stdin.yaml
+  storage:
+    nullable: true
+    properties:
+      configMapVolume:
+        $ref: ../workloads_spec/storage/ConfigMapItems.yaml
+      emptyDirVolume:
+        $ref: ../workloads_spec/storage/EmptyDirItems.yaml
+      hostPath:
+        $ref: ../workloads_spec/storage/HostPathItems.yaml
+      secretVolume:
+        $ref: ../workloads_spec/storage/SecretItems.yaml
+    type: object
+  storageRef:
+    $ref: ../workloads_spec/workflows/WorkflowS3StorageRefs.yaml
+  successExitCodes:
+    $ref: ../workloads_spec/workflows/TaskSuccessExitCodes.yaml
+  terminationGracePeriodSeconds:
+    $ref: ../workloads_spec/advanced/TerminationGracePeriod.yaml
+  tty:
+    $ref: ../workloads_spec/container/Tty.yaml
+  workingDir:
+    $ref: ../workloads_spec/container/WorkingDir.yaml
+type: object

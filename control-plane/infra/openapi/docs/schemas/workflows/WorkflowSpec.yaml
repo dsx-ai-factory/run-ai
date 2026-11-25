@@ -1,14 +1,5 @@
 description: The specifications of the workflow to be created.
 type: object
-allOf:
-  - $ref: "./WorkflowFields.yaml"
-  - type: object
-    properties:
-      groups:
-        $ref: "./WorkflowGroups.yaml"
-      compute:
-        $ref: "./WorkflowComputeProfiles.yaml"
-      placement:
-        $ref: "./WorkflowPlacementProfiles.yaml"
-      storage:
-        $ref: "./WorkflowStorageProfiles.yaml"
+properties:
+  spec:
+    $ref: "./WorkflowSpecSpec.yaml"

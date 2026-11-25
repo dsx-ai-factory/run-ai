@@ -1,4 +1,40 @@
-type: object
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
 properties:
-  todo:
-    type: boolean
+  cpuCoreLimit:
+    $ref: ../workloads_spec/compute/CpuCoreLimit.yaml
+  cpuCoreRequest:
+    $ref: ../workloads_spec/compute/CpuCoreRequest.yaml
+  cpuMemoryLimit:
+    $ref: ../workloads_spec/compute/CpuMemoryLimit.yaml
+  cpuMemoryRequest:
+    $ref: ../workloads_spec/compute/CpuMemoryRequest.yaml
+  ephemeralStorageRequest:
+    $ref: ../workloads_spec/workflows/WorkflowEphemeralStorageRequest.yaml
+  extendedResources:
+    $ref: ../workloads_spec/compute/ExtendedResources.yaml
+  gpuComputeMode:
+    $ref: ../workloads_spec/compute/GpuComputeMode.yaml
+  gpuDevicesRequest:
+    $ref: ../workloads_spec/compute/GpuDevicesRequest.yaml
+  gpuMemoryLimit:
+    $ref: ../workloads_spec/compute/GpuMemoryLimit.yaml
+  gpuMemoryPortionLimit:
+    $ref: ../workloads_spec/compute/GpuMemoryPortionLimit.yaml
+  gpuMemoryPortionRequest:
+    $ref: ../workloads_spec/compute/GpuMemoryPortionRequest.yaml
+  gpuMemoryRequest:
+    $ref: ../workloads_spec/compute/GpuMemoryRequest.yaml
+  gpuPortionLimit:
+    $ref: ../workloads_spec/compute/GpuPortionLimit.yaml
+  gpuPortionRequest:
+    $ref: ../workloads_spec/compute/GpuPortionRequest.yaml
+  gpuRequestType:
+    $ref: ../workloads_spec/compute/GpuRequestType.yaml
+  largeShmRequest:
+    $ref: ../workloads_spec/compute/LargeShmRequest.yaml
+  name:
+    $ref: ../workloads_spec/workflows/WorkflowProfileName.yaml
+type: object
