@@ -20509,6 +20509,7 @@ paths:
       x-authorize:
         resource-type: workflows
         action: delete
+        resource-id: workloadId
       tags:
         - Workflows
       parameters:
@@ -20537,6 +20538,7 @@ paths:
       x-authorize:
         resource-type: workflows
         action: read
+        resource-id: workloadId
       tags:
         - Workflows
       parameters:

@@ -4875,7 +4875,8 @@
         ],
         "x-authorize": {
           "resource-type": "workflows",
-          "action": "delete"
+          "action": "delete",
+          "resource-id": "workloadId"
         },
         "tags": [
           "Workflows"
@@ -4917,7 +4918,8 @@
         ],
         "x-authorize": {
           "resource-type": "workflows",
-          "action": "read"
+          "action": "read",
+          "resource-id": "workloadId"
         },
         "tags": [
           "Workflows"

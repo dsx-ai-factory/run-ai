@@ -9,6 +9,7 @@ delete:
   x-authorize:
     resource-type: workflows
     action: delete
+    resource-id: workloadId
   tags:
     - Workflows
   parameters:
@@ -37,6 +38,7 @@ get:
   x-authorize:
     resource-type: workflows
     action: read
+    resource-id: workloadId
   tags:
     - Workflows
   parameters:
