@@ -26,8 +26,6 @@
     </runai-section>
     <form-ngc-catalog-image-section
       v-else-if="imageOriginValue === EImageOrigin.NGC"
-      :support-authenticated-ngc="supportAuthenticatedNgc"
-      :authenticated-only="authenticatedOnly"
       :scope-id="scopeId"
       :scope-type="scopeType"
       :cluster-id="clusterId"
@@ -55,7 +53,7 @@ import { FormImageInput } from "@/components/environment/form-image-input";
 import { FormNgcCatalogImageSection } from "@/components/environment/form-ngc-catalog-image-section";
 import { FormNgcPrivateRegistrySection } from "@/components/environment/form-ngc-private-registry-section";
 import type { ISelectOption } from "@/models/global.model";
-import type { StringRules } from "@/swagger-models/assets-service-client";
+import type { StringRules } from "@/swagger-models/policy-service-client";
 import { useSettingStore } from "@/stores/setting.store";
 import { ScopeType, type RegistryIntegration } from "@/swagger-models/catalog-service-client";
 import { catalogService } from "@/services/control-plane/catalog.service/catalog.service";

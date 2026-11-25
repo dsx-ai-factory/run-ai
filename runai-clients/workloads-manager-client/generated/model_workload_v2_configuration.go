@@ -27,8 +27,9 @@ type WorkloadV2Configuration struct {
 	Networking      []NetworkingEndpoint                                 `json:"networking,omitempty"`
 	UserCredentials NullableWorkloadV2UpdateConfigurationUserCredentials `json:"userCredentials,omitempty"`
 	// PVCs to create and reconcile alongside the workload.
-	Pvcs       []WorkloadV2UpdateConfigurationPvc              `json:"pvcs,omitempty"`
-	PvcsConfig NullableWorkloadV2UpdateConfigurationPvcsConfig `json:"pvcsConfig,omitempty"`
+	Pvcs             []WorkloadV2UpdateConfigurationPvc              `json:"pvcs,omitempty"`
+	PvcsConfig       NullableWorkloadV2UpdateConfigurationPvcsConfig `json:"pvcsConfig,omitempty"`
+	InferenceRouting NullableWorkloadV2ConfigurationInferenceRouting `json:"inferenceRouting,omitempty"`
 }
 
 // NewWorkloadV2Configuration instantiates a new WorkloadV2Configuration object
@@ -243,6 +244,49 @@ func (o *WorkloadV2Configuration) UnsetPvcsConfig() {
 	o.PvcsConfig.Unset()
 }
 
+// GetInferenceRouting returns the InferenceRouting field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *WorkloadV2Configuration) GetInferenceRouting() WorkloadV2ConfigurationInferenceRouting {
+	if o == nil || IsNil(o.InferenceRouting.Get()) {
+		var ret WorkloadV2ConfigurationInferenceRouting
+		return ret
+	}
+	return *o.InferenceRouting.Get()
+}
+
+// GetInferenceRoutingOk returns a tuple with the InferenceRouting field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *WorkloadV2Configuration) GetInferenceRoutingOk() (*WorkloadV2ConfigurationInferenceRouting, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.InferenceRouting.Get(), o.InferenceRouting.IsSet()
+}
+
+// HasInferenceRouting returns a boolean if a field has been set.
+func (o *WorkloadV2Configuration) HasInferenceRouting() bool {
+	if o != nil && o.InferenceRouting.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetInferenceRouting gets a reference to the given NullableWorkloadV2ConfigurationInferenceRouting and assigns it to the InferenceRouting field.
+func (o *WorkloadV2Configuration) SetInferenceRouting(v WorkloadV2ConfigurationInferenceRouting) {
+	o.InferenceRouting.Set(&v)
+}
+
+// SetInferenceRoutingNil sets the value for InferenceRouting to be an explicit nil
+func (o *WorkloadV2Configuration) SetInferenceRoutingNil() {
+	o.InferenceRouting.Set(nil)
+}
+
+// UnsetInferenceRouting ensures that no value is present for InferenceRouting, not even an explicit nil
+func (o *WorkloadV2Configuration) UnsetInferenceRouting() {
+	o.InferenceRouting.Unset()
+}
+
 func (o WorkloadV2Configuration) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -267,6 +311,9 @@ func (o WorkloadV2Configuration) ToMap() (map[string]interface{}, error) {
 	}
 	if o.PvcsConfig.IsSet() {
 		toSerialize["pvcsConfig"] = o.PvcsConfig.Get()
+	}
+	if o.InferenceRouting.IsSet() {
+		toSerialize["inferenceRouting"] = o.InferenceRouting.Get()
 	}
 	return toSerialize, nil
 }

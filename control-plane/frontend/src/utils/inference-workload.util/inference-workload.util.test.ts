@@ -6,31 +6,24 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import { ERunaiCredentialSource } from "@/components/common/runai-credential-selector-by-source/runai-credential-selector-by-source.model";
-import type { IAutoScaleData } from "@/components/section/compute-resource-section/auto-scale-section/auto-scale-section.model";
 import { SCALE_TO_ZERO_RETENTION_IN_MINUTES_DEFAULT_VALUE } from "@/components/section/compute-resource-section/auto-scale-section/scale-down-section/scale-down-section.model";
-import {
-  DEFAULT_THRESHOLD_VALUE,
-  METRIC_THROUGHPUT,
-} from "@/components/section/compute-resource-section/auto-scale-section/threshold-metric-section/threshold-metric-section.model";
+import { DEFAULT_THRESHOLD_VALUE } from "@/components/section/compute-resource-section/auto-scale-section/threshold-metric-section/threshold-metric-section.model";
 import {
   EAccessOptions,
   type IConnectionAccess,
 } from "@/components/environment/connection-access/connection-access-modal/connection-access-modal.model";
 import { ENimAccessModelMethod } from "@/components/workload-creation/hybrid-nim-model-section/nim-access-model/nim-access-model.model";
 
-import type { IUIVolume } from "@/models/data-source.model";
 import {
   ARGS_PREFIX_FOR_TGI,
   ARGS_PREFIX_FOR_VLLM,
   EInferenceArchitecture,
-  EInferenceType,
   EServerType,
   EHuggingFaceEnvVariableNames,
   ENimEnvVariableNames,
   HF_HOME_DEFAULT_PATH,
   HOME_DEFAULT_PATH,
   LLM_IMAGE_FOR_HUGGING_FACE,
-  LLM_IMAGE_FOR_TGI,
   MAX_REPLICAS_DEFAULT_VALUE,
   MIN_REPLICAS_DEFAULT_VALUE,
   NIM_WORKLOAD_LABEL,
@@ -41,7 +34,6 @@ import type {
   IUIStorageFields,
   IUISuperWorkloadCreationRequest,
   IUISuperWorkloadSpec,
-  IUIWorkloadAssets,
   IUIWorkloadCreation,
   IUIWorkloadSpecificEnv,
 } from "@/models/workload.model";
@@ -54,12 +46,8 @@ import {
   type EnvironmentVariable,
   type EnvironmentVariableOfAsset,
   type HostPathInstance,
-  type InferenceCreationRequestV2,
-  type InferenceSpecificRunParams,
-  type InferenceV2,
   type NfsInstance,
   type PvcInstance,
-  type SpecificRunParams,
 } from "@/swagger-models/assets-service-client";
 import type {
   Inference as InferenceFlat,
@@ -74,12 +62,7 @@ import { inferenceWorkloadUtil } from "@/utils/inference-workload.util/inference
 import { workloadHybridUtil } from "@/utils/workload-hybrid.util/workload-hybrid.util";
 import { workloadUtil } from "@/utils/workload.util/workload.util";
 
-import {
-  mockBaseInferenceWorkload,
-  mockCluster,
-  mockInferenceWorkload,
-  mockInferenceWorkloadUI,
-} from "./inference-workload.util.mocks";
+import { mockCluster } from "./inference-workload.util.mocks";
 
 vi.mock("@/utils/workload.util/workload.util");
 
@@ -454,625 +437,6 @@ describe("inference-workload.util", () => {
     });
   });
 
-  describe("getInferenceRequestV2SpecificRunParams", () => {
-    let defaultSpecificEnv: IUIWorkloadSpecificEnv;
-
-    beforeEach(() => {
-      vi.resetAllMocks();
-      defaultSpecificEnv = {
-        args: "arg1 arg2",
-        command: "cmd",
-        runAsUid: 1000,
-        runAsGid: 2000,
-        supplementalGroups: "3000,4000",
-        environmentVariables: [{ name: "env1", value: "value1", exclude: false }],
-        annotations: [{ name: "anno1", value: "value1", exclude: true }],
-        labels: [{ name: "label1", value: "value1", exclude: false }],
-        connections: null,
-        nodeType: "my-node-type",
-        nodePools: ["node-pool-1", "node-pool-2"],
-        autoDeletionTimeAfterCompletionSeconds: 54,
-        tolerations: undefined,
-      };
-    });
-
-    it("should ignore backoffLimit and allowOverQuota fields if they provided", () => {
-      const specificEnv: IUIWorkloadSpecificEnv = {
-        ...defaultSpecificEnv,
-        allowOverQuota: true,
-        backoffLimit: 6,
-      };
-
-      vi.mocked(workloadUtil.processCommonSpecificEnv).mockReturnValue(omit(defaultSpecificEnv, ["servingPortAccess"]));
-      const processCommonSpecificEnvSpied = vi.spyOn(workloadUtil, "processCommonSpecificEnv");
-
-      const result: InferenceSpecificRunParams =
-        inferenceWorkloadUtil.getInferenceRequestV2SpecificRunParams(specificEnv);
-
-      const expectedSpecificEnv: InferenceSpecificRunParams = omit(defaultSpecificEnv, ["servingPortAccess"]);
-
-      expect(result).toEqual(expectedSpecificEnv);
-      expect(processCommonSpecificEnvSpied).toHaveBeenCalledWith(specificEnv, [
-        "allowOverQuota",
-        "backoffLimit",
-        "autoScaleData",
-        "servingPortAccess",
-      ]);
-    });
-
-    it("should convert autoScaleData field to autoScaling when autoScaleData is provided", () => {
-      const autoScaleData: IAutoScaleData = {
-        minReplicas: 1,
-        maxReplicas: 5,
-        thresholdMetric: METRIC_THROUGHPUT,
-        thresholdValue: 50,
-        scaleToZeroRetentionSeconds: undefined,
-      };
-      const specificEnv: IUIWorkloadSpecificEnv = {
-        ...defaultSpecificEnv,
-        autoScaleData,
-      };
-
-      vi.mocked(workloadUtil.processCommonSpecificEnv).mockReturnValue(omit(defaultSpecificEnv, ["servingPortAccess"]));
-      const processCommonSpecificEnvSpied = vi.spyOn(workloadUtil, "processCommonSpecificEnv");
-
-      const result: InferenceSpecificRunParams =
-        inferenceWorkloadUtil.getInferenceRequestV2SpecificRunParams(specificEnv);
-
-      const expectedSpecificEnv: SpecificRunParams = {
-        ...omit(defaultSpecificEnv, ["servingPortAccess"]),
-        autoScaling: autoScaleData,
-      };
-
-      expect(result).toEqual(expectedSpecificEnv);
-      expect(processCommonSpecificEnvSpied).toHaveBeenCalledWith(specificEnv, [
-        "allowOverQuota",
-        "backoffLimit",
-        "autoScaleData",
-        "servingPortAccess",
-      ]);
-    });
-
-    it("should add servingPortAccess field when supportingServingPortAccess is true", () => {
-      const specificEnv: IUIWorkloadSpecificEnv = {
-        ...defaultSpecificEnv,
-        servingPortAccess: {
-          access: {
-            authorizedUsers: null,
-            authorizedGroups: ["rnd"],
-            accessOption: EAccessOptions.GROUPS,
-          },
-        },
-      };
-
-      vi.mocked(workloadUtil.processCommonSpecificEnv).mockReturnValue(omit(defaultSpecificEnv, ["servingPortAccess"]));
-      const processCommonSpecificEnvSpied = vi.spyOn(workloadUtil, "processCommonSpecificEnv");
-
-      const result: InferenceSpecificRunParams = inferenceWorkloadUtil.getInferenceRequestV2SpecificRunParams(
-        specificEnv,
-        true,
-      );
-
-      expect(result).toEqual({
-        ...specificEnv,
-        servingPortAccess: {
-          authorizationType: ServingPortAccessAuthorizationTypeEnum.AuthorizedUsersOrGroups,
-          authorizedUsers: null,
-          authorizedGroups: ["rnd"],
-        },
-      });
-
-      expect(processCommonSpecificEnvSpied).toHaveBeenCalledWith(specificEnv, [
-        "allowOverQuota",
-        "backoffLimit",
-        "autoScaleData",
-        "servingPortAccess",
-      ]);
-    });
-
-    it("should not add servingPortAccess field when supportingServingPortAccess is false", () => {
-      const specificEnv: IUIWorkloadSpecificEnv = {
-        ...defaultSpecificEnv,
-        servingPortAccess: {
-          access: {
-            authorizedUsers: null,
-            authorizedGroups: ["rnd"],
-            accessOption: EAccessOptions.GROUPS,
-          },
-        },
-      };
-
-      vi.mocked(workloadUtil.processCommonSpecificEnv).mockReturnValue(omit(defaultSpecificEnv, ["servingPortAccess"]));
-      const processCommonSpecificEnvSpied = vi.spyOn(workloadUtil, "processCommonSpecificEnv");
-
-      const result: InferenceSpecificRunParams = inferenceWorkloadUtil.getInferenceRequestV2SpecificRunParams(
-        specificEnv,
-        false,
-      );
-      expect(result).not.toHaveProperty("servingPortAccess");
-      expect(processCommonSpecificEnvSpied).toHaveBeenCalledWith(specificEnv, [
-        "allowOverQuota",
-        "backoffLimit",
-        "autoScaleData",
-        "servingPortAccess",
-      ]);
-    });
-  });
-
-  describe("convertInferenceToWorkloadUI", () => {
-    it("should correctly convert workload to inference UI format with autoScaling and servingPortAccess", () => {
-      const expectedInferenceUI: IUIInferenceCreation = {
-        ...mockBaseInferenceWorkload,
-        inferenceType: EInferenceType.AssetsBased,
-        serverType: EServerType.Custom,
-        templateId: undefined,
-        specificEnv: {
-          ...mockBaseInferenceWorkload.specificEnv,
-          autoScaleData: {
-            minReplicas: 1,
-            maxReplicas: 1,
-            thresholdMetric: undefined,
-            thresholdValue: undefined,
-            scaleToZeroRetentionSeconds: undefined,
-          },
-          servingPortAccess: {
-            access: {
-              accessOption: EAccessOptions.PUBLIC,
-              authorizedGroups: undefined,
-              authorizedUsers: undefined,
-            },
-          },
-        },
-        architecture: EInferenceArchitecture.Standard,
-      };
-
-      vi.mocked(workloadUtil.convertWorkloadToWorkloadUI).mockReturnValue(mockBaseInferenceWorkload);
-
-      const result = inferenceWorkloadUtil.convertInferenceToWorkloadUI(
-        mockInferenceWorkload,
-        EInferenceType.AssetsBased,
-        true,
-      );
-      expect(result).toEqual(expectedInferenceUI);
-    });
-
-    it("should correctly convert workload to inference UI format without servingPortAccess", () => {
-      const mockInferenceUI: IUIInferenceCreation = {
-        ...mockBaseInferenceWorkload,
-        inferenceType: EInferenceType.AssetsBased,
-        serverType: EServerType.Custom,
-        templateId: undefined,
-        specificEnv: {
-          ...mockBaseInferenceWorkload.specificEnv,
-          autoScaleData: {
-            minReplicas: 1,
-            maxReplicas: 1,
-            thresholdMetric: undefined,
-            thresholdValue: undefined,
-            scaleToZeroRetentionSeconds: undefined,
-          },
-        },
-        architecture: EInferenceArchitecture.Standard,
-      };
-
-      vi.mocked(workloadUtil.convertWorkloadToWorkloadUI).mockReturnValue(mockBaseInferenceWorkload);
-      const result = inferenceWorkloadUtil.convertInferenceToWorkloadUI(
-        mockInferenceWorkload,
-        EInferenceType.AssetsBased,
-        false,
-      );
-
-      expect(result).toEqual(mockInferenceUI);
-    });
-
-    it("should correctly convert workload to inference UI format without servingPortAccess when supportingServingPortAccess is false", () => {
-      const mockInferenceUI: IUIInferenceCreation = {
-        ...mockBaseInferenceWorkload,
-        inferenceType: EInferenceType.AssetsBased,
-        serverType: EServerType.Custom,
-        templateId: undefined,
-        specificEnv: {
-          ...mockBaseInferenceWorkload.specificEnv,
-          autoScaleData: {
-            minReplicas: 1,
-            maxReplicas: 1,
-            thresholdMetric: undefined,
-            thresholdValue: undefined,
-            scaleToZeroRetentionSeconds: undefined,
-          },
-        },
-        architecture: EInferenceArchitecture.Standard,
-      };
-
-      vi.mocked(workloadUtil.convertWorkloadToWorkloadUI).mockReturnValue(mockBaseInferenceWorkload);
-      const result = inferenceWorkloadUtil.convertInferenceToWorkloadUI(
-        {
-          ...mockInferenceWorkload,
-          specificRunParams: {
-            ...mockBaseInferenceWorkload.specificEnv,
-            autoScaling: {
-              minReplicas: 1,
-              maxReplicas: 1,
-              thresholdMetric: undefined,
-              thresholdValue: undefined,
-              scaleToZeroRetentionSeconds: undefined,
-            },
-            servingPortAccess: {
-              authorizationType: ServingPortAccessAuthorizationTypeEnum.Public,
-              authorizedGroups: undefined,
-              authorizedUsers: undefined,
-            },
-          },
-        },
-        EInferenceType.AssetsBased,
-        false,
-      );
-
-      expect(result).toEqual(mockInferenceUI);
-    });
-
-    it("should correctly convert workload to inference UI format auto scaling is not provided", () => {
-      const mockInferenceUI: IUIInferenceCreation = {
-        ...mockBaseInferenceWorkload,
-        inferenceType: EInferenceType.AssetsBased,
-        serverType: EServerType.Custom,
-        templateId: undefined,
-        specificEnv: {
-          ...mockBaseInferenceWorkload.specificEnv,
-          autoScaleData: {
-            minReplicas: 1,
-            maxReplicas: 1,
-            thresholdMetric: undefined,
-            thresholdValue: undefined,
-            scaleToZeroRetentionSeconds: undefined,
-          },
-        },
-        architecture: EInferenceArchitecture.Standard,
-      };
-      vi.mocked(workloadUtil.convertWorkloadToWorkloadUI).mockReturnValue(mockBaseInferenceWorkload);
-
-      const result = inferenceWorkloadUtil.convertInferenceToWorkloadUI(
-        {
-          ...mockInferenceWorkload,
-          specificRunParams: {
-            ...mockBaseInferenceWorkload.specificEnv,
-            autoScaling: undefined,
-            servingPortAccess: {
-              authorizationType: ServingPortAccessAuthorizationTypeEnum.Public,
-              authorizedGroups: undefined,
-              authorizedUsers: undefined,
-            },
-          },
-        },
-        EInferenceType.AssetsBased,
-        false,
-      );
-
-      expect(result).toEqual(mockInferenceUI);
-    });
-
-    it("should correctly convert workload to inference UI format when uiVolumes array provided", () => {
-      const uiVolumes: Array<IUIVolume> = [
-        {
-          claimName: "claim-o5xg03jniz",
-          path: "/home",
-          ephemeral: false,
-          claimInfo: {
-            size: "1G",
-            storageClass: "standard",
-            accessModes: {
-              readWriteOnce: true,
-            },
-            volumeMode: "Filesystem",
-          },
-        },
-      ];
-
-      const currentWorkload: InferenceV2 = {
-        ...mockInferenceWorkload,
-        specificRunParams: {
-          ...mockBaseInferenceWorkload.specificEnv,
-          autoScaling: undefined,
-          servingPortAccess: {
-            authorizationType: ServingPortAccessAuthorizationTypeEnum.Public,
-            authorizedGroups: undefined,
-            authorizedUsers: undefined,
-          },
-        },
-      };
-
-      const returnInferenceToWorkloadUI: IUIInferenceCreation = {
-        ...mockBaseInferenceWorkload,
-        assets: {
-          ...mockBaseInferenceWorkload.assets,
-          uiVolumes,
-        },
-        inferenceType: EInferenceType.AssetsBased,
-        serverType: EServerType.Custom,
-        templateId: undefined,
-        architecture: EInferenceArchitecture.Standard,
-      };
-
-      vi.mocked(workloadUtil.convertWorkloadToWorkloadUI).mockReturnValue(returnInferenceToWorkloadUI);
-      const convertWorkloadToWorkloadUISpied = vi.spyOn(workloadUtil, "convertWorkloadToWorkloadUI");
-
-      const result = inferenceWorkloadUtil.convertInferenceToWorkloadUI(
-        currentWorkload,
-        EInferenceType.AssetsBased,
-        false,
-        uiVolumes,
-      );
-
-      expect(convertWorkloadToWorkloadUISpied).toHaveBeenCalledWith(currentWorkload, uiVolumes);
-      expect(result.assets.uiVolumes).toEqual(uiVolumes);
-    });
-
-    it("should correctly convert workload to inference UI format when uiVolumes array not provided", () => {
-      const currentWorkload: InferenceV2 = {
-        ...mockInferenceWorkload,
-        specificRunParams: {
-          ...mockBaseInferenceWorkload.specificEnv,
-          autoScaling: undefined,
-          servingPortAccess: {
-            authorizationType: ServingPortAccessAuthorizationTypeEnum.Public,
-            authorizedGroups: undefined,
-            authorizedUsers: undefined,
-          },
-        },
-      };
-
-      const returnInferenceToWorkloadUI: IUIInferenceCreation = {
-        ...mockBaseInferenceWorkload,
-        assets: {
-          ...mockBaseInferenceWorkload.assets,
-        },
-        inferenceType: EInferenceType.AssetsBased,
-        serverType: EServerType.Custom,
-        templateId: undefined,
-        architecture: EInferenceArchitecture.Standard,
-      };
-
-      vi.mocked(workloadUtil.convertWorkloadToWorkloadUI).mockReturnValue(returnInferenceToWorkloadUI);
-      const convertWorkloadToWorkloadUISpied = vi.spyOn(workloadUtil, "convertWorkloadToWorkloadUI");
-
-      const result = inferenceWorkloadUtil.convertInferenceToWorkloadUI(
-        currentWorkload,
-        EInferenceType.AssetsBased,
-        false,
-      );
-
-      expect(convertWorkloadToWorkloadUISpied).toHaveBeenCalledWith(currentWorkload, undefined);
-      expect(result.assets.uiVolumes).toBeUndefined();
-    });
-
-    it("should add modelName to inference UI format when it is provided", () => {
-      const currentWorkload: InferenceV2 = {
-        ...mockInferenceWorkload,
-        specificRunParams: {
-          ...mockBaseInferenceWorkload.specificEnv,
-          autoScaling: undefined,
-          servingPortAccess: {
-            authorizationType: ServingPortAccessAuthorizationTypeEnum.Public,
-            authorizedGroups: undefined,
-            authorizedUsers: undefined,
-          },
-        },
-      };
-
-      const returnInferenceToWorkloadUI: IUIInferenceCreation = {
-        ...mockBaseInferenceWorkload,
-        assets: {
-          ...mockBaseInferenceWorkload.assets,
-        },
-        inferenceType: EInferenceType.AssetsBased,
-        serverType: EServerType.Custom,
-        templateId: undefined,
-        architecture: EInferenceArchitecture.Standard,
-      };
-
-      vi.mocked(workloadUtil.convertWorkloadToWorkloadUI).mockReturnValue(returnInferenceToWorkloadUI);
-      const convertWorkloadToWorkloadUISpied = vi.spyOn(workloadUtil, "convertWorkloadToWorkloadUI");
-
-      const result = inferenceWorkloadUtil.convertInferenceToWorkloadUI(
-        currentWorkload,
-        EInferenceType.AssetsBased,
-        false,
-        undefined,
-        "someModel",
-      );
-
-      expect(convertWorkloadToWorkloadUISpied).toHaveBeenCalledWith(currentWorkload, undefined);
-      expect(result.modelName).toBe("someModel");
-    });
-
-    it("should not add modelName to inference UI format when it is not provided", () => {
-      const currentWorkload: InferenceV2 = {
-        ...mockInferenceWorkload,
-        specificRunParams: {
-          ...mockBaseInferenceWorkload.specificEnv,
-          autoScaling: undefined,
-          servingPortAccess: {
-            authorizationType: ServingPortAccessAuthorizationTypeEnum.Public,
-            authorizedGroups: undefined,
-            authorizedUsers: undefined,
-          },
-        },
-      };
-
-      const returnInferenceToWorkloadUI: IUIInferenceCreation = {
-        ...mockBaseInferenceWorkload,
-        assets: {
-          ...mockBaseInferenceWorkload.assets,
-        },
-        inferenceType: EInferenceType.AssetsBased,
-        serverType: EServerType.Custom,
-        templateId: undefined,
-        architecture: EInferenceArchitecture.Standard,
-      };
-
-      vi.mocked(workloadUtil.convertWorkloadToWorkloadUI).mockReturnValue(returnInferenceToWorkloadUI);
-      const convertWorkloadToWorkloadUISpied = vi.spyOn(workloadUtil, "convertWorkloadToWorkloadUI");
-
-      const result = inferenceWorkloadUtil.convertInferenceToWorkloadUI(
-        currentWorkload,
-        EInferenceType.AssetsBased,
-        false,
-        undefined,
-      );
-
-      expect(convertWorkloadToWorkloadUISpied).toHaveBeenCalledWith(currentWorkload, undefined);
-      expect(result.modelName).toBeUndefined();
-    });
-  });
-
-  describe("getInferenceCreationRequestV2", () => {
-    const mockAssets: IUIWorkloadAssets = {
-      environment: "4c2f601df492",
-      compute: "832a901021e7",
-      datasources: [{ id: "26f6314a0f0f", kind: AssetKind.Git }],
-    };
-
-    const mockWorkloadVolumes: Array<string> = ["9339", "4154"];
-
-    const uiWorkloadCreation: IUIWorkloadCreation = {
-      name: "i100",
-      projectId: 100,
-      namespace: "",
-      clusterId: "ead7a57f",
-      assets: mockAssets,
-      specificEnv: {
-        backoffLimit: 6,
-        autoScaleData: mockInferenceWorkloadUI.specificEnv.autoScaleData,
-        servingPortAccess: {
-          access: {
-            accessOption: EAccessOptions.PUBLIC,
-          },
-        },
-      },
-    };
-
-    beforeEach(() => {
-      vi.mocked(workloadUtil.processCommonSpecificEnv).mockReturnValue({
-        args: null,
-        command: null,
-        runAsUid: undefined,
-        runAsGid: undefined,
-        supplementalGroups: undefined,
-        autoScaling: {
-          minReplicas: 1,
-          maxReplicas: 2,
-          thresholdMetric: undefined,
-          thresholdValue: undefined,
-          scaleToZeroRetentionSeconds: undefined,
-        },
-      });
-    });
-
-    it("should return a valid InferenceCreationRequestV2 object when all inputs are set", () => {
-      vi.mocked(workloadUtil.getWorkloadAssetsFromUIWorkloadAssets).mockReturnValue({
-        environment: mockAssets.environment || "",
-        compute: mockAssets.compute,
-        datasources: mockAssets.datasources,
-        workloadVolumes: mockWorkloadVolumes,
-      });
-
-      const getWorkloadAssetsFromUIWorkloadAssetsSpied = vi.spyOn(workloadUtil, "getWorkloadAssetsFromUIWorkloadAssets");
-      const result = inferenceWorkloadUtil.getInferenceCreationRequestV2(uiWorkloadCreation, true, mockWorkloadVolumes);
-
-      expect(result).toEqual({
-        meta: {
-          name: uiWorkloadCreation.name,
-          projectId: uiWorkloadCreation.projectId.toString(),
-          clusterId: uiWorkloadCreation.clusterId,
-        },
-        assets: {
-          environment: mockAssets.environment,
-          compute: mockAssets.compute,
-          datasources: mockAssets.datasources,
-          workloadVolumes: mockWorkloadVolumes,
-        },
-        specificRunParams: {
-          args: null,
-          autoScaling: {
-            maxReplicas: 1,
-            minReplicas: 1,
-            scaleToZeroRetentionSeconds: undefined,
-            thresholdMetric: undefined,
-            thresholdValue: undefined,
-          },
-          command: null,
-          runAsGid: undefined,
-          runAsUid: undefined,
-          supplementalGroups: undefined,
-          servingPortAccess: {
-            authorizationType: undefined,
-            authorizedGroups: undefined,
-            authorizedUsers: undefined,
-          },
-        },
-      });
-
-      expect(getWorkloadAssetsFromUIWorkloadAssetsSpied).toHaveBeenCalledWith(mockAssets, mockWorkloadVolumes);
-    });
-
-    it("should throw an error if assets.environment is missing", () => {
-      const invalidInference = {
-        ...uiWorkloadCreation,
-        assets: { environment: "", compute: "compute-1" },
-      };
-
-      expect(() => inferenceWorkloadUtil.getInferenceCreationRequestV2(invalidInference)).toThrow(
-        "Environment details are missing",
-      );
-    });
-
-    it("should handle default workloadVolumes when not provided", () => {
-      vi.mocked(workloadUtil.getWorkloadAssetsFromUIWorkloadAssets).mockReturnValue({
-        environment: mockAssets.environment || "",
-        compute: mockAssets.compute,
-        datasources: mockAssets.datasources,
-      });
-
-      const getWorkloadAssetsFromUIWorkloadAssetsSpied = vi.spyOn(workloadUtil, "getWorkloadAssetsFromUIWorkloadAssets");
-      const result = inferenceWorkloadUtil.getInferenceCreationRequestV2(uiWorkloadCreation, false);
-
-      expect(result.assets.workloadVolumes).toBeUndefined();
-      expect(getWorkloadAssetsFromUIWorkloadAssetsSpied).toHaveBeenCalledWith(mockAssets, undefined);
-    });
-
-    it("should exclude servingPortAccess if supportingServingPortAccess is false", () => {
-      vi.mocked(workloadUtil.getWorkloadAssetsFromUIWorkloadAssets).mockReturnValue({
-        environment: mockAssets.environment || "",
-        compute: mockAssets.compute,
-        datasources: mockAssets.datasources,
-      });
-
-      vi.mocked(workloadUtil.processCommonSpecificEnv).mockReturnValue({
-        args: null,
-        command: null,
-        runAsUid: undefined,
-        runAsGid: undefined,
-        supplementalGroups: undefined,
-        autoScaling: {
-          minReplicas: 1,
-          maxReplicas: 2,
-          thresholdMetric: undefined,
-          thresholdValue: undefined,
-          scaleToZeroRetentionSeconds: undefined,
-        },
-      });
-
-      const result: InferenceCreationRequestV2 = inferenceWorkloadUtil.getInferenceCreationRequestV2(uiWorkloadCreation);
-
-      expect(result.specificRunParams).toBeDefined();
-      expect(result.specificRunParams?.servingPortAccess).toBeUndefined();
-      expect(workloadUtil.processCommonSpecificEnv).toHaveBeenCalledWith(
-        uiWorkloadCreation.specificEnv,
-        expect.any(Array),
-      );
-    });
-  });
-
   describe("_getAuthorizationType", () => {
     it("should return Public when servingPortAccess is null", () => {
       const result = inferenceWorkloadUtil._getAuthorizationType(null);
@@ -1327,7 +691,6 @@ describe("inference-workload.util", () => {
           annotations: [{ name: "annotation1", value: "value1", exclude: false }],
           labels: [{ name: "label1", value: "value1" }],
         },
-        inferenceType: EInferenceType.Nim,
         serverType: EServerType.Nim,
         architecture: EInferenceArchitecture.Standard,
         namespace: "",
@@ -1367,7 +730,6 @@ describe("inference-workload.util", () => {
         name: "test-workload",
         projectId: 2,
         clusterId: "cluster-2",
-        inferenceType: EInferenceType.Nim,
         serverType: EServerType.Nim,
         namespace: "",
         assets: {
@@ -1405,7 +767,6 @@ describe("inference-workload.util", () => {
         projectId: 3,
         clusterId: "cluster-3",
         specificEnv: {},
-        inferenceType: EInferenceType.AssetsBased,
         serverType: EServerType.Custom,
         namespace: "",
         assets: {
@@ -1479,7 +840,6 @@ describe("inference-workload.util", () => {
           },
           servingPortAccess: { access: { accessOption: EAccessOptions.PUBLIC } },
         },
-        inferenceType: EInferenceType.Nim,
         architecture: EInferenceArchitecture.Standard,
         namespace: "",
         assets: {
@@ -1534,7 +894,6 @@ describe("inference-workload.util", () => {
           },
           servingPortAccess: { access: { accessOption: EAccessOptions.PUBLIC } },
         },
-        inferenceType: EInferenceType.Nim,
         architecture: EInferenceArchitecture.Standard,
         namespace: "",
         assets: {
@@ -1682,7 +1041,6 @@ describe("inference-workload.util", () => {
         annotations: [{ name: "annotation1", value: "value1", exclude: false }],
         labels: [{ name: "label1", value: "value1" }],
       },
-      inferenceType: EInferenceType.Nim,
       architecture: EInferenceArchitecture.Standard,
       namespace: "",
       assets: {
@@ -1718,19 +1076,15 @@ describe("inference-workload.util", () => {
       ).toThrow("Missing server type: The workload object must include a valid 'serverType' property.");
     });
 
-    it("should set the correct model flag based on server type", () => {
-      const tgiWorkload = { ...workload, serverType: EServerType.TGI, image: "tgi-image" };
+    it("should set the vLLM model flag", () => {
       const vllmWorkload = { ...workload, serverType: EServerType.VLLM, image: "inference-image" };
-
-      const tgiRequest = inferenceWorkloadUtil.getHFInferenceWorkloadCreationRequest(tgiWorkload, flatCompute);
-      expect(tgiRequest.spec?.args).toContain(`--model-id ${modelName} ${workload.specificEnv.args}`);
 
       const vllmRequest = inferenceWorkloadUtil.getHFInferenceWorkloadCreationRequest(vllmWorkload, flatCompute);
       expect(vllmRequest.spec?.args).toContain(`--model ${modelName} ${workload.specificEnv.args}`);
     });
 
     it("should include the correct server type image", () => {
-      const currWorkload = { ...workload, serverType: EServerType.TGI, image: "custom-image" };
+      const currWorkload = { ...workload, serverType: EServerType.VLLM, image: "custom-image" };
 
       const result = inferenceWorkloadUtil.getHFInferenceWorkloadCreationRequest(currWorkload, flatCompute);
       expect(result.spec?.image).toBe("custom-image");
@@ -2252,73 +1606,6 @@ describe("inference-workload.util", () => {
     });
   });
 
-  describe("normalizeAutoScaleData", () => {
-    const { normalizeAutoScaleData } = inferenceWorkloadUtil;
-
-    it("should default minReplicas and maxReplicas to 1 if not provided", () => {
-      expect(normalizeAutoScaleData({})).toMatchObject({ minReplicas: 1, maxReplicas: 1 });
-      expect(normalizeAutoScaleData(undefined)).toMatchObject({ minReplicas: 1, maxReplicas: 1 });
-      expect(normalizeAutoScaleData(null)).toMatchObject({ minReplicas: 1, maxReplicas: 1 });
-    });
-
-    it("should set thresholdValue to DEFAULT_THRESHOLD_VALUE if thresholdMetric is set but thresholdValue is undefined", () => {
-      expect(normalizeAutoScaleData({ minReplicas: 2, maxReplicas: 3, thresholdMetric: "latency" }).thresholdValue).toBe(
-        DEFAULT_THRESHOLD_VALUE,
-      );
-    });
-
-    it("should clear scaleToZeroRetentionSeconds if minReplicas > 0", () => {
-      expect(
-        normalizeAutoScaleData({ minReplicas: 2, maxReplicas: 3, scaleToZeroRetentionSeconds: 100 })
-          .scaleToZeroRetentionSeconds,
-      ).toBeUndefined();
-    });
-
-    it("should clear thresholdMetric and thresholdValue if minReplicas == maxReplicas", () => {
-      expect(
-        normalizeAutoScaleData({ minReplicas: 2, maxReplicas: 2, thresholdMetric: "latency", thresholdValue: 10 }),
-      ).toMatchObject({ thresholdMetric: undefined, thresholdValue: undefined });
-    });
-
-    it("should clear thresholdMetric and thresholdValue if minReplicas is 0 and maxReplicas is 1", () => {
-      expect(
-        normalizeAutoScaleData({ minReplicas: 0, maxReplicas: 1, thresholdMetric: "latency", thresholdValue: 10 }),
-      ).toMatchObject({ thresholdMetric: undefined, thresholdValue: undefined });
-    });
-
-    it("should clear thresholdMetric and thresholdValue if minReplicas or maxReplicas is null or undefined", () => {
-      expect(
-        normalizeAutoScaleData({
-          minReplicas: undefined,
-          maxReplicas: 1,
-          thresholdMetric: "latency",
-          thresholdValue: 10,
-        }),
-      ).toMatchObject({ thresholdMetric: undefined, thresholdValue: undefined });
-      expect(
-        normalizeAutoScaleData({
-          minReplicas: 1,
-          maxReplicas: undefined,
-          thresholdMetric: "latency",
-          thresholdValue: 10,
-        }),
-      ).toMatchObject({ thresholdMetric: undefined, thresholdValue: undefined });
-      expect(
-        normalizeAutoScaleData({ minReplicas: null, maxReplicas: 1, thresholdMetric: "latency", thresholdValue: 10 }),
-      ).toMatchObject({ thresholdMetric: undefined, thresholdValue: undefined });
-      expect(
-        normalizeAutoScaleData({ minReplicas: 1, maxReplicas: null, thresholdMetric: "latency", thresholdValue: 10 }),
-      ).toMatchObject({ thresholdMetric: undefined, thresholdValue: undefined });
-    });
-
-    it("should preserve scaleToZeroRetentionSeconds if minReplicas is 0", () => {
-      expect(
-        normalizeAutoScaleData({ minReplicas: 0, maxReplicas: 2, scaleToZeroRetentionSeconds: 123 })
-          .scaleToZeroRetentionSeconds,
-      ).toBe(123);
-    });
-  });
-
   describe("prepareDistributedInferenceFlatRequest", () => {
     function makeDistributedModel(replicas?: number): IUISuperWorkloadCreationRequest {
       return {
@@ -2564,27 +1851,20 @@ describe("inference-workload.util", () => {
   describe("getHFArgsForModel", () => {
     const { getHFArgsForModel } = inferenceWorkloadUtil;
 
-    it("should return TGI args string when image is TGI", () => {
-      const modelName = "tgi-model";
-      const result = getHFArgsForModel(LLM_IMAGE_FOR_TGI, modelName);
-      expect(result).toBe(`${ARGS_PREFIX_FOR_TGI} ${modelName}`);
-    });
-
     it("should return VLLM args string when image is VLLM", () => {
       const modelName = "vllm-model";
-      const result = getHFArgsForModel(LLM_IMAGE_FOR_HUGGING_FACE, modelName);
+      const result = getHFArgsForModel(modelName);
       expect(result).toBe(`${ARGS_PREFIX_FOR_VLLM} ${modelName}`);
     });
 
     it("should handle model names with extra whitespace", () => {
       const modelName = "   spaced-model   ";
-      const result = getHFArgsForModel(LLM_IMAGE_FOR_HUGGING_FACE, modelName);
+      const result = getHFArgsForModel(modelName);
       expect(result).toBe(`${ARGS_PREFIX_FOR_VLLM} ${modelName}`);
     });
 
     it("should handle empty model name", () => {
-      expect(getHFArgsForModel(LLM_IMAGE_FOR_TGI, "")).toBe(`${ARGS_PREFIX_FOR_TGI} `);
-      expect(getHFArgsForModel(LLM_IMAGE_FOR_HUGGING_FACE, "")).toBe(`${ARGS_PREFIX_FOR_VLLM} `);
+      expect(getHFArgsForModel("")).toBe(`${ARGS_PREFIX_FOR_VLLM} `);
     });
   });
 

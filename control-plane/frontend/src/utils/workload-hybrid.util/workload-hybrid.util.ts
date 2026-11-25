@@ -859,6 +859,8 @@ function getHybridBaseWorkloadModel(unifiedWorkload: UnifiedWorkload): IUISuperW
 function getHybridWorkspaceModel(unifiedWorkload: UnifiedWorkload): IUISuperWorkloadCreationRequest {
   const workload = getHybridBaseWorkloadModel(unifiedWorkload);
   workload.spec.backoffLimit = unifiedWorkload.spec?.worker?.backoffLimit;
+  workload.spec.nodeAffinityRequired = unifiedWorkload.spec?.worker?.nodeAffinityRequired;
+  workload.spec.restartPolicy = unifiedWorkload.spec?.worker?.restartPolicy;
   workload.spec.priorityClass = unifiedWorkload.spec?.worker?.priorityClass;
   workload.spec.preemptibility = unifiedWorkload.spec?.worker?.preemptibility;
   workload.spec.terminateAfterPreemption = unifiedWorkload.spec?.worker?.terminateAfterPreemption;
@@ -878,6 +880,7 @@ function getHybridTrainingModel(unifiedWorkload: UnifiedWorkload): IUISuperWorkl
       args: unifiedWorkload.spec?.worker?.args,
       image: unifiedWorkload.spec?.worker?.image,
       imagePullPolicy: unifiedWorkload.spec?.worker?.imagePullPolicy,
+      imagePullSecrets: unifiedWorkload.spec?.worker?.imagePullSecrets,
       workingDir: unifiedWorkload.spec?.worker?.workingDir,
       createHomeDir: unifiedWorkload.spec?.worker?.createHomeDir,
       nodeType: unifiedWorkload.spec?.worker?.nodeType,
@@ -923,6 +926,7 @@ function getHybridDistributedModel(
       args: unifiedWorkload.spec?.worker?.args,
       image: unifiedWorkload.spec?.worker?.image,
       imagePullPolicy: unifiedWorkload.spec?.worker?.imagePullPolicy,
+      imagePullSecrets: unifiedWorkload.spec?.worker?.imagePullSecrets,
       workingDir: unifiedWorkload.spec?.worker?.workingDir,
       createHomeDir: unifiedWorkload.spec?.worker?.createHomeDir,
       nodeType: unifiedWorkload.spec?.worker?.nodeType,
@@ -983,6 +987,7 @@ function getMasterModelForUI(
     args: unifiedMaster?.args,
     image: unifiedMaster?.image,
     imagePullPolicy: unifiedMaster?.imagePullPolicy,
+    imagePullSecrets: unifiedMaster?.imagePullSecrets,
     workingDir: unifiedMaster?.workingDir,
     createHomeDir: unifiedMaster?.createHomeDir,
     nodeType: unifiedMaster?.nodeType,

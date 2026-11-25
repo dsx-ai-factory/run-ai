@@ -49,8 +49,7 @@ import { RunaiLogReader } from "@/components/common/runai-log-reader";
 // models
 import type { ILogParams } from "@/models/logs.model";
 import { EWorkloadPodPhase, type WorkloadServicePod } from "@/models/workload.model";
-import type { Workload } from "@/swagger-models/workloads-client";
-import { Phase } from "@/swagger-models/assets-service-client";
+import { Phase, type Workload } from "@/swagger-models/workloads-client";
 
 // stores
 import { useClusterStore } from "@/stores/cluster.store";

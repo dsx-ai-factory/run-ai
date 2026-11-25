@@ -101,6 +101,35 @@ var _ = Describe("ExternalWorkloadHandler.applyRunaiStatus", func() {
 		))
 	})
 
+	It("shows a running inference workload Degraded while its snapshot capture is failed", func() {
+		scheme := newScheme()
+		runner := newRunner("inference-runner")
+		runner.Status.Plugins = map[string]*dromosv1alpha1.PluginStatus{
+			snapshotPluginName: {
+				Phase:  dromosv1alpha1.PluginPhaseFailed,
+				Issues: []dromosv1alpha1.Issue{{Description: "the snapshot capture failed, so replicas start cold"}},
+			},
+		}
+		pod := &corev1.Pod{ObjectMeta: metav1.ObjectMeta{
+			Name: "model-00001-pod", Namespace: namespace,
+			Labels: map[string]string{"serving.knative.dev/revision": "model-00001"},
+		}, Status: corev1.PodStatus{
+			Phase:      corev1.PodRunning,
+			Conditions: []corev1.PodCondition{{Type: corev1.PodReady, Status: corev1.ConditionTrue}},
+		}}
+		client := fakeclient.NewClientBuilder().WithScheme(scheme).WithObjects(runner, pod).Build()
+		handler := &ExternalWorkloadHandler{cachedClient: client}
+		service := &servingv1.Service{ObjectMeta: metav1.ObjectMeta{Name: "model", Namespace: namespace}}
+		service.Status.LatestCreatedRevisionName = "model-00001"
+		service.Status.LatestReadyRevisionName = "model-00001"
+		ew := newEW(inferenceWorkloadType, runner.Name)
+
+		handler.applyRunaiStatus(context.Background(), service, ew)
+
+		Expect(ew.Status.ObservedStatus.Phase).To(Equal(v1alpha1.ExWDegradedPhase))
+		Expect(ew.Status.ObservedStatus.Message).To(Equal("the snapshot capture failed, so replicas start cold"))
+	})
+
 	It("publishes authoritative distributed inference phase and replica counts", func() {
 		scheme := newScheme()
 		runner := newRunner("dinf-runner")

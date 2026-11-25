@@ -97,3 +97,12 @@ The following Kubernetes distributions are **partner-compatible**. They are test
 | [Spectro Cloud](https://docs.palette-ai.com/docs/reference/featured-profile-bundles/runai/)    | 2.24              | 1.34                    |
 | [vCluster](https://www.vcluster.com/docs/platform/integrations/certified-stacks/runai)         | 2.24              | 1.34                    |
 | VMware vSphere Kubernetes Service (VKS)                                                        | 2.22<br>2.24      | 1.33<br>1.35            |
+
+## Supported Browsers
+
+NVIDIA Run:ai supports the web UI on Google Chrome only. All Chrome versions are supported. Other browsers, such as Firefox and Microsoft Edge, are not supported, and issues that occur only in those browsers are not addressed.
+
+| Browser       | Support status |
+| ------------- | -------------- |
+| Google Chrome | Supported (all versions) |
+| Other browsers | Not supported |

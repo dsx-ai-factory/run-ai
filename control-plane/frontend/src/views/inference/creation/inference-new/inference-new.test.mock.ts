@@ -3,10 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { InferenceV2 } from "@/swagger-models/assets-service-client";
 import type { DisplayedCluster } from "@/swagger-models/cluster-service-client";
 import type { ProjectMetadata } from "@/swagger-models/org-unit-service-client";
-import { WorkloadDesiredPhase } from "@/swagger-models/workloads-client";
 
 export const clusters: Array<DisplayedCluster> = [
   {
@@ -96,23 +94,3 @@ export const projects: Array<ProjectMetadata> = [
     deserved: {},
   },
 ];
-
-export const emptyMergedWorkload: InferenceV2 = {
-  meta: {
-    name: "",
-    requestedName: "",
-    workloadId: "",
-    projectId: "",
-    clusterId: "",
-    createdBy: "",
-    createdAt: "0001-01-01T00:00:00Z",
-    desiredPhase: WorkloadDesiredPhase.Running,
-  },
-  assets: {
-    environment: {
-      id: "",
-      name: "",
-    },
-  },
-  specificRunParams: {},
-};

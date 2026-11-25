@@ -1,6 +1,0 @@
-allOf:
-  - $ref: "../Workload/SpecificRunConnections.yaml"
-  - $ref: "../Workload/AllowOverQuota.yaml"
-  - replace: me
-nullable: true
-type: object

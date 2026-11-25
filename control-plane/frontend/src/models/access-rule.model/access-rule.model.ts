@@ -62,7 +62,7 @@ export const subjectTypeOptionsWithSSO: ISubjectTypeOption[] = [
   allAuthenticatedUsersOption,
 ];
 
-export const excludedResourcesTypes: Set<ResourceType> = new Set([ResourceType.ClusterConfig, ResourceType.AccessKeys]);
+export const excludedResourcesTypes: Set<ResourceType> = new Set([ResourceType.AccessKeys]);
 
 export interface IAccessRuleRecords {
   accessRules: AccessRule[];

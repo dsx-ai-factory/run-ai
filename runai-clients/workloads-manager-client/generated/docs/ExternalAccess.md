@@ -7,6 +7,7 @@ Name | Type | Description | Notes
 **Ingress** | Pointer to **map[string]interface{}** | Full Kubernetes Ingress resource (networking.k8s.io/v1). Used when cluster uses Ingress. | [optional] 
 **Route** | Pointer to **map[string]interface{}** | Full OpenShift Route resource (route.openshift.io/v1). Used when cluster uses Route. | [optional] 
 **HttpRoute** | Pointer to **map[string]interface{}** | Full Gateway API HTTPRoute resource (gateway.networking.k8s.io/v1). Used when cluster uses Gateway API. | [optional] 
+**Inference** | Pointer to [**NullableExternalAccessInference**](ExternalAccessInference.md) |  | [optional] 
 
 ## Methods
 
@@ -132,6 +133,41 @@ HasHttpRoute returns a boolean if a field has been set.
 `func (o *ExternalAccess) UnsetHttpRoute()`
 
 UnsetHttpRoute ensures that no value is present for HttpRoute, not even an explicit nil
+### GetInference
+
+`func (o *ExternalAccess) GetInference() ExternalAccessInference`
+
+GetInference returns the Inference field if non-nil, zero value otherwise.
+
+### GetInferenceOk
+
+`func (o *ExternalAccess) GetInferenceOk() (*ExternalAccessInference, bool)`
+
+GetInferenceOk returns a tuple with the Inference field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetInference
+
+`func (o *ExternalAccess) SetInference(v ExternalAccessInference)`
+
+SetInference sets Inference field to given value.
+
+### HasInference
+
+`func (o *ExternalAccess) HasInference() bool`
+
+HasInference returns a boolean if a field has been set.
+
+### SetInferenceNil
+
+`func (o *ExternalAccess) SetInferenceNil(b bool)`
+
+ SetInferenceNil sets the value for Inference to be an explicit nil
+
+### UnsetInference
+`func (o *ExternalAccess) UnsetInference()`
+
+UnsetInference ensures that no value is present for Inference, not even an explicit nil
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

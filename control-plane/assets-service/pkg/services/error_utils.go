@@ -9,20 +9,12 @@ import (
 	"net/http"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/generated/pkg/api"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 func NewErrorResponse(apiError *api.Error) api.ImplResponse {
 	return api.ImplResponse{
 		Code: int(apiError.Code),
 		Body: *apiError,
-	}
-}
-
-func NewSubmissionErrorResponse(err *workloadsApi.SubmissionErrorV2) api.ImplResponse {
-	return api.ImplResponse{
-		Code: int(err.Code),
-		Body: *err,
 	}
 }
 

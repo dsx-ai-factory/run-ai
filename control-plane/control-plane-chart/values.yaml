@@ -199,14 +199,6 @@ assetsService:
     - PathPrefix(`/api/v2/asset`)
     - PathPrefix(`/api/v1/k8s-objects`)
     - PathPrefix(`/api/v1/workload`)
-    - PathPrefix(`/api/v1/workspace`)
-    - PathPrefix(`/api/v2/workspace`)
-    - PathPrefix(`/api/v1/training`)
-    - PathPrefix(`/api/v2/training`)
-    - PathPrefix(`/api/v1/inference`)
-    - PathPrefix(`/api/v2/inference`)
-    - PathPrefix(`/api/v1/model-inference`)
-    - PathPrefix(`/api/v2/model-inference`)
     - PathPrefix(`/api/v2/huggingface-model/info-request`)
     - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/workspaces`)
     - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/trainings`)
@@ -1297,6 +1289,9 @@ keycloakx:
     otelLogsExporter: none
     otelMetricsExporter: none
     otelEndpoint: http://otel-collector:4318
+    # Extra JVM options appended to the Keycloak JAVA_OPTS_APPEND (after jgroups discovery
+    # and the optional OpenTelemetry agent), e.g. "-Xss512k".
+    extraJavaOpts: ""
   resources:
     requests:
       cpu: '1'

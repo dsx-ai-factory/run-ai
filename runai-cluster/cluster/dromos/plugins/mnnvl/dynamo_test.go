@@ -29,6 +29,20 @@ const dynamoNameField = "name"
 
 // Paths match the Dynamo Kartas in control-plane/workloads/pkg/database/go_migrations/ri/source.
 func dynamoKarta(beta bool) *kartav1alpha1.Karta {
+	if beta {
+		return &kartav1alpha1.Karta{Spec: kartav1alpha1.KartaSpec{StructureDefinition: kartav1alpha1.StructureDefinition{
+			RootComponent: kartav1alpha1.ComponentDefinition{Name: "dynamographdeployment", Kind: &kartav1alpha1.GroupVersionKind{
+				Group: "nvidia.com", Version: "v1beta1", Kind: "DynamoGraphDeployment",
+			}},
+			ChildComponents: []kartav1alpha1.ComponentDefinition{{
+				Name: "component", OwnerRef: ptr.To("dynamographdeployment"),
+				InstanceIdPath:  ptr.To(".spec.components[] | .name"),
+				ScaleDefinition: &kartav1alpha1.ScaleDefinition{ReplicasPath: ptr.To(`.spec.components[] | (.replicas // 1) * (if .multinode == null then 1 else (.multinode.nodeCount // 2) end)`)},
+				SpecDefinition:  &kartav1alpha1.SpecDefinition{PodTemplateSpecPath: ptr.To(".spec.components[] | .podTemplate")},
+			}},
+		}}}
+	}
+
 	version := "v1alpha1"
 	prefix := ".spec.services | .[]"
 	podPrefix := prefix + " | .extraPodSpec"
@@ -37,15 +51,6 @@ func dynamoKarta(beta bool) *kartav1alpha1.Karta {
 	replicasPath := ".spec.services[] | (.replicas // 1) * (.multinode.nodeCount // 1)"
 	resourcesPath := ptr.To(prefix + " | .resources")
 	labelsPath := prefix + " | .labels"
-	if beta {
-		version = "v1beta1"
-		podPrefix = ".spec.components[] | .podTemplate.spec"
-		containerPath = podPrefix + ".containers[] | select(.name == \"main\")"
-		instancePath = ".spec.components[] | .name"
-		replicasPath = ".spec.components[] | (.replicas // 1) * (.multinode.nodeCount // 1)"
-		resourcesPath = nil
-		labelsPath = ".spec.components[] | .podTemplate.metadata.labels"
-	}
 	return &kartav1alpha1.Karta{Spec: kartav1alpha1.KartaSpec{StructureDefinition: kartav1alpha1.StructureDefinition{
 		RootComponent: kartav1alpha1.ComponentDefinition{Name: "dynamographdeployment", Kind: &kartav1alpha1.GroupVersionKind{Group: "nvidia.com", Version: version, Kind: "DynamoGraphDeployment"}},
 		ChildComponents: []kartav1alpha1.ComponentDefinition{{Name: "service", OwnerRef: ptr.To("dynamographdeployment"), InstanceIdPath: ptr.To(instancePath),
@@ -236,6 +241,7 @@ func TestDynamoClaimRoundTrip(t *testing.T) {
   },
   "podTemplate": {
     "spec": {
+      "schedulingGroup": {"podGroupName": "model-group"},
       "containers": [
         {
           "name": "main",
@@ -288,6 +294,9 @@ func TestDynamoClaimRoundTrip(t *testing.T) {
 				g.Expect(workerLabels).To(HaveKeyWithValue(WorkloadNameLabel, runner.Name))
 				pod, _, err := unstructured.NestedMap(worker, podPath...)
 				g.Expect(err).NotTo(HaveOccurred())
+				if tc.beta {
+					g.Expect(pod["schedulingGroup"]).To(Equal(map[string]interface{}{"podGroupName": "model-group"}))
+				}
 				claims, _, err := unstructured.NestedSlice(pod, "resourceClaims")
 				g.Expect(err).NotTo(HaveOccurred())
 				g.Expect(claims).To(Equal([]interface{}{
@@ -421,6 +430,7 @@ func TestDynamoCPUAfterWorker(t *testing.T) {
 
 func TestRemoveIntroducedNullFields(t *testing.T) {
 	for _, tc := range []struct{ name, original, updated, want string }{
+		{"preserve new empty selector", `{}`, `{"selector":{}}`, `{"selector":{}}`},
 		{"new empty parents", `{}`, `{"affinity":{"nodeAffinity":null,"podAffinity":null},"resourceClaims":null}`, `{}`},
 		{"existing empty parent", `{"affinity":{}}`, `{"affinity":{"nodeAffinity":null,"podAffinity":null}}`, `{"affinity":{}}`},
 		{"explicit null parent", `{"affinity":null}`, `{"affinity":{"nodeAffinity":null,"podAffinity":null}}`, `{"affinity":null}`},
@@ -444,10 +454,72 @@ func TestRemoveIntroducedNullFields(t *testing.T) {
 			g.Expect(json.Unmarshal([]byte(tc.original), &original)).To(Succeed())
 			g.Expect(json.Unmarshal([]byte(tc.updated), &updated)).To(Succeed())
 			g.Expect(json.Unmarshal([]byte(tc.want), &want)).To(Succeed())
-			removeIntroducedNullFields(original, updated)
+			removeIntroducedNullFields(original, updated, false)
 			g.Expect(updated).To(Equal(want))
-			removeIntroducedNullFields(original, updated)
+			removeIntroducedNullFields(original, updated, false)
 			g.Expect(updated).To(Equal(want))
+		})
+	}
+}
+
+func TestDynamoV1beta1OptionalFrontendTemplates(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		template string
+	}{
+		{name: "omitted"},
+		{name: "null", template: "null"},
+		{name: "metadata only", template: `{"metadata":{"labels":{"app":"frontend"}}}`},
+		{name: "no main container", template: `{"spec":{"containers":[{"name":"sidecar","image":"metrics:test"}]}}`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			g := NewWithT(t)
+			obj := dynamoResource(t, true, `{"replicas":1,"podTemplate":{"spec":{"containers":[{"name":"main","image":"worker:test","resources":{"limits":{"nvidia.com/gpu":"1"}}}]}}}`)
+			components := obj.Object["spec"].(map[string]interface{})["components"].([]interface{})
+			frontend := components[0].(map[string]interface{})
+			delete(frontend, "podTemplate")
+			if tc.template != "" {
+				var template interface{}
+				g.Expect(json.Unmarshal([]byte(tc.template), &template)).To(Succeed())
+				frontend["podTemplate"] = template
+			}
+			original := obj.DeepCopy()
+			runner := newTestRunner(testWorkloadName, testNamespace, newMnnvlConfig(dromosv1alpha1.MnnvlModeRequired, testGPULabel))
+			for range 2 {
+				state := reconcile.New()
+				g.Expect(newTestPlugin(false).MutateResource(context.Background(), runner, obj, dynamoKarta(true), state)).To(Succeed())
+				g.Expect(state.Issues()).To(BeEmpty())
+				g.Expect(dynamoComponent(t, obj, true, "frontend")).To(Equal(dynamoComponent(t, original, true, "frontend")))
+			}
+		})
+	}
+}
+
+func TestMNNVLKeepsNullOnlyCleanupForOtherWorkloads(t *testing.T) {
+	for _, kind := range []kartav1alpha1.GroupVersionKind{
+		{Group: "apps", Version: "v1", Kind: "Deployment"},
+		{Group: "batch", Version: "v1", Kind: "Job"},
+	} {
+		t.Run(kind.Kind, func(t *testing.T) {
+			g := NewWithT(t)
+			obj := &unstructured.Unstructured{}
+			g.Expect(json.Unmarshal([]byte(`{"metadata":{"name":"cpu","namespace":"test"},"spec":{"template":{"spec":{"containers":[{"name":"main","image":"cpu:test"}]}}}}`), &obj.Object)).To(Succeed())
+			obj.SetAPIVersion(kind.Group + "/" + kind.Version)
+			obj.SetKind(kind.Kind)
+			definition := &kartav1alpha1.Karta{Spec: kartav1alpha1.KartaSpec{StructureDefinition: kartav1alpha1.StructureDefinition{
+				RootComponent: kartav1alpha1.ComponentDefinition{
+					Name: "workload", Kind: &kind,
+					SpecDefinition: &kartav1alpha1.SpecDefinition{PodTemplateSpecPath: ptr.To(".spec.template")},
+				},
+			}}}
+			runner := newTestRunner(testWorkloadName, testNamespace, newMnnvlConfig(dromosv1alpha1.MnnvlModeRequired, testGPULabel))
+			state := reconcile.New()
+			g.Expect(newTestPlugin(false).MutateResource(context.Background(), runner, obj, definition, state)).To(Succeed())
+			g.Expect(state.Issues()).To(BeEmpty())
+			containers, _, err := unstructured.NestedSlice(obj.Object, "spec", "template", "spec", "containers")
+			g.Expect(err).NotTo(HaveOccurred())
+			g.Expect(containers).To(HaveLen(1))
+			g.Expect(containers[0].(map[string]interface{})).To(HaveKeyWithValue("resources", map[string]interface{}{}))
 		})
 	}
 }

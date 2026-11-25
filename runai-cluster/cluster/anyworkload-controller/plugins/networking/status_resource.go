@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 
+	endpoints "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints"
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/plugin/framework"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/reconcile"
@@ -97,9 +98,19 @@ func (p *Plugin) Status(ctx context.Context, runner *dromosv1alpha1.WorkloadRunn
 		for _, iss := range state.PluginIssues(p) {
 			if iss.IsCritical {
 				status.SetPhase(dromosv1alpha1.PluginPhaseFailed)
+				if cfg.InferenceEndpointIndex() >= 0 {
+					status.SetCondition(metav1.Condition{
+						Type: endpoints.InferenceEndpointReadyCondition, Status: metav1.ConditionFalse,
+						Reason: "ReconcileFailed", Message: iss.Error(), ObservedGeneration: runner.Generation,
+					})
+				}
 				return nil
 			}
 		}
+	}
+
+	if shape != inputAnnotation {
+		setInferenceEndpointDisabled(runner, status)
 	}
 
 	var statusErr error

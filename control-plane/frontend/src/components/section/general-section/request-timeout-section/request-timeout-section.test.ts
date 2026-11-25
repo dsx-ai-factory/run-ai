@@ -12,7 +12,8 @@ import RequestTimeoutSection, {
   REQUEST_TIMEOUT_DEFAULTS,
 } from "./request-timeout-section.vue";
 import { DurationInputSection } from "./duration-input";
-import type { ServingConfiguration, ServingConfigurationRules } from "@/swagger-models/assets-service-client";
+import type { ServingConfiguration } from "@/swagger-models/assets-service-client";
+import type { ServingConfigurationRules } from "@/swagger-models/policy-service-client";
 
 // Helper to mount the component
 const defaultModelValue: ServingConfiguration = {

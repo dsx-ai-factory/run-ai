@@ -5062,6 +5062,91 @@ paths:
           $ref: '#/components/responses/403Forbidden'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
+  '/api/v1/org-unit/node-pools/{nodepoolId}/fair-share-simulation':
+    x-internal: true
+    post:
+      summary: Simulate the fair share of a node pool's org units
+      operationId: simulate_node_pool_fair_share
+      x-service: org-unit-service
+      description: >
+        Computes the GPUs the scheduler would give org units of a node pool for
+        a scenario: a node pool capacity and
+
+        scheduling capabilities, saved or not, and the org units to return with
+        their unsaved changes. The calculation
+
+        covers every department of the node pool, and for projects every project
+        of the parent, including ones the caller
+
+        can't read; the response holds only the requested org units. Org units
+        not in the request keep their stored
+
+        settings and ask for half the capacity. Nothing is saved. The same
+        scenario gives the same result for every caller.
+
+
+        Only saved org units can be simulated; an org unit that doesn't exist
+        yet can't be part of the scenario.
+
+
+        400 covers, besides the schema: `parent` missing for projects or set for
+        departments; limits on while quota is
+
+        off; a rank or limit the capabilities turn off (a quota is ignored while
+        quota is off, and a weight while
+
+        adjustableWeights is off); a quota or limit between -1 and 0; a limit
+        below the quota; a duplicate id; and an org
+
+        unit that isn't on the node pool, isn't readable by the caller, or (for
+        projects) isn't the parent's. These all
+
+        return the same message as an unknown id, so hidden org units aren't
+        revealed: an unreadable org unit is a 400,
+
+        not a 403.
+
+
+        Authorization: simulating departments requires read on departments, and
+        simulating projects requires read on
+
+        projects, in some scope; otherwise 403. The handler checks it, since the
+        required permission depends on
+
+        `orgUnitType`.
+      x-no-authorization: true
+      x-test-coverage:
+        - >-
+          control-plane/org-unit-service/pkg/test/fair_share_simulation_api_test.go
+      tags:
+        - Org unit
+      parameters:
+        - $ref: '#/components/parameters/NodepoolId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FairShareSimulationRequest'
+      responses:
+        '200':
+          description: >-
+            The simulated fair share of every requested org unit, in one
+            response with no paging.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FairShareSimulationResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/org-unit/projects/node-pool-resources:
     get:
       summary: Get projects node pool resources
@@ -8324,475 +8409,6 @@ paths:
       responses:
         '204':
           $ref: '#/components/responses/204NoContent'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '404':
-          $ref: '#/components/responses/404NotFound'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v1/workspace:
-    post:
-      summary: Create workspace.
-      description: >-
-        Creates a workspace from a given set of assets. The set must include one
-        environment asset and can include one compute asset and multiple
-        datasource assets.
-      operationId: create_workspace
-      x-service: assets-service
-      x-no-authorization: true
-      x-internal: true
-      x-test-coverage:
-        - >-
-          control-plane/assets-service/pkg/services/api_workspaces_service_test.go
-      tags:
-        - Workspaces
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/WorkloadCreationRequest'
-      responses:
-        '200':
-          description: Request completed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Workspace'
-        '400':
-          $ref: '#/components/responses/400SubmissionErrorV2'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v2/workspace/merged:
-    get:
-      summary: Get merged workspace
-      description: >-
-        Get combined policy and specificRunParams data for workload creation
-        form
-      operationId: get_workspace_merged
-      x-service: assets-service
-      x-internal: true
-      x-test-coverage:
-        - control-plane/assets-service/pkg/services/api_workloads_merge_test.go
-        - e2e/src/test/suites/parallel/submitUI/connectToJupiterUI.test.ts
-      x-no-authorization: true
-      tags:
-        - Workspaces
-      parameters:
-        - $ref: '#/components/parameters/ProjectIdOptional'
-        - $ref: '#/components/parameters/WorkloadIdOptional'
-      responses:
-        '200':
-          description: Request completed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WorkspaceV2'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '404':
-          $ref: '#/components/responses/404NotFound'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v2/workspace:
-    post:
-      summary: 'Create a workspace - assets based [Experimental]'
-      description: >-
-        Creates a workspace from a given set of assets. The set must include one
-        environment asset and can include one compute asset and multiple
-        datasource assets.
-      operationId: create_workspace_v2
-      x-service: assets-service
-      x-internal: true
-      x-no-authorization: true
-      x-test-coverage:
-        - >-
-          control-plane/assets-service/pkg/services/api_workspaces_service_test.go
-        - e2e/src/test/suites/parallel/submitUI/connectToJupiterUI.test.ts
-      tags:
-        - Workspaces
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/WorkspaceCreationRequestV2'
-      responses:
-        '200':
-          description: Request completed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WorkspaceV2'
-        '400':
-          $ref: '#/components/responses/400SubmissionErrorV2'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-  '/api/v2/workspace/{workloadId}':
-    get:
-      summary: 'Get workspace data - assets based [Experimental]'
-      description: >-
-        Retrieves the data of a training, i.e. its set of assets and specific
-        env.
-      operationId: get_workspace_by_id_v2
-      x-service: assets-service
-      x-internal: true
-      x-test-coverage:
-        - >-
-          control-plane/assets-service/pkg/services/api_workspaces_service_test.go
-        - e2e/src/test/suites/parallel/submitUI/connectToJupiterUI.test.ts
-      x-no-authorization: true
-      tags:
-        - Workspaces
-      parameters:
-        - $ref: '#/components/parameters/WorkloadId'
-      responses:
-        '200':
-          description: Request completed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WorkspaceV2'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '404':
-          $ref: '#/components/responses/404NotFound'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v1/training:
-    post:
-      summary: Create training workload.
-      description: >-
-        Creates a training workload from a given set of assets. The set must
-        include one environment asset and can include one compute asset and
-        multiple datasource assets.
-      operationId: create_training
-      x-service: assets-service
-      x-no-authorization: true
-      x-internal: true
-      x-test-coverage:
-        - >-
-          control-plane/assets-service/pkg/services/api_workspaces_service_test.go
-        - e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts
-      tags:
-        - Trainings
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/WorkloadCreationRequest'
-      responses:
-        '200':
-          description: Request completed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Training'
-        '400':
-          $ref: '#/components/responses/400SubmissionErrorV2'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v2/training/merged:
-    get:
-      summary: Get merged training
-      description: Get combined policy and workload data for training creation form
-      operationId: get_training_merged
-      x-service: assets-service
-      x-internal: true
-      x-test-coverage:
-        - control-plane/assets-service/pkg/services/api_workloads_merge_test.go
-        - e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts
-      x-no-authorization: true
-      tags:
-        - Trainings
-      parameters:
-        - $ref: '#/components/parameters/ProjectIdOptional'
-        - $ref: '#/components/parameters/WorkloadIdOptional'
-        - $ref: '#/components/parameters/IsDistributedQuery'
-        - $ref: '#/components/parameters/IsDistributedInferenceQuery'
-      responses:
-        '200':
-          description: Request completed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TrainingV2'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '404':
-          $ref: '#/components/responses/404NotFound'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v2/training:
-    post:
-      summary: 'Create a training - assets based [Experimental]'
-      description: >-
-        Creates a training from a given set of assets. The set must include one
-        environment asset and can include one compute asset and multiple
-        datasource assets.
-      operationId: create_training_v2
-      x-service: assets-service
-      x-internal: true
-      x-test-coverage:
-        - e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts
-      x-no-authorization: true
-      tags:
-        - Trainings
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TrainingCreationRequestV2'
-      responses:
-        '200':
-          description: Request completed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TrainingV2'
-        '400':
-          $ref: '#/components/responses/400SubmissionErrorV2'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-  '/api/v2/training/{workloadId}':
-    get:
-      summary: 'Get training data - assets based. [Experimental]'
-      description: >-
-        Retrieves the content of the training, i.e. its set of assets and
-        specific env.
-      operationId: get_training_by_id_v2
-      x-service: assets-service
-      x-internal: true
-      x-test-coverage:
-        - e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts
-      x-no-authorization: true
-      tags:
-        - Trainings
-      parameters:
-        - $ref: '#/components/parameters/WorkloadId'
-      responses:
-        '200':
-          description: Request completed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TrainingV2'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '404':
-          $ref: '#/components/responses/404NotFound'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v1/inference:
-    post:
-      summary: Create inference workload.
-      description: >-
-        Creates an inference workload from a given set of assets. The set must
-        include one environment asset and can include one compute asset and
-        multiple datasource assets.
-      operationId: create_inference
-      x-service: assets-service
-      x-test-coverage:
-        - >-
-          e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
-      x-no-authorization: true
-      x-internal: true
-      tags:
-        - Inferences
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/WorkloadCreationRequest'
-      responses:
-        '200':
-          description: Request completed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Inference'
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-  '/api/v1/inference/{workloadId}':
-    get:
-      summary: Get inference content.
-      description: >-
-        Retrieves the data of an inference, i.e. its set of assets and specific
-        env.
-      operationId: get_inference_by_id
-      x-no-authorization: true
-      x-internal: true
-      x-service: assets-service
-      x-test-coverage:
-        - >-
-          e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
-      tags:
-        - Inferences
-      parameters:
-        - $ref: '#/components/parameters/WorkloadId'
-      responses:
-        '200':
-          description: Request completed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Inference'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '404':
-          $ref: '#/components/responses/404NotFound'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-    delete:
-      summary: Delete an inference workload.
-      description: 'Delete inference workload leftover from backend, by id.'
-      operationId: delete_inference_by_id
-      x-no-authorization: true
-      x-service: assets-service
-      x-internal: true
-      x-test-coverage:
-        - >-
-          control-plane/assets-service/pkg/services/api_inference_service_test.go
-      tags:
-        - Inferences
-      parameters:
-        - $ref: '#/components/parameters/WorkloadId'
-      responses:
-        '202':
-          $ref: '#/components/responses/202Accepted'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '404':
-          $ref: '#/components/responses/404NotFound'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v2/inference:
-    post:
-      summary: Create an inference - assets based.
-      description: >-
-        Creates an inference from a given set of assets. The set must include
-        one environment asset and can include one compute asset and multiple
-        datasource assets.
-      operationId: create_inference_v2
-      x-service: assets-service
-      x-no-authorization: true
-      x-internal: true
-      x-test-coverage:
-        - >-
-          control-plane/assets-service/pkg/services/api_inference_service_test.go
-      tags:
-        - Inferences
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InferenceCreationRequestV2'
-      responses:
-        '200':
-          description: Request completed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InferenceV2'
-        '400':
-          $ref: '#/components/responses/400SubmissionErrorV2'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v2/inference/merged:
-    get:
-      summary: Get merged inference workload
-      description: >-
-        Get combined policy and specificRunParams data for workload creation
-        form
-      operationId: get_inference_merged
-      x-service: assets-service
-      x-internal: true
-      x-test-coverage:
-        - control-plane/assets-service/pkg/services/api_workloads_merge_test.go
-      x-no-authorization: true
-      tags:
-        - Inferences
-      parameters:
-        - $ref: '#/components/parameters/ProjectIdOptional'
-        - $ref: '#/components/parameters/WorkloadIdOptional'
-      responses:
-        '200':
-          description: Request completed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InferenceV2'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '404':
-          $ref: '#/components/responses/404NotFound'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-  '/api/v2/inference/{workloadId}':
-    get:
-      summary: Get inference data - assets based.
-      description: >-
-        Retrieves the data of a training, i.e. its set of assets and specific
-        env.
-      operationId: get_inference_by_id_v2
-      x-service: assets-service
-      x-internal: true
-      x-test-coverage:
-        - >-
-          control-plane/assets-service/pkg/services/api_inference_service_test.go
-        - e2e/src/test/suites/parallel/submitUI/inferenceUI.test.ts
-      x-no-authorization: true
-      tags:
-        - Inferences
-      parameters:
-        - $ref: '#/components/parameters/WorkloadId'
-      responses:
-        '200':
-          description: Request completed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InferenceV2'
         '401':
           $ref: '#/components/responses/401Unauthorized'
         '403':
@@ -18808,7 +18424,7 @@ paths:
   /api/v1/workloads/workspaces:
     post:
       summary: Create a workspace.
-      operationId: create_workspace1
+      operationId: create_workspace
       description: Create a new workspace in a specific project in the cluster.
       x-service: workloads
       x-test-coverage:
@@ -19030,7 +18646,7 @@ paths:
   /api/v1/workloads/trainings:
     post:
       summary: Create a training.
-      operationId: create_training1
+      operationId: create_training
       description: Create a training workload using container related fields.
       x-service: workloads
       x-test-coverage:
@@ -19720,7 +19336,7 @@ paths:
   /api/v1/workloads/inferences:
     post:
       summary: Create an inference.
-      operationId: create_inference1
+      operationId: create_inference
       description: Create an inference using container related fields.
       x-service: workloads
       x-test-coverage:
@@ -19741,7 +19357,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Inference1'
+                $ref: '#/components/schemas/Inference'
         '400':
           $ref: '#/components/responses/400BadRequest'
         '401':
@@ -19875,7 +19491,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Inference1'
+                $ref: '#/components/schemas/Inference'
         '401':
           $ref: '#/components/responses/401Unauthorized'
         '403':
@@ -19911,7 +19527,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Inference1'
+                $ref: '#/components/schemas/Inference'
         '401':
           $ref: '#/components/responses/401Unauthorized'
         '403':
@@ -27831,6 +27447,17 @@ components:
       description: Holds cluster configuration values.
       type: object
       properties:
+        inferenceEndpointSchemaVersion:
+          x-internal: true
+          type: string
+          nullable: true
+          description: >-
+            InferenceEndpoint integration contract declared by the operator when
+            Agent, Anyworkload and inference-endpoint-controller are enabled. v1
+            means the Agent and the Anyworkload networking plugin understand the
+            externalAccess.inference block in networking endpoints. Omitted by
+            older clusters. Operand readiness and administrator Gateway settings
+            must also be checked before enabling new workloads.
         workloadOwnershipProtection:
           type: boolean
           nullable: true
@@ -30858,6 +30485,7 @@ components:
       enum:
         - CPU_QUOTAS_TO_DEFAULT
         - LIMITS_TO_DEFAULT
+        - NEGATIVE_WEIGHTS_TO_DEFAULT
     OrgUnitsNodepoolResourcesResetRequest:
       type: object
       required:
@@ -32550,6 +32178,7 @@ components:
         - clusterId
         - gpuDeserved
         - gpuOverQuotaWeight
+        - gpuLimit
     ResourcesPerNodePool:
       type: object
       properties:
@@ -32777,6 +32406,255 @@ components:
         deservedSum:
           type: number
           format: double
+    FairShareSimulationResources:
+      type: object
+      required:
+        - gpu
+      properties:
+        gpu:
+          type: number
+          format: double
+          minimum: 0
+          example: 4
+    FairShareSimulationSchedulingCapabilities:
+      type: object
+      description: 'The node pool''s scheduling capabilities to simulate, saved or not.'
+      required:
+        - quota
+        - ranks
+        - adjustableWeights
+        - limits
+      properties:
+        quota:
+          type: boolean
+        ranks:
+          type: boolean
+        adjustableWeights:
+          type: boolean
+        limits:
+          type: boolean
+          description: Whether GPU limits apply. Only allowed when quota is true.
+    FairShareSimulationNodePool:
+      type: object
+      description: 'The node pool to simulate, saved or not.'
+      required:
+        - capacity
+        - schedulingCapabilities
+      properties:
+        capacity:
+          description: >
+            GPUs to split. 0 is valid; quotas are still granted, as the
+            scheduler does, and nothing is given above them.
+
+            Required; null is rejected.
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/FairShareSimulationResources'
+        schedulingCapabilities:
+          description: Required; null is rejected.
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/FairShareSimulationSchedulingCapabilities'
+    FairShareSimulationParent:
+      type: object
+      description: >
+        The department whose projects are simulated, with its stored settings.
+        Required when orgUnitType is project; not
+
+        allowed for departments. It needn't be readable by the caller.
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          example: '4500014'
+    FairShareSimulationRank:
+      type: string
+      description: An unsaved rank. Only while ranks is on.
+      enum:
+        - Highest
+        - VeryHigh
+        - High
+        - MediumHigh
+        - Medium
+        - MediumLow
+        - Low
+        - VeryLow
+        - Lowest
+      example: High
+    FairShareSimulationGpuSettings:
+      type: object
+      description: >
+        GPU settings that replace the stored ones. An omitted or null field
+        keeps its stored value; unlike the org unit
+
+        APIs, null doesn't mean unlimited here: send -1.
+      properties:
+        deserved:
+          type: number
+          format: double
+          minimum: -1
+          nullable: true
+          description: >-
+            The GPU quota; -1 means unlimited. Values between -1 and 0 are
+            rejected. Ignored while quota is off.
+          example: 4
+        limit:
+          type: number
+          format: double
+          minimum: -1
+          nullable: true
+          description: >
+            The maximum GPU allocation; -1 means unlimited. Values between -1
+            and 0 are rejected. Only while limits is on,
+
+            and not below the quota.
+          example: -1
+        overQuotaWeight:
+          type: number
+          format: double
+          minimum: 0
+          nullable: true
+          description: >-
+            The over-quota weight within the rank. Ignored while
+            adjustableWeights is off, where the weight is the quota.
+          example: 2
+    FairShareSimulationOrgUnit:
+      type: object
+      description: >
+        A requested org unit with its unsaved changes. Each field replaces the
+        stored value on its own; omitted fields keep
+
+        it. `demand` is the GPUs the org unit asks for, capped by its limit;
+        without it, half the node pool's capacity.
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          example: '4500014'
+        rank:
+          description: >-
+            An unsaved rank. Only while ranks is on. Omitted or null keeps the
+            stored rank.
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/FairShareSimulationRank'
+        gpu:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/FairShareSimulationGpuSettings'
+        demand:
+          description: >-
+            The GPUs the org unit asks for, capped by its limit. Omitted or null
+            asks for half the capacity.
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/FairShareSimulationResources'
+    FairShareSimulationRequest:
+      type: object
+      description: >
+        A scenario to simulate: the node pool and the org units to return, with
+        their unsaved changes. Every org unit
+
+        without a demand asks for half the node pool's capacity, capped by its
+        limit. For departments, every department
+
+        competes. For projects, the other departments ask for nothing, and the
+        parent asks for the sum of its projects'
+
+        demand, capped by its limit.
+      required:
+        - nodePool
+        - orgUnitType
+        - orgUnits
+      properties:
+        nodePool:
+          description: Required; null is rejected.
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/FairShareSimulationNodePool'
+        orgUnitType:
+          type: string
+          description: The type of the requested org units. One type per request.
+          enum:
+            - department
+            - project
+        parent:
+          description: Required for projects; not allowed for departments.
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/FairShareSimulationParent'
+        orgUnits:
+          type: array
+          minItems: 1
+          maxItems: 500
+          description: >
+            The org units to return, with their unsaved changes. Every org unit
+            with an unsaved change must be sent: a change
+
+            that isn't sent isn't simulated.
+          items:
+            $ref: '#/components/schemas/FairShareSimulationOrgUnit'
+    FairShareSimulationResult:
+      type: object
+      description: >
+        The simulated result of one org unit, in GPUs. Values may be fractional,
+        as in the scheduler; the client rounds.
+
+        - `demand`: what the org unit asked for, after the default demand and
+        the limit were applied.
+
+        - `fairShare`: what the scheduler would give it, the sum of `guaranteed`
+        and `overQuota`.
+
+        - `guaranteed`: the part of the fair share within its quota.
+
+        - `overQuota`: the part of the fair share above its quota.
+
+        - `unmet`: `demand` minus `fairShare`, never below 0.
+      required:
+        - id
+        - demand
+        - fairShare
+        - guaranteed
+        - overQuota
+        - unmet
+        - weightShareInRank
+      properties:
+        id:
+          type: string
+          example: '4500014'
+        demand:
+          $ref: '#/components/schemas/FairShareSimulationResources'
+        fairShare:
+          $ref: '#/components/schemas/FairShareSimulationResources'
+        guaranteed:
+          $ref: '#/components/schemas/FairShareSimulationResources'
+        overQuota:
+          $ref: '#/components/schemas/FairShareSimulationResources'
+        unmet:
+          $ref: '#/components/schemas/FairShareSimulationResources'
+        weightShareInRank:
+          type: number
+          format: double
+          description: >
+            The org unit's effective over-quota weight (the quota while
+            adjustableWeights is off) divided by the total of its
+
+            rank among its siblings, including ones the caller can't read. With
+            ranks off, among all siblings.
+          example: 0.25
+    FairShareSimulationResponse:
+      type: object
+      required:
+        - orgUnits
+      properties:
+        orgUnits:
+          type: array
+          description: 'One result per requested org unit, in the request''s order.'
+          items:
+            $ref: '#/components/schemas/FairShareSimulationResult'
     ProjectNodePoolResourcesFilterSortFields:
       type: string
       enum:
@@ -32788,6 +32666,7 @@ components:
         - clusterId
         - gpuDeserved
         - gpuOverQuotaWeight
+        - gpuLimit
     ProjectNodePoolResources:
       type: object
       required:
@@ -38736,1533 +38615,6 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/WorkloadStatusUpdate'
-    Namespace:
-      description: Namespace of the project in which the workload should be created.
-      type: string
-      minLength: 1
-    DistMaster:
-      description: |
-        Parameters which apply to the master in a distributed training.
-      nullable: true
-      type: object
-      properties:
-        assets:
-          $ref: '#/components/schemas/AssetsIds'
-        specificEnv:
-          $ref: '#/components/schemas/SpecificRunParams'
-    Distributed:
-      description: |
-        Parameters which apply to distributed training.
-      allOf:
-        - properties:
-            numWorkers:
-              type: integer
-            noMaster:
-              type: boolean
-              nullable: true
-            distFramework:
-              $ref: '#/components/schemas/DistributedFramework'
-            master:
-              $ref: '#/components/schemas/DistMaster'
-      nullable: true
-      type: object
-    WorkloadCreationRequest:
-      description: >-
-        Request to create a workload from a set of assets and an optional set of
-        specific env parameters.
-      required:
-        - name
-        - clusterId
-        - projectId
-        - namespace
-        - assets
-      properties:
-        name:
-          description: The name of the workload.
-          type: string
-          minLength: 1
-        clusterId:
-          $ref: '#/components/schemas/ClusterId'
-        projectId:
-          $ref: '#/components/schemas/ProjectIdAsNumber'
-        namespace:
-          $ref: '#/components/schemas/Namespace'
-        assets:
-          $ref: '#/components/schemas/AssetsIds'
-        specificEnv:
-          $ref: '#/components/schemas/SpecificRunParams'
-        distributed:
-          $ref: '#/components/schemas/Distributed'
-    ComplianceIssuesV2:
-      properties:
-        complianceIssues:
-          type: array
-          items:
-            type: object
-            required:
-              - details
-              - field
-            properties:
-              field:
-                type: string
-                example: compute.gpuDevicesRequest
-              details:
-                type: string
-                example: value must be no less than 3
-              rule:
-                $ref: '#/components/schemas/PolicyRuleEnum'
-      nullable: true
-      type: object
-    SubmissionErrorV2:
-      allOf:
-        - $ref: '#/components/schemas/Error'
-        - $ref: '#/components/schemas/ComplianceIssuesV2'
-    DepartmentId:
-      description: The id of the department.
-      type: string
-      minLength: 1
-      example: 2
-      pattern: .*
-    WorkloadDesiredPhase:
-      description: The desired phase of the workload.
-      type: string
-      enum:
-        - Running
-        - Stopped
-        - Deleted
-    Phase:
-      type: string
-      enum:
-        - Creating
-        - Initializing
-        - Resuming
-        - Pending
-        - Deleting
-        - Running
-        - Updating
-        - Stopped
-        - Stopping
-        - Degraded
-        - Failed
-        - Completed
-        - Terminating
-        - Unknown
-    WorkloadMeta:
-      required:
-        - name
-        - requestedName
-        - workloadId
-        - projectId
-        - clusterId
-        - createdBy
-        - createdAt
-        - desiredPhase
-      properties:
-        name:
-          $ref: '#/components/schemas/WorkloadName'
-        requestedName:
-          description: >-
-            The name as was requested for the workload. If useGivenNameAsPrefix,
-            in the creation request, is false, name and requestedName should be
-            identical. Otherwise, name should be composed of requestedName
-            followed by a suffix of random characters.
-          type: string
-        workloadId:
-          $ref: '#/components/schemas/WorkloadId'
-        projectId:
-          $ref: '#/components/schemas/ProjectId'
-        departmentId:
-          $ref: '#/components/schemas/DepartmentId'
-        clusterId:
-          $ref: '#/components/schemas/ClusterId'
-        createdBy:
-          description: The user who created the workload
-          type: string
-          example: test@lab.com
-        createdAt:
-          description: The creation time of the workload.
-          type: string
-          format: date-time
-          example: '2022-01-01T03:49:52.531Z'
-        deletedAt:
-          description: The deletion time of the workload.
-          type: string
-          nullable: true
-          format: date-time
-          example: '2022-01-01T03:49:52.531Z'
-        desiredPhase:
-          $ref: '#/components/schemas/WorkloadDesiredPhase'
-        actualPhase:
-          $ref: '#/components/schemas/Phase'
-    WorkspaceSpecificRunParams:
-      allOf:
-        - $ref: '#/components/schemas/SpecificRunConnections'
-        - $ref: '#/components/schemas/AllowOverQuota'
-        - nullable: true
-          properties:
-            annotations:
-              $ref: '#/components/schemas/Annotations'
-            args:
-              $ref: '#/components/schemas/Args'
-            autoDeletionTimeAfterCompletionSeconds:
-              $ref: '#/components/schemas/AutoDeletionTimeAfterPreemption'
-            backoffLimit:
-              $ref: '#/components/schemas/BackoffLimit'
-            category:
-              $ref: '#/components/schemas/Category'
-            command:
-              $ref: '#/components/schemas/Command'
-            environmentVariables:
-              $ref: '#/components/schemas/EnvironmentVariablesOfAsset'
-            imagePullSecrets:
-              $ref: '#/components/schemas/ImagePullSecrets'
-            labels:
-              $ref: '#/components/schemas/Labels'
-            nodeAffinityRequired:
-              $ref: '#/components/schemas/NodeAffinityRequired'
-            nodePools:
-              $ref: '#/components/schemas/NodePools'
-            nodeType:
-              $ref: '#/components/schemas/NodeType1'
-            podAffinity:
-              $ref: '#/components/schemas/PodAffinity'
-            preemptibility:
-              $ref: '#/components/schemas/Preemptibility'
-            priorityClass:
-              $ref: '#/components/schemas/PriorityClass'
-            restartPolicy:
-              $ref: '#/components/schemas/RestartPolicy'
-            runAsGid:
-              $ref: '#/components/schemas/RunAsGid'
-            runAsUid:
-              $ref: '#/components/schemas/RunAsUid'
-            supplementalGroups:
-              $ref: '#/components/schemas/SupplementalGroups'
-            terminateAfterPreemption:
-              $ref: '#/components/schemas/TerminateAfterPreemption'
-            terminationGracePeriodSeconds:
-              $ref: '#/components/schemas/TerminationGracePeriod'
-            tolerations:
-              $ref: '#/components/schemas/Tolerations'
-          type: object
-      nullable: true
-      type: object
-    DataVolume:
-      properties:
-        id:
-          description: The unique identifier of the data volume. (mandatory)
-          type: string
-          format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
-          nullable: true
-        mountPath:
-          description: The path where the data volume will be mounted. (mandatory)
-          type: string
-          example: /mnt/data
-          nullable: true
-          pattern: .*
-          maxLength: 4096
-      nullable: true
-      type: object
-    SecretFieldsUpdatable:
-      properties:
-        mountPath:
-          description: >-
-            Local path within the workload to which the Secret will be mapped
-            to. (mandatory)
-          type: string
-          minLength: 1
-          nullable: true
-        defaultMode:
-          $ref: '#/components/schemas/DefaultMode'
-      nullable: true
-      type: object
-    SecretFieldsNonUpdatable:
-      properties:
-        secret:
-          description: The name of the Secret resource. (mandatory)
-          type: string
-          minLength: 1
-          nullable: true
-      nullable: true
-      type: object
-    Secret:
-      allOf:
-        - $ref: '#/components/schemas/SecretFieldsUpdatable'
-        - $ref: '#/components/schemas/SecretFieldsNonUpdatable'
-    DatasourceDefaults:
-      properties:
-        hostPath:
-          $ref: '#/components/schemas/HostPath'
-        nfs:
-          $ref: '#/components/schemas/Nfs'
-        pvc:
-          $ref: '#/components/schemas/Pvc'
-        git:
-          $ref: '#/components/schemas/GitCommon'
-        s3:
-          $ref: '#/components/schemas/S3Common'
-        dataVolume:
-          $ref: '#/components/schemas/DataVolume'
-        configMapVolume:
-          $ref: '#/components/schemas/ConfigMap'
-        secretVolume:
-          $ref: '#/components/schemas/Secret'
-      nullable: true
-      type: object
-    AssetsDefaults:
-      properties:
-        datasources:
-          $ref: '#/components/schemas/DatasourceDefaults'
-      nullable: true
-      type: object
-    SpecificRunParamAttrDefaults:
-      properties:
-        tolerations:
-          $ref: '#/components/schemas/Toleration'
-      nullable: true
-      type: object
-    AttributeDefaults:
-      properties:
-        assets:
-          $ref: '#/components/schemas/AssetsDefaults'
-        specificRunParams:
-          $ref: '#/components/schemas/SpecificRunParamAttrDefaults'
-      nullable: true
-      type: object
-    ProjectIdOptional:
-      description: The id of the project.
-      type: integer
-      format: int32
-      example: 1
-      nullable: true
-    SourceOfRule:
-      description: >-
-        This field is used by the system along with effective rules, in order to
-        specify the org unit from which this effective rule has been derived. It
-        should be left empty when sending apply policy requests.
-      required:
-        - scope
-      properties:
-        scope:
-          $ref: '#/components/schemas/ScopeType'
-        projectId:
-          $ref: '#/components/schemas/ProjectIdOptional'
-        departmentId:
-          $ref: '#/components/schemas/DepartmentIdOptional'
-        clusterId:
-          $ref: '#/components/schemas/ClusterIdOptional'
-        isFallback:
-          description: source of this rule is the fallback policy
-          type: boolean
-      example:
-        scope: project
-        projectId: 3
-      nullable: true
-      type: object
-    StringRulesCommon:
-      properties:
-        sourceOfRule:
-          $ref: '#/components/schemas/SourceOfRule'
-        required:
-          description: 'Whether the field is mandatory, default to false.'
-          type: boolean
-          nullable: true
-        canEdit:
-          description: 'Whether the value of the field is editable, default to true'
-          type: boolean
-          nullable: true
-        blocked:
-          description: >-
-            Blocks the field to prevent workloads from specifying any value for
-            it.
-          type: boolean
-          nullable: true
-      example:
-        required: true
-        canEdit: false
-        blocked: false
-    StringOption:
-      description: >-
-        One of the values that the field can be assigned to, when options police
-        is applied on the field.
-      required:
-        - value
-      properties:
-        value:
-          description: The value that the field should hold
-          type: string
-          pattern: .*
-        displayed:
-          description: >-
-            Textual description of the value. to be used by user interface
-            applications.
-          type: string
-          nullable: true
-          pattern: .*
-      example:
-        value: value
-        displayed: A description of the value.
-    StringRulesOptions:
-      properties:
-        options:
-          description: Set of options that the value of the field must be chosen from.
-          type: array
-          items:
-            $ref: '#/components/schemas/StringOption'
-          nullable: true
-    StringRules:
-      allOf:
-        - $ref: '#/components/schemas/StringRulesCommon'
-        - $ref: '#/components/schemas/StringRulesOptions'
-      nullable: true
-      type: object
-    DataVolumeRules:
-      properties:
-        id:
-          $ref: '#/components/schemas/StringRules'
-        mountPath:
-          $ref: '#/components/schemas/StringRules'
-      nullable: true
-      type: object
-    ItemRules:
-      properties:
-        sourceOfRule:
-          $ref: '#/components/schemas/SourceOfRule'
-        canAdd:
-          description: Whether it is permitted to add items. Default to true.
-          type: boolean
-          nullable: true
-        locked:
-          description: >-
-            Set of keys for items that are "locked", i.e. cannot be removed or
-            deleted.
-          type: array
-          items:
-            type: string
-          example:
-            - HOME
-            - USER
-      nullable: true
-      type: object
-    DataVolumesRules:
-      properties:
-        attributes:
-          $ref: '#/components/schemas/DataVolumeRules'
-        instances:
-          $ref: '#/components/schemas/ItemRules'
-      nullable: true
-      type: object
-    BooleanRules:
-      properties:
-        sourceOfRule:
-          $ref: '#/components/schemas/SourceOfRule'
-        required:
-          description: Whether the field is mandatory. default to false.
-          type: boolean
-          nullable: true
-        canEdit:
-          description: Whether the value of the field is editable. default to true
-          type: boolean
-          nullable: true
-      nullable: true
-      type: object
-    PvcAccessModesRules:
-      description: Rules for access mode(s) for a newly created PVC.
-      properties:
-        readWriteOnce:
-          $ref: '#/components/schemas/BooleanRules'
-        readOnlyMany:
-          $ref: '#/components/schemas/BooleanRules'
-        readWriteMany:
-          $ref: '#/components/schemas/BooleanRules'
-      nullable: true
-      type: object
-    ClaimInfoRules:
-      properties:
-        size:
-          $ref: '#/components/schemas/StringRules'
-        storageClass:
-          $ref: '#/components/schemas/StringRules'
-        accessModes:
-          $ref: '#/components/schemas/PvcAccessModesRules'
-      nullable: true
-      type: object
-    PvcRules:
-      properties:
-        claimName:
-          $ref: '#/components/schemas/StringRules'
-        path:
-          $ref: '#/components/schemas/StringRules'
-        readOnly:
-          $ref: '#/components/schemas/BooleanRules'
-        claimInfo:
-          $ref: '#/components/schemas/ClaimInfoRules'
-      nullable: true
-      type: object
-    PvcsRules:
-      properties:
-        attributes:
-          $ref: '#/components/schemas/PvcRules'
-        instances:
-          $ref: '#/components/schemas/ItemRules'
-      nullable: true
-      type: object
-    HostPathMountPropagationOptions:
-      properties:
-        options:
-          type: array
-          items:
-            required:
-              - value
-            properties:
-              value:
-                $ref: '#/components/schemas/HostPathMountPropagation'
-              displayed:
-                description: Textual description of the value
-                type: string
-                nullable: true
-                pattern: .*
-          nullable: true
-    HostPathMountPropagationRules:
-      allOf:
-        - $ref: '#/components/schemas/StringRulesCommon'
-        - $ref: '#/components/schemas/HostPathMountPropagationOptions'
-      nullable: true
-      type: object
-    HostPathRules:
-      properties:
-        path:
-          $ref: '#/components/schemas/StringRules'
-        readOnly:
-          $ref: '#/components/schemas/BooleanRules'
-        mountPath:
-          $ref: '#/components/schemas/StringRules'
-        mountPropagation:
-          $ref: '#/components/schemas/HostPathMountPropagationRules'
-      nullable: true
-      type: object
-    HostPathsRules:
-      properties:
-        attributes:
-          $ref: '#/components/schemas/HostPathRules'
-        instances:
-          $ref: '#/components/schemas/ItemRules'
-      nullable: true
-      type: object
-    NfsRules:
-      properties:
-        path:
-          $ref: '#/components/schemas/StringRules'
-        readOnly:
-          $ref: '#/components/schemas/BooleanRules'
-        server:
-          $ref: '#/components/schemas/StringRules'
-        mountPath:
-          $ref: '#/components/schemas/StringRules'
-      nullable: true
-      type: object
-    NfssRules:
-      properties:
-        attributes:
-          $ref: '#/components/schemas/NfsRules'
-        instances:
-          $ref: '#/components/schemas/ItemRules'
-      nullable: true
-      type: object
-    GitRules:
-      properties:
-        repository:
-          $ref: '#/components/schemas/StringRules'
-        branch:
-          $ref: '#/components/schemas/StringRules'
-        revision:
-          $ref: '#/components/schemas/StringRules'
-        path:
-          $ref: '#/components/schemas/StringRules'
-      nullable: true
-      type: object
-    GitsRules:
-      properties:
-        attributes:
-          $ref: '#/components/schemas/GitRules'
-        instances:
-          $ref: '#/components/schemas/ItemRules'
-      nullable: true
-      type: object
-    ConfigMapRules:
-      properties:
-        configMap:
-          $ref: '#/components/schemas/StringRules'
-        mountPath:
-          $ref: '#/components/schemas/StringRules'
-        subPath:
-          $ref: '#/components/schemas/StringRules'
-        defaultMode:
-          $ref: '#/components/schemas/StringRules'
-      nullable: true
-      type: object
-    ConfigMapsRules:
-      properties:
-        attributes:
-          $ref: '#/components/schemas/ConfigMapRules'
-        instances:
-          $ref: '#/components/schemas/ItemRules'
-      nullable: true
-      type: object
-    SecretRules:
-      properties:
-        secret:
-          $ref: '#/components/schemas/StringRules'
-        mountPath:
-          $ref: '#/components/schemas/StringRules'
-        defaultMode:
-          $ref: '#/components/schemas/StringRules'
-      nullable: true
-      type: object
-    SecretsRules:
-      properties:
-        attributes:
-          $ref: '#/components/schemas/SecretRules'
-        instances:
-          $ref: '#/components/schemas/ItemRules'
-      nullable: true
-      type: object
-    EmptyDirRules:
-      properties:
-        path:
-          $ref: '#/components/schemas/StringRules'
-        medium:
-          $ref: '#/components/schemas/StringRules'
-        sizeLimit:
-          $ref: '#/components/schemas/StringRules'
-      nullable: true
-      type: object
-    EmptyDirsRules:
-      properties:
-        attributes:
-          $ref: '#/components/schemas/EmptyDirRules'
-        instances:
-          $ref: '#/components/schemas/ItemRules'
-      nullable: true
-      type: object
-    S3Rules:
-      properties:
-        bucket:
-          $ref: '#/components/schemas/StringRules'
-        path:
-          $ref: '#/components/schemas/StringRules'
-        url:
-          $ref: '#/components/schemas/StringRules'
-      nullable: true
-      type: object
-    S3sRules:
-      properties:
-        attributes:
-          $ref: '#/components/schemas/S3Rules'
-        instances:
-          $ref: '#/components/schemas/ItemRules'
-      nullable: true
-      type: object
-    AssetsRules:
-      properties:
-        datasources:
-          properties:
-            dataVolume:
-              $ref: '#/components/schemas/DataVolumesRules'
-            pvc:
-              $ref: '#/components/schemas/PvcsRules'
-            hostPath:
-              $ref: '#/components/schemas/HostPathsRules'
-            nfs:
-              $ref: '#/components/schemas/NfssRules'
-            git:
-              $ref: '#/components/schemas/GitsRules'
-            configMapVolume:
-              $ref: '#/components/schemas/ConfigMapsRules'
-            secretVolume:
-              $ref: '#/components/schemas/SecretsRules'
-            emptyDirVolume:
-              $ref: '#/components/schemas/EmptyDirsRules'
-            s3:
-              $ref: '#/components/schemas/S3sRules'
-          nullable: true
-          type: object
-      nullable: true
-      type: object
-    InstancesRules:
-      properties:
-        instances:
-          $ref: '#/components/schemas/ItemRules'
-      nullable: true
-      type: object
-    DefaultFromRule:
-      properties:
-        field:
-          description: >-
-            The default of this field is taken from another field, with optional
-            factor. The specified field must belong to the same workload section
-            (compute, security, etc). For itemized field, the value of the field
-            will be taken from the same instance.
-          type: string
-          nullable: true
-          pattern: .*
-        factor:
-          description: >-
-            Multiple the value of the fromField by this factor to get the value
-            for this field For example, if factor is 2 and defaultFrom field has
-            value of 8, the calculated default will be determined to be 16.
-          type: number
-          format: double
-          nullable: true
-          default: 1
-      nullable: true
-      type: object
-    IntegerRules:
-      properties:
-        sourceOfRule:
-          $ref: '#/components/schemas/SourceOfRule'
-        required:
-          description: Whether the field is mandatory. default to false.
-          type: boolean
-          nullable: true
-        canEdit:
-          description: Whether the value of the field is editable. default to true
-          type: boolean
-          nullable: true
-        min:
-          description: The minimum value that the field can be assigned to.
-          type: integer
-          format: int32
-          nullable: true
-        max:
-          description: The maximum value that the field can be assigned to.
-          type: integer
-          format: int32
-          nullable: true
-        step:
-          description: >-
-            The minimal difference between two values the field can be assigned
-            to. For example, min=2, max=10, step=2 implies that the values the
-            field can hold are 2, 4, 6, 8 and 10.
-          type: integer
-          format: int32
-          nullable: true
-        defaultFrom:
-          $ref: '#/components/schemas/DefaultFromRule'
-      nullable: true
-      type: object
-    ImagePullSecretsRulesAttributes:
-      description: Rules for the attributes of imagePullSecrets
-      properties:
-        name:
-          $ref: '#/components/schemas/StringRules'
-        userCredentials:
-          $ref: '#/components/schemas/BooleanRules'
-      nullable: true
-      type: object
-    ImagePullSecretsRules:
-      properties:
-        attributes:
-          $ref: '#/components/schemas/ImagePullSecretsRulesAttributes'
-        instances:
-          $ref: '#/components/schemas/ItemRules'
-      nullable: true
-      type: object
-    ArbitraryRules:
-      properties:
-        sourceOfRule:
-          $ref: '#/components/schemas/SourceOfRule'
-        required:
-          description: Whether this arbitrary object is mandatory. default to false.
-          type: boolean
-          nullable: true
-        canEdit:
-          description: >-
-            Whether the value of the field, as a whole, is editable. default to
-            false.
-          type: boolean
-          nullable: true
-      nullable: true
-      type: object
-    ArrayRules:
-      properties:
-        sourceOfRule:
-          $ref: '#/components/schemas/SourceOfRule'
-        required:
-          description: >-
-            Whether this array is mandatory. Mandatory array must include at
-            least one item. default to false.
-          type: boolean
-          nullable: true
-        options:
-          description: >-
-            Set of options that the value of each item of the array must be
-            chosen from.
-          type: array
-          items:
-            $ref: '#/components/schemas/StringOption'
-        canEdit:
-          description: >-
-            Whether the value of the array, as a whole, is editable. default to
-            false.
-          type: boolean
-          nullable: true
-      nullable: true
-      type: object
-    PodAffinityTypeOptions:
-      properties:
-        options:
-          type: array
-          items:
-            required:
-              - value
-            properties:
-              value:
-                $ref: '#/components/schemas/PodAffinityType'
-              displayed:
-                description: Textual description of the value
-                type: string
-                nullable: true
-                pattern: .*
-          nullable: true
-      type: object
-    PodAffinityTypeRules:
-      allOf:
-        - $ref: '#/components/schemas/StringRulesCommon'
-        - $ref: '#/components/schemas/PodAffinityTypeOptions'
-      nullable: true
-      type: object
-    PodAffinityRules:
-      properties:
-        type:
-          $ref: '#/components/schemas/PodAffinityTypeRules'
-        key:
-          $ref: '#/components/schemas/StringRules'
-      nullable: true
-      type: object
-    PreemptibilityOptions:
-      properties:
-        options:
-          description: >-
-            Limit the permitted values for preemptibility to a given set of
-            values.
-          type: array
-          items:
-            required:
-              - value
-            properties:
-              value:
-                $ref: '#/components/schemas/Preemptibility'
-              displayed:
-                description: Textual description of the value
-                type: string
-                nullable: true
-                pattern: .*
-          nullable: true
-      nullable: true
-      type: object
-    PreemptibilityRules:
-      allOf:
-        - $ref: '#/components/schemas/StringRulesCommon'
-        - $ref: '#/components/schemas/PreemptibilityOptions'
-      nullable: true
-      type: object
-    RestartPolicyOptions:
-      properties:
-        options:
-          description: >-
-            Limit the permitted values for restartPolicy to a given set of
-            values.
-          type: array
-          items:
-            required:
-              - value
-            properties:
-              value:
-                $ref: '#/components/schemas/RestartPolicy'
-              displayed:
-                description: Textual description of the value
-                type: string
-                nullable: true
-                pattern: .*
-          nullable: true
-      nullable: true
-      type: object
-    RestartPolicyRule:
-      allOf:
-        - $ref: '#/components/schemas/StringRulesCommon'
-        - $ref: '#/components/schemas/RestartPolicyOptions'
-      nullable: true
-      type: object
-    IntegerRulesOptional:
-      properties:
-        sourceOfRule:
-          $ref: '#/components/schemas/SourceOfRule'
-        canEdit:
-          description: Whether the value of the field is editable. default to true
-          type: boolean
-          nullable: true
-        min:
-          description: The minimum value that the field can be assigned to.
-          type: integer
-          format: int32
-          nullable: true
-        max:
-          description: The maximum value that the field can be assigned to.
-          type: integer
-          format: int32
-          nullable: true
-        step:
-          description: >-
-            The minimal difference between two values the field can be assigned
-            to. For example, min=2, max=10, step=2 implies that the values the
-            field can hold are 2, 4, 6, 8 and 10.
-          type: integer
-          format: int32
-          nullable: true
-        defaultFrom:
-          $ref: '#/components/schemas/DefaultFromRule'
-      nullable: true
-      type: object
-    TolerationOperatorOptions:
-      properties:
-        options:
-          description: >-
-            Limit the permitted values for imagePullPolicy to a given set of
-            values.
-          type: array
-          items:
-            required:
-              - value
-            properties:
-              value:
-                $ref: '#/components/schemas/TolerationOperator'
-              displayed:
-                description: Textual description of the value
-                type: string
-                nullable: true
-                pattern: .*
-          nullable: true
-      nullable: true
-      type: object
-    TolerationOperatorRules:
-      allOf:
-        - $ref: '#/components/schemas/StringRulesCommon'
-        - $ref: '#/components/schemas/TolerationOperatorOptions'
-      nullable: true
-      type: object
-    TolerationEffectOptions:
-      properties:
-        options:
-          description: >-
-            Limit the permitted values for imagePullPolicy to a given set of
-            values.
-          type: array
-          items:
-            required:
-              - value
-            properties:
-              value:
-                $ref: '#/components/schemas/TolerationEffect'
-              displayed:
-                description: Textual description of the value
-                type: string
-                nullable: true
-                pattern: .*
-          nullable: true
-      nullable: true
-      type: object
-    TolerationEffectRules:
-      allOf:
-        - $ref: '#/components/schemas/StringRulesCommon'
-        - $ref: '#/components/schemas/TolerationEffectOptions'
-      nullable: true
-      type: object
-    TolerationRules:
-      description: Toleration details.
-      properties:
-        operator:
-          $ref: '#/components/schemas/TolerationOperatorRules'
-        key:
-          $ref: '#/components/schemas/StringRules'
-        value:
-          $ref: '#/components/schemas/StringRules'
-        effect:
-          $ref: '#/components/schemas/TolerationEffectRules'
-        seconds:
-          $ref: '#/components/schemas/IntegerRules'
-        exclude:
-          $ref: '#/components/schemas/BooleanRules'
-      nullable: true
-      type: object
-    TolerationsRules:
-      properties:
-        attributes:
-          $ref: '#/components/schemas/TolerationRules'
-        instances:
-          $ref: '#/components/schemas/ItemRules'
-      nullable: true
-      type: object
-    NumberRules:
-      properties:
-        sourceOfRule:
-          $ref: '#/components/schemas/SourceOfRule'
-        required:
-          description: Whether the field is mandatory. default to false.
-          type: boolean
-          nullable: true
-        canEdit:
-          description: Whether the value of the field is editable. default to true
-          type: boolean
-          nullable: true
-        min:
-          description: The minimum value that the field can be assigned to.
-          type: number
-          nullable: true
-        max:
-          description: The maximum value that the field can be assigned to.
-          type: number
-          nullable: true
-        step:
-          description: >-
-            The minimal difference between two values the field can be assigned
-            to. For example, min=2, max=3, step=0.25 implies that the values the
-            field can hold are 2, 2.25, 2.5 and 3.
-          type: number
-          nullable: true
-        defaultFrom:
-          $ref: '#/components/schemas/DefaultFromRule'
-      nullable: true
-      type: object
-    AutoScalingMetricOptions:
-      properties:
-        options:
-          type: array
-          items:
-            required:
-              - value
-            properties:
-              value:
-                $ref: '#/components/schemas/AutoScalingMetric'
-              displayed:
-                description: Textual description of the value
-                type: string
-                nullable: true
-                pattern: .*
-          nullable: true
-      nullable: true
-      type: object
-    AutoScalingMetricRules:
-      allOf:
-        - $ref: '#/components/schemas/StringRulesCommon'
-        - $ref: '#/components/schemas/AutoScalingMetricOptions'
-      nullable: true
-      type: object
-    AutoScalingRules:
-      properties:
-        metricThresholdPercentage:
-          $ref: '#/components/schemas/NumberRules'
-        minReplicas:
-          $ref: '#/components/schemas/IntegerRules'
-        maxReplicas:
-          $ref: '#/components/schemas/IntegerRules'
-        initialReplicas:
-          $ref: '#/components/schemas/IntegerRules'
-        activationReplicas:
-          $ref: '#/components/schemas/IntegerRules'
-        metric:
-          $ref: '#/components/schemas/AutoScalingMetricRules'
-        metricThreshold:
-          $ref: '#/components/schemas/IntegerRules'
-        concurrencyHardLimit:
-          $ref: '#/components/schemas/IntegerRules'
-        scaleToZeroRetentionSeconds:
-          $ref: '#/components/schemas/IntegerRules'
-        scaleDownDelaySeconds:
-          $ref: '#/components/schemas/IntegerRules'
-        initializationTimeoutSeconds:
-          allOf:
-            - $ref: '#/components/schemas/IntegerRules'
-          deprecated: true
-      nullable: true
-      type: object
-    ServingConfigurationRules:
-      properties:
-        initializationTimeoutSeconds:
-          $ref: '#/components/schemas/IntegerRules'
-        requestTimeoutSeconds:
-          $ref: '#/components/schemas/IntegerRules'
-      nullable: true
-      type: object
-    InferenceFieldsRules:
-      properties:
-        autoscaling:
-          $ref: '#/components/schemas/AutoScalingRules'
-        servingConfiguration:
-          $ref: '#/components/schemas/ServingConfigurationRules'
-      nullable: true
-      type: object
-    SpecificRunParamsRules:
-      allOf:
-        - nullable: true
-          properties:
-            annotations:
-              $ref: '#/components/schemas/InstancesRules'
-            args:
-              $ref: '#/components/schemas/StringRules'
-            autoDeletionTimeAfterCompletionSeconds:
-              $ref: '#/components/schemas/IntegerRules'
-            backoffLimit:
-              $ref: '#/components/schemas/IntegerRules'
-            category:
-              $ref: '#/components/schemas/StringRules'
-            command:
-              $ref: '#/components/schemas/StringRules'
-            completions:
-              $ref: '#/components/schemas/IntegerRules'
-            environmentVariables:
-              $ref: '#/components/schemas/InstancesRules'
-            imagePullSecrets:
-              $ref: '#/components/schemas/ImagePullSecretsRules'
-            labels:
-              $ref: '#/components/schemas/InstancesRules'
-            nodeAffinityRequired:
-              $ref: '#/components/schemas/ArbitraryRules'
-            nodePools:
-              $ref: '#/components/schemas/ArrayRules'
-            nodeType:
-              $ref: '#/components/schemas/StringRules'
-            parallelism:
-              $ref: '#/components/schemas/IntegerRules'
-            podAffinity:
-              $ref: '#/components/schemas/PodAffinityRules'
-            preemptibility:
-              $ref: '#/components/schemas/PreemptibilityRules'
-            priorityClass:
-              $ref: '#/components/schemas/StringRules'
-            restartPolicy:
-              $ref: '#/components/schemas/RestartPolicyRule'
-            runAsGid:
-              $ref: '#/components/schemas/IntegerRulesOptional'
-            runAsUid:
-              $ref: '#/components/schemas/IntegerRulesOptional'
-            supplementalGroups:
-              $ref: '#/components/schemas/StringRules'
-            terminateAfterPreemption:
-              $ref: '#/components/schemas/BooleanRules'
-            terminationGracePeriodSeconds:
-              $ref: '#/components/schemas/IntegerRules'
-            tolerations:
-              $ref: '#/components/schemas/TolerationsRules'
-          type: object
-        - $ref: '#/components/schemas/InferenceFieldsRules'
-      description: Rules which apply to specific workload.
-      nullable: true
-      type: object
-    Rules:
-      properties:
-        assets:
-          $ref: '#/components/schemas/AssetsRules'
-        specificRunParams:
-          $ref: '#/components/schemas/SpecificRunParamsRules'
-      nullable: true
-      type: object
-    PolicyInfo:
-      x-internal: true
-      allOf:
-        - type: object
-          nullable: true
-          properties:
-            attributeDefaults:
-              $ref: '#/components/schemas/AttributeDefaults'
-        - type: object
-          nullable: true
-          properties:
-            rules:
-              $ref: '#/components/schemas/Rules'
-      nullable: true
-      type: object
-    WorkspaceV2:
-      description: information about a workspace created based on assets.
-      required:
-        - meta
-        - assets
-      properties:
-        meta:
-          $ref: '#/components/schemas/WorkloadMeta'
-        assets:
-          $ref: '#/components/schemas/AssetsRef'
-        specificRunParams:
-          $ref: '#/components/schemas/WorkspaceSpecificRunParams'
-        policyInfo:
-          $ref: '#/components/schemas/PolicyInfo'
-    WorkloadCreationMeta:
-      required:
-        - name
-        - projectId
-        - clusterId
-      properties:
-        name:
-          $ref: '#/components/schemas/WorkloadName'
-        useGivenNameAsPrefix:
-          description: >-
-            When true, the requested name will be treated as a prefix. The final
-            name of the workload will be composed of the name followed by a
-            random set of characters.
-          type: boolean
-          example: true
-          default: false
-        projectId:
-          $ref: '#/components/schemas/ProjectId'
-        clusterId:
-          $ref: '#/components/schemas/ClusterId'
-    WorkspaceCreationRequestV2:
-      description: >-
-        Request to submit a workspace from a set of assets and an optional set
-        of specific run parameters.
-      required:
-        - meta
-        - assets
-      properties:
-        meta:
-          $ref: '#/components/schemas/WorkloadCreationMeta'
-        assets:
-          $ref: '#/components/schemas/AssetsIds'
-        specificRunParams:
-          $ref: '#/components/schemas/WorkspaceSpecificRunParams'
-    TrainingSpecificRunParams:
-      allOf:
-        - $ref: '#/components/schemas/SpecificRunConnections'
-        - $ref: '#/components/schemas/AllowOverQuota'
-        - nullable: true
-          properties:
-            annotations:
-              $ref: '#/components/schemas/Annotations'
-            args:
-              $ref: '#/components/schemas/Args'
-            autoDeletionTimeAfterCompletionSeconds:
-              $ref: '#/components/schemas/AutoDeletionTimeAfterPreemption'
-            backoffLimit:
-              $ref: '#/components/schemas/BackoffLimit'
-            category:
-              $ref: '#/components/schemas/Category'
-            command:
-              $ref: '#/components/schemas/Command'
-            completions:
-              $ref: '#/components/schemas/Completions'
-            environmentVariables:
-              $ref: '#/components/schemas/EnvironmentVariablesOfAsset'
-            imagePullSecrets:
-              $ref: '#/components/schemas/ImagePullSecrets'
-            labels:
-              $ref: '#/components/schemas/Labels'
-            nodeAffinityRequired:
-              $ref: '#/components/schemas/NodeAffinityRequired'
-            nodePools:
-              $ref: '#/components/schemas/NodePools'
-            nodeType:
-              $ref: '#/components/schemas/NodeType1'
-            parallelism:
-              $ref: '#/components/schemas/Parallelism'
-            podAffinity:
-              $ref: '#/components/schemas/PodAffinity'
-            preemptibility:
-              $ref: '#/components/schemas/Preemptibility'
-            priorityClass:
-              $ref: '#/components/schemas/PriorityClass'
-            restartPolicy:
-              $ref: '#/components/schemas/RestartPolicy'
-            runAsGid:
-              $ref: '#/components/schemas/RunAsGid'
-            runAsUid:
-              $ref: '#/components/schemas/RunAsUid'
-            supplementalGroups:
-              $ref: '#/components/schemas/SupplementalGroups'
-            terminateAfterPreemption:
-              $ref: '#/components/schemas/TerminateAfterPreemption'
-            terminationGracePeriodSeconds:
-              $ref: '#/components/schemas/TerminationGracePeriod'
-            tolerations:
-              $ref: '#/components/schemas/Tolerations'
-          type: object
-      nullable: true
-      type: object
-    DistributedNumWorkers:
-      description: number of worker replicas to process the workload.
-      type: integer
-      minimum: 1
-      example: 3
-    DistributedMasterData:
-      properties:
-        sameAsWorker:
-          description: >-
-            if true, indicates that the master should be identical to the
-            worker. In this case assets and specificRunParams should not be
-            provided.
-          type: boolean
-          example: true
-        assets:
-          $ref: '#/components/schemas/AssetsRefOptional'
-        specificRunParams:
-          $ref: '#/components/schemas/TrainingSpecificRunParams'
-        policyInfo:
-          $ref: '#/components/schemas/PolicyInfo'
-      nullable: true
-      type: object
-    DistributedData:
-      required:
-        - numWorkers
-        - distFramework
-      properties:
-        numWorkers:
-          $ref: '#/components/schemas/DistributedNumWorkers'
-        framework:
-          $ref: '#/components/schemas/DistributedFramework'
-        master:
-          $ref: '#/components/schemas/DistributedMasterData'
-      nullable: true
-      type: object
-    TrainingV2:
-      description: information about a training created based on assets.
-      required:
-        - meta
-        - assets
-      properties:
-        meta:
-          $ref: '#/components/schemas/WorkloadMeta'
-        assets:
-          $ref: '#/components/schemas/AssetsRef'
-        specificRunParams:
-          $ref: '#/components/schemas/TrainingSpecificRunParams'
-        policyInfo:
-          $ref: '#/components/schemas/PolicyInfo'
-        distributed:
-          $ref: '#/components/schemas/DistributedData'
-    OptionalAssetIds:
-      allOf:
-        - $ref: '#/components/schemas/AssetsIds'
-      nullable: true
-      type: object
-    DistributedMaster:
-      properties:
-        sameAsWorker:
-          description: >-
-            if true, indicates that the master should be identical to the
-            worker. In this case assets and specificRunParams should not be
-            provided.
-          type: boolean
-          example: true
-        assets:
-          $ref: '#/components/schemas/OptionalAssetIds'
-        specificRunParams:
-          $ref: '#/components/schemas/TrainingSpecificRunParams'
-      nullable: true
-      type: object
-    DistributedParams:
-      required:
-        - numWorkers
-        - distFramework
-      properties:
-        numWorkers:
-          $ref: '#/components/schemas/DistributedNumWorkers'
-        framework:
-          $ref: '#/components/schemas/DistributedFramework'
-        master:
-          $ref: '#/components/schemas/DistributedMaster'
-      nullable: true
-      type: object
-    TrainingCreationRequestV2:
-      description: >-
-        Request to submit a training from a set of assets and an optional set of
-        specific run parameters.
-      properties:
-        meta:
-          $ref: '#/components/schemas/WorkloadCreationMeta'
-        assets:
-          $ref: '#/components/schemas/AssetsIds'
-        specificRunParams:
-          $ref: '#/components/schemas/TrainingSpecificRunParams'
-        distributed:
-          $ref: '#/components/schemas/DistributedParams'
-    InferenceWorkload:
-      description: >-
-        An inference workload ready for submission at the cluster. Further
-        details at
-        https://github.com/dsx-ai-factory/run-ai/runai-cluster/tree/master/workload-controller/config/crd"
-      type: object
-    Inference:
-      required:
-        - meta
-        - spec
-      properties:
-        meta:
-          $ref: '#/components/schemas/WorkloadMetaV1'
-        spec:
-          $ref: '#/components/schemas/SpecificRunInfoFields'
-        workload:
-          $ref: '#/components/schemas/InferenceWorkload'
-        job:
-          $ref: '#/components/schemas/DisplayedJob'
-    InferenceSpecificRunParams:
-      allOf:
-        - $ref: '#/components/schemas/SpecificRunConnections'
-        - $ref: '#/components/schemas/SpecificRunAutoScaling'
-        - $ref: '#/components/schemas/SpecificRunServingPortAccess'
-        - nullable: true
-          properties:
-            annotations:
-              $ref: '#/components/schemas/Annotations'
-            args:
-              $ref: '#/components/schemas/Args'
-            autoDeletionTimeAfterCompletionSeconds:
-              $ref: '#/components/schemas/AutoDeletionTimeAfterPreemption'
-            backoffLimit:
-              $ref: '#/components/schemas/BackoffLimit'
-            category:
-              $ref: '#/components/schemas/Category'
-            command:
-              $ref: '#/components/schemas/Command'
-            environmentVariables:
-              $ref: '#/components/schemas/EnvironmentVariablesOfAsset'
-            imagePullSecrets:
-              $ref: '#/components/schemas/ImagePullSecrets'
-            labels:
-              $ref: '#/components/schemas/Labels'
-            nodeAffinityRequired:
-              $ref: '#/components/schemas/NodeAffinityRequired'
-            nodePools:
-              $ref: '#/components/schemas/NodePools'
-            nodeType:
-              $ref: '#/components/schemas/NodeType1'
-            podAffinity:
-              $ref: '#/components/schemas/PodAffinity'
-            preemptibility:
-              $ref: '#/components/schemas/Preemptibility'
-            priorityClass:
-              $ref: '#/components/schemas/PriorityClass'
-            restartPolicy:
-              $ref: '#/components/schemas/RestartPolicy'
-            runAsGid:
-              $ref: '#/components/schemas/RunAsGid'
-            runAsUid:
-              $ref: '#/components/schemas/RunAsUid'
-            supplementalGroups:
-              $ref: '#/components/schemas/SupplementalGroups'
-            terminateAfterPreemption:
-              $ref: '#/components/schemas/TerminateAfterPreemption'
-            terminationGracePeriodSeconds:
-              $ref: '#/components/schemas/TerminationGracePeriod'
-            tolerations:
-              $ref: '#/components/schemas/Tolerations'
-          type: object
-      nullable: true
-      type: object
-    InferenceCreationRequestV2:
-      description: >-
-        Request to submit an inference from a set of assets and an optional set
-        of specific env parameters.
-      required:
-        - meta
-        - assets
-      properties:
-        meta:
-          $ref: '#/components/schemas/WorkloadCreationMeta'
-        assets:
-          $ref: '#/components/schemas/AssetsIds'
-        specificRunParams:
-          $ref: '#/components/schemas/InferenceSpecificRunParams'
-    InferenceV2:
-      description: information about an inference created based on assets.
-      required:
-        - meta
-        - assets
-      properties:
-        meta:
-          $ref: '#/components/schemas/WorkloadMeta'
-        assets:
-          $ref: '#/components/schemas/AssetsRef'
-        specificRunParams:
-          $ref: '#/components/schemas/InferenceSpecificRunParams'
-        policyInfo:
-          $ref: '#/components/schemas/PolicyInfo'
-    ModelInferenceCreationRequest:
-      required:
-        - name
-        - clusterId
-        - projectId
-        - namespace
-        - modelId
-      properties:
-        name:
-          description: The name of the workload.
-          type: string
-          minLength: 1
-        clusterId:
-          $ref: '#/components/schemas/ClusterId'
-        projectId:
-          $ref: '#/components/schemas/ProjectIdAsNumber'
-        namespace:
-          $ref: '#/components/schemas/Namespace'
-        assets:
-          required:
-            - compute
-          properties:
-            compute:
-              $ref: '#/components/schemas/AssetId'
-        modelId:
-          description: The id of the model.
-          type: string
-          format: uuid
-          minLength: 1
-        specificEnv:
-          $ref: '#/components/schemas/SpecificRunParams'
-    ModelInference:
-      required:
-        - meta
-        - spec
-      properties:
-        meta:
-          $ref: '#/components/schemas/WorkloadMetaV1'
-        spec:
-          $ref: '#/components/schemas/SpecificRunInfoFields'
-        workload:
-          $ref: '#/components/schemas/InferenceWorkload'
-        job:
-          $ref: '#/components/schemas/DisplayedJob'
-    ModelInferenceCreationRequestV2:
-      description: >-
-        Request to submit a model-inference from a set of assets and an optional
-        set of specific run parameters.
-      required:
-        - meta
-        - assets
-      properties:
-        meta:
-          $ref: '#/components/schemas/WorkloadCreationMeta'
-        assets:
-          required:
-            - model
-            - compute
-          properties:
-            model:
-              $ref: '#/components/schemas/AssetId'
-            compute:
-              $ref: '#/components/schemas/AssetId'
-        specificRunParams:
-          $ref: '#/components/schemas/InferenceSpecificRunParams'
-    ModelInferenceV2:
-      description: information about a model-inference created based on assets.
-      required:
-        - meta
-        - assets
-      properties:
-        meta:
-          $ref: '#/components/schemas/WorkloadMeta'
-        assets:
-          $ref: '#/components/schemas/AssetsRef'
-        specificRunParams:
-          $ref: '#/components/schemas/InferenceSpecificRunParams'
     AssetCountResponse:
       required:
         - result
@@ -40415,6 +38767,30 @@ components:
         language:
           description: is the model a language model
           type: boolean
+    ComplianceIssuesV2:
+      properties:
+        complianceIssues:
+          type: array
+          items:
+            type: object
+            required:
+              - details
+              - field
+            properties:
+              field:
+                type: string
+                example: compute.gpuDevicesRequest
+              details:
+                type: string
+                example: value must be no less than 3
+              rule:
+                $ref: '#/components/schemas/PolicyRuleEnum'
+      nullable: true
+      type: object
+    SubmissionErrorV2:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - $ref: '#/components/schemas/ComplianceIssuesV2'
     WorkloadType:
       description: the type of workload
       type: string
@@ -40686,6 +39062,32 @@ components:
         $ref: '#/components/schemas/PvcInstance'
       maxItems: 1000
       nullable: true
+    SecretFieldsUpdatable:
+      properties:
+        mountPath:
+          description: >-
+            Local path within the workload to which the Secret will be mapped
+            to. (mandatory)
+          type: string
+          minLength: 1
+          nullable: true
+        defaultMode:
+          $ref: '#/components/schemas/DefaultMode'
+      nullable: true
+      type: object
+    SecretFieldsNonUpdatable:
+      properties:
+        secret:
+          description: The name of the Secret resource. (mandatory)
+          type: string
+          minLength: 1
+          nullable: true
+      nullable: true
+      type: object
+    Secret:
+      allOf:
+        - $ref: '#/components/schemas/SecretFieldsUpdatable'
+        - $ref: '#/components/schemas/SecretFieldsNonUpdatable'
     SecretInstance:
       allOf:
         - $ref: '#/components/schemas/StorageInstanceName'
@@ -40800,6 +39202,15 @@ components:
             - $ref: '#/components/schemas/DistributedInferenceLeaderWorkerSpec1'
           nullable: true
           type: object
+    LoadAwareRouting:
+      description: >-
+        Route requests to the serving port through the endpoint picker, which
+        picks a Pod by load. It can be set only when the workload is created.
+        Requires cluster version 3.1.0 or later, with the inference endpoint
+        controller enabled and an administrator-enabled Gateway on the cluster.
+      type: boolean
+      default: false
+      nullable: true
     DistributedInferenceRestartPolicy:
       description: >
         Determines the behavior when a pod fails.
@@ -40974,6 +39385,10 @@ components:
           properties:
             category:
               $ref: '#/components/schemas/Category'
+            loadAwareRouting:
+              allOf:
+                - $ref: '#/components/schemas/LoadAwareRouting'
+              x-internal: true
             nodePools:
               $ref: '#/components/schemas/NodePools'
             preemptibility:
@@ -41377,6 +39792,23 @@ components:
       nullable: true
       default: /root/.ssh
       pattern: .*
+    DataVolume:
+      properties:
+        id:
+          description: The unique identifier of the data volume. (mandatory)
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+          nullable: true
+        mountPath:
+          description: The path where the data volume will be mounted. (mandatory)
+          type: string
+          example: /mnt/data
+          nullable: true
+          pattern: .*
+          maxLength: 4096
+      nullable: true
+      type: object
     DataVolumeInstance:
       allOf:
         - $ref: '#/components/schemas/DataVolume'
@@ -42083,6 +40515,12 @@ components:
           type: string
           minLength: 1
           format: date-time
+    ProjectIdOptional:
+      description: The id of the project.
+      type: integer
+      format: int32
+      example: 1
+      nullable: true
     PolicyName:
       description: A chosen name for the policy.
       type: string
@@ -42448,6 +40886,10 @@ components:
           properties:
             category:
               $ref: '#/components/schemas/Category'
+            loadAwareRouting:
+              allOf:
+                - $ref: '#/components/schemas/LoadAwareRouting'
+              x-internal: true
             nodePools:
               $ref: '#/components/schemas/NodePools'
             preemptibility:
@@ -42674,6 +41116,268 @@ components:
             workingDir:
               $ref: '#/components/schemas/WorkingDir'
           type: object
+    SourceOfRule:
+      description: >-
+        This field is used by the system along with effective rules, in order to
+        specify the org unit from which this effective rule has been derived. It
+        should be left empty when sending apply policy requests.
+      required:
+        - scope
+      properties:
+        scope:
+          $ref: '#/components/schemas/ScopeType'
+        projectId:
+          $ref: '#/components/schemas/ProjectIdOptional'
+        departmentId:
+          $ref: '#/components/schemas/DepartmentIdOptional'
+        clusterId:
+          $ref: '#/components/schemas/ClusterIdOptional'
+        isFallback:
+          description: source of this rule is the fallback policy
+          type: boolean
+      example:
+        scope: project
+        projectId: 3
+      nullable: true
+      type: object
+    DefaultFromRule:
+      properties:
+        field:
+          description: >-
+            The default of this field is taken from another field, with optional
+            factor. The specified field must belong to the same workload section
+            (compute, security, etc). For itemized field, the value of the field
+            will be taken from the same instance.
+          type: string
+          nullable: true
+          pattern: .*
+        factor:
+          description: >-
+            Multiple the value of the fromField by this factor to get the value
+            for this field For example, if factor is 2 and defaultFrom field has
+            value of 8, the calculated default will be determined to be 16.
+          type: number
+          format: double
+          nullable: true
+          default: 1
+      nullable: true
+      type: object
+    NumberRules:
+      properties:
+        sourceOfRule:
+          $ref: '#/components/schemas/SourceOfRule'
+        required:
+          description: Whether the field is mandatory. default to false.
+          type: boolean
+          nullable: true
+        canEdit:
+          description: Whether the value of the field is editable. default to true
+          type: boolean
+          nullable: true
+        min:
+          description: The minimum value that the field can be assigned to.
+          type: number
+          nullable: true
+        max:
+          description: The maximum value that the field can be assigned to.
+          type: number
+          nullable: true
+        step:
+          description: >-
+            The minimal difference between two values the field can be assigned
+            to. For example, min=2, max=3, step=0.25 implies that the values the
+            field can hold are 2, 2.25, 2.5 and 3.
+          type: number
+          nullable: true
+        defaultFrom:
+          $ref: '#/components/schemas/DefaultFromRule'
+      nullable: true
+      type: object
+    IntegerRules:
+      properties:
+        sourceOfRule:
+          $ref: '#/components/schemas/SourceOfRule'
+        required:
+          description: Whether the field is mandatory. default to false.
+          type: boolean
+          nullable: true
+        canEdit:
+          description: Whether the value of the field is editable. default to true
+          type: boolean
+          nullable: true
+        min:
+          description: The minimum value that the field can be assigned to.
+          type: integer
+          format: int32
+          nullable: true
+        max:
+          description: The maximum value that the field can be assigned to.
+          type: integer
+          format: int32
+          nullable: true
+        step:
+          description: >-
+            The minimal difference between two values the field can be assigned
+            to. For example, min=2, max=10, step=2 implies that the values the
+            field can hold are 2, 4, 6, 8 and 10.
+          type: integer
+          format: int32
+          nullable: true
+        defaultFrom:
+          $ref: '#/components/schemas/DefaultFromRule'
+      nullable: true
+      type: object
+    StringRulesCommon:
+      properties:
+        sourceOfRule:
+          $ref: '#/components/schemas/SourceOfRule'
+        required:
+          description: 'Whether the field is mandatory, default to false.'
+          type: boolean
+          nullable: true
+        canEdit:
+          description: 'Whether the value of the field is editable, default to true'
+          type: boolean
+          nullable: true
+        blocked:
+          description: >-
+            Blocks the field to prevent workloads from specifying any value for
+            it.
+          type: boolean
+          nullable: true
+      example:
+        required: true
+        canEdit: false
+        blocked: false
+    AutoScalingMetricOptions:
+      properties:
+        options:
+          type: array
+          items:
+            required:
+              - value
+            properties:
+              value:
+                $ref: '#/components/schemas/AutoScalingMetric'
+              displayed:
+                description: Textual description of the value
+                type: string
+                nullable: true
+                pattern: .*
+          nullable: true
+      nullable: true
+      type: object
+    AutoScalingMetricRules:
+      allOf:
+        - $ref: '#/components/schemas/StringRulesCommon'
+        - $ref: '#/components/schemas/AutoScalingMetricOptions'
+      nullable: true
+      type: object
+    AutoScalingRules:
+      properties:
+        metricThresholdPercentage:
+          $ref: '#/components/schemas/NumberRules'
+        minReplicas:
+          $ref: '#/components/schemas/IntegerRules'
+        maxReplicas:
+          $ref: '#/components/schemas/IntegerRules'
+        initialReplicas:
+          $ref: '#/components/schemas/IntegerRules'
+        activationReplicas:
+          $ref: '#/components/schemas/IntegerRules'
+        metric:
+          $ref: '#/components/schemas/AutoScalingMetricRules'
+        metricThreshold:
+          $ref: '#/components/schemas/IntegerRules'
+        concurrencyHardLimit:
+          $ref: '#/components/schemas/IntegerRules'
+        scaleToZeroRetentionSeconds:
+          $ref: '#/components/schemas/IntegerRules'
+        scaleDownDelaySeconds:
+          $ref: '#/components/schemas/IntegerRules'
+        initializationTimeoutSeconds:
+          allOf:
+            - $ref: '#/components/schemas/IntegerRules'
+          deprecated: true
+      nullable: true
+      type: object
+    ServingConfigurationRules:
+      properties:
+        initializationTimeoutSeconds:
+          $ref: '#/components/schemas/IntegerRules'
+        requestTimeoutSeconds:
+          $ref: '#/components/schemas/IntegerRules'
+      nullable: true
+      type: object
+    InferenceFieldsRules:
+      properties:
+        autoscaling:
+          $ref: '#/components/schemas/AutoScalingRules'
+        servingConfiguration:
+          $ref: '#/components/schemas/ServingConfigurationRules'
+      nullable: true
+      type: object
+    ItemRules:
+      properties:
+        sourceOfRule:
+          $ref: '#/components/schemas/SourceOfRule'
+        canAdd:
+          description: Whether it is permitted to add items. Default to true.
+          type: boolean
+          nullable: true
+        locked:
+          description: >-
+            Set of keys for items that are "locked", i.e. cannot be removed or
+            deleted.
+          type: array
+          items:
+            type: string
+          example:
+            - HOME
+            - USER
+      nullable: true
+      type: object
+    InstancesRules:
+      properties:
+        instances:
+          $ref: '#/components/schemas/ItemRules'
+      nullable: true
+      type: object
+    StringOption:
+      description: >-
+        One of the values that the field can be assigned to, when options police
+        is applied on the field.
+      required:
+        - value
+      properties:
+        value:
+          description: The value that the field should hold
+          type: string
+          pattern: .*
+        displayed:
+          description: >-
+            Textual description of the value. to be used by user interface
+            applications.
+          type: string
+          nullable: true
+          pattern: .*
+      example:
+        value: value
+        displayed: A description of the value.
+    StringRulesOptions:
+      properties:
+        options:
+          description: Set of options that the value of the field must be chosen from.
+          type: array
+          items:
+            $ref: '#/components/schemas/StringOption'
+          nullable: true
+    StringRules:
+      allOf:
+        - $ref: '#/components/schemas/StringRulesCommon'
+        - $ref: '#/components/schemas/StringRulesOptions'
+      nullable: true
+      type: object
     QuantityRules:
       properties:
         sourceOfRule:
@@ -42767,6 +41471,20 @@ components:
         - $ref: '#/components/schemas/GpuRequestOptions'
       nullable: true
       type: object
+    BooleanRules:
+      properties:
+        sourceOfRule:
+          $ref: '#/components/schemas/SourceOfRule'
+        required:
+          description: Whether the field is mandatory. default to false.
+          type: boolean
+          nullable: true
+        canEdit:
+          description: Whether the value of the field is editable. default to true
+          type: boolean
+          nullable: true
+      nullable: true
+      type: object
     SupersetRulesAllOfCompute:
       title: SupersetRulesAllOfCompute
       nullable: true
@@ -42833,6 +41551,70 @@ components:
         - $ref: '#/components/schemas/ImagePullPolicyOptions'
       nullable: true
       type: object
+    ImagePullSecretsRulesAttributes:
+      description: Rules for the attributes of imagePullSecrets
+      properties:
+        name:
+          $ref: '#/components/schemas/StringRules'
+        userCredentials:
+          $ref: '#/components/schemas/BooleanRules'
+      nullable: true
+      type: object
+    ImagePullSecretsRules:
+      properties:
+        attributes:
+          $ref: '#/components/schemas/ImagePullSecretsRulesAttributes'
+        instances:
+          $ref: '#/components/schemas/ItemRules'
+      nullable: true
+      type: object
+    ArbitraryRules:
+      properties:
+        sourceOfRule:
+          $ref: '#/components/schemas/SourceOfRule'
+        required:
+          description: Whether this arbitrary object is mandatory. default to false.
+          type: boolean
+          nullable: true
+        canEdit:
+          description: >-
+            Whether the value of the field, as a whole, is editable. default to
+            false.
+          type: boolean
+          nullable: true
+      nullable: true
+      type: object
+    PodAffinityTypeOptions:
+      properties:
+        options:
+          type: array
+          items:
+            required:
+              - value
+            properties:
+              value:
+                $ref: '#/components/schemas/PodAffinityType'
+              displayed:
+                description: Textual description of the value
+                type: string
+                nullable: true
+                pattern: .*
+          nullable: true
+      type: object
+    PodAffinityTypeRules:
+      allOf:
+        - $ref: '#/components/schemas/StringRulesCommon'
+        - $ref: '#/components/schemas/PodAffinityTypeOptions'
+      nullable: true
+      type: object
+    PodAffinityRules:
+      properties:
+        type:
+          $ref: '#/components/schemas/PodAffinityTypeRules'
+        key:
+          $ref: '#/components/schemas/StringRules'
+      nullable: true
+      type: object
     ProbeHandlerRules:
       properties:
         httpGet:
@@ -42867,6 +41649,61 @@ components:
       properties:
         readiness:
           $ref: '#/components/schemas/ProbeRules'
+      nullable: true
+      type: object
+    ArrayRules:
+      properties:
+        sourceOfRule:
+          $ref: '#/components/schemas/SourceOfRule'
+        required:
+          description: >-
+            Whether this array is mandatory. Mandatory array must include at
+            least one item. default to false.
+          type: boolean
+          nullable: true
+        options:
+          description: >-
+            Set of options that the value of each item of the array must be
+            chosen from.
+          type: array
+          items:
+            $ref: '#/components/schemas/StringOption'
+        canEdit:
+          description: >-
+            Whether the value of the array, as a whole, is editable. default to
+            false.
+          type: boolean
+          nullable: true
+      nullable: true
+      type: object
+    IntegerRulesOptional:
+      properties:
+        sourceOfRule:
+          $ref: '#/components/schemas/SourceOfRule'
+        canEdit:
+          description: Whether the value of the field is editable. default to true
+          type: boolean
+          nullable: true
+        min:
+          description: The minimum value that the field can be assigned to.
+          type: integer
+          format: int32
+          nullable: true
+        max:
+          description: The maximum value that the field can be assigned to.
+          type: integer
+          format: int32
+          nullable: true
+        step:
+          description: >-
+            The minimal difference between two values the field can be assigned
+            to. For example, min=2, max=10, step=2 implies that the values the
+            field can hold are 2, 4, 6, 8 and 10.
+          type: integer
+          format: int32
+          nullable: true
+        defaultFrom:
+          $ref: '#/components/schemas/DefaultFromRule'
       nullable: true
       type: object
     SeccompProfileTypeOptions:
@@ -42921,6 +41758,182 @@ components:
       allOf:
         - $ref: '#/components/schemas/StringRulesCommon'
         - $ref: '#/components/schemas/UidGidSourceOptions'
+      nullable: true
+      type: object
+    ConfigMapRules:
+      properties:
+        configMap:
+          $ref: '#/components/schemas/StringRules'
+        mountPath:
+          $ref: '#/components/schemas/StringRules'
+        subPath:
+          $ref: '#/components/schemas/StringRules'
+        defaultMode:
+          $ref: '#/components/schemas/StringRules'
+      nullable: true
+      type: object
+    ConfigMapsRules:
+      properties:
+        attributes:
+          $ref: '#/components/schemas/ConfigMapRules'
+        instances:
+          $ref: '#/components/schemas/ItemRules'
+      nullable: true
+      type: object
+    EmptyDirRules:
+      properties:
+        path:
+          $ref: '#/components/schemas/StringRules'
+        medium:
+          $ref: '#/components/schemas/StringRules'
+        sizeLimit:
+          $ref: '#/components/schemas/StringRules'
+      nullable: true
+      type: object
+    EmptyDirsRules:
+      properties:
+        attributes:
+          $ref: '#/components/schemas/EmptyDirRules'
+        instances:
+          $ref: '#/components/schemas/ItemRules'
+      nullable: true
+      type: object
+    PvcAccessModesRules:
+      description: Rules for access mode(s) for a newly created PVC.
+      properties:
+        readWriteOnce:
+          $ref: '#/components/schemas/BooleanRules'
+        readOnlyMany:
+          $ref: '#/components/schemas/BooleanRules'
+        readWriteMany:
+          $ref: '#/components/schemas/BooleanRules'
+      nullable: true
+      type: object
+    ClaimInfoRules:
+      properties:
+        size:
+          $ref: '#/components/schemas/StringRules'
+        storageClass:
+          $ref: '#/components/schemas/StringRules'
+        accessModes:
+          $ref: '#/components/schemas/PvcAccessModesRules'
+      nullable: true
+      type: object
+    PvcRules:
+      properties:
+        claimName:
+          $ref: '#/components/schemas/StringRules'
+        path:
+          $ref: '#/components/schemas/StringRules'
+        readOnly:
+          $ref: '#/components/schemas/BooleanRules'
+        claimInfo:
+          $ref: '#/components/schemas/ClaimInfoRules'
+      nullable: true
+      type: object
+    PvcsRules:
+      properties:
+        attributes:
+          $ref: '#/components/schemas/PvcRules'
+        instances:
+          $ref: '#/components/schemas/ItemRules'
+      nullable: true
+      type: object
+    SecretRules:
+      properties:
+        secret:
+          $ref: '#/components/schemas/StringRules'
+        mountPath:
+          $ref: '#/components/schemas/StringRules'
+        defaultMode:
+          $ref: '#/components/schemas/StringRules'
+      nullable: true
+      type: object
+    SecretsRules:
+      properties:
+        attributes:
+          $ref: '#/components/schemas/SecretRules'
+        instances:
+          $ref: '#/components/schemas/ItemRules'
+      nullable: true
+      type: object
+    TolerationOperatorOptions:
+      properties:
+        options:
+          description: >-
+            Limit the permitted values for imagePullPolicy to a given set of
+            values.
+          type: array
+          items:
+            required:
+              - value
+            properties:
+              value:
+                $ref: '#/components/schemas/TolerationOperator'
+              displayed:
+                description: Textual description of the value
+                type: string
+                nullable: true
+                pattern: .*
+          nullable: true
+      nullable: true
+      type: object
+    TolerationOperatorRules:
+      allOf:
+        - $ref: '#/components/schemas/StringRulesCommon'
+        - $ref: '#/components/schemas/TolerationOperatorOptions'
+      nullable: true
+      type: object
+    TolerationEffectOptions:
+      properties:
+        options:
+          description: >-
+            Limit the permitted values for imagePullPolicy to a given set of
+            values.
+          type: array
+          items:
+            required:
+              - value
+            properties:
+              value:
+                $ref: '#/components/schemas/TolerationEffect'
+              displayed:
+                description: Textual description of the value
+                type: string
+                nullable: true
+                pattern: .*
+          nullable: true
+      nullable: true
+      type: object
+    TolerationEffectRules:
+      allOf:
+        - $ref: '#/components/schemas/StringRulesCommon'
+        - $ref: '#/components/schemas/TolerationEffectOptions'
+      nullable: true
+      type: object
+    TolerationRules:
+      description: Toleration details.
+      properties:
+        operator:
+          $ref: '#/components/schemas/TolerationOperatorRules'
+        key:
+          $ref: '#/components/schemas/StringRules'
+        value:
+          $ref: '#/components/schemas/StringRules'
+        effect:
+          $ref: '#/components/schemas/TolerationEffectRules'
+        seconds:
+          $ref: '#/components/schemas/IntegerRules'
+        exclude:
+          $ref: '#/components/schemas/BooleanRules'
+      nullable: true
+      type: object
+    TolerationsRules:
+      properties:
+        attributes:
+          $ref: '#/components/schemas/TolerationRules'
+        instances:
+          $ref: '#/components/schemas/ItemRules'
       nullable: true
       type: object
     DistributedInferenceLeaderWorkerRulesV2:
@@ -43018,6 +42031,33 @@ components:
             - $ref: '#/components/schemas/DistributedInferenceLeaderWorkerRulesV2'
           nullable: true
           type: object
+    PreemptibilityOptions:
+      properties:
+        options:
+          description: >-
+            Limit the permitted values for preemptibility to a given set of
+            values.
+          type: array
+          items:
+            required:
+              - value
+            properties:
+              value:
+                $ref: '#/components/schemas/Preemptibility'
+              displayed:
+                description: Textual description of the value
+                type: string
+                nullable: true
+                pattern: .*
+          nullable: true
+      nullable: true
+      type: object
+    PreemptibilityRules:
+      allOf:
+        - $ref: '#/components/schemas/StringRulesCommon'
+        - $ref: '#/components/schemas/PreemptibilityOptions'
+      nullable: true
+      type: object
     DistributedInferenceRestartPolicyOptions:
       properties:
         options:
@@ -43129,6 +42169,10 @@ components:
           properties:
             category:
               $ref: '#/components/schemas/StringRules'
+            loadAwareRouting:
+              allOf:
+                - $ref: '#/components/schemas/BooleanRules'
+              x-internal: true
             nodePools:
               $ref: '#/components/schemas/ArrayRules'
             preemptibility:
@@ -43365,6 +42409,122 @@ components:
           $ref: '#/components/schemas/StringRules'
       type: object
       nullable: true
+    DataVolumeRules:
+      properties:
+        id:
+          $ref: '#/components/schemas/StringRules'
+        mountPath:
+          $ref: '#/components/schemas/StringRules'
+      nullable: true
+      type: object
+    DataVolumesRules:
+      properties:
+        attributes:
+          $ref: '#/components/schemas/DataVolumeRules'
+        instances:
+          $ref: '#/components/schemas/ItemRules'
+      nullable: true
+      type: object
+    GitRules:
+      properties:
+        repository:
+          $ref: '#/components/schemas/StringRules'
+        branch:
+          $ref: '#/components/schemas/StringRules'
+        revision:
+          $ref: '#/components/schemas/StringRules'
+        path:
+          $ref: '#/components/schemas/StringRules'
+      nullable: true
+      type: object
+    GitsRules:
+      properties:
+        attributes:
+          $ref: '#/components/schemas/GitRules'
+        instances:
+          $ref: '#/components/schemas/ItemRules'
+      nullable: true
+      type: object
+    HostPathMountPropagationOptions:
+      properties:
+        options:
+          type: array
+          items:
+            required:
+              - value
+            properties:
+              value:
+                $ref: '#/components/schemas/HostPathMountPropagation'
+              displayed:
+                description: Textual description of the value
+                type: string
+                nullable: true
+                pattern: .*
+          nullable: true
+    HostPathMountPropagationRules:
+      allOf:
+        - $ref: '#/components/schemas/StringRulesCommon'
+        - $ref: '#/components/schemas/HostPathMountPropagationOptions'
+      nullable: true
+      type: object
+    HostPathRules:
+      properties:
+        path:
+          $ref: '#/components/schemas/StringRules'
+        readOnly:
+          $ref: '#/components/schemas/BooleanRules'
+        mountPath:
+          $ref: '#/components/schemas/StringRules'
+        mountPropagation:
+          $ref: '#/components/schemas/HostPathMountPropagationRules'
+      nullable: true
+      type: object
+    HostPathsRules:
+      properties:
+        attributes:
+          $ref: '#/components/schemas/HostPathRules'
+        instances:
+          $ref: '#/components/schemas/ItemRules'
+      nullable: true
+      type: object
+    NfsRules:
+      properties:
+        path:
+          $ref: '#/components/schemas/StringRules'
+        readOnly:
+          $ref: '#/components/schemas/BooleanRules'
+        server:
+          $ref: '#/components/schemas/StringRules'
+        mountPath:
+          $ref: '#/components/schemas/StringRules'
+      nullable: true
+      type: object
+    NfssRules:
+      properties:
+        attributes:
+          $ref: '#/components/schemas/NfsRules'
+        instances:
+          $ref: '#/components/schemas/ItemRules'
+      nullable: true
+      type: object
+    S3Rules:
+      properties:
+        bucket:
+          $ref: '#/components/schemas/StringRules'
+        path:
+          $ref: '#/components/schemas/StringRules'
+        url:
+          $ref: '#/components/schemas/StringRules'
+      nullable: true
+      type: object
+    S3sRules:
+      properties:
+        attributes:
+          $ref: '#/components/schemas/S3Rules'
+        instances:
+          $ref: '#/components/schemas/ItemRules'
+      nullable: true
+      type: object
     SupersetRules:
       allOf:
         - $ref: '#/components/schemas/InferenceFieldsRules'
@@ -43671,6 +42831,33 @@ components:
             workingDir:
               $ref: '#/components/schemas/WorkingDir'
           type: object
+    RestartPolicyOptions:
+      properties:
+        options:
+          description: >-
+            Limit the permitted values for restartPolicy to a given set of
+            values.
+          type: array
+          items:
+            required:
+              - value
+            properties:
+              value:
+                $ref: '#/components/schemas/RestartPolicy'
+              displayed:
+                description: Textual description of the value
+                type: string
+                nullable: true
+                pattern: .*
+          nullable: true
+      nullable: true
+      type: object
+    RestartPolicyRule:
+      allOf:
+        - $ref: '#/components/schemas/StringRulesCommon'
+        - $ref: '#/components/schemas/RestartPolicyOptions'
+      nullable: true
+      type: object
     TrainingPolicyRulesV2:
       allOf:
         - nullable: true
@@ -45208,6 +44395,10 @@ components:
               $ref: '#/components/schemas/ImagePullSecretsDefaults'
             labels:
               $ref: '#/components/schemas/LabelsDefaults'
+            loadAwareRouting:
+              allOf:
+                - $ref: '#/components/schemas/LoadAwareRouting'
+              x-internal: true
             modelStore:
               nullable: true
               properties:
@@ -45420,6 +44611,10 @@ components:
               $ref: '#/components/schemas/ImagePullSecretsRules'
             labels:
               $ref: '#/components/schemas/InstancesRules'
+            loadAwareRouting:
+              allOf:
+                - $ref: '#/components/schemas/BooleanRules'
+              x-internal: true
             modelStore:
               nullable: true
               properties:
@@ -46734,6 +45929,12 @@ components:
       properties:
         description:
           $ref: '#/components/schemas/PolicyDescriptionOptional'
+    DepartmentId:
+      description: The id of the department.
+      type: string
+      minLength: 1
+      example: 2
+      pattern: .*
     WorkloadTypeAndScope:
       type: object
       description: >-
@@ -48818,6 +48019,14 @@ components:
                   type: string
                   description: Name of the predefined role for cluster permissions
                   example: admin
+            clusterRoleOptional:
+              type: boolean
+              default: false
+              description: >-
+                Indicates if the access rule's role or its predefined role is
+                marked as having no cluster permissions, or the role is a custom
+                role with no predefined role for cluster permissions.
+              example: false
             isDeleting:
               type: boolean
               default: false
@@ -50949,9 +50158,9 @@ components:
       enum:
         - realms
         - clients
-        - apps
-        - internalApps
-        - userApps
+        - serviceAccounts
+        - internalServiceAccounts
+        - accessKeys
         - workloadAuth
     RealmReconcileRequest:
       type: object
@@ -51451,6 +50660,23 @@ components:
           description: This permission includes resume as well as suspend.
           type: boolean
           example: true
+    Phase:
+      type: string
+      enum:
+        - Creating
+        - Initializing
+        - Resuming
+        - Pending
+        - Deleting
+        - Running
+        - Updating
+        - Stopped
+        - Stopping
+        - Degraded
+        - Failed
+        - Completed
+        - Terminating
+        - Unknown
     Condition1:
       type: object
       required:
@@ -53341,6 +52567,26 @@ components:
         - VLLM_REQUEST_DECODE_TIME_SECONDS_PERCENTILES
         - VLLM_INTER_TOKEN_LATENCY_SECONDS_PERCENTILES
         - NVLINK_BANDWIDTH_TOTAL
+    WorkloadCreationMeta:
+      required:
+        - name
+        - projectId
+        - clusterId
+      properties:
+        name:
+          $ref: '#/components/schemas/WorkloadName'
+        useGivenNameAsPrefix:
+          description: >-
+            When true, the requested name will be treated as a prefix. The final
+            name of the workload will be composed of the name followed by a
+            random set of characters.
+          type: boolean
+          example: true
+          default: false
+        projectId:
+          $ref: '#/components/schemas/ProjectId'
+        clusterId:
+          $ref: '#/components/schemas/ClusterId'
     SubmitWithTemplateId:
       properties:
         templateId:
@@ -53557,6 +52803,60 @@ components:
         - $ref: '#/components/schemas/SubmitWithTemplateId'
         - $ref: '#/components/schemas/SubmitWithAssetIds'
         - $ref: '#/components/schemas/WorkspaceSpec'
+    WorkloadDesiredPhase:
+      description: The desired phase of the workload.
+      type: string
+      enum:
+        - Running
+        - Stopped
+        - Deleted
+    WorkloadMeta:
+      required:
+        - name
+        - requestedName
+        - workloadId
+        - projectId
+        - clusterId
+        - createdBy
+        - createdAt
+        - desiredPhase
+      properties:
+        name:
+          $ref: '#/components/schemas/WorkloadName'
+        requestedName:
+          description: >-
+            The name as was requested for the workload. If useGivenNameAsPrefix,
+            in the creation request, is false, name and requestedName should be
+            identical. Otherwise, name should be composed of requestedName
+            followed by a suffix of random characters.
+          type: string
+        workloadId:
+          $ref: '#/components/schemas/WorkloadId'
+        projectId:
+          $ref: '#/components/schemas/ProjectId'
+        departmentId:
+          $ref: '#/components/schemas/DepartmentId'
+        clusterId:
+          $ref: '#/components/schemas/ClusterId'
+        createdBy:
+          description: The user who created the workload
+          type: string
+          example: test@lab.com
+        createdAt:
+          description: The creation time of the workload.
+          type: string
+          format: date-time
+          example: '2022-01-01T03:49:52.531Z'
+        deletedAt:
+          description: The deletion time of the workload.
+          type: string
+          nullable: true
+          format: date-time
+          example: '2022-01-01T03:49:52.531Z'
+        desiredPhase:
+          $ref: '#/components/schemas/WorkloadDesiredPhase'
+        actualPhase:
+          $ref: '#/components/schemas/Phase'
     Workspace1:
       allOf:
         - $ref: '#/components/schemas/WorkloadMeta'
@@ -54347,7 +53647,7 @@ components:
         - $ref: '#/components/schemas/SubmitWithTemplateId'
         - $ref: '#/components/schemas/SubmitWithAssetIds'
         - $ref: '#/components/schemas/InferenceSpec'
-    Inference1:
+    Inference:
       allOf:
         - $ref: '#/components/schemas/WorkloadMeta'
         - $ref: '#/components/schemas/InferenceSpec'
@@ -57454,20 +56754,6 @@ components:
         stage:
           type: string
           readOnly: true
-    GetEnableHybridSubmission:
-      type: object
-      properties:
-        value:
-          $ref: '#/components/schemas/GetEnableSettingsValue'
-        displayName:
-          type: string
-          readOnly: true
-        description:
-          type: string
-          readOnly: true
-        stage:
-          type: string
-          readOnly: true
     GetGpuOverProvisioning:
       type: object
       properties:
@@ -57503,8 +56789,6 @@ components:
           $ref: '#/components/schemas/GetEnablePolicies'
         workloadSubmissionV2Enabled:
           $ref: '#/components/schemas/GetWorkloadSubmissionV2Enabled'
-        enableHybridSubmission:
-          $ref: '#/components/schemas/GetEnableHybridSubmission'
         gpuOverProvisioning:
           $ref: '#/components/schemas/GetGpuOverProvisioning'
         applicationSubmission:
@@ -57514,7 +56798,6 @@ components:
       enum:
         - enablePolicies
         - workloadSubmissionV2Enabled
-        - enableHybridSubmission
         - gpuOverProvisioning
         - applicationSubmission
     GetWorkloadsSetting:
@@ -57598,11 +56881,6 @@ components:
       properties:
         enabled:
           type: boolean
-    EnableHybridSubmissionSetting:
-      type: object
-      properties:
-        enabled:
-          type: boolean
     GpuOverProvisioningSetting:
       type: object
       properties:
@@ -57634,6 +56912,30 @@ components:
         - None: The workload will not use MNNVL acceleration, even if
         MNNVL-capable nodes are available.
       example: Required
+    ExternalAccessInference:
+      type: object
+      nullable: true
+      additionalProperties: false
+      description: >-
+        Server-resolved inference routing for this endpoint. Set only by the
+        control plane; rejected in workload submissions.
+
+        Requires httpRoute and one created Service, or a reference to the
+        NIMService's Service, on the same endpoint.
+
+        The cluster then creates an InferenceEndpoint instead of the HTTPRoute,
+        and derives its workload selector, target port,
+
+        Gateway and hostnames from that Service and httpRoute.
+      required:
+        - epp
+      properties:
+        epp:
+          type: object
+          additionalProperties: true
+          description: >-
+            InferenceEndpoint spec.epp, for example the EPP profile. Validated
+            against the installed CRD when applied.
     ExternalAccess:
       type: object
       description: >-
@@ -57660,6 +56962,10 @@ components:
             Used when cluster uses Gateway API.
           type: object
           nullable: true
+        inference:
+          x-internal: true
+          nullable: true
+          $ref: '#/components/schemas/ExternalAccessInference'
     ServiceType:
       description: The type of Kubernetes Service to create for the endpoint.
       type: string
@@ -58052,6 +57358,18 @@ components:
             When unset, the cluster default behavior applies.
           type: boolean
           nullable: true
+    WorkloadV2ConfigurationInferenceRouting:
+      type: object
+      nullable: true
+      additionalProperties: false
+      description: >-
+        Inference routing fields from the policy-validated workload spec. Set
+        only by the workloads service on the internal create API; rejected in
+        public workload submissions. Workloads Manager resolves them into
+        externalAccess.inference on the serving endpoint.
+      properties:
+        loadAwareRouting:
+          $ref: '#/components/schemas/LoadAwareRouting'
     WorkloadV2Configuration:
       type: object
       description: Specifies the features configuration to apply to a workload.
@@ -58079,6 +57397,9 @@ components:
             Configuration applied to PVCs that are created and reconciled
             alongside the workload.
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcsConfig'
+        inferenceRouting:
+          x-internal: true
+          $ref: '#/components/schemas/WorkloadV2ConfigurationInferenceRouting'
     WorkloadV2MetadataCreateParams:
       type: object
       properties:
@@ -58639,6 +57960,10 @@ components:
               $ref: '#/components/schemas/ImagePullSecrets'
             labels:
               $ref: '#/components/schemas/Labels'
+            loadAwareRouting:
+              allOf:
+                - $ref: '#/components/schemas/LoadAwareRouting'
+              x-internal: true
             modelStore:
               nullable: true
               properties:
@@ -62504,16 +61829,18 @@ components:
         Operators are == Equals, != Not equals, <= Less than or equal, >=
         Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with
         and =$ Ends with. Dates are in ISO 8601 timestamp format and available
-        for operators ==, !=, <= and >=.
+        for operators ==, !=, <= and >=. gpuLimit treats a missing limit as -1
+        (unlimited), so gpuLimit!=-1 matches only org units with a GPU limit.
       schema:
         type: array
         maxItems: 10
         items:
           type: string
           pattern: >-
-            ^(nodePoolName|nodePoolId|orgUnitId|orgUnitName|rank|clusterId)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            ^(nodePoolName|nodePoolId|orgUnitId|orgUnitName|rank|clusterId|gpuLimit)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
         example:
           - nodePoolName!=some-name
+          - gpuLimit!=-1
       explode: false
     DepartmentNodePoolResourcesSortBy:
       name: sortBy
@@ -62559,16 +61886,18 @@ components:
         Operators are == Equals, != Not equals, <= Less than or equal, >=
         Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with
         and =$ Ends with. Dates are in ISO 8601 timestamp format and available
-        for operators ==, !=, <= and >=.
+        for operators ==, !=, <= and >=. gpuLimit treats a missing limit as -1
+        (unlimited), so gpuLimit!=-1 matches only org units with a GPU limit.
       schema:
         type: array
         maxItems: 10
         items:
           type: string
           pattern: >-
-            ^(nodePoolName|nodePoolId|parentId|orgUnitId|orgUnitName|rank|clusterId)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            ^(nodePoolName|nodePoolId|parentId|orgUnitId|orgUnitName|rank|clusterId|gpuLimit)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
         example:
           - nodePoolName!=some-name
+          - gpuLimit!=-1
       explode: false
     ProjectNodePoolResourcesSortBy:
       name: sortBy
@@ -63066,23 +62395,6 @@ components:
       schema:
         type: string
         format: uuid
-    ProjectIdOptional:
-      name: projectId
-      in: query
-      description: The id of the project
-      required: false
-      schema:
-        type: string
-        example: 4500001
-    WorkloadIdOptional:
-      name: workloadId
-      in: query
-      description: The id of the workload
-      required: false
-      schema:
-        type: string
-        format: uuid
-        example: d73a738f-fab3-430a-8fa3-5241493d7128
     AssetKind:
       name: kind
       in: query
