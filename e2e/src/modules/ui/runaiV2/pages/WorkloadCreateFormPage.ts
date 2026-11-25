@@ -14,15 +14,8 @@ export abstract class WorkloadCreateFormPage extends BaseV2Page {
 
     distributedOption: string;
 
-    computeResourceSection: string;
-
-    environmentSection: string;
-
     runaiGeneralSearch: string;
 
-    private readonly submissionSection: string;
-
-    private readonly submissionAssetsOption: string;
 
     modelSection: string;
 
@@ -60,13 +53,9 @@ export abstract class WorkloadCreateFormPage extends BaseV2Page {
         // first step
         this.projectSection = '.project-section';
         this.templateSection = '.template-section';
-        this.submissionSection = '[aid="workload-submission-type-section"]';
-        this.submissionAssetsOption = '[aid="radio-option-Original"]';
         this.distributedOption = '[aid="radio-option-Distributed"]';
 
         // second step
-        this.computeResourceSection = '.compute-resource-section';
-        this.environmentSection = '.environment-section';
         this.modelSection = '.model-catalog-section';
         this.runaiGeneralSearch = '.runai-general-search';
         this.dataSourceNewBtn = '[aid="data-source-gallery-add-new-btn"]';
@@ -116,16 +105,6 @@ export abstract class WorkloadCreateFormPage extends BaseV2Page {
         }
     }
 
-    async selectEnvironment(name: string): Promise<void> {
-        await this.fillWorkloadFormGeneralSearchInput(this.environmentSection, name);
-        await this.selectCard(name);
-    }
-
-    async selectComputeResource(name: string): Promise<void> {
-        await this.fillWorkloadFormGeneralSearchInput(this.computeResourceSection, name);
-        await this.selectCard(name);
-    }
-
     async selectModelInInferenceCreatePage(name: string): Promise<void> {
         await this.fillGeneralSearchInput(this.modelSection, name);
         await this.selectCard(name);
@@ -162,11 +141,6 @@ export abstract class WorkloadCreateFormPage extends BaseV2Page {
 
     async clickOnNewDataSourceBtn(): Promise<void> {
         await this.locator(this.dataSourceNewBtn).click();
-    }
-
-    async selectAssetsSubmissionOption(): Promise<void> {
-        await this.page.waitForSelector(this.submissionSection, { timeout: 3000 });
-        await this.page.locator(this.submissionAssetsOption).click();
     }
 
     async openGeneralSection(): Promise<void> {

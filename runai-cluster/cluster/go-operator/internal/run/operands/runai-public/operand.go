@@ -50,12 +50,12 @@ func (o *operand) Enabled() bool {
 	return true
 }
 
-func Operand(kbClient kc.HybridClient, runaiConfig runv1.RunaiConfig) operands.Operand {
+func Operand(localClusterClient, kbClient kc.HybridClient, runaiConfig runv1.RunaiConfig) operands.Operand {
 	return &operand{
 		k8sReader:   kbClient,
 		runaiConfig: &runaiConfig,
 		resources: []operands.Resource{
-			configmaps.NewRunaiPublic(name, kbClient, runaiConfig),
+			configmaps.NewRunaiPublic(name, kbClient, runaiConfig).WithLocalClusterReader(localClusterClient),
 		},
 	}
 }

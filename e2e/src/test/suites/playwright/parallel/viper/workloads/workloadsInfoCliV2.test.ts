@@ -25,7 +25,7 @@ import {
     tags,
     waitUtils
 } from '../../../../../../modules/helpers';
-import { Phase } from '../../../../../../modules/api/apis/assetsApi';
+import { Phase } from '../../../../../../modules/api/apis/workloadsApi/generated/model/phase';
 import {
     supportedFrom,
     SupportedVersions

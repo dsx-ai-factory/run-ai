@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+suite: Workloads manager assets service URL
+
+templates:
+  - templates/workloads-manager/configmap.yaml
+
+tests:
+  - it: renders the default assets service URL
+    set:
+      workloadsManager.enabled: true
+    asserts:
+      - equal:
+          path: data.ASSETS_SERVICE_URL
+          value: http://runai-backend-assets-service:8080
+
+  - it: uses the configured assets service name and port
+    set:
+      workloadsManager.enabled: true
+      fullnameOverride: custom-control-plane
+      assetsService.name: custom-assets
+      assetsService.service.port: 9090
+    asserts:
+      - equal:
+          path: data.ASSETS_SERVICE_URL
+          value: http://custom-control-plane-custom-assets:9090

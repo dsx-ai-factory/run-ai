@@ -89,6 +89,7 @@ func RegisterSuspendDefCacheStore() {
 }
 
 type WorkloadsV2Impl struct {
+	credentialsClient      credentialAssetsClient
 	k8sUtil                *K8sResourceUtil
 	settingsManager        *settings.SettingsManager
 	gvkPluginFactory       *plugins.Factory
@@ -463,6 +464,9 @@ func (w *WorkloadsV2Impl) buildConfiguration(ctx context.Context, configParams a
 	}
 
 	if pc := configParams.UserCredentials; pc != nil && len(pc.Sources) > 0 {
+		if err := w.validateUserCredentials(ctx, pc.Sources); err != nil {
+			return nil, err
+		}
 		sources := make([]string, 0, len(pc.Sources))
 		for _, s := range pc.Sources {
 			sources = append(sources, s.Ref)

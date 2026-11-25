@@ -30,7 +30,7 @@ Dependencies
 | `github.com/emicklei/go-restful/v3` | v3.14.0 | MIT | https://pkg.go.dev/github.com/emicklei/go-restful/v3@v3.14.0?tab=licenses |
 | `github.com/fxamacker/cbor/v2` | v2.10.0 | MIT | https://pkg.go.dev/github.com/fxamacker/cbor/v2@v2.10.0?tab=licenses |
 | `github.com/go-logr/logr` | v1.4.4 | Apache-2.0 | https://github.com/go-logr/logr/blob/v1.4.4/LICENSE |
-| `github.com/go-openapi/jsonpointer` | v1.0.2 | Apache-2.0 | https://github.com/go-openapi/jsonpointer/blob/v1.0.2/LICENSE |
+| `github.com/go-openapi/jsonpointer` | v1.0.3 | Apache-2.0 | https://github.com/go-openapi/jsonpointer/blob/v1.0.3/LICENSE |
 | `github.com/go-openapi/jsonreference` | v1.0.3 | Apache-2.0 | https://github.com/go-openapi/jsonreference/blob/v1.0.3/LICENSE |
 | `github.com/go-openapi/swag` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/v0.29.2/LICENSE |
 | `github.com/go-openapi/swag/cmdutils` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/cmdutils/v0.29.2/cmdutils/LICENSE |
@@ -53,7 +53,7 @@ Dependencies
 | `github.com/x448/float16` | v0.8.4 | MIT | https://github.com/x448/float16/blob/v0.8.4/LICENSE |
 | `go.yaml.in/yaml/v2` | v2.4.5 | Apache-2.0 | https://pkg.go.dev/go.yaml.in/yaml/v2@v2.4.5?tab=licenses |
 | `go.yaml.in/yaml/v3` | v3.0.6 | MIT | https://pkg.go.dev/go.yaml.in/yaml/v3@v3.0.6?tab=licenses |
-| `golang.org/x/net` | v0.62.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/net@v0.62.0?tab=licenses |
+| `golang.org/x/net` | v0.63.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/net@v0.63.0?tab=licenses |
 | `golang.org/x/oauth2` | v0.38.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/oauth2@v0.38.0?tab=licenses |
 | `golang.org/x/sys/unix` | v0.50.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sys@v0.50.0?tab=licenses |
 | `golang.org/x/term` | v0.48.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/term@v0.48.0?tab=licenses |
@@ -2133,7 +2133,7 @@ section 4(d) of the Apache License, Version 2.0 requires.
 
 --------------------------------------------------------------------------------
 Notice of:
-  - `github.com/go-openapi/jsonpointer` v1.0.2
+  - `github.com/go-openapi/jsonpointer` v1.0.3
 --------------------------------------------------------------------------------
 
 Copyright 2015-2025 go-swagger maintainers

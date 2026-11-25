@@ -13,8 +13,6 @@ import {
     projectResourcesUtils,
     projectUtils,
     tags,
-    unleashClient,
-    assetsApiV2Utils,
     workloadsCrudUtils,
     environmentUtils,
     computeResourceUtils,
@@ -26,7 +24,6 @@ import { AuthPage } from '../../../../../../modules/ui/runaiV2/pages/AuthPage';
 import { BrowserEngine } from '../../../../../../modules/ui/runaiV2/pages/BrowserEngine';
 import { CredentialPage } from '../../../../../../modules/ui/runaiV2/pages/CredentialPage';
 import {
-    AssetKind,
     Scope,
     GenericSecretCreationRequest,
     GenericSecret,
@@ -41,7 +38,6 @@ import {
 import { test, expect } from '@playwright/test';
 import { LocalUserSettings } from '../../../../../../modules/ui/runaiV2/pages/localUserSettings';
 import { SecretType } from '../../../../../../modules/api/apis/k8sObjectsTrackerApi/generated/api';
-import { EFeatureToggleKeys } from '../../../../../../modules/helpers/utils/Unleash/featureToggle';
 import { StatusCodes } from 'http-status-codes';
 import { WorkloadPage } from '../../../../../../modules/ui/runaiV2/pages/WorkloadPage';
 import { HybridForm } from '../../../../../../modules/ui/runaiV2/pages/HybridSubmissionForm';
@@ -178,7 +174,6 @@ test.describe(`Personal credentials, tags: ${tags.tool.ui} ${tags.resource.crede
                     async function () {
                         workloadsCrudUtils.accessToken =
                             flowRootState.users.system_administrator.accessToken;
-                        assetsApiV2Utils.accessToken = flowRootState.users.system_administrator.accessToken;
 
                         await initBrowserAndLogin();
 
@@ -296,7 +291,6 @@ test.describe(`Personal credentials, tags: ${tags.tool.ui} ${tags.resource.crede
 
                 test.beforeEach('setup browser and create docker registry credential', async function () {
                     workloadsCrudUtils.accessToken = flowRootState.users.system_administrator.accessToken;
-                    assetsApiV2Utils.accessToken = flowRootState.users.system_administrator.accessToken;
 
                     await initBrowserAndLogin();
 

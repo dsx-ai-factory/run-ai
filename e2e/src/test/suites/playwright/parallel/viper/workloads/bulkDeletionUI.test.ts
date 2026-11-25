@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TrainingCreationRequestV2, TrainingV2 } from '../../../../../../modules/api/apis/assetsApi';
 import { Project } from '../../../../../../modules/api/apis/projectsDepartmentsApi';
 import {
     computeResourceUtils,
@@ -17,7 +16,8 @@ import {
     settings,
     tags,
     trainingUtils,
-    Utils
+    Utils,
+    waitUtils
 } from '../../../../../../modules/helpers';
 import { shouldRunTests } from '../../../../../../modules/helpers/utils/SupporetedEnvsUtils';
 import { WorkloadPage } from '../../../../../../modules/ui/runaiV2/pages/WorkloadPage';
@@ -37,34 +37,6 @@ test.describe(`Bulk Deletion UI ${tags.teams.viper} ${tags.tool.ui}`, function (
 
         let environmentId: string;
         let computeResourceId: string;
-
-        function getTrainingWorkloadPayload(name: string): TrainingCreationRequestV2 {
-            return {
-                meta: {
-                    projectId: project.id.toString(),
-                    name: name,
-                    clusterId: project.clusterUuid
-                },
-                assets: {
-                    environment: environmentId,
-                    compute: computeResourceId
-                }
-            };
-        }
-
-        async function createTrainingWorkloads(
-            amount: number,
-            workloadNamePrefix: string
-        ): Promise<TrainingV2[]> {
-            const trainingWorkloads = [];
-            for (let i = 0; i < amount; i++) {
-                const name = `${workloadNamePrefix}-${i}`;
-                const workloadPayload = getTrainingWorkloadPayload(name);
-                const trainingWorkload = await trainingUtils.createTraining(workloadPayload);
-                trainingWorkloads.push(trainingWorkload);
-            }
-            return trainingWorkloads;
-        }
 
         test.beforeAll(async function () {
             browserEngine = new BrowserEngine();
@@ -119,7 +91,10 @@ test.describe(`Bulk Deletion UI ${tags.teams.viper} ${tags.tool.ui}`, function (
         test('should be able to select multiple workloads and delete them', async function () {
             videoName = 'select-multiple-workloads-and-delete-them';
             const workloadNamePrefix = objectGenerator.generateShortNameByPrefix('t-bulk');
-            const workloads = await createTrainingWorkloads(3, workloadNamePrefix);
+            const workloadNames = [0, 1, 2].map((i) => `${workloadNamePrefix}-${i}`);
+            await trainingUtils.createTrainingWorkloads(workloadNames, project, {
+                assets: { environment: environmentId, compute: computeResourceId }
+            });
             await workloadPage.navigateToWorkloads();
 
             // The workloads table is shared by all parallel tests and only loads the first page.
@@ -130,14 +105,20 @@ test.describe(`Bulk Deletion UI ${tags.teams.viper} ${tags.tool.ui}`, function (
             ]);
 
             // wait for workloads to appear on UI
-            for (const workload of workloads) {
-                await workloadPage.waitForWorkloadToAppear(workload.meta.name);
+            for (const name of workloadNames) {
+                await workloadPage.waitForWorkloadToAppear(name);
             }
 
-            await workloadPage.deleteWorkloads(workloads.map((workload) => workload.meta.name));
-            await workloadPage.waitForWorkloadStatus(workloads[0].meta.name, 'deleting');
-            await workloadPage.waitForWorkloadStatus(workloads[1].meta.name, 'deleting');
-            await workloadPage.waitForWorkloadStatus(workloads[2].meta.name, 'deleting');
+            await workloadPage.deleteWorkloads(workloadNames);
+            await Promise.all(
+                workloadNames.map((name) =>
+                    waitUtils.waitForElementToNotExist(
+                        workloadPage,
+                        `td${workloadPage.workloadNameCol}:has-text("${name}")`,
+                        120
+                    )
+                )
+            );
         });
     });
 });

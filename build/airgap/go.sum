@@ -1,5 +1,5 @@
-github.com/docker/cli v29.10.0+incompatible h1:lCL+clBUJnHsmjBCr6TwvfQFkmBidPxi5SkuXCoYxc0=
-github.com/docker/cli v29.10.0+incompatible/go.mod h1:JLrzqnKDaYBop7H2jaqPtU4hHvMKP+vjCwu2uszcLI8=
+github.com/docker/cli v29.10.1+incompatible h1:0wlyVoe0snmKYUUjJuhoR0HiSqRHQonKVcZzT7LwkVM=
+github.com/docker/cli v29.10.1+incompatible/go.mod h1:JLrzqnKDaYBop7H2jaqPtU4hHvMKP+vjCwu2uszcLI8=
 github.com/docker/docker-credential-helpers v0.9.13 h1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=
 github.com/docker/docker-credential-helpers v0.9.13/go.mod h1:v1S+hepowrQXITkEfw6o4+BMbGot02wiKpzWhGUZK6c=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
