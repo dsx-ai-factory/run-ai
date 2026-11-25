@@ -1241,22 +1241,15 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				Expect(department.Resources[0].Gpu.Limit).To(Equal(ptr.To(float64(2))))
 			})
 
-			It("accepts CPU and memory limits on a node pool with quota off and limits on", func() {
+			It("rejects CPU and memory limits on a node pool with quota off and limits on", func() {
 				depReq := getDepartmentCreateRequest(createDepartmentName(), clusterId3)
 				resources := CreateNodePoolApiResourcesNoQuota(fmt.Sprint(defaultNodePoolId), "default")
 				resources.Cpu.Limit = ptr.To(float64(4))
-				resources.Memory.Limit = ptr.To(float64(8))
 				depReq.Resources = []api.ResourcesNullable{resources}
 				depRes, err := quotaOffDepartments.CreateDepartment(ctx, depReq)
 				Expect(err).To(BeNil())
-				Expect(depRes.Code).To(Equal(http.StatusCreated), fmt.Sprint(depRes.Body))
-				department := depRes.Body.(api.Department)
-				limitsCapabilityDepIds = append(limitsCapabilityDepIds, department.Id)
-				Expect(department.Resources[0].Cpu).ToNot(BeNil())
-				Expect(department.Resources[0].Cpu.Limit).To(Equal(ptr.To(float64(4))))
-				Expect(department.Resources[0].Cpu.Deserved).To(Equal(ptr.To(-1.0)))
-				Expect(department.Resources[0].Memory).ToNot(BeNil())
-				Expect(department.Resources[0].Memory.Limit).To(Equal(ptr.To(float64(8))))
+				Expect(depRes.Code).To(Equal(http.StatusBadRequest))
+				Expect(fmt.Sprint(depRes.Body)).To(ContainSubstring("CPU and memory limits should be -1, null or omitted"))
 			})
 
 			It("rejects GPU quota on a node pool with quota off and limits on", func() {

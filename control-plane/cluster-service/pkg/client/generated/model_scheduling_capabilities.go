@@ -31,7 +31,7 @@ type SchedulingCapabilities struct {
 	Quota bool `json:"quota"`
 	// Whether to allow CPU quota for the nodepool's resources. Only allowed when allowQuota=true.
 	CpuQuota bool `json:"cpuQuota"`
-	// Whether to allow GPU, CPU and memory limits for the nodepool's resources.
+	// Whether to allow GPU, CPU and memory limits for the nodepool's resources. With quota=false, only GPU limits are allowed.
 	Limits bool `json:"limits"`
 }
 

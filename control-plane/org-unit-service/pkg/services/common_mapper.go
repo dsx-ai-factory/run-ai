@@ -486,7 +486,7 @@ func ApiResourcesFromModel(modelResources []models.Resources, nodePoolsMetadata 
 		// error shouldn't happen, as node pool existence is already validated
 		adjustableWeightsFlag := npSchedulingCapabilities.AdjustableWeights
 		cpuQuotaFlag := npSchedulingCapabilities.CpuQuota
-		apiResources[i] = ApiResourceFromModel(resources, adjustableWeightsFlag, cpuQuotaFlag, npSchedulingCapabilities.Limits, false)
+		apiResources[i] = ApiResourceFromModel(resources, adjustableWeightsFlag, cpuQuotaFlag, false)
 	}
 	return apiResources
 }
@@ -500,7 +500,7 @@ func ApiResourcesFromModelSync(modelResources []models.Resources, nodePools map[
 		adjustableWeightsFlag := npSchedulingCapabilities.AdjustableWeights
 		cpuQuotaFlag := npSchedulingCapabilities.CpuQuota
 
-		apiResourceFromModel := ApiResourceFromModel(resources, adjustableWeightsFlag, cpuQuotaFlag, npSchedulingCapabilities.Limits, true)
+		apiResourceFromModel := ApiResourceFromModel(resources, adjustableWeightsFlag, cpuQuotaFlag, true)
 		rankValue := MapRankToNumber(resources.Rank)
 		apiResources[i] = api.ResourcesSync{
 			NodePool: apiResourceFromModel.NodePool,
@@ -524,7 +524,7 @@ func ApiResourcesFromModelSync(modelResources []models.Resources, nodePools map[
 	return apiResources
 }
 
-func ApiResourceFromModel(resources models.Resources, adjustableWeightsFlag, cpuQuotaFlag, limitsFlag bool, returnClusterUnits bool) api.Resources {
+func ApiResourceFromModel(resources models.Resources, adjustableWeightsFlag, cpuQuotaFlag bool, returnClusterUnits bool) api.Resources {
 	apiResourcesNodePool := api.ResourcesNodePool{
 		Id:   resources.NodePoolId,
 		Name: resources.NodePoolName,
@@ -550,12 +550,6 @@ func ApiResourceFromModel(resources models.Resources, adjustableWeightsFlag, cpu
 		if !adjustableWeightsFlag {
 			result.Cpu.OverQuotaWeight = nonAdjustableOverQuotaWeight(resources.CpuDeserved)
 		}
-	} else if limitsFlag && isLimited(resources.CpuLimit) {
-		// without cpuQuota only the limit applies
-		result.Cpu = &api.ResourcesCpu{
-			Limit:    ptr.To(*resources.CpuLimit),
-			Deserved: ptr.To(-1.0),
-		}
 	}
 	if cpuQuotaFlag && (resources.MemoryDeserved != nil || resources.MemoryLimit != nil || resources.MemoryOverQuotaWeight != nil) {
 		limit := getMemoryResources(resources.MemoryLimit, resources.MemoryUnits, returnClusterUnits)
@@ -569,12 +563,6 @@ func ApiResourceFromModel(resources models.Resources, adjustableWeightsFlag, cpu
 		}
 		if !adjustableWeightsFlag {
 			result.Memory.OverQuotaWeight = nonAdjustableOverQuotaWeight(deserved)
-		}
-	} else if limitsFlag && isLimited(resources.MemoryLimit) {
-		result.Memory = &api.ResourcesMemory{
-			Limit:    getMemoryResources(resources.MemoryLimit, resources.MemoryUnits, returnClusterUnits),
-			Deserved: ptr.To(-1.0),
-			Units:    ModelUnitsToApi(resources.MemoryUnits),
 		}
 	}
 

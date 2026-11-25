@@ -244,10 +244,10 @@ var _ = Describe("Org unit tests", Ordered, func() {
 			Expect(depADefaultRes.Gpu.Limit).To(Equal(ptr.To(float64(2))), "QUOTAS_TO_DEFAULT keeps GPU limits")
 			Expect(depADefaultRes.Cpu).ToNot(BeNil())
 			Expect(depADefaultRes.Cpu.Deserved).To(Equal(ptr.To(-1.0)))
-			Expect(depADefaultRes.Cpu.Limit).To(Equal(ptr.To(float64(2))), "QUOTAS_TO_DEFAULT keeps CPU limits")
+			Expect(depADefaultRes.Cpu.Limit).To(Equal(ptr.To(-1.0)))
 			Expect(depADefaultRes.Memory).ToNot(BeNil())
 			Expect(depADefaultRes.Memory.Deserved).To(Equal(ptr.To(-1.0)))
-			Expect(depADefaultRes.Memory.Limit).To(Equal(ptr.To(float64(2))), "QUOTAS_TO_DEFAULT keeps memory limits")
+			Expect(depADefaultRes.Memory.Limit).To(Equal(ptr.To(-1.0)))
 			// np2 untouched
 			Expect(depANp2Res.Cpu).ToNot(BeNil())
 			Expect(depANp2Res.Cpu.Deserved).To(Equal(ptr.To(FullResourcesDeservedGpu)))
@@ -271,10 +271,10 @@ var _ = Describe("Org unit tests", Ordered, func() {
 			Expect(depBDefaultRes.Gpu.Limit).To(Equal(ptr.To(float64(2))), "QUOTAS_TO_DEFAULT keeps GPU limits")
 			Expect(depBDefaultRes.Cpu).ToNot(BeNil())
 			Expect(depBDefaultRes.Cpu.Deserved).To(Equal(ptr.To(-1.0)))
-			Expect(depBDefaultRes.Cpu.Limit).To(Equal(ptr.To(float64(2))), "QUOTAS_TO_DEFAULT keeps CPU limits")
+			Expect(depBDefaultRes.Cpu.Limit).To(Equal(ptr.To(-1.0)))
 			Expect(depBDefaultRes.Memory).ToNot(BeNil())
 			Expect(depBDefaultRes.Memory.Deserved).To(Equal(ptr.To(-1.0)))
-			Expect(depBDefaultRes.Memory.Limit).To(Equal(ptr.To(float64(2))), "QUOTAS_TO_DEFAULT keeps memory limits")
+			Expect(depBDefaultRes.Memory.Limit).To(Equal(ptr.To(-1.0)))
 			// np2 untouched
 			Expect(depBNp2Res.Gpu.OverQuotaWeight).ToNot(BeNil())
 			Expect(*depBNp2Res.Gpu.OverQuotaWeight).To(Equal(float64(7)))
@@ -537,17 +537,17 @@ var _ = Describe("Org unit tests", Ordered, func() {
 					}
 				}
 				if p.ParentId == depA.Id {
-					// quotas cleared, limits and OQ unchanged
+					// GPU deserved 0 and GPU limit kept, CPU and memory quota and limit cleared, OQ unchanged
 					Expect(defaultRes.Gpu.Deserved).To(Equal(float64(0)))
 					Expect(defaultRes.Gpu.Limit).To(Equal(ptr.To(float64(3))))
 					Expect(defaultRes.Gpu.OverQuotaWeight).To(Equal(ptr.To(float64(5))))
 					Expect(defaultRes.Cpu).ToNot(BeNil())
 					Expect(defaultRes.Cpu.Deserved).To(Equal(ptr.To(-1.0)))
-					Expect(defaultRes.Cpu.Limit).To(Equal(ptr.To(float64(4))))
+					Expect(defaultRes.Cpu.Limit).To(Equal(ptr.To(-1.0)))
 					Expect(defaultRes.Cpu.OverQuotaWeight).To(Equal(ptr.To(float64(6))))
 					Expect(defaultRes.Memory).ToNot(BeNil())
 					Expect(defaultRes.Memory.Deserved).To(Equal(ptr.To(-1.0)))
-					Expect(defaultRes.Memory.Limit).To(Equal(ptr.To(float64(8))))
+					Expect(defaultRes.Memory.Limit).To(Equal(ptr.To(-1.0)))
 					Expect(defaultRes.Memory.OverQuotaWeight).To(Equal(ptr.To(float64(12))))
 				} else {
 					// unchanged on different parent
@@ -999,15 +999,11 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				for _, p := range response.Body.(api.GetProjects200Response).Projects {
 					for _, r := range p.Resources {
 						if r.NodePool.Id == fmt.Sprint(defaultNodePoolId) || r.NodePool.Id == nodePoolId2 {
-							// quotas cleared, limits kept
+							// GPU deserved 0 and GPU limit kept, CPU and memory cleared
 							Expect(r.Gpu.Deserved).To(Equal(float64(0)))
 							Expect(r.Gpu.Limit).To(Equal(ptr.To(float64(3))))
-							Expect(r.Cpu).ToNot(BeNil())
-							Expect(r.Cpu.Deserved).To(Equal(ptr.To(-1.0)))
-							Expect(r.Cpu.Limit).To(Equal(ptr.To(float64(4))))
-							Expect(r.Memory).ToNot(BeNil())
-							Expect(r.Memory.Deserved).To(Equal(ptr.To(-1.0)))
-							Expect(r.Memory.Limit).To(Equal(ptr.To(float64(8))))
+							Expect(r.Cpu).To(BeNil())
+							Expect(r.Memory).To(BeNil())
 						} else {
 							// unchanged on third nodepool
 							Expect(r.Gpu.Deserved).To(Equal(float64(3)))

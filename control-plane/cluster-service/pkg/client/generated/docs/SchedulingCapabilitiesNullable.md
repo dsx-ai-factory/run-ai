@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 **Ranks** | Pointer to **NullableBool** | Whether to allow ranks for the nodepool&#39;s resources. | [optional] [default to true]
 **Quota** | Pointer to **NullableBool** | Whether to allow GPU quota for the nodepool&#39;s resources. | [optional] [default to true]
 **CpuQuota** | Pointer to **NullableBool** | Whether to allow CPU quota for the nodepool&#39;s resources. Only allowed when allowQuota&#x3D;true. | [optional] [default to false]
-**Limits** | Pointer to **NullableBool** | Whether to allow GPU, CPU and memory limits for the nodepool&#39;s resources. | [optional] [default to true]
+**Limits** | Pointer to **NullableBool** | Whether to allow GPU, CPU and memory limits for the nodepool&#39;s resources. With quota&#x3D;false, only GPU limits are allowed. | [optional] [default to true]
 
 ## Methods
 
