@@ -111,9 +111,11 @@ echo ""
 echo -e "${BLUE}📊 Test execution completed with exit code: $TEST_EXIT_CODE${NC}"
 
 if [ -f "$TEMP_OUTPUT" ]; then
-    FAILED_TESTS=$(grep -c "FAIL:" "$TEMP_OUTPUT" 2>/dev/null || echo "0")
-    PASSED_TESTS=$(grep -c "PASS:" "$TEMP_OUTPUT" 2>/dev/null || echo "0")
-    SKIPPED_TESTS=$(grep -c "SKIP:" "$TEMP_OUTPUT" 2>/dev/null || echo "0")
+    FAILED_TESTS=$(grep -c "FAIL:" "$TEMP_OUTPUT" 2>/dev/null || true)
+    PASSED_TESTS=$(grep -c "PASS:" "$TEMP_OUTPUT" 2>/dev/null || true)
+    SKIPPED_TESTS=$(grep -c "SKIP:" "$TEMP_OUTPUT" 2>/dev/null || true)
+    # grep -c prints 0 itself when nothing matches, so only default if it printed nothing
+    FAILED_TESTS=${FAILED_TESTS:-0}; PASSED_TESTS=${PASSED_TESTS:-0}; SKIPPED_TESTS=${SKIPPED_TESTS:-0}
     
     echo ""
     echo -e "${BLUE}📈 Quick Summary:${NC}"

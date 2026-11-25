@@ -34,7 +34,7 @@ unit-test: test-ginkgo ## Run unit tests only.
 integ-tests: build docker-compose-integration-tests-up ## Run integration tests.
 .PHONY: integ-tests
 
-build-integration-tests: build-integration-tests-generic
+build-integration-tests: build build-integration-tests-generic
 	docker compose --profile "*" -f ./integration-tests/docker-compose.yaml build
 
 docker-compose-integration-tests-up: build-integration-tests
