@@ -97,7 +97,7 @@ func (mgr *OrgHierarchyManager) getAncestorsSync(ctx context.Context, resourceId
 	switch resourceType {
 	case api.RESOURCETYPE_TENANT:
 		return &authorization_utils.Ancestors{TenantId: resourceId}, nil
-	case api.RESOURCETYPE_WORKLOADS, api.RESOURCETYPE_TRAININGS, api.RESOURCETYPE_WORKSPACES:
+	case api.RESOURCETYPE_WORKLOADS, api.RESOURCETYPE_TRAININGS, api.RESOURCETYPE_WORKSPACES, api.RESOURCETYPE_WORKFLOWS:
 		return mgr.getWorkloadsAncestorsSync(ctx, resourceId)
 	case api.RESOURCETYPE_INFERENCES:
 		return mgr.getInferenceAncestorsSync(ctx, resourceId)

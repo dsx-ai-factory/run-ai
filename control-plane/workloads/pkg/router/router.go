@@ -87,6 +87,9 @@ func CreateRouter() chi.Router {
 	settingsApiController := api.NewSettingsAPIController(settingsApiService)
 	router := api.NewRouter()
 
+	workflowsService := services_crud.NewWorkflowsService()
+	workflowsAPIController := api.NewWorkflowsAPIController(workflowsService)
+
 	router.Group(func(router chi.Router) {
 		api.AddRoutes(router, HealthAPIController)
 	})
@@ -100,7 +103,8 @@ func CreateRouter() chi.Router {
 		router.Use(chartInspectionBodyLimit)
 		api.AddRoutes(router, WorkloadsBatchAPIController, WorkspacesAPIController, TrainingsAPIController, DistributedAPIController,
 			InferencesAPIController, DistributedInferencesAPIController, WorkloadsAPIController, UnifiedWorkloadAPIController, PodsAPIController, EventsAPIController, RevisionsAPIController, PodGroupsAPIController,
-			TemplatesAPIController, WorkloadPropertiesAPIController, ApplicationsAPIController, SyncController, settingsApiController, WorkloadActionsAPIController)
+			TemplatesAPIController, WorkloadPropertiesAPIController, ApplicationsAPIController, SyncController, settingsApiController, WorkloadActionsAPIController,
+			workflowsAPIController)
 	})
 
 	return router

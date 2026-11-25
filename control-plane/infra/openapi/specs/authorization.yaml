@@ -1826,6 +1826,7 @@ components:
         - nodepools-minimal
         - clusters-minimal
         - users-minimal
+        - workflows
     PermissionAction:
       type: string
       enum:

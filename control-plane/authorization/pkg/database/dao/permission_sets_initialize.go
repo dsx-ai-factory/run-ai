@@ -19,6 +19,7 @@ var (
 	PermissionSets                 = []models.PermissionSet{
 		static_permission_sets.WorkspaceEdit,
 		static_permission_sets.TrainingEdit,
+		static_permission_sets.WorkflowEdit,
 		static_permission_sets.InferenceEdit,
 		static_permission_sets.YamlWorkloadEdit,
 		static_permission_sets.WorkloadRead,

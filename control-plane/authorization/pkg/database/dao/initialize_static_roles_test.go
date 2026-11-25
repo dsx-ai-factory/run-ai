@@ -88,17 +88,18 @@ var _ = Describe("Initialize static roles and permission sets tests", Ordered, f
 		})
 
 		It("test after init that new roles have permission set", func() {
-			// before second run - System administrator has 30 permission sets
+			// before second run - System administrator has 31 permission sets
 			roles, err := DbGetRoles(context.Background(), "", 100, 0, "", "", nil, "", false)
 			Expect(err).To(BeNil())
 			for _, role := range *roles {
 				if role.Name == "System administrator" {
-					Expect(len(*role.PermissionSets)).To(Equal(30))
+					Expect(len(*role.PermissionSets)).To(Equal(31))
 					for _, permission := range role.Permissions {
 						switch permission.ResourceType {
 						case api.RESOURCETYPE_WORKLOADS,
 							api.RESOURCETYPE_WORKSPACES,
 							api.RESOURCETYPE_TRAININGS,
+							api.RESOURCETYPE_WORKFLOWS,
 							api.RESOURCETYPE_INFERENCES,
 							api.RESOURCETYPE_WORKLOAD_PROPERTIES,
 							api.RESOURCETYPE_PROJECT:
@@ -138,6 +139,7 @@ var _ = Describe("Initialize static roles and permission sets tests", Ordered, f
 						case api.RESOURCETYPE_WORKLOADS,
 							api.RESOURCETYPE_WORKSPACES,
 							api.RESOURCETYPE_TRAININGS,
+							api.RESOURCETYPE_WORKFLOWS,
 							api.RESOURCETYPE_INFERENCES,
 							api.RESOURCETYPE_WORKLOAD_PROPERTIES,
 							api.RESOURCETYPE_PROJECT:

@@ -69,6 +69,7 @@ const (
 	RESOURCETYPE_NODEPOOLS_MINIMAL            ResourceType = "nodepools-minimal"
 	RESOURCETYPE_CLUSTERS_MINIMAL             ResourceType = "clusters-minimal"
 	RESOURCETYPE_USERS_MINIMAL                ResourceType = "users-minimal"
+	RESOURCETYPE_WORKFLOWS                    ResourceType = "workflows"
 )
 
 // All allowed values of ResourceType enum
@@ -119,6 +120,7 @@ var AllowedResourceTypeEnumValues = []ResourceType{
 	"nodepools-minimal",
 	"clusters-minimal",
 	"users-minimal",
+	"workflows",
 }
 
 func (v *ResourceType) UnmarshalJSON(src []byte) error {

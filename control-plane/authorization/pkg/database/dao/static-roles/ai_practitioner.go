@@ -20,6 +20,7 @@ var AiPractitioner = models.Role{
 	PermissionSets: &[]models.PermissionSet{
 		{Name: static_permission_sets.WorkspaceEdit.Name},
 		{Name: static_permission_sets.TrainingEdit.Name},
+		{Name: static_permission_sets.WorkflowEdit.Name},
 		{Name: static_permission_sets.InferenceEdit.Name},
 		{Name: static_permission_sets.ApplicationEdit.Name},
 		{Name: static_permission_sets.YamlWorkloadEdit.Name},

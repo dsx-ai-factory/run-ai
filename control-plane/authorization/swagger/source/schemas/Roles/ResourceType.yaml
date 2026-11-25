@@ -50,3 +50,4 @@ enum:
   - nodepools-minimal
   - clusters-minimal
   - users-minimal
+  - workflows

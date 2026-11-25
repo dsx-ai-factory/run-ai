@@ -26,7 +26,7 @@ var _ = Describe("Permissions sets API tests", Ordered, func() {
 	tenantId := fmt.Sprintf("%d", testing.TestTenant)
 	ctx := setContext(tenantId, TestUserId, []string{dao.SuperAdmins})
 	PermissionSetMap := map[string]uuid.UUID{}
-	permissionSetLength := 57
+	permissionSetLength := 58
 	workspaceEditPermissionsLen := 22
 
 	permissionsApiService := NewPermissionsApiService()

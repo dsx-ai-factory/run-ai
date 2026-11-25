@@ -27,6 +27,10 @@ var WorkloadRead = models.PermissionSet{
 			Read:         true,
 		},
 		{
+			ResourceType: api.RESOURCETYPE_WORKFLOWS,
+			Read:         true,
+		},
+		{
 			ResourceType: api.RESOURCETYPE_INFERENCES,
 			Read:         true,
 		},
