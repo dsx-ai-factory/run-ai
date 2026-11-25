@@ -3,9 +3,9 @@ module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/runai-crd-upgrader
 go 1.27.4
 
 require (
-	k8s.io/apiextensions-apiserver v0.37.2
-	k8s.io/apimachinery v0.37.2
-	k8s.io/client-go v0.37.2
+	k8s.io/apiextensions-apiserver v0.37.3
+	k8s.io/apimachinery v0.37.3
+	k8s.io/client-go v0.37.3
 )
 
 require (
@@ -45,7 +45,7 @@ require (
 	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
-	k8s.io/api v0.37.2 // indirect
+	k8s.io/api v0.37.3 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260721132016-d427ff9ee9ad // indirect
 	k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab // indirect
