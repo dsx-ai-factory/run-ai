@@ -313,8 +313,11 @@ func validateNodePoolResources(nodePoolResources api.ResourcesNullable, nodePool
 	}
 
 	gpuDeserved := ptr.Deref(nodePoolResources.Gpu.Deserved, 0)
-	if !quotaFlag && (gpuDeserved > 0 || (nodePoolResources.Gpu.Limit != nil && *nodePoolResources.Gpu.Limit != -1)) {
-		return nil, fmt.Errorf("quota is not enabled on nodepool id <%s>. GPU deserved should be 0 or omitted, and GPU limit should be -1, null or omitted", nodepoolId)
+	if !quotaFlag && gpuDeserved > 0 {
+		return nil, fmt.Errorf("quota is not enabled on nodepool id <%s>. GPU deserved should be 0 or omitted", nodepoolId)
+	}
+	if !quotaFlag && hasCpuOrMemoryLimit(nodePoolResources) {
+		return nil, fmt.Errorf("quota is not enabled on nodepool id <%s>. CPU and memory limits should be -1, null or omitted", nodepoolId)
 	}
 
 	if !limitsFlag && hasNodePoolResourcesLimit(nodePoolResources) {
@@ -357,10 +360,16 @@ func validateNodePoolResources(nodePoolResources api.ResourcesNullable, nodePool
 }
 
 func hasNodePoolResourcesLimit(nodePoolResources api.ResourcesNullable) bool {
-	isLimited := func(limit *float64) bool { return limit != nil && *limit != -1 }
-	return isLimited(nodePoolResources.Gpu.Limit) ||
-		(nodePoolResources.Cpu != nil && isLimited(nodePoolResources.Cpu.Limit)) ||
+	return isLimited(nodePoolResources.Gpu.Limit) || hasCpuOrMemoryLimit(nodePoolResources)
+}
+
+func hasCpuOrMemoryLimit(nodePoolResources api.ResourcesNullable) bool {
+	return (nodePoolResources.Cpu != nil && isLimited(nodePoolResources.Cpu.Limit)) ||
 		(nodePoolResources.Memory != nil && isLimited(nodePoolResources.Memory.Limit))
+}
+
+func isLimited(limit *float64) bool {
+	return limit != nil && *limit != -1
 }
 
 func ValidateResources(ctx context.Context, resources []api.ResourcesNullable, nodePoolsMetadata map[string]apiClusters.NodepoolMinimal) error {

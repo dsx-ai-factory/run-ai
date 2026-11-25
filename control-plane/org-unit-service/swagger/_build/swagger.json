@@ -8177,7 +8177,7 @@
           },
           "limits": {
             "type": "boolean",
-            "description": "Whether GPU limits apply. Only allowed when quota is true."
+            "description": "Whether GPU limits apply."
           }
         }
       },

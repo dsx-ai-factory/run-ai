@@ -7,7 +7,7 @@ Name | Type | Description | Notes
 **Quota** | **bool** |  | 
 **Ranks** | **bool** |  | 
 **AdjustableWeights** | **bool** |  | 
-**Limits** | **bool** | Whether GPU limits apply. Only allowed when quota is true. | 
+**Limits** | **bool** | Whether GPU limits apply. | 
 
 ## Methods
 
