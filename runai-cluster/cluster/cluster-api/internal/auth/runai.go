@@ -21,8 +21,27 @@ const (
 	authzExtractError = "authentication error: %s"
 )
 
+// CreateCORSMiddleware must be registered on the root router, before any route: chi answers
+// an OPTIONS request to a GET-only route with 405 before route-group middleware runs, so a
+// CORS check placed in a group never sees the browser's preflight.
+func CreateCORSMiddleware(allowedOrigins []string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			setCORSHeaders(w, r, allowedOrigins)
+
+			// Preflights carry no credentials, so they are answered here, before authentication.
+			if r.Method == OptionHeader {
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
 func CreateAuthMiddleware(jwksConfig *keyfunc.JWKS, oidcConfigurationProvider configuration.Provider,
-	userInfoProvider userinfo.Provider, allowedOrigins []string,
+	userInfoProvider userinfo.Provider,
 ) func(http.Handler) http.Handler {
 	log.Debug().Msg("Creating authentication middleware")
 
@@ -32,16 +51,6 @@ func CreateAuthMiddleware(jwksConfig *keyfunc.JWKS, oidcConfigurationProvider co
 				Str("method", r.Method).
 				Str("url", r.URL.String()).
 				Msg("Starting request processing")
-
-			setCORSHeaders(w, r, allowedOrigins)
-
-			if r.Method == OptionHeader {
-				log.Debug().Msg("Handling OPTIONS request")
-
-				w.WriteHeader(http.StatusOK)
-
-				return
-			}
 
 			var authInfo *Info
 
@@ -88,6 +97,8 @@ func setCORSHeaders(w http.ResponseWriter, req *http.Request, allowedOrigins []s
 	for _, allowed := range allowedOrigins {
 		if origin == allowed {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
+			// The UI sends requests withCredentials; safe only because origin is an exact allowlist match.
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
 			w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, PATCH")
 			w.Header().Set("Access-Control-Allow-Headers",
 				"Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, authinfo")

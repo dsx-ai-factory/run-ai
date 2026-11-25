@@ -150,14 +150,7 @@ supportedFrom(SupportedVersions.V2_18)(function () {
                     await projectResourcesUtils.createProjectAndNamespace(anotherProjectName);
                 const anotherWorkloadName = objectGenerator.generateNameByPrefix('e2e-wl-cm-other');
                 await browserEngine.currentPage.reload();
-                await trainingPage.fillFirstNewTrainingPage(
-                    anotherProject.name,
-                    anotherWorkloadName,
-                    false,
-                    undefined,
-                    undefined,
-                    true
-                );
+                await trainingPage.fillFlexTrainingFirstPage(anotherProject.name, anotherWorkloadName);
 
                 const hybridForm = new HybridForm(browserEngine.currentPage);
                 await hybridForm.openDataSourcesSection();
@@ -185,7 +178,7 @@ supportedFrom(SupportedVersions.V2_19)(function () {
         let project: any;
         let newDepartment: any;
         let projectInNewDepartment: any;
-        let anotherProjectInDefaultDept: any;
+        let anotherProjectInNewDepartment: any;
         const MOUNT_PATH = '/mnt/data';
         const CONFIG_KEY1 = 'key1';
         const CONFIG_KEY2 = 'key2';
@@ -216,10 +209,11 @@ supportedFrom(SupportedVersions.V2_19)(function () {
                 newDepartment.id
             );
 
-            // Create another project in default department
-            const anotherProjectName = objectGenerator.generateNameByPrefix('project-cm-default-dept');
-            anotherProjectInDefaultDept =
-                await projectResourcesUtils.createProjectAndNamespace(anotherProjectName);
+            const anotherProjectName = objectGenerator.generateNameByPrefix('project-cm-same-dept');
+            anotherProjectInNewDepartment = await projectResourcesUtils.createProjectAndNamespace(
+                anotherProjectName,
+                newDepartment.id
+            );
 
             runaiCliV2.loginAsUser(
                 flowRootState.users.l1_researcher.email,
@@ -231,7 +225,7 @@ supportedFrom(SupportedVersions.V2_19)(function () {
         test.afterAll(async () => {
             await operations.deleteProjectAndNamespace(project.id);
             await operations.deleteProjectAndNamespace(projectInNewDepartment.id);
-            await operations.deleteProjectAndNamespace(anotherProjectInDefaultDept.id);
+            await operations.deleteProjectAndNamespace(anotherProjectInNewDepartment.id);
             await departmentUtils.deleteDepartment(newDepartment.id);
         });
 
@@ -464,51 +458,35 @@ data:
             });
 
             await test.step('Create training workload in another project within same department', async () => {
-                // Create another project in the same department
-                const anotherProjectInSameDeptName =
-                    objectGenerator.generateNameByPrefix('project-cm-same-dept-2');
-                const anotherProjectInSameDept = await projectResourcesUtils.createProjectAndNamespace(
-                    anotherProjectInSameDeptName,
-                    newDepartment.id
-                );
-
                 const workload2Id = await trainingUtils.createArbitraryTrainingWithConfigmap(
                     workloadName2,
-                    anotherProjectInSameDept.id.toString(),
+                    anotherProjectInNewDepartment.id.toString(),
                     dataSourceId
                 );
-
+                createdWorkloadIds.push(workload2Id);
                 await workloadsUtilsV2.waitForWorkloadsPhase([workload2Id], 'Running');
-
-                // Verify data source is accessible
-                await verifyConfigMapDataInWorkload(workloadName2, anotherProjectInSameDept.name);
-
-                // Clean up this temporary project
-                await workloadsUtilsV2.deleteWorkload(workload2Id, WorkloadType.TRAINING);
-                await operations.deleteProjectAndNamespace(anotherProjectInSameDept.id);
+                await verifyConfigMapDataInWorkload(workloadName2, anotherProjectInNewDepartment.name);
             });
 
-            await test.step('Verify ConfigMap data source is not accessible from different department project', async () => {
-                try {
-                    await trainingUtils.createArbitraryTrainingWithConfigmap(
-                        workloadName3,
-                        anotherProjectInDefaultDept.id.toString(),
-                        dataSourceId
-                    );
+            await test.step('Verify the pod in a different department cannot schedule with the missing ConfigMap', async () => {
+                const workload3Id = await trainingUtils.createArbitraryTrainingWithConfigmap(
+                    workloadName3,
+                    project.id.toString(),
+                    dataSourceId
+                );
+                createdWorkloadIds.push(workload3Id);
 
-                    throw new Error(
-                        'Expected workload creation to fail when accessing department-scoped data source from different department'
-                    );
-                } catch (error) {
-                    logger.info(
-                        `Expected failure when accessing department-scoped data source from different department: ${error.message}`
-                    );
-                    const errorMessage = error.message.toLowerCase();
-                    expect(
-                        errorMessage.includes('not associated with the requested project or its ancestors')
-                    ).toBe(true);
-                    expect(errorMessage.includes('404')).toBe(true);
-                }
+                const missingConfigMap = new RegExp(`\\bmissing\\b.*(?<![a-z0-9.-])${configMapName}(?![a-z0-9.-])`, 'is');
+                await expect
+                    .poll(async () => {
+                        const [pod] = await kubeCli.listPodsOfJob(project.namespace, workloadName3);
+                        return pod?.status?.conditions?.find((condition) => condition.type === 'PodScheduled');
+                    }, { timeout: 90_000 })
+                    .toMatchObject({
+                        status: 'False',
+                        reason: 'Unschedulable',
+                        message: expect.stringMatching(missingConfigMap)
+                    });
             });
         });
     });

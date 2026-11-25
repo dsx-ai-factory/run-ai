@@ -63,6 +63,10 @@ allOf:
       $ref: ../workloads_spec/advanced/ImagePullSecrets.yaml
     labels:
       $ref: ../workloads_spec/advanced/Labels.yaml
+    loadAwareRouting:
+      allOf:
+      - $ref: ../workloads_spec/inferences/LoadAwareRouting.yaml
+      x-internal: true
     modelStore:
       nullable: true
       properties:

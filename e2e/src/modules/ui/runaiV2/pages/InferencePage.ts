@@ -10,7 +10,6 @@ import { MENU_SUBJECT_NAMES } from '../../utils/sidenavUtils';
 import {
     EPersistenceOption,
     IInferenceType,
-    IServingPortAccessOptions,
     IVolumeOptions
 } from '../../../helpers/models/inferenceBaseFlatUI.models';
 
@@ -28,17 +27,11 @@ export class InferencePage extends WorkloadCreateFormPage {
 
     createInferenceContinueBtn: string;
 
-    newEnvironmentBtn: string;
-
-    newComputeBtn: string;
-
     createInferenceBtn: string;
 
     submitInferenceMultiBtns: string;
 
     advancedSetupBtn: string;
-
-    envSectionMoreSettingsBtn: string;
 
     computeSectionAutoScaleToggleBtn: string;
 
@@ -68,25 +61,9 @@ export class InferencePage extends WorkloadCreateFormPage {
 
     nimModelSelector: string;
 
-    servingPortProtocol: string;
-
-    servingPortPort: string;
-
     nimModelStorageToggle: string;
 
     servingPortAccessToggle: string;
-
-    servingPortAccessEditBtn: string;
-
-    servingPortAccessPublic: string;
-
-    servingPortAccessEveryone: string;
-
-    servingPortAccessGroup: string;
-
-    servingPortAccessUsers: string;
-
-    servingPortAccessSaveBtn: string;
 
     envVarValue: string;
 
@@ -109,18 +86,14 @@ export class InferencePage extends WorkloadCreateFormPage {
         // inference create elements
         this.createInferenceNameInput = '[aid="inference-name-input"]';
         this.createInferenceContinueBtn = '[aid="create-inference-continue-btn"]';
-        this.newEnvironmentBtn = '[aid="add-new-environment-btn"]';
         this.clusterDropDown = '[aid="cluster-dropdown"]';
-        this.newComputeBtn = '[aid="add-new-compute-resource-btn"]';
         this.createInferenceBtn = '.inference-app [aid="submit-btn"]';
-        this.envSectionMoreSettingsBtn = '[aid="env-section-more-settings-btn"]';
         this.computeSectionAutoScaleToggleBtn = '[aid="compute-section-auto-scale-btn"]';
         this.minReplicasInput = '[aid="min-rep-input"]';
         this.maxReplicasInput = '[aid="max-rep-input"]';
         this.thresholdMetricOptions = '[aid="threshold-metric-options"]';
         this.thresholdValueInput = '[aid="threshold-value-input"]';
         this.scaleDownSelect = '[aid="scale-down-select"]';
-        this.computeResourceSection = '.compute-resource-section';
         this.inferenceTypeSectionSummary = '[aid="inference-type-section-summary"]';
         this.titleInferenceTypeAndBackSection = '[aid="title-inference-type-and-back-section"]';
         this.vllmOption = '[aid="vllm-option"]';
@@ -130,14 +103,6 @@ export class InferencePage extends WorkloadCreateFormPage {
         this.nimModelSelector = '[aid="nim-autocomplete-select"]';
         this.nimModelStorageToggle = '[aid="nim-model-storage"]';
         this.servingPortAccessToggle = '[aid="serving-endpoint-access-btn"]';
-        this.servingPortProtocol = '[aid="connection-protocol"]';
-        this.servingPortPort = '[aid="container-port"]';
-        this.servingPortAccessEditBtn = '.serving-endpoint-access [aid="edit-access-button"]';
-        this.servingPortAccessPublic = '[aid="public"]';
-        this.servingPortAccessEveryone = '[aid="everyone"]';
-        this.servingPortAccessGroup = '[aid="group"]';
-        this.servingPortAccessUsers = '[aid="specific-users"]';
-        this.servingPortAccessSaveBtn = '[aid="save-connection-access-role"]';
 
         this.addEnvVarBtn = '[aid="add-environment-variable-button"]';
         this.envVarValue = '[aid="environment-variable-value"]';
@@ -183,14 +148,6 @@ export class InferencePage extends WorkloadCreateFormPage {
         return await this.page.locator(this.createInferenceContinueBtn).click();
     }
 
-    async clickOnNewEnvironmentBtn(): Promise<void> {
-        return this.page.locator(this.newEnvironmentBtn).click();
-    }
-
-    async clickOnNewComputeBtn(): Promise<void> {
-        return this.page.locator(this.newComputeBtn).click();
-    }
-
     async clickOnCreateInferenceBtn(): Promise<void> {
         return await this.page.locator(this.createInferenceBtn).click();
     }
@@ -224,10 +181,6 @@ export class InferencePage extends WorkloadCreateFormPage {
 
     async clickOnAutoScaleToggleBtn(): Promise<void> {
         await this.page.locator(this.computeSectionAutoScaleToggleBtn).click();
-    }
-
-    async clickOnEnvSectionMoreSettingsBtn(): Promise<void> {
-        await this.page.locator(this.envSectionMoreSettingsBtn).click();
     }
 
     async fillMinReplicasInput(num: number): Promise<void> {
@@ -311,26 +264,6 @@ export class InferencePage extends WorkloadCreateFormPage {
     async openServingPortSection(): Promise<void> {
         await this.locator(this.servingPortAccessToggle).click();
         await this.page.waitForTimeout(1000);
-    }
-
-    async selectServingPortAccess(servingPortAccessOption: IServingPortAccessOptions): Promise<void> {
-        await this.locator(this.servingPortAccessEditBtn).click();
-        switch (servingPortAccessOption) {
-            case IServingPortAccessOptions.Public:
-                await this.locator(this.servingPortAccessPublic).click();
-                break;
-            case IServingPortAccessOptions.Everyone:
-                await this.locator(this.servingPortAccessEveryone).click();
-                break;
-            case IServingPortAccessOptions.Group:
-                await this.locator(this.servingPortAccessGroup).click();
-                break;
-            case IServingPortAccessOptions.Users:
-                await this.locator(this.servingPortAccessUsers).click();
-                break;
-        }
-
-        await this.locator(this.servingPortAccessSaveBtn).click();
     }
 
     private async selectStorageClassAndWaitForConfiguration(): Promise<void> {

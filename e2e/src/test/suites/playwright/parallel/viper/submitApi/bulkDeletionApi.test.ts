@@ -59,7 +59,7 @@ test.describe(
 
         test('should succeed to delete multiple workloads in a single request', async function () {
             const workloads = await trainingUtils.createTrainingWorkloads(3, project);
-            const workloadsIds = workloads.map((workload) => workload.meta.workloadId);
+            const workloadsIds = workloads.map((workload) => workload.workloadId);
             workloadsIds.push(randomUUID());
 
             const res = await workloadUtils.deleteMultipleWorkloads(workloadsIds);
@@ -72,7 +72,7 @@ test.describe(
 
         test('should succeed to delete multiple workloads in a single request, and report on failure of deletion', async function () {
             const workloads = await trainingUtils.createTrainingWorkloads(2, project);
-            const workloadsIds = workloads.map((workload) => workload.meta.workloadId);
+            const workloadsIds = workloads.map((workload) => workload.workloadId);
             workloadsIds.push(randomUUID());
 
             const res = await workloadUtils.deleteMultipleWorkloads(workloadsIds);

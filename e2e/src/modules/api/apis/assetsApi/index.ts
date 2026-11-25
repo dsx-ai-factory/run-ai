@@ -17,7 +17,6 @@ import {
     TrainingsApi,
     InferencesApi,
     ModelApi,
-    ModelInferenceApi,
     ConfigMapApi,
     SecretApi
 } from './generated/api';
@@ -55,8 +54,6 @@ export class AssetsApi {
     inferenceApi: InferencesApi;
 
     modelApi: ModelApi;
-
-    modelInferenceApi: ModelInferenceApi;
 
     constructor(url: string) {
         this.computeApi = new ComputeApi(url);
@@ -103,8 +100,5 @@ export class AssetsApi {
 
         this.modelApi = new ModelApi(url);
         this.modelApi.defaultHeaders = API_DEFAULT_HEADERS;
-
-        this.modelInferenceApi = new ModelInferenceApi(url);
-        this.modelInferenceApi.defaultHeaders = API_DEFAULT_HEADERS;
     }
 }

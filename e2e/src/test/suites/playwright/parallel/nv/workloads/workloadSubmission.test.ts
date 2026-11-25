@@ -132,14 +132,7 @@ test.describe(`Workload Submission Tests using Hybrid Submission  ${tags.tool.ui
                 // Test distributed workload
                 const distributedName = objectGenerator.generateNameByPrefix(`dist-${computeLabel}`);
                 await test.step(`Create distributed training job with ${computeLabel} compute resource`, async () => {
-                    await training.fillFirstNewTrainingPage(
-                        projectName,
-                        distributedName,
-                        true,
-                        DISTRIBUTED_TOOLS_LABELS.PY_TORCH,
-                        true,
-                        true
-                    );
+                    await training.fillFlexTrainingFirstPage(projectName, distributedName, true, DISTRIBUTED_TOOLS_LABELS.PY_TORCH, true);
                     await training.fillHybridDistributedTrainingSecondPage(config.quickStartImage.ubuntu, {
                         command: 'sleep infinity',
                         computeLabel: computeLabel,

@@ -50,14 +50,14 @@ export class WorkloadsCrudApiUtils {
         workloadsCrudService.distributedApi.accessToken = accessToken;
     }
 
-    async createTraining(
+    createTraining = async (
         name: string,
         addSuffixToName: boolean,
         clusterId: string,
         projectId: string,
         spec: TrainingSpecSpec,
         accessToken = flowRootState.users.system_administrator.accessToken
-    ): Promise<{ response: http.IncomingMessage; body: Training }> {
+    ): Promise<{ response: http.IncomingMessage; body: Training }> => {
         const request: TrainingCreationRequest = {
             name: name,
             useGivenNameAsPrefix: addSuffixToName,
@@ -65,18 +65,25 @@ export class WorkloadsCrudApiUtils {
             clusterId: clusterId,
             spec: spec
         };
+        return this.submitTraining(request, accessToken);
+    };
+
+    async submitTraining(
+        request: TrainingCreationRequest,
+        accessToken = flowRootState.users.system_administrator.accessToken
+    ): Promise<{ response: http.IncomingMessage; body: Training }> {
         workloadsCrudService.trainingsApi.accessToken = accessToken;
         return workloadsCrudService.trainingsApi.createTraining(request);
     }
 
-    async createWorkspace(
+    createWorkspace = async (
         name: string,
         addSuffixToName: boolean,
         clusterId: string,
         projectId: string,
         spec: WorkspaceSpecSpec,
         accessToken = flowRootState.users.system_administrator.accessToken
-    ): Promise<{ response: http.IncomingMessage; body: Workspace }> {
+    ): Promise<{ response: http.IncomingMessage; body: Workspace }> => {
         const request: WorkspaceCreationRequest = {
             name: name,
             useGivenNameAsPrefix: addSuffixToName,
@@ -84,6 +91,13 @@ export class WorkloadsCrudApiUtils {
             clusterId: clusterId,
             spec: spec
         };
+        return this.submitWorkspace(request, accessToken);
+    };
+
+    async submitWorkspace(
+        request: WorkspaceCreationRequest,
+        accessToken = flowRootState.users.system_administrator.accessToken
+    ): Promise<{ response: http.IncomingMessage; body: Workspace }> {
         workloadsCrudService.workspacesApi.accessToken = accessToken;
         return workloadsCrudService.workspacesApi.createWorkspace(request);
     }

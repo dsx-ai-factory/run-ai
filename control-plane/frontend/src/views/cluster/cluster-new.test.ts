@@ -222,22 +222,72 @@ describe("cluster-new.vue", () => {
     expect(clusterNewCmp.find(".cluster-installation").exists()).toBeTruthy();
   });
 
-  test("component will delete the cluster it created if the continue button is pressed and there is no clusterUuid in the $route.query", async () => {
+  test("does not offer a back button on the installation step after creating a cluster", async () => {
     mountComponent();
-    const spyDeleteLastCreatedCluster = vi.spyOn(clusterNewCmp.vm, "deleteLastCreatedCluster");
-    await clusterNewCmp.setData({ createdCluster: { uuid: "some-id" } });
     await setValidFormModel();
     await clickContiuneButton();
     await flushPromises();
 
-    expect(spyDeleteLastCreatedCluster).toHaveBeenCalled();
+    expect(clusterNewCmp.vm.currentStep).toBe(2);
+    expect(clusterNewCmp.find("[aid=back-btn]").exists()).toBe(false);
+    expect(clusterNewCmp.find("[aid=leave-btn]").exists()).toBe(true);
   });
 
-  test("calls goBack method when back button is pressed returning to the initial step", async () => {
+  test("does not offer a way back to the initial step once the cluster is created", async () => {
     mountComponent();
-    await clusterNewCmp.setData({ currentStep: 2 });
+    await setValidFormModel();
+    await clickContiuneButton();
+    await flushPromises();
+
+    expect(clusterNewCmp.find(".cluster-creation").exists()).toBe(false);
+    expect(clusterNewCmp.find("[aid=continue-btn]").exists()).toBe(false);
+    expect(clusterStore.create).toHaveBeenCalledTimes(1);
+  });
+
+  test("offers a back button on the installation step in edit mode and returns to the initial step", async () => {
+    mountComponent();
+    await clusterNewCmp.setData({ currentStep: 2, isClusterEditMode: true });
+    expect(clusterNewCmp.find("[aid=back-btn]").exists()).toBe(true);
+
     await clusterNewCmp.find("[aid=back-btn]").trigger("click");
     expect(clusterNewCmp.vm.currentStep).toBe(1);
+  });
+
+  test("loads the installation command before moving to the installation step", async () => {
+    vi.mocked(clusterStore.create).mockResolvedValue({ uuid: "new-id", name: "some-name" } as DisplayedCluster);
+    vi.mocked(clusterService.getClusterInstallationInfo).mockResolvedValue({
+      data: { installationStr: "preloaded-install-command" },
+    } as Awaited<ReturnType<typeof clusterService.getClusterInstallationInfo>>);
+    mountComponent();
+    await setValidFormModel();
+
+    await clickContiuneButton();
+    await flushPromises();
+
+    expect(clusterNewCmp.vm.currentStep).toBe(2);
+    expect(clusterNewCmp.vm.installationInstructions).toBe("preloaded-install-command");
+    expect(clusterNewCmp.text()).toContain("preloaded-install-command");
+    expect(clusterService.getClusterInstallationInfo).toHaveBeenCalledTimes(1);
+    expect(clusterService.getClusterInstallationInfo).toHaveBeenCalledWith("new-id", "2.23.17", "");
+  });
+
+  test("moves to the installation step and lets it load the command itself when preloading fails", async () => {
+    vi.mocked(clusterStore.create).mockResolvedValue({ uuid: "new-id", name: "some-name" } as DisplayedCluster);
+    vi.mocked(clusterService.getClusterInstallationInfo)
+      .mockRejectedValueOnce(new Error("boom"))
+      .mockResolvedValueOnce({ data: { installationStr: "fallback-install-command" } } as Awaited<
+        ReturnType<typeof clusterService.getClusterInstallationInfo>
+      >);
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    mountComponent();
+    await setValidFormModel();
+
+    await clickContiuneButton();
+    await flushPromises();
+
+    expect(clusterNewCmp.vm.currentStep).toBe(2);
+    expect(clusterNewCmp.vm.installationInstructions).toBeUndefined();
+    expect(clusterNewCmp.text()).toContain("fallback-install-command");
   });
 
   test("calls leave method when leave button is pressed", async () => {

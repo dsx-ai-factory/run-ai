@@ -13,8 +13,7 @@ import {
     tags,
     projectResourcesUtils,
     operations,
-    environmentUtils,
-    unleashClient
+    environmentUtils
 } from '../../../../../../modules/helpers';
 import { Project } from '../../../../../../modules/api/apis/projectsDepartmentsApi';
 import { expect, test } from '@playwright/test';
@@ -29,7 +28,6 @@ import {
     UidGidSource,
     WorkloadType
 } from '../../../../../../modules/api/apis/assetsApi';
-import { EFeatureToggleKeys } from '../../../../../../modules/helpers/utils/Unleash/featureToggle';
 
 type TElementDetails = {
     name: string;
