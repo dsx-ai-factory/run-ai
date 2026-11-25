@@ -17520,20 +17520,6 @@ components:
         stage:
           type: string
           readOnly: true
-    GetEnableHybridSubmission:
-      type: object
-      properties:
-        value:
-          $ref: '#/components/schemas/GetEnableSettingsValue'
-        displayName:
-          type: string
-          readOnly: true
-        description:
-          type: string
-          readOnly: true
-        stage:
-          type: string
-          readOnly: true
     GetGpuOverProvisioning:
       type: object
       properties:
@@ -17569,8 +17555,6 @@ components:
           $ref: '#/components/schemas/GetEnablePolicies'
         workloadSubmissionV2Enabled:
           $ref: '#/components/schemas/GetWorkloadSubmissionV2Enabled'
-        enableHybridSubmission:
-          $ref: '#/components/schemas/GetEnableHybridSubmission'
         gpuOverProvisioning:
           $ref: '#/components/schemas/GetGpuOverProvisioning'
         applicationSubmission:
@@ -17580,7 +17564,6 @@ components:
       enum:
         - enablePolicies
         - workloadSubmissionV2Enabled
-        - enableHybridSubmission
         - gpuOverProvisioning
         - applicationSubmission
     GetWorkloadsSetting:
@@ -17660,11 +17643,6 @@ components:
         enabled:
           type: boolean
     WorkloadSubmissionV2EnabledSetting:
-      type: object
-      properties:
-        enabled:
-          type: boolean
-    EnableHybridSubmissionSetting:
       type: object
       properties:
         enabled:

@@ -116,12 +116,8 @@ import {
   type PvcAddedAttribute,
   type StorageClassV2,
 } from "@/swagger-models/k8s-objects-tracker-client";
-import {
-  type PvcAccessModes,
-  PvcVolumeMode,
-  type ClaimInfo,
-  type ClaimInfoRules,
-} from "@/swagger-models/assets-service-client";
+import { type PvcAccessModes, PvcVolumeMode, type ClaimInfo } from "@/swagger-models/assets-service-client";
+import type { ClaimInfoRules } from "@/swagger-models/policy-service-client";
 import type { ISelectOption } from "@/models/global.model";
 import { NONE_STORAGE_CLASS, NONE_STORAGE_CLASS_LABEL } from "@/models/data-source.model";
 // Utils

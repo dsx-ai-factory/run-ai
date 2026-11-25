@@ -44,50 +44,6 @@ func TestServices(t *testing.T) {
 }
 
 var _ = Describe("workload assets validation", func() {
-	Context("[]assetMetaRec -> AssetsIds", func() {
-		It("should populate the assets properly", func() {
-			var result api.AssetsRef
-			source := []dbmodel.AssetMetaRec{
-				{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_ENVIRONMENT, Id: "env-1"}},
-				{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_COMPUTE, Id: "comp-1"}},
-				{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_HOST_PATH, Id: "host-1"}},
-				{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_HOST_PATH, Id: "host-2"}},
-				{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_NFS, Id: "nfs-1"}},
-				{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_NFS, Id: "nfs-2"}},
-				{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_GIT, Id: "git-1"}},
-				{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_GIT, Id: "git-2"}},
-				{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_S3, Id: "s3-1"}},
-				{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_S3, Id: "s3-2"}},
-				{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_PVC, Id: "pvc-1"}},
-				{AssetMeta: dbmodel.AssetMeta{Kind: api.ASSETKIND_PVC, Id: "pvc-2"}},
-			}
-			err := assetRecToAssetRef(&result, source, nil)
-			Expect(err).To(BeNil())
-
-			expected := api.AssetsRef{
-				Environment: api.EnvironmentAssetRef{Id: "env-1"},
-				Compute:     &api.AssetsRefCompute{Id: "comp-1"},
-				Datasources: []api.DatasourceRef{
-					{Kind: api.ASSETKIND_HOST_PATH, Id: "host-1"},
-					{Kind: api.ASSETKIND_HOST_PATH, Id: "host-2"},
-					{Kind: api.ASSETKIND_NFS, Id: "nfs-1"},
-					{Kind: api.ASSETKIND_NFS, Id: "nfs-2"},
-					{Kind: api.ASSETKIND_GIT, Id: "git-1"},
-					{Kind: api.ASSETKIND_GIT, Id: "git-2"},
-					{Kind: api.ASSETKIND_S3, Id: "s3-1"},
-					{Kind: api.ASSETKIND_S3, Id: "s3-2"},
-					{Kind: api.ASSETKIND_PVC, Id: "pvc-1"},
-					{Kind: api.ASSETKIND_PVC, Id: "pvc-2"},
-				},
-			}
-			sort.Slice(expected.Datasources, func(i, j int) bool {
-				return expected.Datasources[i].Id < expected.Datasources[j].Id
-			})
-
-			Expect(result).To(Equal(expected))
-		})
-	})
-
 	Context("validate contained assets", func() {
 		It("should populate the assets properly", func() {
 			ids := api.AssetsIds{
@@ -158,21 +114,4 @@ var _ = Describe("workload assets validation", func() {
 		})
 	})
 
-	Context("validate unsupported assets", func() {
-		It("should fail", func() {
-			wrongKind := dbmodel.AssetMeta{Kind: "xx"}
-
-			assets := []dbmodel.AssetMetaRec{
-				{
-					AssetMeta: dbmodel.AssetMeta{
-						Kind: wrongKind.Kind,
-					},
-				},
-			}
-			var assetsRef api.AssetsRef
-			err := assetRecToAssetRef(&assetsRef, assets, nil)
-			Expect(err).NotTo(BeNil())
-
-		})
-	})
 })

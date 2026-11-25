@@ -26,7 +26,7 @@ import { VolumeForm } from "@/components/section/volume-section/volume-box/volum
 // Models
 import type { IUIPvcInstance } from "@/models/workload.model";
 import type { StorageClassV2 } from "@/swagger-models/k8s-objects-tracker-client";
-import type { PvcRules } from "@/swagger-models/assets-service-client";
+import type { PvcRules } from "@/swagger-models/policy-service-client";
 
 export default defineComponent({
   name: "volume-instance-section",

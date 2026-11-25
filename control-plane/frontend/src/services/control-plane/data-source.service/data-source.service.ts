@@ -7,7 +7,7 @@
 import { assetsServiceApi } from "@/services/infra/client-apis/assets-service-api/assets-service-api";
 import { k8sObjectTrackerApi } from "@/services/infra/client-apis/k8s-object-tracker-api/k8s-object-tracker-api";
 import { httpService } from "@/services/infra/https.service/http.service";
-import { makeId, pick } from "@/utils/common.util";
+import { pick } from "@/utils/common.util";
 
 // model
 import type { HistoryRecord } from "@/swagger-models/assets-service-client";
@@ -54,15 +54,12 @@ import {
   type IUINFSCreationRequest,
   type IUIPVCCreationRequest,
   type IUIHostPathCreationRequest,
-  type IUIVolume,
   type IUIS3CreationRequest,
   type IUIGitCreationRequest,
   type IUISecretCreationRequest,
 } from "@/models/data-source.model";
 // constant
 import type { IUIConfigMapCreationRequest, TDataSourceKinds } from "@/models/data-source.model";
-import { dataSourceUtil } from "@/utils/data-source.util";
-import type { IScopeInfo } from "@/utils/data-source.util/data-source.util";
 import type { IScopeCredentialsList } from "@/models/credential.model";
 import { filterUtil } from "@/utils/filter.util/filter.util";
 import { dataVolumesServiceApi } from "@/services/infra/client-apis/data-volume-service-api/data-volume-service-api";
@@ -97,9 +94,7 @@ export const dataSourceService = {
   updateS3,
   updateConfigMap,
   updateSecretVolume,
-  loadPVCAssets,
   loadPvcEvents,
-  createWorkloadVolumes,
   listExistingPVCs,
   listExistingConfigMaps,
   getDataSourceById,
@@ -501,27 +496,6 @@ async function updateSecretVolume(secretId: string, secretDataSource: SecretAsse
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
   }
-}
-
-async function loadPVCAssets(pvcIds: Array<string>): Promise<Array<PVCAsset>> {
-  if (!pvcIds?.length) return [];
-  const prms = pvcIds.map((id: string) => getPvcById(id));
-  return Promise.all(prms);
-}
-
-async function createWorkloadVolumes(
-  workloadName: string,
-  volumes: Array<IUIVolume>,
-  scopeInfo: IScopeInfo,
-): Promise<Array<string>> {
-  const createdVolumes: PVCAsset[] = await Promise.all(
-    volumes.map((volume: IUIVolume) => {
-      volume.claimName = `${workloadName}-pvc-${makeId(5)}`;
-      const pvc = dataSourceUtil.convertVolumeToPvc(volume, scopeInfo);
-      return createPVC(pvc);
-    }),
-  );
-  return createdVolumes.map((volume: PVCAsset) => volume.meta.id);
 }
 
 async function loadPvcEvents(pvcId: string): Promise<HistoryRecord[]> {
