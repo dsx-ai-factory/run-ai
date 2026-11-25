@@ -17,168 +17,161 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-var _ = Describe("SelectHelmRepoForVersion", func() {
-	const privateUrl = "https://helm.ngc.nvidia.com/nvidia/runai"
-	const publicUrl = "https://helm.ngc.nvidia.com/nvidia/runai-oss"
-	installationConfig := &config.Installation{
+const (
+	publicUrl  = "public-url"
+	privateUrl = "private-url"
+)
+
+func newTwoRepoConfig() *config.Installation {
+	return &config.Installation{
 		HelmRegistryUrl:                 privateUrl,
 		HelmRegistryUsername:            "$oauthtoken",
 		HelmRegistryPasswordPlaceholder: "<NGC_KEY>",
 		HelmRegistryUrlPublic:           publicUrl,
+		Version:                         "3.1.0",
+		MinVersion:                      "2.25",
+	}
+}
+
+var publicVersions = clusterinstallation.VersionsList{{"3.0.2"}, {"3.1.0"}}
+var privateVersions = clusterinstallation.VersionsList{{"2.25.3"}, {"2.26.1"}}
+
+var _ = Describe("GetHelmRepoForVersion", func() {
+	var helmActions *mocks.HelmActions
+	var service clusterinstallation.ClusterInstallService
+
+	BeforeEach(func() {
+		helmActions = mocks.NewHelmActions(GinkgoT())
+		service = clusterinstallation.NewClusterInstallService(helmActions)
+	})
+
+	givenIndexes := func(public, private clusterinstallation.VersionsList, publicErr, privateErr error) {
+		helmActions.On("GetVersionListFromHelm", mock.Anything, publicUrl).Return(public, publicErr).Maybe()
+		helmActions.On("GetVersionListFromHelm", mock.Anything, privateUrl).Return(private, privateErr).Maybe()
 	}
 
-	DescribeTable("picks the repository by cluster version",
-		func(version, expectedUrl string, expectCreds bool) {
-			repo := clusterinstallation.SelectHelmRepoForVersion(installationConfig, version)
-			Expect(repo.URL).To(Equal(expectedUrl))
-			if expectCreds {
-				Expect(repo.Username).To(Equal("$oauthtoken"))
-				Expect(repo.PasswordPlaceholder).To(Equal("<NGC_KEY>"))
-			} else {
-				Expect(repo.Username).To(BeEmpty())
-				Expect(repo.PasswordPlaceholder).To(BeEmpty())
-			}
-		},
-		Entry("3.0 uses the public repo", "3.0.0", publicUrl, false),
-		Entry("3.1 uses the public repo", "3.1.4", publicUrl, false),
-		Entry("3.0 prerelease sorts below 3.0.0 and uses the private repo", "3.0.0-rc.1", privateUrl, true),
-		Entry("2.26 uses the private repo", "2.26.1", privateUrl, true),
-		Entry("2.25 uses the private repo", "2.25.0", privateUrl, true),
-		Entry("range expression means latest and uses the public repo", ">0.0.0-0", publicUrl, false),
-		Entry("development means latest and uses the public repo", "development", publicUrl, false),
-	)
+	It("uses the public repo, without credentials, for a version it lists", func() {
+		givenIndexes(publicVersions, privateVersions, nil, nil)
+		repo := service.GetHelmRepoForVersion(context.Background(), newTwoRepoConfig(), "3.1.0")
+		Expect(repo).To(Equal(clusterinstallation.HelmRepo{URL: publicUrl}))
+	})
 
-	It("uses the public repo for old versions when no private credentials are configured", func() {
-		cfg := *installationConfig
+	It("uses the private repo, with credentials, for a version only it lists", func() {
+		givenIndexes(publicVersions, privateVersions, nil, nil)
+		repo := service.GetHelmRepoForVersion(context.Background(), newTwoRepoConfig(), "2.26.1")
+		Expect(repo).To(Equal(clusterinstallation.HelmRepo{URL: privateUrl, Username: "$oauthtoken", PasswordPlaceholder: "<NGC_KEY>"}))
+	})
+
+	It("prefers the public repo when both list the version", func() {
+		givenIndexes(publicVersions, clusterinstallation.VersionsList{{"3.1.0"}}, nil, nil)
+		Expect(service.GetHelmRepoForVersion(context.Background(), newTwoRepoConfig(), "3.1.0").URL).To(Equal(publicUrl))
+	})
+
+	It("trusts configured credentials when the private index cannot be read", func() {
+		givenIndexes(publicVersions, nil, nil, errors.New("401 unauthorized"))
+		Expect(service.GetHelmRepoForVersion(context.Background(), newTwoRepoConfig(), "2.26.1").URL).To(Equal(privateUrl))
+	})
+
+	It("falls back to the public repo when the version is unlisted and no credentials are configured", func() {
+		givenIndexes(publicVersions, nil, nil, errors.New("401 unauthorized"))
+		cfg := newTwoRepoConfig()
 		cfg.HelmRegistryUsername = ""
 		cfg.HelmRegistryPasswordPlaceholder = ""
-		repo := clusterinstallation.SelectHelmRepoForVersion(&cfg, "2.26.1")
-		Expect(repo.URL).To(Equal(publicUrl))
-		Expect(repo.Username).To(BeEmpty())
-		Expect(repo.PasswordPlaceholder).To(BeEmpty())
+		repo := service.GetHelmRepoForVersion(context.Background(), cfg, "2.26.1")
+		Expect(repo).To(Equal(clusterinstallation.HelmRepo{URL: publicUrl}))
 	})
 
-	It("keeps a custom legacy registry for old versions even without credentials", func() {
-		cfg := *installationConfig
-		cfg.HelmRegistryUrl = "https://charts.example.com"
+	It("uses a private repo that lists the version even without credentials (e.g. an open mirror)", func() {
+		givenIndexes(publicVersions, privateVersions, nil, nil)
+		cfg := newTwoRepoConfig()
 		cfg.HelmRegistryUsername = ""
-		repo := clusterinstallation.SelectHelmRepoForVersion(&cfg, "2.26.1")
-		Expect(repo.URL).To(Equal("https://charts.example.com"))
+		cfg.HelmRegistryPasswordPlaceholder = ""
+		Expect(service.GetHelmRepoForVersion(context.Background(), cfg, "2.26.1").URL).To(Equal(privateUrl))
 	})
 
-	It("ignores the public repo for air-gapped installs", func() {
-		cfg := *installationConfig
-		cfg.InstallationType = "airgap"
-		Expect(clusterinstallation.SelectHelmRepoForVersion(&cfg, "3.1.0").URL).To(Equal(privateUrl))
+	It("uses the private repo when the public one is unreachable and it lists the version", func() {
+		givenIndexes(nil, privateVersions, errors.New("dial tcp: i/o timeout"), nil)
+		Expect(service.GetHelmRepoForVersion(context.Background(), newTwoRepoConfig(), "2.25.3").URL).To(Equal(privateUrl))
 	})
 
-	It("ignores the public repo when the legacy URL is blanked, as the air-gap values do", func() {
-		cfg := *installationConfig
-		cfg.HelmRegistryUrl = ""
-		Expect(clusterinstallation.SelectHelmRepoForVersion(&cfg, "3.1.0").URL).To(BeEmpty())
-	})
+	DescribeTable("uses the public repo for non-concrete versions without reading any index",
+		func(version string) {
+			repo := service.GetHelmRepoForVersion(context.Background(), newTwoRepoConfig(), version)
+			Expect(repo.URL).To(Equal(publicUrl))
+			Expect(repo.Username).To(BeEmpty())
+			helmActions.AssertNotCalled(GinkgoT(), "GetVersionListFromHelm", mock.Anything, mock.Anything)
+		},
+		Entry("range expression", ">0.0.0-0"),
+		Entry("development", "development"),
+	)
 
-	It("uses the legacy repo for every version when no public repo is configured", func() {
-		cfg := *installationConfig
+	It("uses only the private repo when no public repo is configured", func() {
+		cfg := newTwoRepoConfig()
 		cfg.HelmRegistryUrlPublic = ""
-		repo := clusterinstallation.SelectHelmRepoForVersion(&cfg, "3.2.0")
+		repo := service.GetHelmRepoForVersion(context.Background(), cfg, "3.1.0")
 		Expect(repo.URL).To(Equal(privateUrl))
 		Expect(repo.Username).To(Equal("$oauthtoken"))
+		helmActions.AssertNotCalled(GinkgoT(), "GetVersionListFromHelm", mock.Anything, mock.Anything)
+	})
+
+	It("ignores the public repo when the private URL is blanked, as the air-gap values do", func() {
+		cfg := newTwoRepoConfig()
+		cfg.HelmRegistryUrl = ""
+		Expect(service.GetHelmRepoForVersion(context.Background(), cfg, "3.1.0").URL).To(BeEmpty())
+		helmActions.AssertNotCalled(GinkgoT(), "GetVersionListFromHelm", mock.Anything, mock.Anything)
 	})
 })
 
 var _ = Describe("ClusterVersionList with two repositories", func() {
-	const publicUrl, privateUrl = "public-url", "private-url"
-	newConfig := func() *config.Installation {
-		return &config.Installation{
-			HelmRegistryUrl:       privateUrl,
-			HelmRegistryUrlPublic: publicUrl,
-			Version:               "3.1.0",
-			MinVersion:            "2.25",
-		}
-	}
+	var helmActions *mocks.HelmActions
+	var service clusterinstallation.ClusterInstallService
 
-	It("merges versions published in both repositories", func() {
-		helmActions := mocks.NewHelmActions(GinkgoT())
-		helmActions.On("GetVersionListFromHelm", mock.Anything, publicUrl).Return(clusterinstallation.VersionsList{{"3.0.2"}, {"3.1.0"}}, nil)
-		helmActions.On("GetVersionListFromHelm", mock.Anything, privateUrl).Return(clusterinstallation.VersionsList{{"2.25.3"}, {"2.26.1"}}, nil)
-		service := clusterinstallation.NewClusterInstallService(helmActions)
+	BeforeEach(func() {
+		helmActions = mocks.NewHelmActions(GinkgoT())
+		service = clusterinstallation.NewClusterInstallService(helmActions)
+	})
 
-		versions, err := service.GetClusterSupportedVersions(context.Background(), newConfig())
+	It("combines the latest versions published in both repositories", func() {
+		helmActions.On("GetVersionListFromHelm", mock.Anything, publicUrl).Return(publicVersions, nil)
+		helmActions.On("GetVersionListFromHelm", mock.Anything, privateUrl).Return(privateVersions, nil)
+
+		versions, err := service.GetClusterSupportedVersions(context.Background(), newTwoRepoConfig())
 
 		Expect(err).To(BeNil())
 		Expect(versions).To(Equal(map[string]string{"2.25": "2.25.3", "2.26": "2.26.1", "3.0": "3.0.2", "3.1": "3.1.0"}))
 	})
 
 	It("keeps the other repository's versions when one repository fails", func() {
-		helmActions := mocks.NewHelmActions(GinkgoT())
-		helmActions.On("GetVersionListFromHelm", mock.Anything, publicUrl).Return(clusterinstallation.VersionsList{{"3.0.2"}, {"3.1.0"}}, nil)
+		helmActions.On("GetVersionListFromHelm", mock.Anything, publicUrl).Return(publicVersions, nil)
 		helmActions.On("GetVersionListFromHelm", mock.Anything, privateUrl).Return(nil, errors.New("401 unauthorized"))
-		service := clusterinstallation.NewClusterInstallService(helmActions)
 
-		versions, err := service.GetClusterSupportedVersions(context.Background(), newConfig())
+		versions, err := service.GetClusterSupportedVersions(context.Background(), newTwoRepoConfig())
 
 		Expect(err).To(BeNil())
 		Expect(versions).To(Equal(map[string]string{"3.0": "3.0.2", "3.1": "3.1.0"}))
+	})
+
+	It("keeps the private repository's versions when the public one is unreachable", func() {
+		helmActions.On("GetVersionListFromHelm", mock.Anything, publicUrl).Return(nil, errors.New("dial tcp: i/o timeout"))
+		helmActions.On("GetVersionListFromHelm", mock.Anything, privateUrl).Return(privateVersions, nil)
+
+		versions, err := service.GetClusterSupportedVersions(context.Background(), newTwoRepoConfig())
+
+		Expect(err).To(BeNil())
+		Expect(versions).To(Equal(map[string]string{"2.25": "2.25.3", "2.26": "2.26.1"}))
 	})
 
 	It("falls back to the current version when every repository fails", func() {
-		helmActions := mocks.NewHelmActions(GinkgoT())
 		helmActions.On("GetVersionListFromHelm", mock.Anything, mock.Anything).Return(nil, errors.New("boom"))
-		service := clusterinstallation.NewClusterInstallService(helmActions)
 
-		versions, err := service.GetClusterSupportedVersions(context.Background(), newConfig())
-
-		Expect(err).To(BeNil())
-		Expect(versions).To(Equal(map[string]string{"3.1": "3.1.0"}))
-	})
-
-	It("skips the private NGC repo when no credentials are configured", func() {
-		helmActions := mocks.NewHelmActions(GinkgoT())
-		helmActions.On("GetVersionListFromHelm", mock.Anything, "https://helm.ngc.nvidia.com/nvidia/runai-oss").
-			Return(clusterinstallation.VersionsList{{"3.0.2"}, {"3.1.0"}}, nil)
-		service := clusterinstallation.NewClusterInstallService(helmActions)
-		cfg := newConfig()
-		cfg.HelmRegistryUrl = "https://helm.ngc.nvidia.com/nvidia/runai"
-		cfg.HelmRegistryUrlPublic = "https://helm.ngc.nvidia.com/nvidia/runai-oss"
-
-		versions, err := service.GetClusterSupportedVersions(context.Background(), cfg)
-
-		Expect(err).To(BeNil())
-		Expect(versions).To(Equal(map[string]string{"3.0": "3.0.2", "3.1": "3.1.0"}))
-		helmActions.AssertNotCalled(GinkgoT(), "GetVersionListFromHelm", mock.Anything, "https://helm.ngc.nvidia.com/nvidia/runai")
-	})
-
-	It("keeps the private repo's versions when the public repo is unreachable", func() {
-		helmActions := mocks.NewHelmActions(GinkgoT())
-		helmActions.On("GetVersionListFromHelm", mock.Anything, publicUrl).Return(nil, errors.New("dial tcp: i/o timeout"))
-		helmActions.On("GetVersionListFromHelm", mock.Anything, privateUrl).Return(clusterinstallation.VersionsList{{"2.25.3"}}, nil)
-		service := clusterinstallation.NewClusterInstallService(helmActions)
-
-		versions, err := service.GetClusterSupportedVersions(context.Background(), newConfig())
-
-		Expect(err).To(BeNil())
-		Expect(versions).To(Equal(map[string]string{"2.25": "2.25.3"}))
-	})
-
-	It("never contacts the public repository for air-gapped installs", func() {
-		helmActions := mocks.NewHelmActions(GinkgoT())
-		helmActions.On("GetVersionListFromHelm", mock.Anything, privateUrl).Return(clusterinstallation.VersionsList{{"3.1.0"}}, nil)
-		service := clusterinstallation.NewClusterInstallService(helmActions)
-		cfg := newConfig()
-		cfg.InstallationType = "airgap"
-
-		versions, err := service.GetClusterSupportedVersions(context.Background(), cfg)
+		versions, err := service.GetClusterSupportedVersions(context.Background(), newTwoRepoConfig())
 
 		Expect(err).To(BeNil())
 		Expect(versions).To(Equal(map[string]string{"3.1": "3.1.0"}))
-		helmActions.AssertNotCalled(GinkgoT(), "GetVersionListFromHelm", mock.Anything, publicUrl)
 	})
 
-	It("does not contact any repository when the legacy URL is blanked", func() {
-		helmActions := mocks.NewHelmActions(GinkgoT())
-		service := clusterinstallation.NewClusterInstallService(helmActions)
-		cfg := newConfig()
+	It("does not contact any repository when the private URL is blanked", func() {
+		cfg := newTwoRepoConfig()
 		cfg.HelmRegistryUrl = ""
 
 		versions, err := service.GetClusterSupportedVersions(context.Background(), cfg)

@@ -461,7 +461,7 @@ func (s *ClustersApiService) GetClusterInstallInfoByUuid(ctx context.Context, cl
 	}
 
 	installationConfig := runai_config.Get[*cluster_config.Installation]()
-	helmRepo := clusterinstallation.SelectHelmRepoForVersion(installationConfig, version)
+	helmRepo := s.clusterInstallService.GetHelmRepoForVersion(ctx, installationConfig, version)
 	fullHostKey := ctx.Value(utils.FullHostKey)
 	if fullHostKey == nil {
 		fullHostKey = s.appConfig.Host

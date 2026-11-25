@@ -9,7 +9,6 @@ import (
 	"bytes"
 	"context"
 	"slices"
-	"strings"
 	"sync"
 	"text/template"
 	"time"
@@ -52,7 +51,9 @@ type InstallationData struct {
 	LastLiveness         *time.Time
 }
 
-const minVersionForPublicRepo = "3.0.0"
+// repoLookupTimeout bounds the index lookups done to pick the install repo, so an unreachable
+// repository cannot stall command generation.
+const repoLookupTimeout = 10 * time.Second
 
 type HelmRepo struct {
 	URL                 string
@@ -60,61 +61,26 @@ type HelmRepo struct {
 	PasswordPlaceholder string
 }
 
-const ngcHelmHost = "https://helm.ngc.nvidia.com"
-
-func isNgcUrl(url string) bool {
-	return url == ngcHelmHost || strings.HasPrefix(url, ngcHelmHost+"/")
-}
-
 // publicRepoEnabled reports whether the public repo may be used at all. It is off when no public URL is
-// configured and for air-gapped installs (installation type "airgap", or the legacy URL blanked, which is how
-// the air-gap values signal that nothing outside the mirror is reachable), so those keep the old behavior.
+// configured, and when the private URL is blank, which is how air-gapped installs signal that nothing outside
+// their mirror is reachable. Both keep the old single-URL behavior.
 func publicRepoEnabled(installationConfig *config.Installation) bool {
-	return installationConfig.HelmRegistryUrlPublic != "" &&
-		installationConfig.HelmRegistryUrl != "" &&
-		installationConfig.InstallationType != "airgap"
+	return installationConfig.HelmRegistryUrlPublic != "" && installationConfig.HelmRegistryUrl != ""
 }
 
-// legacyRepoUsable reports whether the legacy repo can serve requests. When the public repo is also in play,
-// the legacy URL is the private NGC repo, which cannot be used without credentials, so it is skipped instead of
-// producing a failing command. In single-URL mode the configured URL is always used, as before.
-func legacyRepoUsable(installationConfig *config.Installation) bool {
-	if installationConfig.HelmRegistryUrl == "" {
-		return false
-	}
-	if !publicRepoEnabled(installationConfig) {
-		return true
-	}
-	return !isNgcUrl(installationConfig.HelmRegistryUrl) || installationConfig.HelmRegistryUsername != ""
-}
-
-func SelectHelmRepoForVersion(installationConfig *config.Installation, version string) HelmRepo {
-	legacy := HelmRepo{
+func privateHelmRepo(installationConfig *config.Installation) HelmRepo {
+	return HelmRepo{
 		URL:                 installationConfig.HelmRegistryUrl,
 		Username:            installationConfig.HelmRegistryUsername,
 		PasswordPlaceholder: installationConfig.HelmRegistryPasswordPlaceholder,
 	}
-	if !publicRepoEnabled(installationConfig) {
-		return legacy
-	}
-	minVer, err := semver.NewVersion(minVersionForPublicRepo)
-	if err != nil {
-		return legacy
-	}
-	public := HelmRepo{URL: installationConfig.HelmRegistryUrlPublic}
-	ver, err := semver.NewVersion(version)
-	if err != nil {
-		return public
-	}
-	if ver.LessThan(minVer) && legacyRepoUsable(installationConfig) {
-		return legacy
-	}
-	return public
 }
 
 type ClusterInstallService interface {
 	GetClusterSupportedVersions(ctx context.Context, config *config.Installation) (map[string]string, error)
 	GetInstallationString(data *InstallationData) string
+	// GetHelmRepoForVersion returns the repository whose chart should be installed for the given cluster version.
+	GetHelmRepoForVersion(ctx context.Context, config *config.Installation, version string) HelmRepo
 }
 
 type ClusterInstallServiceImpl struct {
@@ -193,32 +159,18 @@ func (v *ClusterInstallServiceImpl) GetClusterSupportedVersions(ctx context.Cont
 		return defaultResponse, nil
 	}
 
-	// Repos are fetched concurrently so an unreachable one (e.g. a blocked OSS endpoint) costs one timeout,
-	// not one per repo. Results are merged in urls order to stay deterministic.
-	lists := make([]VersionsList, len(urls))
-	errs := make([]error, len(urls))
-	var wg sync.WaitGroup
-	for i, url := range urls {
-		wg.Add(1)
-		go func(i int, url string) {
-			defer wg.Done()
-			logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("GetClusterVersions - trying to get versions list from %s ", url)
-			lists[i], errs[i] = v.helmAction.GetVersionListFromHelm(ctx, url)
-		}(i, url)
-	}
-	wg.Wait()
-
+	results := v.fetchVersionLists(ctx, urls)
 	var versionList VersionsList
 	failed := 0
-	for i, url := range urls {
-		if errs[i] != nil {
+	for _, res := range results {
+		if res.err != nil {
 			failed++
-			logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("GetClusterVersions - Failed to get versions list from %s - %s", url, errs[i].Error())
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("GetClusterVersions - Failed to get versions list from %s - %s", res.url, res.err.Error())
 			continue
 		}
-		versionList = append(versionList, lists[i]...)
+		versionList = append(versionList, res.list...)
 	}
-	if failed == len(urls) {
+	if failed == len(results) {
 		// every repo failed (e.g. no credentials, or no outbound access): return the current version
 		return getCurrentVersionAsVersionList(curVersion, minVersion, maxVersion), nil
 	}
@@ -228,13 +180,81 @@ func (v *ClusterInstallServiceImpl) GetClusterSupportedVersions(ctx context.Cont
 	return response, nil
 }
 
+// registryUrls lists the repositories to read versions from: the public one first, then the private one.
 func registryUrls(installationConfig *config.Installation) []string {
 	var urls []string
 	if publicRepoEnabled(installationConfig) {
 		urls = append(urls, installationConfig.HelmRegistryUrlPublic)
 	}
-	if legacyRepoUsable(installationConfig) && !slices.Contains(urls, installationConfig.HelmRegistryUrl) {
+	if installationConfig.HelmRegistryUrl != "" && !slices.Contains(urls, installationConfig.HelmRegistryUrl) {
 		urls = append(urls, installationConfig.HelmRegistryUrl)
 	}
 	return urls
+}
+
+type repoVersions struct {
+	url  string
+	list VersionsList
+	err  error
+}
+
+// fetchVersionLists reads the version list of every repo concurrently, so an unreachable one costs a single
+// timeout rather than one per repo. Results keep the order of urls.
+func (v *ClusterInstallServiceImpl) fetchVersionLists(ctx context.Context, urls []string) []repoVersions {
+	results := make([]repoVersions, len(urls))
+	var wg sync.WaitGroup
+	for i, url := range urls {
+		wg.Add(1)
+		go func(i int, url string) {
+			defer wg.Done()
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("GetClusterVersions - trying to get versions list from %s ", url)
+			list, err := v.helmAction.GetVersionListFromHelm(ctx, url)
+			results[i] = repoVersions{url: url, list: list, err: err}
+		}(i, url)
+	}
+	wg.Wait()
+	return results
+}
+
+func listsVersion(list VersionsList, version *semver.Version) bool {
+	for _, entry := range list {
+		if candidate, err := semver.NewVersion(entry.Version); err == nil && candidate.Equal(version) {
+			return true
+		}
+	}
+	return false
+}
+
+// GetHelmRepoForVersion picks the repo to install the given cluster version from. The public repo wins when it
+// lists the version. Otherwise the private repo is used if it lists the version, or if credentials for it are
+// configured (its index may not be readable without them, so it cannot be checked). Anything else, including
+// non-concrete versions such as "latest", falls back to the public repo, which needs no credentials.
+func (v *ClusterInstallServiceImpl) GetHelmRepoForVersion(ctx context.Context, installationConfig *config.Installation, version string) HelmRepo {
+	private := privateHelmRepo(installationConfig)
+	if !publicRepoEnabled(installationConfig) {
+		return private
+	}
+	public := HelmRepo{URL: installationConfig.HelmRegistryUrlPublic}
+	concrete, err := semver.NewVersion(version)
+	if err != nil {
+		return public
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, repoLookupTimeout)
+	defer cancel()
+	results := v.fetchVersionLists(ctx, registryUrls(installationConfig))
+	listed := map[string]bool{}
+	for _, res := range results {
+		if res.err == nil && listsVersion(res.list, concrete) {
+			listed[res.url] = true
+		}
+	}
+
+	if listed[public.URL] {
+		return public
+	}
+	if listed[private.URL] || private.Username != "" {
+		return private
+	}
+	return public
 }
