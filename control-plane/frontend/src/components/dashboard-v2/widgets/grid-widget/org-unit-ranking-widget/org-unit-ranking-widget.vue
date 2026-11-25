@@ -344,12 +344,15 @@ export default defineComponent({
       ].includes(selectedMetricOption.value.value),
     );
 
+    watch([selectedEntityOption, () => props.nodePoolName, () => props.clusterId], () => {
+      filterBy.value.page = 1;
+    });
+
     watch(
       [selectedEntityOption, rankingTimeframe, selectedMetricOption, () => props.nodePoolName, () => props.clusterId],
       async () => {
         loading.value = true;
         error.value = false;
-        filterBy.value.page = 1;
         highlightColumn();
         await getEntityRanking();
       },
