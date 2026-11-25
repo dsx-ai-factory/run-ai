@@ -349,6 +349,7 @@ export default defineComponent({
       async () => {
         loading.value = true;
         error.value = false;
+        filterBy.value.page = 1;
         highlightColumn();
         await getEntityRanking();
       },

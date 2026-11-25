@@ -161,6 +161,23 @@ describe("org-unit-ranking-widget", () => {
     expect(departmentCountSpy).toHaveBeenCalled();
   });
 
+  it.each([
+    { change: "entity", apply: () => (wrapper.vm.selectedEntityOption = ORG_UNIT_RANKING_ENTITY_SELECT_OPTIONS[1]) },
+    { change: "metric", apply: () => (wrapper.vm.selectedMetricOption = ORG_UNIT_RANKING_METRIC_SELECT_OPTIONS[2]) },
+  ])("resets to the first page when the $change changes", async ({ apply }) => {
+    vi.mocked(orgUnitService.countDepartments).mockResolvedValue(2);
+    vi.mocked(orgUnitService.getProjectsRanking).mockResolvedValue(MOCK_PROJECTS_RANKING_RECORDS);
+    vi.mocked(orgUnitService.getDepartmentsRanking).mockResolvedValue([]);
+    mountComponent();
+    await flushPromises();
+    wrapper.vm.filterBy.page = 2;
+
+    apply();
+    await flushPromises();
+
+    expect(wrapper.vm.filterBy.page).toBe(1);
+  });
+
   it("links to projects filtered by allocated GPUs for the allocation metric", async () => {
     vi.mocked(orgUnitService.getProjectsRanking).mockResolvedValue(MOCK_PROJECTS_RANKING_RECORDS);
     mountComponent();
