@@ -6,7 +6,6 @@ import { reactive, ref, watch, onScopeDispose } from "vue";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { ErrorAlert } from "@/utils/error-alert.util/error-alert.util";
 import { ConflictError } from "@/models/http-response.model";
-import { errorMessages } from "@/common/error-message.constant";
 import { deepCopy } from "@/utils/common.util";
 import { filterUtil } from "@/utils/filter.util/filter.util";
 import { NodepoolSortFilterFields, type Nodepool } from "@/swagger-models/cluster-service-client";
@@ -16,7 +15,7 @@ export function useNodePoolForm(clusterId: string) {
   const draft = reactive(nodePoolUtil.createNodePoolDraft(clusterId));
   const pools = ref<Nodepool[]>([]);
   const loading = ref(false);
-  const loadError = ref("");
+  const poolLookupFailed = ref(false);
   const submitError = ref("");
   const submitting = ref(false);
   const nameConflict = ref(false);
@@ -36,7 +35,7 @@ export function useNodePoolForm(clusterId: string) {
   async function loadPools() {
     const currentRequest = ++requestId;
     pools.value = [];
-    loadError.value = "";
+    poolLookupFailed.value = false;
     if (!draft.clusterId) {
       loading.value = false;
       return;
@@ -46,13 +45,12 @@ export function useNodePoolForm(clusterId: string) {
       const result = await clusterService.getNodepools([
         filterUtil.getEqualsFilterString(NodepoolSortFilterFields.ClusterId, draft.clusterId),
       ]);
-      if (currentRequest === requestId) pools.value = result;
-    } catch (error) {
-      if (currentRequest === requestId) {
-        const fallback = ErrorAlert.failedLoadingMessage("node pools");
-        const { message } = new ErrorAlert({ generalMessage: fallback }).getNotification(error);
-        loadError.value = `${message || fallback}. ${errorMessages.NODE_POOL_LOADING_RETRY}`;
-      }
+      if (currentRequest !== requestId) return false;
+      pools.value = result;
+      return true;
+    } catch {
+      if (currentRequest === requestId) poolLookupFailed.value = true;
+      return false;
     } finally {
       if (currentRequest === requestId) loading.value = false;
     }
@@ -75,7 +73,7 @@ export function useNodePoolForm(clusterId: string) {
     },
   );
   async function create() {
-    if (submitting.value || loading.value || loadError.value || !draft.clusterId || disposed) return;
+    if (submitting.value || loading.value || poolLookupFailed.value || !draft.clusterId || disposed) return;
     if (created.value) return created.value;
     submitting.value = true;
     submitError.value = "";
@@ -99,5 +97,5 @@ export function useNodePoolForm(clusterId: string) {
       submitting.value = false;
     }
   }
-  return { draft, pools, loading, loadError, submitError, submitting, created, nameConflict, loadPools, create };
+  return { draft, pools, loading, poolLookupFailed, submitError, submitting, created, nameConflict, loadPools, create };
 }

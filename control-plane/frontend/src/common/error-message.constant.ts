@@ -7,7 +7,7 @@ export enum errorMessages {
   NODE_LABEL_SUGGESTIONS_UNAVAILABLE = "Label suggestions are unavailable. You can enter a key or value manually.",
   NODE_POOL_SAVE_FAILED = "Node pool could not be saved.",
   NODE_POOL_LABEL_IN_USE = "This key-value pair is already in use by another node pool.",
-  NODE_POOL_LOADING_RETRY = "Retry before creating a node pool.",
+  NODE_POOL_LOOKUP_FAILED = "Couldn’t check existing node pools. Try creating the node pool again.",
   NODE_POOL_CREATION_IN_PROGRESS = "Wait for node pool creation to finish.",
   VALUE_NOT_EMPTY = "Enter a value",
   SELECT_A_VALUE = "Select a value",

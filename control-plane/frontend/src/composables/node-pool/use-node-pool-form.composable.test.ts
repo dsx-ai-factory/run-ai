@@ -96,7 +96,7 @@ describe("node pool creation", () => {
     state.draft.clusterId = "cluster";
     await flushPromises();
     await state.create();
-    expect(state.loadError.value).toBeTruthy();
+    expect(state.poolLookupFailed.value).toBe(true);
     expect(clusterService.createNodepool).not.toHaveBeenCalled();
   });
   it("sends description and explicit Guaranteed quota capabilities when creating a pool", async () => {

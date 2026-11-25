@@ -83,6 +83,55 @@ describe("Step 1 form", () => {
     expect(key.props("options")).toContainEqual({ label: "custom-key (new key)", value: "custom-key", disable: false });
     wrapper.unmount();
   });
+  it("keeps labels editable after a pool lookup failure and rechecks duplicates on Create", async () => {
+    const authError = new Error("Authentication failed - unable to refresh token");
+    vi.mocked(clusterService.getNodepools)
+      .mockRejectedValueOnce(authError)
+      .mockRejectedValueOnce(authError)
+      .mockResolvedValueOnce([{ id: "taken", name: "training", labelKey: "type", labelValue: "gpu" } as Nodepool]);
+    const wrapper = renderForm("cluster");
+    const notify = vi.spyOn(wrapper.vm.$q, "notify").mockImplementation(() => () => {});
+    try {
+      await flushPromises();
+      expect(wrapper.text()).not.toContain(authError.message);
+      expect(wrapper.find('[aid="retry-node-pools"]').exists()).toBe(false);
+      wrapper.getComponent(RunaiNameValidation).vm.$emit("update:modelValue", "training");
+      const key = wrapper.findAllComponents(QSelect).find((field) => field.props("label") === "Key");
+      if (!key) throw new Error("Key selector missing");
+      expect(key.props("disable")).toBe(false);
+      key.vm.$emit("update:modelValue", "type");
+      await flushPromises();
+      const value = wrapper.findAllComponents(QSelect).find((field) => field.props("label") === "Value");
+      if (!value) throw new Error("Value selector missing");
+      expect(value.props("disable")).toBe(false);
+      value.vm.$emit("update:modelValue", "gpu");
+      await flushPromises();
+      const create = wrapper.get('[aid="create-node-pool-continue"]');
+      await create.trigger("click");
+      await flushPromises();
+      expect(notify).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "negative", message: expect.stringContaining("existing node pools") }),
+      );
+      expect(clusterService.createNodepool).not.toHaveBeenCalled();
+      await create.trigger("click");
+      await flushPromises();
+      expect(clusterService.getNodepools).toHaveBeenCalledTimes(3);
+      expect(wrapper.text()).toContain("This name already exists");
+      expect(wrapper.text()).toContain("This key-value pair is already in use");
+      expect(clusterService.createNodepool).not.toHaveBeenCalled();
+      wrapper.getComponent(RunaiNameValidation).vm.$emit("update:modelValue", "new-pool");
+      value.vm.$emit("update:modelValue", "free");
+      vi.mocked(clusterService.createNodepool).mockResolvedValueOnce({ id: "new" } as Nodepool);
+      await flushPromises();
+      await create.trigger("click");
+      await flushPromises();
+      expect(clusterService.createNodepool).toHaveBeenCalledTimes(1);
+      expect(wrapper.emitted("created")).toHaveLength(1);
+    } finally {
+      notify.mockRestore();
+      wrapper.unmount();
+    }
+  });
   it("validates the shared description input before submitting without a debounce delay", async () => {
     const wrapper = renderForm("cluster");
     await flushPromises();

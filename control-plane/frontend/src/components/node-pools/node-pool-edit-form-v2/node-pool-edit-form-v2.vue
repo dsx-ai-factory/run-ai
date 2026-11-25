@@ -57,14 +57,8 @@
               no-error-icon
             />
           </runai-expansion-item>
-          <runai-expansion-item label="Label" default-opened disable-closing :loading="loading">
+          <runai-expansion-item label="Label" default-opened disable-closing>
             <runai-section-title title="Set the label for the nodes that belong to this node pool" />
-            <q-banner v-if="loadError" class="bg-red-1 text-negative q-mb-md" role="alert">
-              {{ loadError }}
-              <template #action
-                ><runai-btn aid="retry-node-pools" label="Retry" flat color="primary" @click="loadPools"
-              /></template>
-            </q-banner>
             <q-select
               :model-value="draft.labelKey"
               @update:model-value="draft.labelKey = $event ?? ''"
@@ -89,7 +83,7 @@
               emit-value
               map-options
               input-debounce="250"
-              :disable="locked || !draft.clusterId || !!loadError"
+              :disable="locked || !draft.clusterId"
               :rules="[nodePoolUtil.validateLabelKey]"
               no-error-icon
               @filter="filterKeys"
@@ -126,7 +120,7 @@
               emit-value
               map-options
               input-debounce="250"
-              :disable="locked || !!loadError"
+              :disable="locked"
               :rules="[nodePoolUtil.validateLabelValue, uniqueLabel]"
               reactive-rules
               no-error-icon
@@ -212,7 +206,7 @@ const emit = defineEmits<{
   "busy-change": [busy: boolean];
   created: [pool: Nodepool, draft: INodePoolFormDraft, destination: ENodePoolFormDestination];
 }>();
-const { draft, pools, loading, loadError, submitError, submitting, created, nameConflict, loadPools, create } =
+const { draft, pools, loading, poolLookupFailed, submitError, submitting, created, nameConflict, loadPools, create } =
   useNodePoolForm(props.initialClusterId);
 const clusterStore = useClusterStore();
 const nodePoolStore = useNodePoolStore();
@@ -223,7 +217,7 @@ const validating = ref(false);
 const destination = ref<ENodePoolFormDestination>(ENodePoolFormDestination.Continue);
 // Disabling a Quasar field clears its validation errors, so lock only once saving starts.
 const locked = computed(() => submitting.value || !!created.value);
-const busy = computed(() => validating.value || submitting.value || loading.value || !!loadError.value);
+const busy = computed(() => validating.value || submitting.value || loading.value);
 watch(
   () => validating.value || submitting.value,
   (value) => emit("busy-change", value),
@@ -326,6 +320,10 @@ async function submit(target: ENodePoolFormDestination) {
     validating.value = true;
     let valid: boolean;
     try {
+      if (poolLookupFailed.value && !(await loadPools())) {
+        if (poolLookupFailed.value) $q.notify(alertUtil.getError(errorMessages.NODE_POOL_LOOKUP_FAILED));
+        return;
+      }
       valid = !!(await form.value?.validate());
     } finally {
       validating.value = false;
