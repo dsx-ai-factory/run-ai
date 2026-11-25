@@ -216,7 +216,8 @@ jobs:
                 'pr-number':    process.env.PR_NUMBER,
                 'pr-sha':       process.env.PR_SHA,
                 'pr-merge-sha': '',
-                'pin-sha':      fresh.merge_commit_sha || '',
+                // Never let a missing merge commit fall back to a moving PR ref.
+                'pin-sha':      fresh.merge_commit_sha || process.env.PR_SHA,
                 'pr-ref':       process.env.PR_REF,
                 'base-ref':     process.env.PR_BASE_REF,
               },
