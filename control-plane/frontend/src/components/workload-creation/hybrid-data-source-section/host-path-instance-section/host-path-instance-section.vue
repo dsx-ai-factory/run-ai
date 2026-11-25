@@ -87,7 +87,7 @@ import { RunaiToggle } from "@/components/common";
 // Models
 import { assetsUtil } from "@/utils/assets.util/assets.util";
 import type { IUIHostPathInstance } from "@/models/workload.model";
-import type { HostPathRules } from "@/swagger-models/assets-service-client";
+import type { HostPathRules } from "@/swagger-models/policy-service-client";
 import { validationRules } from "@/common/validation-rules";
 
 export default defineComponent({

@@ -61,7 +61,7 @@ import { RunaiFoldingSubSection } from "@/components/common/runai-folding-sub-se
 import { PolicyNumberInput } from "@/components/common/policy-number-input";
 
 // models
-import type { IntegerRules } from "@/swagger-models/assets-service-client";
+import type { IntegerRules } from "@/swagger-models/policy-service-client";
 
 export default defineComponent({
   name: "worker-elasticity-section",

@@ -111,7 +111,7 @@ import { RunaiToggle } from "@/components/common";
 import type { IUINfsInstance } from "@/models/workload.model";
 // Constants
 import { assetsUtil } from "@/utils/assets.util/assets.util";
-import type { NfsRules } from "@/swagger-models/assets-service-client";
+import type { NfsRules } from "@/swagger-models/policy-service-client";
 import { validationRules } from "@/common/validation-rules";
 
 export default defineComponent({

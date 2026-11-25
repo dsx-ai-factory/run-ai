@@ -32,7 +32,7 @@
           <q-separator class="q-mb-md hide-if-last-child" />
         </template>
         <template v-else-if="setting.key && shouldShowSetting(setting.key)">
-          <toggle-setting class="q-mb-md" :setting="setting" @update-setting="onUpdateSetting" />
+          <toggle-setting class="q-mb-md" :setting="setting" />
           <q-separator class="q-mb-md hide-if-last-child" />
         </template>
       </template>
@@ -43,7 +43,6 @@
         class="q-mb-md"
         :setting="ngcIntegrationSetting"
         resource-type="Registries"
-        @update-setting="onUpdateSetting"
       />
       <q-separator class="q-mb-md hide-if-last-child" />
       <ngc-private-registry-section v-if="isNgcIntegrationEnabled" />
@@ -149,9 +148,6 @@ export default defineComponent({
       if (!isModelEnabled) {
         settings.allowGPT2Model = {};
       }
-      if (!this.isHybridSubmissionEnabled) {
-        settings.dataVolumes = {};
-      }
       if (this.showYamlSubmissionSetting && this.yamlSubmissionSetting) {
         settings.yamlSubmission = { value: String(Boolean(this.yamlSubmissionSetting.enabled)) };
       }
@@ -167,9 +163,6 @@ export default defineComponent({
       return Object.values(this.workloadSettings).filter(
         (iWorkloadSetting: Setting) => iWorkloadSetting || iWorkloadSetting === "",
       );
-    },
-    isHybridSubmissionEnabled(): boolean {
-      return stringUtil.toBoolean(this.workloadSectionSettings.hybridSubmission?.value);
     },
   },
   methods: {
@@ -196,10 +189,6 @@ export default defineComponent({
         return !!this.workloadSectionSettings.models?.value;
       }
 
-      if (key === SettingKeys.EnableDataVolumes) {
-        return this.isHybridSubmissionEnabled;
-      }
-
       if (key === SettingKeys.YamlSubmission) {
         return false;
       }
@@ -220,15 +209,6 @@ export default defineComponent({
         this.$q.notify(alertUtil.getSuccess(settingUpdateSuccessMessage));
       } catch (error) {
         this.$q.notify(settingsUtil.getSettingErrorMessage());
-      }
-    },
-    async onUpdateSetting(key: SettingKeys, value: boolean): Promise<void> {
-      if (key === SettingKeys.EnableHybridSubmission && value === false) {
-        try {
-          await this.settingStore.refreshLocalSetting(SettingKeys.EnableDataVolumes);
-        } catch (err) {
-          console.error(err);
-        }
       }
     },
   },

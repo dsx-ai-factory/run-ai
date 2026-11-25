@@ -77,6 +77,8 @@ import type { ISelectOption } from "@/models/global.model";
 import {
   ServingPortAccessAuthorizationTypeEnum,
   type SupersetServingPortRules,
+  type StringOption,
+  type StringRules,
 } from "@/swagger-models/policy-service-client";
 import type { IGenericRadioOptionsPolicyRules } from "@/models/policy.model";
 import { SubjectType } from "@/swagger-models/authorization-client";
@@ -85,7 +87,6 @@ import { SubjectType } from "@/swagger-models/authorization-client";
 import { convertNamesToItems } from "./connection-access-modal.util";
 
 import { errorMessages } from "@/common/error-message.constant";
-import type { StringOption, StringRules } from "@/swagger-models/assets-service-client";
 
 export default defineComponent({
   name: "connection-access-modal",

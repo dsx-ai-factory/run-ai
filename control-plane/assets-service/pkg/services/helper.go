@@ -20,8 +20,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/clients/cluster"
 
-	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/dbmodel"
-
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/clients/org_unit"
 	assetsScope "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/services/scope"
@@ -172,35 +170,6 @@ func ValidateAssetCreateRequestMeta(ctx context.Context, meta *api.AssetCreation
 	}
 
 	return nil
-}
-
-func ContainedAssetsToAssetRef(containedAssets []dbmodel.AssetsContainedInWorkload, dataSourceOverridesById map[string]*api.DataSourceOverrides) api.AssetsRef {
-	result := api.AssetsRef{}
-
-	for _, asset := range containedAssets {
-		switch asset.Kind {
-		case api.ASSETKIND_ENVIRONMENT:
-			result.Environment = api.EnvironmentAssetRef{
-				Id:   asset.Id,
-				Name: asset.Name,
-			}
-		case api.ASSETKIND_COMPUTE:
-			result.Compute = &api.AssetsRefCompute{
-				Id:   asset.Id,
-				Name: asset.Name,
-			}
-		default:
-			dataSourceRef := api.DatasourceRef{
-				Id:        asset.Id,
-				Name:      asset.Name,
-				Kind:      asset.Kind,
-				Overrides: dataSourceOverridesById[asset.Id],
-			}
-			result.Datasources = append(result.Datasources, dataSourceRef)
-		}
-	}
-
-	return result
 }
 
 func safeStrPtr(s *string) string {

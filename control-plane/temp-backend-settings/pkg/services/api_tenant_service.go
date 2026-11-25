@@ -249,7 +249,6 @@ func buildOnSetDeps(deps TenantAPIServiceDeps) *settings.OnSetDeps {
 		DatavolumesUpdater:      datavolumesAdapter,
 		AuthorizationUpdater:    authorizationAdapter,
 		ClusterUpdater:          clusterAdapter,
-		SettingsDao:             deps.SettingsDao,
 	}
 }
 

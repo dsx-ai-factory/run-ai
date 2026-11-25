@@ -11,3 +11,7 @@ in API GET /api/v1/node-pools removed the enum value 'nodeLevelSchedulerEnabled'
 # between legacy and flexible workload templates.
 in API GET /api/v1/workloads/settings/{key} removed the enum value 'enableTemplatesV2' from the 'path' request parameter 'key'
 in API PUT /api/v1/workloads/settings/{key} removed the enum value 'enableTemplatesV2' from the 'path' request parameter 'key'
+
+# The asset submission editor and its selector have been retired.
+in API GET /api/v1/workloads/settings/{key} removed the enum value 'enableHybridSubmission' from the 'path' request parameter 'key'
+in API PUT /api/v1/workloads/settings/{key} removed the enum value 'enableHybridSubmission' from the 'path' request parameter 'key'

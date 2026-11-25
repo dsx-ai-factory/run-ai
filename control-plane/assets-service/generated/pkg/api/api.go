@@ -147,12 +147,6 @@ type HostPathAPIRouter interface {
 // The InferencesAPIRouter implementation should parse necessary information from the http request,
 // pass the data to a InferencesAPIServicer to perform the required actions, then write the service results to the http response.
 type InferencesAPIRouter interface {
-	CreateInference(http.ResponseWriter, *http.Request)
-	GetInferenceById(http.ResponseWriter, *http.Request)
-	DeleteInferenceById(http.ResponseWriter, *http.Request)
-	CreateInferenceV2(http.ResponseWriter, *http.Request)
-	GetInferenceMerged(http.ResponseWriter, *http.Request)
-	GetInferenceByIdV2(http.ResponseWriter, *http.Request)
 	GetHuggingFaceModelInfo(http.ResponseWriter, *http.Request)
 }
 
@@ -165,14 +159,6 @@ type ModelAPIRouter interface {
 	GetModelAssetById(http.ResponseWriter, *http.Request)
 	UpdateModelAssetById(http.ResponseWriter, *http.Request)
 	DeleteModelAssetById(http.ResponseWriter, *http.Request)
-}
-
-// ModelInferenceAPIRouter defines the required methods for binding the api requests to a responses for the ModelInferenceAPI
-// The ModelInferenceAPIRouter implementation should parse necessary information from the http request,
-// pass the data to a ModelInferenceAPIServicer to perform the required actions, then write the service results to the http response.
-type ModelInferenceAPIRouter interface {
-	CreateModelInference(http.ResponseWriter, *http.Request)
-	CreateModelInferenceV2(http.ResponseWriter, *http.Request)
 }
 
 // NFSAPIRouter defines the required methods for binding the api requests to a responses for the NFSAPI
@@ -270,10 +256,6 @@ type TrainingsAPIRouter interface {
 	UpdateDistributedStatus(http.ResponseWriter, *http.Request)
 	SyncDistributedStatus(http.ResponseWriter, *http.Request)
 	DeleteDistributedById(http.ResponseWriter, *http.Request)
-	CreateTraining(http.ResponseWriter, *http.Request)
-	GetTrainingMerged(http.ResponseWriter, *http.Request)
-	CreateTrainingV2(http.ResponseWriter, *http.Request)
-	GetTrainingByIdV2(http.ResponseWriter, *http.Request)
 }
 
 // WorkloadAPIRouter defines the required methods for binding the api requests to a responses for the WorkloadAPI
@@ -293,10 +275,6 @@ type WorkspacesAPIRouter interface {
 	UpdateWorkspaceStatus(http.ResponseWriter, *http.Request)
 	SyncWorkspaceStatus(http.ResponseWriter, *http.Request)
 	DeleteWorkspaceById(http.ResponseWriter, *http.Request)
-	CreateWorkspace(http.ResponseWriter, *http.Request)
-	GetWorkspaceMerged(http.ResponseWriter, *http.Request)
-	CreateWorkspaceV2(http.ResponseWriter, *http.Request)
-	GetWorkspaceByIdV2(http.ResponseWriter, *http.Request)
 	// Deprecated
 	CountAssets(http.ResponseWriter, *http.Request)
 }
@@ -433,12 +411,6 @@ type HostPathAPIServicer interface {
 // while the service implementation can be ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
 type InferencesAPIServicer interface {
-	CreateInference(context.Context, WorkloadCreationRequest) (ImplResponse, error)
-	GetInferenceById(context.Context, string) (ImplResponse, error)
-	DeleteInferenceById(context.Context, string) (ImplResponse, error)
-	CreateInferenceV2(context.Context, InferenceCreationRequestV2) (ImplResponse, error)
-	GetInferenceMerged(context.Context, string, string) (ImplResponse, error)
-	GetInferenceByIdV2(context.Context, string) (ImplResponse, error)
 	GetHuggingFaceModelInfo(context.Context, HuggingFaceModelInfoRequest) (ImplResponse, error)
 }
 
@@ -452,15 +424,6 @@ type ModelAPIServicer interface {
 	GetModelAssetById(context.Context, string, bool, int32, string, string) (ImplResponse, error)
 	UpdateModelAssetById(context.Context, string, ModelUpdateRequest) (ImplResponse, error)
 	DeleteModelAssetById(context.Context, string) (ImplResponse, error)
-}
-
-// ModelInferenceAPIServicer defines the api actions for the ModelInferenceAPI service
-// This interface intended to stay up to date with the openapi yaml used to generate it,
-// while the service implementation can be ignored with the .openapi-generator-ignore file
-// and updated with the logic required for the API.
-type ModelInferenceAPIServicer interface {
-	CreateModelInference(context.Context, ModelInferenceCreationRequest) (ImplResponse, error)
-	CreateModelInferenceV2(context.Context, ModelInferenceCreationRequestV2) (ImplResponse, error)
 }
 
 // NFSAPIServicer defines the api actions for the NFSAPI service
@@ -566,10 +529,6 @@ type TrainingsAPIServicer interface {
 	UpdateDistributedStatus(context.Context, string, WorkloadStatusUpdate) (ImplResponse, error)
 	SyncDistributedStatus(context.Context, string, []WorkloadStatusUpdate) (ImplResponse, error)
 	DeleteDistributedById(context.Context, string, string) (ImplResponse, error)
-	CreateTraining(context.Context, WorkloadCreationRequest) (ImplResponse, error)
-	GetTrainingMerged(context.Context, string, string, bool, bool) (ImplResponse, error)
-	CreateTrainingV2(context.Context, TrainingCreationRequestV2) (ImplResponse, error)
-	GetTrainingByIdV2(context.Context, string) (ImplResponse, error)
 }
 
 // WorkloadAPIServicer defines the api actions for the WorkloadAPI service
@@ -591,10 +550,6 @@ type WorkspacesAPIServicer interface {
 	UpdateWorkspaceStatus(context.Context, string, WorkloadStatusUpdate) (ImplResponse, error)
 	SyncWorkspaceStatus(context.Context, string, []WorkloadStatusUpdate) (ImplResponse, error)
 	DeleteWorkspaceById(context.Context, string, string) (ImplResponse, error)
-	CreateWorkspace(context.Context, WorkloadCreationRequest) (ImplResponse, error)
-	GetWorkspaceMerged(context.Context, string, string) (ImplResponse, error)
-	CreateWorkspaceV2(context.Context, WorkspaceCreationRequestV2) (ImplResponse, error)
-	GetWorkspaceByIdV2(context.Context, string) (ImplResponse, error)
 	// Deprecated
 	CountAssets(context.Context, string, string, string, int32, string, string) (ImplResponse, error)
 }

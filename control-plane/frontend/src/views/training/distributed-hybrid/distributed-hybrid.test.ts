@@ -239,6 +239,38 @@ describe("distributed-hybrid.vue", () => {
     expect(wrapper.html()).toContain("distributed-hybrid");
   });
 
+  it("preserves separate worker and master image pull secrets when copying distributed training", async () => {
+    await flushPromises();
+    const workerSecrets = [{ name: "worker-registry" }];
+    const masterSecrets = [{ name: "master-registry" }];
+    vi.mocked(workloadService.getUnifiedWorkload).mockResolvedValueOnce({
+      spec: {
+        worker: {
+          image: "worker-image",
+          imagePullSecrets: workerSecrets,
+          distributedFramework: "PyTorch",
+          numWorkers: 2,
+        },
+        master: { image: "master-image", imagePullSecrets: masterSecrets },
+      },
+    });
+    factory({ ...defaultQuery, fromCopyId: "source-distributed", clusterId: "test-cluster-id" });
+    await flushPromises();
+
+    wrapper.vm.workerContext.updateWorkloadName("distributed-copy");
+    wrapper.vm.handleNextStep();
+    wrapper.vm.onMasterContinue();
+    await wrapper.vm.onSubmit();
+
+    expect(trainingService.createDistributedFlat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "distributed-copy",
+        spec: expect.objectContaining({ imagePullSecrets: workerSecrets }),
+        masterSpec: expect.objectContaining({ imagePullSecrets: masterSecrets }),
+      }),
+    );
+  });
+
   describe("life cycle - created", () => {
     it("should initiate details from query", async () => {
       expect(wrapper.vm.workerContext.hybridWorkloadModel.value.name).toBe("tr-1");

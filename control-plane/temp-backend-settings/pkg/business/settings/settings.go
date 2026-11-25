@@ -8,8 +8,6 @@ package settings
 import (
 	"context"
 	"fmt"
-
-	"github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/dao"
 )
 
 type OnSetDeps struct {
@@ -22,7 +20,6 @@ type OnSetDeps struct {
 	DatavolumesUpdater      DatavolumesUpdater
 	AuthorizationUpdater    AuthorizationUpdater
 	ClusterUpdater          ClusterUpdater
-	SettingsDao             *dao.TenantSettingsDAO
 }
 
 type OrgUnitSettingsUpdater interface {
@@ -472,38 +469,6 @@ func BuildSettingDefinitions(deps *OnSetDeps) map[string]SettingDefinition {
 				if deps.BffWorkloadsUpdater != nil {
 					if err := deps.BffWorkloadsUpdater.UpdateEnableNIM(ctx, tenantID, value); err != nil {
 						return nil, fmt.Errorf("failed to update enable NIM in BFF service: %w", err)
-					}
-				}
-				return nil, nil
-			},
-		},
-		{
-			Key:      SettingKeyEnableHybridSubmission,
-			Source:   SourceTenant,
-			Category: CategoryTenant,
-			Description: "Enable to submit workloads via the new flexible form. Allow selecting an existing setup " +
-				"or starting from scratch, reviewing existing setups and understanding policy definitions. " +
-				"The form also includes advanced features tailored for inference workloads. For more information, see " +
-				"<a data-doc-key='flexibleSubmission' target='_blank'>Flexible submission.</a>",
-			Label:                       "Flexible workload submission",
-			Type:                        TypeBoolean,
-			Privilege:                   PrivilegeAdmin,
-			DefaultValue:                true,
-			Validate:                    ValidateBoolean,
-			MinimumSingleClusterVersion: "2.18",
-			Migrated:                    true,
-			OnSet: func(ctx context.Context, tenantID int, value interface{}) (*OnSetResult, error) {
-				boolVal, _ := value.(bool)
-				if !boolVal && deps.SettingsDao != nil {
-					if err := deps.SettingsDao.Set(ctx, tenantID, map[string]interface{}{
-						SettingKeyEnableDataVolumes: false,
-					}); err != nil {
-						return nil, fmt.Errorf("failed to update tenant settings: %w", err)
-					}
-				}
-				if deps.WorkloadsUpdater != nil {
-					if err := deps.WorkloadsUpdater.UpdateSetting(ctx, tenantID, SettingKeyEnableHybridSubmission, value); err != nil {
-						return nil, fmt.Errorf("failed to update EnableHybridSubmission in workloads service: %w", err)
 					}
 				}
 				return nil, nil

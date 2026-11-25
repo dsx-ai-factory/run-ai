@@ -8,15 +8,10 @@ import { storageUtil } from "@/utils/storage.util";
 import { dateUtil } from "@/utils/date.util";
 
 // models
-import type { TrainingCreationRequestV2, TrainingV2 } from "@/swagger-models/assets-service-client";
 import type { ILocalStatus } from "@/models/global.model";
-import { PolicyType, type DistributedPolicyV2, type TrainingPolicyV2 } from "@/swagger-models/policy-service-client";
 import { type Training as TrainingFlat } from "@/swagger-models/workloads-client";
 // constants
-import { policyService } from "../policy.service/policy.service";
-import { ScopeType } from "@/swagger-models/authorization-client";
 import { httpService } from "@/services/infra/https.service/http.service";
-import { assetsServiceApi } from "@/services/infra/client-apis/assets-service-api/assets-service-api";
 import { workloadServiceApi } from "@/services/infra/client-apis/workloads-service-api/workloads-service-api";
 import type {
   HttpResponse,
@@ -27,13 +22,9 @@ import type {
 const TRAINING_STATUS = "trainingStatus";
 
 export const trainingService = {
-  getById,
   resumeTrainingV2,
   stopTrainingV2,
   stop,
-  getPolicy,
-  createTrainingV2,
-  getTrainingMergedWithPolicy,
   createTrainingFlat,
   createDistributedFlat,
 };
@@ -56,37 +47,6 @@ async function createDistributedFlat(distCreationRequest: DistributedCreationReq
   }
 }
 
-async function createTrainingV2(trainingCreationRequest: TrainingCreationRequestV2): Promise<TrainingV2> {
-  try {
-    const response = await assetsServiceApi.trainingApi.createTrainingV2(trainingCreationRequest);
-    return response.data;
-  } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
-  }
-}
-
-async function getById(trainingId: string): Promise<TrainingV2> {
-  try {
-    const response = await assetsServiceApi.trainingApi.getTrainingByIdV2(trainingId);
-    return response.data;
-  } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
-  }
-}
-
-async function getTrainingMergedWithPolicy(
-  projectId?: string,
-  workloadId?: string,
-  isDistibuted?: boolean,
-): Promise<TrainingV2> {
-  try {
-    const response = await assetsServiceApi.trainingApi.getTrainingMerged(projectId, workloadId, isDistibuted);
-    return response.data;
-  } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
-  }
-}
-
 async function resumeTrainingV2(trainingId: string): Promise<HttpResponse> {
   try {
     const response = await workloadServiceApi.trainingsApi.resumeTraining(trainingId);
@@ -101,18 +61,6 @@ async function stopTrainingV2(trainingId: string): Promise<HttpResponse> {
     return response.data;
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
-  }
-}
-
-async function getPolicy(workloadType: PolicyType, projectId: number): Promise<TrainingPolicyV2 | DistributedPolicyV2> {
-  const scopeProperties = { scope: ScopeType.Project, projectId };
-  switch (workloadType) {
-    case PolicyType.Distributed:
-      return policyService.getDistributedPolicyByScope(scopeProperties);
-    case PolicyType.Training:
-      return policyService.getTrainingPolicyByScope(scopeProperties);
-    default:
-      return {};
   }
 }
 

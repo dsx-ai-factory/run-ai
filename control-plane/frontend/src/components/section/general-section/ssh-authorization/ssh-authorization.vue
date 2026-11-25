@@ -32,7 +32,7 @@ import { isValidDirectoryPath } from "@/common/form.validators";
 import { errorMessages } from "@/common/error-message.constant";
 
 // Types
-import type { StringRules } from "@/swagger-models/assets-service-client";
+import type { StringRules } from "@/swagger-models/policy-service-client";
 
 export enum ESShAuthorizationEvents {
   UpdateModelValue = "update:model-value",
