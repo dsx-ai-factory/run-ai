@@ -27,7 +27,7 @@ type FairShareSimulationSchedulingCapabilities struct {
 	Quota             bool `json:"quota"`
 	Ranks             bool `json:"ranks"`
 	AdjustableWeights bool `json:"adjustableWeights"`
-	// Whether GPU limits apply. Only allowed when quota is true.
+	// Whether GPU limits apply.
 	Limits bool `json:"limits"`
 }
 

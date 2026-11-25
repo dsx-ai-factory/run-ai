@@ -38,7 +38,7 @@ type FairShareSimulationSchedulingCapabilities struct {
 	AdjustableWeights bool `json:"adjustableWeights" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Whether GPU limits apply. Only allowed when quota is true.
+	// Whether GPU limits apply.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Limits bool `json:"limits"`
 	Limits bool `json:"limits" gorm:"not null;"`

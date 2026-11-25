@@ -241,7 +241,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				}
 			}
 			Expect(depADefaultRes.Gpu.Deserved).To(Equal(float64(0)))
-			Expect(depADefaultRes.Gpu.Limit).To(BeNil())
+			Expect(depADefaultRes.Gpu.Limit).To(Equal(ptr.To(float64(2))), "QUOTAS_TO_DEFAULT keeps GPU limits")
 			Expect(depADefaultRes.Cpu).ToNot(BeNil())
 			Expect(depADefaultRes.Cpu.Deserved).To(Equal(ptr.To(-1.0)))
 			Expect(depADefaultRes.Cpu.Limit).To(Equal(ptr.To(-1.0)))
@@ -268,7 +268,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				}
 			}
 			Expect(depBDefaultRes.Gpu.Deserved).To(Equal(float64(0)))
-			Expect(depBDefaultRes.Gpu.Limit).To(BeNil())
+			Expect(depBDefaultRes.Gpu.Limit).To(Equal(ptr.To(float64(2))), "QUOTAS_TO_DEFAULT keeps GPU limits")
 			Expect(depBDefaultRes.Cpu).ToNot(BeNil())
 			Expect(depBDefaultRes.Cpu.Deserved).To(Equal(ptr.To(-1.0)))
 			Expect(depBDefaultRes.Cpu.Limit).To(Equal(ptr.To(-1.0)))
@@ -537,9 +537,9 @@ var _ = Describe("Org unit tests", Ordered, func() {
 					}
 				}
 				if p.ParentId == depA.Id {
-					// deserved & limit - nil, OQ unchanged
+					// GPU deserved 0 and GPU limit kept, CPU and memory quota and limit cleared, OQ unchanged
 					Expect(defaultRes.Gpu.Deserved).To(Equal(float64(0)))
-					Expect(defaultRes.Gpu.Limit).To(BeNil())
+					Expect(defaultRes.Gpu.Limit).To(Equal(ptr.To(float64(3))))
 					Expect(defaultRes.Gpu.OverQuotaWeight).To(Equal(ptr.To(float64(5))))
 					Expect(defaultRes.Cpu).ToNot(BeNil())
 					Expect(defaultRes.Cpu.Deserved).To(Equal(ptr.To(-1.0)))
@@ -999,9 +999,9 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				for _, p := range response.Body.(api.GetProjects200Response).Projects {
 					for _, r := range p.Resources {
 						if r.NodePool.Id == fmt.Sprint(defaultNodePoolId) || r.NodePool.Id == nodePoolId2 {
-							// deserved & limit - nil
+							// GPU deserved 0 and GPU limit kept, CPU and memory cleared
 							Expect(r.Gpu.Deserved).To(Equal(float64(0)))
-							Expect(r.Gpu.Limit).To(BeNil())
+							Expect(r.Gpu.Limit).To(Equal(ptr.To(float64(3))))
 							Expect(r.Cpu).To(BeNil())
 							Expect(r.Memory).To(BeNil())
 						} else {

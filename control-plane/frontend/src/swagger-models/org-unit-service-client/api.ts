@@ -2433,7 +2433,7 @@ export interface FairShareSimulationNodePoolSchedulingCapabilities {
      */
     'adjustableWeights': boolean;
     /**
-     * Whether GPU limits apply. Only allowed when quota is true.
+     * Whether GPU limits apply.
      * @type {boolean}
      * @memberof FairShareSimulationNodePoolSchedulingCapabilities
      */
@@ -2713,7 +2713,7 @@ export interface FairShareSimulationSchedulingCapabilities {
      */
     'adjustableWeights': boolean;
     /**
-     * Whether GPU limits apply. Only allowed when quota is true.
+     * Whether GPU limits apply.
      * @type {boolean}
      * @memberof FairShareSimulationSchedulingCapabilities
      */

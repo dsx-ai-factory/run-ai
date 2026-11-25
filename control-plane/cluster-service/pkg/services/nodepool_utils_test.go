@@ -172,15 +172,13 @@ var _ = Describe("validateSchedulingCapabilities on update and patch", func() {
 		SchedulingCapabilities: api.SchedulingCapabilitiesNullable{Quota: ptr.To(false), Limits: ptr.To(true)},
 	}
 
-	It("refuses limits on with quota off in a PUT", func() {
+	It("accepts limits on with quota off in a PUT", func() {
 		checker := smocks.NewClusterCapabilityChecker(GinkgoT())
-		err := validateUpdateParams(context.Background(), limitsWithoutQuota, checker)
-		Expect(err).To(MatchError(ContainSubstring("Limits can only be enabled when SchedulingCapabilities.Quota is enabled")))
+		Expect(validateUpdateParams(context.Background(), limitsWithoutQuota, checker)).To(Succeed())
 	})
 
-	It("refuses limits on with quota off in a PATCH", func() {
+	It("accepts limits on with quota off in a PATCH", func() {
 		checker := smocks.NewClusterCapabilityChecker(GinkgoT())
-		err := validatePatchParams(context.Background(), models.Nodepool{}, limitsWithoutQuota, checker)
-		Expect(err).To(MatchError(ContainSubstring("Limits can only be enabled when SchedulingCapabilities.Quota is enabled")))
+		Expect(validatePatchParams(context.Background(), models.Nodepool{}, limitsWithoutQuota, checker)).To(Succeed())
 	})
 })
