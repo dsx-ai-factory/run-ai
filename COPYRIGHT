@@ -11536,7 +11536,7 @@ Copyright Google Inc - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   google.golang.org/api v0.281.0
-  google.golang.org/api v0.312.0
+  google.golang.org/api v0.317.0
   google.golang.org/api/support/bundler v0.278.0
 
 Copyright (c) 2011 Google Inc. All rights reserved.
@@ -12650,7 +12650,7 @@ Copyright Joshua Tacoma - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   google.golang.org/api/internal/third_party/uritemplates v0.281.0
-  google.golang.org/api/internal/third_party/uritemplates v0.312.0
+  google.golang.org/api/internal/third_party/uritemplates v0.317.0
 
 Copyright (c) 2013 Joshua Tacoma. All rights reserved.
 
@@ -18067,7 +18067,7 @@ Components:
   cel.dev/expr v0.25.2
   cel.dev/expr v0.25.3
   cloud.google.com/go/auth v0.20.0
-  cloud.google.com/go/auth v0.24.4
+  cloud.google.com/go/auth v0.24.5
   cloud.google.com/go/auth/oauth2adapt v0.2.8
   cloud.google.com/go/auth/oauth2adapt v0.3.1
   cloud.google.com/go/compute/metadata v0.10.0
