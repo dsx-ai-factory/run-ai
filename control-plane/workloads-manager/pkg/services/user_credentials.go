@@ -7,7 +7,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
@@ -37,10 +36,7 @@ func (w *WorkloadsV2Impl) validateUserCredentials(ctx context.Context, sources [
 		return NewSubmissionError(http.StatusInternalServerError, err.Message, nil)
 	}
 
-	allowedSecretNames, buildErr := buildCredentialSecretNames(credentials.Entries)
-	if buildErr != nil {
-		return NewSubmissionError(http.StatusInternalServerError, "invalid user credential", buildErr)
-	}
+	allowedSecretNames := buildCredentialSecretNames(credentials.Entries)
 	// Reject the workload if any requested Secret does not belong to the caller.
 	// Use the same 404 for missing and unauthorized credentials to avoid revealing their existence.
 	for _, source := range sources {
@@ -53,7 +49,7 @@ func (w *WorkloadsV2Impl) validateUserCredentials(ctx context.Context, sources [
 
 // buildCredentialSecretNames matches Kubernetes Secret names created by the agent
 // from database asset metadata. Workload credential refs use these names.
-func buildCredentialSecretNames(credentials []assetsApi.CredentialsListResponseEntry) (datastructs.Set[string], error) {
+func buildCredentialSecretNames(credentials []assetsApi.CredentialsListResponseEntry) datastructs.Set[string] {
 	secretNames := datastructs.NewSet[string]()
 	for _, credential := range credentials {
 		meta := credential.Meta
@@ -70,9 +66,7 @@ func buildCredentialSecretNames(credentials []assetsApi.CredentialsListResponseE
 				composer.NgcApiKeyGenericSecretPrefix+"-"+baseSecretName,
 				composer.NgcApiKeyDockerRegistryPrefix+"-"+baseSecretName,
 			)
-		default:
-			return nil, fmt.Errorf("credential kind %q does not support private user credentials", meta.Kind)
 		}
 	}
-	return secretNames, nil
+	return secretNames
 }

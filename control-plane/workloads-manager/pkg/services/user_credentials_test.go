@@ -39,8 +39,12 @@ var _ = Describe("User credential validation", func() {
 	registry.Meta.Kind = assetsApi.ASSETKIND_DOCKER_REGISTRY
 	ngc := owned
 	ngc.Meta.Kind = assetsApi.ASSETKIND_NGC_API_KEY
-	unsupported := owned
-	unsupported.Meta.Kind = assetsApi.ASSETKIND_PASSWORD
+	password := owned
+	password.Meta.Name = "password-credential"
+	password.Meta.Kind = assetsApi.ASSETKIND_PASSWORD
+	accessKey := owned
+	accessKey.Meta.Name = "access-key-credential"
+	accessKey.Meta.Kind = assetsApi.ASSETKIND_ACCESS_KEY
 
 	type testCase struct {
 		refs      []string
@@ -144,8 +148,14 @@ var _ = Describe("User credential validation", func() {
 		Entry("accepts both secrets from the user's own NGC API key", testCase{
 			refs: []string{"ngcgs-test-credential-11111111-1", "ngcdr-test-credential-11111111-1"}, entries: []assetsApi.CredentialsListResponseEntry{ngc},
 		}),
-		Entry("rejects credential types that cannot be private", testCase{
-			refs: []string{"test-credential-11111111-1"}, entries: []assetsApi.CredentialsListResponseEntry{unsupported}, wantCode: http.StatusInternalServerError,
+		Entry("ignores unsupported credentials for valid references", testCase{
+			refs: []string{"test-credential-11111111-1"}, entries: []assetsApi.CredentialsListResponseEntry{password, owned, accessKey},
+		}),
+		Entry("rejects password credential references", testCase{
+			refs: []string{"password-credential-11111111-1"}, entries: []assetsApi.CredentialsListResponseEntry{password, owned}, wantCode: http.StatusNotFound,
+		}),
+		Entry("rejects access-key credential references", testCase{
+			refs: []string{"access-key-credential-11111111-1"}, entries: []assetsApi.CredentialsListResponseEntry{accessKey, owned}, wantCode: http.StatusNotFound,
 		}),
 		Entry("skips credential lookup if no credentials are requested", testCase{}),
 	)
