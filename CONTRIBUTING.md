@@ -78,6 +78,7 @@ fix/airgap-registry-secret-upgrade
 
 - **One concern per PR.** Don't bundle unrelated fixes or refactors together; reviewers can approve a focused change much faster than a mixed one.
 - **Add tests for new behavior.** Tests live alongside the code they cover, inside the service you're changing.
+- **Application E2E tests** live under `e2e/`. See [Contributing E2E changes](e2e/README.md#contributing-e2e-changes) for combined product/test PRs, local checks, API-client generation, and handover rules.
 - **Update docs if user-facing.** Documentation source lives under [`docs/`](docs/); see [Documentation Contributions](#documentation-contributions) below.
 
 ### Step 4: Test Locally
@@ -109,7 +110,7 @@ git push origin your-branch-name
 
 ### Step 7: Wait for CI
 
-CI runs automatically once your PR is open: Layer 1 runs immediately, Layer 2 (the full build and end-to-end pipeline) starts once a maintainer types `/ok-to-test`. See [CI for Contributors](#ci-for-contributors--what-runs-and-when) below for what each layer covers.
+Public checks run automatically. Same-repository PRs also trigger the full pipeline automatically; fork PRs need approval from someone with write access using `/ok-to-test <commit-sha>`. See [CI for Contributors](#ci-for-contributors--what-runs-and-when) below.
 
 ### Step 8: Address Review Feedback
 
@@ -141,9 +142,9 @@ We split CI into two layers:
 - **Layer 1: Fast, automatic, no secrets.**
   - Runs on every fork PR as soon as it is opened: DCO check, lint (Go, Helm, CODEOWNERS, workflows), CodeQL diff scan, govulncheck.
   - These checks post results back to your PR within a few minutes.
-  - They are informational: they help you fix obvious issues before a maintainer looks at the PR, but they do not block merge by themselves.
+  - Some checks are informational. E2E public checks and TruffleHog are required on `main` and release branches.
 - **Layer 2: Full build and end-to-end tests, has secrets.**
-  - This is the pipeline that produces the required `Validate Successful Run` status check, and it only runs after a maintainer reviews your PR and types `/ok-to-test` in a comment.
+  - This pipeline produces the required Validate Successful Run status. Same-repository PRs trigger it automatically. Fork PRs need someone with write access to review the commit and comment `/ok-to-test <commit-sha>`. New fork commits need fresh approval.
   - End-to-end tests take 30–90 minutes.
   - A failed Layer 2 run blocks merge for everyone, including maintainers.
   - If a maintainer hasn't reviewed your PR within a few business days and you'd like the full pipeline to run, feel free to ping in the PR.

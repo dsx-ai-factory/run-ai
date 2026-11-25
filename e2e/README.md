@@ -99,6 +99,62 @@ npx playwright test -g "department"
 
 The runner uses the current kubeconfig context unless `KUBECONFIG_PATH` / `KUBECONFIG_CLUSTER_NAME` override it.
 
+## Contributing E2E changes
+
+### Migration handover
+
+The application tests are in this repository under `e2e/`. During migration, NVIDIA contributors should keep using their team's current contribution process until the developer handover is announced. The PR selection rules below become active at that handover. Environment setup, credentials, and internal execution profiles stay in private CI.
+
+After handover, this repository is the source of truth for migrated tests on `main` and `release-3.0`. Submit matching product and E2E changes in the same PR, against the same target branch.
+
+### Product and test changes in one PR
+
+For example, a workspace API change can include both:
+
+- The product change under `control-plane/workloads/`.
+- Its test update in `e2e/src/test/suites/playwright/parallel/viper/submitApi/workspaceApi.test.ts`.
+
+Run the changed service's checks, then run the public E2E checks from `e2e/`:
+
+```bash
+npm ci --ignore-scripts
+./node_modules/.bin/eslint . --ignore-path .eslintignore --ext .ts --quiet
+npm run typecheck
+npm run test:unit
+```
+
+These checks run without a cluster. Live tests also need a configured environment, as described in [How to run](#how-to-run). Keep credentials out of the PR.
+
+If an API definition changes, use the target branch's service Swagger files and the [API-client development](#api-client-development) commands below. Generate into an empty preview directory and review the complete output, including removed files, before updating committed clients. Do not copy client output from a different suite or generator. CI uses the committed clients; it does not regenerate them for you.
+
+### PR test selection after activation
+
+Private CI builds the selected product commit and runs tests from that same public checkout, including E2E changes in the PR. Test selection follows the changed files:
+
+| Change | Live E2E selection |
+| --- | --- |
+| Added or edited test files only | Changed parallel and serial tests, within supported environment and profile boundaries. |
+| Shared helpers, clients, dependencies, configuration, or deleted tests | The broader parallel and serial PR suites. |
+| Product code only | The existing product component selection. |
+| Product code and E2E together | Combined product and E2E selection from the same selected commit. |
+| A recognized skip-only change | No live environment is needed. Public checks still apply. |
+| Removing a skip or re-enabling a test | Live validation is required. |
+| Documentation only | No live environment is needed. |
+
+Existing tags, version restrictions, and profile restrictions still apply. A selected file does not guarantee every test inside it runs.
+
+Same-repository PRs trigger CI automatically. Fork PRs can run public checks without private credentials. Live CI requires a reviewer with write access to approve the reviewed commit with `/ok-to-test <commit-sha>`. A new commit needs fresh approval. Follow the existing [CI contribution process](../CONTRIBUTING.md#ci-for-contributors--what-runs-and-when).
+
+A green offline check does not mean live tests ran. Check the live CI result and its executed commit. When live E2E is required, skipped setup or skipped tests do not count as successful validation. Use the report link from the run; CI logs and report access follow the existing access policy.
+
+### Broken tests, skips, and release fixes
+
+For migrated branches, keep the product fix and matching test change in one PR instead of disabling a test, merging the product separately, and then re-enabling the test in another repository.
+
+Preserve intentional `test.skip`, `test.fixme`, and conditional skips for unsupported versions, platforms, or profiles. If a broken test needs a temporary skip, explain the failure, name its owner, and record the next action. Use a public issue when available; do not publish private ticket URLs or internal details. Re-enabling the test needs live validation.
+
+Older release branches that have not migrated still use their private release suite. Coordinate the matching test fix there as well as any public backport. Do not assume a public change updates an older private release.
+
 ## Layout
 
 ```
