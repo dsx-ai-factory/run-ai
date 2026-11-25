@@ -46,3 +46,43 @@ spec:
   - name: component-c
     replicas: 1
     type: worker
+  - multinode:
+      nodeCount: 2
+    name: component-d
+    replicas: 1
+    roles:
+    - name: leader
+      podTemplate:
+        spec:
+          containers:
+          - image: placeholder
+            imagePullPolicy: IfNotPresent
+            name: main
+            resources:
+              limits:
+                nvidia.com/gpu: "1"
+          - image: placeholder
+            imagePullPolicy: IfNotPresent
+            name: sidecar
+          initContainers:
+          - image: placeholder
+            imagePullPolicy: IfNotPresent
+            name: init
+    - name: worker
+      podTemplate:
+        spec:
+          containers:
+          - image: placeholder
+            imagePullPolicy: IfNotPresent
+            name: main
+            resources:
+              limits:
+                nvidia.com/gpu: "1"
+          - image: placeholder
+            imagePullPolicy: IfNotPresent
+            name: sidecar
+          initContainers:
+          - image: placeholder
+            imagePullPolicy: IfNotPresent
+            name: init
+    type: worker

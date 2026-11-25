@@ -38,6 +38,8 @@ const (
 	ExternalAccessKindIngress   ExternalAccessKind = "Ingress"
 	ExternalAccessKindRoute     ExternalAccessKind = "Route"
 	ExternalAccessKindHTTPRoute ExternalAccessKind = "HTTPRoute"
+	// ExternalAccessKindInferenceEndpoint replaces HTTPRoute for an endpoint with externalAccess.inference.
+	ExternalAccessKindInferenceEndpoint ExternalAccessKind = "InferenceEndpoint"
 )
 
 // NetworkingStatus is the networking plugin's structured status details payload.

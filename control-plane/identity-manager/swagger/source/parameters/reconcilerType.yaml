@@ -3,7 +3,7 @@ nullable: true
 enum:
 - realms
 - clients
-- apps
-- internalApps
-- userApps
+- serviceAccounts
+- internalServiceAccounts
+- accessKeys
 - workloadAuth

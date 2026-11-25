@@ -101,9 +101,11 @@ Override knobs:
 | `INTEG_TESTS_PACKAGE` | `./integration-tests/tests/` | Package compiled by `build-integration-tests-generic`. |
 | `INTEG_TESTS_BIN` | `bin/integ-tests` | Output path of the integration-test binary (relative to the service dir). |
 | `INTEG_TESTS_TAGS` | `integration` | Build tags for the integration-test binary. |
+| `GO_BUILD_TAGS` | empty | Build tags `lint-go` type-checks with (`--build-tags`). |
 
-Fixed (non-overridable) versions: `MOCKERY_VERSION=v2.53.3`,
-`GOLANGCI_LINT_VERSION=v2.9.0`, ginkgo `v2.13.2`, go-acc `v0.2.8`.
+Fixed (non-overridable) versions: `MOCKERY_VERSION` and `GOLANGCI_LINT_VERSION`
+(both in `golang.mk`; Renovate bumps the annotated `GOLANGCI_LINT_VERSION`),
+ginkgo `v2.13.2`, go-acc `v0.2.8`.
 
 ### `javascript.mk`
 

@@ -29,6 +29,7 @@
           :created-cluster="createdCluster"
           :versions-map="operatorVersionsMap"
           :is-higher-cluster-version="isHigherClusterVersion"
+          :preloaded-instructions="installationInstructions"
         ></cluster-installation-step>
       </div>
     </div>
@@ -38,8 +39,16 @@
         <q-field class="col-4 form-hint no-padding" :model-value="displayFormHint" :rules="[isFormIncomplete]"></q-field>
         <runai-btn aid="continue-btn" @click="goNext" :loading="loading" color="primary" label="Continue" />
       </div>
-      <div v-else class="stepper-controls row justify-end full-width">
-        <runai-btn flat @click="goBack" aid="back-btn" color="primary" label="Back" class="q-mr-md" />
+      <div v-else class="stepper-controls stepper-controls--installation row justify-end full-width">
+        <runai-btn
+          v-if="isClusterEditMode"
+          flat
+          @click="goBack"
+          aid="back-btn"
+          color="primary"
+          label="Back"
+          class="q-mr-md"
+        />
         <runai-btn aid="leave-btn" @click="leave" color="primary" label="Done" />
       </div>
     </template>
@@ -95,6 +104,7 @@ export default defineComponent({
         },
       } as IClusterInstalltionModel,
       operatorVersionsMap: null as Record<string, string> | null,
+      installationInstructions: undefined as string | undefined,
     };
   },
   async created() {
@@ -201,9 +211,9 @@ export default defineComponent({
       if (!isValid) return;
       try {
         this.loading = true;
-        if (this.createdCluster?.uuid) await this.deleteLastCreatedCluster();
         this.createdCluster = await this.clusterStore.create(this.clusterFormModel.name);
         this.createdCluster?.uuid && clusterUtil.addSessionCreatedCluster(this.createdCluster.uuid);
+        await this.loadInstallationInstructions();
         this.currentStep = 2;
         window.scrollTo({ top: 0, behavior: "smooth" });
       } catch (error: unknown) {
@@ -218,32 +228,35 @@ export default defineComponent({
         this.loading = false;
       }
     },
-    async deleteLastCreatedCluster(): Promise<void> {
-      if (!this.createdCluster?.uuid) return;
-      try {
-        this.loading = true;
-        this.createdCluster?.uuid && clusterUtil.removeSessionCreatedCluster(this.createdCluster.uuid);
-        await this.clusterStore.deleteCluster(this.createdCluster.uuid);
-      } catch (error: unknown) {
-        if (error instanceof HttpErrorResponse) {
-          console.error(error.serialize());
-          this.$q.notify(alertUtil.getError(error.message));
-        } else {
-          console.error(error);
-          this.$q.notify(alertUtil.getError("Failed to delete cluster"));
-        }
-      } finally {
-        this.loading = false;
-      }
-    },
     async goNext(): Promise<void> {
       if (this.isClusterEditMode) {
         const isValid: boolean = await this.validateAndNotify();
         if (!isValid) return;
+        try {
+          this.loading = true;
+          await this.loadInstallationInstructions();
+        } finally {
+          this.loading = false;
+        }
         this.currentStep = 2;
         return;
       }
       await this.createCluster();
+    },
+    async loadInstallationInstructions(): Promise<void> {
+      this.installationInstructions = undefined;
+      const version = this.clusterFormModel.version;
+      if (!this.createdCluster?.uuid || !this.operatorVersionsMap || !version) return;
+      try {
+        const response = await clusterService.getClusterInstallationInfo(
+          this.createdCluster.uuid,
+          String(this.operatorVersionsMap[version]),
+          this.clusterFormModel.prerequisites.clusterUrl,
+        );
+        this.installationInstructions = response?.data.installationStr;
+      } catch (error: unknown) {
+        console.error("Failed to preload installation instructions:", error);
+      }
     },
     goBack(): void {
       this.currentStep = 1;
@@ -278,5 +291,10 @@ export default defineComponent({
 <style scoped lang="scss">
 .stepper-controls {
   padding-right: 20px;
+}
+
+// The installation card ends further right than the step 1 form card, so Done needs less inset to line up with it.
+.stepper-controls--installation {
+  padding-right: 11px;
 }
 </style>

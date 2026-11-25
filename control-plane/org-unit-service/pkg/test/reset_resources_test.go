@@ -22,7 +22,10 @@ import (
 	"k8s.io/utils/ptr"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/generated/pkg/api"
+	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/database/dao"
+	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/services"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -794,6 +797,39 @@ var _ = Describe("Org unit tests", Ordered, func() {
 			Expect(syncProjects[0].Id).To(Equal(projA.Id))
 		})
 
+		It("DepartmentsResetResources LIMITS_TO_DEFAULT clears limits only on the target nodepool and keeps quotas", func() {
+			depAResources := func() map[string]api.Resources {
+				getA, err := departmentApiService.GetDepartment(ctx, depA.Id)
+				Expect(err).To(BeNil())
+				byNodePool := map[string]api.Resources{}
+				for _, r := range getA.Body.(api.Department).Resources {
+					byNodePool[r.NodePool.Name] = r
+				}
+				return byNodePool
+			}
+			before := depAResources()
+
+			res, err := departmentApiService.DepartmentsResetResources(ctx, api.DepartmentsResourcesResetRequest{
+				ClusterId:   clusterId,
+				NodePoolIds: []string{nodePoolId2},
+				Action:      api.RESOURCESRESETACTION_LIMITS_TO_DEFAULT,
+			})
+			Expect(err).To(BeNil())
+			Expect(res.Code).To(Equal(http.StatusNoContent))
+
+			after := depAResources()
+			np2Before, np2After := before[nodePoolName2], after[nodePoolName2]
+			Expect(np2After.Gpu.Limit).To(BeNil())
+			Expect(np2After.Gpu.Deserved).To(Equal(np2Before.Gpu.Deserved))
+			Expect(np2After.Cpu).ToNot(BeNil())
+			Expect(np2After.Cpu.Limit).To(Equal(ptr.To(-1.0)))
+			Expect(np2After.Cpu.Deserved).To(Equal(np2Before.Cpu.Deserved))
+			Expect(np2After.Memory).ToNot(BeNil())
+			Expect(np2After.Memory.Limit).To(Equal(ptr.To(-1.0)))
+			Expect(np2After.Memory.Deserved).To(Equal(np2Before.Memory.Deserved))
+			Expect(after[defaultNodePoolName]).To(Equal(before[defaultNodePoolName]))
+		})
+
 		Context("some tests with 3 nodepools", func() {
 			var nodePool3Name, nodePool3Id string
 
@@ -982,6 +1018,62 @@ var _ = Describe("Org unit tests", Ordered, func() {
 					}
 				}
 			})
+		})
+
+		It("NodepoolResetResources NEGATIVE_WEIGHTS_TO_DEFAULT sets the negative weights on the target nodepool to the default", func() {
+			setGpuWeight := func(table string, orgUnitId string, nodePoolId string, weight *float64) {
+				_, err := runaidb.DB().Exec(fmt.Sprintf(`UPDATE resources SET gpu_over_quota_weight = ? FROM %s
+					WHERE %s.org_unit_data_id = resources.org_unit_data_id AND %s.id = ? AND resources.node_pool_id = ?`, table, table, table),
+					weight, orgUnitId, nodePoolId)
+				Expect(err).To(BeNil())
+			}
+			gpuWeight := func(resources []api.Resources, nodePoolId string) float64 {
+				for _, r := range resources {
+					if r.NodePool.Id == nodePoolId {
+						Expect(r.Gpu.OverQuotaWeight).ToNot(BeNil())
+						return *r.Gpu.OverQuotaWeight
+					}
+				}
+				Fail("no resources for nodepool " + nodePoolId)
+				return 0
+			}
+			departmentGpuWeight := func(departmentId string, nodePoolId string) float64 {
+				res, err := departmentApiService.GetDepartment(ctx, departmentId)
+				Expect(err).To(BeNil())
+				Expect(res.Code).To(Equal(http.StatusOK))
+				return gpuWeight(res.Body.(api.Department).Resources, nodePoolId)
+			}
+			projectGpuWeight := func(projectId string, nodePoolId string) float64 {
+				res, err := projectApiService.GetProject(ctx, projectId)
+				Expect(err).To(BeNil())
+				Expect(res.Code).To(Equal(http.StatusOK))
+				return gpuWeight(res.Body.(api.Project).Resources, nodePoolId)
+			}
+			defaultNodePool := fmt.Sprint(defaultNodePoolId)
+
+			setGpuWeight(models.DepartmentTable, depA.Id, nodePoolId2, ptr.To(0.0))
+			setGpuWeight(models.DepartmentTable, depB.Id, nodePoolId2, ptr.To(-1.0))
+			setGpuWeight(models.DepartmentTable, depB.Id, defaultNodePool, ptr.To(-1.0))
+			setGpuWeight(models.ProjectTable, projA.Id, nodePoolId2, ptr.To(-1.0))
+			setGpuWeight(models.ProjectTable, projB.Id, nodePoolId2, ptr.To(7.0))
+			dao.InvalidateAllCache(ctx, TestTenant, clusterId)
+
+			Expect(dao.NodepoolResetResources(ctx, TestTenant, clusterId, nodePoolId2,
+				api.NODEPOOLRESOURCESRESETACTION_NEGATIVE_WEIGHTS_TO_DEFAULT)).To(Succeed())
+
+			Expect(departmentGpuWeight(depA.Id, nodePoolId2)).To(Equal(float64(0)))
+			Expect(departmentGpuWeight(depB.Id, nodePoolId2)).To(Equal(models.DefaultOverQuotaWeight))
+			Expect(departmentGpuWeight(depB.Id, defaultNodePool)).To(Equal(float64(-1)))
+			Expect(projectGpuWeight(projA.Id, nodePoolId2)).To(Equal(models.DefaultOverQuotaWeight))
+			Expect(projectGpuWeight(projB.Id, nodePoolId2)).To(Equal(float64(7)))
+
+			setGpuWeight(models.DepartmentTable, depA.Id, nodePoolId2, ptr.To(-1.0))
+			setGpuWeight(models.DepartmentTable, depB.Id, nodePoolId2, ptr.To(5.0))
+			dao.InvalidateAllCache(ctx, TestTenant, clusterId)
+			Expect(dao.NodepoolResetResources(ctx, TestTenant, clusterId, nodePoolId2,
+				api.NODEPOOLRESOURCESRESETACTION_NEGATIVE_WEIGHTS_TO_DEFAULT)).To(Succeed())
+			Expect(departmentGpuWeight(depA.Id, nodePoolId2)).To(Equal(models.DefaultOverQuotaWeight))
+			Expect(departmentGpuWeight(depB.Id, nodePoolId2)).To(Equal(float64(5)))
 		})
 
 		Context("test invalid requests", func() {

@@ -1,0 +1,40 @@
+description: Apply named component policies to both role templates without creating a component template.
+effectiveRules:
+  - field: serviceAccountName
+    specSelector: componentPodSpec
+    selectorParams:
+      componentName: component-d
+    enforcements:
+      - set:
+          value: role-service-account
+  - field: labels
+    specSelector: componentPodMetadata
+    selectorParams:
+      componentName: component-d
+    enforcements:
+      - set:
+          key: app
+          value: role-worker
+  - field: imagePullPolicy
+    specSelector: componentMainContainer
+    selectorParams:
+      componentName: component-d
+    enforcements:
+      - set:
+          value: Always
+  - field: image
+    specSelector: componentAppContainerByName
+    selectorParams:
+      componentName: component-d
+      containerName: sidecar
+    enforcements:
+      - set:
+          value: example/role-sidecar:test
+  - field: image
+    specSelector: componentInitContainerByName
+    selectorParams:
+      componentName: component-d
+      containerName: init
+    enforcements:
+      - set:
+          value: example/role-init:test

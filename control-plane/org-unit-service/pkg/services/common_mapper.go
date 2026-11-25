@@ -435,6 +435,9 @@ func getAllEmptyResources(allClusterNodePools map[string]openapi.NodepoolMinimal
 				if highestMemoryLimit == -1 {
 					maxAllowedMemory = nil
 				}
+				if nodePool.SchedulingCapabilities != nil && !nodePool.SchedulingCapabilities.Limits {
+					maxAllowedGpu, maxAllowedCpu, maxAllowedMemory = nil, nil, nil
+				}
 				emptyResource := createEmptyResources(nodePool, isDepartment, maxAllowedGpu, maxAllowedCpu, maxAllowedMemory)
 				emptyResources = append(emptyResources, emptyResource)
 			}

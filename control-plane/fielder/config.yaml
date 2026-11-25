@@ -2594,6 +2594,21 @@ fields:
           - NimServiceDefaults
           - NimServiceRules
 
+  loadAwareRouting:
+    name: loadAwareRouting
+    variants:
+      - spec: inferences/LoadAwareRouting.yaml
+        defaults: inferences/LoadAwareRouting.yaml
+        rules: ../policy_rules/BooleanRules.yaml
+        internal: true
+        targets:
+          - DinfCommonSpec
+          - DinfCommonDefaults
+          - DinfCommonRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+
 targets:
   SupersetSpec:
     type: spec

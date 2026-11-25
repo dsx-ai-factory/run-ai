@@ -610,6 +610,7 @@ func (p *WorkloadParser) overrideFromWorkloadRunner(
 		return
 	}
 	projectProfileCompatibilityFields(wlr, workloadSyncFields)
+	appendInferenceEndpointCondition(wlr, workloadSyncFields)
 	if externalWorkload.Spec.Type == distributedInferenceWorkloadType {
 		projectDistributedInferenceCompatibilityFields(wlr, workloadSyncFields)
 	}

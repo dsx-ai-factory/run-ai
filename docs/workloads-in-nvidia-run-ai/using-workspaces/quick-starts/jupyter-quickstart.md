@@ -62,9 +62,9 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 7.  Click **CONTINUE**
 
     In the next step:
-8. Under **Environment**, click the **load** icon. A side pane appears, displaying a list of available environments. Select the **‘jupyter-lab’** environment for your workspace (Image URL: `jupyter/scipy-notebook)`
+8. Under **Environment**, click the **load** icon. A side pane appears, displaying a list of available environments. Select the **‘jupyter-lab’** environment for your workspace (Image URL: `quay.io/jupyter/scipy-notebook`)
    * If ‘jupyter-lab’ is not displayed in the gallery, follow the below steps to create a one-time environment configuration::
-     * Enter the jupyter-lab **Image URL** - `jupyter/scipy-notebook`
+     * Enter the jupyter-lab **Image URL** - `quay.io/jupyter/scipy-notebook`
      * Tools - Set the connection for your tool
        * Click **+TOOL**
        * Select **Jupyter** tool from the list
@@ -94,12 +94,12 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 7.  Click **CONTINUE**
 
     In the next step:
-8.  Select the **‘jupyter-lab’** environment for your workspace (Image URL: `jupyter/scipy-notebook`)
+8.  Select the **‘jupyter-lab’** environment for your workspace (Image URL: `quay.io/jupyter/scipy-notebook`)
 
     * If ‘jupyter-lab’ is not displayed in the gallery, follow the below steps:
       * Click **+NEW ENVIRONMENT**
       * Enter jupyter-lab as the **name** for the environment. The name must be unique.
-      * Enter the jupyter-lab **Image URL** - `jupyter/scipy-notebook`
+      * Enter the jupyter-lab **Image URL** - `quay.io/jupyter/scipy-notebook`
       * Tools - Set the connection for your tool
         * Click **+TOOL**
         * Select **Jupyter** tool from the list
@@ -134,7 +134,7 @@ Copy the following command to your terminal. Make sure to update the below with 
 ```shell
 runai project set "project-name"
 runai workspace submit "workload-name" \
---image jupyter/scipy-notebook --gpu-devices-request 0 \
+--image quay.io/jupyter/scipy-notebook --gpu-devices-request 0 \
 --command --external-url container=8888 -- start-notebook.sh \
 --NotebookApp.token=
 ```
@@ -155,7 +155,7 @@ curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \
     "spec": {
         "command" : "start-notebook.sh",
         "args" : "--NotebookApp.token=''",
-        "image": "jupyter/scipy-notebook",
+        "image": "quay.io/jupyter/scipy-notebook",
         "compute": {
             "gpuDevicesRequest": 1
         },

@@ -48,3 +48,39 @@ spec:
           app: inference
     replicas: 1
     type: worker
+  - multinode:
+      nodeCount: 2
+    name: component-d
+    replicas: 1
+    roles:
+    - name: leader
+      podTemplate:
+        metadata:
+          labels:
+            app: inference
+        spec:
+          containers:
+          - image: placeholder
+            name: main
+          - image: placeholder
+            name: sidecar
+          initContainers:
+          - image: placeholder
+            name: init
+          serviceAccountName: inference-sa
+    - name: worker
+      podTemplate:
+        metadata:
+          labels:
+            app: inference
+        spec:
+          containers:
+          - image: placeholder
+            name: main
+          - image: placeholder
+            name: sidecar
+          initContainers:
+          - image: placeholder
+            name: init
+          serviceAccountName: inference-sa
+    type: worker

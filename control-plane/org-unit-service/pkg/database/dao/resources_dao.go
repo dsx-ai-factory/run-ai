@@ -34,6 +34,8 @@ const (
 	hasQuotaQueryCondition = `(gpu_deserved <> 0 OR gpu_limit <> -1 OR 
 					 cpu_deserved <> -1 OR cpu_limit <> -1 OR 
 					 memory_deserved <> -1 OR memory_limit <> -1)`
+
+	hasLimitQueryCondition = `(gpu_limit <> -1 OR cpu_limit <> -1 OR memory_limit <> -1)`
 )
 
 var nonDefaultRankQueryCondition = fmt.Sprintf(`(resources.priority <> '%s')`, models.DefaultResourceRank)
@@ -45,8 +47,10 @@ const (
 	RanksToDefault    = ResetResourcesAction(api.RESOURCESRESETACTION_RANKS_TO_DEFAULT)
 	WeightsToDefault  = ResetResourcesAction(api.RESOURCESRESETACTION_WEIGHTS_TO_DEFAULT)
 	WeightsToDeserved = ResetResourcesAction(api.RESOURCESRESETACTION_WEIGHTS_TO_DESERVED)
+	LimitsToDefault   = ResetResourcesAction(api.RESOURCESRESETACTION_LIMITS_TO_DEFAULT)
 
-	CpuQuotasToDefault = ResetResourcesAction(api.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT)
+	CpuQuotasToDefault       = ResetResourcesAction(api.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT)
+	NegativeWeightsToDefault = ResetResourcesAction(api.NODEPOOLRESOURCESRESETACTION_NEGATIVE_WEIGHTS_TO_DEFAULT)
 )
 
 func getUpdateResourcesQuery(setQuery, conditionQuery string, projects bool) string {
@@ -151,6 +155,8 @@ func getOrgUnitsNodepoolSummaryInternal(ctx context.Context, tenantId, nodepoolI
 		query = query.Where(hasQuotaQueryCondition)
 	case api.ORGUNITSNODEPOOLSUMMARYTYPE_NON_DEFAULT_RANK:
 		query = query.Where(nonDefaultRankQueryCondition)
+	case api.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_LIMIT:
+		query = query.Where(hasLimitQueryCondition)
 	default:
 		return nil, fmt.Errorf("invalid nodepool summary type: %s", nodepoolSummaryType)
 	}
@@ -182,6 +188,9 @@ func getResetResourcesResourcesQuery(projects bool, action ResetResourcesAction,
 	case RanksToDefault:
 		setQuery = fmt.Sprintf(`priority = '%s', updated_at=now()`, models.DefaultResourceRank)
 		conditionQuery = nonDefaultRankQueryCondition
+	case LimitsToDefault:
+		setQuery = `gpu_limit = NULL, cpu_limit = NULL, memory_limit = NULL, updated_at=now()`
+		conditionQuery = hasLimitQueryCondition
 	case WeightsToDefault:
 		// set gpu_over_quota_weight to default always, set cpu_over_quota_weight and memory_over_quota_weight to default only if not null
 		setQuery = fmt.Sprintf(`gpu_over_quota_weight = %f, 
@@ -204,6 +213,13 @@ func getResetResourcesResourcesQuery(projects bool, action ResetResourcesAction,
 	case CpuQuotasToDefault:
 		setQuery = disableCpuQuotaQuerySet
 		conditionQuery = disableCpuQuotaQueryCondition
+	case NegativeWeightsToDefault:
+		// a department's weight starts as a copy of its quota, so a department that had unlimited quota is left
+		// with -1, which isn't a weight. Weight 0 (no quota) is kept: that department gets no share above its
+		// quota, as on a node pool with quota and adjustable weights. Projects start at the default weight, so a
+		// negative project weight can only be an invalid value set through the API.
+		setQuery = fmt.Sprintf(`gpu_over_quota_weight = %f, updated_at=now()`, models.DefaultOverQuotaWeight)
+		conditionQuery = `(gpu_over_quota_weight < 0)`
 	default:
 		return ""
 	}

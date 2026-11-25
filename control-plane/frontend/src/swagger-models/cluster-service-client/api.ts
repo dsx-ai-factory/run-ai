@@ -826,6 +826,12 @@ export interface ClusterNotification {
  */
 export interface ClusterReportedConfig {
     /**
+     * InferenceEndpoint integration contract declared by the operator when Agent, Anyworkload and inference-endpoint-controller are enabled. v1 means the Agent and the Anyworkload networking plugin understand the externalAccess.inference block in networking endpoints. Omitted by older clusters. Operand readiness and administrator Gateway settings must also be checked before enabling new workloads.
+     * @type {string}
+     * @memberof ClusterReportedConfig
+     */
+    'inferenceEndpointSchemaVersion'?: string | null;
+    /**
      * indicates if the cluster workload ownership protection is enabled
      * @type {boolean}
      * @memberof ClusterReportedConfig
@@ -4131,6 +4137,12 @@ export interface NodepoolGpuTypeDetails {
      * @memberof NodepoolGpuTypeDetails
      */
     'totalDevices': number;
+    /**
+     * Largest installed GPU count on a single node for this exact GPU type and per-device memory capacity. Not a sum across nodes or a free-device count. Omitted when per-node count evidence is unavailable.
+     * @type {number}
+     * @memberof NodepoolGpuTypeDetails
+     */
+    'maxDevicesPerNode'?: number;
 }
 /**
  * 
@@ -4792,6 +4804,12 @@ export interface SchedulingCapabilities {
      * @memberof SchedulingCapabilities
      */
     'cpuQuota': boolean;
+    /**
+     * Whether to allow GPU, CPU and memory limits for the nodepool\'s resources. Only allowed when quota=true.
+     * @type {boolean}
+     * @memberof SchedulingCapabilities
+     */
+    'limits': boolean;
 }
 /**
  * 
@@ -4823,6 +4841,12 @@ export interface SchedulingCapabilitiesNullable {
      * @memberof SchedulingCapabilitiesNullable
      */
     'cpuQuota'?: boolean | null;
+    /**
+     * Whether to allow GPU, CPU and memory limits for the nodepool\'s resources. Only allowed when quota=true.
+     * @type {boolean}
+     * @memberof SchedulingCapabilitiesNullable
+     */
+    'limits'?: boolean | null;
 }
 /**
  * 

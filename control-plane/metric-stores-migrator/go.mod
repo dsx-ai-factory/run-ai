@@ -3,19 +3,19 @@ module github.com/dsx-ai-factory/run-ai/control-plane/metric-stores-migrator
 go 1.27.4
 
 require (
-	github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.26
-	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.11
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.4
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.6
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.20
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.12
+	github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.28
+	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.13
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.5
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.22
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.14
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.12.1
 )
 
 require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.33 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.35 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
@@ -38,7 +38,7 @@ require (
 	github.com/spf13/viper v1.21.0 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
+	go.opentelemetry.io/auto/sdk v1.2.2 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0 // indirect
 	go.opentelemetry.io/otel v1.47.0 // indirect
 	go.opentelemetry.io/otel/log v1.47.0 // indirect

@@ -1,0 +1,40 @@
+post:
+  x-internal: true
+  summary: Recommend GPU allocation for a NIM test/dev workload.
+  description: >-
+    Returns recommendations without deploying or reserving resources. Evaluates
+    cluster memory and GPU counts for the exact image tag using GPU-agnostic
+    profiles. GPU model compatibility is not verified. Missing trustworthy sizing
+    data is a no_recommendation result; upstream retrieval failures are errors.
+  operationId: recommend_inference_resources
+  x-service: catalog-service
+  x-authorize:
+    resource-type: inferences
+    action: read
+  x-test-coverage:
+    - control-plane/catalog-service/pkg/services/rightsizing/service_test.go
+  tags:
+    - RightSizing
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/rightSizing/RecommendationRequest.yaml'
+  responses:
+    '200':
+      description: Results per GPU type and capacity; may contain no recommendations.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/rightSizing/RecommendationResponse.yaml'
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
