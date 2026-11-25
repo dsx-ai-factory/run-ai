@@ -3,6 +3,8 @@
 # Run 'make rebuild' in control-plane/fielder to rebuild it
 ###########################################################
 properties:
+  accelerator:
+    $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/ArbitraryRules.yaml
   annotations:
     $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/InstancesRules.yaml
   args:
@@ -15,6 +17,8 @@ properties:
     $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/BooleanRules.yaml
   environmentVariables:
     $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/InstancesRules.yaml
+  gpuType:
+    $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
   image:
     $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
   imagePullPolicy:

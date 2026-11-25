@@ -85,6 +85,7 @@ pkg/api/model_get_nodepools_minimal_200_response.go
 pkg/api/model_get_nodepools_minimal_internal_200_response.go
 pkg/api/model_get_put_patch_cluster_config_response.go
 pkg/api/model_gpu_info.go
+pkg/api/model_gpu_placement_match.go
 pkg/api/model_gpu_pods_placement_strategy.go
 pkg/api/model_gpu_resource_optimization.go
 pkg/api/model_grouped_measurement_group.go

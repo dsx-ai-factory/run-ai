@@ -882,6 +882,25 @@ export type AIApplicationsSortFilterFields = typeof AIApplicationsSortFilterFiel
 
 
 /**
+ * Accelerator resource and optional device model label key for workload placement.
+ * @export
+ * @interface AcceleratorSelection
+ */
+export interface AcceleratorSelection {
+    /**
+     * Kubernetes extended resource name. Defaults to nvidia.com/gpu.
+     * @type {string}
+     * @memberof AcceleratorSelection
+     */
+    'resourceName'?: string | null;
+    /**
+     * Node label key for gpuType. Defaults to nvidia.com/gpu.product for NVIDIA.
+     * @type {string}
+     * @memberof AcceleratorSelection
+     */
+    'deviceLabelKey'?: string | null;
+}
+/**
  * The action to perform on the list of ids.
  * @export
  * @enum {string}
@@ -3112,6 +3131,12 @@ export interface DistributedInference {
      */
     'actualPhase'?: Phase;
     /**
+     * Advisory messages returned when submitting the workload.
+     * @type {Array<SubmissionWarning>}
+     * @memberof DistributedInference
+     */
+    'warnings'?: Array<SubmissionWarning>;
+    /**
      * 
      * @type {DistributedInferenceSpecSpec}
      * @memberof DistributedInference
@@ -3519,6 +3544,12 @@ export interface DistributedInferenceLeaderDefaultsFields {
 export interface DistributedInferenceLeaderDefaultsFieldsLeader {
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof DistributedInferenceLeaderDefaultsFieldsLeader
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof DistributedInferenceLeaderDefaultsFieldsLeader
      */
@@ -3553,6 +3584,12 @@ export interface DistributedInferenceLeaderDefaultsFieldsLeader {
      * @memberof DistributedInferenceLeaderDefaultsFieldsLeader
      */
     'environmentVariables'?: EnvironmentVariablesDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof DistributedInferenceLeaderDefaultsFieldsLeader
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -3648,6 +3685,12 @@ export interface DistributedInferenceLeaderRulesFields {
 export interface DistributedInferenceLeaderRulesFieldsLeader {
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof DistributedInferenceLeaderRulesFieldsLeader
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof DistributedInferenceLeaderRulesFieldsLeader
      */
@@ -3682,6 +3725,12 @@ export interface DistributedInferenceLeaderRulesFieldsLeader {
      * @memberof DistributedInferenceLeaderRulesFieldsLeader
      */
     'environmentVariables'?: InstancesRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof DistributedInferenceLeaderRulesFieldsLeader
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -3775,6 +3824,12 @@ export interface DistributedInferenceLeaderSpecFields {
  */
 export interface DistributedInferenceLeaderSpecFieldsLeader {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof DistributedInferenceLeaderSpecFieldsLeader
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof DistributedInferenceLeaderSpecFieldsLeader
@@ -3810,6 +3865,12 @@ export interface DistributedInferenceLeaderSpecFieldsLeader {
      * @memberof DistributedInferenceLeaderSpecFieldsLeader
      */
     'environmentVariables'?: Array<EnvironmentVariable> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof DistributedInferenceLeaderSpecFieldsLeader
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -3904,6 +3965,12 @@ export interface DistributedInferenceLeaderTemplateSpecFields {
  */
 export interface DistributedInferenceLeaderTemplateSpecFieldsLeader {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof DistributedInferenceLeaderTemplateSpecFieldsLeader
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof DistributedInferenceLeaderTemplateSpecFieldsLeader
@@ -3939,6 +4006,12 @@ export interface DistributedInferenceLeaderTemplateSpecFieldsLeader {
      * @memberof DistributedInferenceLeaderTemplateSpecFieldsLeader
      */
     'environmentVariables'?: Array<EnvironmentVariable> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof DistributedInferenceLeaderTemplateSpecFieldsLeader
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -4015,6 +4088,12 @@ export interface DistributedInferenceLeaderTemplateSpecFieldsLeader {
 export interface DistributedInferenceLeaderWorkerDefaultsV2 {
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof DistributedInferenceLeaderWorkerDefaultsV2
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof DistributedInferenceLeaderWorkerDefaultsV2
      */
@@ -4049,6 +4128,12 @@ export interface DistributedInferenceLeaderWorkerDefaultsV2 {
      * @memberof DistributedInferenceLeaderWorkerDefaultsV2
      */
     'environmentVariables'?: EnvironmentVariablesDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof DistributedInferenceLeaderWorkerDefaultsV2
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -4235,6 +4320,12 @@ export interface DistributedInferenceLeaderWorkerDefaultsV2Storage {
 export interface DistributedInferenceLeaderWorkerRulesV2 {
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof DistributedInferenceLeaderWorkerRulesV2
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof DistributedInferenceLeaderWorkerRulesV2
      */
@@ -4269,6 +4360,12 @@ export interface DistributedInferenceLeaderWorkerRulesV2 {
      * @memberof DistributedInferenceLeaderWorkerRulesV2
      */
     'environmentVariables'?: InstancesRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof DistributedInferenceLeaderWorkerRulesV2
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -4478,6 +4575,12 @@ export interface DistributedInferenceLeaderWorkerRulesV2Storage {
  */
 export interface DistributedInferenceLeaderWorkerSpec {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof DistributedInferenceLeaderWorkerSpec
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof DistributedInferenceLeaderWorkerSpec
@@ -4513,6 +4616,12 @@ export interface DistributedInferenceLeaderWorkerSpec {
      * @memberof DistributedInferenceLeaderWorkerSpec
      */
     'environmentVariables'?: Array<EnvironmentVariable> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof DistributedInferenceLeaderWorkerSpec
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -4698,6 +4807,12 @@ export interface DistributedInferenceLeaderWorkerSpecStorage {
  */
 export interface DistributedInferenceLeaderWorkerTemplateSpec {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof DistributedInferenceLeaderWorkerTemplateSpec
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof DistributedInferenceLeaderWorkerTemplateSpec
@@ -4733,6 +4848,12 @@ export interface DistributedInferenceLeaderWorkerTemplateSpec {
      * @memberof DistributedInferenceLeaderWorkerTemplateSpec
      */
     'environmentVariables'?: Array<EnvironmentVariable> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof DistributedInferenceLeaderWorkerTemplateSpec
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -5675,6 +5796,12 @@ export interface DistributedInferenceWorkerDefaultsFields {
 export interface DistributedInferenceWorkerDefaultsFieldsWorker {
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof DistributedInferenceWorkerDefaultsFieldsWorker
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof DistributedInferenceWorkerDefaultsFieldsWorker
      */
@@ -5709,6 +5836,12 @@ export interface DistributedInferenceWorkerDefaultsFieldsWorker {
      * @memberof DistributedInferenceWorkerDefaultsFieldsWorker
      */
     'environmentVariables'?: EnvironmentVariablesDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof DistributedInferenceWorkerDefaultsFieldsWorker
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -5804,6 +5937,12 @@ export interface DistributedInferenceWorkerRulesFields {
 export interface DistributedInferenceWorkerRulesFieldsWorker {
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof DistributedInferenceWorkerRulesFieldsWorker
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof DistributedInferenceWorkerRulesFieldsWorker
      */
@@ -5838,6 +5977,12 @@ export interface DistributedInferenceWorkerRulesFieldsWorker {
      * @memberof DistributedInferenceWorkerRulesFieldsWorker
      */
     'environmentVariables'?: InstancesRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof DistributedInferenceWorkerRulesFieldsWorker
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -5931,6 +6076,12 @@ export interface DistributedInferenceWorkerSpecFields {
  */
 export interface DistributedInferenceWorkerSpecFieldsWorker {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof DistributedInferenceWorkerSpecFieldsWorker
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof DistributedInferenceWorkerSpecFieldsWorker
@@ -5966,6 +6117,12 @@ export interface DistributedInferenceWorkerSpecFieldsWorker {
      * @memberof DistributedInferenceWorkerSpecFieldsWorker
      */
     'environmentVariables'?: Array<EnvironmentVariable> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof DistributedInferenceWorkerSpecFieldsWorker
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -6060,6 +6217,12 @@ export interface DistributedInferenceWorkerTemplateSpecFields {
  */
 export interface DistributedInferenceWorkerTemplateSpecFieldsWorker {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof DistributedInferenceWorkerTemplateSpecFieldsWorker
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof DistributedInferenceWorkerTemplateSpecFieldsWorker
@@ -6095,6 +6258,12 @@ export interface DistributedInferenceWorkerTemplateSpecFieldsWorker {
      * @memberof DistributedInferenceWorkerTemplateSpecFieldsWorker
      */
     'environmentVariables'?: Array<EnvironmentVariable> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof DistributedInferenceWorkerTemplateSpecFieldsWorker
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -6227,6 +6396,12 @@ export interface DistributedSpec {
  */
 export interface DistributedSpecSpec {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof DistributedSpecSpec
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof DistributedSpecSpec
@@ -6298,6 +6473,12 @@ export interface DistributedSpecSpec {
      * @memberof DistributedSpecSpec
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof DistributedSpecSpec
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -6481,6 +6662,12 @@ export interface DistributedSpecSpec {
  */
 export interface DistributedSpecSpecAllOf {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof DistributedSpecSpecAllOf
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof DistributedSpecSpecAllOf
@@ -6552,6 +6739,12 @@ export interface DistributedSpecSpecAllOf {
      * @memberof DistributedSpecSpecAllOf
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof DistributedSpecSpecAllOf
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -6951,6 +7144,12 @@ export interface DistributedTemplatePatchRequest {
  */
 export interface DistributedTemplateSpec {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof DistributedTemplateSpec
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof DistributedTemplateSpec
@@ -7022,6 +7221,12 @@ export interface DistributedTemplateSpec {
      * @memberof DistributedTemplateSpec
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof DistributedTemplateSpec
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -7199,6 +7404,12 @@ export interface DistributedTemplateSpec {
  */
 export interface DistributedTemplateSpecAllOf {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof DistributedTemplateSpecAllOf
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof DistributedTemplateSpecAllOf
@@ -7270,6 +7481,12 @@ export interface DistributedTemplateSpecAllOf {
      * @memberof DistributedTemplateSpecAllOf
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof DistributedTemplateSpecAllOf
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -7629,6 +7846,12 @@ export interface DistributedWorkload {
      * @memberof DistributedWorkload
      */
     'actualPhase'?: Phase;
+    /**
+     * Advisory messages returned when submitting the workload.
+     * @type {Array<SubmissionWarning>}
+     * @memberof DistributedWorkload
+     */
+    'warnings'?: Array<SubmissionWarning>;
     /**
      * 
      * @type {DistributedSpecSpec}
@@ -9900,6 +10123,12 @@ export interface Inference {
      */
     'actualPhase'?: Phase;
     /**
+     * Advisory messages returned when submitting the workload.
+     * @type {Array<SubmissionWarning>}
+     * @memberof Inference
+     */
+    'warnings'?: Array<SubmissionWarning>;
+    /**
      * 
      * @type {InferenceSpecSpec}
      * @memberof Inference
@@ -10027,6 +10256,12 @@ export interface InferenceSpec {
  */
 export interface InferenceSpecSpec {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof InferenceSpecSpec
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof InferenceSpecSpec
@@ -10074,6 +10309,12 @@ export interface InferenceSpecSpec {
      * @memberof InferenceSpecSpec
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof InferenceSpecSpec
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -10203,6 +10444,12 @@ export interface InferenceSpecSpec {
  */
 export interface InferenceSpecSpecAllOf {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof InferenceSpecSpecAllOf
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof InferenceSpecSpecAllOf
@@ -10250,6 +10497,12 @@ export interface InferenceSpecSpecAllOf {
      * @memberof InferenceSpecSpecAllOf
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof InferenceSpecSpecAllOf
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -10614,6 +10867,12 @@ export interface InferenceTemplatePatchRequest {
  */
 export interface InferenceTemplateSpec {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof InferenceTemplateSpec
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof InferenceTemplateSpec
@@ -10661,6 +10920,12 @@ export interface InferenceTemplateSpec {
      * @memberof InferenceTemplateSpec
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof InferenceTemplateSpec
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -10784,6 +11049,12 @@ export interface InferenceTemplateSpec {
  */
 export interface InferenceTemplateSpecAllOf {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof InferenceTemplateSpecAllOf
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof InferenceTemplateSpecAllOf
@@ -10831,6 +11102,12 @@ export interface InferenceTemplateSpecAllOf {
      * @memberof InferenceTemplateSpecAllOf
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof InferenceTemplateSpecAllOf
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -11081,6 +11358,12 @@ export interface InferenceUpdateSpecServingConfiguration {
  */
 export interface InferenceUpdateSpecSpec {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof InferenceUpdateSpecSpec
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Arguments to the command that the container running the workload executes.
      * @type {string}
      * @memberof InferenceUpdateSpecSpec
@@ -11116,6 +11399,12 @@ export interface InferenceUpdateSpecSpec {
      * @memberof InferenceUpdateSpecSpec
      */
     'environmentVariables'?: Array<EnvironmentVariable> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof InferenceUpdateSpecSpec
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -11203,6 +11492,12 @@ export interface InferenceUpdateSpecSpec {
  */
 export interface InferenceUpdateSpecSpecAllOf {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof InferenceUpdateSpecSpecAllOf
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Arguments to the command that the container running the workload executes.
      * @type {string}
      * @memberof InferenceUpdateSpecSpecAllOf
@@ -11238,6 +11533,12 @@ export interface InferenceUpdateSpecSpecAllOf {
      * @memberof InferenceUpdateSpecSpecAllOf
      */
     'environmentVariables'?: Array<EnvironmentVariable> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof InferenceUpdateSpecSpecAllOf
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -11796,6 +12097,12 @@ export interface ListWorkloadTypes200Response {
  */
 export interface MasterSpec {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof MasterSpec
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof MasterSpec
@@ -11857,6 +12164,12 @@ export interface MasterSpec {
      * @memberof MasterSpec
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof MasterSpec
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -12000,6 +12313,12 @@ export interface MasterSpec {
  */
 export interface MasterTemplateSpec {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof MasterTemplateSpec
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof MasterTemplateSpec
@@ -12061,6 +12380,12 @@ export interface MasterTemplateSpec {
      * @memberof MasterTemplateSpec
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof MasterTemplateSpec
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -16477,6 +16802,31 @@ export interface SubmissionErrorV2 {
 /**
  * 
  * @export
+ * @interface SubmissionWarning
+ */
+export interface SubmissionWarning {
+    /**
+     * 
+     * @type {string}
+     * @memberof SubmissionWarning
+     */
+    'code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SubmissionWarning
+     */
+    'field': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SubmissionWarning
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
  * @interface SubmitWithAssetIds
  */
 export interface SubmitWithAssetIds {
@@ -16592,6 +16942,12 @@ export interface SupersetDefaults {
     'replicas'?: number | null;
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof SupersetDefaults
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof SupersetDefaults
      */
@@ -16662,6 +17018,12 @@ export interface SupersetDefaults {
      * @memberof SupersetDefaults
      */
     'exposedUrls'?: ExposedUrlsDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof SupersetDefaults
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -16822,6 +17184,12 @@ export interface SupersetDefaults {
 export interface SupersetDefaultsAllOf {
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof SupersetDefaultsAllOf
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof SupersetDefaultsAllOf
      */
@@ -16898,6 +17266,12 @@ export interface SupersetDefaultsAllOf {
      * @memberof SupersetDefaultsAllOf
      */
     'exposedUrls'?: ExposedUrlsDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof SupersetDefaultsAllOf
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -17411,6 +17785,12 @@ export interface SupersetRules {
     'replicas'?: IntegerRules | null;
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof SupersetRules
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof SupersetRules
      */
@@ -17481,6 +17861,12 @@ export interface SupersetRules {
      * @memberof SupersetRules
      */
     'exposedUrls'?: ExposedUrlsRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof SupersetRules
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -17640,6 +18026,12 @@ export interface SupersetRules {
 export interface SupersetRulesAllOf {
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof SupersetRulesAllOf
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof SupersetRulesAllOf
      */
@@ -17716,6 +18108,12 @@ export interface SupersetRulesAllOf {
      * @memberof SupersetRulesAllOf
      */
     'exposedUrls'?: ExposedUrlsRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof SupersetRulesAllOf
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -18398,6 +18796,12 @@ export interface SupersetSpec {
      */
     'servingConfiguration'?: ServingConfiguration | null;
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof SupersetSpec
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof SupersetSpec
@@ -18469,6 +18873,12 @@ export interface SupersetSpec {
      * @memberof SupersetSpec
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof SupersetSpec
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -18634,6 +19044,12 @@ export interface SupersetSpec {
  */
 export interface SupersetSpecAllOf {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof SupersetSpecAllOf
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof SupersetSpecAllOf
@@ -18711,6 +19127,12 @@ export interface SupersetSpecAllOf {
      * @memberof SupersetSpecAllOf
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof SupersetSpecAllOf
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -19081,6 +19503,12 @@ export interface SupersetWorkload {
      * @memberof SupersetWorkload
      */
     'actualPhase'?: Phase;
+    /**
+     * Advisory messages returned when submitting the workload.
+     * @type {Array<SubmissionWarning>}
+     * @memberof SupersetWorkload
+     */
+    'warnings'?: Array<SubmissionWarning>;
     /**
      * 
      * @type {SupersetSpec}
@@ -20036,6 +20464,12 @@ export interface Training {
      */
     'actualPhase'?: Phase;
     /**
+     * Advisory messages returned when submitting the workload.
+     * @type {Array<SubmissionWarning>}
+     * @memberof Training
+     */
+    'warnings'?: Array<SubmissionWarning>;
+    /**
      * 
      * @type {TrainingSpecSpec}
      * @memberof Training
@@ -20111,6 +20545,12 @@ export interface TrainingSpec {
  */
 export interface TrainingSpecSpec {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof TrainingSpecSpec
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof TrainingSpecSpec
@@ -20176,6 +20616,12 @@ export interface TrainingSpecSpec {
      * @memberof TrainingSpecSpec
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof TrainingSpecSpec
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -20323,6 +20769,12 @@ export interface TrainingSpecSpec {
  */
 export interface TrainingSpecSpecAllOf {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof TrainingSpecSpecAllOf
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof TrainingSpecSpecAllOf
@@ -20388,6 +20840,12 @@ export interface TrainingSpecSpecAllOf {
      * @memberof TrainingSpecSpecAllOf
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof TrainingSpecSpecAllOf
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -20660,6 +21118,12 @@ export interface TrainingTemplatePatchRequest {
  */
 export interface TrainingTemplateSpec {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof TrainingTemplateSpec
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof TrainingTemplateSpec
@@ -20725,6 +21189,12 @@ export interface TrainingTemplateSpec {
      * @memberof TrainingTemplateSpec
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof TrainingTemplateSpec
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -20866,6 +21336,12 @@ export interface TrainingTemplateSpec {
  */
 export interface TrainingTemplateSpecAllOf {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof TrainingTemplateSpecAllOf
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof TrainingTemplateSpecAllOf
@@ -20931,6 +21407,12 @@ export interface TrainingTemplateSpecAllOf {
      * @memberof TrainingTemplateSpecAllOf
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof TrainingTemplateSpecAllOf
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -21366,6 +21848,12 @@ export interface UnifiedPolicyInfoPerReplicaTypeDefaults {
     'replicas'?: number | null;
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof UnifiedPolicyInfoPerReplicaTypeDefaults
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof UnifiedPolicyInfoPerReplicaTypeDefaults
      */
@@ -21436,6 +21924,12 @@ export interface UnifiedPolicyInfoPerReplicaTypeDefaults {
      * @memberof UnifiedPolicyInfoPerReplicaTypeDefaults
      */
     'exposedUrls'?: ExposedUrlsDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof UnifiedPolicyInfoPerReplicaTypeDefaults
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -21680,6 +22174,12 @@ export interface UnifiedPolicyInfoPerReplicaTypeRules {
     'replicas'?: IntegerRules | null;
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof UnifiedPolicyInfoPerReplicaTypeRules
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof UnifiedPolicyInfoPerReplicaTypeRules
      */
@@ -21750,6 +22250,12 @@ export interface UnifiedPolicyInfoPerReplicaTypeRules {
      * @memberof UnifiedPolicyInfoPerReplicaTypeRules
      */
     'exposedUrls'?: ExposedUrlsRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof UnifiedPolicyInfoPerReplicaTypeRules
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -21946,6 +22452,12 @@ export interface UnifiedSpec {
  */
 export interface UnifiedSpecMaster {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof UnifiedSpecMaster
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof UnifiedSpecMaster
@@ -22007,6 +22519,12 @@ export interface UnifiedSpecMaster {
      * @memberof UnifiedSpecMaster
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof UnifiedSpecMaster
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -22234,6 +22752,12 @@ export interface UnifiedSpecWorker {
      */
     'servingConfiguration'?: ServingConfiguration | null;
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof UnifiedSpecWorker
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof UnifiedSpecWorker
@@ -22305,6 +22829,12 @@ export interface UnifiedSpecWorker {
      * @memberof UnifiedSpecWorker
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof UnifiedSpecWorker
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -24154,6 +24684,12 @@ export interface WorkloadMeta {
      * @memberof WorkloadMeta
      */
     'actualPhase'?: Phase;
+    /**
+     * Advisory messages returned when submitting the workload.
+     * @type {Array<SubmissionWarning>}
+     * @memberof WorkloadMeta
+     */
+    'warnings'?: Array<SubmissionWarning>;
 }
 /**
  * Specify which metric data to request.
@@ -25973,6 +26509,12 @@ export interface Workspace {
      */
     'actualPhase'?: Phase;
     /**
+     * Advisory messages returned when submitting the workload.
+     * @type {Array<SubmissionWarning>}
+     * @memberof Workspace
+     */
+    'warnings'?: Array<SubmissionWarning>;
+    /**
      * 
      * @type {WorkspaceSpecSpec}
      * @memberof Workspace
@@ -26048,6 +26590,12 @@ export interface WorkspaceSpec {
  */
 export interface WorkspaceSpecSpec {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof WorkspaceSpecSpec
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof WorkspaceSpecSpec
@@ -26107,6 +26655,12 @@ export interface WorkspaceSpecSpec {
      * @memberof WorkspaceSpecSpec
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof WorkspaceSpecSpec
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -26248,6 +26802,12 @@ export interface WorkspaceSpecSpec {
  */
 export interface WorkspaceSpecSpecAllOf {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof WorkspaceSpecSpecAllOf
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof WorkspaceSpecSpecAllOf
@@ -26307,6 +26867,12 @@ export interface WorkspaceSpecSpecAllOf {
      * @memberof WorkspaceSpecSpecAllOf
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof WorkspaceSpecSpecAllOf
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -26812,6 +27378,12 @@ export interface WorkspaceTemplatePatchRequest {
  */
 export interface WorkspaceTemplateSpec {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof WorkspaceTemplateSpec
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof WorkspaceTemplateSpec
@@ -26871,6 +27443,12 @@ export interface WorkspaceTemplateSpec {
      * @memberof WorkspaceTemplateSpec
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof WorkspaceTemplateSpec
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -27006,6 +27584,12 @@ export interface WorkspaceTemplateSpec {
  */
 export interface WorkspaceTemplateSpecAllOf {
     /**
+     * 
+     * @type {AcceleratorSelection}
+     * @memberof WorkspaceTemplateSpecAllOf
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
      * Set of annotations to populate into the container running the workload.
      * @type {Array<Annotation>}
      * @memberof WorkspaceTemplateSpecAllOf
@@ -27065,6 +27649,12 @@ export interface WorkspaceTemplateSpecAllOf {
      * @memberof WorkspaceTemplateSpecAllOf
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof WorkspaceTemplateSpecAllOf
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}

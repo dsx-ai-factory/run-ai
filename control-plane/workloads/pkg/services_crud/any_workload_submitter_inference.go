@@ -14,6 +14,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v2"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v2/inference_workloads"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/clusterservice"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/models_crud"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/gojsonq"
@@ -60,6 +61,7 @@ func (s *AnyWorkloadSubmitterInference) Create(ctx context.Context, wc *workload
 		return nil, cfgErr
 	}
 
+	composer.ActualNodePools = wc.create.actualNodePools
 	composer.WithStorageClassConfiguration(wc.storageClassConfigs)
 	composer.WithClusterStorageConfig(clusterStorageConfig)
 	composer.WithDataVolumeClaimNames(wc.dataVolumeClaimNames)
@@ -168,6 +170,15 @@ func (s *AnyWorkloadSubmitterInference) Update(ctx context.Context, wc *workload
 	clusterStorageConfig, cfgErr := buildClusterStorageConfig(ctx, clusterId)
 	if cfgErr != nil {
 		return nil, cfgErr
+	}
+	if len(inferenceSpec.NodePools) > 0 && (inferenceSpec.GpuType.Get() != nil || inferenceSpec.Accelerator.Get() != nil) {
+		pools, err := clusterservice.Get().GetNodePoolsInternalByCluster(ctx, clusterId)
+		if err != nil {
+			return nil, workloadsApi.NewSubmissionErrorV2(http.StatusServiceUnavailable, err.Error())
+		}
+		if pools != nil {
+			composer.ActualNodePools = pools.Nodepools
+		}
 	}
 	composer.WithStorageClassConfiguration(wc.storageClassConfigs)
 	composer.WithClusterStorageConfig(clusterStorageConfig)

@@ -24,7 +24,8 @@ var _ MappedNullable = &TrainingSpecificRunParams{}
 type TrainingSpecificRunParams struct {
 	Connections []SpecificRunConnectionInfo `json:"connections,omitempty"`
 	// Whether to allow the workload to exceed the quota of the project.
-	AllowOverQuota NullableBool `json:"allowOverQuota,omitempty"`
+	AllowOverQuota NullableBool                 `json:"allowOverQuota,omitempty"`
+	Accelerator    NullableAcceleratorSelection `json:"accelerator,omitempty"`
 	// Set of annotations to populate into the container running the workload.
 	Annotations []Annotation `json:"annotations,omitempty"`
 	// Arguments to the command that the container running the workload executes.
@@ -41,6 +42,8 @@ type TrainingSpecificRunParams struct {
 	Completions NullableInt32 `json:"completions,omitempty"`
 	// Set of environment variables to populate into the container running the workspace.
 	EnvironmentVariables []EnvironmentVariableOfAsset `json:"environmentVariables,omitempty"`
+	// Exact device model label value required on the workload's nodes. Use any for no model restriction.
+	GpuType NullableString `json:"gpuType,omitempty"`
 	// A list of references to Kubernetes secrets in the same namespace used for pulling container images.
 	ImagePullSecrets []ImagePullSecret `json:"imagePullSecrets,omitempty"`
 	// Set of labels to populate into the container running the workload.
@@ -163,6 +166,49 @@ func (o *TrainingSpecificRunParams) SetAllowOverQuotaNil() {
 // UnsetAllowOverQuota ensures that no value is present for AllowOverQuota, not even an explicit nil
 func (o *TrainingSpecificRunParams) UnsetAllowOverQuota() {
 	o.AllowOverQuota.Unset()
+}
+
+// GetAccelerator returns the Accelerator field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *TrainingSpecificRunParams) GetAccelerator() AcceleratorSelection {
+	if o == nil || IsNil(o.Accelerator.Get()) {
+		var ret AcceleratorSelection
+		return ret
+	}
+	return *o.Accelerator.Get()
+}
+
+// GetAcceleratorOk returns a tuple with the Accelerator field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *TrainingSpecificRunParams) GetAcceleratorOk() (*AcceleratorSelection, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Accelerator.Get(), o.Accelerator.IsSet()
+}
+
+// HasAccelerator returns a boolean if a field has been set.
+func (o *TrainingSpecificRunParams) HasAccelerator() bool {
+	if o != nil && o.Accelerator.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetAccelerator gets a reference to the given NullableAcceleratorSelection and assigns it to the Accelerator field.
+func (o *TrainingSpecificRunParams) SetAccelerator(v AcceleratorSelection) {
+	o.Accelerator.Set(&v)
+}
+
+// SetAcceleratorNil sets the value for Accelerator to be an explicit nil
+func (o *TrainingSpecificRunParams) SetAcceleratorNil() {
+	o.Accelerator.Set(nil)
+}
+
+// UnsetAccelerator ensures that no value is present for Accelerator, not even an explicit nil
+func (o *TrainingSpecificRunParams) UnsetAccelerator() {
+	o.Accelerator.Unset()
 }
 
 // GetAnnotations returns the Annotations field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -487,6 +533,49 @@ func (o *TrainingSpecificRunParams) HasEnvironmentVariables() bool {
 // SetEnvironmentVariables gets a reference to the given []EnvironmentVariableOfAsset and assigns it to the EnvironmentVariables field.
 func (o *TrainingSpecificRunParams) SetEnvironmentVariables(v []EnvironmentVariableOfAsset) {
 	o.EnvironmentVariables = v
+}
+
+// GetGpuType returns the GpuType field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *TrainingSpecificRunParams) GetGpuType() string {
+	if o == nil || IsNil(o.GpuType.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.GpuType.Get()
+}
+
+// GetGpuTypeOk returns a tuple with the GpuType field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *TrainingSpecificRunParams) GetGpuTypeOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuType.Get(), o.GpuType.IsSet()
+}
+
+// HasGpuType returns a boolean if a field has been set.
+func (o *TrainingSpecificRunParams) HasGpuType() bool {
+	if o != nil && o.GpuType.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuType gets a reference to the given NullableString and assigns it to the GpuType field.
+func (o *TrainingSpecificRunParams) SetGpuType(v string) {
+	o.GpuType.Set(&v)
+}
+
+// SetGpuTypeNil sets the value for GpuType to be an explicit nil
+func (o *TrainingSpecificRunParams) SetGpuTypeNil() {
+	o.GpuType.Set(nil)
+}
+
+// UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
+func (o *TrainingSpecificRunParams) UnsetGpuType() {
+	o.GpuType.Unset()
 }
 
 // GetImagePullSecrets returns the ImagePullSecrets field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -1156,6 +1245,9 @@ func (o TrainingSpecificRunParams) ToMap() (map[string]interface{}, error) {
 	if o.AllowOverQuota.IsSet() {
 		toSerialize["allowOverQuota"] = o.AllowOverQuota.Get()
 	}
+	if o.Accelerator.IsSet() {
+		toSerialize["accelerator"] = o.Accelerator.Get()
+	}
 	if o.Annotations != nil {
 		toSerialize["annotations"] = o.Annotations
 	}
@@ -1179,6 +1271,9 @@ func (o TrainingSpecificRunParams) ToMap() (map[string]interface{}, error) {
 	}
 	if o.EnvironmentVariables != nil {
 		toSerialize["environmentVariables"] = o.EnvironmentVariables
+	}
+	if o.GpuType.IsSet() {
+		toSerialize["gpuType"] = o.GpuType.Get()
 	}
 	if o.ImagePullSecrets != nil {
 		toSerialize["imagePullSecrets"] = o.ImagePullSecrets

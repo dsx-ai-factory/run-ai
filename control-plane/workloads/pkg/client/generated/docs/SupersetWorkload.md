@@ -15,6 +15,7 @@ Name | Type | Description | Notes
 **DeletedAt** | Pointer to **NullableTime** | The deletion time of the workload. | [optional] 
 **DesiredPhase** | [**WorkloadDesiredPhase**](WorkloadDesiredPhase.md) |  | 
 **ActualPhase** | Pointer to [**Phase**](Phase.md) |  | [optional] 
+**Warnings** | Pointer to [**[]SubmissionWarning**](SubmissionWarning.md) | Advisory messages returned when submitting the workload. | [optional] 
 **Spec** | Pointer to [**SupersetSpec**](SupersetSpec.md) |  | [optional] 
 **MasterSpecSameAsWorker** | Pointer to **NullableBool** | used for distributed workloads to indicate that the master spec should be the same as the worker spec. in this case, masterSpec should not be specified. | [optional] 
 **MasterSpec** | Pointer to [**NullableMasterSpec**](MasterSpec.md) |  | [optional] 
@@ -283,6 +284,31 @@ SetActualPhase sets ActualPhase field to given value.
 `func (o *SupersetWorkload) HasActualPhase() bool`
 
 HasActualPhase returns a boolean if a field has been set.
+
+### GetWarnings
+
+`func (o *SupersetWorkload) GetWarnings() []SubmissionWarning`
+
+GetWarnings returns the Warnings field if non-nil, zero value otherwise.
+
+### GetWarningsOk
+
+`func (o *SupersetWorkload) GetWarningsOk() (*[]SubmissionWarning, bool)`
+
+GetWarningsOk returns a tuple with the Warnings field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetWarnings
+
+`func (o *SupersetWorkload) SetWarnings(v []SubmissionWarning)`
+
+SetWarnings sets Warnings field to given value.
+
+### HasWarnings
+
+`func (o *SupersetWorkload) HasWarnings() bool`
+
+HasWarnings returns a boolean if a field has been set.
 
 ### GetSpec
 

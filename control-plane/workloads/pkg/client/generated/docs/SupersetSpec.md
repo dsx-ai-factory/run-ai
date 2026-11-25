@@ -18,6 +18,7 @@ Name | Type | Description | Notes
 **Replicas** | Pointer to **NullableInt32** | Specifies the number of leader-worker sets to deploy. Each replica represents a group consisting of one leader pod and multiple worker pods.  For example, setting replicas: 3 will create 3 independent groups, each with its own leader and corresponding set of workers.  | [optional] [default to 1]
 **Autoscaling** | Pointer to [**NullableAutoScaling**](AutoScaling.md) |  | [optional] 
 **ServingConfiguration** | Pointer to [**NullableServingConfiguration**](ServingConfiguration.md) |  | [optional] 
+**Accelerator** | Pointer to [**NullableAcceleratorSelection**](AcceleratorSelection.md) |  | [optional] 
 **Annotations** | Pointer to [**[]Annotation**](Annotation.md) | Set of annotations to populate into the container running the workload. | [optional] 
 **Args** | Pointer to **NullableString** | Arguments to the command that the container running the workload executes. | [optional] 
 **AutoDeletionTimeAfterCompletionSeconds** | Pointer to **NullableInt64** | Specifies the duration after which a finished workload (completed or failed) will be automatically deleted. The default is 30 days. Log retention is managed separately. | [optional] 
@@ -30,6 +31,7 @@ Name | Type | Description | Notes
 **DistributedFramework** | Pointer to [**NullableDistributedFramework**](DistributedFramework.md) |  | [optional] 
 **EnvironmentVariables** | Pointer to [**[]EnvironmentVariable**](EnvironmentVariable.md) | Set of environment variables to populate into the container running the workload. | [optional] 
 **ExposedUrls** | Pointer to [**[]ExposedUrl**](ExposedUrl.md) | Set of container ports that the workload exposes via URLs. | [optional] 
+**GpuType** | Pointer to **NullableString** | Exact device model label value required on the workload&#39;s nodes. Use any for no model restriction. | [optional] 
 **Image** | Pointer to **NullableString** | Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload. | [optional] 
 **ImagePullPolicy** | Pointer to [**NullableImagePullPolicy**](ImagePullPolicy.md) |  | [optional] 
 **ImagePullSecrets** | Pointer to [**[]ImagePullSecret**](ImagePullSecret.md) | A list of references to Kubernetes secrets in the same namespace used for pulling container images. | [optional] 
@@ -566,6 +568,41 @@ HasServingConfiguration returns a boolean if a field has been set.
 `func (o *SupersetSpec) UnsetServingConfiguration()`
 
 UnsetServingConfiguration ensures that no value is present for ServingConfiguration, not even an explicit nil
+### GetAccelerator
+
+`func (o *SupersetSpec) GetAccelerator() AcceleratorSelection`
+
+GetAccelerator returns the Accelerator field if non-nil, zero value otherwise.
+
+### GetAcceleratorOk
+
+`func (o *SupersetSpec) GetAcceleratorOk() (*AcceleratorSelection, bool)`
+
+GetAcceleratorOk returns a tuple with the Accelerator field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAccelerator
+
+`func (o *SupersetSpec) SetAccelerator(v AcceleratorSelection)`
+
+SetAccelerator sets Accelerator field to given value.
+
+### HasAccelerator
+
+`func (o *SupersetSpec) HasAccelerator() bool`
+
+HasAccelerator returns a boolean if a field has been set.
+
+### SetAcceleratorNil
+
+`func (o *SupersetSpec) SetAcceleratorNil(b bool)`
+
+ SetAcceleratorNil sets the value for Accelerator to be an explicit nil
+
+### UnsetAccelerator
+`func (o *SupersetSpec) UnsetAccelerator()`
+
+UnsetAccelerator ensures that no value is present for Accelerator, not even an explicit nil
 ### GetAnnotations
 
 `func (o *SupersetSpec) GetAnnotations() []Annotation`
@@ -986,6 +1023,41 @@ HasExposedUrls returns a boolean if a field has been set.
 `func (o *SupersetSpec) UnsetExposedUrls()`
 
 UnsetExposedUrls ensures that no value is present for ExposedUrls, not even an explicit nil
+### GetGpuType
+
+`func (o *SupersetSpec) GetGpuType() string`
+
+GetGpuType returns the GpuType field if non-nil, zero value otherwise.
+
+### GetGpuTypeOk
+
+`func (o *SupersetSpec) GetGpuTypeOk() (*string, bool)`
+
+GetGpuTypeOk returns a tuple with the GpuType field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuType
+
+`func (o *SupersetSpec) SetGpuType(v string)`
+
+SetGpuType sets GpuType field to given value.
+
+### HasGpuType
+
+`func (o *SupersetSpec) HasGpuType() bool`
+
+HasGpuType returns a boolean if a field has been set.
+
+### SetGpuTypeNil
+
+`func (o *SupersetSpec) SetGpuTypeNil(b bool)`
+
+ SetGpuTypeNil sets the value for GpuType to be an explicit nil
+
+### UnsetGpuType
+`func (o *SupersetSpec) UnsetGpuType()`
+
+UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
 ### GetImage
 
 `func (o *SupersetSpec) GetImage() string`

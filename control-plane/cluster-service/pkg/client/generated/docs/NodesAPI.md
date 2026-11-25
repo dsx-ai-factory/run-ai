@@ -14,6 +14,7 @@ Method | HTTP request | Description
 [**GetNodeMetrics**](NodesAPI.md#GetNodeMetrics) | **Get** /api/v1/nodes/{nodeId}/metrics | Get the node metrics data.
 [**GetNodeTelemetry**](NodesAPI.md#GetNodeTelemetry) | **Get** /api/v1/nodes/telemetry | Get node telemetry data.
 [**GetTenantNodes**](NodesAPI.md#GetTenantNodes) | **Get** /api/v1/nodes | Get a list of nodes.
+[**MatchGpuPlacement**](NodesAPI.md#MatchGpuPlacement) | **Post** /internal/clusters/{clusterUuid}/gpu-placement/match | Check whether any node in the supplied pools matches the placement labels
 [**SyncNodes**](NodesAPI.md#SyncNodes) | **Post** /api/v1/clusters/{clusterUuid}/nodes/sync | Sync the nodes in the cluster.
 [**SyncNumaNodes**](NodesAPI.md#SyncNumaNodes) | **Post** /api/v1/clusters/{clusterUuid}/nodes/numa/sync | Sync NUMA nodes in a cluster.
 [**UpsertNode**](NodesAPI.md#UpsertNode) | **Put** /api/v1/clusters/{clusterUuid}/nodes/{nodeName} | Update node details.
@@ -752,6 +753,76 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## MatchGpuPlacement
+
+> bool MatchGpuPlacement(ctx, clusterUuid).GpuPlacementMatch(gpuPlacementMatch).Execute()
+
+Check whether any node in the supplied pools matches the placement labels
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client"
+)
+
+func main() {
+	clusterUuid := "9f55255e-11ed-47c7-acef-fc4054768dbc" // string | The Universally Unique Identifier (UUID) of the cluster.
+	gpuPlacementMatch := *openapiclient.NewGpuPlacementMatch([]string{"NodePoolIds_example"}, map[string]string{"key": "Inner_example"}) // GpuPlacementMatch |
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.NodesAPI.MatchGpuPlacement(context.Background(), clusterUuid).GpuPlacementMatch(gpuPlacementMatch).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `NodesAPI.MatchGpuPlacement``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `MatchGpuPlacement`: bool
+	fmt.Fprintf(os.Stdout, "Response from `NodesAPI.MatchGpuPlacement`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**clusterUuid** | **string** | The Universally Unique Identifier (UUID) of the cluster. |
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiMatchGpuPlacementRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **gpuPlacementMatch** | [**GpuPlacementMatch**](GpuPlacementMatch.md) |  |
+
+### Return type
+
+**bool**
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
 - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)

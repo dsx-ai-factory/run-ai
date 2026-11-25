@@ -25,6 +25,7 @@ type IOrgUnitExternalClient interface {
 }
 
 type IOrgUnitClient interface {
+	GetProjectGPUPoolIDs(ctx context.Context, projectID string) ([]string, error)
 	IOrgUnitExternalClient
 	NodePoolCreated(ctx context.Context, clusterId string, nodePoolId string, nodePoolName string) error
 	NodePoolDeleted(ctx context.Context, clusterId string, nodePoolId string, nodePoolName string) error

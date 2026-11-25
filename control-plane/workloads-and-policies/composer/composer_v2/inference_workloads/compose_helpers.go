@@ -44,7 +44,7 @@ func inferenceServingURL(config composer.ClusterStorageConfig, projectName, work
 
 func (itc *InferenceToKnativeComposer) processComputeFields(
 	ctx context.Context,
-	src *workloadsApi.WorkspaceSpecSpecAllOfCompute,
+	src *workloadsApi.WorkspaceSpecSpecAllOfCompute, accelerator *workloadsApi.AcceleratorSelection,
 	target *KnativeServiceTarget,
 ) func() *workloadsApi.Error {
 	return func() *workloadsApi.Error {
@@ -71,9 +71,13 @@ func (itc *InferenceToKnativeComposer) processComputeFields(
 			itc.fc.ComposeGpuRequestsAndLimits(ctx, src.GpuDevicesRequest.Get(), src.GpuRequestType.Get(),
 				src.GpuMemoryPortionRequest.Get(), src.GpuMemoryPortionLimit.Get(),
 				src.GpuMemoryRequest.Get(), src.GpuMemoryLimit.Get(), composer.WholeGpusToK8sResources,
-				&container.Resources, nil, &sizingInfo),
+				&container.Resources, accelerator, &sizingInfo),
 		)
 
+		if accelerator != nil {
+			runner.Run(itc.fc.ComposeExtendedResources(itemized.ExtendedResourceNickPrefix, src.ExtendedResources,
+				&container.Resources, composer.ExtendedResourcesToK8sResources, accelerator))
+		}
 		if sizingInfo.MemoryLimit != nil || sizingInfo.PortionLimit != nil {
 			itc.WorkloadRequirements.GpuOptimization = true
 		}
@@ -285,7 +289,7 @@ func (itc *InferenceToKnativeComposer) buildAuthProxySidecar(
 	}
 }
 
-// processPlacementFields — nodePools and priorityClass are intentionally skipped; see supportedPriorityClass[Inference].
+// Explicit accelerator selection preserves both user node-pool constraints and the device requirement.
 func (itc *InferenceToKnativeComposer) processPlacementFields(
 	ctx context.Context,
 	src *workloadsApi.InferenceSpecSpec,
@@ -303,9 +307,16 @@ func (itc *InferenceToKnativeComposer) processPlacementFields(
 		runner.Batch(
 			itc.fc.CopyString(src.NodeType.Get(), &podSpec.NodeSelector, composer.StringToMapString, "run.ai/node-type"), //nolint:staticcheck // NodeType is deprecated but still supported for backward compatibility
 			itc.fc.ComposePreemptibility(ctx, src.Preemptibility.Get(), &podMeta.Labels, composer.PreemptibilityToK8sLabel, nil),
-			itc.fc.ComposeNodeAffinity(src.NodeAffinityRequired.Get(), &podSpec.Affinity.NodeAffinity, composer.NodeAffinityRequiredToK8s, nil),
+			itc.fc.ComposeNodeAffinity(src.NodeAffinityRequired.Get(), &podSpec.Affinity.NodeAffinity, composer.NodeAffinityRequiredToK8s, src.GpuType.Get() != nil || src.Accelerator.Get() != nil),
 			itc.fc.ComposePodAffinity(src.PodAffinity.Get(), &podSpec.Affinity.PodAffinity, composer.PodAffinityToK8s, itc.fc.WorkloadName),
+			itc.fc.ComposeGPUPlacement(src.GpuType.Get(), src.Accelerator.Get(), src.NodePools, podSpec, podMeta),
 		)
+		if src.GpuType.Get() != nil || src.Accelerator.Get() != nil {
+			requested := &composer.NodePoolsInfo{
+				RequestedNodePools: src.NodePools, ActualNodePools: itc.ActualNodePools, PreserveRequirements: true,
+			}
+			runner.Run(itc.fc.ComposeNodePools(requested, &podSpec.Affinity.NodeAffinity, composer.NodePoolsToK8s, nil))
+		}
 		runner.Run(
 			itc.fc.ComposeTolerations(itemized.TolerationPrefix, src.Tolerations, &podSpec.Tolerations, composer.MapToK8sTolerations, nil),
 		)

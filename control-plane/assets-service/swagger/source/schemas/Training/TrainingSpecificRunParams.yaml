@@ -7,6 +7,8 @@ allOf:
 - $ref: ../Workload/AllowOverQuota.yaml
 - nullable: true
   properties:
+    accelerator:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/AcceleratorSelection.yaml
     annotations:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/Annotations.yaml
     args:
@@ -23,6 +25,8 @@ allOf:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/trainings/Completions.yaml
     environmentVariables:
       $ref: ../Common/EnvironmentVariablesOfAsset.yaml
+    gpuType:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/GpuType.yaml
     imagePullSecrets:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/ImagePullSecrets.yaml
     labels:

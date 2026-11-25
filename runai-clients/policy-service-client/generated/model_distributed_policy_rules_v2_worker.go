@@ -22,6 +22,7 @@ var _ MappedNullable = &DistributedPolicyRulesV2Worker{}
 
 // DistributedPolicyRulesV2Worker struct for DistributedPolicyRulesV2Worker
 type DistributedPolicyRulesV2Worker struct {
+	Accelerator                            NullableArbitraryRules                 `json:"accelerator,omitempty"`
 	Annotations                            NullableInstancesRules                 `json:"annotations,omitempty"`
 	Args                                   NullableStringRules                    `json:"args,omitempty"`
 	AutoDeletionTimeAfterCompletionSeconds NullableIntegerRules                   `json:"autoDeletionTimeAfterCompletionSeconds,omitempty"`
@@ -32,6 +33,7 @@ type DistributedPolicyRulesV2Worker struct {
 	CreateHomeDir                          NullableBooleanRules                   `json:"createHomeDir,omitempty"`
 	EnvironmentVariables                   NullableInstancesRules                 `json:"environmentVariables,omitempty"`
 	ExposedUrls                            NullableExposedUrlsRules               `json:"exposedUrls,omitempty"`
+	GpuType                                NullableStringRules                    `json:"gpuType,omitempty"`
 	Image                                  NullableStringRules                    `json:"image,omitempty"`
 	ImagePullPolicy                        NullableImagePullPolicyRules           `json:"imagePullPolicy,omitempty"`
 	ImagePullSecrets                       NullableImagePullSecretsRules          `json:"imagePullSecrets,omitempty"`
@@ -79,6 +81,49 @@ func NewDistributedPolicyRulesV2Worker() *DistributedPolicyRulesV2Worker {
 func NewDistributedPolicyRulesV2WorkerWithDefaults() *DistributedPolicyRulesV2Worker {
 	this := DistributedPolicyRulesV2Worker{}
 	return &this
+}
+
+// GetAccelerator returns the Accelerator field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *DistributedPolicyRulesV2Worker) GetAccelerator() ArbitraryRules {
+	if o == nil || IsNil(o.Accelerator.Get()) {
+		var ret ArbitraryRules
+		return ret
+	}
+	return *o.Accelerator.Get()
+}
+
+// GetAcceleratorOk returns a tuple with the Accelerator field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DistributedPolicyRulesV2Worker) GetAcceleratorOk() (*ArbitraryRules, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Accelerator.Get(), o.Accelerator.IsSet()
+}
+
+// HasAccelerator returns a boolean if a field has been set.
+func (o *DistributedPolicyRulesV2Worker) HasAccelerator() bool {
+	if o != nil && o.Accelerator.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetAccelerator gets a reference to the given NullableArbitraryRules and assigns it to the Accelerator field.
+func (o *DistributedPolicyRulesV2Worker) SetAccelerator(v ArbitraryRules) {
+	o.Accelerator.Set(&v)
+}
+
+// SetAcceleratorNil sets the value for Accelerator to be an explicit nil
+func (o *DistributedPolicyRulesV2Worker) SetAcceleratorNil() {
+	o.Accelerator.Set(nil)
+}
+
+// UnsetAccelerator ensures that no value is present for Accelerator, not even an explicit nil
+func (o *DistributedPolicyRulesV2Worker) UnsetAccelerator() {
+	o.Accelerator.Unset()
 }
 
 // GetAnnotations returns the Annotations field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -509,6 +554,49 @@ func (o *DistributedPolicyRulesV2Worker) SetExposedUrlsNil() {
 // UnsetExposedUrls ensures that no value is present for ExposedUrls, not even an explicit nil
 func (o *DistributedPolicyRulesV2Worker) UnsetExposedUrls() {
 	o.ExposedUrls.Unset()
+}
+
+// GetGpuType returns the GpuType field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *DistributedPolicyRulesV2Worker) GetGpuType() StringRules {
+	if o == nil || IsNil(o.GpuType.Get()) {
+		var ret StringRules
+		return ret
+	}
+	return *o.GpuType.Get()
+}
+
+// GetGpuTypeOk returns a tuple with the GpuType field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DistributedPolicyRulesV2Worker) GetGpuTypeOk() (*StringRules, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuType.Get(), o.GpuType.IsSet()
+}
+
+// HasGpuType returns a boolean if a field has been set.
+func (o *DistributedPolicyRulesV2Worker) HasGpuType() bool {
+	if o != nil && o.GpuType.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuType gets a reference to the given NullableStringRules and assigns it to the GpuType field.
+func (o *DistributedPolicyRulesV2Worker) SetGpuType(v StringRules) {
+	o.GpuType.Set(&v)
+}
+
+// SetGpuTypeNil sets the value for GpuType to be an explicit nil
+func (o *DistributedPolicyRulesV2Worker) SetGpuTypeNil() {
+	o.GpuType.Set(nil)
+}
+
+// UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
+func (o *DistributedPolicyRulesV2Worker) UnsetGpuType() {
+	o.GpuType.Unset()
 }
 
 // GetImage returns the Image field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -1811,6 +1899,9 @@ func (o DistributedPolicyRulesV2Worker) MarshalJSON() ([]byte, error) {
 
 func (o DistributedPolicyRulesV2Worker) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if o.Accelerator.IsSet() {
+		toSerialize["accelerator"] = o.Accelerator.Get()
+	}
 	if o.Annotations.IsSet() {
 		toSerialize["annotations"] = o.Annotations.Get()
 	}
@@ -1840,6 +1931,9 @@ func (o DistributedPolicyRulesV2Worker) ToMap() (map[string]interface{}, error) 
 	}
 	if o.ExposedUrls.IsSet() {
 		toSerialize["exposedUrls"] = o.ExposedUrls.Get()
+	}
+	if o.GpuType.IsSet() {
+		toSerialize["gpuType"] = o.GpuType.Get()
 	}
 	if o.Image.IsSet() {
 		toSerialize["image"] = o.Image.Get()

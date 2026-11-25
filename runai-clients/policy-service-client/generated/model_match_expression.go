@@ -25,7 +25,7 @@ var _ MappedNullable = &MatchExpression{}
 // MatchExpression A selector that contains values, a key, and an operator that relates the key and values.
 type MatchExpression struct {
 	// The label key that the selector applies to (mandatory).
-	Key      string                  `json:"key" validate:"regexp=.*"`
+	Key      string                  `json:"key" validate:"regexp=^$|^([^\\\\x2F]{1,253}\\\\x2F)?[^\\\\x2F]{1,63}$"`
 	Operator MatchExpressionOperator `json:"operator"`
 	// An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be interpreted as an integer.
 	Values []string `json:"values,omitempty"`

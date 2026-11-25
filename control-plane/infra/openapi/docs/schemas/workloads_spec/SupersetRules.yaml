@@ -9,6 +9,8 @@ allOf:
 - $ref: ./distributed_inferences/DistributedInferenceCommonRules.yaml
 - nullable: true
   properties:
+    accelerator:
+      $ref: ../policy_rules/ArbitraryRules.yaml
     annotations:
       $ref: ../policy_rules/InstancesRules.yaml
     args:
@@ -35,6 +37,8 @@ allOf:
       $ref: ../policy_rules/InstancesRules.yaml
     exposedUrls:
       $ref: ./connectivity/ExposedUrlsRules.yaml
+    gpuType:
+      $ref: ../policy_rules/StringRules.yaml
     image:
       $ref: ../policy_rules/StringRules.yaml
     imagePullPolicy:

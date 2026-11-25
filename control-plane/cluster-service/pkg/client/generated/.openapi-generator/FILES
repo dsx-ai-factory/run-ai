@@ -79,6 +79,7 @@ docs/GetNodepoolsMinimal200Response.md
 docs/GetNodepoolsMinimalInternal200Response.md
 docs/GetPutPatchClusterConfigResponse.md
 docs/GpuInfo.md
+docs/GpuPlacementMatch.md
 docs/GpuPodsPlacementStrategy.md
 docs/GroupedMeasurementGroup.md
 docs/GroupedMeasurementResponse.md
@@ -240,6 +241,7 @@ model_get_nodepools_minimal_200_response.go
 model_get_nodepools_minimal_internal_200_response.go
 model_get_put_patch_cluster_config_response.go
 model_gpu_info.go
+model_gpu_placement_match.go
 model_gpu_pods_placement_strategy.go
 model_gpu_resource_optimization.go
 model_grouped_measurement_group.go

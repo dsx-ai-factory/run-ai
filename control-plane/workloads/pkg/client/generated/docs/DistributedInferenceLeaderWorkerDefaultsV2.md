@@ -4,12 +4,14 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**Accelerator** | Pointer to [**NullableAcceleratorSelection**](AcceleratorSelection.md) |  | [optional] 
 **Annotations** | Pointer to [**NullableAnnotationsDefaults**](AnnotationsDefaults.md) |  | [optional] 
 **Args** | Pointer to **NullableString** | Arguments to the command that the container running the workload executes. | [optional] 
 **Command** | Pointer to **NullableString** | A command to the server as the entry point of the container running the workload. | [optional] 
 **Compute** | Pointer to [**NullableSupersetDefaultsAllOfCompute**](SupersetDefaultsAllOfCompute.md) |  | [optional] 
 **CreateHomeDir** | Pointer to **NullableBool** | When set to &#x60;true&#x60;, creates a home directory for the container. | [optional] 
 **EnvironmentVariables** | Pointer to [**NullableEnvironmentVariablesDefaults**](EnvironmentVariablesDefaults.md) |  | [optional] 
+**GpuType** | Pointer to **NullableString** | Exact device model label value required on the workload&#39;s nodes. Use any for no model restriction. | [optional] 
 **Image** | Pointer to **NullableString** | Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload. | [optional] 
 **ImagePullPolicy** | Pointer to [**NullableImagePullPolicy**](ImagePullPolicy.md) |  | [optional] 
 **ImagePullSecrets** | Pointer to [**NullableImagePullSecretsDefaults**](ImagePullSecretsDefaults.md) |  | [optional] 
@@ -42,6 +44,41 @@ NewDistributedInferenceLeaderWorkerDefaultsV2WithDefaults instantiates a new Dis
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
+### GetAccelerator
+
+`func (o *DistributedInferenceLeaderWorkerDefaultsV2) GetAccelerator() AcceleratorSelection`
+
+GetAccelerator returns the Accelerator field if non-nil, zero value otherwise.
+
+### GetAcceleratorOk
+
+`func (o *DistributedInferenceLeaderWorkerDefaultsV2) GetAcceleratorOk() (*AcceleratorSelection, bool)`
+
+GetAcceleratorOk returns a tuple with the Accelerator field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAccelerator
+
+`func (o *DistributedInferenceLeaderWorkerDefaultsV2) SetAccelerator(v AcceleratorSelection)`
+
+SetAccelerator sets Accelerator field to given value.
+
+### HasAccelerator
+
+`func (o *DistributedInferenceLeaderWorkerDefaultsV2) HasAccelerator() bool`
+
+HasAccelerator returns a boolean if a field has been set.
+
+### SetAcceleratorNil
+
+`func (o *DistributedInferenceLeaderWorkerDefaultsV2) SetAcceleratorNil(b bool)`
+
+ SetAcceleratorNil sets the value for Accelerator to be an explicit nil
+
+### UnsetAccelerator
+`func (o *DistributedInferenceLeaderWorkerDefaultsV2) UnsetAccelerator()`
+
+UnsetAccelerator ensures that no value is present for Accelerator, not even an explicit nil
 ### GetAnnotations
 
 `func (o *DistributedInferenceLeaderWorkerDefaultsV2) GetAnnotations() AnnotationsDefaults`
@@ -252,6 +289,41 @@ HasEnvironmentVariables returns a boolean if a field has been set.
 `func (o *DistributedInferenceLeaderWorkerDefaultsV2) UnsetEnvironmentVariables()`
 
 UnsetEnvironmentVariables ensures that no value is present for EnvironmentVariables, not even an explicit nil
+### GetGpuType
+
+`func (o *DistributedInferenceLeaderWorkerDefaultsV2) GetGpuType() string`
+
+GetGpuType returns the GpuType field if non-nil, zero value otherwise.
+
+### GetGpuTypeOk
+
+`func (o *DistributedInferenceLeaderWorkerDefaultsV2) GetGpuTypeOk() (*string, bool)`
+
+GetGpuTypeOk returns a tuple with the GpuType field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuType
+
+`func (o *DistributedInferenceLeaderWorkerDefaultsV2) SetGpuType(v string)`
+
+SetGpuType sets GpuType field to given value.
+
+### HasGpuType
+
+`func (o *DistributedInferenceLeaderWorkerDefaultsV2) HasGpuType() bool`
+
+HasGpuType returns a boolean if a field has been set.
+
+### SetGpuTypeNil
+
+`func (o *DistributedInferenceLeaderWorkerDefaultsV2) SetGpuTypeNil(b bool)`
+
+ SetGpuTypeNil sets the value for GpuType to be an explicit nil
+
+### UnsetGpuType
+`func (o *DistributedInferenceLeaderWorkerDefaultsV2) UnsetGpuType()`
+
+UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
 ### GetImage
 
 `func (o *DistributedInferenceLeaderWorkerDefaultsV2) GetImage() string`

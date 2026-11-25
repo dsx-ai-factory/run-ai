@@ -1287,6 +1287,84 @@ func (_c *IClusterClient_GetNodepoolMinimal_Call) RunAndReturn(run func(ctx cont
 	return _c
 }
 
+// MatchGPUPlacement provides a mock function for the type IClusterClient
+func (_mock *IClusterClient) MatchGPUPlacement(ctx context.Context, clusterID string, poolIDs []string, labels map[string]string) (bool, error) {
+	ret := _mock.Called(ctx, clusterID, poolIDs, labels)
+
+	if len(ret) == 0 {
+		panic("no return value specified for MatchGPUPlacement")
+	}
+
+	var r0 bool
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, []string, map[string]string) (bool, error)); ok {
+		return returnFunc(ctx, clusterID, poolIDs, labels)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, []string, map[string]string) bool); ok {
+		r0 = returnFunc(ctx, clusterID, poolIDs, labels)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, []string, map[string]string) error); ok {
+		r1 = returnFunc(ctx, clusterID, poolIDs, labels)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// IClusterClient_MatchGPUPlacement_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'MatchGPUPlacement'
+type IClusterClient_MatchGPUPlacement_Call struct {
+	*mock.Call
+}
+
+// MatchGPUPlacement is a helper method to define mock.On call
+//   - ctx context.Context
+//   - clusterID string
+//   - poolIDs []string
+//   - labels map[string]string
+func (_e *IClusterClient_Expecter) MatchGPUPlacement(ctx any, clusterID any, poolIDs any, labels any) *IClusterClient_MatchGPUPlacement_Call {
+	return &IClusterClient_MatchGPUPlacement_Call{Call: _e.mock.On("MatchGPUPlacement", ctx, clusterID, poolIDs, labels)}
+}
+
+func (_c *IClusterClient_MatchGPUPlacement_Call) Run(run func(ctx context.Context, clusterID string, poolIDs []string, labels map[string]string)) *IClusterClient_MatchGPUPlacement_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 []string
+		if args[2] != nil {
+			arg2 = args[2].([]string)
+		}
+		var arg3 map[string]string
+		if args[3] != nil {
+			arg3 = args[3].(map[string]string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *IClusterClient_MatchGPUPlacement_Call) Return(b bool, err error) *IClusterClient_MatchGPUPlacement_Call {
+	_c.Call.Return(b, err)
+	return _c
+}
+
+func (_c *IClusterClient_MatchGPUPlacement_Call) RunAndReturn(run func(ctx context.Context, clusterID string, poolIDs []string, labels map[string]string) (bool, error)) *IClusterClient_MatchGPUPlacement_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // PutClusterConfigStatus provides a mock function for the type IClusterClient
 func (_mock *IClusterClient) PutClusterConfigStatus(ctx context.Context, clusterUUID string, putClusterConfigStatusRequest *openapi.PutClusterConfigStatusRequest) error {
 	ret := _mock.Called(ctx, clusterUUID, putClusterConfigStatusRequest)

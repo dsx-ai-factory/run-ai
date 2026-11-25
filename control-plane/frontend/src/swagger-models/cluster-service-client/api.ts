@@ -1964,6 +1964,25 @@ export interface GpuInfo {
     'gpuMemoryBytes'?: number;
 }
 /**
+ * 
+ * @export
+ * @interface GpuPlacementMatch
+ */
+export interface GpuPlacementMatch {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof GpuPlacementMatch
+     */
+    'nodePoolIds': Array<string>;
+    /**
+     * 
+     * @type {{ [key: string]: string; }}
+     * @memberof GpuPlacementMatch
+     */
+    'labels': { [key: string]: string; };
+}
+/**
  * Defines the placement strategy for GPU pods within the node pool.
  * @export
  * @interface GpuPodsPlacementStrategy
@@ -10282,6 +10301,50 @@ export const NodesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * 
+         * @summary Check whether any node in the supplied pools matches the placement labels
+         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+         * @param {GpuPlacementMatch} gpuPlacementMatch 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        matchGpuPlacement: async (clusterUuid: string, gpuPlacementMatch: GpuPlacementMatch, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'clusterUuid' is not null or undefined
+            assertParamExists('matchGpuPlacement', 'clusterUuid', clusterUuid)
+            // verify required parameter 'gpuPlacementMatch' is not null or undefined
+            assertParamExists('matchGpuPlacement', 'gpuPlacementMatch', gpuPlacementMatch)
+            const localVarPath = `/internal/clusters/{clusterUuid}/gpu-placement/match`
+                .replace(`{${"clusterUuid"}}`, encodeURIComponent(String(clusterUuid)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(gpuPlacementMatch, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Use to sync the nodes in the cluster
          * @summary Sync the nodes in the cluster.
          * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
@@ -10563,6 +10626,18 @@ export const NodesApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
+         * 
+         * @summary Check whether any node in the supplied pools matches the placement labels
+         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+         * @param {GpuPlacementMatch} gpuPlacementMatch 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async matchGpuPlacement(clusterUuid: string, gpuPlacementMatch: GpuPlacementMatch, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.matchGpuPlacement(clusterUuid, gpuPlacementMatch, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
          * Use to sync the nodes in the cluster
          * @summary Sync the nodes in the cluster.
          * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
@@ -10733,6 +10808,17 @@ export const NodesApiFactory = function (configuration?: Configuration, basePath
          */
         getTenantNodes(filterBy?: Array<string>, sortBy?: NodeFilterSortFields, sortOrder?: 'asc' | 'desc', offset?: number, limit?: number, search?: string, options?: any): AxiosPromise<Nodes> {
             return localVarFp.getTenantNodes(filterBy, sortBy, sortOrder, offset, limit, search, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Check whether any node in the supplied pools matches the placement labels
+         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+         * @param {GpuPlacementMatch} gpuPlacementMatch 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        matchGpuPlacement(clusterUuid: string, gpuPlacementMatch: GpuPlacementMatch, options?: any): AxiosPromise<boolean> {
+            return localVarFp.matchGpuPlacement(clusterUuid, gpuPlacementMatch, options).then((request) => request(axios, basePath));
         },
         /**
          * Use to sync the nodes in the cluster
@@ -10921,6 +11007,19 @@ export class NodesApi extends BaseAPI {
      */
     public getTenantNodes(filterBy?: Array<string>, sortBy?: NodeFilterSortFields, sortOrder?: 'asc' | 'desc', offset?: number, limit?: number, search?: string, options?: AxiosRequestConfig) {
         return NodesApiFp(this.configuration).getTenantNodes(filterBy, sortBy, sortOrder, offset, limit, search, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Check whether any node in the supplied pools matches the placement labels
+     * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+     * @param {GpuPlacementMatch} gpuPlacementMatch 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof NodesApi
+     */
+    public matchGpuPlacement(clusterUuid: string, gpuPlacementMatch: GpuPlacementMatch, options?: AxiosRequestConfig) {
+        return NodesApiFp(this.configuration).matchGpuPlacement(clusterUuid, gpuPlacementMatch, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

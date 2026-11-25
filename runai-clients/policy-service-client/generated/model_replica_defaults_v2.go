@@ -22,7 +22,8 @@ var _ MappedNullable = &ReplicaDefaultsV2{}
 
 // ReplicaDefaultsV2 struct for ReplicaDefaultsV2
 type ReplicaDefaultsV2 struct {
-	Annotations NullableAnnotationsDefaults `json:"annotations,omitempty"`
+	Accelerator NullableAcceleratorSelection `json:"accelerator,omitempty"`
+	Annotations NullableAnnotationsDefaults  `json:"annotations,omitempty"`
 	// Arguments to the command that the container running the workload executes.
 	Args NullableString `json:"args,omitempty" validate:"regexp=.*"`
 	// Specifies the duration after which a finished workload (completed or failed) will be automatically deleted. The default is 30 days. Log retention is managed separately.
@@ -38,6 +39,8 @@ type ReplicaDefaultsV2 struct {
 	CreateHomeDir        NullableBool                         `json:"createHomeDir,omitempty"`
 	EnvironmentVariables NullableEnvironmentVariablesDefaults `json:"environmentVariables,omitempty"`
 	ExposedUrls          NullableExposedUrlsDefaults          `json:"exposedUrls,omitempty"`
+	// Exact device model label value required on the workload's nodes. Use any for no model restriction.
+	GpuType NullableString `json:"gpuType,omitempty"`
 	// Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
 	Image                NullableString                   `json:"image,omitempty" validate:"regexp=.*"`
 	ImagePullPolicy      NullableImagePullPolicy          `json:"imagePullPolicy,omitempty"`
@@ -87,6 +90,49 @@ func NewReplicaDefaultsV2() *ReplicaDefaultsV2 {
 func NewReplicaDefaultsV2WithDefaults() *ReplicaDefaultsV2 {
 	this := ReplicaDefaultsV2{}
 	return &this
+}
+
+// GetAccelerator returns the Accelerator field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *ReplicaDefaultsV2) GetAccelerator() AcceleratorSelection {
+	if o == nil || IsNil(o.Accelerator.Get()) {
+		var ret AcceleratorSelection
+		return ret
+	}
+	return *o.Accelerator.Get()
+}
+
+// GetAcceleratorOk returns a tuple with the Accelerator field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ReplicaDefaultsV2) GetAcceleratorOk() (*AcceleratorSelection, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Accelerator.Get(), o.Accelerator.IsSet()
+}
+
+// HasAccelerator returns a boolean if a field has been set.
+func (o *ReplicaDefaultsV2) HasAccelerator() bool {
+	if o != nil && o.Accelerator.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetAccelerator gets a reference to the given NullableAcceleratorSelection and assigns it to the Accelerator field.
+func (o *ReplicaDefaultsV2) SetAccelerator(v AcceleratorSelection) {
+	o.Accelerator.Set(&v)
+}
+
+// SetAcceleratorNil sets the value for Accelerator to be an explicit nil
+func (o *ReplicaDefaultsV2) SetAcceleratorNil() {
+	o.Accelerator.Set(nil)
+}
+
+// UnsetAccelerator ensures that no value is present for Accelerator, not even an explicit nil
+func (o *ReplicaDefaultsV2) UnsetAccelerator() {
+	o.Accelerator.Unset()
 }
 
 // GetAnnotations returns the Annotations field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -517,6 +563,49 @@ func (o *ReplicaDefaultsV2) SetExposedUrlsNil() {
 // UnsetExposedUrls ensures that no value is present for ExposedUrls, not even an explicit nil
 func (o *ReplicaDefaultsV2) UnsetExposedUrls() {
 	o.ExposedUrls.Unset()
+}
+
+// GetGpuType returns the GpuType field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *ReplicaDefaultsV2) GetGpuType() string {
+	if o == nil || IsNil(o.GpuType.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.GpuType.Get()
+}
+
+// GetGpuTypeOk returns a tuple with the GpuType field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ReplicaDefaultsV2) GetGpuTypeOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuType.Get(), o.GpuType.IsSet()
+}
+
+// HasGpuType returns a boolean if a field has been set.
+func (o *ReplicaDefaultsV2) HasGpuType() bool {
+	if o != nil && o.GpuType.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuType gets a reference to the given NullableString and assigns it to the GpuType field.
+func (o *ReplicaDefaultsV2) SetGpuType(v string) {
+	o.GpuType.Set(&v)
+}
+
+// SetGpuTypeNil sets the value for GpuType to be an explicit nil
+func (o *ReplicaDefaultsV2) SetGpuTypeNil() {
+	o.GpuType.Set(nil)
+}
+
+// UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
+func (o *ReplicaDefaultsV2) UnsetGpuType() {
+	o.GpuType.Unset()
 }
 
 // GetImage returns the Image field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -1468,6 +1557,9 @@ func (o ReplicaDefaultsV2) MarshalJSON() ([]byte, error) {
 
 func (o ReplicaDefaultsV2) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if o.Accelerator.IsSet() {
+		toSerialize["accelerator"] = o.Accelerator.Get()
+	}
 	if o.Annotations.IsSet() {
 		toSerialize["annotations"] = o.Annotations.Get()
 	}
@@ -1497,6 +1589,9 @@ func (o ReplicaDefaultsV2) ToMap() (map[string]interface{}, error) {
 	}
 	if o.ExposedUrls.IsSet() {
 		toSerialize["exposedUrls"] = o.ExposedUrls.Get()
+	}
+	if o.GpuType.IsSet() {
+		toSerialize["gpuType"] = o.GpuType.Get()
 	}
 	if o.Image.IsSet() {
 		toSerialize["image"] = o.Image.Get()

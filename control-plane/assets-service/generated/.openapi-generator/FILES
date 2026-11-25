@@ -52,6 +52,7 @@ pkg/api/error.go
 pkg/api/helpers.go
 pkg/api/impl.go
 pkg/api/logger.go
+pkg/api/model_accelerator_selection.go
 pkg/api/model_access_key.go
 pkg/api/model_access_key_creation_request.go
 pkg/api/model_access_key_creation_spec.go
@@ -449,6 +450,7 @@ pkg/api/model_string_rules.go
 pkg/api/model_string_rules_common.go
 pkg/api/model_string_rules_options.go
 pkg/api/model_submission_error_v2.go
+pkg/api/model_submission_warning.go
 pkg/api/model_superset_serving_port.go
 pkg/api/model_superset_spec.go
 pkg/api/model_superset_spec_all_of_security.go

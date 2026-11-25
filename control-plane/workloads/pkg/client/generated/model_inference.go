@@ -45,7 +45,9 @@ type Inference struct {
 	DeletedAt    NullableTime         `json:"deletedAt,omitempty"`
 	DesiredPhase WorkloadDesiredPhase `json:"desiredPhase"`
 	ActualPhase  *Phase               `json:"actualPhase,omitempty"`
-	Spec         *InferenceSpecSpec   `json:"spec,omitempty"`
+	// Advisory messages returned when submitting the workload.
+	Warnings []SubmissionWarning `json:"warnings,omitempty"`
+	Spec     *InferenceSpecSpec  `json:"spec,omitempty"`
 }
 
 type _Inference Inference
@@ -374,6 +376,38 @@ func (o *Inference) SetActualPhase(v Phase) {
 	o.ActualPhase = &v
 }
 
+// GetWarnings returns the Warnings field value if set, zero value otherwise.
+func (o *Inference) GetWarnings() []SubmissionWarning {
+	if o == nil || IsNil(o.Warnings) {
+		var ret []SubmissionWarning
+		return ret
+	}
+	return o.Warnings
+}
+
+// GetWarningsOk returns a tuple with the Warnings field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Inference) GetWarningsOk() ([]SubmissionWarning, bool) {
+	if o == nil || IsNil(o.Warnings) {
+		return nil, false
+	}
+	return o.Warnings, true
+}
+
+// HasWarnings returns a boolean if a field has been set.
+func (o *Inference) HasWarnings() bool {
+	if o != nil && !IsNil(o.Warnings) {
+		return true
+	}
+
+	return false
+}
+
+// SetWarnings gets a reference to the given []SubmissionWarning and assigns it to the Warnings field.
+func (o *Inference) SetWarnings(v []SubmissionWarning) {
+	o.Warnings = v
+}
+
 // GetSpec returns the Spec field value if set, zero value otherwise.
 func (o *Inference) GetSpec() InferenceSpecSpec {
 	if o == nil || IsNil(o.Spec) {
@@ -432,6 +466,9 @@ func (o Inference) ToMap() (map[string]interface{}, error) {
 	toSerialize["desiredPhase"] = o.DesiredPhase
 	if !IsNil(o.ActualPhase) {
 		toSerialize["actualPhase"] = o.ActualPhase
+	}
+	if !IsNil(o.Warnings) {
+		toSerialize["warnings"] = o.Warnings
 	}
 	if !IsNil(o.Spec) {
 		toSerialize["spec"] = o.Spec

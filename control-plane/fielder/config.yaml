@@ -353,6 +353,82 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsEnvSpecOnly
+  gpuType:
+    name: "gpuType"
+    variants:
+      - spec: resources/GpuType.yaml
+        defaults: resources/GpuType.yaml
+        rules: ../policy_rules/StringRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - WorkspaceRunParamsSpec
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - TrainingRunParamsSpec
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - InferenceRunParamsSpec
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+  accelerator:
+    name: "accelerator"
+    variants:
+      - spec: resources/AcceleratorSelection.yaml
+        defaults: resources/AcceleratorSelection.yaml
+        rules: ../policy_rules/ArbitraryRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - WorkspaceRunParamsSpec
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - TrainingRunParamsSpec
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - InferenceRunParamsSpec
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
   nodeType:
     name: "nodeType"
     variants:

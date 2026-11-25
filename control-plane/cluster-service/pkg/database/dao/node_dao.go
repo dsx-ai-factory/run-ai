@@ -7,6 +7,7 @@ package dao
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -718,4 +719,26 @@ func readNodeLabelOptions(query orm.DB) ([]string, *api.Error) {
 		return nil, api.NewError(http.StatusInternalServerError, "Failed to get node label options", err)
 	}
 	return options, nil
+}
+
+// Match the same labels used by Pod admission on one node, including busy nodes.
+func MatchGPUPlacement(ctx context.Context, tenantID int32, clusterID string, placement api.GpuPlacementMatch) (bool, *api.Error) {
+	if len(placement.NodePoolIds) == 0 || len(placement.Labels) == 0 {
+		return false, nil
+	}
+	labels, err := json.Marshal(placement.Labels)
+	if err != nil {
+		return false, api.NewError(http.StatusBadRequest, "Invalid placement labels", err)
+	}
+	const query = `SELECT EXISTS (
+      SELECT 1 FROM node n JOIN nodepools np
+        ON np.tenant_id = n.tenant_id AND np.cluster_id::text = n.cluster_uuid AND np.name = n.node_pool
+      WHERE n.tenant_id = ? AND n.cluster_uuid = ? AND np.deleted_at IS NULL
+        AND np.id::text = ANY(?) AND n.labels::jsonb @> ?::jsonb
+    )`
+	var matches bool
+	if _, err := runaidb.DB().WithContext(ctx).Raw(query, tenantID, clusterID, pq.Array(placement.NodePoolIds), string(labels)).Scan(&matches); err != nil {
+		return false, api.NewError(http.StatusInternalServerError, "Failed to check GPU placement", err)
+	}
+	return matches, nil
 }

@@ -42,10 +42,12 @@ type DistributedInference struct {
 	// The creation time of the workload.
 	CreatedAt time.Time `json:"createdAt"`
 	// The deletion time of the workload.
-	DeletedAt    NullableTime                  `json:"deletedAt,omitempty"`
-	DesiredPhase WorkloadDesiredPhase          `json:"desiredPhase"`
-	ActualPhase  *Phase                        `json:"actualPhase,omitempty"`
-	Spec         *DistributedInferenceSpecSpec `json:"spec,omitempty"`
+	DeletedAt    NullableTime         `json:"deletedAt,omitempty"`
+	DesiredPhase WorkloadDesiredPhase `json:"desiredPhase"`
+	ActualPhase  *Phase               `json:"actualPhase,omitempty"`
+	// Advisory messages returned when submitting the workload.
+	Warnings []SubmissionWarning           `json:"warnings,omitempty"`
+	Spec     *DistributedInferenceSpecSpec `json:"spec,omitempty"`
 }
 
 type _DistributedInference DistributedInference
@@ -374,6 +376,38 @@ func (o *DistributedInference) SetActualPhase(v Phase) {
 	o.ActualPhase = &v
 }
 
+// GetWarnings returns the Warnings field value if set, zero value otherwise.
+func (o *DistributedInference) GetWarnings() []SubmissionWarning {
+	if o == nil || IsNil(o.Warnings) {
+		var ret []SubmissionWarning
+		return ret
+	}
+	return o.Warnings
+}
+
+// GetWarningsOk returns a tuple with the Warnings field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *DistributedInference) GetWarningsOk() ([]SubmissionWarning, bool) {
+	if o == nil || IsNil(o.Warnings) {
+		return nil, false
+	}
+	return o.Warnings, true
+}
+
+// HasWarnings returns a boolean if a field has been set.
+func (o *DistributedInference) HasWarnings() bool {
+	if o != nil && !IsNil(o.Warnings) {
+		return true
+	}
+
+	return false
+}
+
+// SetWarnings gets a reference to the given []SubmissionWarning and assigns it to the Warnings field.
+func (o *DistributedInference) SetWarnings(v []SubmissionWarning) {
+	o.Warnings = v
+}
+
 // GetSpec returns the Spec field value if set, zero value otherwise.
 func (o *DistributedInference) GetSpec() DistributedInferenceSpecSpec {
 	if o == nil || IsNil(o.Spec) {
@@ -432,6 +466,9 @@ func (o DistributedInference) ToMap() (map[string]interface{}, error) {
 	toSerialize["desiredPhase"] = o.DesiredPhase
 	if !IsNil(o.ActualPhase) {
 		toSerialize["actualPhase"] = o.ActualPhase
+	}
+	if !IsNil(o.Warnings) {
+		toSerialize["warnings"] = o.Warnings
 	}
 	if !IsNil(o.Spec) {
 		toSerialize["spec"] = o.Spec

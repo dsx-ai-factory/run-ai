@@ -25,6 +25,25 @@ import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObj
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError } from './base';
 
 /**
+ * Accelerator resource and optional device model label key for workload placement.
+ * @export
+ * @interface AcceleratorSelection
+ */
+export interface AcceleratorSelection {
+    /**
+     * Kubernetes extended resource name. Defaults to nvidia.com/gpu.
+     * @type {string}
+     * @memberof AcceleratorSelection
+     */
+    'resourceName'?: string | null;
+    /**
+     * Node label key for gpuType. Defaults to nvidia.com/gpu.product for NVIDIA.
+     * @type {string}
+     * @memberof AcceleratorSelection
+     */
+    'deviceLabelKey'?: string | null;
+}
+/**
  * 
  * @export
  * @interface ActivationReplicasField
@@ -1905,6 +1924,12 @@ export interface DistributedInferenceLeaderDefaultsFields {
 export interface DistributedInferenceLeaderDefaultsFieldsLeader {
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof DistributedInferenceLeaderDefaultsFieldsLeader
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof DistributedInferenceLeaderDefaultsFieldsLeader
      */
@@ -1939,6 +1964,12 @@ export interface DistributedInferenceLeaderDefaultsFieldsLeader {
      * @memberof DistributedInferenceLeaderDefaultsFieldsLeader
      */
     'environmentVariables'?: EnvironmentVariablesDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof DistributedInferenceLeaderDefaultsFieldsLeader
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -2047,6 +2078,12 @@ export interface DistributedInferenceLeaderRulesFields {
 export interface DistributedInferenceLeaderRulesFieldsLeader {
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof DistributedInferenceLeaderRulesFieldsLeader
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof DistributedInferenceLeaderRulesFieldsLeader
      */
@@ -2081,6 +2118,12 @@ export interface DistributedInferenceLeaderRulesFieldsLeader {
      * @memberof DistributedInferenceLeaderRulesFieldsLeader
      */
     'environmentVariables'?: InstancesRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof DistributedInferenceLeaderRulesFieldsLeader
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -2162,6 +2205,12 @@ export interface DistributedInferenceLeaderRulesFieldsLeader {
 export interface DistributedInferenceLeaderWorkerDefaultsV2 {
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof DistributedInferenceLeaderWorkerDefaultsV2
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof DistributedInferenceLeaderWorkerDefaultsV2
      */
@@ -2196,6 +2245,12 @@ export interface DistributedInferenceLeaderWorkerDefaultsV2 {
      * @memberof DistributedInferenceLeaderWorkerDefaultsV2
      */
     'environmentVariables'?: EnvironmentVariablesDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof DistributedInferenceLeaderWorkerDefaultsV2
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -2382,6 +2437,12 @@ export interface DistributedInferenceLeaderWorkerDefaultsV2Storage {
 export interface DistributedInferenceLeaderWorkerRulesV2 {
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof DistributedInferenceLeaderWorkerRulesV2
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof DistributedInferenceLeaderWorkerRulesV2
      */
@@ -2416,6 +2477,12 @@ export interface DistributedInferenceLeaderWorkerRulesV2 {
      * @memberof DistributedInferenceLeaderWorkerRulesV2
      */
     'environmentVariables'?: InstancesRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof DistributedInferenceLeaderWorkerRulesV2
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -3501,6 +3568,12 @@ export interface DistributedInferenceWorkerDefaultsFields {
 export interface DistributedInferenceWorkerDefaultsFieldsWorker {
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof DistributedInferenceWorkerDefaultsFieldsWorker
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof DistributedInferenceWorkerDefaultsFieldsWorker
      */
@@ -3535,6 +3608,12 @@ export interface DistributedInferenceWorkerDefaultsFieldsWorker {
      * @memberof DistributedInferenceWorkerDefaultsFieldsWorker
      */
     'environmentVariables'?: EnvironmentVariablesDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof DistributedInferenceWorkerDefaultsFieldsWorker
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -3643,6 +3722,12 @@ export interface DistributedInferenceWorkerRulesFields {
 export interface DistributedInferenceWorkerRulesFieldsWorker {
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof DistributedInferenceWorkerRulesFieldsWorker
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof DistributedInferenceWorkerRulesFieldsWorker
      */
@@ -3677,6 +3762,12 @@ export interface DistributedInferenceWorkerRulesFieldsWorker {
      * @memberof DistributedInferenceWorkerRulesFieldsWorker
      */
     'environmentVariables'?: InstancesRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof DistributedInferenceWorkerRulesFieldsWorker
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -3865,6 +3956,12 @@ export interface DistributedPolicyDefaultsV2 {
 export interface DistributedPolicyDefaultsV2Worker {
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof DistributedPolicyDefaultsV2Worker
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof DistributedPolicyDefaultsV2Worker
      */
@@ -3923,6 +4020,12 @@ export interface DistributedPolicyDefaultsV2Worker {
      * @memberof DistributedPolicyDefaultsV2Worker
      */
     'exposedUrls'?: ExposedUrlsDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof DistributedPolicyDefaultsV2Worker
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -4206,6 +4309,12 @@ export interface DistributedPolicyRulesV2 {
 export interface DistributedPolicyRulesV2Worker {
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof DistributedPolicyRulesV2Worker
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof DistributedPolicyRulesV2Worker
      */
@@ -4264,6 +4373,12 @@ export interface DistributedPolicyRulesV2Worker {
      * @memberof DistributedPolicyRulesV2Worker
      */
     'exposedUrls'?: ExposedUrlsRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof DistributedPolicyRulesV2Worker
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -5278,6 +5393,12 @@ export interface FallbackPolicyDefaultsAndRulesDefaults {
     'replicas'?: number | null;
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof FallbackPolicyDefaultsAndRulesDefaults
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof FallbackPolicyDefaultsAndRulesDefaults
      */
@@ -5348,6 +5469,12 @@ export interface FallbackPolicyDefaultsAndRulesDefaults {
      * @memberof FallbackPolicyDefaultsAndRulesDefaults
      */
     'exposedUrls'?: ExposedUrlsDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof FallbackPolicyDefaultsAndRulesDefaults
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -5592,6 +5719,12 @@ export interface FallbackPolicyDefaultsAndRulesRules {
     'replicas'?: IntegerRules | null;
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof FallbackPolicyDefaultsAndRulesRules
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof FallbackPolicyDefaultsAndRulesRules
      */
@@ -5662,6 +5795,12 @@ export interface FallbackPolicyDefaultsAndRulesRules {
      * @memberof FallbackPolicyDefaultsAndRulesRules
      */
     'exposedUrls'?: ExposedUrlsRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof FallbackPolicyDefaultsAndRulesRules
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -7407,6 +7546,12 @@ export interface InferencePolicyDefaultsAndRulesV2 {
 export interface InferencePolicyDefaultsAndRulesV2Defaults {
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof InferencePolicyDefaultsAndRulesV2Defaults
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof InferencePolicyDefaultsAndRulesV2Defaults
      */
@@ -7453,6 +7598,12 @@ export interface InferencePolicyDefaultsAndRulesV2Defaults {
      * @memberof InferencePolicyDefaultsAndRulesV2Defaults
      */
     'exposedUrls'?: ExposedUrlsDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof InferencePolicyDefaultsAndRulesV2Defaults
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -7583,6 +7734,12 @@ export interface InferencePolicyDefaultsAndRulesV2Defaults {
 export interface InferencePolicyDefaultsAndRulesV2Rules {
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof InferencePolicyDefaultsAndRulesV2Rules
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof InferencePolicyDefaultsAndRulesV2Rules
      */
@@ -7629,6 +7786,12 @@ export interface InferencePolicyDefaultsAndRulesV2Rules {
      * @memberof InferencePolicyDefaultsAndRulesV2Rules
      */
     'exposedUrls'?: ExposedUrlsRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof InferencePolicyDefaultsAndRulesV2Rules
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -7758,6 +7921,12 @@ export interface InferencePolicyDefaultsAndRulesV2Rules {
 export interface InferencePolicyDefaultsV2 {
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof InferencePolicyDefaultsV2
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof InferencePolicyDefaultsV2
      */
@@ -7804,6 +7973,12 @@ export interface InferencePolicyDefaultsV2 {
      * @memberof InferencePolicyDefaultsV2
      */
     'exposedUrls'?: ExposedUrlsDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof InferencePolicyDefaultsV2
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -7934,6 +8109,12 @@ export interface InferencePolicyDefaultsV2 {
 export interface InferencePolicyDefaultsV2AllOf {
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof InferencePolicyDefaultsV2AllOf
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof InferencePolicyDefaultsV2AllOf
      */
@@ -7980,6 +8161,12 @@ export interface InferencePolicyDefaultsV2AllOf {
      * @memberof InferencePolicyDefaultsV2AllOf
      */
     'exposedUrls'?: ExposedUrlsDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof InferencePolicyDefaultsV2AllOf
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -8239,6 +8426,12 @@ export interface InferencePolicyOverwriteRequestV2 {
 export interface InferencePolicyRulesV2 {
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof InferencePolicyRulesV2
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof InferencePolicyRulesV2
      */
@@ -8285,6 +8478,12 @@ export interface InferencePolicyRulesV2 {
      * @memberof InferencePolicyRulesV2
      */
     'exposedUrls'?: ExposedUrlsRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof InferencePolicyRulesV2
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -8414,6 +8613,12 @@ export interface InferencePolicyRulesV2 {
 export interface InferencePolicyRulesV2AllOf {
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof InferencePolicyRulesV2AllOf
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof InferencePolicyRulesV2AllOf
      */
@@ -8460,6 +8665,12 @@ export interface InferencePolicyRulesV2AllOf {
      * @memberof InferencePolicyRulesV2AllOf
      */
     'exposedUrls'?: ExposedUrlsRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof InferencePolicyRulesV2AllOf
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -13539,6 +13750,12 @@ export interface RelatedUrlsRules {
 export interface ReplicaDefaultsV2 {
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof ReplicaDefaultsV2
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof ReplicaDefaultsV2
      */
@@ -13597,6 +13814,12 @@ export interface ReplicaDefaultsV2 {
      * @memberof ReplicaDefaultsV2
      */
     'exposedUrls'?: ExposedUrlsDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof ReplicaDefaultsV2
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -13739,6 +13962,12 @@ export interface ReplicaDefaultsV2 {
 export interface ReplicaRulesV2 {
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof ReplicaRulesV2
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof ReplicaRulesV2
      */
@@ -13797,6 +14026,12 @@ export interface ReplicaRulesV2 {
      * @memberof ReplicaRulesV2
      */
     'exposedUrls'?: ExposedUrlsRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof ReplicaRulesV2
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -15355,6 +15590,12 @@ export interface SupersetDefaults {
     'replicas'?: number | null;
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof SupersetDefaults
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof SupersetDefaults
      */
@@ -15425,6 +15666,12 @@ export interface SupersetDefaults {
      * @memberof SupersetDefaults
      */
     'exposedUrls'?: ExposedUrlsDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof SupersetDefaults
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -15585,6 +15832,12 @@ export interface SupersetDefaults {
 export interface SupersetDefaultsAllOf {
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof SupersetDefaultsAllOf
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof SupersetDefaultsAllOf
      */
@@ -15661,6 +15914,12 @@ export interface SupersetDefaultsAllOf {
      * @memberof SupersetDefaultsAllOf
      */
     'exposedUrls'?: ExposedUrlsDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof SupersetDefaultsAllOf
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -16193,6 +16452,12 @@ export interface SupersetRules {
     'replicas'?: IntegerRules | null;
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof SupersetRules
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof SupersetRules
      */
@@ -16263,6 +16528,12 @@ export interface SupersetRules {
      * @memberof SupersetRules
      */
     'exposedUrls'?: ExposedUrlsRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof SupersetRules
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -16422,6 +16693,12 @@ export interface SupersetRules {
 export interface SupersetRulesAllOf {
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof SupersetRulesAllOf
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof SupersetRulesAllOf
      */
@@ -16498,6 +16775,12 @@ export interface SupersetRulesAllOf {
      * @memberof SupersetRulesAllOf
      */
     'exposedUrls'?: ExposedUrlsRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof SupersetRulesAllOf
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -17527,6 +17810,12 @@ export interface TrainingPolicyDefaultsAndRulesV2 {
 export interface TrainingPolicyDefaultsAndRulesV2Defaults {
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof TrainingPolicyDefaultsAndRulesV2Defaults
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof TrainingPolicyDefaultsAndRulesV2Defaults
      */
@@ -17591,6 +17880,12 @@ export interface TrainingPolicyDefaultsAndRulesV2Defaults {
      * @memberof TrainingPolicyDefaultsAndRulesV2Defaults
      */
     'exposedUrls'?: ExposedUrlsDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof TrainingPolicyDefaultsAndRulesV2Defaults
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -17739,6 +18034,12 @@ export interface TrainingPolicyDefaultsAndRulesV2Defaults {
 export interface TrainingPolicyDefaultsAndRulesV2Rules {
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof TrainingPolicyDefaultsAndRulesV2Rules
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof TrainingPolicyDefaultsAndRulesV2Rules
      */
@@ -17803,6 +18104,12 @@ export interface TrainingPolicyDefaultsAndRulesV2Rules {
      * @memberof TrainingPolicyDefaultsAndRulesV2Rules
      */
     'exposedUrls'?: ExposedUrlsRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof TrainingPolicyDefaultsAndRulesV2Rules
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -17950,6 +18257,12 @@ export interface TrainingPolicyDefaultsAndRulesV2Rules {
 export interface TrainingPolicyDefaultsV2 {
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof TrainingPolicyDefaultsV2
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof TrainingPolicyDefaultsV2
      */
@@ -18014,6 +18327,12 @@ export interface TrainingPolicyDefaultsV2 {
      * @memberof TrainingPolicyDefaultsV2
      */
     'exposedUrls'?: ExposedUrlsDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof TrainingPolicyDefaultsV2
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -18162,6 +18481,12 @@ export interface TrainingPolicyDefaultsV2 {
 export interface TrainingPolicyDefaultsV2AllOf {
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof TrainingPolicyDefaultsV2AllOf
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof TrainingPolicyDefaultsV2AllOf
      */
@@ -18226,6 +18551,12 @@ export interface TrainingPolicyDefaultsV2AllOf {
      * @memberof TrainingPolicyDefaultsV2AllOf
      */
     'exposedUrls'?: ExposedUrlsDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof TrainingPolicyDefaultsV2AllOf
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -18393,6 +18724,12 @@ export interface TrainingPolicyOverwriteRequestV2 {
 export interface TrainingPolicyRulesV2 {
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof TrainingPolicyRulesV2
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof TrainingPolicyRulesV2
      */
@@ -18457,6 +18794,12 @@ export interface TrainingPolicyRulesV2 {
      * @memberof TrainingPolicyRulesV2
      */
     'exposedUrls'?: ExposedUrlsRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof TrainingPolicyRulesV2
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -18604,6 +18947,12 @@ export interface TrainingPolicyRulesV2 {
 export interface TrainingPolicyRulesV2AllOf {
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof TrainingPolicyRulesV2AllOf
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof TrainingPolicyRulesV2AllOf
      */
@@ -18668,6 +19017,12 @@ export interface TrainingPolicyRulesV2AllOf {
      * @memberof TrainingPolicyRulesV2AllOf
      */
     'exposedUrls'?: ExposedUrlsRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof TrainingPolicyRulesV2AllOf
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -19048,6 +19403,12 @@ export interface WorkspacePolicyDefaultsAndRulesV2 {
 export interface WorkspacePolicyDefaultsAndRulesV2Defaults {
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof WorkspacePolicyDefaultsAndRulesV2Defaults
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof WorkspacePolicyDefaultsAndRulesV2Defaults
      */
@@ -19106,6 +19467,12 @@ export interface WorkspacePolicyDefaultsAndRulesV2Defaults {
      * @memberof WorkspacePolicyDefaultsAndRulesV2Defaults
      */
     'exposedUrls'?: ExposedUrlsDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof WorkspacePolicyDefaultsAndRulesV2Defaults
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -19248,6 +19615,12 @@ export interface WorkspacePolicyDefaultsAndRulesV2Defaults {
 export interface WorkspacePolicyDefaultsAndRulesV2Rules {
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof WorkspacePolicyDefaultsAndRulesV2Rules
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof WorkspacePolicyDefaultsAndRulesV2Rules
      */
@@ -19306,6 +19679,12 @@ export interface WorkspacePolicyDefaultsAndRulesV2Rules {
      * @memberof WorkspacePolicyDefaultsAndRulesV2Rules
      */
     'exposedUrls'?: ExposedUrlsRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof WorkspacePolicyDefaultsAndRulesV2Rules
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -19447,6 +19826,12 @@ export interface WorkspacePolicyDefaultsAndRulesV2Rules {
 export interface WorkspacePolicyDefaultsV2 {
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof WorkspacePolicyDefaultsV2
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof WorkspacePolicyDefaultsV2
      */
@@ -19505,6 +19890,12 @@ export interface WorkspacePolicyDefaultsV2 {
      * @memberof WorkspacePolicyDefaultsV2
      */
     'exposedUrls'?: ExposedUrlsDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof WorkspacePolicyDefaultsV2
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -19647,6 +20038,12 @@ export interface WorkspacePolicyDefaultsV2 {
 export interface WorkspacePolicyDefaultsV2AllOf {
     /**
      * 
+     * @type {AcceleratorSelection}
+     * @memberof WorkspacePolicyDefaultsV2AllOf
+     */
+    'accelerator'?: AcceleratorSelection | null;
+    /**
+     * 
      * @type {AnnotationsDefaults}
      * @memberof WorkspacePolicyDefaultsV2AllOf
      */
@@ -19705,6 +20102,12 @@ export interface WorkspacePolicyDefaultsV2AllOf {
      * @memberof WorkspacePolicyDefaultsV2AllOf
      */
     'exposedUrls'?: ExposedUrlsDefaults | null;
+    /**
+     * Exact device model label value required on the workload\'s nodes. Use any for no model restriction.
+     * @type {string}
+     * @memberof WorkspacePolicyDefaultsV2AllOf
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -19866,6 +20269,12 @@ export interface WorkspacePolicyOverwriteRequestV2 {
 export interface WorkspacePolicyRulesV2 {
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof WorkspacePolicyRulesV2
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof WorkspacePolicyRulesV2
      */
@@ -19924,6 +20333,12 @@ export interface WorkspacePolicyRulesV2 {
      * @memberof WorkspacePolicyRulesV2
      */
     'exposedUrls'?: ExposedUrlsRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof WorkspacePolicyRulesV2
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -20065,6 +20480,12 @@ export interface WorkspacePolicyRulesV2 {
 export interface WorkspacePolicyRulesV2AllOf {
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof WorkspacePolicyRulesV2AllOf
+     */
+    'accelerator'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {InstancesRules}
      * @memberof WorkspacePolicyRulesV2AllOf
      */
@@ -20123,6 +20544,12 @@ export interface WorkspacePolicyRulesV2AllOf {
      * @memberof WorkspacePolicyRulesV2AllOf
      */
     'exposedUrls'?: ExposedUrlsRules | null;
+    /**
+     * 
+     * @type {StringRules}
+     * @memberof WorkspacePolicyRulesV2AllOf
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}

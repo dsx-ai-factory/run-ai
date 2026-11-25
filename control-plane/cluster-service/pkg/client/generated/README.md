@@ -143,6 +143,7 @@ Class | Method | HTTP request | Description
 *NodesAPI* | [**GetNodeMetrics**](docs/NodesAPI.md#getnodemetrics) | **Get** /api/v1/nodes/{nodeId}/metrics | Get the node metrics data.
 *NodesAPI* | [**GetNodeTelemetry**](docs/NodesAPI.md#getnodetelemetry) | **Get** /api/v1/nodes/telemetry | Get node telemetry data.
 *NodesAPI* | [**GetTenantNodes**](docs/NodesAPI.md#gettenantnodes) | **Get** /api/v1/nodes | Get a list of nodes.
+*NodesAPI* | [**MatchGpuPlacement**](docs/NodesAPI.md#matchgpuplacement) | **Post** /internal/clusters/{clusterUuid}/gpu-placement/match | Check whether any node in the supplied pools matches the placement labels
 *NodesAPI* | [**SyncNodes**](docs/NodesAPI.md#syncnodes) | **Post** /api/v1/clusters/{clusterUuid}/nodes/sync | Sync the nodes in the cluster.
 *NodesAPI* | [**SyncNumaNodes**](docs/NodesAPI.md#syncnumanodes) | **Post** /api/v1/clusters/{clusterUuid}/nodes/numa/sync | Sync NUMA nodes in a cluster.
 *NodesAPI* | [**UpsertNode**](docs/NodesAPI.md#upsertnode) | **Put** /api/v1/clusters/{clusterUuid}/nodes/{nodeName} | Update node details.
@@ -218,6 +219,7 @@ Class | Method | HTTP request | Description
  - [GetNodepoolsMinimalInternal200Response](docs/GetNodepoolsMinimalInternal200Response.md)
  - [GetPutPatchClusterConfigResponse](docs/GetPutPatchClusterConfigResponse.md)
  - [GpuInfo](docs/GpuInfo.md)
+ - [GpuPlacementMatch](docs/GpuPlacementMatch.md)
  - [GpuPodsPlacementStrategy](docs/GpuPodsPlacementStrategy.md)
  - [GroupedMeasurementGroup](docs/GroupedMeasurementGroup.md)
  - [GroupedMeasurementResponse](docs/GroupedMeasurementResponse.md)

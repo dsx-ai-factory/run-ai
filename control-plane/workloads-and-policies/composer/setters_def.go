@@ -123,8 +123,9 @@ type FnPodAffinitySetter func(*workloadsApi.PodAffinity, any, any) *workloadsApi
 
 // NodePoolsInfo contains the requested node pools and the actual node pools from the cluster
 type NodePoolsInfo struct {
-	RequestedNodePools []string
-	ActualNodePools    []clusterApi.Nodepool
+	PreserveRequirements bool
+	RequestedNodePools   []string
+	ActualNodePools      []clusterApi.Nodepool
 }
 
 type FnNodePoolsSetter func(*NodePoolsInfo, any, any) *workloadsApi.Error

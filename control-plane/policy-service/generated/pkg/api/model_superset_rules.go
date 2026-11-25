@@ -95,6 +95,11 @@ type SupersetRules struct {
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Accelerator *ArbitraryRules `json:"accelerator,omitempty"`
+	Accelerator *ArbitraryRules `json:"accelerator,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Annotations *InstancesRules `json:"annotations,omitempty"`
 	Annotations *InstancesRules `json:"annotations,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
@@ -152,6 +157,11 @@ type SupersetRules struct {
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//ExposedUrls *ExposedUrlsRules `json:"exposedUrls,omitempty"`
 	ExposedUrls *ExposedUrlsRules `json:"exposedUrls,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuType *StringRules `json:"gpuType,omitempty"`
+	GpuType *StringRules `json:"gpuType,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
@@ -352,6 +362,11 @@ func AssertSupersetRulesRequired(obj SupersetRules) error {
 			return err
 		}
 	}
+	if obj.Accelerator != nil {
+		if err := AssertArbitraryRulesRequired(*obj.Accelerator); err != nil {
+			return err
+		}
+	}
 	if obj.Annotations != nil {
 		if err := AssertInstancesRulesRequired(*obj.Annotations); err != nil {
 			return err
@@ -409,6 +424,11 @@ func AssertSupersetRulesRequired(obj SupersetRules) error {
 	}
 	if obj.ExposedUrls != nil {
 		if err := AssertExposedUrlsRulesRequired(*obj.ExposedUrls); err != nil {
+			return err
+		}
+	}
+	if obj.GpuType != nil {
+		if err := AssertStringRulesRequired(*obj.GpuType); err != nil {
 			return err
 		}
 	}
@@ -687,6 +707,16 @@ func AssertSupersetRulesConstraints(obj SupersetRules) error {
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
+	if obj.Accelerator != nil {
+		if err := AssertArbitraryRulesConstraints(*obj.Accelerator); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	if obj.Annotations != nil {
 		if err := AssertInstancesRulesConstraints(*obj.Annotations); err != nil {
 			return err
@@ -799,6 +829,16 @@ func AssertSupersetRulesConstraints(obj SupersetRules) error {
 	//////////////////////// RUNAI END //////////////////////////
 	if obj.ExposedUrls != nil {
 		if err := AssertExposedUrlsRulesConstraints(*obj.ExposedUrls); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.GpuType != nil {
+		if err := AssertStringRulesConstraints(*obj.GpuType); err != nil {
 			return err
 		}
 	}

@@ -214,6 +214,7 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [AcceleratorSelection](docs/AcceleratorSelection.md)
  - [AccessKey](docs/AccessKey.md)
  - [AccessKeyCreationRequest](docs/AccessKeyCreationRequest.md)
  - [AccessKeyCreationSpec](docs/AccessKeyCreationSpec.md)
@@ -611,6 +612,7 @@ Class | Method | HTTP request | Description
  - [StringRulesCommon](docs/StringRulesCommon.md)
  - [StringRulesOptions](docs/StringRulesOptions.md)
  - [SubmissionErrorV2](docs/SubmissionErrorV2.md)
+ - [SubmissionWarning](docs/SubmissionWarning.md)
  - [SupersetServingPort](docs/SupersetServingPort.md)
  - [SupersetSpec](docs/SupersetSpec.md)
  - [SupersetSpecAllOfSecurity](docs/SupersetSpecAllOfSecurity.md)

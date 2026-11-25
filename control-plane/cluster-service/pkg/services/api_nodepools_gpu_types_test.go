@@ -165,6 +165,31 @@ var _ = Describe("Nodepool gpu types", Ordered, func() {
 			&api.GpuInfo{GpuType: v100, GpuCount: 3, GpuMemoryBytes: v100Memory})
 	})
 
+	It("matches all placement labels on one node in an eligible pool", func() {
+		clusterID := cluster.ID.String()
+		poolID := createNodepool(clusterID, "placement")
+		hiddenID := createNodepool(clusterID, "hidden-placement")
+		put := func(name, pool string, labels map[string]string) {
+			res, err := nodeService.UpsertNode(testCtx, clusterID, name, api.NodeInfo{Status: "Ready", CreatedAt: time.Now(), NodePool: pool, Labels: labels})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(res.Code).To(Equal(http.StatusNoContent))
+		}
+		put("nv", "placement", map[string]string{"resource": "nvidia", "model": "H100"})
+		put("other", "placement", map[string]string{"resource": "amd", "model": "X2"})
+		put("hidden", "hidden-placement", map[string]string{"resource": "amd", "model": "H100"})
+		check := func(ctx context.Context, cluster string, ids []string, resource, model string, want bool) {
+			res, err := nodeService.MatchGpuPlacement(ctx, cluster, api.GpuPlacementMatch{NodePoolIds: ids, Labels: map[string]string{"resource": resource, "model": model}})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(res.Code).To(Equal(http.StatusOK))
+			Expect(res.Body).To(Equal(want))
+		}
+		check(testCtx, clusterID, []string{poolID}, "nvidia", "H100", true)
+		check(testCtx, clusterID, []string{poolID}, "amd", "H100", false)
+		check(testCtx, clusterID, []string{hiddenID}, "amd", "H100", true)
+		check(testCtx, clusterID, nil, "amd", "H100", false)
+		check(testCtx, otherCluster.ID.String(), []string{poolID}, "nvidia", "H100", false)
+		check(context.WithValue(testCtx, runaictx.CfTenantId, "715"), clusterID, []string{poolID}, "nvidia", "H100", false)
+	})
 	AfterAll(func() {
 		for _, id := range createdIds {
 			Expect(dao.DeleteNodepool(testCtx, tenantId, "", id)).To(BeNil())

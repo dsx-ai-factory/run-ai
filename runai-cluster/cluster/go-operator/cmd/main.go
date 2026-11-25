@@ -107,6 +107,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	workloadClusterManager := localClusterManager
 	if opts.NMCRemoteClusterAPIServerURL != "" {
 		remoteClusterManager, err := initRemoteClusterManager(opts, signalHandlerContext)
 		if err != nil {
@@ -114,6 +115,7 @@ func main() {
 			os.Exit(1)
 		}
 
+		workloadClusterManager = remoteClusterManager
 		remoteClusterHybridClient := kc.New(remoteClusterManager.GetClient(), remoteClusterManager.GetAPIReader(), remoteClusterManager.GetConfig())
 		remoteClusterDiscoveryClient, err := remoteClusterHybridClient.NewDiscoveryClient()
 		if err != nil {
@@ -148,6 +150,11 @@ func main() {
 			setupLog.Error(err, "unable to create runai config controller")
 			os.Exit(1)
 		}
+	}
+
+	if err := controllers.SetupAcceleratorNodeLabels(workloadClusterManager); err != nil {
+		setupLog.Error(err, "unable to register node accelerator resource labels")
+		os.Exit(1)
 	}
 
 	err = controllers.NewRemoteConfigReconciler(localClusterClient, opts.Verbosity).SetupWithManager(localClusterManager)
@@ -228,6 +235,7 @@ func cacheOptions() cache.Options {
 		// We specify that we want to cache them in all namespaces (still an informer per-namespace will be created).
 		ByObject: map[client.Object]cache.ByObject{
 			&v1.Namespace{}:    {},
+			&v1.Node{}:         {},
 			&runaiv1.Cluster{}: {},
 			&v1.Service{}: {
 				Namespaces: map[string]cache.Config{

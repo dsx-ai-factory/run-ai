@@ -45,7 +45,9 @@ type DistributedWorkload struct {
 	DeletedAt    NullableTime         `json:"deletedAt,omitempty"`
 	DesiredPhase WorkloadDesiredPhase `json:"desiredPhase"`
 	ActualPhase  *Phase               `json:"actualPhase,omitempty"`
-	Spec         *DistributedSpecSpec `json:"spec,omitempty"`
+	// Advisory messages returned when submitting the workload.
+	Warnings []SubmissionWarning  `json:"warnings,omitempty"`
+	Spec     *DistributedSpecSpec `json:"spec,omitempty"`
 	// used for distributed workloads to indicate that the master spec should be the same as the worker spec. in this case, masterSpec should not be specified.
 	MasterSpecSameAsWorker NullableBool               `json:"masterSpecSameAsWorker,omitempty"`
 	MasterSpec             NullableMasterSpec         `json:"masterSpec,omitempty"`
@@ -378,6 +380,38 @@ func (o *DistributedWorkload) SetActualPhase(v Phase) {
 	o.ActualPhase = &v
 }
 
+// GetWarnings returns the Warnings field value if set, zero value otherwise.
+func (o *DistributedWorkload) GetWarnings() []SubmissionWarning {
+	if o == nil || IsNil(o.Warnings) {
+		var ret []SubmissionWarning
+		return ret
+	}
+	return o.Warnings
+}
+
+// GetWarningsOk returns a tuple with the Warnings field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *DistributedWorkload) GetWarningsOk() ([]SubmissionWarning, bool) {
+	if o == nil || IsNil(o.Warnings) {
+		return nil, false
+	}
+	return o.Warnings, true
+}
+
+// HasWarnings returns a boolean if a field has been set.
+func (o *DistributedWorkload) HasWarnings() bool {
+	if o != nil && !IsNil(o.Warnings) {
+		return true
+	}
+
+	return false
+}
+
+// SetWarnings gets a reference to the given []SubmissionWarning and assigns it to the Warnings field.
+func (o *DistributedWorkload) SetWarnings(v []SubmissionWarning) {
+	o.Warnings = v
+}
+
 // GetSpec returns the Spec field value if set, zero value otherwise.
 func (o *DistributedWorkload) GetSpec() DistributedSpecSpec {
 	if o == nil || IsNil(o.Spec) {
@@ -565,6 +599,9 @@ func (o DistributedWorkload) ToMap() (map[string]interface{}, error) {
 	toSerialize["desiredPhase"] = o.DesiredPhase
 	if !IsNil(o.ActualPhase) {
 		toSerialize["actualPhase"] = o.ActualPhase
+	}
+	if !IsNil(o.Warnings) {
+		toSerialize["warnings"] = o.Warnings
 	}
 	if !IsNil(o.Spec) {
 		toSerialize["spec"] = o.Spec

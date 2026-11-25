@@ -968,6 +968,37 @@ paths:
           $ref: '#/components/responses/403Forbidden'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/clusters/{clusterUuid}/gpu-placement/match:
+    x-internal: true
+    post:
+      summary: Check whether any node in the supplied pools matches the placement labels
+      operationId: match_gpu_placement
+      x-internal: true
+      x-no-authorization: true
+      x-service: cluster-service
+      x-test-coverage:
+        - control-plane/cluster-service/pkg/services/api_nodepools_gpu_types_test.go
+      tags:
+        - Nodes
+      parameters:
+        - $ref: '#/components/parameters/ClusterUuid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GpuPlacementMatch'
+      responses:
+        '200':
+          description: Whether a node matches all requested labels
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
   /internal/clusters/{clusterUuid}/nodes/{nodeName}:
     x-internal: true
     get:
@@ -4743,6 +4774,21 @@ components:
           $ref: '#/components/schemas/SchedulingCapabilities'
         gpuTypes:
           $ref: '#/components/schemas/NodepoolGpuTypes'
+    GpuPlacementMatch:
+      type: object
+      required:
+        - nodePoolIds
+        - labels
+      properties:
+        nodePoolIds:
+          type: array
+          items:
+            type: string
+        labels:
+          type: object
+          minProperties: 1
+          additionalProperties:
+            type: string
     NetworkTopologyLabelValuesOptional:
       type: array
       items:

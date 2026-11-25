@@ -22,6 +22,7 @@ var _ MappedNullable = &DistributedTemplateSpec{}
 
 // DistributedTemplateSpec struct for DistributedTemplateSpec
 type DistributedTemplateSpec struct {
+	Accelerator NullableAcceleratorSelection `json:"accelerator,omitempty"`
 	// Set of annotations to populate into the container running the workload.
 	Annotations []Annotation `json:"annotations,omitempty"`
 	// Arguments to the command that the container running the workload executes.
@@ -43,6 +44,8 @@ type DistributedTemplateSpec struct {
 	EnvironmentVariables []EnvironmentVariable `json:"environmentVariables,omitempty"`
 	// Set of container ports that the workload exposes via URLs.
 	ExposedUrls []ExposedUrl `json:"exposedUrls,omitempty"`
+	// Exact device model label value required on the workload's nodes. Use any for no model restriction.
+	GpuType NullableString `json:"gpuType,omitempty"`
 	// Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
 	Image           NullableString          `json:"image,omitempty" validate:"regexp=.*"`
 	ImagePullPolicy NullableImagePullPolicy `json:"imagePullPolicy,omitempty"`
@@ -116,6 +119,49 @@ func NewDistributedTemplateSpecWithDefaults() *DistributedTemplateSpec {
 	var sshAuthMountPath string = "/root/.ssh"
 	this.SshAuthMountPath = *NewNullableString(&sshAuthMountPath)
 	return &this
+}
+
+// GetAccelerator returns the Accelerator field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *DistributedTemplateSpec) GetAccelerator() AcceleratorSelection {
+	if o == nil || IsNil(o.Accelerator.Get()) {
+		var ret AcceleratorSelection
+		return ret
+	}
+	return *o.Accelerator.Get()
+}
+
+// GetAcceleratorOk returns a tuple with the Accelerator field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DistributedTemplateSpec) GetAcceleratorOk() (*AcceleratorSelection, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Accelerator.Get(), o.Accelerator.IsSet()
+}
+
+// HasAccelerator returns a boolean if a field has been set.
+func (o *DistributedTemplateSpec) HasAccelerator() bool {
+	if o != nil && o.Accelerator.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetAccelerator gets a reference to the given NullableAcceleratorSelection and assigns it to the Accelerator field.
+func (o *DistributedTemplateSpec) SetAccelerator(v AcceleratorSelection) {
+	o.Accelerator.Set(&v)
+}
+
+// SetAcceleratorNil sets the value for Accelerator to be an explicit nil
+func (o *DistributedTemplateSpec) SetAcceleratorNil() {
+	o.Accelerator.Set(nil)
+}
+
+// UnsetAccelerator ensures that no value is present for Accelerator, not even an explicit nil
+func (o *DistributedTemplateSpec) UnsetAccelerator() {
+	o.Accelerator.Unset()
 }
 
 // GetAnnotations returns the Annotations field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -602,6 +648,49 @@ func (o *DistributedTemplateSpec) HasExposedUrls() bool {
 // SetExposedUrls gets a reference to the given []ExposedUrl and assigns it to the ExposedUrls field.
 func (o *DistributedTemplateSpec) SetExposedUrls(v []ExposedUrl) {
 	o.ExposedUrls = v
+}
+
+// GetGpuType returns the GpuType field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *DistributedTemplateSpec) GetGpuType() string {
+	if o == nil || IsNil(o.GpuType.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.GpuType.Get()
+}
+
+// GetGpuTypeOk returns a tuple with the GpuType field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DistributedTemplateSpec) GetGpuTypeOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuType.Get(), o.GpuType.IsSet()
+}
+
+// HasGpuType returns a boolean if a field has been set.
+func (o *DistributedTemplateSpec) HasGpuType() bool {
+	if o != nil && o.GpuType.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuType gets a reference to the given NullableString and assigns it to the GpuType field.
+func (o *DistributedTemplateSpec) SetGpuType(v string) {
+	o.GpuType.Set(&v)
+}
+
+// SetGpuTypeNil sets the value for GpuType to be an explicit nil
+func (o *DistributedTemplateSpec) SetGpuTypeNil() {
+	o.GpuType.Set(nil)
+}
+
+// UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
+func (o *DistributedTemplateSpec) UnsetGpuType() {
+	o.GpuType.Unset()
 }
 
 // GetImage returns the Image field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -1771,6 +1860,9 @@ func (o DistributedTemplateSpec) MarshalJSON() ([]byte, error) {
 
 func (o DistributedTemplateSpec) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if o.Accelerator.IsSet() {
+		toSerialize["accelerator"] = o.Accelerator.Get()
+	}
 	if o.Annotations != nil {
 		toSerialize["annotations"] = o.Annotations
 	}
@@ -1806,6 +1898,9 @@ func (o DistributedTemplateSpec) ToMap() (map[string]interface{}, error) {
 	}
 	if o.ExposedUrls != nil {
 		toSerialize["exposedUrls"] = o.ExposedUrls
+	}
+	if o.GpuType.IsSet() {
+		toSerialize["gpuType"] = o.GpuType.Get()
 	}
 	if o.Image.IsSet() {
 		toSerialize["image"] = o.Image.Get()

@@ -11,9 +11,15 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
+	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/component-helpers/scheduling/corev1/nodeaffinity"
+	"knative.dev/pkg/apis"
+	"knative.dev/serving/pkg/apis/config"
+	"knative.dev/serving/pkg/apis/serving"
 )
 
 var _ = Describe("GPU mode annotation projection", func() {
@@ -25,9 +31,81 @@ var _ = Describe("GPU mode annotation projection", func() {
 		c := NewInferenceToKnativeComposer("example", "p1", "runai-p1", "user", nil, options)
 		target := NewMinimalKnativeServiceTarget()
 		target.Service.Spec.Template.Spec.Containers = []corev1.Container{{Name: "inference-main"}, {Name: "auth-proxy"}}
-		Expect(c.processComputeFields(context.Background(), &src, target)()).To(BeNil())
+		Expect(c.processComputeFields(context.Background(), &src, nil, target)()).To(BeNil())
 		Expect(target.Service.Spec.Template.Annotations).To(HaveKeyWithValue("nvidia.com/container.inference-main.gpu-compute.mode", mode))
 		Expect(target.Service.Spec.Template.Annotations).NotTo(HaveKey("nvidia.com/container.auth-proxy.gpu-compute.mode"))
 		Expect(target.Service.Spec.Template.Annotations).To(HaveKeyWithValue(composer.GpuFractionAnnotation, "0.25"))
+	})
+})
+
+var _ = Describe("GPU selection in Knative inference", func() {
+	It("rejects a duplicate GPU count in extended resources for a model-only request", func() {
+		var spec workloadsApi.InferenceSpecSpec
+		Expect(json.Unmarshal([]byte(`{"gpuType":"H100","compute":{"gpuDevicesRequest":2,
+			"extendedResources":[{"resource":"nvidia.com/gpu","quantity":"1"}]}}`), &spec)).To(Succeed())
+		c := NewInferenceToKnativeComposer("infer", "p1", "runai-p1", "user", nil, composer.FieldsComposerOptions{})
+		target := NewMinimalKnativeServiceTarget()
+		err := c.processComputeFields(context.Background(), spec.Compute.Get(),
+			composer.RequestedAccelerator(spec.GpuType.Get(), spec.Accelerator.Get()), target)()
+		Expect(err).NotTo(BeNil())
+		Expect(err.Code).To(Equal(int32(400)))
+		Expect(err.Message).To(ContainSubstring("duplicates"))
+	})
+
+	It("admits the Pod with nodeSelector disabled and requires the resource, pool and model", func() {
+		options := composer.FieldsComposerOptions{NodeAffinitySupported: true}
+		c := NewInferenceToKnativeComposer("infer", "p1", "runai-p1", "user", nil, options)
+		var spec workloadsApi.InferenceSpecSpec
+		Expect(json.Unmarshal([]byte(`{
+			"gpuType":"MI300X","accelerator":{"resourceName":"amd.com/gpu","deviceLabelKey":"hardware.example.com/model"},
+			"nodePools":["default"]
+		}`), &spec)).To(Succeed())
+		target := NewMinimalKnativeServiceTarget()
+		template := &target.Service.Spec.Template
+		template.Spec.Containers = []corev1.Container{{Name: "main", Image: "example.com/test:latest"}}
+		Expect(c.processPlacementFields(context.Background(), &spec, target)()).To(BeNil())
+		cfg := config.FromContextOrDefaults(context.Background())
+		cfg.Features.PodSpecAffinity = config.Enabled
+		Expect(cfg.Features.PodSpecNodeSelector).To(Equal(config.Disabled))
+		ctx := config.ToContext(context.Background(), cfg)
+		Expect(serving.ValidatePodSpec(ctx, template.Spec.PodSpec).Filter(apis.ErrorLevel)).To(BeNil())
+		Expect(template.Spec.NodeSelector).To(BeEmpty())
+		Expect(template.Annotations).To(HaveKeyWithValue("runai-nodepools", "default"))
+		pod := &corev1.Pod{Spec: template.Spec.PodSpec}
+		// This is a Knative-valid template before Pod admission. Even the right
+		// GPU remains ineligible while mixed-version admission is unverified.
+		terms := pod.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms
+		for i := range terms {
+			Expect(terms[i].MatchFields).To(HaveLen(2))
+			Expect(terms[i].MatchFields[0]).To(Equal(corev1.NodeSelectorRequirement{
+				Key: "metadata.name", Operator: corev1.NodeSelectorOpIn, Values: []string{commonconstants.GPUPlacementAdmissionNode},
+			}))
+			Expect(terms[i].MatchFields[1]).To(Equal(corev1.NodeSelectorRequirement{
+				Key: "metadata.name", Operator: corev1.NodeSelectorOpNotIn, Values: []string{commonconstants.GPUPlacementAdmissionNode},
+			}))
+		}
+		resourceKey := commonconstants.AcceleratorResourceNodeLabel("amd.com/gpu")
+		for _, tc := range []struct {
+			labels  map[string]string
+			matches bool
+		}{
+			{map[string]string{resourceKey: "true", "hardware.example.com/model": "MI300X"}, true},
+			{map[string]string{"hardware.example.com/model": "MI300X"}, false},
+			{map[string]string{resourceKey: "true", "hardware.example.com/model": "MI250"}, false},
+			{map[string]string{resourceKey: "true", "hardware.example.com/model": "MI300X", composer.NodePoolNameLabel: "other"}, false},
+		} {
+			node := &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: "gpu-node", Labels: tc.labels}}
+			matches, err := nodeaffinity.GetRequiredNodeAffinity(pod).Match(node)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(matches).To(BeFalse())
+			// Check the remaining placement predicates independently of the barrier.
+			admitted := pod.DeepCopy()
+			for i := range admitted.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms {
+				admitted.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms[i].MatchFields = nil
+			}
+			matches, err = nodeaffinity.GetRequiredNodeAffinity(admitted).Match(node)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(matches).To(Equal(tc.matches))
+		}
 	})
 })

@@ -24,6 +24,7 @@ var _ MappedNullable = &InferenceTemplateSpec{}
 type InferenceTemplateSpec struct {
 	Autoscaling          NullableAutoScaling          `json:"autoscaling,omitempty"`
 	ServingConfiguration NullableServingConfiguration `json:"servingConfiguration,omitempty"`
+	Accelerator          NullableAcceleratorSelection `json:"accelerator,omitempty"`
 	// Set of annotations to populate into the container running the workload.
 	Annotations []Annotation `json:"annotations,omitempty"`
 	// Arguments to the command that the container running the workload executes.
@@ -39,6 +40,8 @@ type InferenceTemplateSpec struct {
 	EnvironmentVariables []EnvironmentVariable `json:"environmentVariables,omitempty"`
 	// Set of container ports that the workload exposes via URLs.
 	ExposedUrls []ExposedUrl `json:"exposedUrls,omitempty"`
+	// Exact device model label value required on the workload's nodes. Use any for no model restriction.
+	GpuType NullableString `json:"gpuType,omitempty"`
 	// Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
 	Image           NullableString          `json:"image,omitempty" validate:"regexp=.*"`
 	ImagePullPolicy NullableImagePullPolicy `json:"imagePullPolicy,omitempty"`
@@ -169,6 +172,49 @@ func (o *InferenceTemplateSpec) SetServingConfigurationNil() {
 // UnsetServingConfiguration ensures that no value is present for ServingConfiguration, not even an explicit nil
 func (o *InferenceTemplateSpec) UnsetServingConfiguration() {
 	o.ServingConfiguration.Unset()
+}
+
+// GetAccelerator returns the Accelerator field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *InferenceTemplateSpec) GetAccelerator() AcceleratorSelection {
+	if o == nil || IsNil(o.Accelerator.Get()) {
+		var ret AcceleratorSelection
+		return ret
+	}
+	return *o.Accelerator.Get()
+}
+
+// GetAcceleratorOk returns a tuple with the Accelerator field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *InferenceTemplateSpec) GetAcceleratorOk() (*AcceleratorSelection, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Accelerator.Get(), o.Accelerator.IsSet()
+}
+
+// HasAccelerator returns a boolean if a field has been set.
+func (o *InferenceTemplateSpec) HasAccelerator() bool {
+	if o != nil && o.Accelerator.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetAccelerator gets a reference to the given NullableAcceleratorSelection and assigns it to the Accelerator field.
+func (o *InferenceTemplateSpec) SetAccelerator(v AcceleratorSelection) {
+	o.Accelerator.Set(&v)
+}
+
+// SetAcceleratorNil sets the value for Accelerator to be an explicit nil
+func (o *InferenceTemplateSpec) SetAcceleratorNil() {
+	o.Accelerator.Set(nil)
+}
+
+// UnsetAccelerator ensures that no value is present for Accelerator, not even an explicit nil
+func (o *InferenceTemplateSpec) UnsetAccelerator() {
+	o.Accelerator.Unset()
 }
 
 // GetAnnotations returns the Annotations field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -483,6 +529,49 @@ func (o *InferenceTemplateSpec) HasExposedUrls() bool {
 // SetExposedUrls gets a reference to the given []ExposedUrl and assigns it to the ExposedUrls field.
 func (o *InferenceTemplateSpec) SetExposedUrls(v []ExposedUrl) {
 	o.ExposedUrls = v
+}
+
+// GetGpuType returns the GpuType field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *InferenceTemplateSpec) GetGpuType() string {
+	if o == nil || IsNil(o.GpuType.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.GpuType.Get()
+}
+
+// GetGpuTypeOk returns a tuple with the GpuType field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *InferenceTemplateSpec) GetGpuTypeOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuType.Get(), o.GpuType.IsSet()
+}
+
+// HasGpuType returns a boolean if a field has been set.
+func (o *InferenceTemplateSpec) HasGpuType() bool {
+	if o != nil && o.GpuType.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuType gets a reference to the given NullableString and assigns it to the GpuType field.
+func (o *InferenceTemplateSpec) SetGpuType(v string) {
+	o.GpuType.Set(&v)
+}
+
+// SetGpuTypeNil sets the value for GpuType to be an explicit nil
+func (o *InferenceTemplateSpec) SetGpuTypeNil() {
+	o.GpuType.Set(nil)
+}
+
+// UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
+func (o *InferenceTemplateSpec) UnsetGpuType() {
+	o.GpuType.Unset()
 }
 
 // GetImage returns the Image field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -1185,6 +1274,9 @@ func (o InferenceTemplateSpec) ToMap() (map[string]interface{}, error) {
 	if o.ServingConfiguration.IsSet() {
 		toSerialize["servingConfiguration"] = o.ServingConfiguration.Get()
 	}
+	if o.Accelerator.IsSet() {
+		toSerialize["accelerator"] = o.Accelerator.Get()
+	}
 	if o.Annotations != nil {
 		toSerialize["annotations"] = o.Annotations
 	}
@@ -1208,6 +1300,9 @@ func (o InferenceTemplateSpec) ToMap() (map[string]interface{}, error) {
 	}
 	if o.ExposedUrls != nil {
 		toSerialize["exposedUrls"] = o.ExposedUrls
+	}
+	if o.GpuType.IsSet() {
+		toSerialize["gpuType"] = o.GpuType.Get()
 	}
 	if o.Image.IsSet() {
 		toSerialize["image"] = o.Image.Get()

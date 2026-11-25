@@ -1,0 +1,28 @@
+post:
+  summary: Check whether any node in the supplied pools matches the placement labels
+  operationId: match_gpu_placement
+  x-internal: true
+  x-no-authorization: true
+  x-service: cluster-service
+  x-test-coverage:
+    - control-plane/cluster-service/pkg/services/api_nodepools_gpu_types_test.go
+  tags: [Nodes]
+  parameters:
+    - $ref: "../../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/Nodes/GpuPlacementMatch.yaml"
+  responses:
+    "200":
+      description: Whether a node matches all requested labels
+      content:
+        application/json:
+          schema:
+            type: boolean
+    "400":
+      $ref: "../../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    "500":
+      $ref: "../../../../../infra/openapi/docs/responses/500InternalServerError.yaml"

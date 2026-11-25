@@ -22,7 +22,8 @@ var _ MappedNullable = &DistributedInferenceLeaderWorkerDefaultsV2{}
 
 // DistributedInferenceLeaderWorkerDefaultsV2 struct for DistributedInferenceLeaderWorkerDefaultsV2
 type DistributedInferenceLeaderWorkerDefaultsV2 struct {
-	Annotations NullableAnnotationsDefaults `json:"annotations,omitempty"`
+	Accelerator NullableAcceleratorSelection `json:"accelerator,omitempty"`
+	Annotations NullableAnnotationsDefaults  `json:"annotations,omitempty"`
 	// Arguments to the command that the container running the workload executes.
 	Args NullableString `json:"args,omitempty" validate:"regexp=.*"`
 	// A command to the server as the entry point of the container running the workload.
@@ -31,6 +32,8 @@ type DistributedInferenceLeaderWorkerDefaultsV2 struct {
 	// When set to `true`, creates a home directory for the container.
 	CreateHomeDir        NullableBool                         `json:"createHomeDir,omitempty"`
 	EnvironmentVariables NullableEnvironmentVariablesDefaults `json:"environmentVariables,omitempty"`
+	// Exact device model label value required on the workload's nodes. Use any for no model restriction.
+	GpuType NullableString `json:"gpuType,omitempty"`
 	// Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
 	Image                NullableString                   `json:"image,omitempty" validate:"regexp=.*"`
 	ImagePullPolicy      NullableImagePullPolicy          `json:"imagePullPolicy,omitempty"`
@@ -64,6 +67,49 @@ func NewDistributedInferenceLeaderWorkerDefaultsV2() *DistributedInferenceLeader
 func NewDistributedInferenceLeaderWorkerDefaultsV2WithDefaults() *DistributedInferenceLeaderWorkerDefaultsV2 {
 	this := DistributedInferenceLeaderWorkerDefaultsV2{}
 	return &this
+}
+
+// GetAccelerator returns the Accelerator field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *DistributedInferenceLeaderWorkerDefaultsV2) GetAccelerator() AcceleratorSelection {
+	if o == nil || IsNil(o.Accelerator.Get()) {
+		var ret AcceleratorSelection
+		return ret
+	}
+	return *o.Accelerator.Get()
+}
+
+// GetAcceleratorOk returns a tuple with the Accelerator field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DistributedInferenceLeaderWorkerDefaultsV2) GetAcceleratorOk() (*AcceleratorSelection, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Accelerator.Get(), o.Accelerator.IsSet()
+}
+
+// HasAccelerator returns a boolean if a field has been set.
+func (o *DistributedInferenceLeaderWorkerDefaultsV2) HasAccelerator() bool {
+	if o != nil && o.Accelerator.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetAccelerator gets a reference to the given NullableAcceleratorSelection and assigns it to the Accelerator field.
+func (o *DistributedInferenceLeaderWorkerDefaultsV2) SetAccelerator(v AcceleratorSelection) {
+	o.Accelerator.Set(&v)
+}
+
+// SetAcceleratorNil sets the value for Accelerator to be an explicit nil
+func (o *DistributedInferenceLeaderWorkerDefaultsV2) SetAcceleratorNil() {
+	o.Accelerator.Set(nil)
+}
+
+// UnsetAccelerator ensures that no value is present for Accelerator, not even an explicit nil
+func (o *DistributedInferenceLeaderWorkerDefaultsV2) UnsetAccelerator() {
+	o.Accelerator.Unset()
 }
 
 // GetAnnotations returns the Annotations field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -322,6 +368,49 @@ func (o *DistributedInferenceLeaderWorkerDefaultsV2) SetEnvironmentVariablesNil(
 // UnsetEnvironmentVariables ensures that no value is present for EnvironmentVariables, not even an explicit nil
 func (o *DistributedInferenceLeaderWorkerDefaultsV2) UnsetEnvironmentVariables() {
 	o.EnvironmentVariables.Unset()
+}
+
+// GetGpuType returns the GpuType field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *DistributedInferenceLeaderWorkerDefaultsV2) GetGpuType() string {
+	if o == nil || IsNil(o.GpuType.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.GpuType.Get()
+}
+
+// GetGpuTypeOk returns a tuple with the GpuType field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DistributedInferenceLeaderWorkerDefaultsV2) GetGpuTypeOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuType.Get(), o.GpuType.IsSet()
+}
+
+// HasGpuType returns a boolean if a field has been set.
+func (o *DistributedInferenceLeaderWorkerDefaultsV2) HasGpuType() bool {
+	if o != nil && o.GpuType.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuType gets a reference to the given NullableString and assigns it to the GpuType field.
+func (o *DistributedInferenceLeaderWorkerDefaultsV2) SetGpuType(v string) {
+	o.GpuType.Set(&v)
+}
+
+// SetGpuTypeNil sets the value for GpuType to be an explicit nil
+func (o *DistributedInferenceLeaderWorkerDefaultsV2) SetGpuTypeNil() {
+	o.GpuType.Set(nil)
+}
+
+// UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
+func (o *DistributedInferenceLeaderWorkerDefaultsV2) UnsetGpuType() {
+	o.GpuType.Unset()
 }
 
 // GetImage returns the Image field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -853,6 +942,9 @@ func (o DistributedInferenceLeaderWorkerDefaultsV2) MarshalJSON() ([]byte, error
 
 func (o DistributedInferenceLeaderWorkerDefaultsV2) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if o.Accelerator.IsSet() {
+		toSerialize["accelerator"] = o.Accelerator.Get()
+	}
 	if o.Annotations.IsSet() {
 		toSerialize["annotations"] = o.Annotations.Get()
 	}
@@ -870,6 +962,9 @@ func (o DistributedInferenceLeaderWorkerDefaultsV2) ToMap() (map[string]interfac
 	}
 	if o.EnvironmentVariables.IsSet() {
 		toSerialize["environmentVariables"] = o.EnvironmentVariables.Get()
+	}
+	if o.GpuType.IsSet() {
+		toSerialize["gpuType"] = o.GpuType.Get()
 	}
 	if o.Image.IsSet() {
 		toSerialize["image"] = o.Image.Get()

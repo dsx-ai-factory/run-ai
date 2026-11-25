@@ -25,8 +25,8 @@ type MatchExpression struct {
 
 	// The label key that the selector applies to (mandatory).
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Key string `json:"key" validate:"regexp=.*"`
-	Key string `json:"key" gorm:"not null;" validate:"regexp=.*"`
+	//Key string `json:"key" validate:"regexp=^$|^([^\\\\x2F]{1,253}\\\\x2F)?[^\\\\x2F]{1,63}$"`
+	Key string `json:"key" gorm:"not null;" validate:"regexp=^$|^([^\\\\x2F]{1,253}\\\\x2F)?[^\\\\x2F]{1,63}$"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
@@ -59,10 +59,10 @@ func AssertMatchExpressionRequired(obj MatchExpression) error {
 // AssertMatchExpressionConstraints checks if the values respects the defined constraints
 func AssertMatchExpressionConstraints(obj MatchExpression) error {
 	//////////////////////// RUNAI START (18.2) //////////////////////////
-	if patternErr := runaihttp.AssertPattern(obj.Key, "Key", "/.*/"); patternErr != nil {
+	if patternErr := runaihttp.AssertPattern(obj.Key, "Key", "/^$|^([^\\x2F]{1,253}\\x2F)?[^\\x2F]{1,63}$/"); patternErr != nil {
 		return &ParsingError{Param: "Key", Err: patternErr}
 	}
-	if maxLengthErr := runaihttp.AssertMaxLength(obj.Key, "Key", 63); maxLengthErr != nil {
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.Key, "Key", 317); maxLengthErr != nil {
 		return &ParsingError{Param: "Key", Err: maxLengthErr}
 	}
 	//////////////////////// RUNAI END //////////////////////////

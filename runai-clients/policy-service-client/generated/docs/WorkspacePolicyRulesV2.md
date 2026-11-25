@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**Accelerator** | Pointer to [**NullableArbitraryRules**](ArbitraryRules.md) |  | [optional] 
 **Annotations** | Pointer to [**NullableInstancesRules**](InstancesRules.md) |  | [optional] 
 **Args** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
 **AutoDeletionTimeAfterCompletionSeconds** | Pointer to [**NullableIntegerRules**](IntegerRules.md) |  | [optional] 
@@ -14,6 +15,7 @@ Name | Type | Description | Notes
 **CreateHomeDir** | Pointer to [**NullableBooleanRules**](BooleanRules.md) |  | [optional] 
 **EnvironmentVariables** | Pointer to [**NullableInstancesRules**](InstancesRules.md) |  | [optional] 
 **ExposedUrls** | Pointer to [**NullableExposedUrlsRules**](ExposedUrlsRules.md) |  | [optional] 
+**GpuType** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
 **Image** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
 **ImagePullPolicy** | Pointer to [**NullableImagePullPolicyRules**](ImagePullPolicyRules.md) |  | [optional] 
 **ImagePullSecrets** | Pointer to [**NullableImagePullSecretsRules**](ImagePullSecretsRules.md) |  | [optional] 
@@ -56,6 +58,41 @@ NewWorkspacePolicyRulesV2WithDefaults instantiates a new WorkspacePolicyRulesV2 
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
+### GetAccelerator
+
+`func (o *WorkspacePolicyRulesV2) GetAccelerator() ArbitraryRules`
+
+GetAccelerator returns the Accelerator field if non-nil, zero value otherwise.
+
+### GetAcceleratorOk
+
+`func (o *WorkspacePolicyRulesV2) GetAcceleratorOk() (*ArbitraryRules, bool)`
+
+GetAcceleratorOk returns a tuple with the Accelerator field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAccelerator
+
+`func (o *WorkspacePolicyRulesV2) SetAccelerator(v ArbitraryRules)`
+
+SetAccelerator sets Accelerator field to given value.
+
+### HasAccelerator
+
+`func (o *WorkspacePolicyRulesV2) HasAccelerator() bool`
+
+HasAccelerator returns a boolean if a field has been set.
+
+### SetAcceleratorNil
+
+`func (o *WorkspacePolicyRulesV2) SetAcceleratorNil(b bool)`
+
+ SetAcceleratorNil sets the value for Accelerator to be an explicit nil
+
+### UnsetAccelerator
+`func (o *WorkspacePolicyRulesV2) UnsetAccelerator()`
+
+UnsetAccelerator ensures that no value is present for Accelerator, not even an explicit nil
 ### GetAnnotations
 
 `func (o *WorkspacePolicyRulesV2) GetAnnotations() InstancesRules`
@@ -406,6 +443,41 @@ HasExposedUrls returns a boolean if a field has been set.
 `func (o *WorkspacePolicyRulesV2) UnsetExposedUrls()`
 
 UnsetExposedUrls ensures that no value is present for ExposedUrls, not even an explicit nil
+### GetGpuType
+
+`func (o *WorkspacePolicyRulesV2) GetGpuType() StringRules`
+
+GetGpuType returns the GpuType field if non-nil, zero value otherwise.
+
+### GetGpuTypeOk
+
+`func (o *WorkspacePolicyRulesV2) GetGpuTypeOk() (*StringRules, bool)`
+
+GetGpuTypeOk returns a tuple with the GpuType field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuType
+
+`func (o *WorkspacePolicyRulesV2) SetGpuType(v StringRules)`
+
+SetGpuType sets GpuType field to given value.
+
+### HasGpuType
+
+`func (o *WorkspacePolicyRulesV2) HasGpuType() bool`
+
+HasGpuType returns a boolean if a field has been set.
+
+### SetGpuTypeNil
+
+`func (o *WorkspacePolicyRulesV2) SetGpuTypeNil(b bool)`
+
+ SetGpuTypeNil sets the value for GpuType to be an explicit nil
+
+### UnsetGpuType
+`func (o *WorkspacePolicyRulesV2) UnsetGpuType()`
+
+UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
 ### GetImage
 
 `func (o *WorkspacePolicyRulesV2) GetImage() StringRules`

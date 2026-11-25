@@ -28,6 +28,7 @@ api_workload.go
 api_workspaces.go
 client.go
 configuration.go
+docs/AcceleratorSelection.md
 docs/AccessKey.md
 docs/AccessKeyCreationRequest.md
 docs/AccessKeyCreationSpec.md
@@ -444,6 +445,7 @@ docs/StringRules.md
 docs/StringRulesCommon.md
 docs/StringRulesOptions.md
 docs/SubmissionErrorV2.md
+docs/SubmissionWarning.md
 docs/SupersetServingPort.md
 docs/SupersetSpec.md
 docs/SupersetSpecAllOfSecurity.md
@@ -492,6 +494,7 @@ docs/WorkspacesAPI.md
 git_push.sh
 go.mod
 go.sum
+model_accelerator_selection.go
 model_access_key.go
 model_access_key_creation_request.go
 model_access_key_creation_spec.go
@@ -889,6 +892,7 @@ model_string_rules.go
 model_string_rules_common.go
 model_string_rules_options.go
 model_submission_error_v2.go
+model_submission_warning.go
 model_superset_serving_port.go
 model_superset_spec.go
 model_superset_spec_all_of_security.go

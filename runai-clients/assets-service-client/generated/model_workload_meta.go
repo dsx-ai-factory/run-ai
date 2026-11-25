@@ -45,6 +45,8 @@ type WorkloadMeta struct {
 	DeletedAt    NullableTime         `json:"deletedAt,omitempty"`
 	DesiredPhase WorkloadDesiredPhase `json:"desiredPhase"`
 	ActualPhase  *Phase               `json:"actualPhase,omitempty"`
+	// Advisory messages returned when submitting the workload.
+	Warnings []SubmissionWarning `json:"warnings,omitempty"`
 }
 
 type _WorkloadMeta WorkloadMeta
@@ -373,6 +375,38 @@ func (o *WorkloadMeta) SetActualPhase(v Phase) {
 	o.ActualPhase = &v
 }
 
+// GetWarnings returns the Warnings field value if set, zero value otherwise.
+func (o *WorkloadMeta) GetWarnings() []SubmissionWarning {
+	if o == nil || IsNil(o.Warnings) {
+		var ret []SubmissionWarning
+		return ret
+	}
+	return o.Warnings
+}
+
+// GetWarningsOk returns a tuple with the Warnings field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *WorkloadMeta) GetWarningsOk() ([]SubmissionWarning, bool) {
+	if o == nil || IsNil(o.Warnings) {
+		return nil, false
+	}
+	return o.Warnings, true
+}
+
+// HasWarnings returns a boolean if a field has been set.
+func (o *WorkloadMeta) HasWarnings() bool {
+	if o != nil && !IsNil(o.Warnings) {
+		return true
+	}
+
+	return false
+}
+
+// SetWarnings gets a reference to the given []SubmissionWarning and assigns it to the Warnings field.
+func (o *WorkloadMeta) SetWarnings(v []SubmissionWarning) {
+	o.Warnings = v
+}
+
 func (o WorkloadMeta) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -399,6 +433,9 @@ func (o WorkloadMeta) ToMap() (map[string]interface{}, error) {
 	toSerialize["desiredPhase"] = o.DesiredPhase
 	if !IsNil(o.ActualPhase) {
 		toSerialize["actualPhase"] = o.ActualPhase
+	}
+	if !IsNil(o.Warnings) {
+		toSerialize["warnings"] = o.Warnings
 	}
 	return toSerialize, nil
 }

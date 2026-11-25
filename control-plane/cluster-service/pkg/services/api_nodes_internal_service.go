@@ -48,3 +48,15 @@ func (s *NodeService) GetNodeInternal(ctx context.Context, clusterUuid string, n
 
 	return api.Response(http.StatusOK, nodeInternal), nil
 }
+
+func (s *NodeService) MatchGpuPlacement(ctx context.Context, clusterUuid string, placement api.GpuPlacementMatch) (api.ImplResponse, error) {
+	tenantID, err := ParseTenantId(ctx)
+	if err != nil {
+		return NewErrorResponse(err), nil
+	}
+	matches, dbErr := dao.MatchGPUPlacement(ctx, tenantID, clusterUuid, placement)
+	if dbErr != nil {
+		return NewErrorResponse(dbErr), nil
+	}
+	return api.Response(http.StatusOK, matches), nil
+}

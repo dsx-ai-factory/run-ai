@@ -26,6 +26,11 @@ var dummyMasterSpec = runaihttp.AssertPattern
 
 type MasterSpec struct {
 
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Accelerator *AcceleratorSelection `json:"accelerator,omitempty"`
+	Accelerator *AcceleratorSelection `json:"accelerator,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	// Set of annotations to populate into the container running the workload.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Annotations *[]Annotation `json:"annotations,omitempty"`
@@ -85,6 +90,12 @@ type MasterSpec struct {
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//ExposedUrls *[]ExposedUrl `json:"exposedUrls,omitempty"`
 	ExposedUrls *[]ExposedUrl `json:"exposedUrls,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Exact device model label value required on the workload's nodes. Use any for no model restriction.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuType *string `json:"gpuType,omitempty"`
+	GpuType *string `json:"gpuType,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	// Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
@@ -217,6 +228,11 @@ type MasterSpec struct {
 
 // AssertMasterSpecRequired checks if the required fields are not zero-ed
 func AssertMasterSpecRequired(obj MasterSpec) error {
+	if obj.Accelerator != nil {
+		if err := AssertAcceleratorSelectionRequired(*obj.Accelerator); err != nil {
+			return err
+		}
+	}
 	if obj.Annotations != nil {
 		for _, el := range *obj.Annotations {
 			if err := AssertAnnotationRequired(el); err != nil {
@@ -308,6 +324,16 @@ func AssertMasterSpecRequired(obj MasterSpec) error {
 
 // AssertMasterSpecConstraints checks if the values respects the defined constraints
 func AssertMasterSpecConstraints(obj MasterSpec) error {
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.Accelerator != nil {
+		if err := AssertAcceleratorSelectionConstraints(*obj.Accelerator); err != nil {
+			return err
+		}
+	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	if maxItemsErr := runaihttp.AssertMaxItems(obj.Annotations, "Annotations", 1000); maxItemsErr != nil {
 		return &ParsingError{Param: "Annotations", Err: maxItemsErr}
@@ -414,6 +440,17 @@ func AssertMasterSpecConstraints(obj MasterSpec) error {
 			}
 		}
 	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if minLengthErr := runaihttp.AssertMinLength(obj.GpuType, "GpuType", 1); minLengthErr != nil {
+		return &ParsingError{Param: "GpuType", Err: minLengthErr}
+	}
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.GpuType, "GpuType", 63); maxLengthErr != nil {
+		return &ParsingError{Param: "GpuType", Err: maxLengthErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	if patternErr := runaihttp.AssertPattern(obj.Image, "Image", "/.*/"); patternErr != nil {
 		return &ParsingError{Param: "Image", Err: patternErr}

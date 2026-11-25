@@ -10,6 +10,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
+
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/admission-controller/pkg/mutators/utils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/admission-controller/pkg/patch"
 
@@ -32,14 +34,12 @@ func (pm *PodMutator) mutateNodeAffinityForDefaultNodePools(pod *v1.Pod, request
 	namespace := getDestinationNamespace(pod, request)
 	projectName := utils.GetDesiredProjectName(pm.client, namespace, nil)
 	if projectName == "" {
-		log.Printf("error: Could not identify the runai project related to this pod")
-		return nil
+		return nodePoolLookupError(pod, fmt.Errorf("could not identify the Run:ai project for pod namespace %q", namespace))
 	}
 
 	project, err := utils.GetProjectResource(pm.client, projectName)
 	if err != nil {
-		log.Printf("error: Could get project resources for project %s, err: %s", projectName, err.Error())
-		return nil
+		return nodePoolLookupError(pod, fmt.Errorf("get project %s: %w", projectName, err))
 	}
 
 	nodePoolName, found := pod.Labels[patch.NodePoolNameLabel]
@@ -48,9 +48,7 @@ func (pm *PodMutator) mutateNodeAffinityForDefaultNodePools(pod *v1.Pod, request
 
 		err := pm.setNodeAffinityForDefaultNodePools(pod, []string{nodePoolName})
 		if err != nil {
-			log.Printf(
-				"error: failed to add nodepool %s from label to the pod's node affinity, err: %s",
-				nodePoolName, err.Error())
+			return nodePoolLookupError(pod, fmt.Errorf("apply labeled node pool %s: %w", nodePoolName, err))
 		}
 
 		return nil
@@ -60,8 +58,7 @@ func (pm *PodMutator) mutateNodeAffinityForDefaultNodePools(pod *v1.Pod, request
 	nodePoolsNames, found, err = unstructured.NestedStringSlice(project.Object, "spec",
 		defaultNodePoolsFieldName)
 	if err != nil {
-		log.Printf("error: got an error trying to fetch the default node pool list from the project, err:  %s", err.Error())
-		return nil
+		return nodePoolLookupError(pod, fmt.Errorf("read project %s default node pools: %w", projectName, err))
 	}
 	if !found || len(nodePoolsNames) == 0 {
 		log.Printf("No default node pools defined for project %s, do nothing", projectName)
@@ -70,8 +67,7 @@ func (pm *PodMutator) mutateNodeAffinityForDefaultNodePools(pod *v1.Pod, request
 
 	hasNodePoolInPodsNodeAffinity, err := pm.hasNodePoolInPodsNodeAffinity(pod)
 	if err != nil {
-		log.Printf("error: failed to calculate current pod's node pools, err: %s", err.Error())
-		return nil
+		return nodePoolLookupError(pod, fmt.Errorf("identify existing node pool requirements: %w", err))
 	}
 	if hasNodePoolInPodsNodeAffinity {
 		log.Printf(
@@ -83,15 +79,29 @@ func (pm *PodMutator) mutateNodeAffinityForDefaultNodePools(pod *v1.Pod, request
 
 	err = pm.setNodeAffinityForDefaultNodePools(pod, nodePoolsNames)
 	if err != nil {
-		log.Printf(
-			"error: failed to add project %s default node pools to the pod's node affinity, err: %s",
-			projectName, err.Error())
+		return nodePoolLookupError(pod, fmt.Errorf("apply project %s default node pools: %w", projectName, err))
 	}
 
 	return nil
 }
 
+// Explicit GPU placement must intersect the project rules. A failed pool lookup
+// must not silently admit these pods with a broader selector.
+func nodePoolLookupError(pod *v1.Pod, err error) error {
+	log.Printf("error: %s", err)
+	if patch.HasAcceleratorSelection(&pod.Spec, pod.Annotations) {
+		return err
+	}
+	return nil
+}
+
 func (pm *PodMutator) hasNodePoolInPodsNodeAffinity(pod *v1.Pod) (bool, error) {
+	hasGPUSelection := patch.HasAcceleratorSelection(&pod.Spec, pod.Annotations)
+	// GPU placement and Knative's converted nodeSelector can both look exactly
+	// like a pool selector. Only a named pool can override the project defaults.
+	if hasGPUSelection && len(strings.Fields(pod.Annotations[constants.AnnotationNodepools])) == 0 {
+		return false, nil
+	}
 	if pod.Spec.Affinity == nil ||
 		pod.Spec.Affinity.NodeAffinity == nil ||
 		pod.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution == nil ||
@@ -110,40 +120,59 @@ func (pm *PodMutator) hasNodePoolInPodsNodeAffinity(pod *v1.Pod) (bool, error) {
 		return false, err
 	}
 
-	return hasNodePoolInNodeAffinity(terms, nodePoolsMapping), nil
+	return hasNodePoolInNodeAffinity(terms, nodePoolsMapping, hasGPUSelection), nil
 }
 
 func hasNodePoolInNodeAffinity(
 	terms []v1.NodeSelectorTerm,
-	nodePoolsMapping map[KeyValuePair]bool) bool {
+	nodePoolsMapping map[KeyValuePair]bool, requireAllTerms bool) bool {
+	hasPool := false
 	for _, term := range terms {
-		for _, matchExpression := range term.MatchExpressions {
-			if matchExpression.Operator != v1.NodeSelectorOpIn {
-				if isMatchExpressionOfDefaultNodePool(matchExpression) {
-					return true
-				}
-				continue
-			}
-
-			if isMatchExpressionOfCustomNodePool(matchExpression, nodePoolsMapping) {
+		// Kubernetes never matches an empty term.
+		if len(term.MatchExpressions) == 0 && len(term.MatchFields) == 0 {
+			continue
+		}
+		if termHasNodePool(term, nodePoolsMapping, requireAllTerms) {
+			hasPool = true
+			if !requireAllTerms {
 				return true
 			}
+		} else if requireAllTerms {
+			// A single OR branch without a pool can escape the defaults.
+			return false
 		}
 	}
+	return hasPool
+}
 
+func termHasNodePool(term v1.NodeSelectorTerm, nodePoolsMapping map[KeyValuePair]bool, requireAllValues bool) bool {
+	for _, expression := range term.MatchExpressions {
+		if isMatchExpressionOfDefaultNodePool(expression) {
+			return true
+		}
+		if expression.Operator != v1.NodeSelectorOpIn {
+			continue
+		}
+		if isMatchExpressionOfCustomNodePool(expression, nodePoolsMapping, requireAllValues) {
+			return true
+		}
+	}
 	return false
 }
 
 func isMatchExpressionOfCustomNodePool(
 	matchExpression v1.NodeSelectorRequirement,
-	nodePoolsMapping map[KeyValuePair]bool) bool {
+	nodePoolsMapping map[KeyValuePair]bool, requireAllValues bool) bool {
 	for _, value := range matchExpression.Values {
-		_, foundNodePool := nodePoolsMapping[KeyValuePair{Key: matchExpression.Key, Value: value}]
-		if foundNodePool {
+		found := nodePoolsMapping[KeyValuePair{Key: matchExpression.Key, Value: value}]
+		if requireAllValues && !found {
+			return false
+		}
+		if !requireAllValues && found {
 			return true
 		}
 	}
-	return false
+	return requireAllValues && len(matchExpression.Values) > 0
 }
 
 func isMatchExpressionOfDefaultNodePool(expression v1.NodeSelectorRequirement) bool {
@@ -164,8 +193,11 @@ func (pm *PodMutator) setNodeAffinityForDefaultNodePools(pod *v1.Pod, nodePoolsN
 		}
 	}
 
+	if len(matchExpressionsToAdd) == 0 && patch.HasAcceleratorSelection(&pod.Spec, pod.Annotations) {
+		return fmt.Errorf("none of the specified node pools %v are active", nodePoolsNames)
+	}
 	if len(matchExpressionsToAdd) > 0 {
-		patch.AddNodeAffinityToPodSpec(&pod.Spec, matchExpressionsToAdd)
+		patch.AddPlacementRequirements(&pod.Spec, pod.Annotations, matchExpressionsToAdd)
 	}
 
 	return nil

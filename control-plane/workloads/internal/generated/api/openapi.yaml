@@ -16039,8 +16039,8 @@ components:
       properties:
         key:
           description: The label key that the selector applies to (mandatory).
-          maxLength: 63
-          pattern: .*
+          maxLength: 317
+          pattern: "^$|^([^\\x2F]{1,253}\\x2F)?[^\\x2F]{1,63}$"
           type: string
         operator:
           $ref: '#/components/schemas/MatchExpressionOperator'
@@ -25566,6 +25566,26 @@ components:
       properties:
         assets:
           $ref: '#/components/schemas/AssetSubmissionIds'
+    AcceleratorSelection:
+      description: Accelerator resource and optional device model label key for workload
+        placement.
+      example:
+        resourceName: nvidia.com/gpu
+        deviceLabelKey: nvidia.com/gpu.product
+      nullable: true
+      properties:
+        resourceName:
+          description: Kubernetes extended resource name. Defaults to nvidia.com/gpu.
+          example: nvidia.com/gpu
+          nullable: true
+          type: string
+        deviceLabelKey:
+          description: Node label key for gpuType. Defaults to nvidia.com/gpu.product
+            for NVIDIA.
+          example: nvidia.com/gpu.product
+          nullable: true
+          type: string
+      type: object
     Annotation:
       description: Annotation details to be populated into the container.
       example:
@@ -26106,6 +26126,14 @@ components:
       maxItems: 1000
       nullable: true
       type: array
+    GpuType:
+      description: Exact device model label value required on the workload's nodes.
+        Use any for no model restriction.
+      example: NVIDIA-H100-80GB-HBM3
+      maxLength: 63
+      minLength: 1
+      nullable: true
+      type: string
     Image:
       description: "Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images).\
         \ The image name is mandatory for creating a workload."
@@ -27807,6 +27835,8 @@ components:
       allOf:
       - nullable: true
         properties:
+          accelerator:
+            $ref: '#/components/schemas/AcceleratorSelection'
           annotations:
             $ref: '#/components/schemas/Annotations'
           args:
@@ -27827,6 +27857,8 @@ components:
             $ref: '#/components/schemas/EnvironmentVariables'
           exposedUrls:
             $ref: '#/components/schemas/ExposedUrls'
+          gpuType:
+            $ref: '#/components/schemas/GpuType'
           image:
             $ref: '#/components/schemas/Image'
           imagePullPolicy:
@@ -28488,6 +28520,10 @@ components:
         podAffinity:
           type: Required
           key: key
+        gpuType: NVIDIA-H100-80GB-HBM3
+        accelerator:
+          resourceName: nvidia.com/gpu
+          deviceLabelKey: nvidia.com/gpu.product
         image: python:3.8
         imagePullPolicy: Always
         nodeAffinityRequired:
@@ -29457,6 +29493,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -29800,6 +29840,23 @@ components:
       - Stopped
       - Deleted
       type: string
+    SubmissionWarning:
+      example:
+        code: code
+        field: field
+        message: message
+      properties:
+        code:
+          type: string
+        field:
+          type: string
+        message:
+          type: string
+      required:
+      - code
+      - field
+      - message
+      type: object
     WorkloadMeta:
       example:
         createdAt: 2022-01-01T03:49:52.531Z
@@ -29810,6 +29867,13 @@ components:
         departmentId: "2"
         desiredPhase: Running
         actualPhase: Creating
+        warnings:
+        - code: code
+          field: field
+          message: message
+        - code: code
+          field: field
+          message: message
         name: my-workload-name
         clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
         projectId: "1"
@@ -29865,6 +29929,11 @@ components:
           $ref: '#/components/schemas/WorkloadDesiredPhase'
         actualPhase:
           $ref: '#/components/schemas/Phase'
+        warnings:
+          description: Advisory messages returned when submitting the workload.
+          items:
+            $ref: '#/components/schemas/SubmissionWarning'
+          type: array
       required:
       - clusterId
       - createdAt
@@ -29879,17 +29948,16 @@ components:
       - $ref: '#/components/schemas/WorkloadMeta'
       - $ref: '#/components/schemas/WorkspaceSpec'
       example:
-        createdAt: 2022-01-01T03:49:52.531Z
-        deletedAt: 2022-01-01T03:49:52.531Z
-        requestedName: requestedName
-        createdBy: test@lab.com
-        workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         departmentId: "2"
         desiredPhase: Running
-        actualPhase: Creating
-        name: my-workload-name
+        warnings:
+        - code: code
+          field: field
+          message: message
+        - code: code
+          field: field
+          message: message
         clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
-        projectId: "1"
         spec:
           terminationGracePeriodSeconds: 20
           stdin: null
@@ -30506,6 +30574,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -30836,6 +30908,14 @@ components:
             url: https://my-url.com
           tty: null
           category: null
+        createdAt: 2022-01-01T03:49:52.531Z
+        deletedAt: 2022-01-01T03:49:52.531Z
+        requestedName: requestedName
+        createdBy: test@lab.com
+        workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        actualPhase: Creating
+        name: my-workload-name
+        projectId: "1"
     PolicyRuleEnum:
       description: "Indicates which validation rule (e.g., min, max, step, options,\
         \ required, canEdit, canAdd) conflicted with policy restrictions, causing\
@@ -30995,6 +31075,8 @@ components:
       type: object
     DistributedInferenceLeaderWorkerSpec:
       properties:
+        accelerator:
+          $ref: '#/components/schemas/AcceleratorSelection'
         annotations:
           description: Set of annotations to populate into the container running the
             workload.
@@ -31035,6 +31117,14 @@ components:
           maxItems: 1000
           nullable: true
           type: array
+        gpuType:
+          description: Exact device model label value required on the workload's nodes.
+            Use any for no model restriction.
+          example: NVIDIA-H100-80GB-HBM3
+          maxLength: 63
+          minLength: 1
+          nullable: true
+          type: string
         image:
           description: "Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images).\
             \ The image name is mandatory for creating a workload."
@@ -31660,6 +31750,8 @@ components:
       - $ref: '#/components/schemas/InferenceFields'
       - nullable: true
         properties:
+          accelerator:
+            $ref: '#/components/schemas/AcceleratorSelection'
           annotations:
             $ref: '#/components/schemas/Annotations'
           args:
@@ -31686,6 +31778,8 @@ components:
             $ref: '#/components/schemas/EnvironmentVariables'
           exposedUrls:
             $ref: '#/components/schemas/ExposedUrls'
+          gpuType:
+            $ref: '#/components/schemas/GpuType'
           image:
             $ref: '#/components/schemas/Image'
           imagePullPolicy:
@@ -31920,6 +32014,9 @@ components:
           type: Required
           key: key
         startupPolicy: LeaderCreated
+        accelerator:
+          resourceName: nvidia.com/gpu
+          deviceLabelKey: nvidia.com/gpu.product
         image: python:3.8
         nodeAffinityRequired:
           nodeSelectorTerms:
@@ -32635,6 +32732,7 @@ components:
             successThreshold: 1
             initialDelaySeconds: 0
         workers: 4
+        gpuType: NVIDIA-H100-80GB-HBM3
         imagePullPolicy: Always
         replicas: 2
         segmentSize: null
@@ -33407,6 +33505,10 @@ components:
         podAffinity:
           type: Required
           key: key
+        gpuType: NVIDIA-H100-80GB-HBM3
+        accelerator:
+          resourceName: nvidia.com/gpu
+          deviceLabelKey: nvidia.com/gpu.product
         image: python:3.8
         imagePullPolicy: null
         nodeAffinityRequired:
@@ -33739,6 +33841,8 @@ components:
         category: category
       nullable: true
       properties:
+        accelerator:
+          $ref: '#/components/schemas/AcceleratorSelection'
         annotations:
           description: Set of annotations to populate into the container running the
             workload.
@@ -33810,6 +33914,14 @@ components:
           maxItems: 1000
           nullable: true
           type: array
+        gpuType:
+          description: Exact device model label value required on the workload's nodes.
+            Use any for no model restriction.
+          example: NVIDIA-H100-80GB-HBM3
+          maxLength: 63
+          minLength: 1
+          nullable: true
+          type: string
         image:
           description: "Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images).\
             \ The image name is mandatory for creating a workload."
@@ -34018,6 +34130,13 @@ components:
       example:
         departmentId: "2"
         desiredPhase: Running
+        warnings:
+        - code: code
+          field: field
+          message: message
+        - code: code
+          field: field
+          message: message
         masterSpecSameAsWorker: null
         masterSpec:
           terminationGracePeriodSeconds: 20
@@ -34635,6 +34754,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: null
           nodeAffinityRequired:
@@ -35137,6 +35260,9 @@ components:
             type: Required
             key: key
           startupPolicy: LeaderCreated
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           nodeAffinityRequired:
             nodeSelectorTerms:
@@ -35852,6 +35978,7 @@ components:
               successThreshold: 1
               initialDelaySeconds: 0
           workers: 4
+          gpuType: NVIDIA-H100-80GB-HBM3
           imagePullPolicy: Always
           replicas: 2
           segmentSize: null
@@ -35979,6 +36106,13 @@ components:
         workload:
           departmentId: "2"
           desiredPhase: Running
+          warnings:
+          - code: code
+            field: field
+            message: message
+          - code: code
+            field: field
+            message: message
           masterSpecSameAsWorker: null
           masterSpec:
             terminationGracePeriodSeconds: 20
@@ -36596,6 +36730,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: null
             nodeAffinityRequired:
@@ -37098,6 +37236,9 @@ components:
               type: Required
               key: key
             startupPolicy: LeaderCreated
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             nodeAffinityRequired:
               nodeSelectorTerms:
@@ -37813,6 +37954,7 @@ components:
                 successThreshold: 1
                 initialDelaySeconds: 0
             workers: 4
+            gpuType: NVIDIA-H100-80GB-HBM3
             imagePullPolicy: Always
             replicas: 2
             segmentSize: null
@@ -37951,6 +38093,13 @@ components:
           workload:
             departmentId: "2"
             desiredPhase: Running
+            warnings:
+            - code: code
+              field: field
+              message: message
+            - code: code
+              field: field
+              message: message
             masterSpecSameAsWorker: null
             masterSpec:
               terminationGracePeriodSeconds: 20
@@ -38568,6 +38717,10 @@ components:
               podAffinity:
                 type: Required
                 key: key
+              gpuType: NVIDIA-H100-80GB-HBM3
+              accelerator:
+                resourceName: nvidia.com/gpu
+                deviceLabelKey: nvidia.com/gpu.product
               image: python:3.8
               imagePullPolicy: null
               nodeAffinityRequired:
@@ -39070,6 +39223,9 @@ components:
                 type: Required
                 key: key
               startupPolicy: LeaderCreated
+              accelerator:
+                resourceName: nvidia.com/gpu
+                deviceLabelKey: nvidia.com/gpu.product
               image: python:3.8
               nodeAffinityRequired:
                 nodeSelectorTerms:
@@ -39785,6 +39941,7 @@ components:
                   successThreshold: 1
                   initialDelaySeconds: 0
               workers: 4
+              gpuType: NVIDIA-H100-80GB-HBM3
               imagePullPolicy: Always
               replicas: 2
               segmentSize: null
@@ -39910,6 +40067,13 @@ components:
           workload:
             departmentId: "2"
             desiredPhase: Running
+            warnings:
+            - code: code
+              field: field
+              message: message
+            - code: code
+              field: field
+              message: message
             masterSpecSameAsWorker: null
             masterSpec:
               terminationGracePeriodSeconds: 20
@@ -40527,6 +40691,10 @@ components:
               podAffinity:
                 type: Required
                 key: key
+              gpuType: NVIDIA-H100-80GB-HBM3
+              accelerator:
+                resourceName: nvidia.com/gpu
+                deviceLabelKey: nvidia.com/gpu.product
               image: python:3.8
               imagePullPolicy: null
               nodeAffinityRequired:
@@ -41029,6 +41197,9 @@ components:
                 type: Required
                 key: key
               startupPolicy: LeaderCreated
+              accelerator:
+                resourceName: nvidia.com/gpu
+                deviceLabelKey: nvidia.com/gpu.product
               image: python:3.8
               nodeAffinityRequired:
                 nodeSelectorTerms:
@@ -41744,6 +41915,7 @@ components:
                   successThreshold: 1
                   initialDelaySeconds: 0
               workers: 4
+              gpuType: NVIDIA-H100-80GB-HBM3
               imagePullPolicy: Always
               replicas: 2
               segmentSize: null
@@ -41900,6 +42072,8 @@ components:
       allOf:
       - nullable: true
         properties:
+          accelerator:
+            $ref: '#/components/schemas/AcceleratorSelection'
           annotations:
             $ref: '#/components/schemas/Annotations'
           args:
@@ -41922,6 +42096,8 @@ components:
             $ref: '#/components/schemas/EnvironmentVariables'
           exposedUrls:
             $ref: '#/components/schemas/ExposedUrls'
+          gpuType:
+            $ref: '#/components/schemas/GpuType'
           image:
             $ref: '#/components/schemas/Image'
           imagePullPolicy:
@@ -42586,6 +42762,10 @@ components:
         podAffinity:
           type: Required
           key: key
+        gpuType: NVIDIA-H100-80GB-HBM3
+        accelerator:
+          resourceName: nvidia.com/gpu
+          deviceLabelKey: nvidia.com/gpu.product
         image: python:3.8
         imagePullPolicy: Always
         nodeAffinityRequired:
@@ -43557,6 +43737,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -43893,17 +44077,16 @@ components:
       - $ref: '#/components/schemas/WorkloadMeta'
       - $ref: '#/components/schemas/TrainingSpec'
       example:
-        createdAt: 2022-01-01T03:49:52.531Z
-        deletedAt: 2022-01-01T03:49:52.531Z
-        requestedName: requestedName
-        createdBy: test@lab.com
-        workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         departmentId: "2"
         desiredPhase: Running
-        actualPhase: Creating
-        name: my-workload-name
+        warnings:
+        - code: code
+          field: field
+          message: message
+        - code: code
+          field: field
+          message: message
         clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
-        projectId: "1"
         spec:
           terminationGracePeriodSeconds: 20
           stdin: null
@@ -44521,6 +44704,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -44852,10 +45039,20 @@ components:
             url: https://my-url.com
           tty: null
           category: null
+        createdAt: 2022-01-01T03:49:52.531Z
+        deletedAt: 2022-01-01T03:49:52.531Z
+        requestedName: requestedName
+        createdBy: test@lab.com
+        workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        actualPhase: Creating
+        name: my-workload-name
+        projectId: "1"
     DistributedSpecSpec:
       allOf:
       - nullable: true
         properties:
+          accelerator:
+            $ref: '#/components/schemas/AcceleratorSelection'
           annotations:
             $ref: '#/components/schemas/Annotations'
           args:
@@ -44880,6 +45077,8 @@ components:
             $ref: '#/components/schemas/EnvironmentVariables'
           exposedUrls:
             $ref: '#/components/schemas/ExposedUrls'
+          gpuType:
+            $ref: '#/components/schemas/GpuType'
           image:
             $ref: '#/components/schemas/Image'
           imagePullPolicy:
@@ -45561,6 +45760,10 @@ components:
         podAffinity:
           type: Required
           key: key
+        gpuType: NVIDIA-H100-80GB-HBM3
+        accelerator:
+          resourceName: nvidia.com/gpu
+          deviceLabelKey: nvidia.com/gpu.product
         image: python:3.8
         imagePullPolicy: Always
         nodeAffinityRequired:
@@ -46546,6 +46749,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: null
           nodeAffinityRequired:
@@ -47502,6 +47709,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -47842,6 +48053,13 @@ components:
       example:
         departmentId: "2"
         desiredPhase: Running
+        warnings:
+        - code: code
+          field: field
+          message: message
+        - code: code
+          field: field
+          message: message
         masterSpecSameAsWorker: true
         masterSpec:
           terminationGracePeriodSeconds: 20
@@ -48459,6 +48677,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: null
           nodeAffinityRequired:
@@ -49412,6 +49634,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -49855,17 +50081,16 @@ components:
       - $ref: '#/components/schemas/WorkloadMeta'
       - $ref: '#/components/schemas/DistributedInferenceSpec'
       example:
-        createdAt: 2022-01-01T03:49:52.531Z
-        deletedAt: 2022-01-01T03:49:52.531Z
-        requestedName: requestedName
-        createdBy: test@lab.com
-        workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         departmentId: "2"
         desiredPhase: Running
-        actualPhase: Creating
-        name: my-workload-name
+        warnings:
+        - code: code
+          field: field
+          message: message
+        - code: code
+          field: field
+          message: message
         clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
-        projectId: "1"
         spec:
           preemptibility: preemptible
           startupPolicy: LeaderCreated
@@ -49892,6 +50117,14 @@ components:
           worker: "{}"
           restartPolicy: RecreateGroupOnPodRestart
           workers: 4
+        createdAt: 2022-01-01T03:49:52.531Z
+        deletedAt: 2022-01-01T03:49:52.531Z
+        requestedName: requestedName
+        createdBy: test@lab.com
+        workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        actualPhase: Creating
+        name: my-workload-name
+        projectId: "1"
     UpdateSpec:
       description: The specifications of the inference to be updated.
       properties:
@@ -50098,6 +50331,8 @@ components:
     InferenceSpecSpec:
       allOf:
       - properties:
+          accelerator:
+            $ref: '#/components/schemas/AcceleratorSelection'
           annotations:
             $ref: '#/components/schemas/Annotations'
           args:
@@ -50114,6 +50349,8 @@ components:
             $ref: '#/components/schemas/EnvironmentVariables'
           exposedUrls:
             $ref: '#/components/schemas/ExposedUrls'
+          gpuType:
+            $ref: '#/components/schemas/GpuType'
           image:
             $ref: '#/components/schemas/Image'
           imagePullPolicy:
@@ -50756,6 +50993,10 @@ components:
         podAffinity:
           type: Required
           key: key
+        gpuType: NVIDIA-H100-80GB-HBM3
+        accelerator:
+          resourceName: nvidia.com/gpu
+          deviceLabelKey: nvidia.com/gpu.product
         image: python:3.8
         imagePullPolicy: Always
         nodeAffinityRequired:
@@ -51723,6 +51964,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -52068,17 +52313,16 @@ components:
       - $ref: '#/components/schemas/WorkloadMeta'
       - $ref: '#/components/schemas/InferenceSpec'
       example:
-        createdAt: 2022-01-01T03:49:52.531Z
-        deletedAt: 2022-01-01T03:49:52.531Z
-        requestedName: requestedName
-        createdBy: test@lab.com
-        workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         departmentId: "2"
         desiredPhase: Running
-        actualPhase: Creating
-        name: my-workload-name
+        warnings:
+        - code: code
+          field: field
+          message: message
+        - code: code
+          field: field
+          message: message
         clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
-        projectId: "1"
         spec:
           servingPort:
             container: 8080
@@ -52683,6 +52927,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -53023,6 +53271,14 @@ components:
             initializationTimeoutSeconds: 1
             concurrencyHardLimit: 0
           category: null
+        createdAt: 2022-01-01T03:49:52.531Z
+        deletedAt: 2022-01-01T03:49:52.531Z
+        requestedName: requestedName
+        createdBy: test@lab.com
+        workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        actualPhase: Creating
+        name: my-workload-name
+        projectId: "1"
     InferenceUpdateSpecAutoscaling:
       properties:
         autoscaling:
@@ -53041,6 +53297,9 @@ components:
       - $ref: '#/components/schemas/InferenceUpdateSpec'
       example:
         spec:
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -53415,6 +53674,7 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
     InferenceWorkloadMetricType:
       description: Specify which data to request.
       enum:
@@ -54781,6 +55041,10 @@ components:
         podAffinity:
           type: Required
           key: key
+        gpuType: NVIDIA-H100-80GB-HBM3
+        accelerator:
+          resourceName: nvidia.com/gpu
+          deviceLabelKey: nvidia.com/gpu.product
         image: python:3.8
         imagePullPolicy: Always
         nodeAffinityRequired:
@@ -55113,6 +55377,8 @@ components:
         category: category
       nullable: true
       properties:
+        accelerator:
+          $ref: '#/components/schemas/AcceleratorSelection'
         annotations:
           description: Set of annotations to populate into the container running the
             workload.
@@ -55184,6 +55450,14 @@ components:
           maxItems: 1000
           nullable: true
           type: array
+        gpuType:
+          description: Exact device model label value required on the workload's nodes.
+            Use any for no model restriction.
+          example: NVIDIA-H100-80GB-HBM3
+          maxLength: 63
+          minLength: 1
+          nullable: true
+          type: string
         image:
           description: "Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images).\
             \ The image name is mandatory for creating a workload."
@@ -55928,6 +56202,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -56923,6 +57201,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -57455,6 +57737,9 @@ components:
             type: Required
             key: key
           startupPolicy: LeaderCreated
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           nodeAffinityRequired:
             nodeSelectorTerms:
@@ -58170,6 +58455,7 @@ components:
               successThreshold: 1
               initialDelaySeconds: 0
           workers: 4
+          gpuType: NVIDIA-H100-80GB-HBM3
           imagePullPolicy: Always
           replicas: 2
           segmentSize: null
@@ -58883,6 +59169,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -59384,6 +59674,9 @@ components:
             type: Required
             key: key
           startupPolicy: LeaderCreated
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           nodeAffinityRequired:
             nodeSelectorTerms:
@@ -60099,6 +60392,7 @@ components:
               successThreshold: 1
               initialDelaySeconds: 0
           workers: 4
+          gpuType: NVIDIA-H100-80GB-HBM3
           imagePullPolicy: Always
           replicas: 2
           segmentSize: null
@@ -60826,6 +61120,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -61358,6 +61656,9 @@ components:
               type: Required
               key: key
             startupPolicy: LeaderCreated
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             nodeAffinityRequired:
               nodeSelectorTerms:
@@ -62073,6 +62374,7 @@ components:
                 successThreshold: 1
                 initialDelaySeconds: 0
             workers: 4
+            gpuType: NVIDIA-H100-80GB-HBM3
             imagePullPolicy: Always
             replicas: 2
             segmentSize: null
@@ -62786,6 +63088,10 @@ components:
               podAffinity:
                 type: Required
                 key: key
+              gpuType: NVIDIA-H100-80GB-HBM3
+              accelerator:
+                resourceName: nvidia.com/gpu
+                deviceLabelKey: nvidia.com/gpu.product
               image: python:3.8
               imagePullPolicy: Always
               nodeAffinityRequired:
@@ -63287,6 +63593,9 @@ components:
               type: Required
               key: key
             startupPolicy: LeaderCreated
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             nodeAffinityRequired:
               nodeSelectorTerms:
@@ -64002,6 +64311,7 @@ components:
                 successThreshold: 1
                 initialDelaySeconds: 0
             workers: 4
+            gpuType: NVIDIA-H100-80GB-HBM3
             imagePullPolicy: Always
             replicas: 2
             segmentSize: null
@@ -64708,6 +65018,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -65240,6 +65554,9 @@ components:
               type: Required
               key: key
             startupPolicy: LeaderCreated
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             nodeAffinityRequired:
               nodeSelectorTerms:
@@ -65955,6 +66272,7 @@ components:
                 successThreshold: 1
                 initialDelaySeconds: 0
             workers: 4
+            gpuType: NVIDIA-H100-80GB-HBM3
             imagePullPolicy: Always
             replicas: 2
             segmentSize: null
@@ -66668,6 +66986,10 @@ components:
               podAffinity:
                 type: Required
                 key: key
+              gpuType: NVIDIA-H100-80GB-HBM3
+              accelerator:
+                resourceName: nvidia.com/gpu
+                deviceLabelKey: nvidia.com/gpu.product
               image: python:3.8
               imagePullPolicy: Always
               nodeAffinityRequired:
@@ -67169,6 +67491,9 @@ components:
               type: Required
               key: key
             startupPolicy: LeaderCreated
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             nodeAffinityRequired:
               nodeSelectorTerms:
@@ -67884,6 +68209,7 @@ components:
                 successThreshold: 1
                 initialDelaySeconds: 0
             workers: 4
+            gpuType: NVIDIA-H100-80GB-HBM3
             imagePullPolicy: Always
             replicas: 2
             segmentSize: null
@@ -68016,6 +68342,8 @@ components:
       allOf:
       - nullable: true
         properties:
+          accelerator:
+            $ref: '#/components/schemas/AcceleratorSelection'
           annotations:
             $ref: '#/components/schemas/Annotations'
           args:
@@ -68036,6 +68364,8 @@ components:
             $ref: '#/components/schemas/EnvironmentVariables'
           exposedUrls:
             $ref: '#/components/schemas/ExposedUrls'
+          gpuType:
+            $ref: '#/components/schemas/GpuType'
           image:
             $ref: '#/components/schemas/Image'
           imagePullPolicy:
@@ -68679,6 +69009,10 @@ components:
         podAffinity:
           type: Required
           key: key
+        gpuType: NVIDIA-H100-80GB-HBM3
+        accelerator:
+          resourceName: nvidia.com/gpu
+          deviceLabelKey: nvidia.com/gpu.product
         image: python:3.8
         imagePullPolicy: Always
         nodeAffinityRequired:
@@ -69650,6 +69984,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -70580,6 +70918,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -71545,6 +71887,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -72475,6 +72821,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -73438,6 +73788,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -74368,6 +74722,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -75328,6 +75686,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -76258,6 +76620,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -77258,6 +77624,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -78230,6 +78600,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -79225,6 +79599,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -79559,6 +79937,8 @@ components:
       allOf:
       - nullable: true
         properties:
+          accelerator:
+            $ref: '#/components/schemas/AcceleratorSelection'
           annotations:
             $ref: '#/components/schemas/Annotations'
           args:
@@ -79581,6 +79961,8 @@ components:
             $ref: '#/components/schemas/EnvironmentVariables'
           exposedUrls:
             $ref: '#/components/schemas/ExposedUrls'
+          gpuType:
+            $ref: '#/components/schemas/GpuType'
           image:
             $ref: '#/components/schemas/Image'
           imagePullPolicy:
@@ -80227,6 +80609,10 @@ components:
         podAffinity:
           type: Required
           key: key
+        gpuType: NVIDIA-H100-80GB-HBM3
+        accelerator:
+          resourceName: nvidia.com/gpu
+          deviceLabelKey: nvidia.com/gpu.product
         image: python:3.8
         imagePullPolicy: Always
         nodeAffinityRequired:
@@ -81196,6 +81582,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -82128,6 +82518,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -83095,6 +83489,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -84027,6 +84425,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -84992,6 +85394,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -85924,6 +86330,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -86886,6 +87296,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -87818,6 +88232,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -88780,6 +89198,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -89729,6 +90151,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -90682,6 +91108,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -91017,6 +91447,8 @@ components:
       allOf:
       - nullable: true
         properties:
+          accelerator:
+            $ref: '#/components/schemas/AcceleratorSelection'
           annotations:
             $ref: '#/components/schemas/Annotations'
           args:
@@ -91041,6 +91473,8 @@ components:
             $ref: '#/components/schemas/EnvironmentVariables'
           exposedUrls:
             $ref: '#/components/schemas/ExposedUrls'
+          gpuType:
+            $ref: '#/components/schemas/GpuType'
           image:
             $ref: '#/components/schemas/Image'
           imagePullPolicy:
@@ -91704,6 +92138,10 @@ components:
         podAffinity:
           type: Required
           key: key
+        gpuType: NVIDIA-H100-80GB-HBM3
+        accelerator:
+          resourceName: nvidia.com/gpu
+          deviceLabelKey: nvidia.com/gpu.product
         image: python:3.8
         imagePullPolicy: Always
         nodeAffinityRequired:
@@ -92657,6 +93095,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -93617,6 +94059,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -94557,6 +95003,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -95509,6 +95959,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -96447,6 +96901,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -97414,6 +97872,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -98354,6 +98816,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -99306,6 +99772,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -100242,6 +100712,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -101209,6 +101683,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -102149,6 +102627,10 @@ components:
               podAffinity:
                 type: Required
                 key: key
+              gpuType: NVIDIA-H100-80GB-HBM3
+              accelerator:
+                resourceName: nvidia.com/gpu
+                deviceLabelKey: nvidia.com/gpu.product
               image: python:3.8
               imagePullPolicy: Always
               nodeAffinityRequired:
@@ -103101,6 +103583,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -104034,6 +104520,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -105001,6 +105491,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -105941,6 +106435,10 @@ components:
               podAffinity:
                 type: Required
                 key: key
+              gpuType: NVIDIA-H100-80GB-HBM3
+              accelerator:
+                resourceName: nvidia.com/gpu
+                deviceLabelKey: nvidia.com/gpu.product
               image: python:3.8
               imagePullPolicy: Always
               nodeAffinityRequired:
@@ -106893,6 +107391,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -107871,6 +108373,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -108811,6 +109317,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -109773,6 +110283,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -110713,6 +111227,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -111679,6 +112197,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -112619,6 +113141,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -112952,6 +113478,8 @@ components:
     InferenceTemplateSpec:
       allOf:
       - properties:
+          accelerator:
+            $ref: '#/components/schemas/AcceleratorSelection'
           annotations:
             $ref: '#/components/schemas/Annotations'
           args:
@@ -112968,6 +113496,8 @@ components:
             $ref: '#/components/schemas/EnvironmentVariables'
           exposedUrls:
             $ref: '#/components/schemas/ExposedUrls'
+          gpuType:
+            $ref: '#/components/schemas/GpuType'
           image:
             $ref: '#/components/schemas/Image'
           imagePullPolicy:
@@ -113592,6 +114122,10 @@ components:
         podAffinity:
           type: Required
           key: key
+        gpuType: NVIDIA-H100-80GB-HBM3
+        accelerator:
+          resourceName: nvidia.com/gpu
+          deviceLabelKey: nvidia.com/gpu.product
         image: python:3.8
         imagePullPolicy: Always
         nodeAffinityRequired:
@@ -114559,6 +115093,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -115487,6 +116025,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -116450,6 +116992,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -117378,6 +117924,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -118339,6 +118889,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -119267,6 +119821,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -120225,6 +120783,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -121153,6 +121715,10 @@ components:
             podAffinity:
               type: Required
               key: key
+            gpuType: NVIDIA-H100-80GB-HBM3
+            accelerator:
+              resourceName: nvidia.com/gpu
+              deviceLabelKey: nvidia.com/gpu.product
             image: python:3.8
             imagePullPolicy: Always
             nodeAffinityRequired:
@@ -122112,6 +122678,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -123058,6 +123628,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -124008,6 +124582,10 @@ components:
           podAffinity:
             type: Required
             key: key
+          gpuType: NVIDIA-H100-80GB-HBM3
+          accelerator:
+            resourceName: nvidia.com/gpu
+            deviceLabelKey: nvidia.com/gpu.product
           image: python:3.8
           imagePullPolicy: Always
           nodeAffinityRequired:
@@ -124350,6 +124928,8 @@ components:
           category: null
     DistributedInferenceLeaderWorkerTemplateSpec:
       properties:
+        accelerator:
+          $ref: '#/components/schemas/AcceleratorSelection'
         annotations:
           description: Set of annotations to populate into the container running the
             workload.
@@ -124390,6 +124970,14 @@ components:
           maxItems: 1000
           nullable: true
           type: array
+        gpuType:
+          description: Exact device model label value required on the workload's nodes.
+            Use any for no model restriction.
+          example: NVIDIA-H100-80GB-HBM3
+          maxLength: 63
+          minLength: 1
+          nullable: true
+          type: string
         image:
           description: "Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images).\
             \ The image name is mandatory for creating a workload."
@@ -125351,6 +125939,8 @@ components:
       type: object
     DistributedInferenceLeaderWorkerDefaultsV2:
       properties:
+        accelerator:
+          $ref: '#/components/schemas/AcceleratorSelection'
         annotations:
           $ref: '#/components/schemas/AnnotationsDefaults'
         args:
@@ -125379,6 +125969,14 @@ components:
           type: boolean
         environmentVariables:
           $ref: '#/components/schemas/EnvironmentVariablesDefaults'
+        gpuType:
+          description: Exact device model label value required on the workload's nodes.
+            Use any for no model restriction.
+          example: NVIDIA-H100-80GB-HBM3
+          maxLength: 63
+          minLength: 1
+          nullable: true
+          type: string
         image:
           description: "Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images).\
             \ The image name is mandatory for creating a workload."
@@ -125666,6 +126264,8 @@ components:
       - $ref: '#/components/schemas/DistributedInferenceCommonDefaultsV2'
       - nullable: true
         properties:
+          accelerator:
+            $ref: '#/components/schemas/AcceleratorSelection'
           annotations:
             $ref: '#/components/schemas/AnnotationsDefaults'
           args:
@@ -125692,6 +126292,8 @@ components:
             $ref: '#/components/schemas/EnvironmentVariablesDefaults'
           exposedUrls:
             $ref: '#/components/schemas/ExposedUrlsDefaults'
+          gpuType:
+            $ref: '#/components/schemas/GpuType'
           image:
             $ref: '#/components/schemas/Image'
           imagePullPolicy:
@@ -125954,6 +126556,21 @@ components:
         servingConfiguration:
           $ref: '#/components/schemas/ServingConfigurationRules'
       type: object
+    ArbitraryRules:
+      nullable: true
+      properties:
+        sourceOfRule:
+          $ref: '#/components/schemas/SourceOfRule'
+        required:
+          description: Whether this arbitrary object is mandatory. default to false.
+          nullable: true
+          type: boolean
+        canEdit:
+          description: "Whether the value of the field, as a whole, is editable. default\
+            \ to false."
+          nullable: true
+          type: boolean
+      type: object
     ItemRules:
       nullable: true
       properties:
@@ -126173,21 +126790,6 @@ components:
           $ref: '#/components/schemas/ImagePullSecretsRulesAttributes'
         instances:
           $ref: '#/components/schemas/ItemRules'
-      type: object
-    ArbitraryRules:
-      nullable: true
-      properties:
-        sourceOfRule:
-          $ref: '#/components/schemas/SourceOfRule'
-        required:
-          description: Whether this arbitrary object is mandatory. default to false.
-          nullable: true
-          type: boolean
-        canEdit:
-          description: "Whether the value of the field, as a whole, is editable. default\
-            \ to false."
-          nullable: true
-          type: boolean
       type: object
     PodAffinityTypeOptions:
       properties:
@@ -126482,6 +127084,8 @@ components:
       type: object
     DistributedInferenceLeaderWorkerRulesV2:
       properties:
+        accelerator:
+          $ref: '#/components/schemas/ArbitraryRules'
         annotations:
           $ref: '#/components/schemas/InstancesRules'
         args:
@@ -126494,6 +127098,8 @@ components:
           $ref: '#/components/schemas/BooleanRules'
         environmentVariables:
           $ref: '#/components/schemas/InstancesRules'
+        gpuType:
+          $ref: '#/components/schemas/StringRules'
         image:
           $ref: '#/components/schemas/StringRules'
         imagePullPolicy:
@@ -126957,6 +127563,8 @@ components:
       - $ref: '#/components/schemas/DistributedInferenceCommonRulesV2'
       - nullable: true
         properties:
+          accelerator:
+            $ref: '#/components/schemas/ArbitraryRules'
           annotations:
             $ref: '#/components/schemas/InstancesRules'
           args:
@@ -126983,6 +127591,8 @@ components:
             $ref: '#/components/schemas/InstancesRules'
           exposedUrls:
             $ref: '#/components/schemas/ExposedUrlsRules'
+          gpuType:
+            $ref: '#/components/schemas/StringRules'
           image:
             $ref: '#/components/schemas/StringRules'
           imagePullPolicy:
@@ -127100,6 +127710,13 @@ components:
           departmentId: "2"
           desiredPhase: Running
           actualPhase: Creating
+          warnings:
+          - code: code
+            field: field
+            message: message
+          - code: code
+            field: field
+            message: message
           name: my-workload-name
           clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
           projectId: "1"
@@ -134771,6 +135388,8 @@ components:
       allOf:
       - nullable: true
         properties:
+          accelerator:
+            $ref: '#/components/schemas/AcceleratorSelection'
           args:
             $ref: '#/components/schemas/Args'
           category:
@@ -134783,6 +135402,8 @@ components:
             $ref: '#/components/schemas/CreateHomeDir'
           environmentVariables:
             $ref: '#/components/schemas/EnvironmentVariables'
+          gpuType:
+            $ref: '#/components/schemas/GpuType'
           image:
             $ref: '#/components/schemas/Image'
           imagePullPolicy:
@@ -134809,6 +135430,9 @@ components:
       - $ref: '#/components/schemas/InferenceUpdateSpecAutoscaling'
       - $ref: '#/components/schemas/InferenceUpdateSpecServingConfiguration'
       example:
+        accelerator:
+          resourceName: nvidia.com/gpu
+          deviceLabelKey: nvidia.com/gpu.product
         image: python:3.8
         imagePullPolicy: Always
         nodeAffinityRequired:
@@ -135183,6 +135807,7 @@ components:
         podAffinity:
           type: Required
           key: key
+        gpuType: NVIDIA-H100-80GB-HBM3
     DistributedInferenceLeaderWorkerDefaultsV2_storage:
       nullable: true
       properties:

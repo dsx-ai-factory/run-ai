@@ -369,3 +369,15 @@ func (client *ClusterClient) GetNodeNetworkTopologyLabelValues(ctx context.Conte
 func (client *ClusterClient) GetNodeInternal(ctx context.Context, clusterUuid string, nodeName string) (*openapi.NodeInternal, *http.Response, error) {
 	return client.ApiClient.NodesAPI.GetNodeInternal(ctx, clusterUuid, nodeName).Execute()
 }
+
+func (client *ClusterClient) MatchGPUPlacement(ctx context.Context, clusterID string, poolIDs []string, labels map[string]string) (bool, error) {
+	placement := openapi.NewGpuPlacementMatch(poolIDs, labels)
+	matches, resp, err := client.ApiClient.NodesAPI.MatchGpuPlacement(ctx, clusterID).GpuPlacementMatch(*placement).Execute()
+	if resp != nil && resp.Body != nil {
+		resp.Body.Close()
+	}
+	if err != nil {
+		return false, err
+	}
+	return matches, nil
+}

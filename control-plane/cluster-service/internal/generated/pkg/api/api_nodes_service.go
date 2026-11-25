@@ -216,6 +216,23 @@ func (s *NodesAPIService) SyncNumaNodes(ctx context.Context, clusterUuid string,
 	return Response(http.StatusNotImplemented, nil), errors.New("SyncNumaNodes method not implemented")
 }
 
+// MatchGpuPlacement - Check whether any node in the supplied pools matches the placement labels
+func (s *NodesAPIService) MatchGpuPlacement(ctx context.Context, clusterUuid string, gpuPlacementMatch GpuPlacementMatch) (ImplResponse, error) {
+	// TODO - update MatchGpuPlacement with the required logic for this service method.
+	// Add api_nodes_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	// TODO: Uncomment the next line to return response Response(200, bool{}) or use other options such as http.Ok ...
+	// return Response(200, bool{}), nil
+
+	// TODO: Uncomment the next line to return response Response(400, Error{}) or use other options such as http.Ok ...
+	// return Response(400, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(500, Error{}) or use other options such as http.Ok ...
+	// return Response(500, Error{}), nil
+
+	return Response(http.StatusNotImplemented, nil), errors.New("MatchGpuPlacement method not implemented")
+}
+
 // GetNodeInternal - Get node internal data by cluster UUID and name
 func (s *NodesAPIService) GetNodeInternal(ctx context.Context, clusterUuid string, nodeName string) (ImplResponse, error) {
 	// TODO - update GetNodeInternal with the required logic for this service method.

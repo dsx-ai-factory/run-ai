@@ -886,6 +886,10 @@ func (m *templatesOrgUnitMock) GetOrgTreeMap(context.Context) (structs.OrgUnitMa
 	return structs.OrgUnitMap{}, nil, nil
 }
 
+func (m *templatesOrgUnitMock) GetProjectGPUPoolIDs(context.Context, string) ([]string, error) {
+	return nil, nil
+}
+
 func (m *templatesOrgUnitMock) GetDepartmentName(context.Context, string) (string, *orgUnitApi.Error) {
 	return "", nil
 }

@@ -2316,6 +2316,61 @@ paths:
       x-test-coverage:
       - e2e/src/test/suites/playwright/serial/regression/node-pools/advancedNodePoolsApi.test.ts
     x-internal: true
+  /internal/clusters/{clusterUuid}/gpu-placement/match:
+    post:
+      operationId: match_gpu_placement
+      parameters:
+      - description: The Universally Unique Identifier (UUID) of the cluster.
+        explode: false
+        in: path
+        name: clusterUuid
+        required: true
+        schema:
+          example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+          format: uuid
+          minLength: 1
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GpuPlacementMatch'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: boolean
+          description: Whether a node matches all requested labels
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Check whether any node in the supplied pools matches the placement
+        labels
+      tags:
+      - Nodes
+      x-no-authorization: true
+      x-service: cluster-service
+      x-test-coverage:
+      - control-plane/cluster-service/pkg/services/api_nodepools_gpu_types_test.go
+    x-internal: true
   /internal/clusters/{clusterUuid}/nodes/{nodeName}:
     get:
       description: Returns minimal node data including topology labels for internal
@@ -8943,6 +8998,27 @@ components:
       - clusterId
       - id
       - name
+      type: object
+    GpuPlacementMatch:
+      example:
+        nodePoolIds:
+        - nodePoolIds
+        - nodePoolIds
+        labels:
+          key: labels
+      properties:
+        nodePoolIds:
+          items:
+            type: string
+          type: array
+        labels:
+          additionalProperties:
+            type: string
+          minProperties: 1
+          type: object
+      required:
+      - labels
+      - nodePoolIds
       type: object
     NetworkTopologyLabelValuesOptional:
       description: The topology levels of node (node address) according to nodepool
