@@ -140,8 +140,8 @@ func (c *WorkflowsAPIController) Routes() Routes {
 						next,
 						"workflows",
 						"read",
-						false,
-						"",
+						true,
+						"workloadId",
 					)
 				},
 				func(next http.HandlerFunc) http.HandlerFunc {
@@ -162,8 +162,8 @@ func (c *WorkflowsAPIController) Routes() Routes {
 						next,
 						"workflows",
 						"delete",
-						false,
-						"",
+						true,
+						"workloadId",
 					)
 				},
 				func(next http.HandlerFunc) http.HandlerFunc {

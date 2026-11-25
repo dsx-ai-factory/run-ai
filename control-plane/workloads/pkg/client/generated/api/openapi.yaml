@@ -7530,6 +7530,7 @@ paths:
       x-authorize:
         resource-type: workflows
         action: delete
+        resource-id: workloadId
     get:
       description: Retrieve workflow details using a workflow id.
       operationId: get_workflow
@@ -7604,6 +7605,7 @@ paths:
       x-authorize:
         resource-type: workflows
         action: read
+        resource-id: workloadId
   /api/v1/workload-templates:
     get:
       description: Retrieve all available templates.
