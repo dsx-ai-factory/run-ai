@@ -1,7 +1,7 @@
 {
   "service_name": "runai-workloads-kit",
   "artifact_type": "container",
-  "enabled": false,
+  "enabled": true,
   "cache_artifacts": false,
   "skip_container_validation": true,
   "make": {
