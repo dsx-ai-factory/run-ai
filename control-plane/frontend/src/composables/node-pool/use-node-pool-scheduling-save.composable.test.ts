@@ -59,6 +59,25 @@ describe("scheduling persistence", () => {
       .spyOn(orgUnitService, "resetProjectResources")
       .mockRejectedValueOnce(new Error("try again"))
       .mockResolvedValue(undefined);
+    const readDepartments = vi
+      .spyOn(orgUnitService, "getDepartmentNodePoolResources")
+      .mockResolvedValue({ nodePoolResources: [] });
+    const projectRows = ["unlimited", "zero", "positive"].map((orgUnitId, i) => ({
+      ...success([orgUnitId]).succeeded[0],
+      parentId: "a",
+      resources: { gpu: { deserved: [-1, 0, 6][i], overQuotaWeight: [-1, 0, 6][i] } },
+    }));
+    const readProjects = vi
+      .spyOn(orgUnitService, "getProjectNodePoolResources")
+      .mockResolvedValueOnce({ nodePoolResources: [projectRows[0]], next: 1 })
+      .mockResolvedValueOnce({ nodePoolResources: projectRows.slice(1) });
+    const patchProjects = vi
+      .spyOn(orgUnitService, "batchPatchProjectNodePoolResources")
+      .mockImplementation(async ({ patchRequests }) => ({
+        ...success([]),
+        succeeded: [],
+        totalSuccessful: patchRequests.length,
+      }));
     const patchDepartments = vi.fn(async () => success(["a"]));
     const saver = createSchedulingSaver({ patchPool, patchDepartments });
     await expect(saver.save(automatic, input)).rejects.toThrow("try again");
@@ -74,6 +93,13 @@ describe("scheduling persistence", () => {
     expect(patchDepartments).toHaveBeenCalledExactlyOnceWith({
       patchRequests: [{ orgUnitId: "a", nodePoolId: "17", resources: { gpu: { overQuotaWeight: 6 } } }],
     });
+    expect(patchProjects.mock.calls.map(([batch]) => batch.patchRequests)).toEqual([
+      [{ orgUnitId: "unlimited", nodePoolId: "17", resources: { gpu: { overQuotaWeight: 2 } } }],
+      [{ orgUnitId: "zero", nodePoolId: "17", resources: { gpu: { overQuotaWeight: 0.01 } } }],
+    ]);
+    readProjects.mockRestore();
+    readDepartments.mockRestore();
+    patchProjects.mockRestore();
     resetDepartments.mockRestore();
     resetProjects.mockRestore();
   });

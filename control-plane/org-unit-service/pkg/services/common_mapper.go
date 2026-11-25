@@ -34,7 +34,7 @@ const (
 	// MinOverQuotaWeight is the floor applied to the API response value of
 	// OverQuotaWeight when adjustable weights are disabled and deserved == 0,
 	// so the cluster scheduler can still fairshare/reclaim for the queue.
-	MinOverQuotaWeight = models.MinOverQuotaWeight
+	MinOverQuotaWeight = 0.01
 )
 
 type QuotaStatus struct {

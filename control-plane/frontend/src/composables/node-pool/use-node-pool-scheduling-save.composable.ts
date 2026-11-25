@@ -6,7 +6,7 @@ import { clusterService } from "@/services/control-plane/cluster.service/cluster
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 import { ResourcesResetAction } from "@/swagger-models/org-unit-service-client";
 import type { Nodepool, SchedulingCapabilitiesNullable } from "@/swagger-models/cluster-service-client/index";
-import type { SchedulingDraft } from "@/models/node-pool-scheduling.model";
+import { weightFromGuaranteedQuota, type SchedulingDraft } from "@/models/node-pool-scheduling.model";
 import { buildSchedulingSave } from "@/utils/node-pool-scheduling.util/node-pool-scheduling-save.util";
 export function switchingToCustomWeights(saved?: SchedulingCapabilitiesNullable, next?: SchedulingCapabilitiesNullable) {
   return (
@@ -14,12 +14,44 @@ export function switchingToCustomWeights(saved?: SchedulingCapabilitiesNullable,
   );
 }
 
+type OrgUnitKind = "departments" | "projects";
+
+async function normalizeResetGpuWeights(pool: Nodepool, kind: OrgUnitKind) {
+  const list =
+    kind === "departments" ? orgUnitService.getDepartmentNodePoolResources : orgUnitService.getProjectNodePoolResources;
+  const patch =
+    kind === "departments"
+      ? orgUnitService.batchPatchDepartmentNodePoolResources
+      : orgUnitService.batchPatchProjectNodePoolResources;
+  const filters = [`clusterId==${pool.clusterId}`, `nodePoolId==${pool.id}`];
+  let offset = 0;
+  while (true) {
+    // Sort by a stable ID; updating weights must not move rows between pages.
+    const page = await list(filters, "orgUnitId", "asc", offset, 100);
+    const patchRequests = page.nodePoolResources.flatMap(({ orgUnitId, nodePoolId, resources }) => {
+      const { deserved, overQuotaWeight } = resources.gpu ?? {};
+      // The existing reset copies quota literally. Only repair the two sentinels it copied.
+      if ((deserved !== -1 && deserved !== 0) || overQuotaWeight !== deserved) return [];
+      return [{ orgUnitId, nodePoolId, resources: { gpu: { overQuotaWeight: weightFromGuaranteedQuota(deserved) } } }];
+    });
+    if (patchRequests.length) {
+      const result = await patch({ patchRequests });
+      if (result.totalFailed || result.totalSuccessful !== patchRequests.length) {
+        throw new Error(result.failed?.[0]?.message || `Could not initialize weights for all ${kind}.`);
+      }
+    }
+    if (page.next == null) return;
+    if (page.next <= offset) throw new Error(`Could not load the next page of ${kind}.`);
+    offset = page.next;
+  }
+}
+
 export function useNodePoolSchedulingSave() {
   let busy = false;
   let poolKey = "";
   let savedPool: Nodepool | undefined;
   let poolSettingsSaved = false;
-  let pendingReset: "departments" | "projects" | undefined;
+  let pendingReset: OrgUnitKind | "departmentWeights" | "projectWeights" | undefined;
   const completed = new Map<string, string>();
   return {
     get resetPending() {
@@ -75,7 +107,15 @@ export function useNodePoolSchedulingSave() {
             await orgUnitService.resetDepartmentResources(request);
             pendingReset = "projects";
           }
-          await orgUnitService.resetProjectResources(request);
+          if (pendingReset === "projects") {
+            await orgUnitService.resetProjectResources(request);
+            pendingReset = "departmentWeights";
+          }
+          if (pendingReset === "departmentWeights") {
+            await normalizeResetGpuWeights(pool, "departments");
+            pendingReset = "projectWeights";
+          }
+          await normalizeResetGpuWeights(pool, "projects");
           pendingReset = undefined;
         }
         const pending = plan.departments.filter((row) => completed.get(row.orgUnitId) !== JSON.stringify(row));

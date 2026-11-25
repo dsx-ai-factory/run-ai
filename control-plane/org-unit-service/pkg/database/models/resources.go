@@ -21,8 +21,6 @@ const (
 
 	DefaultResourceRank    = "MediumLow"
 	DefaultOverQuotaWeight = float64(2)
-	// A zero-quota queue needs a positive weight to participate in fair sharing.
-	MinOverQuotaWeight = 0.01
 
 	ResourcesNodePoolIdColumn   = "node_pool_id"
 	ResourcesNodePoolNameColumn = "node_pool_name"

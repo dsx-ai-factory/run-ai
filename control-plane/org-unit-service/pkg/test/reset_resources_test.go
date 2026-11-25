@@ -440,7 +440,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 			}
 		})
 
-		It("DepartmentsResetResources WEIGHTS_TO_DESERVED uses the quota for finite resources and the default weight for unlimited resources", func() {
+		It("DepartmentsResetResources WEIGHTS_TO_DESERVED sets weights equal to deserved on target nodepool", func() {
 			// set weights that are different from deserved on all departments node pool 2
 			response, err := departmentApiService.GetDepartments(ctx, []string{fmt.Sprintf("clusterId==%s", clusterId)}, "", "", "", 0, 0)
 			Expect(err).To(BeNil())
@@ -452,7 +452,6 @@ var _ = Describe("Org unit tests", Ordered, func() {
 						departmentUpdateReq.Resources[i].Gpu.Deserved = ptr.To(float64(5))
 						departmentUpdateReq.Resources[i].Gpu.Limit = ptr.To(float64(10))
 						departmentUpdateReq.Resources[i].Gpu.OverQuotaWeight = ptr.To(float64(15))
-						departmentUpdateReq.Resources[i].Cpu = &api.ResourcesCpu{Deserved: ptr.To(-1.0), OverQuotaWeight: ptr.To(15.0)}
 					}
 				}
 				updRes, err := departmentApiService.UpdateDepartment(ctx, dep.Id, departmentUpdateReq)
@@ -478,8 +477,6 @@ var _ = Describe("Org unit tests", Ordered, func() {
 						Expect(r.Gpu.Limit).To(Equal(ptr.To(float64(10))))
 						Expect(r.Gpu.OverQuotaWeight).ToNot(BeNil())
 						Expect(*r.Gpu.OverQuotaWeight).To(Equal(r.Gpu.Deserved))
-						Expect(r.Cpu).NotTo(BeNil())
-						Expect(r.Cpu.OverQuotaWeight).To(Equal(ptr.To(2.0)))
 					}
 				}
 			}
@@ -682,18 +679,14 @@ var _ = Describe("Org unit tests", Ordered, func() {
 			}
 		})
 
-		It("ProjectsResetResources WEIGHTS_TO_DESERVED uses the default weight for unlimited GPU quotas", func() {
-			// Give one project unlimited quota alongside its siblings with finite quotas.
+		It("ProjectsResetResources WEIGHTS_TO_DESERVED sets oq weights equal to deserved values", func() {
+			// First, modify projB default GPU deserved to a distinct number to assert mapping
 			getProjectBResponse, _ := projectApiService.GetProject(ctx, projB.Id)
 			projectBBefore := getProjectBResponse.Body.(api.Project)
 			projectUpdateReq := getProjectUpdateRequest(projectBBefore)
 			for i := range projectUpdateReq.Resources {
 				if projectUpdateReq.Resources[i].NodePool.Name == defaultNodePoolName {
-					projectUpdateReq.Resources[i].Gpu.Deserved = ptr.To(-1.0)
-					projectUpdateReq.Resources[i].Gpu.Limit = ptr.To(-1.0)
-					projectUpdateReq.Resources[i].Gpu.OverQuotaWeight = ptr.To(15.0)
-					projectUpdateReq.Resources[i].Cpu = &api.ResourcesCpu{Deserved: ptr.To(0.0), OverQuotaWeight: ptr.To(15.0)}
-					projectUpdateReq.Resources[i].Memory = &api.ResourcesMemory{OverQuotaWeight: ptr.To(15.0)}
+					projectUpdateReq.Resources[i].Gpu.Deserved = ptr.To(float64(3))
 				}
 			}
 			updateProjectBResponse, err := projectApiService.UpdateProject(ctx, projB.Id, projectUpdateReq)
@@ -714,17 +707,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				for _, r := range p.Resources {
 					if r.NodePool.Name == defaultNodePoolName {
 						Expect(r.Gpu.OverQuotaWeight).ToNot(BeNil())
-						if p.Id == projB.Id {
-							Expect(r.Gpu.Deserved).To(Equal(-1.0))
-							Expect(*r.Gpu.OverQuotaWeight).To(Equal(2.0))
-							Expect(r.Cpu).NotTo(BeNil())
-							Expect(r.Cpu.OverQuotaWeight).To(Equal(ptr.To(0.01)))
-							Expect(r.Memory).To(BeNil())
-						} else if r.Gpu.Deserved == 0 {
-							Expect(*r.Gpu.OverQuotaWeight).To(Equal(0.01))
-						} else {
-							Expect(*r.Gpu.OverQuotaWeight).To(Equal(r.Gpu.Deserved))
-						}
+						Expect(*r.Gpu.OverQuotaWeight).To(Equal(r.Gpu.Deserved))
 					}
 				}
 			}
