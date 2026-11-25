@@ -31,7 +31,8 @@ func (w *WorkloadsV2Impl) validateUserCredentials(ctx context.Context, sources [
 		// The service is constructed before configuration is loaded.
 		client = assetsClient.NewAssetsClient(config.Get[*ourConfig.Services]().AssetsServiceUrl)
 	}
-	credentials, err := client.ListCredentialsAssets(ctx, true)
+	const privateOnly = true
+	credentials, err := client.ListCredentialsAssets(ctx, privateOnly)
 	if err != nil {
 		return NewSubmissionError(http.StatusInternalServerError, err.Message, nil)
 	}
