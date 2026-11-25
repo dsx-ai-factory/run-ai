@@ -120,17 +120,6 @@ func (c *HostPathTestFactory) validateListContent(listRequest *http.Request, exp
 	tg.validateListContent(c.router, listRequest, expectedUsedBy, createdSpecs)
 }
 
-func (c *HostPathTestFactory) addToWorkloadCreationReq(request *api.WorkloadCreationRequest, assetMeta *api.AssetMeta) bool {
-	if request.Assets.Datasources == nil {
-		request.Assets.Datasources = make([]api.AssetIdAndKind, 0)
-	}
-	request.Assets.Datasources = append(request.Assets.Datasources, api.AssetIdAndKind{
-		Kind: api.ASSETKIND_HOST_PATH,
-		Id:   assetMeta.Id,
-	})
-	return true
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 //    Asset Builders
 /////////////////////////////////////////////////////////////////////////////////////////////

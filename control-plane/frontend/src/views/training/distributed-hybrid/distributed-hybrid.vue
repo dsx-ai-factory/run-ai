@@ -101,9 +101,10 @@ import DistributedHybridMaster from "./distributed-hybrid-master.vue";
 import DistributedHybridWorker from "./distributed-hybrid-worker.vue";
 import DistributedHybridSetup from "./distributed-hybrid-setup.vue";
 import { alertUtil } from "@/utils/alert.util";
-import type { UnifiedPolicyInfo, UnifiedSpecMaster } from "@/swagger-models/workloads-client";
 import {
   CleanPodPolicy,
+  type UnifiedPolicyInfo,
+  type UnifiedSpecMaster,
   type UnifiedProjectInfo,
   type UnifiedWorkload,
   type UnifiedWorkloadRequest,
@@ -116,7 +117,12 @@ import { useTrainingStore } from "@/stores/training.store";
 import { useAuthStore } from "@/stores/auth.store";
 import type { IPolicyViewDetails } from "@/utils/policy.util/policy-view.util";
 import { getDistributedPolicyViewDetails } from "@/utils/policy.util/policy-view.util";
-import { DistributedFramework, Scope, type StringOption } from "@/swagger-models/assets-service-client";
+import { DistributedFramework, Scope } from "@/swagger-models/assets-service-client";
+import type {
+  StringOption,
+  DistributedPolicyDefaultsV2Worker,
+  DistributedPolicyRulesV2Worker,
+} from "@/swagger-models/policy-service-client";
 import { useEnvironmentVariablesSection } from "@/composables/use-environment-variables-section.composable";
 import { deepCopy } from "@/utils/common.util";
 import { workloadService } from "@/services/cluster/workload.service/workload.service";
@@ -146,10 +152,6 @@ import {
   MIN_CLUSTER_VERSION_FOR_SEMI_PREEMPTIBILITY,
   MIN_CLUSTER_VERSION_FOR_TERMINATION_GRACE_PERIOD,
 } from "@/common/version.constant";
-import type {
-  DistributedPolicyDefaultsV2Worker,
-  DistributedPolicyRulesV2Worker,
-} from "@/swagger-models/policy-service-client";
 
 const DistributedHybrid = defineComponent({
   name: "distributed-hybrid",

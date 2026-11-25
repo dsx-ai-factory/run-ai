@@ -121,19 +121,6 @@ func (c *GitTestFactory) validateListContent(listRequest *http.Request, expected
 	tg.validateListContent(c.router, listRequest, expectedUsedBy, createdSpecs)
 }
 
-func (c *GitTestFactory) addToWorkloadCreationReq(request *api.WorkloadCreationRequest, assetMeta *api.AssetMeta) bool {
-	if request.Assets.Datasources == nil {
-		request.Assets.Datasources = make([]api.AssetIdAndKind, 0)
-	}
-	request.Assets.Datasources = []api.AssetIdAndKind{
-		{
-			Id:   assetMeta.Id,
-			Kind: api.ASSETKIND_GIT,
-		},
-	}
-	return true
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 //    Asset Builders
 /////////////////////////////////////////////////////////////////////////////////////////////

@@ -16,7 +16,6 @@ import type {
   SpecificRunConnectionInfo,
   AssetIdAndKind,
   ToolType,
-  DistributedData,
   DistributedFramework,
   Toleration,
   PodAffinity,
@@ -33,10 +32,10 @@ import type {
 } from "@/swagger-models/assets-service-client";
 import type { ENimAccessModelMethod } from "@/components/workload-creation/hybrid-nim-model-section/nim-access-model/nim-access-model.model";
 
-import type { IAutoScaleData } from "@/components/section/compute-resource-section";
+import type { IAutoScaleData } from "@/components/section/compute-resource-section/auto-scale-section";
 import type { IItemizedListItem } from "@/components/common/runai-itemized-list";
-import type { IUIVolume, TUIDataSourceInstancesKinds } from "@/models/data-source.model";
-import type { EInferenceArchitecture, EInferenceType, EServerType } from "@/models/inference.model";
+import type { TUIDataSourceInstancesKinds } from "@/models/data-source.model";
+import type { EInferenceArchitecture, EServerType } from "@/models/inference.model";
 import type { IEnumBasedFilterSelectOption, IPaginationFilter } from "@/models/filter.model";
 import type { IUIConnection } from "./environment.model";
 import type { IServingEndpointAccessData } from "@/components/section/inference/serving-endpoint-section/serving-endpoint-access.model";
@@ -201,7 +200,6 @@ export enum EWorkloadErrorMessage {
   WorkloadDeletingCantBeUpdated = "The selected workload is deleting and can't be updated",
   WorkloadTerminatingCantBeUpdated = "The selected workload is terminating and can't be updated",
   CliWorkloadsCantBeUpdated = "This action is not supported for the selected workload because it was created via the CLI. To perform the action, go to the CLI to update the workload.",
-  RequiresFlexibleSubmissionForm = "This action is not supported for the selected workload. To perform it, ask your administrator to enable the flexible workload submission form.",
   ActionNotSupported = "This action is not supported for the selected workload",
 }
 
@@ -425,14 +423,8 @@ export interface IWorkloadListModal {
   status: IStatusColOptions;
 }
 
-export interface IUIDistributedMaster {
-  assets: IUIWorkloadAssets;
-  specificEnv: IUIWorkloadSpecificEnv;
-}
-
-export interface IUIDistributed extends Omit<DistributedData, "master" | "framework" | "numWorkers"> {
+export interface IUIDistributed {
   numWorkers?: number;
-  master?: IUIDistributedMaster | null;
   distFramework?: DistributedFramework | null;
   noMaster?: boolean;
 }
@@ -445,11 +437,9 @@ export interface IUIWorkloadCreation {
   assets: IUIWorkloadAssets;
   specificEnv: IUIWorkloadSpecificEnv;
   distributed?: IUIDistributed | null;
-  enableEditingMaster?: boolean;
 }
 
 export interface IUIInferenceCreation extends IUIWorkloadCreation {
-  inferenceType?: EInferenceType;
   modelName?: string;
   image?: string;
   accessModelMethod?: ENimAccessModelMethod;
@@ -473,7 +463,6 @@ export interface IUIWorkloadAssets {
   environment: string | null;
   compute: string | null;
   datasources?: Array<AssetIdAndKind>;
-  uiVolumes?: Array<IUIVolume>;
 }
 
 export interface IUIWorkloadSpecificEnv {
@@ -499,13 +488,6 @@ export interface IUIWorkloadSpecificEnv {
   servingPortAccess?: IServingEndpointAccessData | null;
   terminationGracePeriodSeconds?: number | null;
   servingConfiguration?: ServingConfiguration | null;
-}
-
-export interface IWorkloadMeta {
-  name: string;
-  namespace: string;
-  clusterId: string;
-  projectId: number;
 }
 
 export interface IWorkloadPodsModalOptions {

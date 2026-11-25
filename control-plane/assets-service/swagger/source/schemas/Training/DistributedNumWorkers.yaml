@@ -1,4 +1,0 @@
-description: number of worker replicas to process the workload.
-type: integer
-minimum: 1
-example: 3

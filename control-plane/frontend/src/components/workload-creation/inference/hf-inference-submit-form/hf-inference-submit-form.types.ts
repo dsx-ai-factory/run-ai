@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { StringOption, AssetKind } from "@/swagger-models/assets-service-client";
+import type { AssetKind } from "@/swagger-models/assets-service-client";
+import type { StringOption } from "@/swagger-models/policy-service-client";
 import type { UnifiedPolicyInfoPerReplicaType } from "@/swagger-models/workloads-client";
 import type { IPolicyViewDetails } from "@/utils/policy.util/policy-view.util";
 import type { WorkloadCreationDrawerEntities } from "@/models/workload-creation-drawer-model";

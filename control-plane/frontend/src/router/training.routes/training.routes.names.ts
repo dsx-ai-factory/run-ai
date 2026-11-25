@@ -11,8 +11,6 @@
 // So I moved the names out of the route file, which fix this error.
 export const TRAINING_ROUTE_NAMES = {
   TRAINING_NEW: "training-new",
-  TRAINING_ASSETS_EDIT: "training-assets-edit",
-  DISTRIBUTED_ASSETS_EDIT: "distributed-assets-edit",
   TRAINING_HYBRID: "training-hybrid",
   DISTRIBUTED_HYBRID: "distributed-hybrid",
 };
