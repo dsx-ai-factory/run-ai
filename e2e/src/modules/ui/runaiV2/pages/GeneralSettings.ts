@@ -93,7 +93,6 @@ export class GeneralSettings extends BaseV2Page {
 
     dataVolumeToggle: string;
 
-    flexWorkloadSubmissionToggle: string;
 
     newPolicyToggle: string;
 
@@ -111,7 +110,6 @@ export class GeneralSettings extends BaseV2Page {
 
     ngcIntegrationBetaBadge: string;
 
-    workloadsExpansionHeader: string;
 
     linkToSamlDescriptor: string;
 
@@ -188,7 +186,6 @@ export class GeneralSettings extends BaseV2Page {
         this.overQuotaWeightToggle = '[aid="toggle-setting-project.quota.manual_over_quota"]';
         this.gpuResourceOptimizationToggle = '[aid="toggle-setting-tenant.gpu_over_provisioning"]';
         this.dataVolumeToggle = '[aid="toggle-setting-tenant.enable_data_volumes"]';
-        this.flexWorkloadSubmissionToggle = '[aid="toggle-setting-tenant.enable_hybrid_submission"]';
         this.newPolicyToggle = '[aid="toggle-setting-tenant.enable_policies"]';
         this.modelCatalogToggle = '[aid="toggle-setting-tenant.enable_model_catalog"]';
         this.nimToggle = '[aid="toggle-setting-tenant.enable_nim"]';
@@ -198,7 +195,6 @@ export class GeneralSettings extends BaseV2Page {
         this.allowGpt2ModelExperimentalBadge =
             '[aid="tenant.allow_gpt2_model-setting"] [aid="badge-Experimental"]';
         this.ngcIntegrationBetaBadge = '[aid="tenant.enable_ngc_integration-setting"] [aid="badge-Beta"]';
-        this.workloadsExpansionHeader = 'div[aid="workloads-expansion-toggle"] div.runai-expansion-header';
         this.linkToSamlDescriptor = '[aid="open-metadata-xml"]';
         this.branding = 'text=Branding';
         this.addLogoButton = '[aid="add-logo-btn"]';
@@ -853,33 +849,6 @@ export class GeneralSettings extends BaseV2Page {
         const checked = await this.locator(this.dataVolumeToggle).getAttribute('aria-checked');
         if (checked === 'false') {
             await this.locator(this.dataVolumeToggle).click();
-        }
-    }
-
-    async isWorkloadsSectionExpanded(): Promise<boolean> {
-        const ariaLabel = await this.page.locator(this.workloadsExpansionHeader).getAttribute('aria-label');
-        return ariaLabel.includes('Collapse');
-    }
-
-    async disableFlexWorkloadSubmission(): Promise<void> {
-        await this.goToPage();
-        const isExpanded = await this.isWorkloadsSectionExpanded();
-        if (!isExpanded) await this.page.locator(this.workloadsSection).click();
-
-        const checked = await this.locator(this.flexWorkloadSubmissionToggle).getAttribute('aria-checked');
-        if (checked === 'true') {
-            await this.locator(this.flexWorkloadSubmissionToggle).click();
-        }
-    }
-
-    async enableFlexWorkloadSubmission(): Promise<void> {
-        await this.goToPage();
-        const isExpanded = await this.isWorkloadsSectionExpanded();
-        if (!isExpanded) await this.page.locator(this.workloadsSection).click();
-
-        const checked = await this.locator(this.flexWorkloadSubmissionToggle).getAttribute('aria-checked');
-        if (checked === 'false') {
-            await this.locator(this.flexWorkloadSubmissionToggle).click();
         }
     }
 

@@ -4800,6 +4800,7 @@ Components:
   k8s.io/kube-openapi/pkg/internal/third_party/govalidator v0.0.0-20260317180543-43fb72c5454a
   k8s.io/kube-openapi/pkg/internal/third_party/govalidator v0.0.0-20260427204847-8949caaa1199
   k8s.io/kube-openapi/pkg/internal/third_party/govalidator v0.0.0-20260519202549-bbf5c5577288
+  k8s.io/kube-openapi/pkg/internal/third_party/govalidator v0.0.0-20260721132016-d427ff9ee9ad
 
 The MIT License (MIT)
 
@@ -14251,7 +14252,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Copyright Miklos Szeredi, Miklos Szeredi <miklos@szeredi.hu>, Russ Cox and 3 others - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
-  github.com/jacobsa/fuse v0.0.0-20260630194014-a124548f6da7
+  github.com/jacobsa/fuse v0.0.0-20261123163607-fc8dd07009de
 
 Apache License
                            Version 2.0, January 2004
@@ -17701,7 +17702,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 --------------------------------------------------------------------------------
-Copyright the authors of cel.dev/expr, cloud.google.com/go/auth, cloud.google.com/go/auth/oauth2adapt and 124 others - (MPL-2.0 OR Apache-2.0) / Apache-2.0
+Copyright the authors of cel.dev/expr, cloud.google.com/go/auth, cloud.google.com/go/auth/oauth2adapt and 125 others - (MPL-2.0 OR Apache-2.0) / Apache-2.0
 License Text(http://www.apache.org/licenses/LICENSE-2.0)
 Components:
   cel.dev/expr v0.25.2
@@ -17723,9 +17724,9 @@ Components:
   echarts 6.1.0
   github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.34.0
   github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.55.0
-  github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.62.0
+  github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.63.0
   github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.55.0
-  github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.62.0
+  github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.63.0
   github.com/Masterminds/goutils v1.1.1
   github.com/NVIDIA/k8s-dra-driver-gpu v0.0.0-20260329235847-c657396bd619
   github.com/aws/amazon-ssm-agent/agent/versionutil v0.0.0-20260407151232-1233a2a55f57
@@ -17742,6 +17743,7 @@ Components:
   github.com/go-openapi/jsonreference v0.21.2
   github.com/go-openapi/jsonreference v0.21.4
   github.com/go-openapi/jsonreference v0.21.6
+  github.com/go-openapi/jsonreference v1.0.0
   github.com/go-openapi/jsonreference v1.0.2
   github.com/go-openapi/jsonreference v1.0.3
   github.com/go-openapi/loads v0.25.4
@@ -17789,6 +17791,7 @@ Components:
   github.com/golang/mock/gomock v1.6.0
   github.com/google/btree v1.1.3
   github.com/google/cel-go v0.29.0
+  github.com/google/cel-go v0.29.2
   github.com/google/gnostic-models v0.7.0
   github.com/google/gnostic-models v0.7.1
   github.com/google/go-containerregistry v0.22.1
@@ -17827,18 +17830,17 @@ Components:
   go.uber.org/mock/gomock v0.6.0
   google.golang.org/genproto/googleapis/api v0.0.0-20261012220534-4341edf3f941
   google.golang.org/genproto/googleapis/api v0.0.0-20261104224025-d1e00e9f33ab
-  google.golang.org/genproto/googleapis/api v0.0.0-20261116203732-fd2c7689a808
+  google.golang.org/genproto/googleapis/api v0.0.0-20261123191846-1e707ab9fbc2
   google.golang.org/genproto/googleapis/api/expr/v1alpha1 v0.0.0-20261104224025-d1e00e9f33ab
   google.golang.org/genproto/googleapis/api/httpbody v0.0.0-20261012220534-4341edf3f941
   google.golang.org/genproto/googleapis/api/httpbody v0.0.0-20261104224025-d1e00e9f33ab
   google.golang.org/genproto/googleapis/api/httpbody v0.0.0-20261123191846-1e707ab9fbc2
   google.golang.org/genproto/googleapis/rpc v0.0.0-20261012220534-4341edf3f941
   google.golang.org/genproto/googleapis/rpc v0.0.0-20261104224025-d1e00e9f33ab
-  google.golang.org/genproto/googleapis/rpc v0.0.0-20261116203732-fd2c7689a808
   google.golang.org/genproto/googleapis/rpc v0.0.0-20261123191846-1e707ab9fbc2
   google.golang.org/genproto/googleapis/rpc/status v0.0.0-20261104224025-d1e00e9f33ab
   google.golang.org/genproto/googleapis/type v0.0.0-20260319201613-d00831a3d3e7
-  google.golang.org/genproto/googleapis/type v0.0.0-20261116203732-fd2c7689a808
+  google.golang.org/genproto/googleapis/type v0.0.0-20261123191846-1e707ab9fbc2
   google.golang.org/grpc v1.84.0
   google.golang.org/grpc v1.85.0
   k8s.io/api v0.35.4
@@ -17855,6 +17857,7 @@ Components:
   k8s.io/apiextensions-apiserver/pkg/apis/apiextensions v0.35.4
   k8s.io/apiextensions-apiserver/pkg/apis/apiextensions v0.36.0
   k8s.io/apiextensions-apiserver/pkg/apis/apiextensions v0.36.4
+  k8s.io/apiextensions-apiserver/pkg/apis/apiextensions v0.37.0
   k8s.io/apiextensions-apiserver/pkg/apis/apiextensions v0.37.1
   k8s.io/apiextensions-apiserver/pkg/apis/apiextensions v0.37.2
   k8s.io/apimachinery/pkg v0.35.4
@@ -17864,6 +17867,7 @@ Components:
   k8s.io/apimachinery/pkg v0.37.1
   k8s.io/apimachinery/pkg v0.37.2
   k8s.io/apimachinery/pkg/util v0.36.2
+  k8s.io/apiserver v0.37.0
   k8s.io/apiserver/pkg v0.35.4
   k8s.io/apiserver/pkg v0.36.0
   k8s.io/apiserver/pkg v0.36.2
@@ -17882,6 +17886,7 @@ Components:
   k8s.io/component-base v0.35.4
   k8s.io/component-base v0.36.0
   k8s.io/component-base v0.36.2
+  k8s.io/component-base v0.37.0
   k8s.io/component-base/cli/flag v0.37.2
   k8s.io/component-base/version v0.37.1
   k8s.io/component-helpers v0.35.4
@@ -17901,6 +17906,7 @@ Components:
   k8s.io/kube-openapi/pkg/validation/errors v0.0.0-20260317180543-43fb72c5454a
   k8s.io/kube-openapi/pkg/validation/errors v0.0.0-20260427204847-8949caaa1199
   k8s.io/kube-openapi/pkg/validation/errors v0.0.0-20260519202549-bbf5c5577288
+  k8s.io/kube-openapi/pkg/validation/errors v0.0.0-20260721132016-d427ff9ee9ad
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20250910181357-589584f1c912
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260317180543-43fb72c5454a
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260427204847-8949caaa1199
@@ -17910,6 +17916,7 @@ Components:
   k8s.io/kube-openapi/pkg/validation/strfmt v0.0.0-20260317180543-43fb72c5454a
   k8s.io/kube-openapi/pkg/validation/strfmt v0.0.0-20260427204847-8949caaa1199
   k8s.io/kube-openapi/pkg/validation/strfmt v0.0.0-20260519202549-bbf5c5577288
+  k8s.io/kube-openapi/pkg/validation/strfmt v0.0.0-20260721132016-d427ff9ee9ad
   k8s.io/kube-scheduler v0.35.4
   k8s.io/kube-scheduler v0.36.2
   k8s.io/kubelet/pkg/apis v0.35.4
@@ -17918,6 +17925,7 @@ Components:
   k8s.io/kubernetes/pkg v1.36.2
   k8s.io/kubernetes/pkg/apis v1.37.2
   k8s.io/streaming/pkg v0.36.2
+  k8s.io/streaming/pkg v0.37.0
   k8s.io/utils v0.0.0-20260319190234-28399d86e0b5
   k8s.io/utils v0.0.0-20260507154919-ff6756f316d2
   k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
@@ -18165,6 +18173,7 @@ Components:
   github.com/prometheus/common v0.67.1
   github.com/prometheus/common v0.67.5
   github.com/prometheus/common v0.71.0
+  github.com/prometheus/common v0.72.0
   github.com/prometheus/common v0.72.1
   github.com/prometheus/procfs v0.19.1
   github.com/prometheus/procfs v0.20.1
@@ -18182,6 +18191,7 @@ Components:
   go.opentelemetry.io/contrib/detectors/gcp v1.44.0
   go.opentelemetry.io/contrib/detectors/gcp v1.47.0
   go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.72.0
+  go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.69.0
   go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0
   go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0
   go.opentelemetry.io/otel v1.47.0
@@ -18580,6 +18590,7 @@ here rather than reproduced with unresolved placeholders.]
 Copyright the authors of github.com/aws/smithy-go/ptr, github.com/awslabs/operatorpkg, github.com/russellhaering/goxmldsig and 4 others - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
+  github.com/aws/smithy-go/ptr v1.28.10
   github.com/aws/smithy-go/ptr v1.28.5
   github.com/aws/smithy-go/ptr v1.28.9
   github.com/awslabs/operatorpkg v0.0.0-20261030165915-63f6f735c934
@@ -20730,6 +20741,7 @@ Copyright The github.com/redis/go-redis Authors - BSD-2-Clause
 License Text(https://spdx.org/licenses/BSD-2-Clause.html)
 Components:
   github.com/redis/go-redis/v9 v9.23.0
+  github.com/redis/go-redis/v9 v9.24.0
 
 Copyright (c) 2013 The github.com/redis/go-redis Authors.
 All rights reserved.
@@ -20801,17 +20813,14 @@ Components:
   golang.org/x/crypto/sha3 v0.59.0
   golang.org/x/exp v0.0.0-20250103183323-7d7fa50e5329
   golang.org/x/exp v0.0.0-20261014143641-f0251eb4aa3e
-  golang.org/x/exp v0.0.0-20261121134650-e1094eeca1b5
+  golang.org/x/exp v0.0.0-20261124000051-d6646c509b6d
   golang.org/x/exp/slices v0.0.0-20260410095643-746e56fc9e2f
   golang.org/x/exp/slices v0.0.0-20261014143641-f0251eb4aa3e
-  golang.org/x/exp/slices v0.0.0-20261113113407-e3970619a1a4
-  golang.org/x/exp/slices v0.0.0-20261121134650-e1094eeca1b5
   golang.org/x/exp/slices v0.0.0-20261124000051-d6646c509b6d
   golang.org/x/mod/semver v0.42.0
   golang.org/x/mod/semver v0.43.0
   golang.org/x/net v0.59.0
   golang.org/x/net v0.61.0
-  golang.org/x/net v0.62.0
   golang.org/x/net v0.63.0
   golang.org/x/oauth2 v0.32.0
   golang.org/x/oauth2 v0.36.0
@@ -24793,6 +24802,7 @@ Components:
   k8s.io/kubectl/pkg/util/resource v0.35.4
   k8s.io/mount-utils v0.35.4
   k8s.io/mount-utils v0.36.2
+  sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.36.0
   sigs.k8s.io/controller-runtime v0.23.3
   sigs.k8s.io/controller-runtime v0.24.1
   sigs.k8s.io/controller-runtime v0.25.3
@@ -25471,6 +25481,7 @@ Copyright 2014-2015 Stripe, Inc.
 --------------------------------------------------------------------------------
 NOTICE of github.com/aws/smithy-go, github.com/awslabs/operatorpkg
 Components:
+  github.com/aws/smithy-go v1.28.10
   github.com/aws/smithy-go v1.28.5
   github.com/aws/smithy-go v1.28.9
   github.com/awslabs/operatorpkg v0.0.0-20261030165915-63f6f735c934
@@ -25596,6 +25607,7 @@ limitations under the License.
 NOTICE of github.com/go-openapi/jsonreference
 Components:
   github.com/go-openapi/jsonreference v0.21.6
+  github.com/go-openapi/jsonreference v1.0.0
   github.com/go-openapi/jsonreference v1.0.2
   github.com/go-openapi/jsonreference v1.0.3
 
@@ -34650,6 +34662,7 @@ SoundCloud Ltd. (http://soundcloud.com/).
 NOTICE of github.com/prometheus/common
 Components:
   github.com/prometheus/common v0.67.5
+  github.com/prometheus/common v0.72.0
   github.com/prometheus/common v0.72.1
 
 Common libraries shared by Prometheus Go components.

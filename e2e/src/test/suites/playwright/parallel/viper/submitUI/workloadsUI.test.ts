@@ -36,21 +36,6 @@ import {
 } from '../../../../../../modules/helpers/utils/AuthorizationUtils';
 import { PROPERTY_TO_ROLE_MAPPING } from '../../../../../../modules/helpers/config/roleMapping';
 
-interface CreateWorkloadOptions {
-    clusterName: string;
-    workloadName: string;
-    environmentSelector?: string;
-    projectId: number;
-    projectName: string;
-    environmentData?: {
-        name: string;
-        image?: string;
-        containerPort?: number;
-    };
-    computeResourceData?: {
-        name: string;
-    };
-}
 test.describe(`Workloads UI, tags: ${tags.tool.ui} ${tags.resource.workloads} ${tags.teams.viper}`, () => {
     let browserEngine: BrowserEngine;
     let authPage: AuthPage;
@@ -92,64 +77,6 @@ test.describe(`Workloads UI, tags: ${tags.tool.ui} ${tags.resource.workloads} ${
                 await browserEngine.stopAndArchive(testInfo, 'workloads-' + videoName);
             });
 
-            const createTraining = async (options: CreateWorkloadOptions): Promise<void> => {
-                await pageFilterUtils.selectCluster(workloadTable.page, options.clusterName);
-                await workloadTable.openTrainingForm();
-
-                // fill the workspace form details
-                await workloadTable.workloadFormSelectProject(projectName);
-                await waitUtils.waitForElementToExist(trainingPage, trainingPage.createNameInput);
-                await trainingPage.workloadFormSelectTemplate();
-                await trainingPage.fillTrainingName(options.workloadName);
-                await trainingPage.waitForTrainingNameCount(options.workloadName);
-                await trainingPage.selectAssetsSubmissionOption();
-                await trainingPage.clickOnContinueBtn();
-
-                // choose env
-                await hybridForm.openEnvironmentsDrawer();
-                await hybridForm.clickOnDrawerItemByLabel(options.environmentData.name);
-
-                // choose compute
-                await hybridForm.openComputesDrawer();
-                await hybridForm.clickOnDrawerItemByLabel(options.computeResourceData.name);
-
-                //submit form
-                await trainingPage.clickOnSubmitBtn();
-
-                //validate return to workloads
-                await workloadTable.validateCurrentPageIsWorkload();
-            };
-
-            const createWorkspace = async (options: CreateWorkloadOptions): Promise<void> => {
-                await pageFilterUtils.selectCluster(workloadTable.page, options.clusterName);
-                await workloadTable.openWorkspaceForm();
-
-                // fill the workspace form details
-                await workloadTable.workloadFormSelectProject(projectName);
-                await waitUtils.waitForElementToExist(workspacePage, workspacePage.createWorkspaceNameInput);
-                await workspacePage.workloadFormSelectTemplate();
-                await workspacePage.fillWorkspaceName(options.workloadName);
-                await workspacePage.waitForWorkspaceNameCount(options.workloadName);
-                await workspacePage.selectAssetsSubmissionOption();
-                await workspacePage.clickOnContinue();
-
-                // choose env
-                await hybridForm.openEnvironmentsDrawer();
-                await hybridForm.clickOnDrawerItemByLabel(options.environmentData.name);
-
-                // choose compute
-                await hybridForm.openComputesDrawer();
-                await hybridForm.clickOnDrawerItemByLabel(options.computeResourceData.name);
-
-                // create workspace
-                await workspacePage.clickOnCreateWorkspaceBtn();
-                logger.debug('workspace created successfully');
-                await workloadsUtilsV2.waitForStatusInWorkload(options.workloadName, Phase.Running, 180, options.projectId);
-
-                //validate return to workloads
-                await workloadTable.validateCurrentPageIsWorkload();
-            };
-
             test.describe(`workloads table, tags: ${tags.teams.viper}`, () => {
                 test('validate the presence of the Workload page', async () => {
                     videoName = 'table-exists';
@@ -158,75 +85,68 @@ test.describe(`Workloads UI, tags: ${tags.tool.ui} ${tags.resource.workloads} ${
 
                 test('submit and validate Interactive workload with fraction of GPU', async () => {
                     videoName = 'submit-and-validate-interactive-workload';
-                    const envName = await environmentUtils.resolveEnvPresetName('jupyter-lab');
-                    const createWorkloadOptions: CreateWorkloadOptions = {
-                        clusterName: flowRootState.cluster.name,
-                        workloadName: objectGenerator.generateShortNameByPrefix('half-gpu-workspace'),
-                        projectId: Number(project.id),
-                        projectName: project.name,
-                        environmentSelector: `[aid="${envName}-card"]`,
-                        computeResourceData: {
-                            name: 'half-gpu'
-                        },
-                        environmentData: {
-                            name: envName
-                        }
-                    };
+                    const environmentName = await environmentUtils.resolveEnvPresetName('jupyter-lab');
+                    const workspaceName = objectGenerator.generateShortNameByPrefix('half-gpu-workspace');
 
-                    await createWorkspace(createWorkloadOptions);
+                    await pageFilterUtils.selectCluster(workloadTable.page, flowRootState.cluster.name);
+                    await workspacePage.submitWorkspaceWorkloadHybridUI(project.name, workspaceName, {
+                        environment: environmentName,
+                        computeResource: 'half-gpu'
+                    });
+                    await workloadsUtilsV2.waitForStatusInWorkload(
+                        workspaceName,
+                        Phase.Running,
+                        180,
+                        Number(project.id)
+                    );
+                    await workloadTable.validateCurrentPageIsWorkload();
 
                     //validate requested gpu is correct
-                    const workloadRowIndex = await workloadTable.getWorkloadRowIndexByName(
-                        createWorkloadOptions.workloadName
-                    );
+                    const workloadRowIndex = await workloadTable.getWorkloadRowIndexByName(workspaceName);
                     await workloadTable.isRequestedGpuCorrect(workloadRowIndex, '0.5');
 
-                    await workloadTable.deleteWorkload(createWorkloadOptions.workloadName);
-                    logger.info(`workload ${createWorkloadOptions.workloadName} deleted.`);
+                    await workloadTable.deleteWorkload(workspaceName);
+                    logger.info(`workload ${workspaceName} deleted.`);
                     await waitUtils.waitForElementToNotExist(
                         workloadTable,
-                        `td:has-text("${createWorkloadOptions.workloadName}")`
+                        `td:has-text("${workspaceName}")`
                     );
                 });
 
                 test('submit and validate Training workload with 1 GPU and copy it', async () => {
                     videoName = 'submit-and-validate-training-workload';
-                    const trainingEnvName = await environmentUtils.resolveEnvPresetName('jupyter-lab');
-                    const createWorkloadOptions: CreateWorkloadOptions = {
-                        clusterName: flowRootState.cluster.name,
-                        workloadName: objectGenerator.generateShortNameByPrefix('one-gpu-training'),
-                        projectId: Number(project.id),
-                        projectName: project.name,
-                        environmentSelector: `[aid="${trainingEnvName}-card"]`,
-                        computeResourceData: {
-                            name: 'one-gpu'
-                        },
-                        environmentData: {
-                            name: trainingEnvName
-                        }
-                    };
-                    await createTraining(createWorkloadOptions);
+                    const environmentName = await environmentUtils.resolveEnvPresetName('jupyter-lab');
+                    const trainingName = objectGenerator.generateShortNameByPrefix('one-gpu-training');
+
+                    await pageFilterUtils.selectCluster(workloadTable.page, flowRootState.cluster.name);
+                    await trainingPage.createFlexibleTraining(
+                        project.name,
+                        trainingName,
+                        undefined,
+                        undefined,
+                        environmentName,
+                        'one-gpu'
+                    );
+                    await workloadTable.validateCurrentPageIsWorkload();
 
                     //validate requested gpu is correct
-                    const workloadRowIndex = await workloadTable.getWorkloadRowIndexByName(
-                        createWorkloadOptions.workloadName
-                    );
+                    const workloadRowIndex = await workloadTable.getWorkloadRowIndexByName(trainingName);
                     await workloadTable.isRequestedGpuCorrect(workloadRowIndex, '1');
 
                     //copy and edit
-                    await workloadTable.toggleWorkload(createWorkloadOptions.workloadName);
+                    await workloadTable.toggleWorkload(trainingName);
                     await workloadTable.clickOnCopyAndEditWorkload();
 
                     const copiedTrainingName = objectGenerator.generateShortNameByPrefix('copied');
                     await trainingPage.fillTrainingName(copiedTrainingName);
 
                     //submit form
-                    await trainingPage.clickOnSubmitBtn();
+                    await hybridForm.clickOnSubmit();
                     await workloadsUtilsV2.waitForStatusInWorkload(
-                        createWorkloadOptions.workloadName,
+                        trainingName,
                         Phase.Running,
                         180,
-                        createWorkloadOptions.projectId
+                        Number(project.id)
                     );
                     await waitUtils.waitForElementToExist(
                         workloadTable,
@@ -241,46 +161,42 @@ test.describe(`Workloads UI, tags: ${tags.tool.ui} ${tags.resource.workloads} ${
                     await workloadTable.deleteWorkload(copiedTrainingName);
                     logger.info(`workload ${copiedTrainingName} deleted.`);
 
-                    await workloadTable.deleteWorkload(createWorkloadOptions.workloadName);
-                    logger.info(`workload ${createWorkloadOptions.workloadName} deleted.`);
+                    await workloadTable.deleteWorkload(trainingName);
+                    logger.info(`workload ${trainingName} deleted.`);
                     //validate removed from the table
-                    await workloadTable.isTableNotIncludeWorkload(createWorkloadOptions.workloadName);
+                    await workloadTable.isTableNotIncludeWorkload(trainingName);
                 });
 
                 test('should create a training and validate show details drawer', async () => {
                     videoName = 'submit-and-validate-training-workload-with-show-details-validation';
-                    const drawerEnvName = await environmentUtils.resolveEnvPresetName('jupyter-lab');
-                    const createWorkloadOptions: CreateWorkloadOptions = {
-                        clusterName: flowRootState.cluster.name,
-                        workloadName: objectGenerator.generateShortNameByPrefix('one-gpu-training'),
-                        projectId: Number(project.id),
-                        projectName: project.name,
-                        environmentSelector: `[aid="${drawerEnvName}-card"]`,
-                        computeResourceData: {
-                            name: 'one-gpu'
-                        },
-                        environmentData: {
-                            name: drawerEnvName
-                        }
-                    };
-                    await createTraining(createWorkloadOptions);
-                    const workloadIndex = await workloadTable.getWorkloadRowIndexByName(
-                        createWorkloadOptions.workloadName
+                    const environmentName = await environmentUtils.resolveEnvPresetName('jupyter-lab');
+                    const trainingName = objectGenerator.generateShortNameByPrefix('one-gpu-training');
+
+                    await pageFilterUtils.selectCluster(workloadTable.page, flowRootState.cluster.name);
+                    await trainingPage.createFlexibleTraining(
+                        project.name,
+                        trainingName,
+                        undefined,
+                        undefined,
+                        environmentName,
+                        'one-gpu'
                     );
+                    await workloadTable.validateCurrentPageIsWorkload();
+                    const workloadIndex = await workloadTable.getWorkloadRowIndexByName(trainingName);
                     await workloadTable.validateRunningPhase(workloadIndex);
-                    logger.info(`workload ${createWorkloadOptions.workloadName} is running.`);
+                    logger.info(`workload ${trainingName} is running.`);
                     //validate drawer tabs
-                    await workloadTable.toggleWorkloadDrawerContent(createWorkloadOptions.workloadName);
+                    await workloadTable.toggleWorkloadDrawerContent(trainingName);
                     await workloadTable.validateEventsHistoryTabContentExists();
                     await workloadTable.validateMetricTabAllPodsContentExists();
                     await workloadTable.validateLogsTabContentExists();
                     await workloadTable.closeWorkloadDrawerContent();
-                    logger.info(`workload ${createWorkloadOptions.workloadName} drawer content validated.`);
+                    logger.info(`workload ${trainingName} drawer content validated.`);
 
                     //wait for actions to hide
-                    await workloadTable.deleteWorkload(createWorkloadOptions.workloadName);
-                    logger.info(`training ${createWorkloadOptions.workloadName} deleted.`);
-                    await workloadTable.isTableNotIncludeWorkload(createWorkloadOptions.workloadName);
+                    await workloadTable.deleteWorkload(trainingName);
+                    logger.info(`training ${trainingName} deleted.`);
+                    await workloadTable.isTableNotIncludeWorkload(trainingName);
                 });
             });
         });

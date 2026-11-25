@@ -20,7 +20,7 @@ import {
     DeleteFlagsMerged,
     SubmitFlagsMerged
 } from '../../../../../../../../modules/cli/tools/RunaiCliV2.constants';
-import { Phase } from '../../../../../../../../modules/api/apis/assetsApi';
+import { Phase } from '../../../../../../../../modules/api/apis/workloadsApi/generated/model/phase';
 import { assert } from 'chai';
 import { ScopeType } from '../../../../../../../../modules/api/apis/policyApi';
 import { WorkloadType } from '../../../../../../../../modules/helpers/utils/policyUtils';

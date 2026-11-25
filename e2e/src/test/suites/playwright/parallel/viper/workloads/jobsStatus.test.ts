@@ -12,6 +12,7 @@ import {
     operations,
     settings,
     tags,
+    trainingUtils,
     Utils,
     versionUtils,
     waitUtils,
@@ -22,12 +23,12 @@ import {
 import { Project } from '../../../../../../modules/api/apis/projectsDepartmentsApi';
 import { kubeCli } from '../../../../../../modules/cli';
 import { createProject } from '../../../../../../modules/helpers/models/projects';
-import { assetsApi, backendClusterApi } from '../../../../../../modules/api';
+import { backendClusterApi } from '../../../../../../modules/api';
 import { isMpiInstalled } from '../../../../../../modules/helpers/utils/Mpi';
 import { isKubeflowInstalled } from '../../../../../../modules/helpers/utils/IsInstalledUtils';
 import { JobUtils } from '../../../../../../modules/helpers/utils/jobUtils';
 import { Phase } from '../../../../../../modules/api/apis/workloadsApi/generated/model/phase';
-import { WorkloadCreationRequest } from '../../../../../../modules/api/apis/assetsApi';
+import { TrainingCreationRequest } from '../../../../../../modules/api/apis/workloadsApi/generated/api';
 import {
     shouldRunTests,
     SupportedVersions
@@ -114,27 +115,25 @@ test.describe(
             });
 
             test('Workload should be creating', async function () {
-                assetsApi.trainingApi.accessToken = flowRootState.users.system_administrator.accessToken;
                 const trainName = objectGenerator.generateNameByPrefix('created-training');
                 const anyEnv = await environmentUtils.get('tensorboard');
-                const trainWorkloadRequest: WorkloadCreationRequest = {
+                const trainWorkloadRequest: TrainingCreationRequest = {
                     assets: {
                         environment: anyEnv.meta.id
                     },
                     clusterId: flowRootState.cluster.uuid,
                     name: trainName,
-                    namespace: Utils.namespaceFromProjectName(project.name),
-                    projectId: project.id
+                    projectId: String(project.id)
                 };
-                const trainingWorkload = await assetsApi.trainingApi.createTraining(trainWorkloadRequest);
+                const trainingWorkload = await trainingUtils.createTraining(trainWorkloadRequest);
 
                 await waitUtils.waitForBackendWorkloadPhaseInHistory(
-                    trainingWorkload.body.meta.id,
-                    trainingWorkload.body.meta.name,
+                    trainingWorkload.workloadId,
+                    trainingWorkload.name,
                     Phase.Creating
                 );
 
-                await workloadsUtilsV2.deleteWorkload(trainingWorkload.body.meta.id, WorkloadTypeV2.TRAINING);
+                await workloadsUtilsV2.deleteWorkload(trainingWorkload.workloadId, WorkloadTypeV2.TRAINING);
             });
         });
 

@@ -4,7 +4,8 @@
  */
 
 import { assetsApi } from '../../api';
-import { Training, TrainingCreationRequestV2, TrainingV2 } from '../../api/apis/assetsApi';
+import { Training } from '../../api/apis/assetsApi';
+import { TrainingCreationRequest, WorkspaceSpecSpecAllOfCompute } from '../../api/apis/workloadsApi/generated/api';
 import { Training as TrainingModel } from '../../api/apis/workloadsApi/generated/model/training';
 import { flowRootState } from '../config/config';
 import {
@@ -13,61 +14,65 @@ import {
     logger,
     objectGenerator,
     policyUtils,
-    trainingUtils,
     waitUtils,
     workloadsCrudUtils
 } from '../index';
 import { Project } from '../../api/apis/projectsDepartmentsApi';
 import { MatchExpressionOperator } from '../../api/apis/workloadsApi/generated/model/matchExpressionOperator';
 import http from 'http';
-import { AssetKind } from '../../api/apis/assetsApi';
-import { WorkspaceSpecSpecAllOfCompute } from '../../api/apis/workloadsApi/generated/api';
 
 export class TrainingUtils {
     async createTraining(
-        trainingWorkload: TrainingCreationRequestV2,
+        trainingWorkload: TrainingCreationRequest,
         accessToken?: string
-    ): Promise<TrainingV2> {
-        assetsApi.trainingApi.accessToken =
-            accessToken ?? flowRootState.users.system_administrator.accessToken;
+    ): Promise<TrainingModel> {
         try {
-            const response = await assetsApi.trainingApi.createTrainingV2(trainingWorkload);
-            logger.info(`created training ${trainingWorkload.meta.name}`);
+            const response = await workloadsCrudUtils.submitTraining(trainingWorkload, accessToken);
+            logger.info(`created training ${trainingWorkload.name}`);
             return response.body;
         } catch (e) {
-            logger.error(`failed to create training ${trainingWorkload.meta.name} \n${e}`);
+            logger.error(`failed to create training ${trainingWorkload.name} \n${e}`);
             throw e;
         }
     }
 
-    async createTrainingWorkloads(amount: number, project: Project): Promise<TrainingV2[]> {
-        async function getTrainingWorkloadPayload(name: string): Promise<TrainingCreationRequestV2> {
-            const envName = (await environmentUtils.presetNames()).jupyter;
-            return {
-                meta: {
-                    projectId: project.id.toString(),
-                    name: name,
-                    clusterId: project.clusterUuid
-                },
-                assets: {
-                    environment: await environmentUtils.getId(envName),
-                    compute: await computeResourceUtils.getId('cpu-only')
-                },
-                specificRunParams: {
-                    command: 'sleep',
-                    args: 'infinity'
-                }
-            };
+    async createTrainingWorkloads(
+        countOrNames: number | string[],
+        project: Project,
+        configuration?: Pick<TrainingCreationRequest, 'assets' | 'spec'>,
+        accessToken?: string
+    ): Promise<TrainingModel[]> {
+        const names = Array.isArray(countOrNames)
+            ? countOrNames
+            : Array.from({ length: countOrNames }, (_, i) =>
+                  objectGenerator.generateShortNameByPrefix(`training-${i}`)
+              );
+        if (names.length === 0) {
+            return [];
         }
 
-        const trainingWorkloads = [];
-        for (let i = 0; i < amount; i++) {
-            const name = objectGenerator.generateShortNameByPrefix(`training-${i}`);
-            const workloadPayload = await getTrainingWorkloadPayload(name);
-            const trainingWorkload = await trainingUtils.createTraining(workloadPayload);
-            trainingWorkloads.push(trainingWorkload);
+        const workloadConfiguration = configuration ?? {
+            assets: {
+                environment: await environmentUtils.getId((await environmentUtils.presetNames()).jupyter),
+                compute: await computeResourceUtils.getId('cpu-only')
+            },
+            spec: { command: 'sleep', args: 'infinity' }
+        };
+
+        const workloads: TrainingModel[] = [];
+        for (const name of names) {
+            const workload = await this.createTraining(
+                {
+                    name,
+                    projectId: project.id.toString(),
+                    clusterId: project.clusterUuid,
+                    ...workloadConfiguration
+                },
+                accessToken
+            );
+            workloads.push(workload);
         }
-        return trainingWorkloads;
+        return workloads;
     }
 
     async list(): Promise<Array<Training>> {
@@ -128,25 +133,18 @@ export class TrainingUtils {
         environment = 'tensorboard',
         compute = 'cpu-only'
     ): Promise<string> {
-        const trainingCreationRequest: TrainingCreationRequestV2 = {
-            meta: {
-                projectId: projectId,
-                name: workloadName,
-                clusterId: flowRootState.cluster.uuid
-            },
+        const trainingCreationRequest: TrainingCreationRequest = {
+            projectId: projectId,
+            name: workloadName,
+            clusterId: flowRootState.cluster.uuid,
             assets: {
                 environment: await environmentUtils.getId(environment),
                 compute: await computeResourceUtils.getId(compute),
-                datasources: [
-                    {
-                        id: dataSourceId,
-                        kind: AssetKind.ConfigMap
-                    }
-                ]
+                datasources: [dataSourceId]
             }
         };
 
         const workload = await this.createTraining(trainingCreationRequest);
-        return workload.meta.workloadId;
+        return workload.workloadId;
     }
 }

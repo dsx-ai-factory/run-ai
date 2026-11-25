@@ -26,7 +26,7 @@ import {
     SupportedVersions
 } from '../../../../../../modules/helpers/utils/SupporetedEnvsUtils';
 import { expect, test } from '@playwright/test';
-import { Phase } from '../../../../../../modules/api/apis/assetsApi';
+import { Phase } from '../../../../../../modules/api/apis/workloadsApi/generated/model/phase';
 import { DistributedFramework } from '../../../../../../modules/api/apis/workloadsApi/generated/model/distributedFramework';
 import { runaiCliV2 } from '../../../../../../modules/cli';
 import {

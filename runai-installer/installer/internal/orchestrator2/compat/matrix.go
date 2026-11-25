@@ -74,7 +74,8 @@ const latest = "3.0"
 // populated; older rows are filled in as their real locks are confirmed.
 var matrix = map[string]Locks{
 	"3.0": {
-		Prometheus:          "92.7.0",
+		// renovate: datasource=helm depName=kube-prometheus-stack registryUrl=https://prometheus-community.github.io/helm-charts allow=major
+		Prometheus:          "93.10.1",
 		GPUOperator:         "v26.7.1",
 		GPUOperatorFake:     "0.0.62",
 		NetworkOperator:     "v26.7.0",
@@ -93,7 +94,8 @@ var matrix = map[string]Locks{
 		CertManagerOperator: "stable-v1",
 	},
 	"2.26": {
-		Prometheus:          "76.2.0",
+		// renovate: datasource=helm depName=kube-prometheus-stack registryUrl=https://prometheus-community.github.io/helm-charts allow=minor
+		Prometheus:          "76.5.1",
 		GPUOperator:         "v25.3.0",
 		GPUOperatorFake:     "0.0.62",
 		NetworkOperator:     "v25.10.0",
@@ -112,7 +114,8 @@ var matrix = map[string]Locks{
 		CertManagerOperator: "stable-v1",
 	},
 	"2.25": {
-		Prometheus:          "76.2.0",
+		// renovate: datasource=helm depName=kube-prometheus-stack registryUrl=https://prometheus-community.github.io/helm-charts allow=minor
+		Prometheus:          "76.5.1",
 		GPUOperator:         "v25.3.0",
 		GPUOperatorFake:     "0.0.62",
 		NetworkOperator:     "v25.10.0",

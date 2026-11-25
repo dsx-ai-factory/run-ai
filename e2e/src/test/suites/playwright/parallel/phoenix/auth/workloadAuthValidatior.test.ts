@@ -25,7 +25,7 @@ import { kubeCli } from '../../../../../../modules/cli';
 import { invalidUuid } from '../../../../../../modules/helpers/config/const';
 import { AxiosResponse } from 'axios';
 import { Project } from '../../../../../../modules/api/apis/orgUnitApi';
-import { TrainingV2 } from '../../../../../../modules/api/apis/assetsApi/generated/api';
+import { Training } from '../../../../../../modules/api/apis/workloadsApi/generated/api';
 import { Phase } from '../../../../../../modules/api/apis/workloadsApi/generated/model/phase';
 import { WorkloadType } from '../../../../../../modules/helpers/utils/WorkloadsUtilsV2';
 import { isOCP } from '../../../../../../modules/helpers/utils/EnvironmentUtils';
@@ -35,7 +35,7 @@ test.describe(
     { tag: [tags.services.identityManager, tags.services.keycloak] },
     function () {
         let project: Project;
-        let training: TrainingV2;
+        let training: Training;
         
             let clientId: string;
             const maliciousRedirectUri = 'https://www.malicious-domain.com';
@@ -170,16 +170,14 @@ test.describe(
                     : '--NotebookApp.base_url=/${RUNAI_PROJECT}/${RUNAI_JOB_NAME} --NotebookApp.token=""';
 
                 training = await trainingUtils.createTraining({
-                    meta: {
-                        name: workloadName,
-                        projectId: project.id.toString(),
-                        clusterId: project.clusterId
-                    },
+                    name: workloadName,
+                    projectId: project.id.toString(),
+                    clusterId: project.clusterId,
                     assets: {
                         environment: await environmentUtils.getId('jupyter-lab'),
                         compute: await computeResourceUtils.getId('cpu-only')
                     },
-                    specificRunParams: {
+                    spec: {
                         command: 'start-notebook.sh',
                         args: jupyterArgs,
                         environmentVariables: [],
@@ -189,32 +187,26 @@ test.describe(
                         annotations: [],
                         labels: [],
                         tolerations: [],
-                        connections: [
-                            {
-                                name: 'Jupyter'
-                            }
-                        ],
-                        completions: 1,
-                        allowOverQuota: false
+                        completions: 1
                     }
                 });
                 logger.info(`Created Jupyter workload: ${workloadName}`);
                 try {
                     await workloadsUtilsV2.waitForApiWorkloadWithPhase(
-                        training.meta.workloadId,
+                        training.workloadId,
                         Phase.Running,
                         workloadName,
                         true,
                         180
                     );
                 } catch (err) {
-                    await logSchedulingDiagnostics(training.meta.workloadId, workloadName);
+                    await logSchedulingDiagnostics(training.workloadId, workloadName);
                     throw err;
                 }
                 logger.info('Jupyter workload is running');
-                expect(training.meta.name, 'created training workload name should match the requested name').toBe(workloadName);
+                expect(training.name, 'created training workload name should match the requested name').toBe(workloadName);
                 const workloadDetails = await workloadsUtilsV2.getWorkloadByWorkloadId(
-                    training.meta.workloadId
+                    training.workloadId
                 );
                 const workload = workloadDetails.body;
                 logger.info('Workload Connection Details:');
@@ -238,7 +230,7 @@ test.describe(
                 expect(response.status, 'Jupyter kernelspecs API should return 200 OK with service account token').toBe(200);
                 expect(response.data, 'Jupyter kernelspecs response should have kernelspecs property').toHaveProperty('kernelspecs');
                 expect(response.data.default, 'default kernel should be python3').toBe('python3');
-                await workloadsUtilsV2.deleteWorkload(training.meta.workloadId, WorkloadType.TRAINING);
+                await workloadsUtilsV2.deleteWorkload(training.workloadId, WorkloadType.TRAINING);
                 await serviceAccountUtils.deleteServiceAccount(
                     flowRootState.users.system_administrator.accessToken,
                     serviceAccount.body.id
@@ -272,16 +264,14 @@ test.describe(
                     : '--NotebookApp.base_url=/${RUNAI_PROJECT}/${RUNAI_JOB_NAME} --NotebookApp.token=""';
 
                 training = await trainingUtils.createTraining({
-                    meta: {
-                        name: workloadName,
-                        projectId: project.id.toString(),
-                        clusterId: project.clusterId
-                    },
+                    name: workloadName,
+                    projectId: project.id.toString(),
+                    clusterId: project.clusterId,
                     assets: {
                         environment: await environmentUtils.getId('jupyter-lab'),
                         compute: await computeResourceUtils.getId('cpu-only')
                     },
-                    specificRunParams: {
+                    spec: {
                         command: 'start-notebook.sh',
                         args: jupyterArgs,
                         environmentVariables: [],
@@ -291,32 +281,26 @@ test.describe(
                         annotations: [],
                         labels: [],
                         tolerations: [],
-                        connections: [
-                            {
-                                name: 'Jupyter'
-                            }
-                        ],
-                        completions: 1,
-                        allowOverQuota: false
+                        completions: 1
                     }
                 });
                 logger.info(`Created Jupyter workload: ${workloadName}`);
                 try {
                     await workloadsUtilsV2.waitForApiWorkloadWithPhase(
-                        training.meta.workloadId,
+                        training.workloadId,
                         Phase.Running,
                         workloadName,
                         true,
                         180
                     );
                 } catch (err) {
-                    await logSchedulingDiagnostics(training.meta.workloadId, workloadName);
+                    await logSchedulingDiagnostics(training.workloadId, workloadName);
                     throw err;
                 }
                 logger.info('Jupyter workload is running');
-                expect(training.meta.name, 'created training workload name should match the requested name').toBe(workloadName);
+                expect(training.name, 'created training workload name should match the requested name').toBe(workloadName);
                 const workloadDetails = await workloadsUtilsV2.getWorkloadByWorkloadId(
-                    training.meta.workloadId
+                    training.workloadId
                 );
                 const workload = workloadDetails.body;
                 logger.info('Workload Connection Details:');
@@ -340,7 +324,7 @@ test.describe(
                 expect(response.status, 'Jupyter kernelspecs API should return 200 OK with access key token').toBe(200);
                 expect(response.data, 'Jupyter kernelspecs response should have kernelspecs property').toHaveProperty('kernelspecs');
                 expect(response.data.default, 'default kernel should be python3').toBe('python3');
-                await workloadsUtilsV2.deleteWorkload(training.meta.workloadId, WorkloadType.TRAINING);
+                await workloadsUtilsV2.deleteWorkload(training.workloadId, WorkloadType.TRAINING);
                 await accessKeyUtils.deleteAccessKey(
                     flowRootState.users.system_administrator.accessToken,
                     accessKey.body.id

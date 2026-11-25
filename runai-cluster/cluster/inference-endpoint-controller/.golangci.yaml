@@ -1,0 +1,91 @@
+version: "2"
+
+run:
+  tests: true
+  timeout: 10m
+  issues-exit-code: 1
+
+output:
+  formats:
+    json:
+      path: linter.json
+    text:
+      path: stdout
+      colors: true
+
+formatters:
+  enable:
+    - gofmt
+
+linters:
+  default: none
+  enable:
+    # Tier 1 — Correctness
+    - errcheck
+    - govet
+    - staticcheck
+    - ineffassign
+    - unused
+
+    # Tier 2 — Safety
+    - bodyclose
+    - durationcheck
+    - nilerr
+    - gosec
+    - noctx
+    - rowserrcheck   # sql.Rows.Err() not checked after iteration
+    - sqlclosecheck  # sql.Rows/sql.Stmt not closed
+
+    # Tier 3 — Readability
+    - lll
+    - goconst
+    - unconvert
+    - nakedret
+    - whitespace
+
+  settings:
+    lll:
+      line-length: 220
+      tab-width: 1
+    staticcheck:
+      checks:
+        - all
+        - "-ST1000"  # Disable "Incorrect or missing package comment"
+        - "-ST1003"  # Disable "Poorly chosen identifier"
+    goconst:
+      ignore-string-values:
+        - "true"
+        - "false"
+    nakedret:
+      max-func-lines: 10
+    gosec:
+      excludes:
+        - G104  # Audit errors not checked (overlaps with errcheck)
+
+  exclusions:
+    generated: lax
+    paths:
+      - "generated"
+      - "vendor"
+    rules:
+      # Don't check line length on go:generate directives
+      - source: "^//\\s*go:generate\\s"
+        linters: [lll]
+      # Don't check line length on kubebuilder marker comments (can't be split)
+      - source: "^//\\s*\\+kubebuilder:"
+        linters: [lll]
+      # Relax linting in test files
+      - path: "_test\\.go"
+        linters:
+          - bodyclose
+          - goconst
+          - gosec
+          - noctx
+
+issues:
+  new-from-rev: origin/main
+  max-same-issues: 50
+  max-issues-per-linter: 100
+
+severity:
+  default: error

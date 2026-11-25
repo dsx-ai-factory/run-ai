@@ -138,6 +138,28 @@
       "major": {
         "enabled": false
       }
+    },
+    {
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "matchPackageNames": [
+        "kube-prometheus-stack"
+      ],
+      "group": {
+        "commitMessageTopic": "kube-prometheus-stack"
+      }
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^runai-installer/installer/internal/orchestrator2/compat/matrix\\.go$/"
+      ],
+      "matchStrings": [
+        "// renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?(?: allow=(?<depType>patch|minor|major))?\\s+\\w+\\s*[:=]\\s*\"(?<currentValue>[^\"]+)\""
+      ]
     }
   ]
 }
