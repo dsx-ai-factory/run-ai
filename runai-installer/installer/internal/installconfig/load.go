@@ -62,7 +62,13 @@ func ensureNoExtraDocuments(dec *yaml.Decoder) error {
 			return err
 		}
 		if !isEmptyDocument(&node) {
-			return fmt.Errorf("unexpected extra YAML document at line %d: only one configuration document is allowed", node.Line)
+			// A DocumentNode reports the line of its "---" marker; report the
+			// line of the content instead.
+			line := node.Line
+			if node.Kind == yaml.DocumentNode && len(node.Content) > 0 {
+				line = node.Content[0].Line
+			}
+			return fmt.Errorf("unexpected extra YAML document at line %d: only one configuration document is allowed", line)
 		}
 	}
 }

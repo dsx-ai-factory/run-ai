@@ -199,3 +199,18 @@ func TestLoad_TrailingEmptyDocumentsAccepted(t *testing.T) {
 		})
 	}
 }
+
+func TestLoad_ExtraDocumentReportsContentLine(t *testing.T) {
+	path := writeConfig(t, "{}\n---\nunexpectedField: true\n")
+	_, err := Load(path)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "unexpected extra YAML document at line 3")
+}
+
+func TestLoad_UnknownFieldInFirstDocumentRejected(t *testing.T) {
+	path := writeConfig(t, "unexpectedField: true\n")
+	_, err := Load(path)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "unexpectedField")
+	assert.Contains(t, err.Error(), path)
+}
