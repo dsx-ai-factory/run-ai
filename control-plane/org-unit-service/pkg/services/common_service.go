@@ -316,10 +316,6 @@ func validateNodePoolResources(nodePoolResources api.ResourcesNullable, nodePool
 	if !quotaFlag && gpuDeserved > 0 {
 		return nil, fmt.Errorf("quota is not enabled on nodepool id <%s>. GPU deserved should be 0 or omitted", nodepoolId)
 	}
-	if !quotaFlag && hasCpuOrMemoryLimit(nodePoolResources) {
-		return nil, fmt.Errorf("quota is not enabled on nodepool id <%s>. CPU and memory limits should be -1, null or omitted", nodepoolId)
-	}
-
 	if !limitsFlag && hasNodePoolResourcesLimit(nodePoolResources) {
 		return nil, fmt.Errorf("limits are not enabled on nodepool id <%s>. GPU, CPU and memory limits should be -1, null or omitted", nodepoolId)
 	}

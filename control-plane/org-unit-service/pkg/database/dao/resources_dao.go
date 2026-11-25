@@ -25,17 +25,16 @@ const (
                              AND %s AND %s.tenant_id = ? AND %s.cluster_id = ? 
                              AND %s.deleted_at is NULL and resources.deleted_at is NULL;`
 
-	disableCpuQuotaQueryCondition = `(cpu_deserved IS NOT NULL OR cpu_limit IS NOT NULL OR cpu_over_quota_weight IS NOT NULL 
-                     OR memory_deserved IS NOT NULL OR memory_limit IS NOT NULL OR memory_over_quota_weight IS NOT NULL)`
+	// Limits aren't quota: GPU, CPU and memory limits apply in every scheduling mode, so they neither stop quota or
+	// cpuQuota from turning off nor are cleared by QUOTAS_TO_DEFAULT or CPU_QUOTAS_TO_DEFAULT. LIMITS_TO_DEFAULT
+	// clears them.
+	disableCpuQuotaQueryCondition = `(cpu_deserved IS NOT NULL OR cpu_over_quota_weight IS NOT NULL 
+                     OR memory_deserved IS NOT NULL OR memory_over_quota_weight IS NOT NULL)`
 
-	disableCpuQuotaQuerySet = `cpu_deserved = NULL, cpu_limit = NULL, cpu_over_quota_weight = NULL, 
-                     memory_deserved = NULL, memory_limit = NULL, memory_over_quota_weight = NULL, updated_at=now()`
+	disableCpuQuotaQuerySet = `cpu_deserved = NULL, cpu_over_quota_weight = NULL, 
+                     memory_deserved = NULL, memory_over_quota_weight = NULL, updated_at=now()`
 
-	// A GPU limit isn't quota: limits apply in every scheduling mode, so it neither stops quota from turning off nor
-	// is cleared by QUOTAS_TO_DEFAULT. LIMITS_TO_DEFAULT clears it.
-	hasQuotaQueryCondition = `(gpu_deserved <> 0 OR 
-					 cpu_deserved <> -1 OR cpu_limit <> -1 OR 
-					 memory_deserved <> -1 OR memory_limit <> -1)`
+	hasQuotaQueryCondition = `(gpu_deserved <> 0 OR cpu_deserved <> -1 OR memory_deserved <> -1)`
 
 	hasLimitQueryCondition = `(gpu_limit <> -1 OR cpu_limit <> -1 OR memory_limit <> -1)`
 )
@@ -183,9 +182,7 @@ func getResetResourcesResourcesQuery(projects bool, action ResetResourcesAction,
 
 	switch action {
 	case QuotasToDefault:
-		setQuery = `gpu_deserved = 0,
-                     cpu_deserved = NULL, cpu_limit = NULL,
-                     memory_deserved = NULL, memory_limit = NULL, updated_at=now()`
+		setQuery = `gpu_deserved = 0, cpu_deserved = NULL, memory_deserved = NULL, updated_at=now()`
 		conditionQuery = hasQuotaQueryCondition
 	case RanksToDefault:
 		setQuery = fmt.Sprintf(`priority = '%s', updated_at=now()`, models.DefaultResourceRank)

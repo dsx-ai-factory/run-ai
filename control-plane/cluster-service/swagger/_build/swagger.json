@@ -5876,7 +5876,7 @@
           },
           "limits": {
             "type": "boolean",
-            "description": "Whether to allow GPU, CPU and memory limits for the nodepool's resources. With quota=false, only GPU limits are allowed.",
+            "description": "Whether to allow GPU, CPU and memory limits for the nodepool's resources.",
             "example": false,
             "default": true,
             "nullable": true
@@ -6260,7 +6260,7 @@
           },
           "limits": {
             "type": "boolean",
-            "description": "Whether to allow GPU, CPU and memory limits for the nodepool's resources. With quota=false, only GPU limits are allowed.",
+            "description": "Whether to allow GPU, CPU and memory limits for the nodepool's resources.",
             "example": false,
             "default": true
           }

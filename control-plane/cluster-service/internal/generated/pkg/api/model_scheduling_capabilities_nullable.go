@@ -45,7 +45,7 @@ type SchedulingCapabilitiesNullable struct {
 	CpuQuota *bool `json:"cpuQuota,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Whether to allow GPU, CPU and memory limits for the nodepool's resources. With quota=false, only GPU limits are allowed.
+	// Whether to allow GPU, CPU and memory limits for the nodepool's resources.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Limits *bool `json:"limits,omitempty"`
 	Limits *bool `json:"limits,omitempty" gorm:""`

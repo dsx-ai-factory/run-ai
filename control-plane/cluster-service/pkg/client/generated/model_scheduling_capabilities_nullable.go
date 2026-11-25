@@ -29,7 +29,7 @@ type SchedulingCapabilitiesNullable struct {
 	Quota NullableBool `json:"quota,omitempty"`
 	// Whether to allow CPU quota for the nodepool's resources. Only allowed when allowQuota=true.
 	CpuQuota NullableBool `json:"cpuQuota,omitempty"`
-	// Whether to allow GPU, CPU and memory limits for the nodepool's resources. With quota=false, only GPU limits are allowed.
+	// Whether to allow GPU, CPU and memory limits for the nodepool's resources.
 	Limits NullableBool `json:"limits,omitempty"`
 }
 

@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 **Ranks** | **bool** | Whether to allow ranks for the nodepool&#39;s resources. | [default to true]
 **Quota** | **bool** | Whether to allow GPU quota for the nodepool&#39;s resources. | [default to true]
 **CpuQuota** | **bool** | Whether to allow CPU quota for the nodepool&#39;s resources. Only allowed when allowQuota&#x3D;true. | [default to false]
-**Limits** | **bool** | Whether to allow GPU, CPU and memory limits for the nodepool&#39;s resources. With quota&#x3D;false, only GPU limits are allowed. | [default to true]
+**Limits** | **bool** | Whether to allow GPU, CPU and memory limits for the nodepool&#39;s resources. | [default to true]
 
 ## Methods
 

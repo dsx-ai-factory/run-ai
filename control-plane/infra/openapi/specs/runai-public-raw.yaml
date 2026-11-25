@@ -28658,7 +28658,7 @@ components:
           type: boolean
           description: >-
             Whether to allow GPU, CPU and memory limits for the nodepool's
-            resources. With quota=false, only GPU limits are allowed.
+            resources.
           example: false
           default: true
           nullable: true
@@ -28946,7 +28946,7 @@ components:
           type: boolean
           description: >-
             Whether to allow GPU, CPU and memory limits for the nodepool's
-            resources. With quota=false, only GPU limits are allowed.
+            resources.
           example: false
           default: true
     NodepoolGPUNetworkAccelerationDetection:
