@@ -4,13 +4,6 @@
  */
 import { automaticWeightFromQuota, type IDepartmentSchedulingEdit } from "@/models/node-pool-scheduling.model";
 
-export function effectiveDepartmentEdit(
-  baseline: Record<string, IDepartmentSchedulingEdit>,
-  edits: Record<string, IDepartmentSchedulingEdit>,
-  id: string,
-): IDepartmentSchedulingEdit {
-  return { ...baseline[id], ...edits[id], id };
-}
 interface ICompletePeerTotal {
   rawWeightsSum?: number;
   automaticWeightsSum: number;

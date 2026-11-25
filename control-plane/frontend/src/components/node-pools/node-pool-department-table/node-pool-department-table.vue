@@ -341,10 +341,7 @@ import { useNodePoolSimulation } from "@/composables/node-pool/use-node-pool-sim
 import { defaultSimulationDemand } from "@/utils/node-pool-scheduling.util/node-pool-simulation.util";
 import { integerSimulationValues } from "@/utils/node-pool-scheduling.util/node-pool-simulation-display.util";
 import { formatUtil } from "@/utils/format.util/format.util";
-import {
-  completePeerSchedulingTotals,
-  effectiveDepartmentEdit,
-} from "@/utils/node-pool-scheduling.util/node-pool-scheduling-totals.util";
+import { completePeerSchedulingTotals } from "@/utils/node-pool-scheduling.util/node-pool-scheduling-totals.util";
 import {
   departmentTableColumns,
   schedulingColumnOrder,
@@ -360,6 +357,7 @@ import { DepartmentResourceEditor } from "@/components/node-pools/department-res
 import {
   DEPARTMENT_PAGE_SIZE,
   schedulingTotalsWithEdits,
+  effectiveDepartmentEdit,
   automaticWeightFromQuota,
   weightFromGuaranteedQuota,
   weightPercentage,
@@ -408,7 +406,8 @@ const initializingCustomWeights = computed(
   () =>
     props.draft.mode === ESchedulingMode.Guaranteed &&
     !props.draft.automaticWeights &&
-    props.draft.capabilities?.adjustableWeights === false &&
+    props.draft.capabilities?.quota === true &&
+    props.draft.capabilities.adjustableWeights === false &&
     !props.rawWeightsAvailable,
 );
 const knownRows = ref<Record<string, DepartmentNodePoolResources>>({});
@@ -454,30 +453,14 @@ const completeEffectiveRows = computed(() =>
     ? undefined
     : props.baselineRows?.map((row) => effectiveDepartmentEdit(baseline.value, props.draft.departments, row.orgUnitId)),
 );
-const completeCustomWeightTotals = computed(() =>
-  !automatic.value && props.totalsComplete !== false && completeEffectiveRows.value
+const peerTotals = computed(() =>
+  props.totalsComplete && completeEffectiveRows.value
     ? completePeerSchedulingTotals(completeEffectiveRows.value)
     : undefined,
 );
-const totals = computed(() => {
-  // Server quota sums exclude the scheduler's zero-quota floor. Use the unfiltered
-  // snapshot for Automatic and newly initialized Custom weights, including hidden ranks.
-  let aggregates = props.aggregates;
-  if ((automatic.value || initializingCustomWeights.value) && !hasMore.value && props.baselineRows) {
-    const peers = completePeerSchedulingTotals(Object.values(baseline.value));
-    aggregates = Object.fromEntries(
-      Object.entries(aggregates).map(([rank, total]) => [
-        rank,
-        {
-          ...total,
-          automaticWeightsSum: peers[rank]?.automaticWeightsSum ?? 0,
-          rawWeightsSum: initializingCustomWeights.value ? peers[rank]?.rawWeightsSum : total.rawWeightsSum,
-        },
-      ]),
-    );
-  }
-  return schedulingTotalsWithEdits(aggregates, baseline.value, props.draft.departments, automatic.value);
-});
+const totals = computed(() =>
+  schedulingTotalsWithEdits(props.aggregates, baseline.value, props.draft.departments, automatic.value),
+);
 const quotaExcess = computed(() => {
   const capacity = props.capacity;
   const assigned = totals.value.all;
@@ -789,9 +772,14 @@ function resultLegend(row: IDepartmentSchedulingEdit) {
   }));
 }
 function weightTotal(row: IDepartmentSchedulingEdit) {
-  if ((automatic.value || initializingCustomWeights.value) && hasMore.value) return undefined;
   const key = ranked.value ? (row.rank ?? "") : "all";
-  return totals.value[key]?.weightsSum ?? completeCustomWeightTotals.value?.[key]?.rawWeightsSum;
+  if (automatic.value || initializingCustomWeights.value) {
+    // The server's quota sum omits the zero-quota scheduler floor and unlimited defaults.
+    if (hasMore.value) return undefined;
+    if (peerTotals.value)
+      return automatic.value ? peerTotals.value[key]?.automaticWeightsSum : peerTotals.value[key]?.rawWeightsSum;
+  }
+  return totals.value[key]?.weightsSum ?? peerTotals.value?.[key]?.rawWeightsSum;
 }
 async function loadWeightPeers() {
   if (!(await props.departmentPages?.loadAll())) throw new Error("Department weights are unavailable.");

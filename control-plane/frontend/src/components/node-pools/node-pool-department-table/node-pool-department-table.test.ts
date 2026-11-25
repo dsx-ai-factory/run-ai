@@ -1190,7 +1190,7 @@ describe("scheduling department table", () => {
       ...draft,
       mode: ESchedulingMode.Guaranteed,
       automaticWeights: true,
-      capabilities: { adjustableWeights: false },
+      capabilities: { adjustableWeights: false, quota: true },
     };
     const peers = [2, 6].map((quota, i) => ({
       ...rows[0],

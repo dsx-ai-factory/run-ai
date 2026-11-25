@@ -1,8 +1,6 @@
+import { effectiveDepartmentEdit } from "@/models/node-pool-scheduling.model";
 import { describe, expect, it } from "vitest";
-import {
-  completePeerSchedulingTotals,
-  effectiveDepartmentEdit,
-} from "@/utils/node-pool-scheduling.util/node-pool-scheduling-totals.util";
+import { completePeerSchedulingTotals } from "@/utils/node-pool-scheduling.util/node-pool-scheduling-totals.util";
 
 describe("complete department peer totals", () => {
   const rows = [

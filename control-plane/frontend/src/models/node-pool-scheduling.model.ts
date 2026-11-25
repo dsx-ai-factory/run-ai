@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { ENodePoolSchedulingMode as ESchedulingMode, isSupportedSchedulingMode } from "@/models/node-pool.model";
-import { effectiveDepartmentEdit } from "@/utils/node-pool-scheduling.util/node-pool-scheduling-totals.util";
 import type { SchedulingCapabilitiesNullable } from "@/swagger-models/cluster-service-client/index";
 
 export const DEFAULT_DEPARTMENT_SCHEDULING_WEIGHT = 2;
 
 export function weightFromGuaranteedQuota(quota: number): number {
   if (quota === -1) return DEFAULT_DEPARTMENT_SCHEDULING_WEIGHT;
+  // The scheduler assigns a minimum over-quota weight to an explicit zero quota.
   return quota === 0 ? 0.01 : quota;
 }
 
@@ -25,6 +25,13 @@ export interface IDepartmentSchedulingEdit {
   quota?: number;
   limit?: number | null;
   rank?: string;
+}
+export function effectiveDepartmentEdit(
+  baseline: Record<string, IDepartmentSchedulingEdit>,
+  edits: Record<string, IDepartmentSchedulingEdit>,
+  id: string,
+): IDepartmentSchedulingEdit {
+  return { ...baseline[id], ...edits[id], id };
 }
 export interface ISchedulingSnapshot {
   mode?: ESchedulingMode;
