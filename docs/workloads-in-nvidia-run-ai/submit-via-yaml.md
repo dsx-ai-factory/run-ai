@@ -30,7 +30,7 @@ Via YAML submission is enabled by default. If you do not see it in the menu, con
 
 Supported workload types include a broad range of workloads from the ML and Kubernetes ecosystem that are already registered as workload types in the platform and ready to use. See [Supported workload types](workload-types/supported-workload-types.md) for more details.
 
-* Your administrator can also register additional workload types for your organization. See [Registering new workload types](workload-types/extending-workload-support/#registering-new-workload-types) for more details.
+* Your administrator can also register additional workload types for your organization. See [Registering new workload types](workload-types/extending-workload-support/README.md#registering-new-workload-types) for more details.
 * By default, workload types are grouped into Build, Train and Deploy categories. These categories determine how the workload is scheduled and prioritized within a project and how they are grouped for monitoring and reporting.
 
 <Note>
@@ -46,7 +46,7 @@ By default, supported workload types are assigned a priority and preemptibility 
 
 ## Setting GPU Fractions
 
-To enable GPU fractions for workloads submitted via YAML, use the following annotations to define the GPU fraction configuration. You can configure `gpu-fraction`, `gpu-memory`, or the NVIDIA-native `nvidia.com/container.<container-name>.gpu-memory.request` alternative. For concept details, deployment considerations, and a full example, see [GPU Fractions](../platform-management/runai-scheduler/resource-optimization/memory-fractions.md#setting-gpu-memory-fractions-via-yaml).
+To enable GPU fractions for workloads submitted via YAML, use the following annotations to define the GPU fraction configuration. You can configure `gpu-fraction`, `gpu-memory`, or the NVIDIA-native `nvidia.com/container.<container-name>.gpu-memory.request` alternative. For concept details, deployment considerations, and a full example, see [GPU Fractions](configure-workload-scheduling/configure-gpu-sharing/request-gpu-memory-fractions.md#setting-gpu-memory-fractions-via-yaml).
 
 GPU fractions can be assigned to only one container in the pod. By default, GPU fraction allocation is applied to the first container (index 0) in the pod. Set the `gpu-fraction-container-name` annotation to specify which container should consume the fractional GPU resources. The specified container can be the main container, a sidecar, or an init container, any container other than the default first container.
 

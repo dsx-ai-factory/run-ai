@@ -7,9 +7,7 @@ When allocating compute resources for workloads, GPUs are often seen as the main
 
 Modern GPU servers typically include substantial CPU compute and memory to support these needs.
 
-## Requesting CPU Compute and Memory
-
-When submitting a [workload](../../../workloads-in-nvidia-run-ai/workloads.md) or creating [compute resources](../../../workloads-in-nvidia-run-ai/workload-assets/compute-resources.md), you can explicitly request both CPU compute and memory resources. The system guarantees that, if the workload is scheduled, the requested resources will be available for that workload.
+## How CPU Compute and Memory Are Allocated
 
 The number of CPUs and amount of memory your workload will receive is guaranteed to be the number requested. In practice, however, you may receive more resources than requested:
 
@@ -25,12 +23,9 @@ If your workload temporarily uses more memory than requested and new workloads a
 
 </Note>
 
-## Setting CPU Compute and Memory Limits
+## Requesting and Limiting CPU Compute and Memory in Workloads
 
-You can further control CPU compute and memory resource usage by specifying limits. The system will ensure your workload does not consume more than the limits set for compute or memory.
-
-* If your workload exceeds its memory limit, it will get an out of memory error and may be terminated.
-* The limit must be equal to or greater than the request.
+When you submit a workload or create a compute resource, you can request CPU compute and memory and set limits. For the steps, refer to [Configure CPU and memory requests](../../../workloads-in-nvidia-run-ai/configure-workload-scheduling/configure-cpu-and-memory-requests.md).
 
 ## Cluster Default Resource Settings
 
@@ -79,22 +74,4 @@ The example below shows:
       memoryDefaultLimitGpuFactor: 2Gi
       cpuDefaultRequestCpuLimitFactorNoGpu: 0.1
       memoryDefaultRequestMemoryLimitFactorNoGpu: 0.1
-```
-
-## Validating CPU Resource Allocations
-
-Once a workload is submitted, its resource requests and limits are reflected in the underlying Kubernetes pod. Review pod specifications in Kubernetes to check the assigned CPU and memory.
-
-1. Get the pod name by running: `runai workload describe WORKLOAD_NAME`
-2. The pod will appear under the `PODS` category. Run: `kubectl describe pod <POD_NAME>`
-
-The information will appear under `Requests` and `Limits`. For example:
-
-```yaml
-Limits:
-    nvidia.com/gpu:  2
-Requests:
-    cpu:             1
-    memory:          104857600
-    nvidia.com/gpu:  2
 ```

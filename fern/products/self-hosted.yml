@@ -242,80 +242,8 @@ navigation:
         contents:
         - page: Nodes
           path: ../../docs/platform-management/aiinitiatives/resources/nodes.md
-        - page: Configuring NVIDIA MIG Profiles
-          slug: mig-profiles
-          path: ../../docs/platform-management/aiinitiatives/resources/mig-profiles.md
-        - page: Using GB200 NVL72 and Multi-Node NVLink Domains
-          slug: using-gb200
-          path: ../../docs/platform-management/aiinitiatives/resources/using-gb200.md
-        - section: Accelerating Workloads with Network Topology-Aware Scheduling
-          slug: topology-aware-scheduling
-          path: ../../docs/platform-management/aiinitiatives/resources/topology-aware-scheduling/README.md
-          contents:
-          - page: Workload-Based Topology Placement
-            path: ../../docs/platform-management/aiinitiatives/resources/topology-aware-scheduling/workload-level-topology.md
-          - page: Segment-Based Topology Placement
-            path: ../../docs/platform-management/aiinitiatives/resources/topology-aware-scheduling/segment-based-topology-placement.md
-        - page: Enabling Spectrum-X Networking for NVIDIA Run:ai Workloads
-          slug: spectrum-x-networking
-          path: ../../docs/platform-management/aiinitiatives/resources/spectrum-x-networking.md
-        - page: Configuring NUMA-Aware Scheduling
-          slug: numa-aware-scheduling
-          path: ../../docs/platform-management/aiinitiatives/resources/numa-aware-scheduling.md
         - page: Node Pools
           path: ../../docs/platform-management/aiinitiatives/resources/node-pools.md
-    - section: Scheduling and Resource Optimization
-      slug: runai-scheduler
-      contents:
-      - section: Scheduling
-        contents:
-        - page: 'The NVIDIA Run:ai Scheduler: Concepts and Principles'
-          slug: concepts-and-principles
-          path: ../../docs/platform-management/runai-scheduler/scheduling/concepts-and-principles.md
-        - page: How the Scheduler Works
-          path: ../../docs/platform-management/runai-scheduler/scheduling/how-the-scheduler-works.md
-        - page: Setting the Default Scheduler
-          slug: default-scheduler
-          path: ../../docs/platform-management/runai-scheduler/scheduling/default-scheduler.md
-        - page: Workload Priority and Preemption
-          slug: workload-priority-control
-          path: ../../docs/platform-management/runai-scheduler/scheduling/workload-priority-control.md
-        - page: Background Workloads
-          slug: background-workloads
-          path: ../../docs/platform-management/runai-scheduler/scheduling/background-workloads.md
-        - section: Quick Starts
-          contents:
-          - page: Over Quota, Fairness and Preemption
-            slug: over-quota
-            path: ../../docs/platform-management/runai-scheduler/scheduling/quick-starts/over-quota.md
-      - section: Resource Optimization
-        contents:
-        - section: GPU Fractions
-          slug: gpu-fractions
-          contents:
-          - page: GPU Memory Fractions
-            slug: memory-fractions
-            path: ../../docs/platform-management/runai-scheduler/resource-optimization/memory-fractions.md
-          - page: Dynamic GPU Memory Fractions
-            slug: dynamic-memory-fractions
-            path: ../../docs/platform-management/runai-scheduler/resource-optimization/dynamic-memory-fractions.md
-          - page: GPU Compute Modes
-            slug: compute-modes
-            path: ../../docs/platform-management/runai-scheduler/resource-optimization/compute-modes.md
-        - page: CPU Compute and Memory Allocation
-          slug: allocation-of-cpu-and-memory
-          path: ../../docs/platform-management/runai-scheduler/resource-optimization/allocation-of-cpu-and-memory.md
-        - section: Quick Starts
-          contents:
-          - page: Launching Workloads with GPU Memory Fractions
-            slug: gpu-fractions-quickstart
-            path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/gpu-fractions-quickstart.md
-          - page: Launching Workloads with Dynamic GPU Memory Fractions
-            slug: dynamic-gpu-fractions-quickstart
-            path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/dynamic-gpu-fractions-quickstart.md
-          - page: Launching Workloads with GPU Compute Modes
-            slug: compute-modes-quickstart
-            path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/compute-modes-quickstart.md
     - section: Policies
       contents:
       - page: Policies and Rules
@@ -371,7 +299,79 @@ navigation:
           path: ../../docs/settings/user-settings/user-access-keys.md
         - page: User Credentials
           path: ../../docs/settings/user-settings/user-credentials.md
+  - section: Scheduling
+    slug: scheduling
+    contents:
+    - section: Scheduling Fundamentals
+      slug: fundamentals
+      contents:
+      - page: 'The NVIDIA Run:ai Scheduler: Concepts and Principles'
+        slug: concepts-and-principles
+        path: ../../docs/platform-management/runai-scheduler/scheduling/concepts-and-principles.md
+      - page: How the Scheduler Works
+        path: ../../docs/platform-management/runai-scheduler/scheduling/how-the-scheduler-works.md
+      - page: Setting the Default Scheduler
+        slug: default-scheduler
+        path: ../../docs/platform-management/runai-scheduler/scheduling/default-scheduler.md
+      - page: Workload Priority and Preemption
+        slug: workload-priority-control
+        path: ../../docs/platform-management/runai-scheduler/scheduling/workload-priority-control.md
+      - page: Background Workloads
+        slug: background-workloads
+        path: ../../docs/platform-management/runai-scheduler/scheduling/background-workloads.md
+      - page: CPU Compute and Memory Allocation
+        slug: allocation-of-cpu-and-memory
+        path: ../../docs/platform-management/runai-scheduler/resource-optimization/allocation-of-cpu-and-memory.md
+      - section: Quick Starts
+        contents:
+        - page: Over Quota, Fairness and Preemption
+          slug: over-quota
+          path: ../../docs/platform-management/runai-scheduler/scheduling/quick-starts/over-quota.md
+    - section: GPU Sharing
+      slug: gpu-sharing
+      contents:
+      - page: GPU Memory Fractions
+        slug: memory-fractions
+        path: ../../docs/platform-management/runai-scheduler/resource-optimization/memory-fractions.md
+      - page: Dynamic GPU Memory Fractions
+        slug: dynamic-memory-fractions
+        path: ../../docs/platform-management/runai-scheduler/resource-optimization/dynamic-memory-fractions.md
+      - page: GPU Compute Modes
+        slug: compute-modes
+        path: ../../docs/platform-management/runai-scheduler/resource-optimization/compute-modes.md
+      - page: Configuring NVIDIA MIG Profiles
+        slug: mig-profiles
+        path: ../../docs/platform-management/aiinitiatives/resources/mig-profiles.md
+      - section: Quick Starts
+        contents:
+        - page: Launching Workloads with GPU Memory Fractions
+          slug: gpu-fractions-quickstart
+          path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/gpu-fractions-quickstart.md
+        - page: Launching Workloads with Dynamic GPU Memory Fractions
+          slug: dynamic-gpu-fractions-quickstart
+          path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/dynamic-gpu-fractions-quickstart.md
+        - page: Launching Workloads with GPU Compute Modes
+          slug: compute-modes-quickstart
+          path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/compute-modes-quickstart.md
+    - section: Hardware-Aware Scheduling
+      slug: hardware-aware-scheduling
+      contents:
+      - page: Using GB200 NVL72 and Multi-Node NVLink Domains
+        slug: using-gb200
+        path: ../../docs/platform-management/aiinitiatives/resources/using-gb200.md
+      - section: Accelerating Workloads with Network Topology-Aware Scheduling
+        slug: topology-aware-scheduling
+        path: ../../docs/platform-management/aiinitiatives/resources/topology-aware-scheduling/README.md
+        contents:
+        - page: Workload-Based Topology Placement
+          path: ../../docs/platform-management/aiinitiatives/resources/topology-aware-scheduling/workload-level-topology.md
+        - page: Segment-Based Topology Placement
+          path: ../../docs/platform-management/aiinitiatives/resources/topology-aware-scheduling/segment-based-topology-placement.md
+      - page: Configuring NUMA-Aware Scheduling
+        slug: numa-aware-scheduling
+        path: ../../docs/platform-management/aiinitiatives/resources/numa-aware-scheduling.md
   - section: Workloads in NVIDIA Run:ai
+    slug: workloads-in-nvidia-run-ai
     contents:
     - page: Introduction to Workloads
       path: ../../docs/workloads-in-nvidia-run-ai/introduction-to-workloads.md
@@ -393,47 +393,54 @@ navigation:
           path: ../../docs/workloads-in-nvidia-run-ai/workload-types/extending-workload-support/quick-start-templates.md
       - page: Supported Features
         path: ../../docs/workloads-in-nvidia-run-ai/workload-types/supported-features.md
-    - page: Workloads
-      path: ../../docs/workloads-in-nvidia-run-ai/workloads.md
-    - section: Workload Assets
-      slug: assets
+    - section: Workload Management
+      skip-slug: true
       contents:
-      - page: Workload Assets
-        slug: overview
-        path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/overview.md
-      - page: Environments
-        path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/environments.md
-      - page: Data Sources
-        slug: datasources
-        path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/datasources.md
-      - page: Data Volumes
-        path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/data-volumes.md
-      - page: Compute Resources
-        path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/compute-resources.md
-      - page: Credentials
-        path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/credentials.md
-    - section: Workload Templates
-      path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/README.md
-      contents:
-      - page: Workspace Templates
-        path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/workspace-templates/README.md
-      - section: Training Templates
+      - page: Workloads
+        path: ../../docs/workloads-in-nvidia-run-ai/workloads.md
+      - section: Workload Assets
+        slug: assets
         contents:
-        - page: Standard Training Templates
-          path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/training-templates/standard-training-templates.md
-        - page: Distributed Training Templates
-          path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/training-templates/distributed-training-templates.md
-      - section: Inference Templates
+        - page: Workload Assets
+          slug: overview
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/overview.md
+        - page: Environments
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/environments.md
+        - page: Data Sources
+          slug: datasources
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/datasources.md
+        - page: Data Volumes
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/data-volumes.md
+        - page: Compute Resources
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/compute-resources.md
+        - page: Credentials
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/credentials.md
+      - section: Workload Templates
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/README.md
         contents:
-        - page: NVIDIA NIM Inference Templates
-          path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/inference-templates/nvidia-nim-inference-templates.md
-        - page: vLLM Inference Templates
-          path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/inference-templates/hugging-face-inference-templates.md
-        - page: Custom Inference Templates
-          path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/inference-templates/custom-inference-templates.md
+        - page: Workspace Templates
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/workspace-templates/README.md
+        - section: Training Templates
+          contents:
+          - page: Standard Training Templates
+            path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/training-templates/standard-training-templates.md
+          - page: Distributed Training Templates
+            path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/training-templates/distributed-training-templates.md
+        - section: Inference Templates
+          contents:
+          - page: NVIDIA NIM Inference Templates
+            path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/inference-templates/nvidia-nim-inference-templates.md
+          - page: vLLM Inference Templates
+            path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/inference-templates/hugging-face-inference-templates.md
+          - page: Custom Inference Templates
+            path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/inference-templates/custom-inference-templates.md
+
     - section: Experiment Using Workspaces
       slug: using-workspaces
       contents:
+      - page: Overview
+        slug: overview
+        path: ../../docs/workloads-in-nvidia-run-ai/using-workspaces/overview.md
       - page: Running Workspaces
         slug: running-workspace
         path: ../../docs/workloads-in-nvidia-run-ai/using-workspaces/running-workspace.md
@@ -445,15 +452,15 @@ navigation:
     - section: Train Models Using Training
       slug: using-training
       contents:
+      - page: Overview
+        slug: overview
+        path: ../../docs/workloads-in-nvidia-run-ai/using-training/overview.md
       - page: Train Models Using a Standard Training Workload
         slug: train-models
         path: ../../docs/workloads-in-nvidia-run-ai/using-training/train-models.md
       - page: Train Models Using a Distributed Training Workload
         slug: distributed-training-models
         path: ../../docs/workloads-in-nvidia-run-ai/using-training/distributed-training-models.md
-      - page: 'Best Practices: Checkpointing Preemptible Training Workloads'
-        slug: checkpointing-preemptible-workloads
-        path: ../../docs/workloads-in-nvidia-run-ai/using-training/checkpointing-preemptible-workloads.md
       - section: Quick Starts
         contents:
         - page: Run Your First Standard Training
@@ -462,10 +469,28 @@ navigation:
         - page: Run Your First Distributed Training
           slug: distributed-training-quickstart
           path: ../../docs/workloads-in-nvidia-run-ai/using-training/quick-starts/distributed-training-quickstart.md
+      - page: 'Best Practices: Checkpointing Preemptible Training Workloads'
+        slug: checkpointing-preemptible-workloads
+        path: ../../docs/workloads-in-nvidia-run-ai/using-training/checkpointing-preemptible-workloads.md
+      - section: Tutorials
+        slug: tutorials
+        contents:
+        - page: Distributed Training with PyTorch
+          slug: distributed-pytorch
+          path: ../../docs/tutorials/training-tutorials/distributed-pytorch.md
+        - page: Validating GPU Cluster Communication with NCCL Tests
+          slug: nccl-tests
+          path: ../../docs/tutorials/training-tutorials/nccl-tests.md
+        - page: Deploying a Slurm Cluster with Slinky
+          slug: deploying-slurm
+          path: ../../docs/tutorials/training-tutorials/deploying-slurm.md
+        - page: Running NVIDIA OSMO Workflows on NVIDIA Run:ai
+          slug: osmo-on-runai
+          path: ../../docs/tutorials/pipeline-tutorials/osmo-on-runai.md
     - section: Deploy Models Using Inference
       slug: using-inference
       contents:
-      - page: NVIDIA Run:ai Inference Overview
+      - page: Overview
         slug: inference-overview
         path: ../../docs/workloads-in-nvidia-run-ai/using-inference/nvidia-run-ai-inference-overview.md
       - page: Deploy Inference Workloads with NVIDIA NIM
@@ -488,61 +513,85 @@ navigation:
         - page: Run Your First Custom Inference Workload
           slug: inference-quickstart
           path: ../../docs/workloads-in-nvidia-run-ai/using-inference/quick-starts/inference-quickstart.md
-    - page: Submit Supported Workload Types via YAML
-      slug: submit-via-yaml
-      path: ../../docs/workloads-in-nvidia-run-ai/submit-via-yaml.md
-  - section: AI Applications
-    contents:
-    - page: Introduction to AI Applications
-      path: ../../docs/ai-applications/introduction-to-ai-applications.md
-    - page: AI Applications
-      slug: submit-ai-applications
-      path: ../../docs/ai-applications/ai-applications.md
-  - section: Tutorials
-    contents:
-    - section: Training Tutorials
+      - section: Tutorials
+        slug: tutorials
+        contents:
+        - page: Hugging Face Distributed Inference Deployment
+          slug: hugging-face-distributed
+          path: ../../docs/tutorials/inference-tutorials/hugging-face-distributed.md
+        - page: NVIDIA NIM Distributed Inference Deployment
+          slug: nvidia-nim-distributed
+          path: ../../docs/tutorials/inference-tutorials/nvidia-nim-distributed.md
+        - page: Running AI Agents with NVIDIA OpenShell on NVIDIA Run:ai
+          slug: openshell-on-runai
+          path: ../../docs/tutorials/agent-tutorials/openshell-on-runai.md
+    - section: Supported Workload Types
+      slug: supported-workload-types
       contents:
-      - page: Distributed Training with PyTorch
-        slug: distributed-pytorch
-        path: ../../docs/tutorials/training-tutorials/distributed-pytorch.md
-      - page: Validating GPU Cluster Communication with NCCL Tests
-        slug: nccl-tests
-        path: ../../docs/tutorials/training-tutorials/nccl-tests.md
-      - page: Deploying a Slurm Cluster with Slinky
-        slug: deploying-slurm
-        path: ../../docs/tutorials/training-tutorials/deploying-slurm.md
-    - section: Inference Tutorials
+      - page: Overview
+        slug: overview
+        path: ../../docs/workloads-in-nvidia-run-ai/supported-workload-types/overview.md
+      - page: Submit Supported Workload Types via YAML
+        slug: submit-via-yaml
+        path: ../../docs/workloads-in-nvidia-run-ai/submit-via-yaml.md
+      - section: Tutorials
+        slug: tutorials
+        contents:
+        - page: NVIDIA Dynamo Aggregated Inference Deployment
+          slug: aggregated-dynamo
+          path: ../../docs/tutorials/inference-tutorials/aggregated-dynamo.md
+        - page: NVIDIA Dynamo Disaggregated Inference Deployment
+          slug: disaggregated-dynamo
+          path: ../../docs/tutorials/inference-tutorials/disaggregated-dynamo.md
+        - page: Model-Free NIM Service Deployment
+          slug: nim-service
+          path: ../../docs/tutorials/inference-tutorials/nim-service.md
+    - section: AI Applications
+      slug: ai-applications
       contents:
-      - page: NVIDIA NIM Distributed Inference Deployment
-        slug: nvidia-nim-distributed
-        path: ../../docs/tutorials/inference-tutorials/nvidia-nim-distributed.md
-      - page: Hugging Face Distributed Inference Deployment
-        slug: hugging-face-distributed
-        path: ../../docs/tutorials/inference-tutorials/hugging-face-distributed.md
-      - page: NVIDIA Dynamo Aggregated Inference Deployment
-        slug: aggregated-dynamo
-        path: ../../docs/tutorials/inference-tutorials/aggregated-dynamo.md
-      - page: NVIDIA Dynamo Disaggregated Inference Deployment
-        slug: disaggregated-dynamo
-        path: ../../docs/tutorials/inference-tutorials/disaggregated-dynamo.md
-      - page: Model-Free NIM Service Deployment
-        slug: nim-service
-        path: ../../docs/tutorials/inference-tutorials/nim-service.md
-    - section: Blueprint Tutorials
+      - page: Introduction to AI Applications
+        path: ../../docs/ai-applications/introduction-to-ai-applications.md
+      - page: AI Applications
+        slug: submit-ai-applications
+        path: ../../docs/ai-applications/ai-applications.md
+      - section: Tutorials
+        slug: tutorials
+        contents:
+        - page: RAG Blueprint Deployment from NGC Catalog
+          slug: rag-blueprint-deployment
+          path: ../../docs/tutorials/blueprint-tutorials/rag-blueprint-deployment.md
+    - section: Configure Workload Scheduling
+      slug: configure-workload-scheduling
       contents:
-      - page: RAG Blueprint Deployment from NGC Catalog
-        slug: rag-blueprint-deployment
-        path: ../../docs/tutorials/blueprint-tutorials/rag-blueprint-deployment.md
-    - section: Agent Tutorials
-      contents:
-      - page: Running AI Agents with NVIDIA OpenShell on NVIDIA Run:ai
-        slug: openshell-on-runai
-        path: ../../docs/tutorials/agent-tutorials/openshell-on-runai.md
-    - section: Pipeline Tutorials
-      contents:
-      - page: Running NVIDIA OSMO Workflows on NVIDIA Run:ai
-        slug: osmo-on-runai
-        path: ../../docs/tutorials/pipeline-tutorials/osmo-on-runai.md
+      - page: Configure Priority and Preemption
+        path: ../../docs/workloads-in-nvidia-run-ai/configure-workload-scheduling/configure-priority-and-preemption.md
+      - page: Label a Workload as Background
+        path: ../../docs/workloads-in-nvidia-run-ai/configure-workload-scheduling/label-a-workload-as-background.md
+      - page: Configure CPU and Memory Requests
+        path: ../../docs/workloads-in-nvidia-run-ai/configure-workload-scheduling/configure-cpu-and-memory-requests.md
+      - section: Configure GPU Sharing
+        slug: configure-gpu-sharing
+        contents:
+        - page: Request GPU Memory Fractions
+          path: ../../docs/workloads-in-nvidia-run-ai/configure-workload-scheduling/configure-gpu-sharing/request-gpu-memory-fractions.md
+        - page: Configure GPU Compute Mode
+          path: ../../docs/workloads-in-nvidia-run-ai/configure-workload-scheduling/configure-gpu-sharing/configure-gpu-compute-mode.md
+      - section: Configure Workload Placement
+        slug: configure-workload-placement
+        contents:
+        - section: Configure Topology-Aware Placement
+          slug: topology-aware-placement
+          contents:
+          - page: Configure Workload-Based Placement
+            path: ../../docs/workloads-in-nvidia-run-ai/configure-workload-scheduling/configure-workload-placement/configure-workload-based-placement.md
+          - page: Configure Segment-Based Placement
+            path: ../../docs/workloads-in-nvidia-run-ai/configure-workload-scheduling/configure-workload-placement/configure-segment-based-placement.md
+        - page: Enabling Spectrum-X Networking for NVIDIA Run:ai Workloads
+          slug: spectrum-x-networking
+          path: ../../docs/platform-management/aiinitiatives/resources/spectrum-x-networking.md
+        - page: Configure GB200 NVL72 Placement
+          slug: configure-gb200-nvl72-placement
+          path: ../../docs/workloads-in-nvidia-run-ai/configure-workload-scheduling/configure-workload-placement/configure-gb200-nvl72-placement.md
   - section: Agents
     contents:
     - page: Overview
