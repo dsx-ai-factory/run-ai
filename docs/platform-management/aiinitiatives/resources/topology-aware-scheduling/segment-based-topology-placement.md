@@ -6,7 +6,7 @@ For distributed training workloads, you can divide worker pods into fixed-size t
 
 **Note**
 
-Segment-based placement is currently supported for the PyTorch framework (native distributed training workloads), PyTorchJob, and LeaderWorkerSet (LWS) ([supported workload types](../../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md)).
+Segment-based placement is currently supported for the PyTorch framework (native distributed training workloads), PyTorchJob, and LeaderWorkerSet (LWS) ([supported workload types](../../../../workloads-in-nvidia-run-ai/supported-workload-types/list-of-supported-workload-types.md)).
 
 </Note>
 

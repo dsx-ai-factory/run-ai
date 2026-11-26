@@ -4,7 +4,7 @@ This guide explains how to create a native workspace via the NVIDIA Run:ai UI.
 
 A workspace contains the setup and configuration needed for building your model, including the container, images, data sets, and resource requests, as well as the required tools for the research, all in a single place.
 
-To learn more about the workspace workload type in NVIDIA Run:ai and determine that it is the most suitable workload type for your goals, see [Workload types and features](../workload-types/native-workloads.md).
+To learn more about the workspace workload type in NVIDIA Run:ai and determine that it is the most suitable workload type for your goals, see [Workload types and features](../workload-types/workload-types.md).
 
 <figure><img src="../../assets/workspace-no-jobs.png" alt=""/><figcaption></figcaption></figure>
 

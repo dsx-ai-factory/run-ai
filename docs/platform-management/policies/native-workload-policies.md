@@ -1,6 +1,6 @@
 # NVIDIA Run:ai Native Workload Policies
 
-This guide explains the structure and procedures for managing policies for [NVIDIA Run:ai native workloads](../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md).
+This guide explains the structure and procedures for managing policies for [NVIDIA Run:ai native workloads](../../workloads-in-nvidia-run-ai/workload-types/workload-types.md).
 
 <Note>
 
@@ -26,7 +26,7 @@ The Workload policies table consists of the following columns:
 | Column               | Description                                                                                                                                                                                      |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Policy               | The policy name which is a combination of the policy scope and the policy type                                                                                                                   |
-| Type                 | The policy type is per NVIDIA Run:ai workload type. This allows administrators to set different policies for each [workload type](../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md).           |
+| Type                 | The policy type is per NVIDIA Run:ai workload type. This allows administrators to set different policies for each [workload type](../../workloads-in-nvidia-run-ai/supported-workload-types/list-of-supported-workload-types.md).           |
 | Policy architecture  | Indicates whether the policy targets a **Standard** workload (Training, Workspace, or Inference) or a **Distributed** workload.                                                                  |
 | Status               | The current state of the policy. Indicates whether the policy is Ready to enforce workloads.                                                                                                     |
 | Scope         | The scope the policy affects. Click the name of the scope to view the organizational tree diagram. You can only view the parts of the organizational tree for which you have permission to view. |

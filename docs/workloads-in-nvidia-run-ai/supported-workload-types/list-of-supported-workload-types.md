@@ -1,6 +1,6 @@
-# Supported Workload Types
+# List of Supported Workload Types
 
-NVIDIA Run:ai supports a broad range of workloads from the ML and Kubernetes ecosystem that are already registered as workload types in the platform and ready to use. These workloads are managed by [Karta](extending-workload-support/#karta-overview), which ensures they receive the same advanced scheduling, orchestration, and monitoring capabilities as NVIDIA Run:ai native workloads. For more details on feature support, see [Supported features](supported-features.md).
+This page lists the workload types that are pre-registered in the platform, and their default categories, priorities, and preemptibility. For an introduction to supported workload types and how they are managed, see [Overview](overview.md). For details on feature support, see [Supported features](../workload-types/supported-features.md).
 
 All supported workload types are pre-registered using the [Workload Types](api:main-api:POST/api/v1/workload-types) API. You can retrieve the full list of these workloads and their current configuration defaults.
 

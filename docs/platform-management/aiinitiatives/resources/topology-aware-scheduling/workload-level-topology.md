@@ -10,7 +10,7 @@ By default, topology-aware scheduling in NVIDIA Run:ai is applied at the **workl
 
 NVIDIA Run:ai automatically applies a **Preferred** topology constraint at the lowest defined topology level. This co-locates pods as close as possible in the network hierarchy, reducing communication overhead. If the Scheduler cannot place pods at this level, it automatically escalates placement by moving up through the topology hierarchy (for example: from node → rack → block → zone), always seeking the closest available level to minimize latency.
 
-This behavior applies to distributed [native workloads](../../../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md), [supported workload types](../../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md), and workloads submitted via `kubectl`. To override the default behavior and define your own topology-related annotations when submitting a distributed workload, see [Fine-tuning Topology-Aware Scheduling per Workload](#fine-tuning-topology-aware-scheduling-per-workload) below.
+This behavior applies to distributed [native workloads](../../../../workloads-in-nvidia-run-ai/workload-types/workload-types.md), [supported workload types](../../../../workloads-in-nvidia-run-ai/supported-workload-types/list-of-supported-workload-types.md), and workloads submitted via `kubectl`. To override the default behavior and define your own topology-related annotations when submitting a distributed workload, see [Fine-tuning Topology-Aware Scheduling per Workload](#fine-tuning-topology-aware-scheduling-per-workload) below.
 
 ## Fine-tuning Topology-Aware Scheduling per Workload
 

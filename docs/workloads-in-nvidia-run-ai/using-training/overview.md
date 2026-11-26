@@ -70,7 +70,7 @@ NVIDIA Run:ai also supports training workloads from the Kubernetes and machine l
 
 These workload types can be submitted using Kubernetes YAML manifests and managed through NVIDIA Run:ai scheduling, resource management, and monitoring capabilities.
 
-For the complete list, refer to [Supported Workload Types](../workload-types/supported-workload-types.md).
+For the complete list, refer to [Supported Workload Types](../supported-workload-types/list-of-supported-workload-types.md).
 
 ## Getting Started
 

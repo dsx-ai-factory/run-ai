@@ -42,8 +42,8 @@ NVIDIA Run:ai empowers data scientists and ML engineers by providing:
 * [**Optimized workload scheduling**](../platform-management/runai-scheduler/scheduling/how-the-scheduler-works.md) - Ensure high-priority jobs get GPU resources. Workloads dynamically receive resources based on demand.
 * [**Fractional GPU usage**](../platform-management/runai-scheduler/resource-optimization/memory-fractions.md) - Request and utilize only a fraction of a GPU's memory, ensuring efficient resource allocation and leaving room for other workloads.
 * [**AI initiatives lifecycle support**](../workloads-in-nvidia-run-ai/introduction-to-workloads.md) - Run your entire AI initiatives lifecycle – Jupyter Notebooks, training jobs, and inference workloads efficiently.
-* [**Interactive session** ](../workloads-in-nvidia-run-ai/workload-types/native-workloads.md#workspaces-the-experimentation-phase)- Ensure an uninterrupted experience when working on Jupyter Notebooks without taking away GPUs.
-* [**Scalability for training and inference**](../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) - Support for distributed training across multiple GPUs and auto-scales inference workloads.
+* [**Interactive session** ](../workloads-in-nvidia-run-ai/workload-types/workload-types.md#workspaces-the-experimentation-phase)- Ensure an uninterrupted experience when working on Jupyter Notebooks without taking away GPUs.
+* [**Scalability for training and inference**](../workloads-in-nvidia-run-ai/workload-types/workload-types.md) - Support for distributed training across multiple GPUs and auto-scales inference workloads.
 * [**Integrations**](../installation-and-configuration/configuration/third-party-integrations/supported-integrations.md) - Integrate with popular ML frameworks - PyTorch, TensorFlow, XGBoost, Knative, Spark, Kubeflow Pipelines, Apache Airflow, Argo workloads, Ray and more.
 * [**Flexible workload submission**](../workloads-in-nvidia-run-ai/introduction-to-workloads.md) - Submit workloads using the NVIDIA Run:ai UI, API, CLI or run third-party workloads.
 

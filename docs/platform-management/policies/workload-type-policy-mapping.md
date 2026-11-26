@@ -35,7 +35,7 @@ Three building blocks work together to enable policies for a new workload type. 
 
 ## Before You Start
 
-* Your new workload type must be registered using the [Workload Types API](api:main-api:POST/api/v1/workload-types). See [Extending workload support with Karta](../../workloads-in-nvidia-run-ai/workload-types/extending-workload-support/README.md).
+* Your new workload type must be registered using the [Workload Types API](api:main-api:POST/api/v1/workload-types). See [Extending workload support with Karta](../../workloads-in-nvidia-run-ai/supported-workload-types/extending-workload-support/README.md).
 * Identify the **group**, **version**, and **kind** (GVK) of your workload type as defined in its CRD.
 * You have the `policies:create` permission at the **tenant** scope. Department or project administrators with policy creation permissions scoped to a department, cluster, or project cannot create mappings.
 

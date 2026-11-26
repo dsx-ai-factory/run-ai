@@ -6,7 +6,7 @@ A training workload contains the setup and configuration needed for building you
 
 The distributed training workload is assigned to a project and is affected by the project’s quota.
 
-To learn more about the distributed training workload type in NVIDIA Run:ai and determine that it is the most suitable workload type for your goals, see [Workload types and features](../workload-types/native-workloads.md).
+To learn more about the distributed training workload type in NVIDIA Run:ai and determine that it is the most suitable workload type for your goals, see [Workload types and features](../workload-types/workload-types.md).
 
 <Note>
 

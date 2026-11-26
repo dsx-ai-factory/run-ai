@@ -143,6 +143,21 @@ redirects:
   - source: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/submit-via-yaml
     destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/supported-workload-types/submit-via-yaml
     permanent: true
+  - source: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/workload-types/native-workloads
+    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/workload-types/workload-types
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/workload-types/supported-workload-types
+    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/supported-workload-types/list-of-supported-workload-types
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/workload-types/extending-workload-support
+    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/supported-workload-types/extending-workload-support
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/workload-types/extending-workload-support/defining-a-karta
+    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/supported-workload-types/extending-workload-support/defining-a-karta
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/workload-types/extending-workload-support/quick-start-templates
+    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/supported-workload-types/extending-workload-support/quick-start-templates
+    permanent: true
   - source: /self-hosted/v2.26/:slug*
     destination: https://run-ai-docs.nvidia.com/self-hosted
     permanent: false

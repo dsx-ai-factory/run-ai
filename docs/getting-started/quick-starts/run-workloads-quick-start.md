@@ -26,7 +26,7 @@ Choose a quick start based on your goal. Each scenario walks through a practical
 After completing the quick starts, explore the broader workload capabilities available in NVIDIA Run:ai. This helps you move beyond basic scenarios and take advantage of advanced scheduling, scaling, and configuration options.
 
 * [Introduction to workloads](../../workloads-in-nvidia-run-ai/introduction-to-workloads.md) - How workloads are defined, scheduled, and executed in NVIDIA Run:ai.
-* [Workload types and features](../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) - The different supported workload types and the capabilities available for each, including scaling, resource configuration, scheduling behavior, and other advanced options.
+* [Workload types and features](../../workloads-in-nvidia-run-ai/workload-types/workload-types.md) - The different supported workload types and the capabilities available for each, including scaling, resource configuration, scheduling behavior, and other advanced options.
 * [Workload assets](../../workloads-in-nvidia-run-ai/workload-assets/overview.md) - Shared resources used by workloads, such as environments, data sources, and credentials.
 * [Workload templates](../../workloads-in-nvidia-run-ai/workload-templates/README.md) - Reusable configurations that help standardize and simplify workload creation.
 

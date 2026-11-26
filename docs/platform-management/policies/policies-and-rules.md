@@ -29,7 +29,7 @@ The policy enforces the workloads regardless of whether they were submitted via 
 
 #### Policy Types
 
-NVIDIA Run:ai policies can target any workload type in the platform -- both NVIDIA Run:ai [native workloads](../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) and [supported workload types](../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md).
+NVIDIA Run:ai policies can target any workload type in the platform -- both NVIDIA Run:ai [native workloads](../../workloads-in-nvidia-run-ai/workload-types/workload-types.md) and [supported workload types](../../workloads-in-nvidia-run-ai/supported-workload-types/list-of-supported-workload-types.md).
 
 * NVIDIA Run:ai native workloads are fully integrated into the platform. Policies for these workloads are configured using the policy YAML editor.
 * Supported workload types include any other workload type registered in the platform (such as PyTorchJob, RayJob, and others). Policies for these types can be configured interactively using the Rule builder or written as YAML.
@@ -38,7 +38,7 @@ NVIDIA Run:ai policies can target any workload type in the platform -- both NVID
 
 **Note**
 
-To apply policies to a new [workload type](../../workloads-in-nvidia-run-ai/workload-types/extending-workload-support/README.md) your organization has registered, you must first map it to the policy engine using the mapping APIs. See [Workload types policy mapping](workload-type-policy-mapping.md).
+To apply policies to a new [workload type](../../workloads-in-nvidia-run-ai/supported-workload-types/extending-workload-support/README.md) your organization has registered, you must first map it to the policy engine using the mapping APIs. See [Workload types policy mapping](workload-type-policy-mapping.md).
 
 </Note>
 

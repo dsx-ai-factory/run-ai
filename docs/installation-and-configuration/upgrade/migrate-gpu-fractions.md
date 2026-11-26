@@ -6,8 +6,8 @@ The upgrade affects every cluster running fractional GPU workloads. The submissi
 
 | Workload type | Anything else required |
 | --- | --- |
-| [Native workload types](../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) | No changes - the request and limit are still set through the same UI, API, and CLI fields. NVIDIA Run:ai converts the workload to the new annotation format automatically. Existing automation, pipelines, and saved templates continue to work unchanged. |
-| [Supported workload types](../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md), submitted as a Kubernetes manifest | The manifest itself requires a change only for dynamic fractions - a workload using a GPU fraction that declares a memory limit in addition to a request. A manifest that requests a fraction without a limit needs no change. See [Migrate Dynamic Fractions YAML](#migrate-dynamic-fractions-yaml). |
+| [Native workload types](../../workloads-in-nvidia-run-ai/workload-types/workload-types.md) | No changes - the request and limit are still set through the same UI, API, and CLI fields. NVIDIA Run:ai converts the workload to the new annotation format automatically. Existing automation, pipelines, and saved templates continue to work unchanged. |
+| [Supported workload types](../../workloads-in-nvidia-run-ai/supported-workload-types/list-of-supported-workload-types.md), submitted as a Kubernetes manifest | The manifest itself requires a change only for dynamic fractions - a workload using a GPU fraction that declares a memory limit in addition to a request. A manifest that requests a fraction without a limit needs no change. See [Migrate Dynamic Fractions YAML](#migrate-dynamic-fractions-yaml). |
 
 ## Prerequisites
 
@@ -20,7 +20,7 @@ The upgrade affects every cluster running fractional GPU workloads. The submissi
 
 ## Migrate Dynamic Fractions YAML
 
-This section applies only to [supported workload types](../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) whose manifest sets a fraction limit. [Native workload types](../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) use the same UI, API, and CLI fields as before - NVIDIA Run:ai converts them to the new annotation format automatically.
+This section applies only to [supported workload types](../../workloads-in-nvidia-run-ai/supported-workload-types/list-of-supported-workload-types.md) whose manifest sets a fraction limit. [Native workload types](../../workloads-in-nvidia-run-ai/workload-types/workload-types.md) use the same UI, API, and CLI fields as before - NVIDIA Run:ai converts them to the new annotation format automatically.
 
 In releases up to v2.26, a dynamic fraction was expressed in two places: the fraction request was an annotation, while the fraction limit was the container environment variable `RUNAI_GPU_MEMORY_LIMIT`. In v3.0, the limit becomes an annotation alongside the request.
 
@@ -110,8 +110,8 @@ The CUDA driver, GPU Operator, and NVIDIA Run:ai upgrades can happen in either o
 
 **Step 1 - Suspend or delete running and pending workloads using GPU fractions**
 
-* For [native workload types](../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md), suspend the workload through the NVIDIA Run:ai UI, CLI, or API.
-* For [supported workload types](../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) submitted as a Kubernetes manifest, delete the workload but retain its manifest.
+* For [native workload types](../../workloads-in-nvidia-run-ai/workload-types/workload-types.md), suspend the workload through the NVIDIA Run:ai UI, CLI, or API.
+* For [supported workload types](../../workloads-in-nvidia-run-ai/supported-workload-types/list-of-supported-workload-types.md) submitted as a Kubernetes manifest, delete the workload but retain its manifest.
 
 No workload using a GPU fraction may be running or pending when the NVIDIA Run:ai upgrade begins.
 

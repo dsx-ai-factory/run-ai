@@ -1,4 +1,12 @@
-# NVIDIA Run:ai Native Workloads
+# Workload Types
+
+NVIDIA Run:ai supports three kinds of workloads: native workloads, supported workload types, and Kubernetes workloads that are submitted outside of NVIDIA Run:ai. They differ in how they are submitted and in how much of the platform they can use. For a comparison of the capabilities that each kind supports, see [Supported features](supported-features.md).
+
+* [Native workloads](#native-workloads) - Workspaces, Training, and Inference, submitted from the NVIDIA Run:ai UI, API, or CLI.
+* [Supported workload types](#supported-workload-types) - Workloads from the ML and Kubernetes ecosystem that are already registered in the platform, submitted as Kubernetes YAML manifests.
+* [Externally submitted Kubernetes workloads](#externally-submitted-kubernetes-workloads) - Workloads submitted directly to the cluster, outside of NVIDIA Run:ai.
+
+## Native Workloads
 
 NVIDIA Run:ai workloads are ready-to-use workload types provided natively in the platform, including Workspaces, Training, and Inference. Native workloads include built-in support for orchestration, scheduling, and policy controls, ensuring optimization, governance, and security standards. These workloads are fully integrated and immediately available as part of the platform. For more details on feature support, see [Supported features](supported-features.md).
 
@@ -57,3 +65,16 @@ Once a model is trained and validated, it moves to the Inference stage, where it
     Inference models differ in size and purpose, leading to varying computational requirements. For example, small OCR models can run efficiently on CPUs, whereas LLMs typically require significant GPU memory for deployment and serving. Inference workloads are considered production-critical and are given the highest priority to ensure compliance with SLAs. Additionally, NVIDIA Run:ai ensures that inference workloads cannot be preempted, maintaining consistent performance and reliability.
 
 See [Deploy a custom inference workload](../using-inference/nvidia-run-ai-inference-overview.md) to learn more about how to submit an inference workload via the NVIDIA Run:ai UI. For a quick start, see [Run your first custom inference workload](../using-inference/quick-starts/inference-quickstart.md).
+
+## Supported Workload Types
+
+Supported workload types are workloads from the ML and Kubernetes ecosystem, such as Kubeflow, Ray, Tekton, NVIDIA NIM, and NVIDIA Dynamo, that are already registered in the platform and ready to use. They are managed through Karta and receive the same scheduling, orchestration, and monitoring as native workloads. They are submitted as Kubernetes YAML manifests, not through the native workload forms, and workload templates and workload assets are not available for them. Administrators can register additional workload types.
+
+* [Overview](../supported-workload-types/overview.md)
+* [List of supported workload types](../supported-workload-types/list-of-supported-workload-types.md)
+* [Submit supported workload types via YAML](../submit-via-yaml.md)
+* [Extending workload support with Karta](../supported-workload-types/extending-workload-support/README.md)
+
+## Externally Submitted Kubernetes Workloads
+
+Kubernetes workloads can also be submitted outside of NVIDIA Run:ai, for example with `kubectl` or with Helm charts as part of an [AI application](../../ai-applications/ai-applications.md). NVIDIA Run:ai schedules these workloads and monitors them, but they receive only a subset of the scheduling capabilities. For the list of supported capabilities, see [Externally submitted Kubernetes workloads](supported-features.md#externally-submitted-kubernetes-workloads).

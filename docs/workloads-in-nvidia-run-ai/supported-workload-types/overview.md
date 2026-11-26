@@ -14,7 +14,7 @@ NVIDIA Run:ai supports a broad range of workloads from the ML and Kubernetes eco
 
 Feature availability differs by workload type. For a breakdown of the capabilities that each workload type supports, refer to [Supported features](../workload-types/supported-features.md).
 
-* **Pre-registered workload types** - Workload types from NVIDIA, Kubernetes, Kubeflow, Ray, Tekton, Slinky, and other frameworks are available without additional registration. Refer to [Supported workload types](../workload-types/supported-workload-types.md) for the full list.
+* **Pre-registered workload types** - Workload types from NVIDIA, Kubernetes, Kubeflow, Ray, Tekton, Slinky, and other frameworks are available without additional registration. Refer to [Supported workload types](list-of-supported-workload-types.md) for the full list.
 * **Scheduling and monitoring** - Supported workload types are scheduled by the NVIDIA Run:ai Scheduler, appear in the Workloads table, and are monitored in the same way as native workloads.
 * **Policies and access control** - Workload policies and role-based access control apply to supported workload types. Workload templates and workload assets are not available for them.
 * **Default categories** - Each workload type belongs to a Build, Train, or Deploy category by default. The category determines the default priority and preemptibility. Administrators can change the default mapping. Refer to [Workload priority and preemption](../../platform-management/runai-scheduler/scheduling/workload-priority-control.md).
@@ -23,11 +23,11 @@ Feature availability differs by workload type. For a breakdown of the capabiliti
 
 ## Getting Started
 
-To learn about the supported workload types and their defaults, refer to [Supported workload types](../workload-types/supported-workload-types.md).
+To learn about the supported workload types and their defaults, refer to [Supported workload types](list-of-supported-workload-types.md).
 
 To submit a supported workload type, refer to [Submit supported workload types via YAML](../submit-via-yaml.md).
 
-Administrators can register additional workload types. Refer to [Extending workload support with Karta](../workload-types/extending-workload-support/README.md).
+Administrators can register additional workload types. Refer to [Extending workload support with Karta](extending-workload-support/README.md).
 
 For end-to-end examples, refer to the following tutorials:
 

@@ -2,8 +2,8 @@
 
 This page compares feature support across different workload types in NVIDIA Run:ai. Use it to understand which scheduling, resource management, and platform capabilities are available for each workload type before selecting a workload model or submission method.
 
-* [Native workloads](native-workloads.md) - Fully integrated into the platform - Workspace, Training and Inference.
-* [Supported workload types](supported-workload-types.md) - A broad range of workloads from the ML and Kubernetes ecosystem enabled through Karta.
+* [Native workloads](workload-types.md#native-workloads) - Fully integrated into the platform - Workspace, Training and Inference.
+* [Supported workload types](../supported-workload-types/list-of-supported-workload-types.md) - A broad range of workloads from the ML and Kubernetes ecosystem enabled through Karta.
 * [Externally submitted Kubernetes workloads](supported-features.md#externally-submitted-kubernetes-workloads) - Workloads submitted outside of NVIDIA Run:ai. These workloads receive only minimal scheduling and platform capabilities.
 
 Feature availability may vary across NVIDIA Run:ai versions and cluster deployments. Refer to this page and the linked documentation for the most up-to-date support details.

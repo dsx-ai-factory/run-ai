@@ -2,7 +2,7 @@
 
 This guide describes how to run supported workload types using the NVIDIA Run:ai UI by submitting a YAML manifest directly.
 
-To learn more about workload types in NVIDIA Run:ai and determine what is the most suitable workload type for your goals, see [Workload types and features](workload-types/supported-workload-types.md).
+To learn more about workload types in NVIDIA Run:ai and determine what is the most suitable workload type for your goals, see [Workload types and features](workload-types/workload-types.md).
 
 <Note>
 
@@ -28,9 +28,9 @@ Via YAML submission is enabled by default. If you do not see it in the menu, con
 
 ## Supported Workload Types
 
-Supported workload types include a broad range of workloads from the ML and Kubernetes ecosystem that are already registered as workload types in the platform and ready to use. See [Supported workload types](workload-types/supported-workload-types.md) for more details.
+Supported workload types include a broad range of workloads from the ML and Kubernetes ecosystem that are already registered as workload types in the platform and ready to use. See [Supported workload types](supported-workload-types/list-of-supported-workload-types.md) for more details.
 
-* Your administrator can also register additional workload types for your organization. See [Registering new workload types](workload-types/extending-workload-support/README.md#registering-new-workload-types) for more details.
+* Your administrator can also register additional workload types for your organization. See [Registering new workload types](supported-workload-types/extending-workload-support/README.md#registering-new-workload-types) for more details.
 * By default, workload types are grouped into Build, Train and Deploy categories. These categories determine how the workload is scheduled and prioritized within a project and how they are grouped for monitoring and reporting.
 
 <Note>
@@ -42,7 +42,7 @@ Some supported workload types require additional installation or cluster prepara
 </Note>
 
 ## Workload Priority and Preemption
-By default, supported workload types are assigned a priority and preemptibility based on their workload type. These defaults determine how workloads are scheduled relative to others within the same project, whether they can use over-quota resources, and whether they may be interrupted once running. You can override the defaults by configuring priority and preemptibility. For more details on the default values per workload type, see [Workload types default](workload-types/supported-workload-types.md#workload-types-defaults).
+By default, supported workload types are assigned a priority and preemptibility based on their workload type. These defaults determine how workloads are scheduled relative to others within the same project, whether they can use over-quota resources, and whether they may be interrupted once running. You can override the defaults by configuring priority and preemptibility. For more details on the default values per workload type, see [Workload types default](supported-workload-types/list-of-supported-workload-types.md#workload-types-and-defaults).
 
 ## Setting GPU Fractions
 
@@ -256,7 +256,7 @@ Failed to read request body
 
 **Workload type (GVK) not found or not ready in the cluster**
 
-**Description**: NVIDIA Run:ai can’t map your manifest’s **GVK** (group/version/kind) to a workload type that is registered and ready in the selected cluster. See [Supported workload types](workload-types/supported-workload-types.md).
+**Description**: NVIDIA Run:ai can’t map your manifest’s **GVK** (group/version/kind) to a workload type that is registered and ready in the selected cluster. See [Supported workload types](supported-workload-types/list-of-supported-workload-types.md).
 
 ```
 failed to extract resource info: <error>

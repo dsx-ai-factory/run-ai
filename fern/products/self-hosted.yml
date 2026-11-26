@@ -378,19 +378,8 @@ navigation:
     - section: Workload Types and Features
       slug: workload-types
       contents:
-      - page: NVIDIA Run:ai Native Workloads
-        slug: native-workloads
-        path: ../../docs/workloads-in-nvidia-run-ai/workload-types/native-workloads.md
-      - page: Supported Workload Types
-        path: ../../docs/workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md
-      - section: Extending Workload Support with Karta
-        slug: extending-workload-support
-        path: ../../docs/workloads-in-nvidia-run-ai/workload-types/extending-workload-support/README.md
-        contents:
-        - page: Defining a Karta
-          path: ../../docs/workloads-in-nvidia-run-ai/workload-types/extending-workload-support/defining-a-karta.md
-        - page: Quick Start Templates
-          path: ../../docs/workloads-in-nvidia-run-ai/workload-types/extending-workload-support/quick-start-templates.md
+      - page: Workload Types
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-types/workload-types.md
       - page: Supported Features
         path: ../../docs/workloads-in-nvidia-run-ai/workload-types/supported-features.md
     - section: Workload Management
@@ -531,9 +520,19 @@ navigation:
       - page: Overview
         slug: overview
         path: ../../docs/workloads-in-nvidia-run-ai/supported-workload-types/overview.md
+      - page: List of Supported Workload Types
+        path: ../../docs/workloads-in-nvidia-run-ai/supported-workload-types/list-of-supported-workload-types.md
       - page: Submit Supported Workload Types via YAML
         slug: submit-via-yaml
         path: ../../docs/workloads-in-nvidia-run-ai/submit-via-yaml.md
+      - section: Extending Workload Support with Karta
+        slug: extending-workload-support
+        path: ../../docs/workloads-in-nvidia-run-ai/supported-workload-types/extending-workload-support/README.md
+        contents:
+        - page: Defining a Karta
+          path: ../../docs/workloads-in-nvidia-run-ai/supported-workload-types/extending-workload-support/defining-a-karta.md
+        - page: Quick Start Templates
+          path: ../../docs/workloads-in-nvidia-run-ai/supported-workload-types/extending-workload-support/quick-start-templates.md
       - section: Tutorials
         slug: tutorials
         contents:

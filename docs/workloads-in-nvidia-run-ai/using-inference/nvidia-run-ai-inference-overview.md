@@ -48,7 +48,7 @@ NVIDIA Run:ai supports multiple native inference workload types to accommodate d
 
 ### Additional Supported Inference Workloads
 
-NVIDIA Run:ai supports a broad range of workloads from the ML and Kubernetes ecosystem that are already registered as workload types in the platform and ready to use. These workloads can then be submitted using [via YAML](../submit-via-yaml.md) and managed with the same orchestration, monitoring, and scheduling capabilities as native workloads. See [Supported workload types](../workload-types/supported-workload-types.md) for the full list of supported inference workload types. Key workload types include the following:
+NVIDIA Run:ai supports a broad range of workloads from the ML and Kubernetes ecosystem that are already registered as workload types in the platform and ready to use. These workloads can then be submitted using [via YAML](../submit-via-yaml.md) and managed with the same orchestration, monitoring, and scheduling capabilities as native workloads. See [Supported workload types](../supported-workload-types/list-of-supported-workload-types.md) for the full list of supported inference workload types. Key workload types include the following:
 
 * [**NVIDIA NIM Services**](https://docs.nvidia.com/nim-operator/latest/service.html) - NVIDIA NIM workloads are deployed and managed using the NVIDIA NIM Operator and exposed through a dedicated [NVIDIA NIM](api:main-api:POST/api/v2/workloads/nim-services) API. This enables standardized, production-ready deployment of optimized inference services while allowing NVIDIA Run:ai to handle scheduling, resource management, and observability.
 * [**DynamoGraphDeployment**](https://docs.nvidia.com/dynamo/latest/index.html) - Dynamo workloads are deployed using the NVIDIA Dynamo Operator, which manages graph-based, distributed inference pipelines. NVIDIA Run:ai integrates with the operator to schedule and manage Dynamo-based inference workloads across the cluster.
@@ -56,7 +56,7 @@ NVIDIA Run:ai supports a broad range of workloads from the ML and Kubernetes eco
 
 ### Extending Inference Workload Support
 
-For emerging ML frameworks, tools, or Kubernetes resources, Karta provides a declarative way to extend platform support. Administrators can register new workload types via the [Workload Types](api:main-api:POST/api/v1/workload-types) API, making them available across the organization without requiring platform updates or code changes. Once registered, these workloads can then be submitted using [via YAML](../submit-via-yaml.md) and managed with the same orchestration, monitoring, and scheduling capabilities as native workloads. See [Extending workload support with Karta](../workload-types/extending-workload-support/) for more details.
+For emerging ML frameworks, tools, or Kubernetes resources, Karta provides a declarative way to extend platform support. Administrators can register new workload types via the [Workload Types](api:main-api:POST/api/v1/workload-types) API, making them available across the organization without requiring platform updates or code changes. Once registered, these workloads can then be submitted using [via YAML](../submit-via-yaml.md) and managed with the same orchestration, monitoring, and scheduling capabilities as native workloads. See [Extending workload support with Karta](../supported-workload-types/extending-workload-support/) for more details.
 
 ## Observability and Metrics
 

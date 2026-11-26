@@ -31,7 +31,7 @@ If priority or preemptibility is set through the UI, API, or CLI, those values o
 
 </Note>
 
-For [supported workload types](../workload-types/supported-workload-types.md) submitted with a YAML manifest, priority and preemptibility can be set as follows:
+For [supported workload types](../supported-workload-types/list-of-supported-workload-types.md) submitted with a YAML manifest, priority and preemptibility can be set as follows:
 
 * **UI** - Set workload priority and preemptibility under **General** settings
 * **API** - Set using the `priority` and `preemptibility` fields

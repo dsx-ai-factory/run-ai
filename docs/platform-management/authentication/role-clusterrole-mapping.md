@@ -22,7 +22,7 @@ When an access rule assigns a role to a subject, NVIDIA Run:ai binds the subject
 | `runai-<role>-runai-cs` | In the `runai` namespace, with a RoleBinding | Access rules scoped to the cluster or the account. This ClusterRole exists only for the System administrator and Data and storage administrator roles. |
 | `runai-system-administrator-logs` | In the `runai-backend`, `runai-reservation`, `training-operator`, `knative`, `gpu-operator`, and `nim-operator` namespaces, with a RoleBinding | System administrator only |
 
-The `runai-<role>-ns` ClusterRoles are aggregated ClusterRoles. Their rules combine the rules listed on this page with one additional ClusterRole, `runai-additional-workload-gvks-read` or `runai-additional-workload-gvks-crud`. NVIDIA Run:ai creates this additional ClusterRole at runtime, and it grants read or full access to every [external workload type](../../workloads-in-nvidia-run-ai/workload-types/extending-workload-support/defining-a-karta.md) registered in the cluster.
+The `runai-<role>-ns` ClusterRoles are aggregated ClusterRoles. Their rules combine the rules listed on this page with one additional ClusterRole, `runai-additional-workload-gvks-read` or `runai-additional-workload-gvks-crud`. NVIDIA Run:ai creates this additional ClusterRole at runtime, and it grants read or full access to every [external workload type](../../workloads-in-nvidia-run-ai/supported-workload-types/extending-workload-support/defining-a-karta.md) registered in the cluster.
 
 <Note>
 

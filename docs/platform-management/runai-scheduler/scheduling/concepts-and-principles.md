@@ -219,7 +219,7 @@ In both scenarios, the platform schedules the workloads, accounts for the reques
 
 #### Extended-Resource Translation
 
-A translation layer in the Scheduler translates legacy extended-resource requests (for example, `nvidia.com/gpu: 2`) into DRA `ResourceClaim` requests automatically, so [NVIDIA Run:ai native workloads](../../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) and [supported workload types](../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) can use DRA without submitting a claim directly.
+A translation layer in the Scheduler translates legacy extended-resource requests (for example, `nvidia.com/gpu: 2`) into DRA `ResourceClaim` requests automatically, so [NVIDIA Run:ai native workloads](../../../workloads-in-nvidia-run-ai/workload-types/workload-types.md) and [supported workload types](../../../workloads-in-nvidia-run-ai/supported-workload-types/list-of-supported-workload-types.md) can use DRA without submitting a claim directly.
 
 Workloads that request extended resources and workloads that submit DRA claims can run in the same cluster when extended-resource translation is enabled. Translation requires all of the following:
 

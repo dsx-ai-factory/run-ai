@@ -136,7 +136,7 @@ The `nodesets` and `partitions.all.enabled` settings create the default worker N
 
 ## Step 4: Viewing Slurm Workloads in NVIDIA Run:ai
 
-After installation, NVIDIA Run:ai shows the controller, login service, REST API, and worker NodeSets in the `slurm` project. Slinky NodeSets are a natively supported NVIDIA Run:ai [workload type](../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md). No workload-type registration is required. NVIDIA Run:ai schedules the NodeSet pod through a pod group and enforces the project's GPU quota.
+After installation, NVIDIA Run:ai shows the controller, login service, REST API, and worker NodeSets in the `slurm` project. Slinky NodeSets are a natively supported NVIDIA Run:ai [workload type](../../workloads-in-nvidia-run-ai/supported-workload-types/list-of-supported-workload-types.md). No workload-type registration is required. NVIDIA Run:ai schedules the NodeSet pod through a pod group and enforces the project's GPU quota.
 
 The following example uses the CLI:
 

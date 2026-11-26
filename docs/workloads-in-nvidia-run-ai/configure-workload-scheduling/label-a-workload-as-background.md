@@ -18,7 +18,7 @@ The following are handled for you and do not need to be set manually:
 
 ### NVIDIA Run:ai Native Workloads
 
-For [native NVIDIA Run:ai workloads](../workload-types/native-workloads.md), the label can be set during workload submission using one of the following methods:
+For [native NVIDIA Run:ai workloads](../workload-types/workload-types.md), the label can be set during workload submission using one of the following methods:
 
 * **UI** - Under **General** settings, click **+LABEL** in **Set label(s)**. In **Name**, enter `kai.scheduler/background`, and in **Value**, enter `true`
 * **API** - Set using the `labels` field, with `kai.scheduler/background` as the `name` and `true` as the `value`
@@ -26,7 +26,7 @@ For [native NVIDIA Run:ai workloads](../workload-types/native-workloads.md), the
 
 ### Supported Workload Types
 
-For [supported workload types](../workload-types/supported-workload-types.md) submitted with a YAML manifest, add the label to your YAML manifest under the `metadata.labels` section of your workload definition:
+For [supported workload types](../supported-workload-types/list-of-supported-workload-types.md) submitted with a YAML manifest, add the label to your YAML manifest under the `metadata.labels` section of your workload definition:
 
 ```yaml
 metadata:

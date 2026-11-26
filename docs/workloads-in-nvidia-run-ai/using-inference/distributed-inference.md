@@ -6,7 +6,7 @@ An inference workload provides the setup and configuration needed to deploy your
 
 The inference workload is assigned to a project and is affected by the project’s quota.
 
-To learn more about the inference workload type in NVIDIA Run:ai and determine that it is the most suitable workload type for your goals, see [Workload types and features](../workload-types/native-workloads.md).
+To learn more about the inference workload type in NVIDIA Run:ai and determine that it is the most suitable workload type for your goals, see [Workload types and features](../workload-types/workload-types.md).
 
 <figure><img src="../../assets/inference-no-jobs.png" alt=""/><figcaption></figcaption></figure>
 

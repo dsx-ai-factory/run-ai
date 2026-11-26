@@ -14,7 +14,7 @@ A typical AI initiative progresses through several key stages, each with distinc
 
 ## What Is a Workload?
 
-A workload runs in the cluster, is associated with a namespace, and operates to fulfill its targets, whether that is running to completion for a [batch job](workload-types/native-workloads.md#training-scaling-resources-for-model-development), allocating resources for [experimentation](workload-types/native-workloads.md#workspaces-the-experimentation-phase) in an integrated development environment (IDE)/notebook, or serving [inference](workload-types/native-workloads.md#inference-deploying-and-serving-models) requests in production.
+A workload runs in the cluster, is associated with a namespace, and operates to fulfill its targets, whether that is running to completion for a [batch job](workload-types/workload-types.md#training-scaling-resources-for-model-development), allocating resources for [experimentation](workload-types/workload-types.md#workspaces-the-experimentation-phase) in an integrated development environment (IDE)/notebook, or serving [inference](workload-types/workload-types.md#inference-deploying-and-serving-models) requests in production.
 
 The workload, defined by the AI practitioner, consists of:
 
@@ -32,15 +32,15 @@ Workloads in NVIDIA Run:ai can be either built into the platform or brought in f
 
 ### NVIDIA Run:ai Native Workloads
 
-These are the native platform workload types provided by NVIDIA Run:ai - Workspaces, Training, and Inference. They are submitted directly from the NVIDIA Run:ai platform and are represented by Kubernetes Custom Resource Definitions (CRDs) and APIs. Native workloads include built-in support for orchestration, scheduling, and policy controls, ensuring optimization, governance, and security standards. These workloads are fully integrated and immediately available as part of the platform. See [NVIDIA Run:ai native workloads](workload-types/native-workloads.md) for more details.
+These are the native platform workload types provided by NVIDIA Run:ai - Workspaces, Training, and Inference. They are submitted directly from the NVIDIA Run:ai platform and are represented by Kubernetes Custom Resource Definitions (CRDs) and APIs. Native workloads include built-in support for orchestration, scheduling, and policy controls, ensuring optimization, governance, and security standards. These workloads are fully integrated and immediately available as part of the platform. See [NVIDIA Run:ai native workloads](workload-types/workload-types.md) for more details.
 
 ### Extending Supported Workload Types with Karta
 
 NVIDIA Run:ai enables support for workload types that originate from any ML framework, tool, or the broader Kubernetes ecosystem. These workloads can be managed and monitored directly through the NVIDIA Run:ai platform, allowing seamless integration with external tools and providing teams flexibility to deploy and scale various ML frameworks alongside NVIDIA Run:ai native workloads.
 
-Some workload types are already available in the platform, ready to use with default category and priority mappings applied. See [Supported workload types](workload-types/supported-workload-types.md) for a full list.
+Some workload types are already available in the platform, ready to use with default category and priority mappings applied. See [Supported workload types](supported-workload-types/list-of-supported-workload-types.md) for a full list.
 
-Administrators can extend workload support by introducing new workload types at any time using the [Workload Types](api:main-api:POST/api/v1/workload-types) API. The Karta infrastructure interprets and manages these workloads, enabling advanced orchestration, scheduling, and monitoring. See [Extending workload support with Karta](workload-types/extending-workload-support/) for more details.
+Administrators can extend workload support by introducing new workload types at any time using the [Workload Types](api:main-api:POST/api/v1/workload-types) API. The Karta infrastructure interprets and manages these workloads, enabling advanced orchestration, scheduling, and monitoring. See [Extending workload support with Karta](supported-workload-types/extending-workload-support/) for more details.
 
 ## AI Applications
 

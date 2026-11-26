@@ -15,7 +15,7 @@ Substitute `<container-name>` with the name of the container receiving the GPU m
 
 If the annotation is omitted, time-slicing applies.
 
-This annotation applies the same way to [supported workload types](../../workload-types/supported-workload-types.md) submitted via YAML and to [workloads submitted externally](../../workload-types/supported-features.md#externally-submitted-kubernetes-workloads), outside of NVIDIA Run:ai.
+This annotation applies the same way to [supported workload types](../../supported-workload-types/list-of-supported-workload-types.md) submitted via YAML and to [workloads submitted externally](../../workload-types/supported-features.md#externally-submitted-kubernetes-workloads), outside of NVIDIA Run:ai.
 
 ## Example
 

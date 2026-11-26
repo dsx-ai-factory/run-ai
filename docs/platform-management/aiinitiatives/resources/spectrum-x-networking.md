@@ -15,7 +15,7 @@ Before using Spectrum-X with NVIDIA Run:ai, ensure the following components are 
 
 To leverage Spectrum-X networking with NVIDIA Run:ai, the workload must be configured to use the Spectrum-X network and request the required networking capabilities and resources.
 
-For [NVIDIA Run:ai native workloads](../../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) and [supported workload types](../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md), you can configure these settings across all interfaces - UI, API, CLI, or MCP. Supported workload types submitted [via YAML](../../../workloads-in-nvidia-run-ai/submit-via-yaml.md) require the settings to be included in the workload YAML manifest.
+For [NVIDIA Run:ai native workloads](../../../workloads-in-nvidia-run-ai/workload-types/workload-types.md) and [supported workload types](../../../workloads-in-nvidia-run-ai/supported-workload-types/list-of-supported-workload-types.md), you can configure these settings across all interfaces - UI, API, CLI, or MCP. Supported workload types submitted [via YAML](../../../workloads-in-nvidia-run-ai/submit-via-yaml.md) require the settings to be included in the workload YAML manifest.
 
 ### Required Configuration
 
