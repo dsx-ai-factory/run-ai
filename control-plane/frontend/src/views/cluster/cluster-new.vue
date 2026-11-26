@@ -173,9 +173,14 @@ export default defineComponent({
         this.clusterFormModel.version = this.sortedVersions[0]; // sortedVersions[0] is the latest version
       }
 
-      this.clusterFormModel.prerequisites.clusterUrl = selectedCluster.domain || "";
-      this.clusterFormModel.prerequisites.location =
-        selectedCluster.domain === window.location.hostname ? EClusterLocations.CONTROL_PLANE : EClusterLocations.REMOTE;
+      const domain = selectedCluster.domain || "";
+      // The location isn't stored on the cluster, and its domain stays empty until the cluster is installed and
+      // reports it. An empty domain therefore means a same-location cluster, not a remote one.
+      const isSameAsControlPlane = domain === window.location.hostname || (!domain && !this.isMultiTenant);
+      this.clusterFormModel.prerequisites.clusterUrl = domain;
+      this.clusterFormModel.prerequisites.location = isSameAsControlPlane
+        ? EClusterLocations.CONTROL_PLANE
+        : EClusterLocations.REMOTE;
       this.isClusterEditMode = true;
     },
     setClusterDataCreateMode(): void {

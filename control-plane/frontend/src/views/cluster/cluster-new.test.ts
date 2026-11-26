@@ -148,6 +148,30 @@ describe("cluster-new.vue", () => {
     expect(clusterNewCmp.vm.isClusterEditMode).toEqual(true);
   });
 
+  test.each([
+    { name: "has no domain yet", domain: "", location: EClusterLocations.CONTROL_PLANE, clusterUrl: "" },
+    { name: "has the control plane domain", domain: "dummy.com", location: EClusterLocations.CONTROL_PLANE },
+    { name: "has another domain", domain: "remote.example.com", location: EClusterLocations.REMOTE },
+  ])("edit mode: cluster that $name opens with location $location", async ({ domain, location, clusterUrl }) => {
+    vi.mocked(clusterStore.getClusterById).mockImplementation(() => ({ ...clusters[0], domain }));
+
+    mountComponent({}, { id: clusters[0].uuid });
+    await flushPromises();
+
+    expect(clusterNewCmp.vm.clusterFormModel.prerequisites.location).toEqual(location);
+    expect(clusterNewCmp.vm.clusterFormModel.prerequisites.clusterUrl).toEqual(clusterUrl ?? domain);
+  });
+
+  test("edit mode: cluster without a domain opens as remote in multi-tenant", async () => {
+    appStore.$patch({ config: { isMultiTenant: true } });
+    vi.mocked(clusterStore.getClusterById).mockImplementation(() => ({ ...clusters[0], domain: "" }));
+
+    mountComponent({}, { id: clusters[0].uuid });
+    await flushPromises();
+
+    expect(clusterNewCmp.vm.clusterFormModel.prerequisites.location).toEqual(EClusterLocations.REMOTE);
+  });
+
   test("createCluster should be called when pressing continue button", async () => {
     mountComponent();
     await clusterNewCmp.vm.$nextTick();
