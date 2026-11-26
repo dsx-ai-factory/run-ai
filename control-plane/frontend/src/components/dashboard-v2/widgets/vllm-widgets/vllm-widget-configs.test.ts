@@ -28,6 +28,18 @@ const allWorkloadMetrics = [...vllmLinearWidgets, ...vllmHistogramWidgets].flatM
 );
 const allPodMetrics = [...vllmLinearWidgets, ...vllmHistogramWidgets].flatMap(({ podConfig }) => podConfig.metricTypes);
 
+// The token usage metric types return one value per period and have no widget yet.
+const vllmTokenUsageMetrics: string[] = [
+  WorkloadMetricType.VllmPromptTokensTotal,
+  WorkloadMetricType.VllmGenerationTokensTotal,
+  WorkloadMetricType.VllmCachedPromptTokensTotal,
+  WorkloadMetricType.VllmFinishedEngineRequestCount,
+  WorkloadMetricType.VllmPromptTokensPerRequestAvg,
+  WorkloadMetricType.VllmGenerationTokensPerRequestAvg,
+  WorkloadMetricType.VllmPromptTokensPerRequestPercentiles,
+  WorkloadMetricType.VllmGenerationTokensPerRequestPercentiles,
+];
+
 describe("vLLM widget configs", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -36,7 +48,9 @@ describe("vLLM widget configs", () => {
   });
 
   it("uses every planned workload and pod vLLM metric enum", () => {
-    const expectedWorkloadMetrics = Object.values(WorkloadMetricType).filter((metric) => metric.startsWith("VLLM_"));
+    const expectedWorkloadMetrics = Object.values(WorkloadMetricType).filter(
+      (metric) => metric.startsWith("VLLM_") && !vllmTokenUsageMetrics.includes(metric),
+    );
     const expectedPodMetrics = Object.values(PodMetricType).filter((metric) => metric.startsWith("VLLM_"));
 
     expect(new Set(allWorkloadMetrics)).toEqual(new Set(expectedWorkloadMetrics));

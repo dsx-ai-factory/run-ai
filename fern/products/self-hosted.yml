@@ -776,6 +776,8 @@ navigation:
         path: ../../docs/rest-api/api-guides/using-node-affinity-via-api.md
       - page: NIM Observability Metrics via API
         path: ../../docs/rest-api/api-guides/nim-observability-metrics-via-api.md
+      - page: vLLM Token Usage Metrics via API
+        path: ../../docs/rest-api/api-guides/vllm-token-usage-metrics-via-api.md
     - section: API Python Client Reference
       contents:
       - page: API Python Client (runapy)

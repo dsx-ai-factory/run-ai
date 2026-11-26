@@ -273,6 +273,10 @@ const (
 	// resource readers support per-container GPU memory requests without gpu-memory.
 	MinVersionGpuMemoryRequestAnnotations
 
+	// MinVersionVLLMTokenUsageMetrics is the minimum cluster version that records the per-engine
+	// vLLM token counters and request token histograms used for token usage totals.
+	MinVersionVLLMTokenUsageMetrics
+
 	// NOTE -> Make sure to add the min version to the map below
 )
 
@@ -356,6 +360,7 @@ var clusterVersionToCapabilityMap = map[int]string{
 	MinVersionResourceClaimTemplates:                    "3.1.0",
 	MinVersionNetworkingOwnershipEnforcement:            "3.0.0",
 	MinVersionOAuth2ProxyTemplates:                      "3.0.18",
+	MinVersionVLLMTokenUsageMetrics:                     "3.1.0",
 }
 
 // ClustersCacheConfig is a struct that holds the configuration for the clusters cache.

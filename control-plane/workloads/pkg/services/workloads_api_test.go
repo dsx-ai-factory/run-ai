@@ -2959,6 +2959,133 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 			Expect((*metricsResp.Histogram)[1].Values[0].Data["p99"]).To(Equal("0.09"))
 		})
 
+		Context("vLLM token usage metrics", func() {
+			tokenUsageMetric := func(name runaimetrics.VLLMTokenUsageMetricName) string {
+				return runaimetrics.RunaiVLLMTokenUsagePerWorkloadMetric{Name: name}.GetName()
+			}
+			singleValue := func(value string) openapi.GetMetrics200Response {
+				return getMetricResponse([]string{testing.TestUuid1}, []string{value})
+			}
+			noData := getMetricResponse(nil, nil)
+
+			BeforeEach(func() {
+				metrics_client.AddResponsesForMockMetricsServer(map[string]openapi.GetMetrics200Response{
+					tokenUsageMetric(runaimetrics.VLLMPromptTokensTotal):                    singleValue("650"),
+					tokenUsageMetric(runaimetrics.VLLMCachedPromptTokensTotal):              noData,
+					tokenUsageMetric(runaimetrics.VLLMFinishedEngineRequestCount):           singleValue("10"),
+					tokenUsageMetric(runaimetrics.VLLMPromptTokensPerRequestAvg):            singleValue("65"),
+					tokenUsageMetric(runaimetrics.VLLMPromptTokensPerRequestPercentile):     getPercentileMetricMock(1713258503000, [][2]string{{"50", "40"}, {"95", "180"}, {"99", "250"}}),
+					tokenUsageMetric(runaimetrics.VLLMGenerationTokensPerRequestPercentile): noData,
+				})
+			})
+
+			It("returns one value per metric for the requested period", func() {
+				requested := []api.WorkloadMetricType{
+					api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_TOTAL,
+					api.WORKLOADMETRICTYPE_VLLM_FINISHED_ENGINE_REQUEST_COUNT,
+					api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_PER_REQUEST_AVG,
+					api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_PER_REQUEST_PERCENTILES,
+				}
+				resp, err := workloadsService.GetWorkloadMetrics(ctx, testing.TestUuid1, requested, time.Now().Add(-time.Hour), time.Now(), 10)
+				Expect(err).To(BeNil())
+				Expect(resp.Code).To(Equal(http.StatusOK))
+
+				metricsResp, ok := resp.Body.(api.MetricsCompositeResponse)
+				Expect(ok).To(BeTrue())
+				Expect(metricsResp.Measurements).To(HaveLen(3))
+				Expect(metricsResp.Measurements[0].Type).To(Equal(string(api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_TOTAL)))
+				Expect(*metricsResp.Measurements[0].Values).To(HaveLen(1))
+				Expect((*metricsResp.Measurements[0].Values)[0].Value).To(Equal("650"))
+				Expect((*metricsResp.Measurements[1].Values)[0].Value).To(Equal("10"))
+				Expect((*metricsResp.Measurements[2].Values)[0].Value).To(Equal("65"))
+				Expect(metricsResp.Histogram).NotTo(BeNil())
+				Expect(*metricsResp.Histogram).To(HaveLen(1))
+				percentiles := (*metricsResp.Histogram)[0]
+				Expect(percentiles.Type).To(Equal(string(api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_PER_REQUEST_PERCENTILES)))
+				Expect(percentiles.Values).To(HaveLen(1))
+				Expect(percentiles.Values[0].Data).To(Equal(map[string]string{"p50": "40", "p95": "180", "p99": "250"}))
+			})
+
+			It("returns no values, not zero, when there is no data", func() {
+				requested := []api.WorkloadMetricType{
+					api.WORKLOADMETRICTYPE_VLLM_CACHED_PROMPT_TOKENS_TOTAL,
+					api.WORKLOADMETRICTYPE_VLLM_GENERATION_TOKENS_PER_REQUEST_PERCENTILES,
+				}
+				resp, err := workloadsService.GetWorkloadMetrics(ctx, testing.TestUuid1, requested, time.Now().Add(-time.Hour), time.Now(), 10)
+				Expect(err).To(BeNil())
+				Expect(resp.Code).To(Equal(http.StatusOK))
+
+				metricsResp := resp.Body.(api.MetricsCompositeResponse)
+				Expect(metricsResp.Measurements).To(HaveLen(1))
+				Expect(metricsResp.Measurements[0].Values).NotTo(BeNil())
+				Expect(*metricsResp.Measurements[0].Values).To(BeEmpty())
+				Expect(metricsResp.Histogram).To(BeNil())
+			})
+
+			It("returns a partial success without values when the query fails", func() {
+				requested := []api.WorkloadMetricType{
+					api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_TOTAL,
+					api.WORKLOADMETRICTYPE_VLLM_GENERATION_TOKENS_TOTAL, // not mocked: the query fails
+				}
+				resp, err := workloadsService.GetWorkloadMetrics(ctx, testing.TestUuid1, requested, time.Now().Add(-time.Hour), time.Now(), 10)
+				Expect(err).To(BeNil())
+				Expect(resp.Code).To(Equal(http.StatusMultiStatus))
+
+				metricsResp := resp.Body.(api.MetricsCompositeResponse)
+				Expect(metricsResp.Measurements).To(HaveLen(2))
+				Expect((*metricsResp.Measurements[0].Values)[0].Value).To(Equal("650"))
+				Expect(metricsResp.Measurements[1].Type).To(Equal(string(api.WORKLOADMETRICTYPE_VLLM_GENERATION_TOKENS_TOTAL)))
+				Expect(metricsResp.Measurements[1].Values).To(BeNil())
+			})
+
+			DescribeTable("rejects a period that is empty or reversed",
+				func(start, end time.Time) {
+					requested := []api.WorkloadMetricType{
+						api.WORKLOADMETRICTYPE_VLLM_NUM_REQUESTS_RUNNING,
+						api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_TOTAL,
+					}
+					resp, err := workloadsService.GetWorkloadMetrics(ctx, testing.TestUuid1, requested, start, end, 10)
+					Expect(err).To(BeNil())
+					Expect(resp.Code).To(Equal(http.StatusBadRequest))
+				},
+				Entry("end before start", time.Now(), time.Now().Add(-time.Hour)),
+				Entry("end equal to start", time.Unix(1713258503, 0), time.Unix(1713258503, 0)),
+				Entry("period shorter than one second", time.Unix(1713258503, 0), time.Unix(1713258503, 0).Add(500*time.Millisecond)),
+				Entry("missing start", time.Time{}, time.Now()),
+				Entry("missing end", time.Now().Add(-time.Hour), time.Time{}),
+			)
+
+			It("still serves a deleted workload until it is removed", func() {
+				deletedId := uuid.NewString()
+				w := SetupBaseWorkload(deletedId, DefaultProjectId, testing.ClusterUuid1)
+				w.AdditionalFields = fmt.Sprintf("{\"%s\":\"true\"}", clusterCommonConstants.AdditionalVLLMWorkload)
+				apiResponse, _ := workloadsService.SyncWorkloads(ctx, []string{}, api.WorkloadsSyncRequest{
+					ProjectId: DefaultProjectId,
+					Workloads: []api.WorkloadSyncFields{w},
+				})
+				Expect(apiResponse.Code).To(Equal(http.StatusNoContent))
+				apiResponse, _ = workloadsService.DeleteWorkload(ctx, deletedId)
+				Expect(apiResponse.Code).To(Equal(http.StatusNoContent))
+
+				metrics_client.AddResponsesForMockMetricsServer(map[string]openapi.GetMetrics200Response{
+					tokenUsageMetric(runaimetrics.VLLMGenerationTokensTotal): singleValue("42"),
+				})
+				requested := []api.WorkloadMetricType{api.WORKLOADMETRICTYPE_VLLM_GENERATION_TOKENS_TOTAL}
+				resp, err := workloadsService.GetWorkloadMetrics(ctx, deletedId, requested, time.Now().Add(-time.Hour), time.Now(), 10)
+				Expect(err).To(BeNil())
+				Expect(resp.Code).To(Equal(http.StatusOK))
+				metricsResp := resp.Body.(api.MetricsCompositeResponse)
+				Expect((*metricsResp.Measurements[0].Values)[0].Value).To(Equal("42"))
+			})
+
+			It("rejects token usage metrics for a workload that is not vLLM", func() {
+				requested := []api.WorkloadMetricType{api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_TOTAL}
+				resp, err := workloadsService.GetWorkloadMetrics(ctx, testing.TestUuid2, requested, time.Now().Add(-time.Hour), time.Now(), 10)
+				Expect(err).To(BeNil())
+				Expect(resp.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+
 		It("Get unsupported cluster metric", func() {
 			requested := []api.WorkloadMetricType{
 				api.WORKLOADMETRICTYPE_NVLINK_BANDWIDTH_TOTAL,
@@ -3152,6 +3279,35 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 			Expect(response.Data[0]).To(ContainElement("VLLM_REQUEST_QUEUE_TIME_SECONDS_PERCENTILES[p50]"))
 			Expect(response.Data[0]).To(ContainElement("VLLM_REQUEST_QUEUE_TIME_SECONDS_PERCENTILES[p95]"))
 			Expect(response.Data[0]).To(ContainElement("VLLM_REQUEST_QUEUE_TIME_SECONDS_PERCENTILES[p99]"))
+		})
+
+		It("Get workload token usage metrics csv (vLLM)", func() {
+			const valueTimestamp = int64(1708958503653) // the timestamp getMetricResponse uses
+			metrics_client.AddResponsesForMockMetricsServer(map[string]openapi.GetMetrics200Response{
+				(runaimetrics.RunaiVLLMTokenUsagePerWorkloadMetric{Name: runaimetrics.VLLMPromptTokensTotal}).GetName():                getMetricResponse([]string{testing.TestUuid1}, []string{"650"}),
+				(runaimetrics.RunaiVLLMTokenUsagePerWorkloadMetric{Name: runaimetrics.VLLMPromptTokensPerRequestPercentile}).GetName(): getPercentileMetricMock(valueTimestamp, [][2]string{{"50", "40"}, {"95", "180"}, {"99", "250"}}),
+			})
+			requested := []api.WorkloadMetricType{
+				api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_TOTAL,
+				api.WORKLOADMETRICTYPE_VLLM_PROMPT_TOKENS_PER_REQUEST_PERCENTILES,
+			}
+			resp, err := workloadsService.GetWorkloadMetrics(ctx, testing.TestUuid1, requested, time.Now().Add(-time.Hour), time.Now(), 10)
+			Expect(err).To(BeNil())
+			Expect(resp.Code).To(Equal(http.StatusOK))
+
+			response, ok := resp.Body.(runaihttp.CsvFile)
+			Expect(ok).To(BeTrue())
+			// The single value for the period becomes one row, with the percentiles in the same row.
+			Expect(response.Data).To(Equal([][]string{
+				{
+					"Timestamp",
+					"VLLM_PROMPT_TOKENS_TOTAL",
+					"VLLM_PROMPT_TOKENS_PER_REQUEST_PERCENTILES[p50]",
+					"VLLM_PROMPT_TOKENS_PER_REQUEST_PERCENTILES[p95]",
+					"VLLM_PROMPT_TOKENS_PER_REQUEST_PERCENTILES[p99]",
+				},
+				{stringTimestamp(valueTimestamp), "650", "40", "180", "250"},
+			}))
 		})
 
 		It("Get workload histogram bucket+percentile metrics csv (NIM) values", func() {

@@ -51,6 +51,12 @@ func mockHttpEndpoints() {
 	mockClusterHistories(cluster1Id, conf, http.StatusOK, histories)
 	mockClusterHistories(cluster2Id, conf, http.StatusOK, []api.ClusterHistory{})
 	mockClusterHistories(cluster3Id, conf, http.StatusOK, []api.ClusterHistory{})
+	// cluster_4 upgrades to 3.1, the first version with the vLLM token usage recording rules.
+	cluster4Id := "cluster_4"
+	mockClusterHistories(cluster4Id, conf, http.StatusOK, []api.ClusterHistory{
+		{ClusterId: cluster4Id, Version: "3.1", UpdateTimestamp: ts.Add(-1 * time.Hour).Unix()},
+		{ClusterId: cluster4Id, Version: "3.0", UpdateTimestamp: ts.Add(-25 * time.Hour).Unix()},
+	})
 
 	mockGetClusterName(cluster1Id, conf, http.StatusOK, api.GetClusterName200Response{Name: "cluster_1_name"})
 }

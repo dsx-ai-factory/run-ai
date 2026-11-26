@@ -777,6 +777,38 @@ data:
         cross_version_query: label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, workload_id) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
         queries:
             3.0.0: label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, workload_id) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+      runai_vllm_prompt_tokens_total_per_workload:
+        cross_version_query: round(sum by (workload_id) (increase(runai_vllm_prompt_tokens_total_per_pod{FILTERS}[RANGE])))
+        queries:
+            3.1.0: round(sum by (workload_id) (increase(runai_vllm_prompt_tokens_total_per_pod{FILTERS}[RANGE])))
+      runai_vllm_generation_tokens_total_per_workload:
+        cross_version_query: round(sum by (workload_id) (increase(runai_vllm_generation_tokens_total_per_pod{FILTERS}[RANGE])))
+        queries:
+            3.1.0: round(sum by (workload_id) (increase(runai_vllm_generation_tokens_total_per_pod{FILTERS}[RANGE])))
+      runai_vllm_prompt_tokens_cached_total_per_workload:
+        cross_version_query: round(sum by (workload_id) (increase(runai_vllm_prompt_tokens_cached_total_per_pod{FILTERS}[RANGE])))
+        queries:
+            3.1.0: round(sum by (workload_id) (increase(runai_vllm_prompt_tokens_cached_total_per_pod{FILTERS}[RANGE])))
+      runai_vllm_finished_engine_request_count_per_workload:
+        cross_version_query: round(sum by (workload_id) (increase(runai_vllm_request_prompt_tokens_count_per_pod{FILTERS}[RANGE])))
+        queries:
+            3.1.0: round(sum by (workload_id) (increase(runai_vllm_request_prompt_tokens_count_per_pod{FILTERS}[RANGE])))
+      runai_vllm_prompt_tokens_per_request_avg_per_workload:
+        cross_version_query: sum by (workload_id) (increase(runai_vllm_request_prompt_tokens_sum_per_pod{FILTERS}[RANGE])) / (sum by (workload_id) (increase(runai_vllm_request_prompt_tokens_count_per_pod{FILTERS}[RANGE])) > 0)
+        queries:
+            3.1.0: sum by (workload_id) (increase(runai_vllm_request_prompt_tokens_sum_per_pod{FILTERS}[RANGE])) / (sum by (workload_id) (increase(runai_vllm_request_prompt_tokens_count_per_pod{FILTERS}[RANGE])) > 0)
+      runai_vllm_prompt_tokens_per_request_percentile_per_workload:
+        cross_version_query: (label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_vllm_request_prompt_tokens_bucket_per_pod{FILTERS}[RANGE]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, workload_id) (increase(runai_vllm_request_prompt_tokens_bucket_per_pod{FILTERS}[RANGE]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_vllm_request_prompt_tokens_bucket_per_pod{FILTERS}[RANGE]))), "quantile_label", "99", "ignored_src_label", ".*")) and on (workload_id) (sum by (workload_id) (increase(runai_vllm_request_prompt_tokens_count_per_pod{FILTERS}[RANGE])) > 0)
+        queries:
+            3.1.0: (label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_vllm_request_prompt_tokens_bucket_per_pod{FILTERS}[RANGE]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, workload_id) (increase(runai_vllm_request_prompt_tokens_bucket_per_pod{FILTERS}[RANGE]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_vllm_request_prompt_tokens_bucket_per_pod{FILTERS}[RANGE]))), "quantile_label", "99", "ignored_src_label", ".*")) and on (workload_id) (sum by (workload_id) (increase(runai_vllm_request_prompt_tokens_count_per_pod{FILTERS}[RANGE])) > 0)
+      runai_vllm_generation_tokens_per_request_avg_per_workload:
+        cross_version_query: sum by (workload_id) (increase(runai_vllm_request_generation_tokens_sum_per_pod{FILTERS}[RANGE])) / (sum by (workload_id) (increase(runai_vllm_request_generation_tokens_count_per_pod{FILTERS}[RANGE])) > 0)
+        queries:
+            3.1.0: sum by (workload_id) (increase(runai_vllm_request_generation_tokens_sum_per_pod{FILTERS}[RANGE])) / (sum by (workload_id) (increase(runai_vllm_request_generation_tokens_count_per_pod{FILTERS}[RANGE])) > 0)
+      runai_vllm_generation_tokens_per_request_percentile_per_workload:
+        cross_version_query: (label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_vllm_request_generation_tokens_bucket_per_pod{FILTERS}[RANGE]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, workload_id) (increase(runai_vllm_request_generation_tokens_bucket_per_pod{FILTERS}[RANGE]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_vllm_request_generation_tokens_bucket_per_pod{FILTERS}[RANGE]))), "quantile_label", "99", "ignored_src_label", ".*")) and on (workload_id) (sum by (workload_id) (increase(runai_vllm_request_generation_tokens_count_per_pod{FILTERS}[RANGE])) > 0)
+        queries:
+            3.1.0: (label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_vllm_request_generation_tokens_bucket_per_pod{FILTERS}[RANGE]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, workload_id) (increase(runai_vllm_request_generation_tokens_bucket_per_pod{FILTERS}[RANGE]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_vllm_request_generation_tokens_bucket_per_pod{FILTERS}[RANGE]))), "quantile_label", "99", "ignored_src_label", ".*")) and on (workload_id) (sum by (workload_id) (increase(runai_vllm_request_generation_tokens_count_per_pod{FILTERS}[RANGE])) > 0)
       runai_pod_count_per_workload:
         cross_version_query: count by (workload_id) (runai_pod_phase_with_info{phase=~"Running|Pending",detailed_status!="Terminating",FILTER::workload_id::FILTER} == 1)
         queries:

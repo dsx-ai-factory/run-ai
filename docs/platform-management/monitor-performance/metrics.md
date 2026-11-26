@@ -101,7 +101,7 @@ NVIDIA NIM metrics provide workload-level observability, including key runtime a
 
 ### vLLM
 
-vLLM metrics provide workload-level observability for large language model (LLM) inference workloads served with the vLLM inference engine, including request concurrency, token throughput, latency, and GPU KV-cache utilization. NVIDIA Run:ai detects a vLLM workload automatically from the container image name, or you can set it explicitly with the `run.ai/vllm-workload` label.
+vLLM metrics provide workload-level observability for large language model (LLM) inference workloads served with the vLLM inference engine, including request concurrency, token throughput, latency, and GPU KV-cache utilization. NVIDIA Run:ai detects a vLLM workload automatically from the container image name, or you can set it explicitly with the `run.ai/vllm-workload` label. The vLLM token usage metrics return one value for a requested period and are available through the API only. Refer to [vLLM token usage metrics via API](../../rest-api/api-guides/vllm-token-usage-metrics-via-api.md) for more details.
 
 | Metric name in API | Applicable API endpoint | Metric name in UI per grid | Applicable UI grid |
 | --- | --- | --- | --- |
@@ -120,6 +120,14 @@ vLLM metrics provide workload-level observability for large language model (LLM)
 | <code>VLLM_REQUEST_PREFILL_TIME_SECONDS_PERCENTILES</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Latency phase breakdown | Workloads |
 | <code>VLLM_REQUEST_DECODE_TIME_SECONDS_PERCENTILES</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Latency phase breakdown | Workloads |
 | <code>VLLM_INTER_TOKEN_LATENCY_SECONDS_PERCENTILES</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Latency phase breakdown | Workloads |
+| <code>VLLM_PROMPT_TOKENS_TOTAL</code> | Workloads | | |
+| <code>VLLM_GENERATION_TOKENS_TOTAL</code> | Workloads | | |
+| <code>VLLM_CACHED_PROMPT_TOKENS_TOTAL</code> | Workloads | | |
+| <code>VLLM_FINISHED_ENGINE_REQUEST_COUNT</code> | Workloads | | |
+| <code>VLLM_PROMPT_TOKENS_PER_REQUEST_AVG</code> | Workloads | | |
+| <code>VLLM_GENERATION_TOKENS_PER_REQUEST_AVG</code> | Workloads | | |
+| <code>VLLM_PROMPT_TOKENS_PER_REQUEST_PERCENTILES</code> | Workloads | | |
+| <code>VLLM_GENERATION_TOKENS_PER_REQUEST_PERCENTILES</code> | Workloads | | |
 
 ## Supported Telemetry
 

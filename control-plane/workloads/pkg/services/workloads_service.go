@@ -64,9 +64,9 @@ const (
 	Bucket                      = "Bucket"
 )
 
-var supportedWorkloadsMetricsVersion = withVLLMMetricsVersion(map[string]int{
+var supportedWorkloadsMetricsVersion = withVLLMTokenUsageMetricsVersion(withVLLMMetricsVersion(map[string]int{
 	string(api.WORKLOADMETRICTYPE_NVLINK_BANDWIDTH_TOTAL): checker.MinVersionNvlinkMetrics,
-})
+}))
 
 type WorkloadsService struct {
 	ModelFieldToDbFieldMap map[string][]string
@@ -835,6 +835,10 @@ func (s *WorkloadsService) GetWorkloadMetrics(ctx context.Context, workloadId st
 	apiErr := validateRequestedMetrics(len(metricTypes))
 	if apiErr != nil {
 		return NewErrorResponse(apiErr), nil
+	}
+
+	if err := validateRequestedVLLMTokenUsagePeriod(metricTypes, start, end); err != nil {
+		return NewErrorResponse(err), nil
 	}
 
 	tenantId, apiErr := services_utils.ParseTenantId(ctx)

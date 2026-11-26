@@ -36,7 +36,7 @@ func TestVLLMRulesHaveDedicatedGroup(t *testing.T) {
 	for _, group := range DefaultRuleGroups(testRuleGroupsConfig()) {
 		if group.Name == groupName {
 			vllmGroupCount++
-			if got, want := len(group.Rules), 53; got != want {
+			if got, want := len(group.Rules), 62; got != want {
 				t.Errorf("%s contains %d rules, want %d", groupName, got, want)
 			}
 		}

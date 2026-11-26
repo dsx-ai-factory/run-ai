@@ -24112,7 +24112,7 @@ export interface WorkloadMeta {
     'actualPhase'?: Phase;
 }
 /**
- * Specify which metric data to request.
+ * Specify which metric data to request.  The vLLM token usage metrics require cluster version 3.1 or later. Each returns one result for the requested `start` to `end` period, so `numberOfSamples` does not apply. The period must be at least one second.  - `VLLM_PROMPT_TOKENS_TOTAL` - Input tokens processed in the period, including cached input tokens. - `VLLM_GENERATION_TOKENS_TOTAL` - Output tokens generated in the period. - `VLLM_CACHED_PROMPT_TOKENS_TOTAL` - Input tokens served from the prefix cache in the period, already included in `VLLM_PROMPT_TOKENS_TOTAL`. Requires vLLM 0.16.0 or later. - `VLLM_FINISHED_ENGINE_REQUEST_COUNT` - Engine requests that finished in the period. - `VLLM_PROMPT_TOKENS_PER_REQUEST_AVG`, `VLLM_GENERATION_TOKENS_PER_REQUEST_AVG` - Average input or output tokens per finished engine request in the period. - `VLLM_PROMPT_TOKENS_PER_REQUEST_PERCENTILES`, `VLLM_GENERATION_TOKENS_PER_REQUEST_PERCENTILES` - Approximate p50, p95 and p99 input or output tokens per finished engine request in the period.  All values are in tokens, except the request count. 
  * @export
  * @enum {string}
  */
@@ -24155,6 +24155,14 @@ export const WorkloadMetricType = {
     VllmRequestPrefillTimeSecondsPercentiles: 'VLLM_REQUEST_PREFILL_TIME_SECONDS_PERCENTILES',
     VllmRequestDecodeTimeSecondsPercentiles: 'VLLM_REQUEST_DECODE_TIME_SECONDS_PERCENTILES',
     VllmInterTokenLatencySecondsPercentiles: 'VLLM_INTER_TOKEN_LATENCY_SECONDS_PERCENTILES',
+    VllmPromptTokensTotal: 'VLLM_PROMPT_TOKENS_TOTAL',
+    VllmGenerationTokensTotal: 'VLLM_GENERATION_TOKENS_TOTAL',
+    VllmCachedPromptTokensTotal: 'VLLM_CACHED_PROMPT_TOKENS_TOTAL',
+    VllmFinishedEngineRequestCount: 'VLLM_FINISHED_ENGINE_REQUEST_COUNT',
+    VllmPromptTokensPerRequestAvg: 'VLLM_PROMPT_TOKENS_PER_REQUEST_AVG',
+    VllmGenerationTokensPerRequestAvg: 'VLLM_GENERATION_TOKENS_PER_REQUEST_AVG',
+    VllmPromptTokensPerRequestPercentiles: 'VLLM_PROMPT_TOKENS_PER_REQUEST_PERCENTILES',
+    VllmGenerationTokensPerRequestPercentiles: 'VLLM_GENERATION_TOKENS_PER_REQUEST_PERCENTILES',
     NvlinkBandwidthTotal: 'NVLINK_BANDWIDTH_TOTAL'
 } as const;
 

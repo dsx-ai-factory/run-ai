@@ -103,6 +103,22 @@ var _ = Describe("Cluster capabilities checker", func() {
 			Expect(isCapable).To(BeTrue())
 		})
 
+		It("enforces the vLLM token usage metrics capability version boundary", func() {
+			Expect(MinVersionForSupporting(MinVersionVLLMTokenUsageMetrics)).To(Equal("3.1.0"))
+
+			checker, err := NewClusterCapabilitiesCheckerForVersion("3.0.99")
+			Expect(err).NotTo(HaveOccurred())
+			isCapable, err := checker.ValidateClusterCapability(context.Background(), MinVersionVLLMTokenUsageMetrics)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(isCapable).To(BeFalse())
+
+			checker, err = NewClusterCapabilitiesCheckerForVersion("3.1.0")
+			Expect(err).NotTo(HaveOccurred())
+			isCapable, err = checker.ValidateClusterCapability(context.Background(), MinVersionVLLMTokenUsageMetrics)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(isCapable).To(BeTrue())
+		})
+
 		It("should not call the cluster client if the cluster is in the cache", func() {
 			err := cache.ClearStore[clusterInfo]()
 			Expect(err).To(BeNil())
