@@ -52,6 +52,8 @@ type AccessRuleSync struct {
 	CreatedBy      string                                    `json:"createdBy"`
 	SubjectType    SubjectTypeExtended                       `json:"subjectType"`
 	PredefinedRole NullableAccessRuleSyncAllOfPredefinedRole `json:"predefinedRole,omitempty"`
+	// Indicates if the access rule's role or its predefined role is marked as having no cluster permissions, or the role is a custom role with no predefined role for cluster permissions.
+	ClusterRoleOptional *bool `json:"clusterRoleOptional,omitempty"`
 	// Indicates if the access rule is in 'Deleting' phase and should be deleted from the cluster
 	IsDeleting *bool `json:"isDeleting,omitempty"`
 }
@@ -75,6 +77,8 @@ func NewAccessRuleSync(subjectId string, roleId int32, scopeId string, scopeType
 	this.UpdatedAt = updatedAt
 	this.CreatedBy = createdBy
 	this.SubjectType = subjectType
+	var clusterRoleOptional bool = false
+	this.ClusterRoleOptional = &clusterRoleOptional
 	var isDeleting bool = false
 	this.IsDeleting = &isDeleting
 	return &this
@@ -85,6 +89,8 @@ func NewAccessRuleSync(subjectId string, roleId int32, scopeId string, scopeType
 // but it doesn't guarantee that properties required by API are set
 func NewAccessRuleSyncWithDefaults() *AccessRuleSync {
 	this := AccessRuleSync{}
+	var clusterRoleOptional bool = false
+	this.ClusterRoleOptional = &clusterRoleOptional
 	var isDeleting bool = false
 	this.IsDeleting = &isDeleting
 	return &this
@@ -504,6 +510,38 @@ func (o *AccessRuleSync) UnsetPredefinedRole() {
 	o.PredefinedRole.Unset()
 }
 
+// GetClusterRoleOptional returns the ClusterRoleOptional field value if set, zero value otherwise.
+func (o *AccessRuleSync) GetClusterRoleOptional() bool {
+	if o == nil || IsNil(o.ClusterRoleOptional) {
+		var ret bool
+		return ret
+	}
+	return *o.ClusterRoleOptional
+}
+
+// GetClusterRoleOptionalOk returns a tuple with the ClusterRoleOptional field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *AccessRuleSync) GetClusterRoleOptionalOk() (*bool, bool) {
+	if o == nil || IsNil(o.ClusterRoleOptional) {
+		return nil, false
+	}
+	return o.ClusterRoleOptional, true
+}
+
+// HasClusterRoleOptional returns a boolean if a field has been set.
+func (o *AccessRuleSync) HasClusterRoleOptional() bool {
+	if o != nil && !IsNil(o.ClusterRoleOptional) {
+		return true
+	}
+
+	return false
+}
+
+// SetClusterRoleOptional gets a reference to the given bool and assigns it to the ClusterRoleOptional field.
+func (o *AccessRuleSync) SetClusterRoleOptional(v bool) {
+	o.ClusterRoleOptional = &v
+}
+
 // GetIsDeleting returns the IsDeleting field value if set, zero value otherwise.
 func (o *AccessRuleSync) GetIsDeleting() bool {
 	if o == nil || IsNil(o.IsDeleting) {
@@ -568,6 +606,9 @@ func (o AccessRuleSync) ToMap() (map[string]interface{}, error) {
 	toSerialize["subjectType"] = o.SubjectType
 	if o.PredefinedRole.IsSet() {
 		toSerialize["predefinedRole"] = o.PredefinedRole.Get()
+	}
+	if !IsNil(o.ClusterRoleOptional) {
+		toSerialize["clusterRoleOptional"] = o.ClusterRoleOptional
 	}
 	if !IsNil(o.IsDeleting) {
 		toSerialize["isDeleting"] = o.IsDeleting
