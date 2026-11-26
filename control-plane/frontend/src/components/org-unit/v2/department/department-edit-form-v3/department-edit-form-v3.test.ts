@@ -65,7 +65,6 @@ const mountForm = (props: Record<string, unknown> = {}) => {
         RunaiFormWrapper: RunaiFormWrapperStub,
         SchedulingRulesStep: true,
         AccessRulesStep: true,
-        OrgUnitWizardSummary: true,
       },
     },
   });

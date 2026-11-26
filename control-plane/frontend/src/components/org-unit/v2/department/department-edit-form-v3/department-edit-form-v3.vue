@@ -102,12 +102,9 @@
       </template>
 
       <template #right-sidebar>
-        <org-unit-wizard-summary
+        <org-unit-wizard-summary-v3
           :entity-type="EQuotaEntity.department"
-          :resources="localDepartment.resources ?? []"
-          :default-node-pools="localDepartment.defaultNodePools ?? []"
           :scheduling-rules="localDepartment.schedulingRules"
-          :scope-id="(localDepartment as Department).id"
           :access-rules-count="accessRulesCount"
         />
       </template>
@@ -123,7 +120,7 @@ import { usePermissionStore } from "@/stores/permissions.store";
 import { RunaiFormWrapper } from "@/components/common/runai-form-wrapper";
 import { RunaiWizardLayout } from "@/components/common/runai-wizard-layout/";
 import { RunaiExpansionItem } from "@/components/common/runai-expansion-item";
-import { OrgUnitWizardSummary } from "@/components/org-unit/v2/wizard-summary";
+import { OrgUnitWizardSummaryV3 } from "@/components/org-unit/v2/wizard-summary-v3";
 import { OrgUnitFormFooter } from "@/components/org-unit/v2/org-unit-form-footer";
 import type { SubmittingAction } from "@/components/org-unit/v2/org-unit-form-footer/org-unit-form-footer.vue";
 import { OrgUnitCreationWarningDialog } from "@/components/org-unit/v2/common/org-unit-creation-warning-dialog";
@@ -150,7 +147,6 @@ import {
 import { EQuotaEntity } from "@/models/resource.model";
 import { EAccessRuleModalPage } from "@/models/access-rule.model";
 import {
-  DEPARTMENT_FORM_V3_WIZARD_STEPS,
   EOrgUnitFormTooltip,
   ESaveOrgUnitAction,
   EStepNames,
@@ -163,7 +159,7 @@ import { deepCopy } from "@/utils/common.util";
 import { storageUtil } from "@/utils/storage.util";
 import { filterUtil } from "@/utils/filter.util/filter.util";
 import { ErrorAlert } from "@/utils/error-alert.util";
-import { filterOrgUnitSteps } from "@/utils/wizard-steps.util/wizard-steps.util";
+import { filterDepartmentFormV3Steps } from "@/utils/wizard-steps.util/wizard-steps.util";
 import { DEPARTMENT_CREATION_WARNING_DIALOG_DONT_SHOW } from "@/common/storage.constant";
 
 export interface Props {
@@ -229,9 +225,8 @@ const isSingleNodePool = computed(() => props.nodePoolsMinimal.length === 1);
 
 const getInitialSteps = (): IRunaiWizardLayoutStep[] =>
   deepCopy(
-    filterOrgUnitSteps(DEPARTMENT_FORM_V3_WIZARD_STEPS, {
-      // GPU quota is shown in every scheduling mode in this form, not only when a node pool has quota on.
-      nodepoolCapabilities: { cpuQuota: hasCpuQuotaPool.value, quota: true },
+    filterDepartmentFormV3Steps({
+      nodepoolCapabilities: { cpuQuota: hasCpuQuotaPool.value },
       hasPermission: (resource, action) => permissionStore.hasPermission(resource, action),
     }),
   );
