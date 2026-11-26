@@ -5206,6 +5206,11 @@ spec:
                   image:
                     description: ImageSpec is a struct describing a container image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
