@@ -271,16 +271,46 @@ jobs:
             exit 0
           fi
 
-          if [ ! -f "Dockerfile" ]; then
+          # A service can build from a context or a Dockerfile outside its own
+          # directory. artifact-metadata.json then names them, as paths from the
+          # repository root, in build_and_push.context / build_and_push.dockerfile.
+          # Without them the service directory is the context and holds the Dockerfile.
+          DOCKER_CONTEXT="."
+          DOCKERFILE=""
+          if [ -f "artifact-metadata.json" ]; then
+            configured_context=$(jq -r '.build_and_push.context // empty' artifact-metadata.json)
+            configured_dockerfile=$(jq -r '.build_and_push.dockerfile // empty' artifact-metadata.json)
+            if [ -n "$configured_context" ]; then
+              DOCKER_CONTEXT="${GITHUB_WORKSPACE}/${configured_context}"
+              if [ ! -d "$DOCKER_CONTEXT" ]; then
+                echo "::error::${SERVICE}: build_and_push.context does not exist: ${configured_context}"
+                exit 1
+              fi
+            fi
+            if [ -n "$configured_dockerfile" ]; then
+              DOCKERFILE="${GITHUB_WORKSPACE}/${configured_dockerfile}"
+              if [ ! -f "$DOCKERFILE" ]; then
+                echo "::error::${SERVICE}: build_and_push.dockerfile does not exist: ${configured_dockerfile}"
+                exit 1
+              fi
+            fi
+          fi
+          if [ -z "$DOCKERFILE" ]; then
+            DOCKERFILE="${DOCKER_CONTEXT}/Dockerfile"
+          fi
+
+          if [ ! -f "$DOCKERFILE" ]; then
             echo "::notice::${SERVICE} has no Dockerfile — skipping docker validate"
             exit 0
           fi
 
           echo "::group::docker buildx build (validate, no push) ${SERVICE}"
+          echo "Docker build context: ${DOCKER_CONTEXT}"
+          echo "Dockerfile: ${DOCKERFILE}"
           docker buildx build \
             --build-arg SERVICE_NAME="$(basename "$SERVICE")" \
             --output type=cacheonly \
             --platform linux/amd64 \
-            -f "Dockerfile" \
-            .
+            -f "$DOCKERFILE" \
+            "$DOCKER_CONTEXT"
           echo "::endgroup::"
