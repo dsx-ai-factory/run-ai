@@ -36,6 +36,19 @@ import {
 // Mock Setup
 // ============================================================================
 
+const orgUnitFormsV3Gate = vi.hoisted(() => ({ enabled: false }));
+vi.mock("@/constants/org-unit.constants", () => ({
+  get ENABLE_ORG_UNIT_FORMS_V3() {
+    return orgUnitFormsV3Gate.enabled;
+  },
+}));
+vi.mock("@/components/org-unit/v2/department/department-edit-form-v3", () => ({
+  DepartmentEditFormV3: {
+    name: "DepartmentEditFormV3",
+    props: ["department", "isNewDepartment", "isDepartmentSubmitting", "nodePoolsMinimal", "readOnly", "nodePoolTotals"],
+    template: "<div />",
+  },
+}));
 vi.mock("@/services/control-plane/org-unit.service/org-unit.service");
 vi.mock("@/services/control-plane/cluster.service/cluster.service");
 vi.mock("@/services/infra/router.service/router.service");
@@ -127,9 +140,33 @@ describe("DepartmentEdit", () => {
   });
 
   afterEach(() => {
+    orgUnitFormsV3Gate.enabled = false;
     if (wrapper) {
       wrapper.unmount();
     }
+  });
+
+  describe("Node pool flow gate", () => {
+    it("opens today's form when the gate is off", async () => {
+      await mountComponent();
+
+      expect(wrapper.findComponent({ name: "DepartmentEditFormV2" }).exists()).toBe(true);
+      expect(wrapper.findComponent({ name: "DepartmentEditFormV3" }).exists()).toBe(false);
+    });
+
+    it("opens the new form with the same props when the gate is on", async () => {
+      await mountComponent();
+      const todaysFormProps = wrapper.findComponent({ name: "DepartmentEditFormV2" }).props();
+      wrapper.unmount();
+
+      orgUnitFormsV3Gate.enabled = true;
+      await mountComponent();
+
+      const form = wrapper.findComponent({ name: "DepartmentEditFormV3" });
+      expect(form.exists()).toBe(true);
+      expect(form.props()).toEqual(todaysFormProps);
+      expect(wrapper.findComponent({ name: "DepartmentEditFormV2" }).exists()).toBe(false);
+    });
   });
 
   // ==========================================================================

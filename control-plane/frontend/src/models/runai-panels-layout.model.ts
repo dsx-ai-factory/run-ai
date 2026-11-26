@@ -13,4 +13,8 @@ export interface IRunaiPanelsLayoutProps {
   collapsedLeftWidth?: string;
   hideRightOnSmallScreen?: boolean;
   collapseLeftOnSmallScreen?: boolean;
+  /** Viewport width in px below which `hideRightOnSmallScreen` hides the right panel. */
+  hideRightBreakpoint?: number;
+  /** Viewport width in px below which `collapseLeftOnSmallScreen` collapses the left panel. */
+  collapseLeftBreakpoint?: number;
 }
