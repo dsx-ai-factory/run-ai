@@ -41,11 +41,10 @@
             <div class="scheduling-overview">
               <div class="capacity-label text-b-subtitle1">Total node pool capacity</div>
               <div class="capacity" aid="pool-gpu-capacity">
-                <span v-if="resources?.nodes === 0" class="capacity-number">Empty</span>
-                <template v-else-if="resources?.gpus != null">
+                <template v-if="resources?.gpus != null && resources.nodes !== 0">
                   <span class="capacity-number">{{ resources.gpus }}</span> <span class="capacity-unit">GPUs</span>
                 </template>
-                <span v-else class="capacity-number">Unknown</span>
+                <span v-else class="capacity-number">Empty</span>
               </div>
               <div class="mode-selector">
                 <runai-section-title

@@ -647,11 +647,14 @@ describe("scheduling step with all modes enabled", () => {
     wrapper.unmount();
   });
 
-  it("distinguishes an empty pool, an unknown capacity, and a measured zero with nodes", async () => {
+  it("shows Empty until capacity is reported and preserves a measured zero for a nonempty pool", async () => {
     const wrapper = render();
-    expect(wrapper.get('[aid="pool-gpu-capacity"]').text()).toBe("Unknown");
+    expect(wrapper.get('[aid="pool-gpu-capacity"]').text()).toBe("Empty");
     await wrapper.setProps({ resources: { nodes: 2 } });
-    expect(wrapper.get('[aid="pool-gpu-capacity"]').text()).toBe("Unknown");
+    expect(wrapper.get('[aid="pool-gpu-capacity"]').text()).toBe("Empty");
+    expect(wrapper.getComponent(Table).props("capacity")).toBeUndefined();
+    await wrapper.setProps({ resources: { nodes: 2, gpus: 8 } });
+    expect(wrapper.get('[aid="pool-gpu-capacity"]').text()).toBe("8 GPUs");
     await wrapper.setProps({ resources: { nodes: 0, gpus: 0 } });
     expect(wrapper.get('[aid="pool-gpu-capacity"]').text()).toBe("Empty");
     expect(wrapper.getComponent(Table).props("capacity")).toBe(0);
