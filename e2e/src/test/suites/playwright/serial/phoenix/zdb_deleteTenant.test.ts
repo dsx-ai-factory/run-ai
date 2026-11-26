@@ -26,10 +26,8 @@ import {
     usersUtils,
     Utils,
     waitUtils,
-    workloadUtils
+    workloadsCrudUtils
 } from '../../../../../modules/helpers';
-import { WorkloadType } from '../../../../../modules/helpers/utils/WorkloadUtils';
-import { BaseWorkload } from '../../../../../modules/helpers';
 import { Keycloak } from '../../../../../modules/helpers/utils/Keycloak';
 import { DatabaseConnection, db } from '../../../../../modules/db';
 import { kubeCli } from '../../../../../modules/cli';
@@ -203,42 +201,39 @@ test.describe(`Phoenix tests Delete Tenant SH Multi-Tenancy: ${tags.teams.phoeni
         expect(project, 'test project should be created successfully in the new tenant').to.be.exist;
         logger.info(`Project created: ${project.name} (ID: ${project.id})`);
 
-        const jobName = objectGenerator.generateNameByPrefix('test-job');
-        let job: BaseWorkload;
-        await waitUtils.waitForCondition(
-            async () => {
-                try {
-                    job = await workloadUtils.createWorkloadAndWaitUntilCreated(
-                        WorkloadType.Train,
-                        namespace,
-                        jobName,
-                        config.quickStartImage.training
-                    );
-                    return true;
-                } catch (e) {
-                    const msg = e instanceof Error ? e.message : JSON.stringify(e);
-                    if (msg.includes('migration in progress') || msg.includes('connection refused')) {
-                        logger.warn('Transient error, retrying workload creation...');
-                        return false;
-                    }
-                    throw e;
-                }
+        const trainingName = objectGenerator.generateNameByPrefix('test-training');
+        const { body: training } = await workloadsCrudUtils.createTraining(
+            trainingName,
+            false,
+            cluster.uuid,
+            project.id.toString(),
+            {
+                image: config.quickStartImage.training,
+                command: 'sleep infinity'
             },
-            'Wait for migration to complete before creating training workload',
-            true,
+            userToken
+        );
+        expect(training, 'training workload should be created successfully in the new tenant').to.be.exist;
+        await kubeCli.waitForJobPodsRunning(namespace, training.name, 120);
+        logger.info(`Training workload created: ${training.name} in namespace: ${namespace}`);
+
+        const workspaceName = objectGenerator.generateNameByPrefix('test-workspace');
+        const workspace = await workloadsCrudUtils.createWorkspaceAndWaitForPodsRunning(
+            workspaceName,
+            false,
+            cluster.uuid,
+            project.id.toString(),
+            {
+                image: config.quickStartImage.interactive,
+                command: 'sleep infinity'
+            },
+            namespace,
+            userToken,
             120
         );
-        expect(job, 'training job should be created successfully in the new tenant').to.be.exist;
-        logger.info(`Job created: ${job.name} in namespace: ${namespace}`);
-        const interactiveJob = await workloadUtils.createWorkloadAndWaitUntilCreated(
-            WorkloadType.Interactive,
-            namespace,
-            objectGenerator.generateNameByPrefix('test-interactive-job'),
-            config.quickStartImage.interactive
-        );
-        expect(interactiveJob, 'interactive job should be created successfully in the new tenant').to.be.exist;
-        logger.info(`Interactive job created: ${interactiveJob.name} in namespace: ${namespace}`);
-        await new Promise((resolve) => setTimeout(resolve, 120000));
+        expect(workspace, 'workspace should be created successfully in the new tenant').to.be.exist;
+        logger.info(`Workspace created: ${workspace.name} in namespace: ${namespace}`);
+
         const forceDeleted = await tenantUtils.deleteTenant(
             token.accessToken,
             tenantUrl,
