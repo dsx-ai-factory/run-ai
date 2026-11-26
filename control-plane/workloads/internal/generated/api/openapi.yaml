@@ -7448,7 +7448,7 @@ paths:
       - Workflows
       x-service: workloads
       x-test-coverage:
-      - control-plane/workloads/pkg/services_crud/workflow_service_test.go
+      - control-plane/workloads/pkg/services_crud/workflows_service_test.go
       x-authorize:
         resource-type: workflows
         action: create
@@ -7526,7 +7526,7 @@ paths:
       - Workflows
       x-service: workloads
       x-test-coverage:
-      - control-plane/workloads/pkg/services_crud/workflow_service_test.go
+      - control-plane/workloads/pkg/services_crud/workflows_service_test.go
       x-authorize:
         resource-type: workflows
         action: delete
@@ -7601,7 +7601,7 @@ paths:
       - Workflows
       x-service: workloads
       x-test-coverage:
-      - control-plane/workloads/pkg/services_crud/workflow_service_test.go
+      - control-plane/workloads/pkg/services_crud/workflows_service_test.go
       x-authorize:
         resource-type: workflows
         action: read

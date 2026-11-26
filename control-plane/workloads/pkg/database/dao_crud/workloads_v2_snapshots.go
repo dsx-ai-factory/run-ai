@@ -41,6 +41,16 @@ func DbUpsertWorkloadV2Snapshot(ctx context.Context, snapshot *models_crud.Workl
 	return nil
 }
 
+func DbUpsertWorkflowSnapshot(ctx context.Context, snapshot *models_crud.WorkflowSnapshot) *api.Error {
+	_, err := runaidb.DB().WithContext(ctx).Table(models_crud.WorkloadV2SnapshotsTableName).Save(snapshot)
+	if err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to upsert workflow snapshot %s, err %v", snapshot.ID, err)
+		return api.NewError(http.StatusServiceUnavailable, fmt.Sprintf("Failed to upsert workflow snapshot %s", snapshot.ID), nil).WithDetails(err)
+	}
+
+	return nil
+}
+
 func DbGetWorkloadV2Snapshot(ctx context.Context, tenantId uint, workloadType string, workloadId string,
 	permittedScopes *authorization.PermittedScopes,
 ) (*models_crud.WorkloadV2Snapshot, *api.Error) {

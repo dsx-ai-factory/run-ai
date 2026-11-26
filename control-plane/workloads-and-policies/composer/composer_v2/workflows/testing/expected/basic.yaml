@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  annotations:
+    run.ai/submitted-by: tester
+  labels:
+    app: workflow
+    createdBy: Workflow
+    project: test
+    release: basic
+    run.ai/control-plane-managed: "true"
+    run.ai/converted-from-native: "true"
+    workloadKind: Workflow
+    workloadName: basic
+  name: basic
+  namespace: runai-test
+spec:
+  arguments: {}
+  entrypoint: hello-world
+  templates:
+  - container:
+      args:
+      - echo this is temporary until we develop the full composer
+      command:
+      - sh
+      - -c
+      image: busybox:1.37
+      name: main
+      resources: {}
+    inputs: {}
+    metadata: {}
+    name: hello-world
+    outputs: {}
+status:
+  finishedAt: null
+  startedAt: null

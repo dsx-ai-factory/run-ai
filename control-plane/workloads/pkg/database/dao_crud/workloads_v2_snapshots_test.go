@@ -69,6 +69,44 @@ var _ = Describe("DbUpsertWorkloadV2Snapshot", func() {
 	})
 })
 
+var _ = Describe("DbUpsertWorkflowSnapshot", func() {
+	const workflowSnapshotUpsertUpdate = "UPDATE workloads_v2_snapshots SET created_at=?,created_by=?,updated_at=?,updated_by=?,tenant_id=?,cluster_id=?,department_id=?,project_id=?,workload_type=?,requested_name=?,name=?,namespace=?,spec=?,assets_mapping=? WHERE id = ?"
+
+	newWorkflowSnapshotFixture := func() *models_crud.WorkflowSnapshot {
+		return &models_crud.WorkflowSnapshot{
+			ID:           snapshotFixtureId,
+			TenantId:     1,
+			ClusterId:    "cluster-1",
+			ProjectId:    "p1",
+			WorkloadType: "Workflow",
+			Name:         "wf",
+			Namespace:    "runai-p1",
+		}
+	}
+
+	It("upserts the snapshot without the master spec columns", func() {
+		m := setupDaoMock(GinkgoT())
+		m.ExpectTransaction().Begin()
+		m.ExpectExec(workflowSnapshotUpsertUpdate).Returns(1)
+		m.ExpectTransaction().Commit()
+
+		apiErr := DbUpsertWorkflowSnapshot(testCtx(1), newWorkflowSnapshotFixture())
+
+		Expect(apiErr).To(BeNil())
+	})
+
+	It("returns an error when the upsert fails", func() {
+		m := setupDaoMock(GinkgoT())
+		m.ExpectTransaction().Begin()
+		m.ExpectExec(workflowSnapshotUpsertUpdate).ReturnsError(errors.New("boom"))
+		m.ExpectTransaction().Rollback()
+
+		apiErr := DbUpsertWorkflowSnapshot(testCtx(1), newWorkflowSnapshotFixture())
+
+		Expect(apiErr).ToNot(BeNil())
+	})
+})
+
 var _ = Describe("DbGetWorkloadV2Snapshot", func() {
 	It("returns the snapshot", func() {
 		m := setupDaoMock(GinkgoT())

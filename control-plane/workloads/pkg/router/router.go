@@ -87,7 +87,7 @@ func CreateRouter() chi.Router {
 	settingsApiController := api.NewSettingsAPIController(settingsApiService)
 	router := api.NewRouter()
 
-	workflowsService := services_crud.NewWorkflowsService()
+	workflowsService := services_crud.NewWorkflowsService(tenantSettingsClient)
 	workflowsAPIController := api.NewWorkflowsAPIController(workflowsService)
 
 	router.Group(func(router chi.Router) {

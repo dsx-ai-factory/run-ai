@@ -25,17 +25,21 @@ var memoryAliases = [][2]string{
 // ValidateMemoryRequestInput runs before adapting submitted specs or defaults.
 // Normalized legacy requests may exceed one and must not be validated as new input.
 func ValidateMemoryRequestInput(source map[string]any) error {
-	return visitCompute(source, "", func(compute map[string]any, path string) error {
-		value := compute["gpuMemoryPortionRequest"]
-		if value == nil {
-			return nil
-		}
-		number, ok := numericValue(value)
-		if !ok || number.Sign() < 0 || number.Cmp(big.NewRat(1, 1)) > 0 {
-			return fmt.Errorf("%s.gpuMemoryPortionRequest must be between 0 and 1", path)
-		}
+	return visitCompute(source, "", ValidateComputeMemoryRequestInput)
+}
+
+// ValidateComputeMemoryRequestInput validates a single compute section, for compute sections
+// outside the containers ValidateMemoryRequestInput visits, such as a workflow's compute profiles.
+func ValidateComputeMemoryRequestInput(compute map[string]any, path string) error {
+	value := compute["gpuMemoryPortionRequest"]
+	if value == nil {
 		return nil
-	})
+	}
+	number, ok := numericValue(value)
+	if !ok || number.Sign() < 0 || number.Cmp(big.NewRat(1, 1)) > 0 {
+		return fmt.Errorf("%s.gpuMemoryPortionRequest must be between 0 and 1", path)
+	}
+	return nil
 }
 
 // NormalizeLegacyGPUFields copies one source before resolving deprecated aliases.

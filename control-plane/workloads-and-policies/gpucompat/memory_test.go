@@ -179,6 +179,14 @@ func TestMemoryRequestInputBounds(t *testing.T) {
 					t.Fatal("mutated input")
 				}
 			}
+
+			err := ValidateComputeMemoryRequestInput(tc.compute, "compute[0]")
+			if (err != nil) != tc.invalid {
+				t.Fatalf("compute profile: invalid=%v, got %v", tc.invalid, err)
+			}
+			if err != nil && !strings.Contains(err.Error(), "compute[0].gpuMemoryPortionRequest") {
+				t.Fatal("missing field path", err)
+			}
 		})
 	}
 }
