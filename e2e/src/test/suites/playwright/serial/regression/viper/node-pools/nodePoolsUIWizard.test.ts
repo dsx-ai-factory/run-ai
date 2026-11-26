@@ -5,15 +5,16 @@
 
 import { expect } from '@playwright/test';
 import { nodePoolUtils, tags } from '../../../../../../../modules/helpers';
+import { NodePoolPage } from '../../../../../../../modules/ui/runaiV2/pages/NodePoolPage';
 import { createPool, editFromGrid, expectTooltip, test } from './wizardFixtures';
 
 const lockedMessage = /^This can’t be modified once a node pool has been created\.?$/;
 
-test.use({ baseURL: process.env.APP_URL || process.env.CONTROL_PLANE_URL, testIdAttribute: 'aid' });
+test.use({ testIdAttribute: 'aid' });
 
 // Enable these scenarios when the wizard becomes the standard node pool form.
 test.describe.skip(
-    `Node pool wizard, tags: ${tags.tool.ui} ${tags.resource.nodepools} ${tags.teams.viper}`,
+    `Node pools UI wizard, tags: ${tags.tool.ui} ${tags.resource.nodepools} ${tags.teams.viper}`,
     () => {
         test('creation keeps later steps locked until the identity is saved', async ({ wizard: page }) => {
             await expect(page.getByTestId('wizard-step-item-identity')).toHaveAttribute(
@@ -44,7 +45,7 @@ test.describe.skip(
             await expect(page).toHaveURL((url) => url.pathname === '/node-pools');
         });
 
-        test('create and continue saves ranked scheduling and GPU placement', async ({
+        test('create and continue saves Guaranteed quota and GPU placement', async ({
             wizard: page,
             poolName
         }) => {
@@ -54,8 +55,9 @@ test.describe.skip(
                     url.pathname === '/node-pools/edit/' + id &&
                     url.searchParams.get('stepName') === 'scheduling'
             );
-            await expect(page.getByTestId('mode-proportional')).toBeChecked();
-            await page.getByTestId('mode-ranked').click();
+            await expect(page.getByTestId('mode-proportional')).toBeDisabled();
+            await expect(page.getByTestId('mode-ranked')).toBeDisabled();
+            await page.getByTestId('mode-guaranteed').click();
             await page.getByTestId('scheduling-save-continue').click();
             await expect(page.getByTestId('wizard-step-item-topology')).toHaveAttribute(
                 'aria-current',
@@ -85,10 +87,10 @@ test.describe.skip(
                 (value) => value === 'spread'
             );
             await page.getByTestId('wizard-step-item-scheduling').click();
-            await expect(page.getByTestId('mode-ranked')).toBeChecked();
+            await expect(page.getByTestId('mode-guaranteed')).toBeChecked();
         });
 
-        test('create and close allows editing the description and preserves guaranteed quota', async ({
+        test('create and close allows editing the description and preserves Guaranteed quota', async ({
             wizard: page,
             poolName
         }) => {
@@ -132,9 +134,7 @@ test.describe.skip(
             await createPool(page, poolName, 'close');
             const row = page.getByRole('row').filter({ has: page.getByText(poolName, { exact: true }) });
             await expect(row).toBeVisible();
-            await row.getByRole('checkbox').click();
-            await page.getByTestId('node-pool-delete-btn').click();
-            await page.getByTestId('delete-modal-delete-button').click();
+            await new NodePoolPage(page).deleteNodePoolByName(poolName);
             await expect(row).toHaveCount(0, { timeout: 120000 });
         });
     }

@@ -3,41 +3,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { randomUUID } from 'node:crypto';
 import { expect, type Locator, type Page, test as base } from '@playwright/test';
+import { NodepoolPhase } from '../../../../../../../modules/api/apis/clusterApi/generated/model/nodepoolPhase';
 import type { Nodepool } from '../../../../../../../modules/api/apis/clusterApi/generated/model/nodepool';
 
-import { flowRootState } from '../../../../../../../modules/helpers';
+import { AuthPage } from '../../../../../../../modules/ui/runaiV2/pages/AuthPage';
+import { NodePoolPage } from '../../../../../../../modules/ui/runaiV2/pages/NodePoolPage';
+import { BrowserEngine } from '../../../../../../../modules/ui/runaiV2/pages/BrowserEngine';
+import { flowRootState, objectGenerator } from '../../../../../../../modules/helpers';
 
 const poolsApi = '/api/v1/node-pools';
 
 export const test = base.extend<{ wizard: Page; poolName: string }>({
-    wizard: async ({ page }, use) => {
-        const { email, password } = flowRootState.users.system_administrator;
-        await page.goto('/node-pools');
-        await page
-            .locator('input[name="email"], input[name="username"], #inputUsername')
-            .fill(email, { timeout: 70_000 });
-        await page.locator('input[name="password"]').fill(password);
-        await page
-            .locator(
-                '[aid="loginSubmitButton"]:not(#loginWithSSOButton), input[type="submit"], button[type="submit"]'
-            )
-            .first()
-            .click();
-        await page.waitForURL(
-            (url) => url.pathname === '/node-pools' || /^\/(dashboard|overview)(\/|$)/.test(url.pathname)
-        );
-        await page.goto('/node-pools');
-        await page.addLocatorHandler(
-            page.getByRole('button', { name: 'Close onboarding', exact: true }),
-            async (button) => button.click()
-        );
-        await page.getByRole('button', { name: 'New node pool', exact: true }).click();
-        await use(page);
+    wizard: async ({}, use, testInfo) => {
+        const browser = new BrowserEngine();
+        const page = await browser.start();
+        try {
+            const { email, password } = flowRootState.users.system_administrator;
+            await new AuthPage(page).signIn(email, password);
+            const pools = new NodePoolPage(page);
+            await pools.navigateToNodePools();
+            await page.locator(pools.addNewNodePoolBtn).click();
+            await use(page);
+        } finally {
+            await browser.stopAndArchive(testInfo, 'node-pools-ui-wizard');
+        }
     },
     poolName: async ({ request }, use) => {
-        const name = 'e2e-wizard-' + randomUUID().slice(0, 18);
+        const name = objectGenerator.generateNameByPrefix('e2e-wizard');
         const api = new URL(poolsApi, process.env.CONTROL_PLANE_URL).href;
         const headers = { Authorization: 'Bearer ' + flowRootState.users.system_administrator.accessToken };
         const query = { headers, params: { filterBy: 'name==' + name } };
@@ -51,6 +44,7 @@ export const test = base.extend<{ wizard: Page; poolName: string }>({
                 expect(pool.name).toBe(name);
                 expect(pool.labelKey).toBe('e2e.run.ai/' + name);
                 expect(pool.isDefault).toBe(false);
+                if (pool.phase === NodepoolPhase.Deleting) continue;
                 await expect(
                     await request.delete(api + '/' + encodeURIComponent(pool.id), { headers })
                 ).toBeOK();
