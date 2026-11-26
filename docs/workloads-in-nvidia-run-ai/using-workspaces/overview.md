@@ -16,8 +16,8 @@ NVIDIA Run:ai supports native workspaces and additional supported workload types
 ### Performance and Optimizations
 
 * **Flexible resource allocation** - Assign GPU, CPU, and memory resources according to development and experimentation requirements.
-* **GPU sharing** - Allocate fractional GPUs to development workloads that do not require a dedicated GPU. See [Request GPU memory fractions](../configure-workload-scheduling/configure-gpu-sharing/request-gpu-memory-fractions.md).
-* **Priority and scheduling** - By default, workspaces are assigned high priority and are non-preemptible, allowing practitioners to work without scheduling-related interruptions. A non-preemptible workspace cannot use resources beyond its project's deserved quota. See [Set priority and preemptibility](../configure-workload-scheduling/configure-priority-and-preemption.md).
+* **GPU sharing** - Allocate fractional GPUs to development workloads that do not require a dedicated GPU. See [Request GPU memory fractions](../optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md).
+* **Priority and scheduling** - By default, workspaces are assigned high priority and are non-preemptible, allowing practitioners to work without scheduling-related interruptions. A non-preemptible workspace cannot use resources beyond its project's deserved quota. See [Set priority and preemptibility](../optimize-workload-scheduling-and-placement/configure-priority-and-preemption.md).
 * **Node pool selection** - Select node pools to target infrastructure that meets the workspace's resource requirements. See [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md).
 
 ### Lifecycle Management

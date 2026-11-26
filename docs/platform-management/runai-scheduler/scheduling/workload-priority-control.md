@@ -104,7 +104,7 @@ NVIDIA Run:ai defines the following default mappings of workload types to priori
 
 ## Setting Priority and Preemptibility During Workload Submission
 
-You can set priority and preemptibility when you submit a workload, through the UI, API, or CLI, or with labels in the YAML manifest of a supported workload type. For the steps and values, refer to [Configure priority and preemption](../../../workloads-in-nvidia-run-ai/configure-workload-scheduling/configure-priority-and-preemption.md).
+You can set priority and preemptibility when you submit a workload, through the UI, API, or CLI, or with labels in the YAML manifest of a supported workload type. For the steps and values, refer to [Configure priority and preemption](../../../workloads-in-nvidia-run-ai/optimize-workload-scheduling-and-placement/configure-priority-and-preemption.md).
 
 ## Updating the Default Mapping
 

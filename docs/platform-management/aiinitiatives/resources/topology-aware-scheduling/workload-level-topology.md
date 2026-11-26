@@ -1,6 +1,6 @@
 # Workload-Based Topology Placement
 
-This page describes topology-aware scheduling applied on a workload-based scope - the default scope, in which NVIDIA Run:ai treats the entire distributed workload as a single unit for placement. All pods in the workload are subject to the same topology constraints. To further co-locate workers in smaller, independently placed groups within the workload (for example, tensor-parallel training jobs), see [Segment-Based Topology Placement](segment-based-topology-placement.md) - segment-based constraints can be combined with workload-based constraints on the same workload; see [Combining Workload-Based and Segment-Based Placement](../../../../workloads-in-nvidia-run-ai/configure-workload-scheduling/configure-workload-placement/configure-segment-based-placement.md#combining-workload-based-and-segment-based-placement).
+This page describes topology-aware scheduling applied on a workload-based scope - the default scope, in which NVIDIA Run:ai treats the entire distributed workload as a single unit for placement. All pods in the workload are subject to the same topology constraints. To further co-locate workers in smaller, independently placed groups within the workload (for example, tensor-parallel training jobs), see [Segment-Based Topology Placement](segment-based-topology-placement.md) - segment-based constraints can be combined with workload-based constraints on the same workload; see [Combining Workload-Based and Segment-Based Placement](../../../../workloads-in-nvidia-run-ai/optimize-workload-scheduling-and-placement/workload-placement/configure-segment-based-placement.md#combining-workload-based-and-segment-based-placement).
 
 ## Automatic Topology-Aware Scheduling
 
@@ -14,7 +14,7 @@ This behavior applies to distributed [native workloads](../../../../workloads-in
 
 ## Fine-tuning Topology-Aware Scheduling per Workload
 
-You can override the automatic behavior for each distributed workload with topology annotations when you submit it. This includes how topology applies to LeaderWorkerSet workloads. For the annotations and examples, refer to [Configure workload-based placement](../../../../workloads-in-nvidia-run-ai/configure-workload-scheduling/configure-workload-placement/configure-workload-based-placement.md).
+You can override the automatic behavior for each distributed workload with topology annotations when you submit it. This includes how topology applies to LeaderWorkerSet workloads. For the annotations and examples, refer to [Configure workload-based placement](../../../../workloads-in-nvidia-run-ai/optimize-workload-scheduling-and-placement/workload-placement/configure-workload-based-placement.md).
 
 ## Topology-Aware Scheduling for Dynamo over Grove
 

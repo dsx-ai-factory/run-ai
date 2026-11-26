@@ -112,7 +112,7 @@ If you are upgrading from a release that used the proprietary GPU sharing implem
 
 </Note>
 
-When you submit a workload, you can request a portion of GPU memory or an absolute amount of GPU memory, on one GPU or on multiple GPUs of the same node. You can request it through a compute resource or, for supported workload types, through annotations in the YAML manifest. For the steps, the annotation reference, and examples, refer to [Request GPU memory fractions](../../../workloads-in-nvidia-run-ai/configure-workload-scheduling/configure-gpu-sharing/request-gpu-memory-fractions.md).
+When you submit a workload, you can request a portion of GPU memory or an absolute amount of GPU memory, on one GPU or on multiple GPUs of the same node. You can request it through a compute resource or, for supported workload types, through annotations in the YAML manifest. For the steps, the annotation reference, and examples, refer to [Request GPU memory fractions](../../../workloads-in-nvidia-run-ai/optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md).
 
 ## Enforcing GPU Memory Fractions with a Policy
 

@@ -8,14 +8,14 @@ Leveraging Spectrum-X with NVIDIA Run:ai extends these benefits into day-to-day 
 
 Before using Spectrum-X with NVIDIA Run:ai, ensure the following components are installed and configured:
 
-* NVIDIA Network Operator version 26.1.0. See the [NVIDIA Network Operator](../../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#nvidia-network-operator) section for installation instructions.
+* NVIDIA Network Operator version 26.1.0. See the [NVIDIA Network Operator](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#nvidia-network-operator) section for installation instructions.
 * NVIDIA Spectrum-X Operator version 2.1, installed via the Network Operator.
 
 ## Submitting a Workload with Spectrum-X
 
 To leverage Spectrum-X networking with NVIDIA Run:ai, the workload must be configured to use the Spectrum-X network and request the required networking capabilities and resources.
 
-For [NVIDIA Run:ai native workloads](../../../workloads-in-nvidia-run-ai/workload-types/workload-types.md) and [supported workload types](../../../workloads-in-nvidia-run-ai/supported-workload-types/list-of-supported-workload-types.md), you can configure these settings across all interfaces - UI, API, CLI, or MCP. Supported workload types submitted [via YAML](../../../workloads-in-nvidia-run-ai/submit-via-yaml.md) require the settings to be included in the workload YAML manifest.
+For [NVIDIA Run:ai native workloads](../workload-types/workload-types.md) and [supported workload types](../supported-workload-types/list-of-supported-workload-types.md), you can configure these settings across all interfaces - UI, API, CLI, or MCP. Supported workload types submitted [via YAML](../submit-via-yaml.md) require the settings to be included in the workload YAML manifest.
 
 ### Required Configuration
 
@@ -59,7 +59,7 @@ spec:
 
 ### Native Workload Policies
 
-Administrators can use NVIDIA Run:ai [workload policies](../../policies/native-workload-policies.md) to ensure that workloads intended to run on Spectrum-X infrastructure are configured with the required capabilities, resources, and network attachments. For full policy structure and supported fields, see [Policy YAML Reference](../../policies/policy-yaml-reference.md).
+Administrators can use NVIDIA Run:ai [workload policies](../../platform-management/policies/native-workload-policies.md) to ensure that workloads intended to run on Spectrum-X infrastructure are configured with the required capabilities, resources, and network attachments. For full policy structure and supported fields, see [Policy YAML Reference](../../platform-management/policies/policy-yaml-reference.md).
 
 **Example workload policy:**
 
@@ -85,4 +85,4 @@ rules:
 
 ### Supported Workload Type Policies
 
-Policies for supported workload types can also be used to enforce Spectrum-X requirements, provided the required workload fields are available in the workload type mapping. Configure the policy using the Rule builder or YAML editor for the selected workload type. Refer to [Supported workload types policies](../../policies/supported-workload-type-policies.md) for details on creating rules and selecting mapped fields.
+Policies for supported workload types can also be used to enforce Spectrum-X requirements, provided the required workload fields are available in the workload type mapping. Configure the policy using the Rule builder or YAML editor for the selected workload type. Refer to [Supported workload types policies](../../platform-management/policies/supported-workload-type-policies.md) for details on creating rules and selecting mapped fields.

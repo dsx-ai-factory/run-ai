@@ -62,10 +62,10 @@ After creating a topology, the administrator must associate it with the relevant
 
 NVIDIA Run:ai supports topology-aware scheduling at two scopes, which can be applied independently or together on the same workload:
 
-* **Workload-based** (default) - The entire distributed workload is placed as a single group, so all of its pods are subject to the same topology constraints. See [Workload-Based Topology Placement](workload-level-topology.md).
+* **Workload-based** (default) - The entire distributed workload is placed as a single group, so all of its pods are subject to the same topology constraints. See [Workload-Based Topology Placement](workload-level-topology.md). To apply it to a workload, see [Configure Workload-Based Placement](../../../../workloads-in-nvidia-run-ai/optimize-workload-scheduling-and-placement/workload-placement/configure-workload-based-placement.md).
 * **Segment-based** - Worker pods are divided into fixed-size groups, and each group is independently co-located within the same topology level. This is useful for workloads where groups of workers communicate more frequently within the group than across groups - for example, tensor-parallel training jobs where intra-group communication benefits from tight locality. See [Segment-Based Topology Placement](segment-based-topology-placement.md).
 
-The two scopes are not mutually exclusive. A common pattern is to combine them: a broader workload-based constraint keeps the entire workload within one topology level (for example, a zone), while a tighter segment-based constraint co-locates each segment within a more specific level (for example, a rack) inside that zone. See [Combining Workload-Based and Segment-Based Placement](../../../../workloads-in-nvidia-run-ai/configure-workload-scheduling/configure-workload-placement/configure-segment-based-placement.md#combining-workload-based-and-segment-based-placement).
+The two scopes are not mutually exclusive. A common pattern is to combine them: a broader workload-based constraint keeps the entire workload within one topology level (for example, a zone), while a tighter segment-based constraint co-locates each segment within a more specific level (for example, a rack) inside that zone. See [Combining Workload-Based and Segment-Based Placement](../../../../workloads-in-nvidia-run-ai/optimize-workload-scheduling-and-placement/workload-placement/configure-segment-based-placement.md#combining-workload-based-and-segment-based-placement).
 
 ## Topology Constraints Visibility
 

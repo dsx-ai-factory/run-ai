@@ -108,7 +108,7 @@ These additional steps are crucial for the creation of underlying HW resources (
 
 ## Fine-Tuning Placement in Workloads
 
-You can influence how the Scheduler places a distributed workload in a GB200 NVL72 node pool, and set the MNNVL behavior for each workload. For the Topology field options and the `run.ai/MNNVL` label values, refer to [Configure GB200 NVL72 placement](../../../workloads-in-nvidia-run-ai/configure-workload-scheduling/configure-workload-placement/configure-gb200-nvl72-placement.md).
+You can influence how the Scheduler places a distributed workload in a GB200 NVL72 node pool, and set the MNNVL behavior for each workload. For the Topology field options and the `run.ai/MNNVL` label values, refer to [Configure GB200 NVL72 placement](../../../workloads-in-nvidia-run-ai/optimize-workload-scheduling-and-placement/workload-placement/configure-gb200-nvl72-placement.md).
 
 ## Known Limitations and Compatibility
 
