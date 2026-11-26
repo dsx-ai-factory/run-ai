@@ -12,6 +12,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/internal/auth"
+	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/internal/mocks"
 	clustercpconfigprovider "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/business/cluster-cp-config/provider"
 	access_control "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/business/cluster-infra/access-control"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/business/cluster-infra/access-control/authn"
@@ -64,6 +66,9 @@ func init() {
 		logging.Fatalf("Failed to initialize database: %v", err)
 	}
 	authorization_client.Init(nil)
+	if runai_config.Get[*config.Service]().UseMocks {
+		authorization_client.SetMockAuthorizationClient(auth.MockService{})
+	}
 	err := cache.Init(nil)
 	if err != nil {
 		logging.Errorf("Failed to initialize cache: %v", err)
@@ -71,7 +76,10 @@ func init() {
 	clients_cache.Init()
 
 	backendConfig := runai_config.Get[*config.Backend]()
-	backendClient := clients.NewBackendClient(backendConfig.TempBackendSettingsUrl)
+	var backendClient setting.BackendClient = clients.NewBackendClient(backendConfig.TempBackendSettingsUrl)
+	if runai_config.Get[*config.Service]().UseMocks {
+		backendClient = mocks.BackendClient{}
+	}
 	setting.Init(&setting.SettingConfig{
 		BackendClient: backendClient,
 	}, nil)

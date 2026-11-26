@@ -18,11 +18,11 @@ import { EQuotaEntity } from "@/models/resource.model";
 import type { Department } from "@/swagger-models/org-unit-service-client";
 
 // Mock orgUnitService
-vi.mock("@/services/control-plane/org-unit.service/org-unit.service", () => ({
-  orgUnitService: {
-    getDepartment: vi.fn(),
-  },
-}));
+vi.mock("@/services/control-plane/org-unit.service/org-unit.service", async (original) => {
+  const actual = await original<{ orgUnitService: typeof orgUnitService }>();
+  actual.orgUnitService.getDepartment = vi.fn();
+  return actual;
+});
 
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 
@@ -305,7 +305,7 @@ describe("OrgUnitGpuEditableQuotaCol", () => {
     });
   });
 
-  describe.only("Apply Functionality", () => {
+  describe("Apply Functionality", () => {
     it("calls onSave with correct payload when apply is clicked", async () => {
       const wrapper = createWrapper();
 
@@ -576,7 +576,9 @@ describe("OrgUnitGpuEditableQuotaCol", () => {
     });
 
     it("handles fetch failure gracefully", async () => {
-      vi.mocked(orgUnitService.getDepartment).mockRejectedValue(new Error("Failed to fetch department"));
+      const fetchError = new Error("Failed to fetch department");
+      const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+      vi.mocked(orgUnitService.getDepartment).mockRejectedValue(fetchError);
 
       const column = createColumn({ entityType: EQuotaEntity.department });
       const row = createRow({ id: "dept-1", gpuQuota: 30 });
@@ -598,6 +600,9 @@ describe("OrgUnitGpuEditableQuotaCol", () => {
 
       // Should not show error since subordinateQuota is undefined
       expect(wrapper.vm.quotaState).not.toBe(EQuotaInputState.Error);
+      expect(consoleError).toHaveBeenCalledWith("Failed to fetch department subordinate quota:", fetchError);
+      consoleError.mockRestore();
+      wrapper.unmount();
     });
 
     it("treats -1 as unlimited (null) for subordinate quota", async () => {

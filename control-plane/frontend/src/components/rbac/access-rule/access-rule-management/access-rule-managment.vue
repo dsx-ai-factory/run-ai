@@ -237,13 +237,7 @@ const roles = computed<Role[]>(() =>
   roleStore.roleList.filter((role: Role) => rolesService.isPermittedRole(role, permissionStore.permissionsList)),
 );
 
-const rolesOptions = computed<ISelectOption[]>(() =>
-  roles.value.map((role: Role) => ({
-    label: role.name,
-    value: role.id,
-    roleStageBadge: role.name, // Pass role name for badge lookup
-  })),
-);
+const rolesOptions = computed<ISelectOption[]>(() => rolesService.toSelectOptions(roles.value));
 
 const isSso = computed(() => authStore.isSSO);
 
