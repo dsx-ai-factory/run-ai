@@ -130,6 +130,18 @@ Decision rules:
 - Feature quick starts stay next to the feature page they teach. The Scheduling
   section keeps its own **Quick Starts** group.
 
+### Scheduling and Workload-Level Configuration
+
+- Keep concept and platform-level pages in the Scheduling section, and keep the
+  pages that show how to apply a capability to an individual workload in
+  `docs/platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/`.
+  This folder is the **Optimize Workload Scheduling and Placement** subsection
+  of Scheduling. Do not merge a workload-level page into its concept page.
+- Link each concept page and its workload-level page to each other. Add a new
+  workload-level page to the landing page (`README.md`) of that folder.
+- In workload submission guides, link to the workload-level page at the field
+  where the user sets the value. Do not repeat the configuration steps.
+
 ## Repository Structure
 
 Place new files under `docs/` in the subdirectory that matches the topic area.

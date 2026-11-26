@@ -16,8 +16,8 @@ NVIDIA Run:ai supports native workspaces and additional supported workload types
 ### Performance and Optimizations
 
 * **Flexible resource allocation** - Assign GPU, CPU, and memory resources according to development and experimentation requirements.
-* **GPU sharing** - Allocate fractional GPUs to development workloads that do not require a dedicated GPU. See [Request GPU memory fractions](../optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md).
-* **Priority and scheduling** - By default, workspaces are assigned high priority and are non-preemptible, allowing practitioners to work without scheduling-related interruptions. A non-preemptible workspace cannot use resources beyond its project's deserved quota. See [Set priority and preemptibility](../optimize-workload-scheduling-and-placement/configure-priority-and-preemption.md).
+* **GPU sharing** - Allocate fractional GPUs to development workloads that do not require a dedicated GPU. See [Request GPU memory fractions](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md).
+* **Priority and scheduling** - By default, workspaces are assigned high priority and are non-preemptible, allowing practitioners to work without scheduling-related interruptions. A non-preemptible workspace cannot use resources beyond its project's deserved quota. See [Set priority and preemptibility](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-priority-and-preemption.md).
 * **Node pool selection** - Select node pools to target infrastructure that meets the workspace's resource requirements. See [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md).
 
 ### Lifecycle Management
@@ -32,6 +32,16 @@ NVIDIA Run:ai supports native workspaces and additional supported workload types
 ### Visualization and Monitoring
 
 **Workload monitoring** - Monitor workspace status, resource utilization (GPU, CPU, and network), workload events, and container logs to understand resource consumption and troubleshoot workloads. See [Workloads](../workloads.md#show-hide-details).
+
+## Optimize Scheduling and Placement
+
+Configure how NVIDIA Run:ai schedules a workspace and which resources it receives:
+
+* [Configure priority and preemption](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-priority-and-preemption.md) - Override the default priority and preemptibility of a workspace.
+* [Configure CPU and memory requests](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-cpu-and-memory-requests.md) - Request CPU compute and memory for a workspace, and set limits.
+* [Request GPU memory fractions](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md) and [Configure GPU compute mode](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/configure-gpu-compute-mode.md) - Share a GPU between workspaces by requesting a portion of its memory and setting how workloads share its compute.
+
+For all workload-level scheduling and placement pages, see [Optimize workload scheduling and placement](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/README.md).
 
 ## Workload Support and Framework Compatibility
 

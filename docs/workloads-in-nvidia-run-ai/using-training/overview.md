@@ -17,11 +17,11 @@ NVIDIA Run:ai supports native training workloads and additional supported worklo
 ### Performance and Optimizations
 
 * **Flexible resource allocation** - Assign GPU, CPU, and memory resources to standard and distributed training workloads.
-* **GPU sharing** - Allocate fractional GPUs according to training workload requirements. See [Request GPU memory fractions](../optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md).
-* **Priority and scheduling** - By default, training workloads are assigned low priority and are preemptible, allowing them to use resources beyond their project's deserved quota when available. See [Set priority and preemptibility](../optimize-workload-scheduling-and-placement/configure-priority-and-preemption.md).
+* **GPU sharing** - Allocate fractional GPUs according to training workload requirements. See [Request GPU memory fractions](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md).
+* **Priority and scheduling** - By default, training workloads are assigned low priority and are preemptible, allowing them to use resources beyond their project's deserved quota when available. See [Set priority and preemptibility](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-priority-and-preemption.md).
 * **Gang scheduling** - Schedules the pods of a distributed training workload together, so that the workload starts only when the resources for the required pods are available. See [Gang scheduling](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#gang-scheduling).
-* **Topology-aware scheduling** - Places distributed training workers according to network topology constraints, reducing communication overhead between workers. See [Configure workload-based placement](../optimize-workload-scheduling-and-placement/workload-placement/configure-workload-based-placement.md).
-* **Segment-based placement** - Groups workers into segments that are placed as close as possible, to match the application's parallelism. Supported for native distributed PyTorch training workloads and for PyTorchJob. See [Configure segment-based placement](../optimize-workload-scheduling-and-placement/workload-placement/configure-segment-based-placement.md).
+* **Topology-aware scheduling** - Places distributed training workers according to network topology constraints, reducing communication overhead between workers. See [Configure workload-based placement](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/workload-placement/configure-workload-based-placement.md).
+* **Segment-based placement** - Groups workers into segments that are placed as close as possible, to match the application's parallelism. Supported for native distributed PyTorch training workloads and for PyTorchJob. See [Configure segment-based placement](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/workload-placement/configure-segment-based-placement.md).
 * **Automatic MNNVL support** - Optimizes placement of distributed workloads on Multi-Node NVLink systems when available. See [Using GB200 NVL72 and Multi-Node NVLink domains](../../platform-management/aiinitiatives/resources/using-gb200.md).
 * **Elastic scaling** - Configure minimum and maximum worker counts for supported PyTorch distributed training workloads, allowing the number of active workers to adjust to resource availability.
 
@@ -38,6 +38,23 @@ NVIDIA Run:ai supports native training workloads and additional supported worklo
 ### Visualization and Monitoring
 
 **Workload monitoring** - Monitor workload status, resource utilization, the status of individual pods, workload events, and container logs. When [GPU profiling metrics](../../platform-management/monitor-performance/gpu-profiling-metrics.md) are enabled, they provide additional visibility into GPU device-level performance. See [Workloads](../workloads.md#show-hide-details).
+
+## Optimize Scheduling and Placement
+
+Configure how NVIDIA Run:ai schedules a training workload and which resources it receives:
+
+* [Configure priority and preemption](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-priority-and-preemption.md) - Override the default priority and preemptibility. Training workloads are low priority and preemptible by default.
+* [Configure CPU and memory requests](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-cpu-and-memory-requests.md) - Request CPU compute and memory for a training workload, and set limits.
+* [Request GPU memory fractions](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md) and [Configure GPU compute mode](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/configure-gpu-compute-mode.md) - Share a GPU between workloads by requesting a portion of its memory and setting how workloads share its compute.
+
+For distributed training workloads, you can also control where the pods run:
+
+* [Configure workload-based placement](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/workload-placement/configure-workload-based-placement.md) - Override the topology-aware scheduling of the workers.
+* [Configure segment-based placement](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/workload-placement/configure-segment-based-placement.md) - Group workers into segments that are placed together. Supported for native distributed PyTorch training workloads and PyTorchJob.
+* [Configure GB200 NVL72 placement](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/workload-placement/configure-gb200-nvl72-placement.md) - Set the placement and the Multi-Node NVLink behavior in GB200 NVL72 node pools.
+* [Enabling Spectrum-X networking](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/spectrum-x-networking.md) - Attach Spectrum-X networks to the workload.
+
+For all workload-level scheduling and placement pages, see [Optimize workload scheduling and placement](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/README.md).
 
 ## Workload Support and Framework Compatibility
 

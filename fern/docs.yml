@@ -87,7 +87,7 @@ redirects:
     destination: /run-ai/self-hosted/documentation/scheduling/hardware-aware-scheduling/numa-aware-scheduling
     permanent: true
   - source: /run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/resources/spectrum-x-networking
-    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/optimize-workload-scheduling-and-placement/spectrum-x-networking
+    destination: /run-ai/self-hosted/documentation/scheduling/optimize-workload-scheduling-and-placement/spectrum-x-networking
     permanent: true
   - source: /run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/resources/topology-aware-scheduling
     destination: /run-ai/self-hosted/documentation/scheduling/hardware-aware-scheduling/topology-aware-scheduling

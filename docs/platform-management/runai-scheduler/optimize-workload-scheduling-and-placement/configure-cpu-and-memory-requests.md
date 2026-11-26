@@ -1,10 +1,10 @@
 # Configure CPU and Memory Requests
 
-Request CPU compute and memory for a workload, and set limits. For how the allocation works and the cluster defaults, refer to [CPU compute and memory allocation](../../platform-management/runai-scheduler/resource-optimization/allocation-of-cpu-and-memory.md).
+Request CPU compute and memory for a workload, and set limits. For how the allocation works and the cluster defaults, refer to [CPU compute and memory allocation](../resource-optimization/allocation-of-cpu-and-memory.md).
 
 ## Requesting CPU Compute and Memory
 
-When submitting a [workload](../workloads.md) or creating [compute resources](../workload-assets/compute-resources.md), you can explicitly request both CPU compute and memory resources. The system guarantees that, if the workload is scheduled, the requested resources will be available for that workload.
+When submitting a [workload](../../../workloads-in-nvidia-run-ai/workloads.md) or creating [compute resources](../../../workloads-in-nvidia-run-ai/workload-assets/compute-resources.md), you can explicitly request both CPU compute and memory resources. The system guarantees that, if the workload is scheduled, the requested resources will be available for that workload.
 
 ## Setting CPU Compute and Memory Limits
 

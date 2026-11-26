@@ -76,7 +76,7 @@ GPU compute modes require the following on every GPU node in the cluster. GPU no
 
 ## Using GPU Compute Modes in Workloads
 
-When you submit a workload, you can set its GPU compute mode with an annotation. If you do not set it, the workload uses time-slicing. For the annotation reference and an example, refer to [Configure GPU compute mode](../../../workloads-in-nvidia-run-ai/optimize-workload-scheduling-and-placement/gpu-sharing/configure-gpu-compute-mode.md).
+When you submit a workload, you can set its GPU compute mode with an annotation. If you do not set it, the workload uses time-slicing. For the annotation reference and an example, refer to [Configure GPU compute mode](../optimize-workload-scheduling-and-placement/gpu-sharing/configure-gpu-compute-mode.md).
 
 <Note>
 

@@ -19,7 +19,7 @@ This guide explains how to create vLLM inference templates for reuse during work
 ## Workload Priority and Preemption
 By default, inference workloads in NVIDIA Run:ai are assigned a **Very high** priority and are **non-preemptible**. These defaults ensures that inference workloads, which often serve real-time or latency-sensitive traffic, are guaranteed the resources they need. The default very-high priority ensures the fastest possible scheduling, and the default non-preemptible value guarantees that the workload will not be disrupted by other workloads once it starts running.
 
-You can override the defaults by configuring priority and preemptibility. For more details, see [Workload priority and preemption](../../../platform-management/runai-scheduler/scheduling/workload-priority-control.md).
+You can override the defaults by configuring priority and preemptibility. To set them on a workload, see [Configure priority and preemption](../../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-priority-and-preemption.md). For more details, see [Workload priority and preemption](../../../platform-management/runai-scheduler/scheduling/workload-priority-control.md).
 
 ## Linking Assets
 
@@ -139,6 +139,8 @@ Manually configure the settings below as needed.
 </Tabs>
 
 ### Setting Up Compute Resources
+
+For details on requesting CPU and memory, GPU memory fractions, and the GPU compute mode, see [Configure CPU and memory requests](../../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-cpu-and-memory-requests.md), [Request GPU memory fractions](../../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md), and [Configure GPU compute mode](../../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/configure-gpu-compute-mode.md).
 
 <Note>
 

@@ -120,7 +120,7 @@ If you are upgrading from a release that used the `RUNAI_GPU_MEMORY_LIMIT` envir
 
 </Warning>
 
-When you submit a workload, you can add a memory Limit to the memory Request, so that the workload can use more memory than its Request while the GPU has memory to spare. Setting the Limit through the UI or CLI requires an administrator to enable it first. For the steps, the annotation reference, and examples, refer to [Request GPU memory fractions](../../../workloads-in-nvidia-run-ai/optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md#dynamic-gpu-memory-fractions).
+When you submit a workload, you can add a memory Limit to the memory Request, so that the workload can use more memory than its Request while the GPU has memory to spare. Setting the Limit through the UI or CLI requires an administrator to enable it first. For the steps, the annotation reference, and examples, refer to [Request GPU memory fractions](../optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md#dynamic-gpu-memory-fractions).
 
 ## Enforcing Dynamic GPU Memory Fractions with a Policy
 

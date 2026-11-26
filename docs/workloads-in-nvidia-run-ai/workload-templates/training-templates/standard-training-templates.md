@@ -16,7 +16,7 @@ If the image you are planning to use is hosted in NGC, make sure you have an NGC
 ## Workload Priority and Preemption
 By default, training workloads are assigned a **Low** priority and are **preemptible**. These defaults allow training workloads to use opportunistic compute resources beyond the project’s deserved quota while being scheduled after higher-priority workloads. Preemptible training workloads may be interrupted if those resources are required by higher-priority, non-preemptible workloads.
 
-You can override the defaults by configuring priority and preemptibility. For more details, see [Workload priority and preemption](../../../platform-management/runai-scheduler/scheduling/workload-priority-control.md).
+You can override the defaults by configuring priority and preemptibility. To set them on a workload, see [Configure priority and preemption](../../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-priority-and-preemption.md). For more details, see [Workload priority and preemption](../../../platform-management/runai-scheduler/scheduling/workload-priority-control.md).
 
 ## Linking Assets
 
@@ -99,6 +99,8 @@ Manually configure the settings below as needed.
 8. Select additional Linux capabilities for the container from the dropdown menu. This grants certain privileges to a container without granting all the root user's privileges.
 
 ### Setting Up Compute Resources
+
+For details on requesting CPU and memory, GPU memory fractions, and the GPU compute mode, see [Configure CPU and memory requests](../../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-cpu-and-memory-requests.md), [Request GPU memory fractions](../../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md), and [Configure GPU compute mode](../../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/configure-gpu-compute-mode.md).
 
 <Note>
 

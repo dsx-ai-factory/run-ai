@@ -1,6 +1,6 @@
 # Configure Workload-Based Placement
 
-Override the automatic topology-aware scheduling for a distributed workload. For how topology-aware scheduling works and how administrators configure it, refer to [Network topology-aware scheduling](../../../platform-management/aiinitiatives/resources/topology-aware-scheduling/README.md) and [Workload-based topology placement](../../../platform-management/aiinitiatives/resources/topology-aware-scheduling/workload-level-topology.md).
+Override the automatic topology-aware scheduling for a distributed workload. For how topology-aware scheduling works and how administrators configure it, refer to [Network topology-aware scheduling](../../../aiinitiatives/resources/topology-aware-scheduling/README.md) and [Workload-based topology placement](../../../aiinitiatives/resources/topology-aware-scheduling/workload-level-topology.md).
 
 ## Fine-tuning Topology-Aware Scheduling per Workload
 

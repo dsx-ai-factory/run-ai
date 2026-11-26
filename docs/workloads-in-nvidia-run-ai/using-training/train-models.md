@@ -18,7 +18,7 @@ To learn more about the training workload type in NVIDIA Run:ai and determine th
 ## Workload Priority and Preemption
 By default, training workloads are assigned a **Low** priority and are **preemptible**. These defaults allow training workloads to use opportunistic compute resources beyond the project’s deserved quota while being scheduled after higher-priority workloads. Preemptible training workloads may be interrupted if those resources are required by higher-priority, non-preemptible workloads.
 
-You can override the defaults by configuring priority and preemptibility. For more details, see [Workload priority and preemption](../../platform-management/runai-scheduler/scheduling/workload-priority-control.md). To set them on a workload, see [Configure priority and preemption](../optimize-workload-scheduling-and-placement/configure-priority-and-preemption.md).
+You can override the defaults by configuring priority and preemptibility. To set them on a workload, see [Configure priority and preemption](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-priority-and-preemption.md). For more details, see [Workload priority and preemption](../../platform-management/runai-scheduler/scheduling/workload-priority-control.md).
 
 ## Workload Policies
 
@@ -185,10 +185,10 @@ Manually configure the settings below as needed. The changes will apply to this 
 **Configure compute resources**
 
 1. Set the number of **GPU devices** per pod (physical GPUs).
-2. Enable **GPU fractioning** to set the GPU memory per device using either a fraction of a GPU device’s memory **(% of device)** or a GPU memory unit **(MB/GB)** (see [Request GPU memory fractions](../optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md)):
+2. Enable **GPU fractioning** to set the GPU memory per device using either a fraction of a GPU device’s memory **(% of device)** or a GPU memory unit **(MB/GB)** (see [Request GPU memory fractions](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md) and [Configure GPU compute mode](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/configure-gpu-compute-mode.md)):
    * **Request** - The minimum GPU memory allocated per device. Each pod in the workload receives at least this amount per device it uses.
    * **Limit** - The maximum GPU memory allocated per device. Each pod in the workload receives **at most** this amount of GPU memory for each device(s) the pod utilizes. This is disabled by default, to enable see the above note.
-3. Set the **CPU resources** (see [Configure CPU and memory requests](../optimize-workload-scheduling-and-placement/configure-cpu-and-memory-requests.md))
+3. Set the **CPU resources** (see [Configure CPU and memory requests](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-cpu-and-memory-requests.md))
    * Set **CPU compute resources** per pod by choosing the unit (**cores** or **millicores**):
      * **Request** - The minimum amount of CPU compute provisioned per pod. Each running pod receives this amount of CPU compute.
      * **Limit** - The maximum amount of CPU compute a pod can use. Each pod receives **at most** this amount of CPU compute. By default, the limit is set to **Auto** which means that the pod may consume up to the node's maximum available CPU compute resources.

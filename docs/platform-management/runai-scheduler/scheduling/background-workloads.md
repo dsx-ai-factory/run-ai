@@ -53,7 +53,7 @@ These settings mean the project is never entitled to resources of its own, but c
 
 ### Label the Workloads
 
-Add the `kai.scheduler/background` label to each background workload, and submit it under the project created for background workloads. For the label, the ways to set it, and the considerations for background workloads, refer to [Label a workload as background](../../../workloads-in-nvidia-run-ai/optimize-workload-scheduling-and-placement/label-a-workload-as-background.md).
+Add the `kai.scheduler/background` label to each background workload, and submit it under the project created for background workloads. For the label, the ways to set it, and the considerations for background workloads, refer to [Label a workload as background](../optimize-workload-scheduling-and-placement/label-a-workload-as-background.md).
 
 ## Deployment Considerations
 

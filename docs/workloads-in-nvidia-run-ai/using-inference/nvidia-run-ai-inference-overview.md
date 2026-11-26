@@ -35,6 +35,22 @@ NVIDIA Run:ai supports a wide range of workload types, from native workloads to 
 
 **End-to-end observability** - Provides unified access to resource utilization (GPU, CPU, network), inference metrics (throughput, latency, replica counts), and NIM-specific workload metrics (request concurrency, request counts, TTFT, latency percentiles, GPU KV-cache utilization) for comprehensive monitoring and analysis.
 
+## Optimize Scheduling and Placement
+
+Configure how NVIDIA Run:ai schedules an inference workload and which resources it receives:
+
+* [Configure priority and preemption](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-priority-and-preemption.md) - Override the default priority and preemptibility. Inference workloads are very high priority and non-preemptible by default.
+* [Configure CPU and memory requests](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-cpu-and-memory-requests.md) - Request CPU compute and memory for an inference workload, and set limits.
+* [Request GPU memory fractions](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md) and [Configure GPU compute mode](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/configure-gpu-compute-mode.md) - Share a GPU between workloads by requesting a portion of its memory and setting how workloads share its compute.
+
+For distributed inference workloads, you can also control where the pods run:
+
+* [Configure workload-based placement](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/workload-placement/configure-workload-based-placement.md) - Override the topology-aware scheduling of the leader and worker pods.
+* [Configure GB200 NVL72 placement](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/workload-placement/configure-gb200-nvl72-placement.md) - Set the placement and the Multi-Node NVLink behavior in GB200 NVL72 node pools.
+* [Enabling Spectrum-X networking](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/spectrum-x-networking.md) - Attach Spectrum-X networks to the workload.
+
+For all workload-level scheduling and placement pages, see [Optimize workload scheduling and placement](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/README.md).
+
 ## Workload Support and Framework Compatibility
 
 ### Native Inference Workloads

@@ -19,7 +19,7 @@ To learn more about the inference workload type in NVIDIA Run:ai and determine t
 ## Workload Priority and Preemption
 By default, inference workloads in NVIDIA Run:ai are assigned a **Very high** priority and are **non-preemptible**. These defaults ensures that inference workloads, which often serve real-time or latency-sensitive traffic, are guaranteed the resources they need. The default very-high priority ensures the fastest possible scheduling, and the default non-preemptible value guarantees that the workload will not be disrupted by other workloads once it starts running.
 
-You can override the defaults by configuring priority and preemptibility. For more details, see [Workload priority and preemption](../../platform-management/runai-scheduler/scheduling/workload-priority-control.md). To set them on a workload, see [Configure priority and preemption](../optimize-workload-scheduling-and-placement/configure-priority-and-preemption.md).
+You can override the defaults by configuring priority and preemptibility. To set them on a workload, see [Configure priority and preemption](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-priority-and-preemption.md). For more details, see [Workload priority and preemption](../../platform-management/runai-scheduler/scheduling/workload-priority-control.md).
 
 ## Stale Gang Eviction
 
@@ -147,10 +147,10 @@ Manually configure the settings below as needed. The changes will apply to this 
 
 1. Set the number of workers for each replica. This setting is only available in the **Workers** step.
 2. Set the number of **GPU devices** per pod (physical GPUs).
-3. Enable **GPU fractioning** to set the GPU memory per device using either a fraction of a GPU device’s memory **(% of device)** or a GPU memory unit **(MB/GB)** (see [Request GPU memory fractions](../optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md)):
+3. Enable **GPU fractioning** to set the GPU memory per device using either a fraction of a GPU device’s memory **(% of device)** or a GPU memory unit **(MB/GB)** (see [Request GPU memory fractions](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md) and [Configure GPU compute mode](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/configure-gpu-compute-mode.md)):
    * **Request** - The minimum GPU memory allocated per device. Each pod in the workload receives at least this amount per device it uses.
    * **Limit** - The maximum GPU memory allocated per device. Each pod in the workload receives **at most** this amount of GPU memory for each device(s) the pod utilizes. This is disabled by default, to enable see the above note.
-4. Set the **CPU resources** (see [Configure CPU and memory requests](../optimize-workload-scheduling-and-placement/configure-cpu-and-memory-requests.md))
+4. Set the **CPU resources** (see [Configure CPU and memory requests](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-cpu-and-memory-requests.md))
    * Set **CPU compute resources** per pod by choosing the unit (**cores** or **millicores**):
      * **Request** - The minimum amount of CPU compute provisioned per pod. Each running pod receives this amount of CPU compute.
      * **Limit** - The maximum amount of CPU compute a pod can use. Each pod receives **at most** this amount of CPU compute. By default, the limit is set to **Auto** which means that the pod may consume up to the node's maximum available CPU compute resources.
@@ -170,7 +170,7 @@ Manually configure the settings below as needed. The changes will apply to this 
 8. Click **+TOLERATION** to allow the workload to be scheduled on a node with a matching taint. Select the **operator** and the **effect**:
    * If you select **Exists**, the effect will be applied if the key exists on the node.
    * If you select **Equals,** the effect will be applied if the key and the value set match the value on the node.
-9. Click **+TOPOLOGY** to let the workload be scheduled on nodes with a matching topology - same region, zone, placement group or any other topology you define. For more information, see [Configure workload-based placement](../optimize-workload-scheduling-and-placement/workload-placement/configure-workload-based-placement.md).
+9. Click **+TOPOLOGY** to let the workload be scheduled on nodes with a matching topology - same region, zone, placement group or any other topology you define. For more information, see [Configure workload-based placement](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/workload-placement/configure-workload-based-placement.md). For GB200 NVL72 node pools, see [Configure GB200 NVL72 placement](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/workload-placement/configure-gb200-nvl72-placement.md). To use Spectrum-X networking, see [Enabling Spectrum-X networking](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/spectrum-x-networking.md).
 
 ### Setting Up Data & Storage
 

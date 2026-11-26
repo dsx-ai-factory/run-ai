@@ -1,10 +1,10 @@
 # Configure GB200 NVL72 Placement
 
-Influence how the Scheduler places a distributed workload in a GB200 NVL72 node pool, and set the MNNVL behavior for each workload. For the prerequisites and how the platform configures MNNVL domains, refer to [Using GB200 NVL72 and Multi-Node NVLink Domains](../../../platform-management/aiinitiatives/resources/using-gb200.md).
+Influence how the Scheduler places a distributed workload in a GB200 NVL72 node pool, and set the MNNVL behavior for each workload. For the prerequisites and how the platform configures MNNVL domains, refer to [Using GB200 NVL72 and Multi-Node NVLink Domains](../../../aiinitiatives/resources/using-gb200.md).
 
 ## Fine-Tuning Distributed Workload Constraints
 
-You can influence how the Scheduler places distributed workloads into GB200 MNNVL node pools using the **Topology** field available in the [distributed training](../../using-training/distributed-training-models.md) and [distributed inference](../../using-inference/distributed-inference.md) workload submission forms.
+You can influence how the Scheduler places distributed workloads into GB200 MNNVL node pools using the **Topology** field available in the [distributed training](../../../../workloads-in-nvidia-run-ai/using-training/distributed-training-models.md) and [distributed inference](../../../../workloads-in-nvidia-run-ai/using-inference/distributed-inference.md) workload submission forms.
 
 <Note>
 
@@ -20,7 +20,7 @@ The following options are based on [inter-pod affinity rules](https://kubernetes
 
 ## Fine-tuning MNNVL per Workload
 
-You can customize how the NVIDIA Run:ai platform applies the MNNVL feature to each distributed workload. This allows you to override the default behavior when needed. To configure this behavior, set the proprietary label key `run.ai/MNNVL` in the **General settings** section of the [distributed training](../../using-training/distributed-training-models.md) and [distributed inference](../../using-inference/distributed-inference.md) workload submission forms. The following values are supported:
+You can customize how the NVIDIA Run:ai platform applies the MNNVL feature to each distributed workload. This allows you to override the default behavior when needed. To configure this behavior, set the proprietary label key `run.ai/MNNVL` in the **General settings** section of the [distributed training](../../../../workloads-in-nvidia-run-ai/using-training/distributed-training-models.md) and [distributed inference](../../../../workloads-in-nvidia-run-ai/using-inference/distributed-inference.md) workload submission forms. The following values are supported:
 
 * **None** - Disables the MNNVL feature for the workload. The platform does not create a ComputeDomain and no pod affinity or node affinity is applied by default.
 * **Preferred** (default) _-_ Indicates that MNNVL feature is preferred but not required. This is the default behavior when submitting a distributed workload:

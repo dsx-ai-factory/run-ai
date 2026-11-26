@@ -1,26 +1,26 @@
 # Request GPU Memory Fractions
 
-Request a portion of GPU memory, or an absolute amount of GPU memory, for a workload, with or without a memory Limit. For how GPU memory fractions work and their prerequisites, refer to [GPU memory fractions](../../../platform-management/runai-scheduler/resource-optimization/memory-fractions.md) and [dynamic GPU memory fractions](../../../platform-management/runai-scheduler/resource-optimization/dynamic-memory-fractions.md).
+Request a portion of GPU memory, or an absolute amount of GPU memory, for a workload, with or without a memory Limit. For how GPU memory fractions work and their prerequisites, refer to [GPU memory fractions](../../resource-optimization/memory-fractions.md) and [dynamic GPU memory fractions](../../resource-optimization/dynamic-memory-fractions.md).
 
 ## GPU Memory Fractions
 
 ### Setting GPU Memory Fractions
 
 
-Using the [compute resources](../../workload-assets/compute-resources.md) asset, you can define the compute requirements by specifying your requested GPU portion or GPU memory, and use it with [NVIDIA Run:ai native workloads](../../workload-types/workload-types.md) for single-GPU and multi-GPU memory fractions.
+Using the [compute resources](../../../../workloads-in-nvidia-run-ai/workload-assets/compute-resources.md) asset, you can define the compute requirements by specifying your requested GPU portion or GPU memory, and use it with [NVIDIA Run:ai native workloads](../../../../workloads-in-nvidia-run-ai/workload-types/workload-types.md) for single-GPU and multi-GPU memory fractions.
 
 * **Single-GPU memory fractions** - Define the compute requirement to run 1 GPU device, by specifying either a fraction (percentage) of the overall memory or a memory request (GB, MB).
 * **Multi-GPU memory fractions** - Define the compute requirement to run multiple GPU devices, by specifying either a fraction (percentage) of the overall memory or a memory request (GB, MB).
 
 ### Setting GPU Memory Fractions via YAML
 
-This method applies to [supported workload types](../../supported-workload-types/list-of-supported-workload-types.md) and to [workloads submitted externally](../../workload-types/supported-features.md#externally-submitted-kubernetes-workloads), outside of NVIDIA Run:ai. To enable GPU memory fractions for workloads submitted via Kubernetes YAML, use the annotations described below.
+This method applies to [supported workload types](../../../../workloads-in-nvidia-run-ai/supported-workload-types/list-of-supported-workload-types.md) and to [workloads submitted externally](../../../../workloads-in-nvidia-run-ai/workload-types/supported-features.md#externally-submitted-kubernetes-workloads), outside of NVIDIA Run:ai. To enable GPU memory fractions for workloads submitted via Kubernetes YAML, use the annotations described below.
 
 <Note>
 
 **Note**
 
-Make sure the [default scheduler](../../../platform-management/runai-scheduler/scheduling/default-scheduler.md) is set to `runai-scheduler`.
+Make sure the [default scheduler](../../scheduling/default-scheduler.md) is set to `runai-scheduler`.
 
 </Note>
 
@@ -49,8 +49,8 @@ GPU memory fractions can be assigned to only one container in the pod. An annota
 
 **Note**
 
-* To set how a workload shares GPU compute, refer to the annotations described in [GPU compute modes](../../../platform-management/runai-scheduler/resource-optimization/compute-modes.md).
-* Dynamic GPU memory fractions add a memory limit to the request. Refer to [dynamic GPU memory fractions](../../../platform-management/runai-scheduler/resource-optimization/dynamic-memory-fractions.md) for those annotations.
+* To set how a workload shares GPU compute, refer to the annotations described in [GPU compute modes](../../resource-optimization/compute-modes.md).
+* Dynamic GPU memory fractions add a memory limit to the request. Refer to [dynamic GPU memory fractions](../../resource-optimization/dynamic-memory-fractions.md) for those annotations.
 
 </Note>
 
@@ -138,7 +138,7 @@ GPU memory fractions can be assigned to only one container in the pod. An annota
 ### Setting Dynamic GPU Memory Fractions
 
 
-Using the [compute resources](../../workload-assets/compute-resources.md) asset, you can define the compute requirements by specifying your requested GPU memory portion or GPU memory size, and set a Limit. You can then use the compute resource with [NVIDIA Run:ai native workloads](../../workload-types/workload-types.md) for single-GPU and multi-GPU dynamic memory fractions. In addition, you can view the workloads' utilization compared to Request and Limit parameters in the [metrics pane for each workload](../../workloads.md).
+Using the [compute resources](../../../../workloads-in-nvidia-run-ai/workload-assets/compute-resources.md) asset, you can define the compute requirements by specifying your requested GPU memory portion or GPU memory size, and set a Limit. You can then use the compute resource with [NVIDIA Run:ai native workloads](../../../../workloads-in-nvidia-run-ai/workload-types/workload-types.md) for single-GPU and multi-GPU dynamic memory fractions. In addition, you can view the workloads' utilization compared to Request and Limit parameters in the [metrics pane for each workload](../../../../workloads-in-nvidia-run-ai/workloads.md).
 
 * **Single-GPU dynamic memory fractions** - Define the compute requirement to run 1 GPU device, by specifying either a portion (percentage) of the overall memory or a memory request (GB, MB) with a Limit.
 * **Multi-GPU dynamic memory fractions** - Define the compute requirement to run multiple GPU devices, by specifying either a portion (percentage) of the overall memory or a memory request (GB, MB) with a Limit.
@@ -155,13 +155,13 @@ The setting does not apply to supported workload types submitted via YAML or to 
 
 ### Setting Dynamic GPU Memory Fractions via YAML
 
-This method applies to [supported workload types](../../supported-workload-types/list-of-supported-workload-types.md) and to [workloads submitted externally](../../workload-types/supported-features.md#externally-submitted-kubernetes-workloads), outside of NVIDIA Run:ai. To enable dynamic GPU memory fractions for workloads submitted via Kubernetes YAML, use the annotations described below.
+This method applies to [supported workload types](../../../../workloads-in-nvidia-run-ai/supported-workload-types/list-of-supported-workload-types.md) and to [workloads submitted externally](../../../../workloads-in-nvidia-run-ai/workload-types/supported-features.md#externally-submitted-kubernetes-workloads), outside of NVIDIA Run:ai. To enable dynamic GPU memory fractions for workloads submitted via Kubernetes YAML, use the annotations described below.
 
 <Note>
 
 **Note**
 
-Make sure the [default scheduler](../../../platform-management/runai-scheduler/scheduling/default-scheduler.md) is set to `runai-scheduler`.
+Make sure the [default scheduler](../../scheduling/default-scheduler.md) is set to `runai-scheduler`.
 
 </Note>
 
@@ -195,7 +195,7 @@ A dynamic GPU memory fraction can be assigned to only one container in the pod. 
 **Note**
 
 * The Limit does not affect the Scheduler. The Scheduler places the workload according to its Request. The Limit governs only how far the workload can then grow at runtime.
-* To set how a workload shares GPU compute, refer to the annotations described in [GPU compute modes](../../../platform-management/runai-scheduler/resource-optimization/compute-modes.md).
+* To set how a workload shares GPU compute, refer to the annotations described in [GPU compute modes](../../resource-optimization/compute-modes.md).
 
 </Note>
 

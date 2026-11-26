@@ -42,11 +42,11 @@ Some supported workload types require additional installation or cluster prepara
 </Note>
 
 ## Workload Priority and Preemption
-By default, supported workload types are assigned a priority and preemptibility based on their workload type. These defaults determine how workloads are scheduled relative to others within the same project, whether they can use over-quota resources, and whether they may be interrupted once running. You can override the defaults by configuring priority and preemptibility. For more details on the default values per workload type, see [Workload types default](supported-workload-types/list-of-supported-workload-types.md#workload-types-and-defaults).
+By default, supported workload types are assigned a priority and preemptibility based on their workload type. These defaults determine how workloads are scheduled relative to others within the same project, whether they can use over-quota resources, and whether they may be interrupted once running. You can override the defaults by configuring priority and preemptibility. For more details on the default values per workload type, see [Workload types default](supported-workload-types/list-of-supported-workload-types.md#workload-types-and-defaults). To set the priority and preemptibility of a workload, see [Configure priority and preemption](../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-priority-and-preemption.md).
 
 ## Setting GPU Fractions
 
-To enable GPU fractions for workloads submitted via YAML, use the following annotations to define the GPU fraction configuration. You can configure `gpu-fraction`, `gpu-memory`, or the NVIDIA-native `nvidia.com/container.<container-name>.gpu-memory.request` alternative. For concept details, deployment considerations, and a full example, see [GPU Fractions](optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md#setting-gpu-memory-fractions-via-yaml).
+To enable GPU fractions for workloads submitted via YAML, use the following annotations to define the GPU fraction configuration. You can configure `gpu-fraction`, `gpu-memory`, or the NVIDIA-native `nvidia.com/container.<container-name>.gpu-memory.request` alternative. For concept details, deployment considerations, and a full example, see [GPU Fractions](../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md#setting-gpu-memory-fractions-via-yaml). To set the GPU compute mode, see [Configure GPU compute mode](../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/configure-gpu-compute-mode.md).
 
 GPU fractions can be assigned to only one container in the pod. By default, GPU fraction allocation is applied to the first container (index 0) in the pod. Set the `gpu-fraction-container-name` annotation to specify which container should consume the fractional GPU resources. The specified container can be the main container, a sidecar, or an init container, any container other than the default first container.
 
@@ -114,7 +114,7 @@ The value is a duration string, a number followed by a unit (`s`, `m`, or `h`), 
     * **Not required** - The workload will not use MNNVL acceleration, even if MNNVL-capable nodes are available.
     * **Required** - The workload will require MNNVL-capable nodes. Scheduling may be restricted to compatible nodes, and if none are available, the workload may remain pending.
 
-    For more information, see [Using GB200 NVL72 and Multi-Node NVLink Domains](../platform-management/aiinitiatives/resources/using-gb200.md).
+    For more information, see [Configure GB200 NVL72 placement](../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/workload-placement/configure-gb200-nvl72-placement.md) and [Using GB200 NVL72 and Multi-Node NVLink Domains](../platform-management/aiinitiatives/resources/using-gb200.md).
 9. Click **CREATE WORKLOAD**
 
 ## Managing and Monitoring

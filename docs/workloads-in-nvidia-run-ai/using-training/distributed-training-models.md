@@ -26,7 +26,7 @@ Multi-GPU training and distributed training are two distinct concepts. Multi-GPU
 ## Workload Priority and Preemption
 By default, training workloads are assigned a **Low** priority and are **preemptible**. These defaults allow training workloads to use opportunistic compute resources beyond the project’s deserved quota while being scheduled after higher-priority workloads. Preemptible training workloads may be interrupted if those resources are required by higher-priority, non-preemptible workloads.
 
-You can override the defaults by configuring priority and preemptibility. For more details, see [Workload priority and preemption](../../platform-management/runai-scheduler/scheduling/workload-priority-control.md). To set them on a workload, see [Configure priority and preemption](../optimize-workload-scheduling-and-placement/configure-priority-and-preemption.md).
+You can override the defaults by configuring priority and preemptibility. To set them on a workload, see [Configure priority and preemption](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-priority-and-preemption.md). For more details, see [Workload priority and preemption](../../platform-management/runai-scheduler/scheduling/workload-priority-control.md).
 
 ## Stale Gang Eviction
 
@@ -204,18 +204,18 @@ Manually configure the settings below as needed. The changes will apply to this 
 **Configure compute resources**
 
 1. Set the number of **GPU devices** per pod (physical GPUs).
-2. Enable **GPU fractioning** to set the GPU memory per device using either a fraction of a GPU device’s memory **(% of device)** or a GPU memory unit **(MB/GB)** (see [Request GPU memory fractions](../optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md)):
+2. Enable **GPU fractioning** to set the GPU memory per device using either a fraction of a GPU device’s memory **(% of device)** or a GPU memory unit **(MB/GB)** (see [Request GPU memory fractions](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md) and [Configure GPU compute mode](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/configure-gpu-compute-mode.md)):
    * **Request** - The minimum GPU memory allocated per device. Each pod in the workload receives at least this amount per device it uses.
    * **Limit** - The maximum GPU memory allocated per device. Each pod in the workload receives **at most** this amount of GPU memory for each device(s) the pod utilizes. This is disabled by default, to enable see the above note.
 3. Set the number of workers for your workload.
-4. Set the number of **workers per segment** (PyTorch only). Workers in the same segment are placed as close as possible. Enter a positive integer to match your application's parallel segment size, or leave it blank to disable segmentation. For more information, see [Segment-Level Placement](../../platform-management/aiinitiatives/resources/topology-aware-scheduling/segment-based-topology-placement.md) and [Configure segment-based placement](../optimize-workload-scheduling-and-placement/workload-placement/configure-segment-based-placement.md).
+4. Set the number of **workers per segment** (PyTorch only). Workers in the same segment are placed as close as possible. Enter a positive integer to match your application's parallel segment size, or leave it blank to disable segmentation. For more information, see [Segment-Level Placement](../../platform-management/aiinitiatives/resources/topology-aware-scheduling/segment-based-topology-placement.md) and [Configure segment-based placement](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/workload-placement/configure-segment-based-placement.md).
 5. Configure worker elasticity (PyTorch only). Define the **minimum** and **maximum** number of workers your workload can scale between:
 
     * **Minimum** - Enter a value greater than 0, up to the number of workers.
     * **Maximum** - Enter a value equal to or greater than the total number of workers, up to 10,000.
 
     The workload can use more or fewer workers within this range based on available resources. If the number of active workers falls below the defined minimum, the workload will stop or remain pending until resources become available.
-6. Set the **CPU resources** (see [Configure CPU and memory requests](../optimize-workload-scheduling-and-placement/configure-cpu-and-memory-requests.md))
+6. Set the **CPU resources** (see [Configure CPU and memory requests](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-cpu-and-memory-requests.md))
    * Set **CPU compute resources** per pod by choosing the unit (**cores** or **millicores**):
      * **Request** - The minimum amount of CPU compute provisioned per pod. Each running pod receives this amount of CPU compute.
      * **Limit** - The maximum amount of CPU compute a pod can use. Each pod receives **at most** this amount of CPU compute. By default, the limit is set to **Auto** which means that the pod may consume up to the node's maximum available CPU compute resources.
@@ -232,7 +232,7 @@ Manually configure the settings below as needed. The changes will apply to this 
 10. Click **+TOLERATION** to allow the workspace to be scheduled on a node with a matching taint. Select the **operator** and the **effect**:
    * If you select **Exists**, the effect will be applied if the key exists on the node.
    * If you select **Equals**, the effect will be applied if the key and the value set match the value on the node.
-11. Click **+TOPOLOGY** to let the workload be scheduled on nodes with a matching topology - same region, zone, placement group or any other topology you define. For more information, see [Configure workload-based placement](../optimize-workload-scheduling-and-placement/workload-placement/configure-workload-based-placement.md).
+11. Click **+TOPOLOGY** to let the workload be scheduled on nodes with a matching topology - same region, zone, placement group or any other topology you define. For more information, see [Configure workload-based placement](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/workload-placement/configure-workload-based-placement.md). For GB200 NVL72 node pools, see [Configure GB200 NVL72 placement](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/workload-placement/configure-gb200-nvl72-placement.md). To use Spectrum-X networking, see [Enabling Spectrum-X networking](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/spectrum-x-networking.md).
 
 </Tab>
 
@@ -248,7 +248,7 @@ Manually configure the settings below as needed. The changes will apply to this 
 5. Optional: Click **+TOLERATION** to allow the workload to be scheduled on a node with a matching taint. Select the **operator** and the **effect.**
    * If you select **Exists**, the effect will be applied if the key exists on the node.
    * If you select **Equals,** the effect will be applied if the key and the value set match the value on the node.
-6. Click **+TOPOLOGY** to let the workload be scheduled on nodes with a matching topology - same region, zone, placement group or any other topology you define. For more information, see [Configure workload-based placement](../optimize-workload-scheduling-and-placement/workload-placement/configure-workload-based-placement.md).
+6. Click **+TOPOLOGY** to let the workload be scheduled on nodes with a matching topology - same region, zone, placement group or any other topology you define. For more information, see [Configure workload-based placement](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/workload-placement/configure-workload-based-placement.md). For GB200 NVL72 node pools, see [Configure GB200 NVL72 placement](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/workload-placement/configure-gb200-nvl72-placement.md). To use Spectrum-X networking, see [Enabling Spectrum-X networking](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/spectrum-x-networking.md).
 
 </Tab>
 

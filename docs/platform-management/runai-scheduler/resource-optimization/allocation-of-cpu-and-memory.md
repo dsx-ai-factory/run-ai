@@ -25,7 +25,7 @@ If your workload temporarily uses more memory than requested and new workloads a
 
 ## Requesting and Limiting CPU Compute and Memory in Workloads
 
-When you submit a workload or create a compute resource, you can request CPU compute and memory and set limits. For the steps, refer to [Configure CPU and memory requests](../../../workloads-in-nvidia-run-ai/optimize-workload-scheduling-and-placement/configure-cpu-and-memory-requests.md).
+When you submit a workload or create a compute resource, you can request CPU compute and memory and set limits. For the steps, refer to [Configure CPU and memory requests](../optimize-workload-scheduling-and-placement/configure-cpu-and-memory-requests.md).
 
 ## Cluster Default Resource Settings
 

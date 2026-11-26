@@ -21,6 +21,19 @@ Feature availability differs by workload type. For a breakdown of the capabiliti
 * **Submission with YAML** - Submit a Kubernetes YAML manifest from the NVIDIA Run:ai UI, or submit it outside of NVIDIA Run:ai, for example with `kubectl`.
 * **Extensibility with Karta** - Administrators register new workload types by defining how NVIDIA Run:ai interprets the workload structure, maps its status for monitoring, and applies optimization instructions such as gang scheduling.
 
+## Optimize Scheduling and Placement
+
+Supported workload types are configured in the YAML manifest. The following pages describe the fields and annotations that apply:
+
+* [Configure priority and preemption](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-priority-and-preemption.md) - Override the default priority and preemptibility of the workload type.
+* [Request GPU memory fractions](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md) and [Configure GPU compute mode](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/configure-gpu-compute-mode.md) - Request a portion of GPU memory and set how workloads share GPU compute.
+* [Configure workload-based placement](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/workload-placement/configure-workload-based-placement.md) - Override the topology-aware scheduling of a distributed workload.
+* [Configure segment-based placement](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/workload-placement/configure-segment-based-placement.md) - Group workers into segments that are placed together. Supported for PyTorchJob and LeaderWorkerSet.
+* [Configure GB200 NVL72 placement](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/workload-placement/configure-gb200-nvl72-placement.md) - Set the placement and the Multi-Node NVLink behavior in GB200 NVL72 node pools.
+* [Enabling Spectrum-X networking](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/spectrum-x-networking.md) - Attach Spectrum-X networks to the workload.
+
+For all workload-level scheduling and placement pages, see [Optimize workload scheduling and placement](../../platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/README.md).
+
 ## Getting Started
 
 To learn about the supported workload types and their defaults, refer to [Supported workload types](list-of-supported-workload-types.md).

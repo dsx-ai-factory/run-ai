@@ -1,6 +1,6 @@
 # Configure Segment-Based Placement
 
-Divide the workers of a distributed workload into segments and set the topology constraint for each segment. For how segment-based placement works, refer to [Segment-based topology placement](../../../platform-management/aiinitiatives/resources/topology-aware-scheduling/segment-based-topology-placement.md).
+Divide the workers of a distributed workload into segments and set the topology constraint for each segment. For how segment-based placement works, refer to [Segment-based topology placement](../../../aiinitiatives/resources/topology-aware-scheduling/segment-based-topology-placement.md).
 
 ## Fine-tuning Topology-Aware Scheduling per Segment
 
@@ -13,7 +13,7 @@ Use the following annotations to define segment-based topology constraints:
 
 **How to apply these annotations:**
 
-* **Native distributed training workloads** - Supported for the PyTorch framework only. Set the number of workers per segment when submitting the [distributed training workload](../../using-training/distributed-training-models.md).
+* **Native distributed training workloads** - Supported for the PyTorch framework only. Set the number of workers per segment when submitting the [distributed training workload](../../../../workloads-in-nvidia-run-ai/using-training/distributed-training-models.md).
 * **Supported workload types submitted via YAML** - Supported for PyTorchJob and LeaderWorkerSet (LWS). Add the annotations above to the `Worker` template (PyTorchJob) or the `workerTemplate` (LeaderWorkerSet).
 * **Workloads submitted via `kubectl`** - Topology-aware scheduling is not applied automatically by NVIDIA Run:ai for workloads submitted this way. Add the same annotations directly to the `Worker` template (PyTorchJob) or `workerTemplate` (LeaderWorkerSet) in the workload manifest to ensure the Scheduler respects the desired segment-based placement.
 
@@ -49,7 +49,7 @@ spec:
 
 ## Combining Workload-Based and Segment-Based Placement
 
-Workload-based and segment-based placement are not mutually exclusive - you can apply both to the same workload. A common pattern is to enforce a broader [workload-based](../../../platform-management/aiinitiatives/resources/topology-aware-scheduling/workload-level-topology.md) constraint that keeps the entire workload within one topology level (for example, a zone), while a tighter segment-based constraint co-locates each segment within a more specific level (for example, a rack) inside that zone.
+Workload-based and segment-based placement are not mutually exclusive - you can apply both to the same workload. A common pattern is to enforce a broader [workload-based](../../../aiinitiatives/resources/topology-aware-scheduling/workload-level-topology.md) constraint that keeps the entire workload within one topology level (for example, a zone), while a tighter segment-based constraint co-locates each segment within a more specific level (for example, a rack) inside that zone.
 
 For example:
 

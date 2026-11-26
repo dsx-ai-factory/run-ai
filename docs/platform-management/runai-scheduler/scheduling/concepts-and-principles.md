@@ -6,6 +6,8 @@ The Scheduler is platform-agnostic, supporting native Kubernetes workloads, NVID
 
 To better understand the logic driving these allocation decisions, get to know the key concepts, resource management and scheduling principles of the Scheduler.
 
+To apply these capabilities to an individual workload, see [Optimize workload scheduling and placement](../optimize-workload-scheduling-and-placement/README.md).
+
 ## Workloads, Pod Groups and Sub Groups
 
 ### Workloads and Pod Groups

@@ -1,6 +1,6 @@
 # Configure Priority and Preemption
 
-Set the priority and preemptibility of a workload when you submit it. For how priority and preemptibility work, the defaults for each workload type, and how administrators change the defaults, refer to [Workload priority and preemption](../../platform-management/runai-scheduler/scheduling/workload-priority-control.md).
+Set the priority and preemptibility of a workload when you submit it. For how priority and preemptibility work, the defaults for each workload type, and how administrators change the defaults, refer to [Workload priority and preemption](../scheduling/workload-priority-control.md).
 
 ## Setting Priority and Preemptibility During Workload Submission
 
@@ -31,7 +31,7 @@ If priority or preemptibility is set through the UI, API, or CLI, those values o
 
 </Note>
 
-For [supported workload types](../supported-workload-types/list-of-supported-workload-types.md) submitted with a YAML manifest, priority and preemptibility can be set as follows:
+For [supported workload types](../../../workloads-in-nvidia-run-ai/supported-workload-types/list-of-supported-workload-types.md) submitted with a YAML manifest, priority and preemptibility can be set as follows:
 
 * **UI** - Set workload priority and preemptibility under **General** settings
 * **API** - Set using the `priority` and `preemptibility` fields

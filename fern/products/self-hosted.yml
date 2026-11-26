@@ -370,6 +370,36 @@ navigation:
       - page: Configuring NUMA-Aware Scheduling
         slug: numa-aware-scheduling
         path: ../../docs/platform-management/aiinitiatives/resources/numa-aware-scheduling.md
+    - section: Optimize Workload Scheduling and Placement
+      slug: optimize-workload-scheduling-and-placement
+      path: ../../docs/platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/README.md
+      contents:
+      - page: Configure Priority and Preemption
+        path: ../../docs/platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-priority-and-preemption.md
+      - page: Label a Workload as Background
+        path: ../../docs/platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/label-a-workload-as-background.md
+      - page: Configure CPU and Memory Requests
+        path: ../../docs/platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/configure-cpu-and-memory-requests.md
+      - section: GPU Sharing
+        slug: gpu-sharing
+        contents:
+        - page: Request GPU Memory Fractions
+          path: ../../docs/platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md
+        - page: Configure GPU Compute Mode
+          path: ../../docs/platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/gpu-sharing/configure-gpu-compute-mode.md
+      - section: Workload Placement
+        slug: workload-placement
+        contents:
+        - page: Configure GB200 NVL72 Placement
+          slug: configure-gb200-nvl72-placement
+          path: ../../docs/platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/workload-placement/configure-gb200-nvl72-placement.md
+        - page: Configure Workload-Based Placement
+          path: ../../docs/platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/workload-placement/configure-workload-based-placement.md
+        - page: Configure Segment-Based Placement
+          path: ../../docs/platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/workload-placement/configure-segment-based-placement.md
+      - page: Enabling Spectrum-X Networking for NVIDIA Run:ai Workloads
+        slug: spectrum-x-networking
+        path: ../../docs/platform-management/runai-scheduler/optimize-workload-scheduling-and-placement/spectrum-x-networking.md
   - section: Workloads in NVIDIA Run:ai
     slug: workloads-in-nvidia-run-ai
     contents:
@@ -568,35 +598,6 @@ navigation:
         - page: RAG Blueprint Deployment from NGC Catalog
           slug: rag-blueprint-deployment
           path: ../../docs/workloads-in-nvidia-run-ai/tutorials/blueprint-tutorials/rag-blueprint-deployment.md
-    - section: Optimize Workload Scheduling and Placement
-      slug: optimize-workload-scheduling-and-placement
-      contents:
-      - page: Configure Priority and Preemption
-        path: ../../docs/workloads-in-nvidia-run-ai/optimize-workload-scheduling-and-placement/configure-priority-and-preemption.md
-      - page: Label a Workload as Background
-        path: ../../docs/workloads-in-nvidia-run-ai/optimize-workload-scheduling-and-placement/label-a-workload-as-background.md
-      - page: Configure CPU and Memory Requests
-        path: ../../docs/workloads-in-nvidia-run-ai/optimize-workload-scheduling-and-placement/configure-cpu-and-memory-requests.md
-      - section: GPU Sharing
-        slug: gpu-sharing
-        contents:
-        - page: Request GPU Memory Fractions
-          path: ../../docs/workloads-in-nvidia-run-ai/optimize-workload-scheduling-and-placement/gpu-sharing/request-gpu-memory-fractions.md
-        - page: Configure GPU Compute Mode
-          path: ../../docs/workloads-in-nvidia-run-ai/optimize-workload-scheduling-and-placement/gpu-sharing/configure-gpu-compute-mode.md
-      - section: Workload Placement
-        slug: workload-placement
-        contents:
-        - page: Configure GB200 NVL72 Placement
-          slug: configure-gb200-nvl72-placement
-          path: ../../docs/workloads-in-nvidia-run-ai/optimize-workload-scheduling-and-placement/workload-placement/configure-gb200-nvl72-placement.md
-        - page: Configure Workload-Based Placement
-          path: ../../docs/workloads-in-nvidia-run-ai/optimize-workload-scheduling-and-placement/workload-placement/configure-workload-based-placement.md
-        - page: Configure Segment-Based Placement
-          path: ../../docs/workloads-in-nvidia-run-ai/optimize-workload-scheduling-and-placement/workload-placement/configure-segment-based-placement.md
-      - page: Enabling Spectrum-X Networking for NVIDIA Run:ai Workloads
-        slug: spectrum-x-networking
-        path: ../../docs/workloads-in-nvidia-run-ai/optimize-workload-scheduling-and-placement/spectrum-x-networking.md
   - section: Agents
     contents:
     - page: Overview
