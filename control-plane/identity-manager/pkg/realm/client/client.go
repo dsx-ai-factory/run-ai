@@ -49,12 +49,6 @@ func NewAdminUiClient(realm, tenantId, appHost, hostTemplate string) Client {
 	})
 }
 
-func NewRunaiCliClient(realm, tenantId, appHost, hostTemplate string) Client {
-	return newProfileClient(ClientTypeRunaiCLI, ClientParams{
-		Realm: realm, TenantId: tenantId, AppHost: appHost, HostTemplate: hostTemplate,
-	})
-}
-
 func NewCLIClient(realm, tenantId, appHost, hostTemplate string) Client {
 	return newProfileClient(ClientTypeCLI, ClientParams{
 		Realm: realm, TenantId: tenantId, AppHost: appHost, HostTemplate: hostTemplate,
