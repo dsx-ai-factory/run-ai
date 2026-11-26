@@ -638,7 +638,7 @@ func validateChangeOfPvcSize(ctx context.Context, id string, meta *dbmodel.Asset
 	}
 
 	if toSize.Value() < fromSize.Value() {
-		return api.NewValidationError(fmt.Sprintf("requested size (%s) must be no less than the originakl requested size (%s) of the PVC", toSizeAsStr, fromSizeAsStr))
+		return api.NewValidationError(fmt.Sprintf("requested size (%s) must be no less than the originally requested size (%s) of the PVC", toSizeAsStr, fromSizeAsStr))
 	}
 
 	//
@@ -684,10 +684,10 @@ func validateChangeOfPvcSize(ctx context.Context, id string, meta *dbmodel.Asset
 
 		reqCapacity, convErr := resource.ParseQuantity(reqCapacityStr)
 		if convErr != nil {
-			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("invalid requested capqcity size %s", reqCapacityStr)
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("invalid requested capacity size %s", reqCapacityStr)
 		} else {
 			if toSize.Value() < reqCapacity.Value() {
-				return api.NewValidationError(fmt.Sprintf("requested size (%s) must be no less than the effective requested capacity (%s) of the PVC", reqCapacityStr, toSizeAsStr))
+				return api.NewValidationError(fmt.Sprintf("requested size (%s) must be no less than the effective requested capacity (%s) of the PVC", toSizeAsStr, reqCapacityStr))
 			}
 		}
 	}
