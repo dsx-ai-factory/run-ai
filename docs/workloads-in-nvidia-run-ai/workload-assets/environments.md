@@ -108,7 +108,10 @@ To add a new environment:
 6. Optional: Provide a **description** of the essence of the environment
 7. Set the **environment image**:
    * Select **Custom image** and enter the **Image URL**. If a token or secret is required to pull the image, it is possible to create it via [user credentials](../../settings/user-settings/user-credentials.md) of type docker registry. These credentials are automatically used once the image is pulled (which happens when the workload is submitted)
-   * **Select from the NGC catalog** and choose the **image name** and **tag** from the dropdown.
+   * **Select from the NGC catalog**, select an NGC API key credential, and then choose the **image name** and **tag** from the dropdown:
+     * Under **Source**, select [**Shared secret**](credentials.md#ngc-api-key).
+     * The **Type** field is fixed to **NGC API key**.
+     * Under **Credential name**, select an existing credential from the dropdown.
    * **Select from the NGC private registry** and then set how to access the registry:
      * Select a **registry** from the dropdown.
      * Under **Source**, select [**Shared secret**](credentials.md#ngc-api-key).
