@@ -8,6 +8,7 @@ import type { IEnumBasedFilterModel } from "@/models/filter.model";
 import type { VueWrapper } from "@vue/test-utils";
 import { mount } from "@vue/test-utils";
 import { Quasar } from "quasar";
+import { RunaiPageFilterWrapper } from "@/components/common/runai-advanced-filters/runai-page-filter-wrapper";
 import { RunaiEnumBasedFilter } from "@/components/common/runai-advanced-filters/runai-enum-based-filter/index";
 import { unitTestUtil } from "@/utils/unit-test.util";
 import { EColumnFilterType } from "@/models/filter.model";
@@ -52,6 +53,8 @@ describe("RunaiFreeTextFilter", () => {
 
     expect(wrapper.exists()).toBe(true);
     expect(menuElement.find(".checkbox-container").exists()).toBe(true);
+    expect(wrapper.getComponent(RunaiPageFilterWrapper).props("maxWidth")).toBe("250px");
+    expect(wrapper.getComponent(RunaiPageFilterWrapper).props("width")).toBeUndefined();
     const allCheckboxes = menuElement.findAll(".q-checkbox");
     expect(allCheckboxes.length).toBe(filter.selectOptions.length);
     filter.selectOptions.forEach((option, index) => {

@@ -24,13 +24,14 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/status-updater/pkg/controllers/patcher"
 )
 
-func updatePod(ctx context.Context, pod *v1.Pod, kubeClient client.Client) error {
+func updatePod(ctx context.Context, pod *v1.Pod, kubeClient client.Client,
+	draResolver podmetacalc.DRAGpuResolver) error {
 	logger := log.FromContext(ctx)
 
 	podMeta := metadata.PodMetadata{}
 	podMeta.Status = podmetacalc.TranslatePodStatus(pod)
 
-	err := podmetacalc.CalcPodGpuResources(ctx, pod, &podMeta, kubeClient)
+	err := podmetacalc.CalcPodGpuResources(ctx, pod, &podMeta, kubeClient, draResolver)
 	if err != nil {
 		return fmt.Errorf("failed to calculate gpu resources for pod: <%v/%v> with error : %w",
 			pod.Namespace, pod.Name, err)

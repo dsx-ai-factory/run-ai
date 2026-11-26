@@ -7,6 +7,7 @@
   <q-dialog
     class="runai-base-dialog"
     :model-value="modelValue"
+    :aria-labelledby="dialogLabelledby"
     @hide="$emit('close')"
     @escape-key="$emit('close')"
     :persistent="isModalPersistent"
@@ -16,7 +17,7 @@
   >
     <q-card class="dialog-content-container" :class="[customClass, size]">
       <q-card-section class="runai-base-dialog-header row justify-between items-center no-wrap">
-        <h6 class="ellipsis">
+        <h6 :id="titleId" class="ellipsis">
           <b><slot name="header"></slot></b>
         </h6>
         <q-btn
@@ -60,7 +61,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType } from "vue";
+import { defineComponent, type PropType, useId } from "vue";
 
 export interface IStyles {
   minHeight?: string;
@@ -131,7 +132,15 @@ export default defineComponent({
       required: false,
     },
   },
+  setup() {
+    return { titleId: useId() };
+  },
   computed: {
+    dialogLabelledby(): string | undefined {
+      const explicitLabelledby = this.$attrs["aria-labelledby"];
+      if (explicitLabelledby !== undefined) return explicitLabelledby as string;
+      return this.$attrs["aria-label"] !== undefined ? undefined : this.titleId;
+    },
     bodyStyles(): IStyles {
       const styles: IStyles = {};
       if (this.bodyMinHeight) {

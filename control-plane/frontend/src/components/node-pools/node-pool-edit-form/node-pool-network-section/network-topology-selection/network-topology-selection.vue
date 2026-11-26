@@ -7,18 +7,20 @@
   <runai-section
     class="q-mb-md"
     title="Select the topology that represents this node pool's network"
-    tooltip-text="Optimizes placement and accelerates distributed workloads by keeping pods on nodes that are as close to each other as possible in the network"
+    tooltip-text="This optimizes placement and accelerates distributed workloads by keeping pods on nodes that are as close to each other as possible in the network."
   >
     <div class="row">
       <runai-select
         :loading="loadingNetworkTopologies"
+        :disable="selectDisabled"
         emit-value
         class="col-5"
         placeholder="Select..."
         stack-label
         label="Network topology"
-        clear-icon="ph-bold ph-x"
-        :custom-action="{ text: 'new network topology' }"
+        popup-content-class="network-topology-menu"
+        :clear-icon="networkTopologyId ? 'ph-bold ph-x' : undefined"
+        :custom-action="canStartCreation ? { text: 'new network topology' } : undefined"
         @custom-action="setModalOpen(true)"
         @update:model-value="updateNetworkTopologyId"
         :model-value="networkTopologyId"
@@ -27,9 +29,23 @@
       />
     </div>
 
+    <div v-if="loadError" class="row items-center q-gutter-sm text-negative" role="alert">
+      <span>{{ loadError }}</span>
+      <runai-btn
+        aid="network-topologies-retry"
+        label="Retry"
+        color="primary"
+        flat
+        :disable="loadingNetworkTopologies || creating"
+        @click="loadNetworkTopologies"
+      />
+    </div>
+
     <runai-base-dialog
       aid="network-topologies-creation-modal"
       :model-value="showCreationModal"
+      :is-modal-persistent="creating"
+      :hide-x="creating"
       @close="setModalOpen(false)"
       size="width-lg"
       no-padding
@@ -38,17 +54,19 @@
 
       <template #body>
         <section aid="network-topologies-modal-body">
-          <div class="q-px-md q-my-md">Add a topology that represents this node pool's network</div>
+          <fieldset class="topology-form-fields" :disabled="creating" :inert="creating || undefined">
+            <div class="q-px-md q-my-md">Add a topology that represents this node pool's network</div>
 
-          <network-topology-form
-            ref="topologyFormComponent"
-            :bordered="false"
-            :show-action-buttons="false"
-            :cluster-id="clusterId"
-            :external-submit-trigger="externalSubmitTrigger"
-            @close="setModalOpen(false)"
-            @submit="createNetworkTopology"
-          />
+            <network-topology-form
+              :bordered="false"
+              :show-action-buttons="false"
+              show-level-order-controls
+              :cluster-id="clusterId"
+              :external-submit-trigger="externalSubmitTrigger"
+              @close="setModalOpen(false)"
+              @submit="createNetworkTopology"
+            />
+          </fieldset>
         </section>
       </template>
 
@@ -57,14 +75,16 @@
           label="Cancel"
           color="primary"
           flat
+          :disable="creating"
           @click="setModalOpen(false)"
           aid="network-topologies-modal-cancel-button"
         />
         <runai-btn
           :loading="creating"
+          :disable="!canStartCreation"
           label="Save network topology"
           color="primary"
-          @click="triggerFormSubmit"
+          @click="externalSubmitTrigger++"
           aid="network-topologies-modal-save-button"
         />
       </template>
@@ -88,11 +108,23 @@ import type { ISelectOption } from "@/models/global.model";
 export default defineComponent({
   name: "network-topology-selection",
   components: { RunaiSection, RunaiSelect, RunaiBaseDialog, RunaiBtn, NetworkTopologyForm },
-  emits: ["select"],
+  emits: ["select", "loaded", "creating"],
   props: {
     clusterId: {
       type: String as PropType<string>,
       required: true,
+    },
+    disable: {
+      type: Boolean,
+      default: false,
+    },
+    canCreate: {
+      type: Boolean,
+      default: true,
+    },
+    networkTopologyName: {
+      type: String,
+      default: "",
     },
     networkTopologyId: {
       type: [String, null] as PropType<string | null>,
@@ -105,67 +137,125 @@ export default defineComponent({
       externalSubmitTrigger: 0,
 
       networkTopologies: [] as NetworkTopology[],
-      loadingNetworkTopologies: false as boolean,
+      loadingNetworkTopologies: false,
+      loadError: "",
+      requestId: 0,
 
       creating: false,
     };
   },
   computed: {
+    selectDisabled(): boolean {
+      return this.disable || this.loadingNetworkTopologies || this.creating;
+    },
+    canStartCreation(): boolean {
+      return !!this.clusterId && this.canCreate && !this.selectDisabled;
+    },
     networkTopologyOptions(): ISelectOption[] {
-      return this.networkTopologies.map((topology) => ({
+      const options = this.networkTopologies.map((topology) => ({
         label: topology.name,
         value: topology.id,
       }));
+      if (this.networkTopologyId && !options.some((option) => option.value === this.networkTopologyId)) {
+        options.push({ value: this.networkTopologyId, label: this.networkTopologyName || this.networkTopologyId });
+      }
+      return options;
     },
   },
   methods: {
     async loadNetworkTopologies(): Promise<void> {
+      if (this.creating) return;
+      const requestId = ++this.requestId;
+      this.loadError = "";
+      this.loadingNetworkTopologies = !!this.clusterId;
+      if (!this.clusterId) return;
       try {
-        this.loadingNetworkTopologies = true;
-        this.networkTopologies = await clusterService.getNetworkTopologies([
-          filterUtil.getEqualsFilterString("clusterId", this.clusterId || ""),
+        const topologies = await clusterService.getNetworkTopologies([
+          filterUtil.getEqualsFilterString("clusterId", this.clusterId),
         ]);
+        if (requestId !== this.requestId) return;
+        this.networkTopologies = topologies;
+        this.loadingNetworkTopologies = false;
+        this.$emit("loaded", topologies);
       } catch (error) {
+        if (requestId !== this.requestId) return;
         console.error("Failed to load network topologies", error);
-        this.$q.notify(alertUtil.getError("Failed to load network topologies"));
-      } finally {
+        this.loadError = "Failed to load network topologies";
         this.loadingNetworkTopologies = false;
       }
     },
     async createNetworkTopology(request: NetworkTopologyCreateRequest): Promise<void> {
+      if (!this.showCreationModal || !this.canStartCreation) return;
+      if (request.clusterId !== this.clusterId) {
+        this.$q.notify(alertUtil.getWarning("The selected cluster changed. Review the topology and save it again."));
+        return;
+      }
+      // Loading a different cluster invalidates its predecessor's creation as well.
+      const requestId = this.requestId;
+      this.creating = true;
       try {
-        this.creating = true;
         const newTopology = await clusterService.createNetworkTopology(request);
-        this.networkTopologies.push(newTopology);
-        this.updateNetworkTopologyId(newTopology.id);
-        this.setModalOpen(false);
+        if (requestId !== this.requestId) return;
+        this.networkTopologies = [
+          ...this.networkTopologies.filter((topology) => topology.id !== newTopology.id),
+          newTopology,
+        ];
+        this.$emit("loaded", this.networkTopologies);
+        this.$emit("select", newTopology.id);
+        this.showCreationModal = false;
       } catch (error) {
+        if (requestId !== this.requestId) return;
         console.error("Failed to create network topology", error);
         this.$q.notify(alertUtil.getError("Failed to create network topology"));
-      } finally {
-        this.creating = false;
       }
+      this.creating = false;
     },
     updateNetworkTopologyId(value: string | null): void {
-      this.$emit("select", value);
+      if (!this.selectDisabled) this.$emit("select", value);
     },
     setModalOpen(value: boolean): void {
-      this.showCreationModal = value;
-    },
-    triggerFormSubmit(): void {
-      // Increment the trigger to notify the form to validate and submit
-      this.externalSubmitTrigger++;
+      if (value ? this.canStartCreation : !this.creating) this.showCreationModal = value;
     },
   },
+  beforeUnmount() {
+    this.requestId++;
+    this.creating = false;
+  },
   watch: {
+    showCreationModal: {
+      flush: "post",
+      handler(open: boolean) {
+        if (!open && !this.selectDisabled) this.$el.querySelector('[role="combobox"]')?.focus();
+      },
+    },
+    creating: {
+      handler(value: boolean) {
+        this.$emit("creating", value);
+      },
+      flush: "sync",
+    },
     clusterId: {
-      handler(newValue: string, oldValue: string) {
-        if (newValue && newValue !== oldValue) {
-          this.loadNetworkTopologies();
-        }
+      handler() {
+        this.creating = false;
+        this.showCreationModal = false;
+        this.networkTopologies = [];
+        void this.loadNetworkTopologies();
       },
       immediate: true,
     },
   },
 });
 </script>
+
+<style lang="scss" scoped>
+:global(.network-topology-menu .custom-action-item-text) {
+  font-weight: 500;
+}
+
+.topology-form-fields {
+  border: 0;
+  margin: 0;
+  min-width: 0;
+  padding: 0;
+}
+</style>

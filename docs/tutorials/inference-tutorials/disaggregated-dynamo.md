@@ -232,6 +232,7 @@ For more details, see the [NVIDIA Dynamo documentation](https://docs.nvidia.com/
 3. In the YAML submission form, select the **cluster** where the workload will run.
 4. Upload or paste your YAML manifest. To upload a file, click **UPLOAD YAML FILE** and choose your YAML. To **paste the YAML**, insert it directly into the editor. Before submitting, update the following fields in the manifest:
    * `<pvc-claim-name>` - The claim name associated with the PVC created in [Step 3](disaggregated-dynamo.md#step-3-creating-a-pvc-data-source).
+   * `<your-hf-token>` - Required only for gated Hugging Face models. Generate a token from your [Hugging Face account](https://huggingface.co/) and provide it to the workload as an environment variable.
 
 ```yaml
 apiVersion: nvidia.com/v1beta1
@@ -253,6 +254,8 @@ spec:
           env:
           - name: HF_HOME
             value: /opt/models
+          - name: HF_TOKEN
+            value: <your-hf-token>
           volumeMounts:
           - name: model-cache
             mountPath: /opt/models
@@ -296,6 +299,8 @@ spec:
           env:
           - name: HF_HOME
             value: /opt/models
+          - name: HF_TOKEN
+            value: <your-hf-token>
           resources:
             limits:
               nvidia.com/gpu: '8'
@@ -344,6 +349,8 @@ spec:
           env:
           - name: HF_HOME
             value: /opt/models
+          - name: HF_TOKEN
+            value: <your-hf-token>
           resources:
             limits:
               nvidia.com/gpu: '8'
@@ -372,6 +379,7 @@ Copy the following command to your terminal. Make sure to update the following p
 * `<TOKEN>` - The API access token obtained in [Step 2](disaggregated-dynamo.md#step-2-creating-a-user-access-key).
 * `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](api:main-api:GET/api/v1/org-unit/projects) API.
 * `<pvc-claim-name>` - The claim name associated with the PVC created in [Step 3](disaggregated-dynamo.md#step-3-creating-a-pvc-data-source).
+* `<your-hf-token>` - Required only for gated Hugging Face models. Generate a token from your [Hugging Face account](https://huggingface.co/) and provide it to the workload as an environment variable.
 
 ```bash
 curl -L 'https://<COMPANY-URL>/api/v2/workloads' \
@@ -409,6 +417,10 @@ curl -L 'https://<COMPANY-URL>/api/v2/workloads' \
                     {
                       "name": "HF_HOME",
                       "value": "/opt/models"
+                    },
+                    {
+                      "name": "HF_TOKEN",
+                      "value": "<your-hf-token>"
                     }
                   ],
                   "volumeMounts": [
@@ -471,6 +483,10 @@ curl -L 'https://<COMPANY-URL>/api/v2/workloads' \
                     {
                       "name": "HF_HOME",
                       "value": "/opt/models"
+                    },
+                    {
+                      "name": "HF_TOKEN",
+                      "value": "<your-hf-token>"
                     }
                   ],
                   "resources": {
@@ -541,6 +557,10 @@ curl -L 'https://<COMPANY-URL>/api/v2/workloads' \
                     {
                       "name": "HF_HOME",
                       "value": "/opt/models"
+                    },
+                    {
+                      "name": "HF_TOKEN",
+                      "value": "<your-hf-token>"
                     }
                   ],
                   "resources": {
@@ -585,6 +605,7 @@ Follow the below steps. For more details, see [CLI reference](../../reference/cl
 1.  Save the following YAML file. Before submitting, update the following fields in the manifest:
 
     * `<pvc-claim-name>` - The claim name associated with the PVC created in [Step 3](disaggregated-dynamo.md#step-3-creating-a-pvc-data-source).
+    * `<your-hf-token>` - Required only for gated Hugging Face models. Generate a token from your [Hugging Face account](https://huggingface.co/) and provide it to the workload as an environment variable.
 
     ```yaml
     apiVersion: nvidia.com/v1beta1
@@ -606,6 +627,8 @@ Follow the below steps. For more details, see [CLI reference](../../reference/cl
               env:
               - name: HF_HOME
                 value: /opt/models
+              - name: HF_TOKEN
+                value: <your-hf-token>
               volumeMounts:
               - name: model-cache
                 mountPath: /opt/models
@@ -649,6 +672,8 @@ Follow the below steps. For more details, see [CLI reference](../../reference/cl
               env:
               - name: HF_HOME
                 value: /opt/models
+              - name: HF_TOKEN
+                value: <your-hf-token>
               resources:
                 limits:
                   nvidia.com/gpu: '8'
@@ -697,6 +722,8 @@ Follow the below steps. For more details, see [CLI reference](../../reference/cl
               env:
               - name: HF_HOME
                 value: /opt/models
+              - name: HF_TOKEN
+                value: <your-hf-token>
               resources:
                 limits:
                   nvidia.com/gpu: '8'
@@ -728,7 +755,7 @@ Follow the below steps. For more details, see [CLI reference](../../reference/cl
 To expose the frontend in Dynamo v1beta1, create a separate Ingress. Update the following fields:
 
 * `<INGRESS-CLASS>` - The ingress controller class name configured in your cluster (for example, `haproxy`). Contact your administrator to obtain the correct value.
-* `<DEPLOYMENT-PREFIX>` - A unique prefix for the deployment endpoint (for example, `llama3-agg`).
+* `<DEPLOYMENT-PREFIX>` - A unique prefix for the deployment endpoint (for example, `llama3-disagg`).
 * `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../installation-and-configuration/system-requirements/networking-setup.md#fqdn-and-dns). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](api:main-api:GET/api/v1/clusters/minimal) API - use the `domain` field in the response.
 * `<tls-secret-name>` - The name of a TLS Secret in the workload namespace that covers the endpoint hostname.
 
