@@ -38,6 +38,10 @@ func defaultRedirectURIs() []string {
 	}
 }
 
+func cliRedirectURIs() []string {
+	return append(defaultRedirectURIs(), "http://127.0.0.1", "http://[::1]")
+}
+
 func adminUiRedirectURIs() []string {
 	return append(defaultRedirectURIs(), "http://localhost/login/callback")
 }
@@ -138,7 +142,7 @@ func TestRunaiCliClient_GetClientData_NilExisting(t *testing.T) {
 	assert.True(t, *result.Enabled)
 	assert.Equal(t, ClientTypeRunaiCLI, *result.Attributes.ClientType)
 	assert.Equal(t, []string{testTenantUrl, testAppHost}, *result.WebOrigins)
-	assert.Equal(t, defaultRedirectURIs(), *result.RedirectURIs)
+	assert.Equal(t, cliRedirectURIs(), *result.RedirectURIs)
 	assert.True(t, *result.ClientConfig.PublicClient)
 	assert.True(t, *result.ClientConfig.DirectAccessGrantsEnabled)
 	assert.True(t, *result.ClientConfig.StandardFlowEnabled)
@@ -177,7 +181,7 @@ func TestCLIClient_GetClientData_NilExisting(t *testing.T) {
 	assert.True(t, *result.Enabled)
 	assert.Equal(t, ClientTypeCLI, *result.Attributes.ClientType)
 	assert.Equal(t, []string{testTenantUrl, testAppHost}, *result.WebOrigins)
-	assert.Equal(t, defaultRedirectURIs(), *result.RedirectURIs)
+	assert.Equal(t, cliRedirectURIs(), *result.RedirectURIs)
 	assert.False(t, *result.ClientConfig.PublicClient)
 	assert.True(t, *result.ClientConfig.DirectAccessGrantsEnabled)
 	assert.True(t, *result.ClientConfig.StandardFlowEnabled)
