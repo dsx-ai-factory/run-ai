@@ -42,20 +42,20 @@ Dependencies
 | `github.com/go-logr/logr` | v1.4.4 | Apache-2.0 | https://github.com/go-logr/logr/blob/v1.4.4/LICENSE |
 | `github.com/go-logr/stdr` | v1.2.2 | Apache-2.0 | https://github.com/go-logr/stdr/blob/v1.2.2/LICENSE |
 | `github.com/go-logr/zapr` | v1.3.0 | Apache-2.0 | https://github.com/go-logr/zapr/blob/v1.3.0/LICENSE |
-| `github.com/go-openapi/jsonpointer` | v1.0.0 | Apache-2.0 | https://github.com/go-openapi/jsonpointer/blob/v1.0.0/LICENSE |
-| `github.com/go-openapi/jsonreference` | v1.0.0 | Apache-2.0 | https://github.com/go-openapi/jsonreference/blob/v1.0.0/LICENSE |
-| `github.com/go-openapi/swag` | v0.27.1 | Apache-2.0 | https://github.com/go-openapi/swag/blob/v0.27.1/LICENSE |
-| `github.com/go-openapi/swag/cmdutils` | v0.27.1 | Apache-2.0 | https://github.com/go-openapi/swag/blob/cmdutils/v0.27.1/cmdutils/LICENSE |
-| `github.com/go-openapi/swag/conv` | v0.27.1 | Apache-2.0 | https://github.com/go-openapi/swag/blob/conv/v0.27.1/conv/LICENSE |
-| `github.com/go-openapi/swag/fileutils` | v0.27.1 | Apache-2.0 | https://github.com/go-openapi/swag/blob/fileutils/v0.27.1/fileutils/LICENSE |
-| `github.com/go-openapi/swag/jsonutils` | v0.27.1 | Apache-2.0 | https://github.com/go-openapi/swag/blob/jsonutils/v0.27.1/jsonutils/LICENSE |
-| `github.com/go-openapi/swag/loading` | v0.27.1 | Apache-2.0 | https://github.com/go-openapi/swag/blob/loading/v0.27.1/loading/LICENSE |
-| `github.com/go-openapi/swag/mangling` | v0.27.1 | Apache-2.0 | https://github.com/go-openapi/swag/blob/mangling/v0.27.1/mangling/LICENSE |
-| `github.com/go-openapi/swag/netutils` | v0.27.1 | Apache-2.0 | https://github.com/go-openapi/swag/blob/netutils/v0.27.1/netutils/LICENSE |
-| `github.com/go-openapi/swag/pools` | v0.27.1 | Apache-2.0 | https://github.com/go-openapi/swag/blob/pools/v0.27.1/pools/LICENSE |
-| `github.com/go-openapi/swag/stringutils` | v0.27.1 | Apache-2.0 | https://github.com/go-openapi/swag/blob/stringutils/v0.27.1/stringutils/LICENSE |
-| `github.com/go-openapi/swag/typeutils` | v0.27.1 | Apache-2.0 | https://github.com/go-openapi/swag/blob/typeutils/v0.27.1/typeutils/LICENSE |
-| `github.com/go-openapi/swag/yamlutils` | v0.27.1 | Apache-2.0 | https://github.com/go-openapi/swag/blob/yamlutils/v0.27.1/yamlutils/LICENSE |
+| `github.com/go-openapi/jsonpointer` | v1.0.3 | Apache-2.0 | https://github.com/go-openapi/jsonpointer/blob/v1.0.3/LICENSE |
+| `github.com/go-openapi/jsonreference` | v1.0.3 | Apache-2.0 | https://github.com/go-openapi/jsonreference/blob/v1.0.3/LICENSE |
+| `github.com/go-openapi/swag` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/v0.29.2/LICENSE |
+| `github.com/go-openapi/swag/cmdutils` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/cmdutils/v0.29.2/cmdutils/LICENSE |
+| `github.com/go-openapi/swag/conv` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/conv/v0.29.2/conv/LICENSE |
+| `github.com/go-openapi/swag/fileutils` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/fileutils/v0.29.2/fileutils/LICENSE |
+| `github.com/go-openapi/swag/jsonutils` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/jsonutils/v0.29.2/jsonutils/LICENSE |
+| `github.com/go-openapi/swag/loading` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/loading/v0.29.2/loading/LICENSE |
+| `github.com/go-openapi/swag/mangling` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/mangling/v0.29.2/mangling/LICENSE |
+| `github.com/go-openapi/swag/netutils` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/netutils/v0.29.2/netutils/LICENSE |
+| `github.com/go-openapi/swag/pools` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/pools/v0.29.2/pools/LICENSE |
+| `github.com/go-openapi/swag/stringutils` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/stringutils/v0.29.2/stringutils/LICENSE |
+| `github.com/go-openapi/swag/typeutils` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/typeutils/v0.29.2/typeutils/LICENSE |
+| `github.com/go-openapi/swag/yamlutils` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/yamlutils/v0.29.2/yamlutils/LICENSE |
 | `github.com/google/cel-go` | v0.29.2 | Apache-2.0 | https://github.com/google/cel-go/blob/v0.29.2/LICENSE |
 | `github.com/google/gnostic-models` | v0.7.1 | Apache-2.0 | https://github.com/google/gnostic-models/blob/v0.7.1/LICENSE |
 | `github.com/google/uuid` | v1.6.0 | BSD-3-Clause | https://github.com/google/uuid/blob/v1.6.0/LICENSE |
@@ -119,7 +119,7 @@ Dependencies
 | `k8s.io/kube-openapi/pkg/validation/errors` | v0.0.0-20260721132016-d427ff9ee9ad | Apache-2.0 | https://pkg.go.dev/k8s.io/kube-openapi@v0.0.0-20260721132016-d427ff9ee9ad?tab=licenses |
 | `k8s.io/kube-openapi/pkg/validation/spec` | v0.0.0-20260721132016-d427ff9ee9ad | Apache-2.0 | https://pkg.go.dev/k8s.io/kube-openapi@v0.0.0-20260721132016-d427ff9ee9ad?tab=licenses |
 | `k8s.io/kube-openapi/pkg/validation/strfmt` | v0.0.0-20260721132016-d427ff9ee9ad | Apache-2.0 | https://pkg.go.dev/k8s.io/kube-openapi@v0.0.0-20260721132016-d427ff9ee9ad?tab=licenses |
-| `k8s.io/streaming/pkg` | v0.37.2 | Apache-2.0 | https://pkg.go.dev/k8s.io/streaming@v0.37.2?tab=licenses |
+| `k8s.io/streaming/pkg` | v0.37.3 | Apache-2.0 | https://pkg.go.dev/k8s.io/streaming@v0.37.3?tab=licenses |
 | `k8s.io/utils` | v0.0.0-20261023123148-ca04ba58ecab | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20261023123148-ca04ba58ecab?tab=licenses |
 | `k8s.io/utils/internal/third_party/forked/golang` | v0.0.0-20261023123148-ca04ba58ecab | BSD-3-Clause | https://pkg.go.dev/k8s.io/utils@v0.0.0-20261023123148-ca04ba58ecab?tab=licenses |
 | `k8s.io/utils/third_party/forked/golang/btree` | v0.0.0-20261023123148-ca04ba58ecab | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20261023123148-ca04ba58ecab?tab=licenses |
@@ -3064,7 +3064,7 @@ section 4(d) of the Apache License, Version 2.0 requires.
 
 --------------------------------------------------------------------------------
 Notice of:
-  - `github.com/go-openapi/jsonpointer` v1.0.0
+  - `github.com/go-openapi/jsonpointer` v1.0.3
 --------------------------------------------------------------------------------
 
 Copyright 2015-2025 go-swagger maintainers
@@ -3109,7 +3109,7 @@ limitations under the License.
 
 --------------------------------------------------------------------------------
 Notice of:
-  - `github.com/go-openapi/jsonreference` v1.0.0
+  - `github.com/go-openapi/jsonreference` v1.0.3
 --------------------------------------------------------------------------------
 
 Copyright 2015-2025 go-swagger maintainers
