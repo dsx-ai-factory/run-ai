@@ -51,7 +51,8 @@ export interface ISaveOrgUnitPayload<T> {
   project?: T;
   department?: T;
   action: ESaveOrgUnitAction;
-  onComplete?: () => void; // Callback to execute after save completes (success or error)
+  onComplete?: () => void;
+  onError?: () => void;
   // Runs once a create succeeds and before the page moves on, so follow-up requests finish first.
   onCreated?: (saved: T) => Promise<void>;
 }

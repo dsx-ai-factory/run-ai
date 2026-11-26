@@ -73,7 +73,7 @@
         v-model="selectedNodePool"
         class="node-pool-step"
         :node-pools="stepNodePools"
-        :disable-reorder="readOnly"
+        :disable-reorder="readOnly || isDepartmentSubmitting"
         :disable-reorder-tooltip="readOnly ? EOrgUnitFormTooltip.NodePoolsPriorityOrderReadOnly : undefined"
         @update:node-pools="handleNodePoolsReorder"
       >
@@ -91,6 +91,7 @@
         :loading="isDepartmentSubmitting"
         :read-only="readOnly"
         :is-single-node-pool="isSingleNodePool"
+        :is-last-step="isLastStep"
         @save-scheduling-rules="handleSaveSchedulingRules"
         @close="handleClose"
       />
@@ -263,7 +264,17 @@ const getInitialSteps = (): IRunaiWizardLayoutStep[] =>
     }),
   );
 
-const initialActiveStep = route.query.stepName?.toString();
+// Links built for today's form can still point at its GPU over quota step, which the GPU quota step replaces.
+const LEGACY_STEP_NAMES = new Map<string, string>([[EStepNames.OverQuota, EStepNames.GpuQuota]]);
+
+const resolveInitialStep = (requested: string | undefined): string | undefined => {
+  if (!requested) return undefined;
+  const stepName = LEGACY_STEP_NAMES.get(requested) ?? requested;
+  if (props.isNewDepartment) return undefined;
+  return getInitialSteps().some((step) => step.name === stepName) ? stepName : undefined;
+};
+
+const initialActiveStep = resolveInitialStep(route.query.stepName?.toString());
 
 const wizard = useWizardLayout(getInitialSteps(), initialActiveStep);
 const { steps, currentStep, activeStep, isFirstStep, isLastStep, nextStep, handleStepClick, setSteps } = wizard;
@@ -308,10 +319,12 @@ const accessRulesFormOptions = computed(() => ({
   page: EAccessRuleModalPage.Department,
 }));
 
+const isSavingUnsavedChanges = ref(false);
+
 const unsavedDialogModel = computed({
   get: () => unsavedGuard.dialog.isOpen.value,
   set: (value: boolean) => {
-    if (!value) unsavedGuard.cancelPending();
+    if (!value && !isSavingUnsavedChanges.value) unsavedGuard.cancelPending();
   },
 });
 
@@ -321,7 +334,11 @@ const runGuardedAction = async (action: () => Promise<void> | void): Promise<boo
     await action();
     return true;
   }
-  return unsavedGuard.requestAction({ stepName, onProceed: action });
+  try {
+    return await unsavedGuard.requestAction({ stepName, onProceed: action });
+  } catch {
+    return false;
+  }
 };
 
 const validate = async (): Promise<boolean> => {
@@ -342,9 +359,20 @@ const handleNodePoolsReorder = (reorderedStepPools: string[]): void => {
   );
 };
 
-const saveNodePoolOrder = (): void => {
-  emit("on-save", { department: localDepartment.value, action: ESaveOrgUnitAction.Save });
-  initialNodePoolOrder.value = [...(localDepartment.value.defaultNodePools ?? [])];
+// Resolves only once the update succeeds, so a failed save keeps the order unsaved and the user on the step.
+const saveNodePoolOrder = (): Promise<void> => {
+  const savedOrder = [...(localDepartment.value.defaultNodePools ?? [])];
+  return new Promise((resolve, reject) => {
+    emit("on-save", {
+      department: localDepartment.value,
+      action: ESaveOrgUnitAction.Save,
+      onComplete: () => {
+        initialNodePoolOrder.value = savedOrder;
+        resolve();
+      },
+      onError: () => reject(new Error("The node pool order wasn't saved")),
+    });
+  });
 };
 
 const discardNodePoolOrder = (): void => {
@@ -381,10 +409,11 @@ const handleSaveSchedulingRules = async (payload: {
   localDepartment.value.schedulingRules = payload.schedulingRules ? deepCopy(payload.schedulingRules) : null;
   localDepartment.value.nodeTypes = payload.nodeTypes ? deepCopy(payload.nodeTypes) : undefined;
 
+  const closesForm = !!payload.navigateAfterSave && isLastStep.value;
   emit("on-save", {
     department: localDepartment.value,
-    action: ESaveOrgUnitAction.Save,
-    onComplete: payload.navigateAfterSave ? completeStepAndContinue : undefined,
+    action: closesForm ? ESaveOrgUnitAction.Close : ESaveOrgUnitAction.Save,
+    onComplete: payload.navigateAfterSave && !closesForm ? completeStepAndContinue : undefined,
   });
 };
 
@@ -396,11 +425,17 @@ const onStepClick = async (payload: { step: IRunaiWizardLayoutStep; name: string
 };
 
 const handleSaveUnsavedChanges = async (): Promise<void> => {
-  if (!(await validate())) {
-    unsavedGuard.cancelPending();
-    return;
+  if (isSavingUnsavedChanges.value) return;
+  isSavingUnsavedChanges.value = true;
+  try {
+    if (!(await validate())) {
+      unsavedGuard.cancelPending();
+      return;
+    }
+    await unsavedGuard.confirmAction("save");
+  } finally {
+    isSavingUnsavedChanges.value = false;
   }
-  await unsavedGuard.confirmAction("save");
 };
 
 const handleClose = async (): Promise<void> => {
@@ -441,6 +476,9 @@ const proceedWithSaveAndClose = (): void => {
     onComplete: () => {
       submittingAction.value = null;
     },
+    onError: () => {
+      submittingAction.value = null;
+    },
   });
 };
 
@@ -468,6 +506,9 @@ const handleSubmitAndContinue = async (): Promise<void> => {
       onComplete: () => {
         submittingAction.value = null;
         handleNext();
+      },
+      onError: () => {
+        submittingAction.value = null;
       },
     });
   });

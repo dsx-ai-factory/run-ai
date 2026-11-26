@@ -363,7 +363,7 @@ const handleSaveError = (error: unknown): void => {
 // ==================== Main Save Handler ====================
 
 const onSave = async (payload: ISaveOrgUnitPayload<Department | DepartmentCreationRequest>) => {
-  const { department: departmentData, action, onComplete, onCreated } = payload;
+  const { department: departmentData, action, onComplete, onCreated, onError } = payload;
 
   if (!departmentData) return;
 
@@ -385,6 +385,7 @@ const onSave = async (payload: ISaveOrgUnitPayload<Department | DepartmentCreati
     onComplete?.();
   } catch (error: unknown) {
     handleSaveError(error);
+    onError?.();
   } finally {
     isDepartmentSubmitting.value = false;
   }

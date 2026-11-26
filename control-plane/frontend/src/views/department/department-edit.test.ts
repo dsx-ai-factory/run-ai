@@ -467,6 +467,26 @@ describe("DepartmentEdit", () => {
       errorSpy.mockRestore();
     });
 
+    it("tells the form when the save fails", async () => {
+      vi.mocked(orgUnitService.createDepartment).mockRejectedValue(new Error("Create failed"));
+      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      await mountComponent();
+
+      const onError = vi.fn();
+      const onComplete = vi.fn();
+      wrapper.findComponent({ name: "DepartmentEditFormV2" }).vm.$emit("on-save", {
+        department: { name: "New Department", clusterId: CLUSTER_ID },
+        action: ESaveOrgUnitAction.Continue,
+        onComplete,
+        onError,
+      });
+      await flushPromises();
+
+      expect(onError).toHaveBeenCalledTimes(1);
+      expect(onComplete).not.toHaveBeenCalled();
+      errorSpy.mockRestore();
+    });
+
     it("does NOT call onComplete callback when create fails", async () => {
       vi.mocked(orgUnitService.createDepartment).mockRejectedValue(new Error("Create failed"));
       const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
