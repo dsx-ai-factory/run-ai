@@ -55,8 +55,12 @@ var _ = Describe("GPU selection in submitted jobs", func() {
 				quantity := list[corev1.ResourceName("amd.com/gpu")]
 				Expect(quantity.Value()).To(Equal(int64(2)))
 			}
-			Expect(template.Spec.NodeSelector).To(HaveKeyWithValue("hardware.example.com/model", "MI300X"))
-			Expect(template.Annotations).To(HaveKeyWithValue("run.ai/gpu-type-label", "hardware.example.com/model=MI300X"))
+			Expect(template.Spec.NodeSelector).To(BeEmpty())
+			terms := template.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms
+			Expect(terms).To(HaveLen(1))
+			Expect(terms[0].MatchExpressions).To(ContainElement(corev1.NodeSelectorRequirement{
+				Key: "hardware.example.com/model", Operator: corev1.NodeSelectorOpIn, Values: []string{"MI300X"},
+			}))
 		}
 	})
 })

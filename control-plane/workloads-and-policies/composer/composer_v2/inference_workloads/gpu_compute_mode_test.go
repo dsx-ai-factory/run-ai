@@ -9,6 +9,7 @@ import (
 	"context"
 	"encoding/json"
 
+	clusterapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
@@ -58,8 +59,9 @@ var _ = Describe("GPU selection in Knative inference", func() {
 		var spec workloadsApi.InferenceSpecSpec
 		Expect(json.Unmarshal([]byte(`{
 			"gpuType":"MI300X","accelerator":{"resourceName":"amd.com/gpu","deviceLabelKey":"hardware.example.com/model"},
-			"nodePools":["default"]
+			"nodePools":["default","research"]
 		}`), &spec)).To(Succeed())
+		c.ActualNodePools = []clusterapi.Nodepool{{Name: "research", LabelKey: composer.NodePoolNameLabel, LabelValue: "research"}}
 		target := NewMinimalKnativeServiceTarget()
 		template := &target.Service.Spec.Template
 		template.Spec.Containers = []corev1.Container{{Name: "main", Image: "example.com/test:latest"}}
@@ -70,25 +72,21 @@ var _ = Describe("GPU selection in Knative inference", func() {
 		ctx := config.ToContext(context.Background(), cfg)
 		Expect(serving.ValidatePodSpec(ctx, template.Spec.PodSpec).Filter(apis.ErrorLevel)).To(BeNil())
 		Expect(template.Spec.NodeSelector).To(BeEmpty())
-		Expect(template.Annotations).To(HaveKeyWithValue("runai-nodepools", "default"))
+		Expect(template.Annotations).To(HaveKeyWithValue("runai-nodepools", "default research"))
 		pod := &corev1.Pod{Spec: template.Spec.PodSpec}
-		// This is a Knative-valid template before Pod admission. Even the right
-		// GPU remains ineligible while mixed-version admission is unverified.
 		terms := pod.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms
-		for i := range terms {
-			Expect(terms[i].MatchFields).To(HaveLen(2))
-			Expect(terms[i].MatchFields[0]).To(Equal(corev1.NodeSelectorRequirement{
-				Key: "metadata.name", Operator: corev1.NodeSelectorOpIn, Values: []string{commonconstants.GPUPlacementAdmissionNode},
-			}))
-			Expect(terms[i].MatchFields[1]).To(Equal(corev1.NodeSelectorRequirement{
-				Key: "metadata.name", Operator: corev1.NodeSelectorOpNotIn, Values: []string{commonconstants.GPUPlacementAdmissionNode},
-			}))
+		Expect(terms).To(HaveLen(2))
+		for _, term := range terms {
+			Expect(term.MatchFields).To(BeEmpty())
 		}
 		resourceKey := commonconstants.AcceleratorResourceNodeLabel("amd.com/gpu")
 		for _, tc := range []struct {
 			labels  map[string]string
 			matches bool
 		}{
+			{map[string]string{resourceKey: "true", "hardware.example.com/model": "MI300X", composer.NodePoolNameLabel: "research"}, true},
+			{map[string]string{resourceKey: "true", "hardware.example.com/model": "MI250", composer.NodePoolNameLabel: "research"}, false},
+			{map[string]string{"hardware.example.com/model": "MI300X", composer.NodePoolNameLabel: "research"}, false},
 			{map[string]string{resourceKey: "true", "hardware.example.com/model": "MI300X"}, true},
 			{map[string]string{"hardware.example.com/model": "MI300X"}, false},
 			{map[string]string{resourceKey: "true", "hardware.example.com/model": "MI250"}, false},
@@ -96,14 +94,6 @@ var _ = Describe("GPU selection in Knative inference", func() {
 		} {
 			node := &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: "gpu-node", Labels: tc.labels}}
 			matches, err := nodeaffinity.GetRequiredNodeAffinity(pod).Match(node)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(matches).To(BeFalse())
-			// Check the remaining placement predicates independently of the barrier.
-			admitted := pod.DeepCopy()
-			for i := range admitted.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms {
-				admitted.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms[i].MatchFields = nil
-			}
-			matches, err = nodeaffinity.GetRequiredNodeAffinity(admitted).Match(node)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(matches).To(Equal(tc.matches))
 		}

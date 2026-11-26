@@ -61,10 +61,9 @@ func TestGPUSelectionChoosesResourceAndModelInMixedPool(t *testing.T) {
 					t.Fatalf("unexpected resources %v", list)
 				}
 			}
-			// The scheduling barrier is covered by the Knative and admission tests.
-			// Remove just that pair here to test the actual GPU placement requirements.
-			term := &pod.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms[0]
-			term.MatchFields = term.MatchFields[2:]
+			if len(pod.Spec.NodeSelector) != 0 {
+				t.Fatalf("GPU placement added a nodeSelector: %v", pod.Spec.NodeSelector)
+			}
 			for i, node := range []corev1.Node{amdNode, h100, a100} {
 				node.Name = "gpu-node"
 				match, err := nodeaffinity.GetRequiredNodeAffinity(&pod).Match(&node)

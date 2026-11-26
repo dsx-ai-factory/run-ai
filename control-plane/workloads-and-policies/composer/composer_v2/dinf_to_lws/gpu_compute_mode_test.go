@@ -56,7 +56,12 @@ var _ = Describe("GPU selection in distributed inference", func() {
 			{templates.LeaderTemplate, composer.NvidiaProductLabel, "H100", composer.NvidiaResourceName, 1},
 			{&templates.WorkerTemplate, "hardware.example.com/model", "MI300X", "amd.com/gpu", 2},
 		} {
-			Expect(tc.pod.Spec.NodeSelector).To(HaveKeyWithValue(tc.key, tc.model))
+			Expect(tc.pod.Spec.NodeSelector).To(BeEmpty())
+			terms := tc.pod.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms
+			Expect(terms).To(HaveLen(1))
+			Expect(terms[0].MatchExpressions).To(ContainElement(corev1.NodeSelectorRequirement{
+				Key: tc.key, Operator: corev1.NodeSelectorOpIn, Values: []string{tc.model},
+			}))
 			limits := tc.pod.Spec.Containers[0].Resources.Limits
 			quantity := limits[corev1.ResourceName(tc.resource)]
 			Expect(quantity.Value()).To(Equal(tc.count))

@@ -78,10 +78,7 @@ func (fc *FieldsComposer) ComposeGPUPlacement(model *string, accelerator *worklo
 			return workloadsApi.NewError(http.StatusBadRequest, "accelerator selection requires node affinity support")
 		}
 
-		// KAI accounts NVIDIA and AMD in the same GPU slot. Constrain the
-		// physical resource advertised by each candidate node as well.
-		knative := fc.WorkloadType == Inference
-		if knative {
+		if fc.WorkloadType == Inference {
 			// Knative installations require affinity support but may disable
 			// podspec-nodeselector. Preserve existing equalities in required affinity.
 			for _, key := range slices.Sorted(maps.Keys(pod.NodeSelector)) {
@@ -92,49 +89,13 @@ func (fc *FieldsComposer) ComposeGPUPlacement(model *string, accelerator *worklo
 			pod.NodeSelector = nil
 		}
 
-		requireLabel := func(req corev1.NodeSelectorRequirement) {
-			intersectGPURequirement(pod, req)
-			// Also protect the equality from older Pod mutators that replace
-			// same-key expressions. Never remove an existing conflicting selector.
-			if !knative {
-				if pod.NodeSelector == nil {
-					pod.NodeSelector = make(map[string]string)
-				}
-				if _, exists := pod.NodeSelector[req.Key]; !exists {
-					pod.NodeSelector[req.Key] = req.Values[0]
-				}
-			}
-		}
-		requireLabel(corev1.NodeSelectorRequirement{
+		// KAI accounts NVIDIA and AMD in the same GPU slot. Constrain the
+		// physical resource advertised by each candidate node as well.
+		intersectGPURequirement(pod, corev1.NodeSelectorRequirement{
 			Key: commonconstants.AcceleratorResourceNodeLabel(resourceName), Operator: corev1.NodeSelectorOpIn, Values: []string{"true"},
 		})
 		if requirement != nil {
-			requireLabel(*requirement)
-			metav1.SetMetaDataAnnotation(meta, commonconstants.AnnotationGPUTypeLabel, requirement.Key+"="+*model)
-		}
-		// Older admission replaces same-key scheduling requirements and may
-		// skip project-pool checks. Keep the template unschedulable until
-		// upgraded Pod admission has enforced the actual resource, model and pools.
-		alreadyGuarded := meta.Annotations[commonconstants.AnnotationGPUPlacementResource] == resourceName
-		metav1.SetMetaDataAnnotation(meta, commonconstants.AnnotationGPUPlacementResource, resourceName)
-		terms := pod.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms
-		for i := range terms {
-			fields := terms[i].MatchFields
-			if alreadyGuarded && len(fields) >= 2 && fields[0].Key == "metadata.name" && fields[1].Key == "metadata.name" &&
-				fields[0].Operator == corev1.NodeSelectorOpIn && fields[1].Operator == corev1.NodeSelectorOpNotIn &&
-				len(fields[0].Values) == 1 && slices.Equal(fields[0].Values, fields[1].Values) &&
-				(fields[0].Values[0] == commonconstants.GPUPlacementAdmissionNode || fields[0].Values[0] == commonconstants.GPUPlacementAdmissionNode+"-empty") {
-				continue
-			}
-			node := commonconstants.GPUPlacementAdmissionNode
-			if len(terms[i].MatchFields) == 0 && len(terms[i].MatchExpressions) == 0 {
-				// An originally empty term must remain unsatisfiable after admission.
-				node += "-empty"
-			}
-			terms[i].MatchFields = append([]corev1.NodeSelectorRequirement{
-				{Key: "metadata.name", Operator: corev1.NodeSelectorOpIn, Values: []string{node}},
-				{Key: "metadata.name", Operator: corev1.NodeSelectorOpNotIn, Values: []string{node}},
-			}, terms[i].MatchFields...)
+			intersectGPURequirement(pod, *requirement)
 		}
 		if len(pools) > 0 {
 			metav1.SetMetaDataAnnotation(meta, commonconstants.AnnotationNodepools, strings.Join(pools, " "))

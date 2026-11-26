@@ -8,8 +8,6 @@ package patch
 import (
 	"testing"
 
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
-
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
 )
@@ -216,39 +214,4 @@ func TestAddMultipleTolerations(t *testing.T) {
 			assert.Fail(t, "unexpected toleration")
 		}
 	}
-}
-
-func TestGPUSelectionIntersectsPlacementOnEveryAdmission(t *testing.T) {
-	model := v1.NodeSelectorRequirement{Key: "nvidia.com/gpu.product", Operator: v1.NodeSelectorOpIn, Values: []string{"A100"}}
-	conflict := v1.NodeSelectorRequirement{Key: model.Key, Operator: v1.NodeSelectorOpIn, Values: []string{"H100"}}
-	zone := v1.NodeSelectorRequirement{Key: "zone", Operator: v1.NodeSelectorOpIn, Values: []string{"west"}}
-	name := v1.NodeSelectorRequirement{Key: "metadata.name", Operator: v1.NodeSelectorOpIn, Values: []string{"worker-1"}}
-	selector := &v1.NodeSelector{NodeSelectorTerms: []v1.NodeSelectorTerm{{MatchExpressions: []v1.NodeSelectorRequirement{model}, MatchFields: []v1.NodeSelectorRequirement{name}}, {}}}
-	spec := &v1.PodSpec{Affinity: &v1.Affinity{NodeAffinity: &v1.NodeAffinity{RequiredDuringSchedulingIgnoredDuringExecution: selector}}}
-	selection := map[string]string{constants.AnnotationGPUTypeLabel: model.Key + "=A100"}
-	alternatives := []v1.NodeSelectorRequirement{conflict, zone}
-
-	AddPlacementRequirements(spec, selection, alternatives)
-	assert.Equal(t, []v1.NodeSelectorTerm{
-		{MatchExpressions: []v1.NodeSelectorRequirement{model, conflict}, MatchFields: []v1.NodeSelectorRequirement{name}},
-		{MatchExpressions: []v1.NodeSelectorRequirement{model, zone}, MatchFields: []v1.NodeSelectorRequirement{name}},
-		{},
-	}, selector.NodeSelectorTerms)
-	once := spec.DeepCopy()
-	AddPlacementRequirements(spec, selection, alternatives)
-	assert.Equal(t, once, spec)
-
-	selector.NodeSelectorTerms = []v1.NodeSelectorTerm{}
-	AddPlacementRequirements(spec, selection, alternatives)
-	assert.Empty(t, selector.NodeSelectorTerms)
-}
-
-func TestKnativeResourceOnlyAffinityUsesStrictPlacement(t *testing.T) {
-	key := constants.AcceleratorResourceNodeLabel("amd.com/gpu")
-	requested := v1.NodeSelectorRequirement{Key: key, Operator: v1.NodeSelectorOpIn, Values: []string{"true"}}
-	conflict := v1.NodeSelectorRequirement{Key: key, Operator: v1.NodeSelectorOpDoesNotExist}
-	required := &v1.NodeSelector{NodeSelectorTerms: []v1.NodeSelectorTerm{{MatchExpressions: []v1.NodeSelectorRequirement{requested}}}}
-	spec := &v1.PodSpec{Affinity: &v1.Affinity{NodeAffinity: &v1.NodeAffinity{RequiredDuringSchedulingIgnoredDuringExecution: required}}}
-	AddPlacementRequirements(spec, nil, []v1.NodeSelectorRequirement{conflict})
-	assert.Equal(t, []v1.NodeSelectorRequirement{requested, conflict}, required.NodeSelectorTerms[0].MatchExpressions)
 }

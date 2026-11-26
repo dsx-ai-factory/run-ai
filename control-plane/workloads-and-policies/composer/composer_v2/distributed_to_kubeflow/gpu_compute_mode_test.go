@@ -50,8 +50,15 @@ var _ = Describe("GPU selection in distributed training", func() {
 		c.WithClusterStorageConfig(testClusterStorageConfig("https://example.com", false))
 		target := NewMinimalDistributedTarget(workloadsApi.DISTRIBUTEDFRAMEWORK_MPI, true)
 		Expect(c.Compose(context.Background(), &workload, target)()).To(BeNil())
-		Expect(target.WorkerSpec.Template.Spec.NodeSelector).To(HaveKeyWithValue(composer.NvidiaProductLabel, "H100"))
-		Expect(target.MasterSpec.Template.Spec.NodeSelector).NotTo(HaveKey(composer.NvidiaProductLabel))
-		Expect(target.MasterSpec.Template.Annotations).NotTo(HaveKey("run.ai/gpu-type-label"))
+		worker := target.WorkerSpec.Template.Spec
+		Expect(worker.NodeSelector).To(BeEmpty())
+		terms := worker.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms
+		Expect(terms).To(HaveLen(1))
+		Expect(terms[0].MatchExpressions).To(ContainElement(corev1.NodeSelectorRequirement{
+			Key: composer.NvidiaProductLabel, Operator: corev1.NodeSelectorOpIn, Values: []string{"H100"},
+		}))
+		launcher := target.MasterSpec.Template.Spec
+		Expect(launcher.NodeSelector).To(BeEmpty())
+		Expect(launcher.Affinity).To(BeNil())
 	})
 })

@@ -114,14 +114,23 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 		cluster := workloadtest.BuildDisplayedCluster(project.ClusterId, "3.1.0", nil)
 		checkerCluster.SetMock(checkerCluster.NewSimpleMockClient().WithCluster(project.ClusterId, cluster))
 		checker.InitClusterCapabilitiesChecker("", workloadtest.GetDefaultClustersCacheConfig(), "")
-		clusterservice.SetMock(placementLookup{ClientInterface: clusterMock.NewSimpleMock().WithDefaultNodePool(project.ClusterId).WithNodePools(project.ClusterId, "h100", "cpu").WithCluster(project.ClusterId, &cluster),
+		clusterClient := clusterMock.NewSimpleMock().WithDefaultNodePool(project.ClusterId).WithNodePools(project.ClusterId, "h100", "cpu").WithCluster(project.ClusterId, &cluster)
+		poolList, err := clusterClient.GetNodePoolsInternalByCluster(ctx, project.ClusterId)
+		Expect(err).NotTo(HaveOccurred())
+		for i := range poolList.Nodepools {
+			pool := &poolList.Nodepools[i]
+			if !pool.IsDefault {
+				pool.LabelKey, pool.LabelValue = "pool", pool.Name
+			}
+		}
+		clusterservice.SetMock(placementLookup{ClientInterface: clusterClient,
 			clusterID: project.ClusterId, nodes: []map[string]string{
 				{clusterconstants.AcceleratorResourceNodeLabel(nvidia): "true", nvidiaLabel: "H100"},
 				{clusterconstants.AcceleratorResourceNodeLabel(amd): "true", amdLabel: "MI300X"},
 				{clusterconstants.AcceleratorResourceNodeLabel("gpu.intel.com/i915"): "true", "hardware.example.com/model": "Flex170"},
 			}})
 		projectInfo := GetProjectResponse(*project)
-		projectInfo.DefaultNodePools = []string{"h100"}
+		projectInfo.DefaultNodePools = []string{"cpu", "h100"}
 		for _, pool := range []struct{ name, id string }{{"h100", "eligible"}, {"cpu", "other"}} {
 			resource := orgapi.Resources{}
 			nodePool := orgapi.NewResourcesNodePool(pool.id)
@@ -165,7 +174,7 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 		return created
 	}
 
-	assertPlacement := func(resource, key, model string) {
+	assertPlacement := func(resource, key, model string) []corev1.NodeSelectorTerm {
 		GinkgoHelper()
 		var manifest struct {
 			Spec struct{ Template corev1.PodTemplateSpec }
@@ -181,17 +190,22 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 			Expect(ok).To(BeTrue())
 			Expect(quantity.Value()).To(Equal(int64(1)))
 		}
-		Expect(template.Annotations).To(HaveKeyWithValue("run.ai/gpu-type-label", key+"="+model))
+		Expect(template.Spec.NodeSelector).To(BeEmpty())
 		Expect(template.Spec.Affinity).NotTo(BeNil())
 		Expect(template.Spec.Affinity.NodeAffinity).NotTo(BeNil())
 		required := template.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution
 		Expect(required).NotTo(BeNil())
 		Expect(required.NodeSelectorTerms).NotTo(BeEmpty())
 		for _, term := range required.NodeSelectorTerms {
+			Expect(term.MatchFields).To(BeEmpty())
+			Expect(term.MatchExpressions).To(ContainElement(corev1.NodeSelectorRequirement{
+				Key: clusterconstants.AcceleratorResourceNodeLabel(resource), Operator: corev1.NodeSelectorOpIn, Values: []string{"true"},
+			}))
 			Expect(term.MatchExpressions).To(ContainElement(corev1.NodeSelectorRequirement{
 				Key: key, Operator: corev1.NodeSelectorOpIn, Values: []string{model},
 			}))
 		}
+		return required.NodeSelectorTerms
 	}
 
 	DescribeTable("rejects invalid explicit device label keys before model selection",
@@ -226,6 +240,17 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 			}
 			created := submit("trainings", "h100-placement", spec)
 			Expect(created.Spec.GetGpuType()).To(Equal("H100"))
+			wantPools := selected
+			if len(wantPools) == 0 {
+				wantPools = []string{"cpu", "h100"}
+			}
+			terms := assertPlacement(nvidia, nvidiaLabel, "H100")
+			Expect(terms).To(HaveLen(len(wantPools)))
+			for i, name := range wantPools {
+				Expect(terms[i].MatchExpressions).To(ContainElement(corev1.NodeSelectorRequirement{
+					Key: "pool", Operator: corev1.NodeSelectorOpIn, Values: []string{name},
+				}))
+			}
 			if expectWarning {
 				Expect(created.Warnings).To(HaveLen(1))
 				Expect(created.Warnings[0].Code).To(Equal(gpuTypeNotFound))
@@ -235,7 +260,8 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 		},
 		Entry("selected zero-limit H100 pool", []string{"h100"}, false),
 		Entry("H100 in the second selected pool", []string{"cpu", "h100"}, false),
-		Entry("implicit project default is the zero-limit H100 pool", []string(nil), false),
+		Entry("omitted pools use both project defaults", []string(nil), false),
+		Entry("empty pools use both project defaults", []string{}, false),
 		Entry("H100 exists only outside the selected pool", []string{"cpu"}, true),
 	)
 

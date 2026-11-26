@@ -55,7 +55,7 @@ func (pm *PodMutator) MutatePod(pod *v1.Pod, request *v1beta1.AdmissionRequest) 
 		}
 	}
 
-	return pm.enforceSelectedGPUPlacement(pod)
+	return nil
 }
 
 func (pm *PodMutator) listSingleActionPodMutators() []PodMutatingFunc {

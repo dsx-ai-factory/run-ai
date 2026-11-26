@@ -40,12 +40,12 @@ func (pm *PodControllerMutator) setRunaiNodeAffinityForNodeType(podController *t
 
 	interactive := utils.IsInteractiveByPriority(pm.client.GetCachedReader(),
 		podController.Labels, podController.Spec.Template.Spec.PriorityClassName)
-	setNodeAffinityForNodeType(podSpec, podController.Spec.Template.Annotations, project, interactive)
+	setNodeAffinityForNodeType(podSpec, project, interactive)
 
 	return nil
 }
 
-func setNodeAffinityForNodeType(podSpec *v1.PodSpec, annotations map[string]string, project *unstructured.Unstructured, interactive bool) {
+func setNodeAffinityForNodeType(podSpec *v1.PodSpec, project *unstructured.Unstructured, interactive bool) {
 	// The node types moved from Project.spec to an annotation with the kai.resources CRD.
 	nodeAffinityTypes := utils.NodeAffinityTypesFromAnnotation(project, interactive)
 
@@ -58,5 +58,5 @@ func setNodeAffinityForNodeType(podSpec *v1.PodSpec, annotations map[string]stri
 		Operator: v1.NodeSelectorOpIn,
 		Values:   nodeAffinityTypes,
 	}
-	patch.AddPlacementRequirements(podSpec, annotations, []v1.NodeSelectorRequirement{matchExpressionToAdd})
+	patch.AddNodeAffinityToPodSpec(podSpec, []v1.NodeSelectorRequirement{matchExpressionToAdd})
 }
