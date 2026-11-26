@@ -800,7 +800,7 @@ function percentage(row: IDepartmentSchedulingEdit) {
   const value = rowWeightPercentage(row);
   if (value == null || !Number.isFinite(value)) return "Unknown";
   if (value > 0 && value < 0.1) return "<0.1%";
-  return `${formatUtil.roundToDecimal(value, automatic.value ? 1 : 2)}%`;
+  return `${formatUtil.roundToDecimal(value, 2)}%`;
 }
 function maximumDemand(row: IDepartmentSchedulingEdit) {
   const capacity = Number.isFinite(props.capacity) ? Math.max(0, props.capacity ?? 0) : 0;

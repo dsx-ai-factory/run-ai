@@ -309,7 +309,7 @@ describe("scheduling step with all modes enabled", () => {
       await wrapper.vm.$nextTick();
       expect(labels()).toEqual(["49.94%", "0.12%", "49.94%"]);
       await wrapper.get('[aid="radio-option-Automatic"]').trigger("click");
-      expect(labels()).toEqual(["0%", "0.2%", "99.8%"]);
+      expect(labels()).toEqual(["0%", "0.25%", "99.75%"]);
       await wrapper.get('[aid="radio-option-Custom"]').trigger("click");
       expect(labels()).toEqual(["33.28%", "0.17%", "66.56%"]);
       expect(table.props("draft").departments["0"]?.weight).toBeUndefined();

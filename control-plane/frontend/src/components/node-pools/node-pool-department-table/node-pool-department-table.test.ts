@@ -602,7 +602,7 @@ describe("scheduling department table", () => {
   it.each([
     { value: 0.001, automatic: true, display: "<0.1%", marker: "0.01%" },
     { value: 0, automatic: true, display: "<0.1%", marker: "0.0999001%" },
-    { value: 4.996, automatic: true, display: "50%", marker: "49.96%" },
+    { value: 4.996, automatic: true, display: "49.96%", marker: "49.96%" },
     { value: 4.996, automatic: false, display: "49.96%", marker: "49.96%" },
   ])(
     "formats weight $value with automatic=$automatic without rounding geometry",
@@ -1205,14 +1205,18 @@ describe("scheduling department table", () => {
     expect(wrapper.find('[aria-disabled="true"]').exists()).toBe(true);
     wrapper.unmount();
   });
-  it("retains the quota split and full rank denominator when switching to Custom", async () => {
+  it.each([
+    { quotas: [2, 6], shares: ["25%", "75%"] },
+    { quotas: [1, 10], shares: ["9.09%", "90.91%"] },
+  ])("retains the displayed shares $shares when switching to Custom", async ({ quotas, shares }) => {
     const saved = {
       ...draft,
       mode: ESchedulingMode.Guaranteed,
       automaticWeights: true,
       capabilities: { adjustableWeights: false, quota: true },
     };
-    const peers = [2, 6].map((quota, i) => ({
+    const total = quotas[0] + quotas[1];
+    const peers = quotas.map((quota, i) => ({
       ...rows[0],
       orgUnitId: String(i),
       orgUnitName: ["Alpha", "Beta"][i],
@@ -1226,7 +1230,9 @@ describe("scheduling department table", () => {
         rawWeightsAvailable: false,
         ranks: ["MediumLow"],
         rankCounts: { MediumLow: 2 },
-        aggregates: { MediumLow: { weightsSum: 8, deservedSum: 8, rawWeightsSum: undefined, automaticWeightsSum: 8 } },
+        aggregates: {
+          MediumLow: { weightsSum: total, deservedSum: total, rawWeightsSum: undefined, automaticWeightsSum: total },
+        },
         readonly: false,
         loading: false,
       },
@@ -1238,15 +1244,15 @@ describe("scheduling department table", () => {
     const weights = () =>
       wrapper.findAllComponents(DepartmentResourceEditor).filter((cell) => cell.props("kind") === "weight");
     try {
-      expect(weights().map((cell) => cell.props("displayValue"))).toEqual(["25%", "75%"]);
+      expect(weights().map((cell) => cell.props("displayValue"))).toEqual(shares);
       expect(weights().every((cell) => cell.props("disabled"))).toBe(true);
       await wrapper.setProps({ draft: { ...saved, automaticWeights: false } });
-      expect(weights().map((cell) => cell.props("displayValue"))).toEqual(["25%", "75%"]);
-      expect(weights().map((cell) => cell.props("value"))).toEqual([2, 6]);
+      expect(weights().map((cell) => cell.props("displayValue"))).toEqual(shares);
+      expect(weights().map((cell) => cell.props("value"))).toEqual(quotas);
       expect(weights().every((cell) => !cell.props("disabled"))).toBe(true);
       await wrapper.setProps({ rows: [peers[1]], searchTerm: "Beta" });
-      expect(weights().map((cell) => cell.props("displayValue"))).toEqual(["75%"]);
-      expect(weights()[0].props("previewWeightPercentage")?.(2)).toBe(50);
+      expect(weights().map((cell) => cell.props("displayValue"))).toEqual([shares[1]]);
+      expect(weights()[0].props("previewWeightPercentage")?.(quotas[0])).toBe(50);
     } finally {
       wrapper.unmount();
     }
