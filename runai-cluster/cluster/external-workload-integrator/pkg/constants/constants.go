@@ -23,4 +23,8 @@ const (
 	ManagedByLabelKey                 = "app.kubernetes.io/managed-by"
 	HelmReleaseAnnotationKey          = "meta.helm.sh/release-name"
 	DynamoGraphDeploymentNameLabelKey = "nvidia.com/dynamo-graph-deployment-name"
+
+	WorkflowLabelKey          = "run.ai/workflow"
+	ArgoWorkflowLabelKey      = "workflows.argoproj.io/workflow"
+	ArgoNodeNameAnnotationKey = "workflows.argoproj.io/node-name"
 )

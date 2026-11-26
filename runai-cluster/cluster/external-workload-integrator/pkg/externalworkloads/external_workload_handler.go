@@ -244,7 +244,22 @@ func (h *ExternalWorkloadHandler) HandleWorkloadAddUpdateEvent(ctx context.Conte
 		return h.handleTopOwnedObject(ctx, object, addedResource)
 	}
 
-	return h.handleOwnedObject(ctx, object, addedResource)
+	err := h.handleOwnedObject(ctx, object, addedResource)
+	if isWorkflowPod(object, gvk) {
+		if attemptErr := h.handleTopOwnedObject(ctx, object, addedResource); attemptErr != nil {
+			err = multierror.Append(err, attemptErr)
+		}
+	}
+	return err
+}
+
+// isWorkflowPod reports whether the object is a pod of a Run:ai workflow. Such a pod is an attempt of a
+// task, with its own status: it stays part of the workflow's workload, and is also a workload of its own.
+func isWorkflowPod(object client.Object, gvk schema.GroupVersionKind) bool {
+	if gvk.Group != "" || gvk.Kind != "Pod" {
+		return false
+	}
+	return object.GetLabels()[constants.WorkflowLabelKey] != ""
 }
 
 func (h *ExternalWorkloadHandler) createChildId(object client.Object) *v1alpha1.ChildId {

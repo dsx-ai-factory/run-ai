@@ -17,6 +17,9 @@ metadata:
 spec:
   arguments: {}
   entrypoint: hello-world
+  podMetadata:
+    labels:
+      run.ai/workflow: basic
   templates:
   - container:
       args:

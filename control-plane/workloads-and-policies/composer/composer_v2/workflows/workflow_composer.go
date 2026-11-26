@@ -17,6 +17,9 @@ import (
 const (
 	helloWorldTemplate = "hello-world"
 	helloWorldImage    = "busybox:1.37"
+
+	// The cluster's integrator identifies the pods of a Run:ai workflow by this label.
+	workflowPodLabel = "run.ai/workflow"
 )
 
 type WorkflowComposer struct {
@@ -56,7 +59,8 @@ func (wc *WorkflowComposer) Compose(src *workloadsApi.WorkflowSpecSpec, target *
 		)
 
 		target.Spec = wfv1.WorkflowSpec{
-			Entrypoint: helloWorldTemplate,
+			Entrypoint:  helloWorldTemplate,
+			PodMetadata: &wfv1.Metadata{Labels: map[string]string{workflowPodLabel: wc.fc.WorkloadName}},
 			Templates: []wfv1.Template{{
 				Name: helloWorldTemplate,
 				Container: &corev1.Container{

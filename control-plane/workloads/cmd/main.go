@@ -63,7 +63,7 @@ func init() {
 		logging.Fatalf("Failed to run go DB migrations: %v", err)
 	}
 
-	err := cache.Init(nil)
+	err = cache.Init(nil)
 	if err != nil {
 		logging.Errorf("Failed to initialize cache: %v", err)
 	}
