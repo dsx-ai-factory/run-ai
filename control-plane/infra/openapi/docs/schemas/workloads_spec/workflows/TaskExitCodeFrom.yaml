@@ -1,0 +1,7 @@
+description: The first exit code of the range. (mandatory)
+type: integer
+format: int32
+minimum: 0
+maximum: 255
+example: 5
+nullable: true

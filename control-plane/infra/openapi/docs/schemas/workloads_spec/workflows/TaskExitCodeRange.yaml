@@ -1,0 +1,8 @@
+description: A range of exit codes, including both ends.
+properties:
+  from:
+    $ref: "./TaskExitCodeFrom.yaml"
+  to:
+    $ref: "./TaskExitCodeTo.yaml"
+nullable: true
+type: object

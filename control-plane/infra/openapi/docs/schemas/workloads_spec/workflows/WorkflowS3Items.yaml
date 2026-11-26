@@ -1,0 +1,5 @@
+description: Set of S3 buckets that the tasks of the workflow can use.
+type: array
+items:
+  $ref: "./WorkflowS3Instance.yaml"
+nullable: true

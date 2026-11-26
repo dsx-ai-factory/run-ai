@@ -1,0 +1,6 @@
+description: How long, in seconds, each task waits for the group's other tasks. (mandatory when enabled)
+type: integer
+format: int32
+minimum: 1
+example: 600
+nullable: true

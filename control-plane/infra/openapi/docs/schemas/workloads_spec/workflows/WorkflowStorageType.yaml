@@ -1,0 +1,6 @@
+description: The type of the storage. (mandatory)
+type: string
+enum:
+  - s3
+example: s3
+nullable: true

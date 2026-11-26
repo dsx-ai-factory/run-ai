@@ -1,0 +1,8 @@
+description: The maximum number of retries. The task is retried when it ends with one of `onExitCodes`,
+  when it's preempted, and after an infrastructure error such as a lost node.
+  0 means that the task isn't retried, and fails on its first failure or preemption.
+type: integer
+format: int32
+minimum: 0
+example: 3
+nullable: true

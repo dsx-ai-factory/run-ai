@@ -1,0 +1,5 @@
+description: Defines the workflow placement profiles.
+type: array
+items:
+  $ref: WorkflowPlacementProfile.yaml
+maxItems: 100

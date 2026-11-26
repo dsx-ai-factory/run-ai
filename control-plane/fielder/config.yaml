@@ -34,6 +34,7 @@ fields:
           - DinfLeaderWorkerRules
           - SpecificRunParamsSpec
           - AssetsEnvSpecAndRunParams
+          - WorkflowTaskSpec
   args:
     name: "args"
     variants:
@@ -70,6 +71,7 @@ fields:
           - DinfLeaderWorkerRules
           - SpecificRunParamsSpec
           - AssetsEnvSpecAndRunParams
+          - WorkflowTaskSpec
   image:
     name: "image"
     variants:
@@ -107,6 +109,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsEnvSpecOnly
+          - WorkflowTaskSpec
   imagePullPolicy:
     name: "imagePullPolicy"
     variants:
@@ -144,6 +147,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsEnvSpecOnly
+          - WorkflowTaskSpec
   environmentVariables:
     name: environmentVariables
     variants:
@@ -181,6 +185,7 @@ fields:
           - DinfLeaderWorkerTemplateSpec
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
+          - WorkflowTaskSpec
       - spec: ../../../../../assets-service/swagger/source/schemas/Common/EnvironmentVariablesOfAsset.yaml
         name: assets
         targets:
@@ -220,6 +225,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsEnvSpecOnly
+          - WorkflowTaskSpec
   createHomeDir:
     name: "createHomeDir"
     variants:
@@ -254,6 +260,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsEnvSpecOnly
+          - WorkflowTaskSpec
   stdin:
     name: stdin
     variants:
@@ -279,6 +286,7 @@ fields:
           - ReplicaRules
           - ReplicaDefaults
           - AssetsEnvSpecOnly
+          - WorkflowTaskSpec
   tty:
     name: tty
     variants:
@@ -304,6 +312,7 @@ fields:
           - ReplicaRules
           - ReplicaDefaults
           - AssetsEnvSpecOnly
+          - WorkflowTaskSpec
   probes:
     name: "probes"
     variants:
@@ -341,6 +350,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsEnvSpecOnly
+          - WorkflowTaskSpec
   nodeType:
     name: "nodeType"
     variants:
@@ -411,6 +421,8 @@ fields:
           - DinfCommonDefaults
           - DinfCommonRules
           - SpecificRunParamsSpec
+          - WorkflowGroupFieldsSpec
+          - WorkflowFieldsSpec
   nodeAffinityRequired:
     name: "nodeAffinityRequired"
     variants:
@@ -445,6 +457,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - SpecificRunParamsSpec
+          - WorkflowPlacementProfileSpec
   podAffinity:
     name: "podAffinity"
     variants:
@@ -515,6 +528,7 @@ fields:
           - NimServiceDefaults
           - NimServiceRules
           - SpecificRunParamsSpec
+          - WorkflowFieldsSpec
   preemptibility:
     name: "preemptibility"
     variants:
@@ -551,6 +565,7 @@ fields:
           - NimServiceDefaults
           - NimServiceRules
           - SpecificRunParamsSpec
+          - WorkflowFieldsSpec
   priorityClass:
     name: "priorityClass"
     variants:
@@ -586,6 +601,7 @@ fields:
           - NimServiceDefaults
           - NimServiceRules
           - SpecificRunParamsSpec
+          - WorkflowFieldsSpec
       - name: masterPriorityClass
         spec: resources/PriorityClassMaster.yaml
         defaults: resources/PriorityClass.yaml
@@ -673,6 +689,7 @@ fields:
           - ReplicaDefaults
           - ReplicaRules
           - SpecificRunParamsSpec
+          - WorkflowTaskSpec
       - name: masterTerminationGracePeriod
         spec: advanced/TerminationGracePeriodMaster.yaml
         defaults: advanced/TerminationGracePeriod.yaml
@@ -716,6 +733,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - SpecificRunParamsSpec
+          - WorkflowTaskSpec
   labels:
     name: labels
     variants:
@@ -752,6 +770,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - SpecificRunParamsSpec
+          - WorkflowTaskSpec
   imagePullSecrets:
     name: imagePullSecrets
     variants:
@@ -783,6 +802,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - SpecificRunParamsSpec
+          - WorkflowTaskSpec
   tolerations:
     name: tolerations
     variants:
@@ -819,6 +839,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - SpecificRunParamsSpec
+          - WorkflowPlacementProfileSpec
 
   backoffLimit:
     name: backoffLimit
@@ -1136,6 +1157,7 @@ fields:
           - StorageFieldsSpec
           - StorageFieldsDefaults
           - StorageFieldsRules
+          - WorkflowTaskSpec
   nfs:
     name: "storage.nfs"
     variants:
@@ -1233,6 +1255,7 @@ fields:
           - StorageFieldsSpec
           - StorageFieldsDefaults
           - StorageFieldsRules
+          - WorkflowTaskSpec
   secretVolume:
     name: "storage.secretVolume"
     variants:
@@ -1268,6 +1291,7 @@ fields:
           - StorageFieldsSpec
           - StorageFieldsDefaults
           - StorageFieldsRules
+          - WorkflowTaskSpec
   emptyDirVolume:
     name: "storage.emptyDirVolume"
     variants:
@@ -1303,6 +1327,7 @@ fields:
           - StorageFieldsSpec
           - StorageFieldsDefaults
           - StorageFieldsRules
+          - WorkflowTaskSpec
   s3:
     name: "storage.s3"
     variants:
@@ -1330,6 +1355,10 @@ fields:
           - StorageFieldsSpec
           - StorageFieldsDefaults
           - StorageFieldsRules
+      - name: workflow
+        spec: workflows/WorkflowS3Items.yaml
+        targets:
+          - WorkflowStorageProfileSpec
   nimCache:
     name: "modelStore.nimCache"
     variants:
@@ -1383,6 +1412,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsEnvSpecOnly
+          - WorkflowTaskSpec
   capabilities:
     name: "security.capabilities"
     variants:
@@ -1416,6 +1446,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsEnvSpecOnly
+          - WorkflowTaskSpec
   seccompProfileType:
     name: "security.seccompProfileType"
     variants:
@@ -1449,6 +1480,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsEnvSpecOnly
+          - WorkflowTaskSpec
   runAsNonRoot:
     name: "security.runAsNonRoot"
     variants:
@@ -1482,6 +1514,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsEnvSpecOnly
+          - WorkflowTaskSpec
   readOnlyRootFilesystem:
     name: "security.readOnlyRootFilesystem"
     variants:
@@ -1515,6 +1548,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsEnvSpecOnly
+          - WorkflowTaskSpec
   runAsUid:
     name: security.runAsUid
     variants:
@@ -1552,6 +1586,7 @@ fields:
           - DinfLeaderWorkerRules
           - SpecificRunParamsSpec
           - AssetsEnvSpecAndRunParams
+          - WorkflowTaskSpec
   runAsGid:
     name: security.runAsGid
     variants:
@@ -1589,6 +1624,7 @@ fields:
           - DinfLeaderWorkerRules
           - SpecificRunParamsSpec
           - AssetsEnvSpecAndRunParams
+          - WorkflowTaskSpec
   supplementalGroups:
     name: security.supplementalGroups
     variants:
@@ -1623,6 +1659,7 @@ fields:
           - DinfLeaderWorkerRules
           - SpecificRunParamsSpec
           - AssetsEnvSpecAndRunParams
+          - WorkflowTaskSpec
   hostIpc:
     name: security.hostIpc
     variants:
@@ -1656,6 +1693,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsEnvSpecOnly
+          - WorkflowTaskSpec
   hostNetwork:
     name: security.hostNetwork
     variants:
@@ -1689,6 +1727,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsEnvSpecOnly
+          - WorkflowTaskSpec
   allowPrivilegeEscalation:
     name: security.allowPrivilegeEscalation
     variants:
@@ -1714,6 +1753,7 @@ fields:
           - ReplicaDefaults
           - ReplicaRules
           - AssetsEnvSpecOnly
+          - WorkflowTaskSpec
   privileged:
     name: security.privileged
     variants:
@@ -1742,6 +1782,7 @@ fields:
           - DinfLeaderWorkerSpec
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
+          - WorkflowTaskSpec
   gpuDevicesRequest:
     name: compute.gpuDevicesRequest
     variants:
@@ -1779,6 +1820,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsComputeSpec
+          - WorkflowComputeProfileSpec
   gpuRequestType:
     name: compute.gpuRequestType
     variants:
@@ -1816,6 +1858,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsComputeSpec
+          - WorkflowComputeProfileSpec
   gpuComputeMode:
     name: compute.gpuComputeMode
     variants:
@@ -1853,6 +1896,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsComputeSpec
+          - WorkflowComputeProfileSpec
   gpuMemoryPortionRequest:
     name: compute.gpuMemoryPortionRequest
     variants:
@@ -1890,6 +1934,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsComputeSpec
+          - WorkflowComputeProfileSpec
   gpuPortionRequest:
     name: compute.gpuPortionRequest
     variants:
@@ -1966,6 +2011,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsComputeSpec
+          - WorkflowComputeProfileSpec
   gpuPortionLimit:
     name: compute.gpuPortionLimit
     variants:
@@ -2042,6 +2088,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsComputeSpec
+          - WorkflowComputeProfileSpec
   gpuMemoryLimit:
     name: compute.gpuMemoryLimit
     variants:
@@ -2079,6 +2126,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsComputeSpec
+          - WorkflowComputeProfileSpec
   cpuCoreRequest:
     name: compute.cpuCoreRequest
     variants:
@@ -2116,6 +2164,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsComputeSpec
+          - WorkflowComputeProfileSpec
   cpuCoreLimit:
     name: compute.cpuCoreLimit
     variants:
@@ -2153,6 +2202,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsComputeSpec
+          - WorkflowComputeProfileSpec
   cpuMemoryRequest:
     name: compute.cpuMemoryRequest
     variants:
@@ -2190,6 +2240,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsComputeSpec
+          - WorkflowComputeProfileSpec
   cpuMemoryLimit:
     name: compute.cpuMemoryLimit
     variants:
@@ -2227,6 +2278,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsComputeSpec
+          - WorkflowComputeProfileSpec
   largeShmRequest:
     name: compute.largeShmRequest
     variants:
@@ -2261,6 +2313,7 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsComputeSpec
+          - WorkflowComputeProfileSpec
   extendedResources:
     name: compute.extendedResources
     variants:
@@ -2295,6 +2348,13 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsComputeSpec
+          - WorkflowComputeProfileSpec
+  ephemeralStorageRequest:
+    name: compute.ephemeralStorageRequest
+    variants:
+      - spec: workflows/WorkflowEphemeralStorageRequest.yaml
+        targets:
+          - WorkflowComputeProfileSpec
   numWorkers:
     name: numWorkers
     variants:
@@ -2516,6 +2576,79 @@ fields:
           - NimServiceSpec
           - NimServiceDefaults
           - NimServiceRules
+
+  name:
+    name: name
+    variants:
+      - name: group
+        spec: workflows/GroupName.yaml
+        targets:
+          - WorkflowGroupFieldsSpec
+      - name: task
+        spec: workflows/TaskName.yaml
+        targets:
+          - WorkflowTaskSpec
+      - name: profile
+        spec: workflows/WorkflowProfileName.yaml
+        targets:
+          - WorkflowComputeProfileSpec
+          - WorkflowPlacementProfileSpec
+
+  dependsOn:
+    name: dependsOn
+    variants:
+      - spec: workflows/GroupDependsOn.yaml
+        targets:
+          - WorkflowGroupFieldsSpec
+
+  leader:
+    name: leader
+    variants:
+      - spec: workflows/GroupLeader.yaml
+        targets:
+          - WorkflowGroupFieldsSpec
+
+  synchronizedStart:
+    name: synchronizedStart
+    variants:
+      - spec: workflows/SynchronizedStart.yaml
+        targets:
+          - WorkflowGroupFieldsSpec
+
+  computeRef:
+    name: computeRef
+    variants:
+      - spec: workflows/WorkflowProfileName.yaml
+        targets:
+          - WorkflowTaskSpec
+
+  placementRef:
+    name: placementRef
+    variants:
+      - spec: workflows/WorkflowProfileName.yaml
+        targets:
+          - WorkflowTaskSpec
+
+  storageRef:
+    name: storageRef
+    variants:
+      - spec: workflows/WorkflowS3StorageRefs.yaml
+        targets:
+          - WorkflowTaskSpec
+
+  retry:
+    name: retry
+    variants:
+      - spec: workflows/TaskRetry.yaml
+        targets:
+          - WorkflowTaskSpec
+
+  successExitCodes:
+    name: successExitCodes
+    variants:
+      - spec: workflows/TaskSuccessExitCodes.yaml
+        targets:
+          - WorkflowTaskSpec
 
 targets:
   SupersetSpec:
@@ -2761,3 +2894,32 @@ targets:
     nameChange:
       # in assets spec fields, no need for the section itself
       compute: {}
+  WorkflowFieldsSpec:
+    type: spec
+    path: infra/openapi/docs/schemas/workflows/WorkflowFields.yaml
+    nullable: false
+  WorkflowGroupFieldsSpec:
+    type: spec
+    path: infra/openapi/docs/schemas/workflows/WorkflowGroupFields.yaml
+    nullable: false
+  WorkflowTaskSpec:
+    type: spec
+    path: infra/openapi/docs/schemas/workflows/WorkflowTask.yaml
+    nullable: false
+  WorkflowComputeProfileSpec:
+    type: spec
+    path: infra/openapi/docs/schemas/workflows/WorkflowComputeProfile.yaml
+    nullable: false
+    nameChange:
+      # in a compute profile, no need for the section itself
+      compute: {}
+  WorkflowPlacementProfileSpec:
+    type: spec
+    path: infra/openapi/docs/schemas/workflows/WorkflowPlacementProfile.yaml
+    nullable: false
+  WorkflowStorageProfileSpec:
+    type: spec
+    path: infra/openapi/docs/schemas/workflows/WorkflowStorageProfile.yaml
+    nameChange:
+      # in the storage profile, no need for the section itself
+      storage: {}

@@ -1,0 +1,7 @@
+description: The name of the profile, which tasks use to reference it. It must be unique among the profiles of its kind. (mandatory)
+type: string
+minLength: 1
+maxLength: 63
+example: h100
+nullable: true
+pattern: .*

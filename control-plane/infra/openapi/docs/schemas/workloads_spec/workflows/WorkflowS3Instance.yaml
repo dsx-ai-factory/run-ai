@@ -1,0 +1,6 @@
+allOf:
+  - $ref: "./WorkflowS3Common.yaml"
+  - $ref: "../storage/S3AccessKey.yaml"
+  - $ref: "../ExcludeField.yaml"
+nullable: true
+type: object

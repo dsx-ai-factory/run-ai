@@ -1,0 +1,5 @@
+description: The specifications of the workflow to be created.
+type: object
+properties:
+  spec:
+    $ref: "./WorkflowSpecSpec.yaml"

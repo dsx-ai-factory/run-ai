@@ -1,0 +1,14 @@
+description: When and how many times the task is retried. Each retry runs the task again as a new attempt.
+  Retrying a task that decides its group's result restarts the whole group.
+properties:
+  limit:
+    $ref: "./TaskRetryLimit.yaml"
+  onExitCodes:
+    description: Ranges of exit codes that retry the task.
+    type: array
+    items:
+      $ref: "./TaskExitCodeRange.yaml"
+    maxItems: 256
+    nullable: true
+nullable: true
+type: object

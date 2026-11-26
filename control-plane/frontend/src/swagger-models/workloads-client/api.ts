@@ -19220,6 +19220,31 @@ export interface SyncRevisions207Response {
     'failedRevisions': Array<string>;
 }
 /**
+ * Makes all the tasks of the group start their commands at the same moment, once all of them are ready.
+ * @export
+ * @interface SynchronizedStart
+ */
+export interface SynchronizedStart {
+    /**
+     * Turns on the synchronized start for the group. The default is false.
+     * @type {boolean}
+     * @memberof SynchronizedStart
+     */
+    'enabled'?: boolean | null;
+    /**
+     * The port that the tasks of the group use to reach each other before they start. It must be a port that the group\'s tasks don\'t use. (mandatory when enabled)
+     * @type {number}
+     * @memberof SynchronizedStart
+     */
+    'port'?: number | null;
+    /**
+     * How long, in seconds, each task waits for the group\'s other tasks. (mandatory when enabled)
+     * @type {number}
+     * @memberof SynchronizedStart
+     */
+    'timeoutSeconds'?: number | null;
+}
+/**
  * the highest update count that was assigned to the data being synchronized. for example, it is possible that the agent sent afterUpdate=12 and received a bulk containing only four updates (13, 15, 18, 19) but in the system there is already update 21 which was not included in this bulk and can be received in the following bulk.
  * @export
  * @interface SystemInfo
@@ -19231,6 +19256,44 @@ export interface SystemInfo {
      * @memberof SystemInfo
      */
     'highestUpdate'?: number;
+}
+/**
+ * A range of exit codes, including both ends.
+ * @export
+ * @interface TaskExitCodeRange
+ */
+export interface TaskExitCodeRange {
+    /**
+     * The first exit code of the range. (mandatory)
+     * @type {number}
+     * @memberof TaskExitCodeRange
+     */
+    'from'?: number | null;
+    /**
+     * The last exit code of the range. (mandatory)
+     * @type {number}
+     * @memberof TaskExitCodeRange
+     */
+    'to'?: number | null;
+}
+/**
+ * When and how many times the task is retried. Each retry runs the task again as a new attempt. Retrying a task that decides its group\'s result restarts the whole group.
+ * @export
+ * @interface TaskRetry
+ */
+export interface TaskRetry {
+    /**
+     * The maximum number of retries. The task is retried when it ends with one of `onExitCodes`, when it\'s preempted, and after an infrastructure error such as a lost node. 0 means that the task isn\'t retried, and fails on its first failure or preemption.
+     * @type {number}
+     * @memberof TaskRetry
+     */
+    'limit'?: number | null;
+    /**
+     * Ranges of exit codes that retry the task.
+     * @type {Array<TaskExitCodeRange>}
+     * @memberof TaskRetry
+     */
+    'onExitCodes'?: Array<TaskExitCodeRange> | null;
 }
 /**
  * 
@@ -22582,6 +22645,812 @@ export interface UpdateWorkloadsSettingByKeyRequest {
      * @memberof UpdateWorkloadsSettingByKeyRequest
      */
     'enabled'?: boolean | null;
+}
+/**
+ * 
+ * @export
+ * @interface Workflow
+ */
+export interface Workflow {
+    /**
+     * The name of the workload.
+     * @type {string}
+     * @memberof Workflow
+     */
+    'name': string;
+    /**
+     * The name as was requested for the workload. If useGivenNameAsPrefix, in the creation request, is false, name and requestedName should be identical. Otherwise, name should be composed of requestedName followed by a suffix of random characters.
+     * @type {string}
+     * @memberof Workflow
+     */
+    'requestedName': string;
+    /**
+     * A unique ID of the workload.
+     * @type {string}
+     * @memberof Workflow
+     */
+    'workloadId': string;
+    /**
+     * The id of the project.
+     * @type {string}
+     * @memberof Workflow
+     */
+    'projectId': string;
+    /**
+     * The id of the department.
+     * @type {string}
+     * @memberof Workflow
+     */
+    'departmentId'?: string;
+    /**
+     * The id of the cluster.
+     * @type {string}
+     * @memberof Workflow
+     */
+    'clusterId': string;
+    /**
+     * The user who created the workload
+     * @type {string}
+     * @memberof Workflow
+     */
+    'createdBy': string;
+    /**
+     * The creation time of the workload.
+     * @type {string}
+     * @memberof Workflow
+     */
+    'createdAt': string;
+    /**
+     * The deletion time of the workload.
+     * @type {string}
+     * @memberof Workflow
+     */
+    'deletedAt'?: string | null;
+    /**
+     * 
+     * @type {WorkloadDesiredPhase}
+     * @memberof Workflow
+     */
+    'desiredPhase': WorkloadDesiredPhase;
+    /**
+     * 
+     * @type {Phase}
+     * @memberof Workflow
+     */
+    'actualPhase'?: Phase;
+    /**
+     * 
+     * @type {WorkflowSpecSpec}
+     * @memberof Workflow
+     */
+    'spec'?: WorkflowSpecSpec;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowComputeProfile
+ */
+export interface WorkflowComputeProfile {
+    /**
+     * Limitations on the number of CPUs consumed by the workload (0.5, 1, .etc). The system guarantees that this workload will not be able to consume more than this amount of CPUs.
+     * @type {number}
+     * @memberof WorkflowComputeProfile
+     */
+    'cpuCoreLimit'?: number | null;
+    /**
+     * CPU units to allocate for the created workload (0.5, 1, .etc). The workload will receive at least this amount of CPU. Note that the workload will not be scheduled unless the system can guarantee this amount of CPUs to the workload.
+     * @type {number}
+     * @memberof WorkflowComputeProfile
+     */
+    'cpuCoreRequest'?: number | null;
+    /**
+     * Limitations on the CPU memory to allocate for this workload (1G, 20M, .etc). The system guarantees that this workload will not be able to consume more than this amount of memory. The workload will receive an error when trying to allocate more memory than this limit.
+     * @type {string}
+     * @memberof WorkflowComputeProfile
+     */
+    'cpuMemoryLimit'?: string | null;
+    /**
+     * The amount of CPU memory to allocate for this workload (1G, 20M, .etc). The workload will receive at least this amount of memory. Note that the workload will not be scheduled unless the system can guarantee this amount of memory to the workload
+     * @type {string}
+     * @memberof WorkflowComputeProfile
+     */
+    'cpuMemoryRequest'?: string | null;
+    /**
+     * The amount of local disk space (ephemeral storage) to allocate for the task (1G, 20M, etc.), including the space of its S3 inputs and outputs. The task will not be scheduled unless a node can guarantee this amount of disk space.
+     * @type {string}
+     * @memberof WorkflowComputeProfile
+     */
+    'ephemeralStorageRequest'?: string | null;
+    /**
+     * Extended resources and their quantity.
+     * @type {Array<ExtendedResource>}
+     * @memberof WorkflowComputeProfile
+     */
+    'extendedResources'?: Array<ExtendedResource> | null;
+    /**
+     * 
+     * @type {GpuComputeMode}
+     * @memberof WorkflowComputeProfile
+     */
+    'gpuComputeMode'?: GpuComputeMode | null;
+    /**
+     * Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
+     * @type {number}
+     * @memberof WorkflowComputeProfile
+     */
+    'gpuDevicesRequest'?: number | null;
+    /**
+     * Limitation on the memory consumed by the workload, per GPU device. The system guarantees The gpuMemoryLimit must be no less than gpuMemoryRequest.
+     * @type {string}
+     * @memberof WorkflowComputeProfile
+     */
+    'gpuMemoryLimit'?: string | null;
+    /**
+     * Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.
+     * @type {number}
+     * @memberof WorkflowComputeProfile
+     */
+    'gpuMemoryPortionLimit'?: number | null;
+    /**
+     * GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.
+     * @type {number}
+     * @memberof WorkflowComputeProfile
+     */
+    'gpuMemoryPortionRequest'?: number | null;
+    /**
+     * Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload.
+     * @type {string}
+     * @memberof WorkflowComputeProfile
+     */
+    'gpuMemoryRequest'?: string | null;
+    /**
+     * 
+     * @type {GpuRequestType}
+     * @memberof WorkflowComputeProfile
+     */
+    'gpuRequestType'?: GpuRequestType | null;
+    /**
+     * A large /dev/shm device to mount into a container running the created workload. An shm is a shared file system mounted on RAM.
+     * @type {boolean}
+     * @memberof WorkflowComputeProfile
+     */
+    'largeShmRequest'?: boolean | null;
+    /**
+     * The name of the profile, which tasks use to reference it. It must be unique among the profiles of its kind. (mandatory)
+     * @type {string}
+     * @memberof WorkflowComputeProfile
+     */
+    'name'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowCreationRequest
+ */
+export interface WorkflowCreationRequest {
+    /**
+     * The name of the workload.
+     * @type {string}
+     * @memberof WorkflowCreationRequest
+     */
+    'name': string;
+    /**
+     * When true, the requested name will be treated as a prefix. The final name of the workload will be composed of the name followed by a random set of characters.
+     * @type {boolean}
+     * @memberof WorkflowCreationRequest
+     */
+    'useGivenNameAsPrefix'?: boolean;
+    /**
+     * The id of the project.
+     * @type {string}
+     * @memberof WorkflowCreationRequest
+     */
+    'projectId': string;
+    /**
+     * The id of the cluster.
+     * @type {string}
+     * @memberof WorkflowCreationRequest
+     */
+    'clusterId': string;
+    /**
+     * 
+     * @type {WorkflowSpecSpec}
+     * @memberof WorkflowCreationRequest
+     */
+    'spec'?: WorkflowSpecSpec;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowFields
+ */
+export interface WorkflowFields {
+    /**
+     * Specify the workload category assigned to the workload. Categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform.
+     * @type {string}
+     * @memberof WorkflowFields
+     */
+    'category'?: string | null;
+    /**
+     * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
+     * @type {Array<string>}
+     * @memberof WorkflowFields
+     */
+    'nodePools'?: Array<string> | null;
+    /**
+     * 
+     * @type {Preemptibility}
+     * @memberof WorkflowFields
+     */
+    'preemptibility'?: Preemptibility | null;
+    /**
+     * Specifies the priority class for the workload, which determines its scheduling behavior. Valid values are: very-low, low, medium-low, medium, medium-high, high, and very-high. Each workload type has a default priority. To view the default priority for each workload type, use the GET /workload-types endpoint. Once you change the priority from the default value defined for that workload type, the preemptibility field is not automatically updated. Make sure to set the desired preemptibility value.
+     * @type {string}
+     * @memberof WorkflowFields
+     */
+    'priorityClass'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowGroupFields
+ */
+export interface WorkflowGroupFields {
+    /**
+     * The names of the groups that must finish successfully before this group starts. If one of them fails, this group doesn\'t start.
+     * @type {Array<string>}
+     * @memberof WorkflowGroupFields
+     */
+    'dependsOn'?: Array<string> | null;
+    /**
+     * The name of the group\'s lead task. When the leader ends, the group ends with the leader\'s result, and the group\'s other tasks are stopped. Without a leader, the group ends when all its tasks have ended, and fails if any of them failed.
+     * @type {string}
+     * @memberof WorkflowGroupFields
+     */
+    'leader'?: string | null;
+    /**
+     * The name of the group. It must be unique in the workflow, and begin with a letter. (mandatory)
+     * @type {string}
+     * @memberof WorkflowGroupFields
+     */
+    'name'?: string | null;
+    /**
+     * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
+     * @type {Array<string>}
+     * @memberof WorkflowGroupFields
+     */
+    'nodePools'?: Array<string> | null;
+    /**
+     * 
+     * @type {SynchronizedStart}
+     * @memberof WorkflowGroupFields
+     */
+    'synchronizedStart'?: SynchronizedStart | null;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowGroupsInner
+ */
+export interface WorkflowGroupsInner {
+    /**
+     * The names of the groups that must finish successfully before this group starts. If one of them fails, this group doesn\'t start.
+     * @type {Array<string>}
+     * @memberof WorkflowGroupsInner
+     */
+    'dependsOn'?: Array<string> | null;
+    /**
+     * The name of the group\'s lead task. When the leader ends, the group ends with the leader\'s result, and the group\'s other tasks are stopped. Without a leader, the group ends when all its tasks have ended, and fails if any of them failed.
+     * @type {string}
+     * @memberof WorkflowGroupsInner
+     */
+    'leader'?: string | null;
+    /**
+     * The name of the group. It must be unique in the workflow, and begin with a letter. (mandatory)
+     * @type {string}
+     * @memberof WorkflowGroupsInner
+     */
+    'name'?: string | null;
+    /**
+     * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
+     * @type {Array<string>}
+     * @memberof WorkflowGroupsInner
+     */
+    'nodePools'?: Array<string> | null;
+    /**
+     * 
+     * @type {SynchronizedStart}
+     * @memberof WorkflowGroupsInner
+     */
+    'synchronizedStart'?: SynchronizedStart | null;
+    /**
+     * 
+     * @type {Array<WorkflowTask>}
+     * @memberof WorkflowGroupsInner
+     */
+    'tasks'?: Array<WorkflowTask>;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowGroupsInnerAllOf
+ */
+export interface WorkflowGroupsInnerAllOf {
+    /**
+     * 
+     * @type {Array<WorkflowTask>}
+     * @memberof WorkflowGroupsInnerAllOf
+     */
+    'tasks'?: Array<WorkflowTask>;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowPlacementProfile
+ */
+export interface WorkflowPlacementProfile {
+    /**
+     * The name of the profile, which tasks use to reference it. It must be unique among the profiles of its kind. (mandatory)
+     * @type {string}
+     * @memberof WorkflowPlacementProfile
+     */
+    'name'?: string | null;
+    /**
+     * 
+     * @type {NodeAffinityRequired}
+     * @memberof WorkflowPlacementProfile
+     */
+    'nodeAffinityRequired'?: NodeAffinityRequired | null;
+    /**
+     * Set of tolerations to apply to the workload.
+     * @type {Array<Toleration>}
+     * @memberof WorkflowPlacementProfile
+     */
+    'tolerations'?: Array<Toleration> | null;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowS3Common
+ */
+export interface WorkflowS3Common {
+    /**
+     * The name of the profile, which tasks use to reference it. It must be unique among the profiles of its kind. (mandatory)
+     * @type {string}
+     * @memberof WorkflowS3Common
+     */
+    'name'?: string | null;
+    /**
+     * The name of the bucket. (mandatory)
+     * @type {string}
+     * @memberof WorkflowS3Common
+     */
+    'bucket'?: string | null;
+    /**
+     * The url of the S3 service provider. The default is the URL of the Amazon AWS S3 service.
+     * @type {string}
+     * @memberof WorkflowS3Common
+     */
+    'url'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowS3Instance
+ */
+export interface WorkflowS3Instance {
+    /**
+     * The name of the profile, which tasks use to reference it. It must be unique among the profiles of its kind. (mandatory)
+     * @type {string}
+     * @memberof WorkflowS3Instance
+     */
+    'name'?: string | null;
+    /**
+     * The name of the bucket. (mandatory)
+     * @type {string}
+     * @memberof WorkflowS3Instance
+     */
+    'bucket'?: string | null;
+    /**
+     * The url of the S3 service provider. The default is the URL of the Amazon AWS S3 service.
+     * @type {string}
+     * @memberof WorkflowS3Instance
+     */
+    'url'?: string | null;
+    /**
+     * Name of the secret containing credentials of the S3 bucket. Used for private S3 buckets.
+     * @type {string}
+     * @memberof WorkflowS3Instance
+     */
+    'accessKeySecret'?: string | null;
+    /**
+     * The key to use for loading the access key id from the secret. The default is `AccessKeyId`. For more information, see [Credentials access keys](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html).
+     * @type {string}
+     * @memberof WorkflowS3Instance
+     */
+    'secretKeyOfAccessKeyId'?: string | null;
+    /**
+     * The key to use for loading the secret key from the secret. The default is `SecretKey`. For more information, see [Credentials access keys](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html).
+     * @type {string}
+     * @memberof WorkflowS3Instance
+     */
+    'secretKeyOfSecretKey'?: string | null;
+    /**
+     * An AWS session token. It should be provided (in addition to the access key ID and secret access key) to authenticate to a bucket that is configured to use AWS Security Token Service (STS).
+     * @type {string}
+     * @memberof WorkflowS3Instance
+     */
+    'awsSessionToken'?: string | null;
+    /**
+     * Use \'true\' in case the item is defined in defaults of the policy, and you wish to exclude it from the workload.
+     * @type {boolean}
+     * @memberof WorkflowS3Instance
+     */
+    'exclude'?: boolean | null;
+}
+/**
+ * A storage of the workflow that the task uses.
+ * @export
+ * @interface WorkflowS3StorageRef
+ */
+export interface WorkflowS3StorageRef {
+    /**
+     * The name of the profile, which tasks use to reference it. It must be unique among the profiles of its kind. (mandatory)
+     * @type {string}
+     * @memberof WorkflowS3StorageRef
+     */
+    'name'?: string | null;
+    /**
+     * 
+     * @type {WorkflowStorageType}
+     * @memberof WorkflowS3StorageRef
+     */
+    'type'?: WorkflowStorageType | null;
+    /**
+     * The outputs of other tasks that the task reads.
+     * @type {Array<WorkflowStorageRefInput>}
+     * @memberof WorkflowS3StorageRef
+     */
+    'inputs'?: Array<WorkflowStorageRefInput> | null;
+    /**
+     * 
+     * @type {WorkflowS3StorageRefOutputs}
+     * @memberof WorkflowS3StorageRef
+     */
+    'outputs'?: WorkflowS3StorageRefOutputs | null;
+}
+/**
+ * The folder in which the task writes its outputs. Its files are kept in the storage, in a folder of the task\'s own.
+ * @export
+ * @interface WorkflowS3StorageRefOutputs
+ */
+export interface WorkflowS3StorageRefOutputs {
+    /**
+     * The path of the folder in the task\'s container. (mandatory)
+     * @type {string}
+     * @memberof WorkflowS3StorageRefOutputs
+     */
+    'mountPath'?: string | null;
+}
+/**
+ * The specifications of the workflow to be created.
+ * @export
+ * @interface WorkflowSpec
+ */
+export interface WorkflowSpec {
+    /**
+     * 
+     * @type {WorkflowSpecSpec}
+     * @memberof WorkflowSpec
+     */
+    'spec'?: WorkflowSpecSpec;
+}
+/**
+ * The specifications of the workflow.
+ * @export
+ * @interface WorkflowSpecSpec
+ */
+export interface WorkflowSpecSpec {
+    /**
+     * Specify the workload category assigned to the workload. Categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform.
+     * @type {string}
+     * @memberof WorkflowSpecSpec
+     */
+    'category'?: string | null;
+    /**
+     * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
+     * @type {Array<string>}
+     * @memberof WorkflowSpecSpec
+     */
+    'nodePools'?: Array<string> | null;
+    /**
+     * 
+     * @type {Preemptibility}
+     * @memberof WorkflowSpecSpec
+     */
+    'preemptibility'?: Preemptibility | null;
+    /**
+     * Specifies the priority class for the workload, which determines its scheduling behavior. Valid values are: very-low, low, medium-low, medium, medium-high, high, and very-high. Each workload type has a default priority. To view the default priority for each workload type, use the GET /workload-types endpoint. Once you change the priority from the default value defined for that workload type, the preemptibility field is not automatically updated. Make sure to set the desired preemptibility value.
+     * @type {string}
+     * @memberof WorkflowSpecSpec
+     */
+    'priorityClass'?: string | null;
+    /**
+     * Definitions of the workflow groups.
+     * @type {Array<WorkflowGroupsInner>}
+     * @memberof WorkflowSpecSpec
+     */
+    'groups'?: Array<WorkflowGroupsInner>;
+    /**
+     * Defines the workflow compute profiles.
+     * @type {Array<WorkflowComputeProfile>}
+     * @memberof WorkflowSpecSpec
+     */
+    'compute'?: Array<WorkflowComputeProfile>;
+    /**
+     * Defines the workflow placement profiles.
+     * @type {Array<WorkflowPlacementProfile>}
+     * @memberof WorkflowSpecSpec
+     */
+    'placement'?: Array<WorkflowPlacementProfile>;
+    /**
+     * Defines the workflow storage profiles.
+     * @type {Array<WorkflowStorageProfile>}
+     * @memberof WorkflowSpecSpec
+     */
+    'storage'?: Array<WorkflowStorageProfile>;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowSpecSpecAllOf
+ */
+export interface WorkflowSpecSpecAllOf {
+    /**
+     * Definitions of the workflow groups.
+     * @type {Array<WorkflowGroupsInner>}
+     * @memberof WorkflowSpecSpecAllOf
+     */
+    'groups'?: Array<WorkflowGroupsInner>;
+    /**
+     * Defines the workflow compute profiles.
+     * @type {Array<WorkflowComputeProfile>}
+     * @memberof WorkflowSpecSpecAllOf
+     */
+    'compute'?: Array<WorkflowComputeProfile>;
+    /**
+     * Defines the workflow placement profiles.
+     * @type {Array<WorkflowPlacementProfile>}
+     * @memberof WorkflowSpecSpecAllOf
+     */
+    'placement'?: Array<WorkflowPlacementProfile>;
+    /**
+     * Defines the workflow storage profiles.
+     * @type {Array<WorkflowStorageProfile>}
+     * @memberof WorkflowSpecSpecAllOf
+     */
+    'storage'?: Array<WorkflowStorageProfile>;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowStorageProfile
+ */
+export interface WorkflowStorageProfile {
+    /**
+     * Set of S3 buckets that the tasks of the workflow can use.
+     * @type {Array<WorkflowS3Instance>}
+     * @memberof WorkflowStorageProfile
+     */
+    's3'?: Array<WorkflowS3Instance> | null;
+}
+/**
+ * The outputs of another task that the task reads.
+ * @export
+ * @interface WorkflowStorageRefInput
+ */
+export interface WorkflowStorageRefInput {
+    /**
+     * The name of the group. It must be unique in the workflow, and begin with a letter. (mandatory)
+     * @type {string}
+     * @memberof WorkflowStorageRefInput
+     */
+    'group'?: string | null;
+    /**
+     * The name of the task. It must be unique in its group, and begin with a letter. It can be omitted in a group with a single task, which then takes the group\'s name.
+     * @type {string}
+     * @memberof WorkflowStorageRefInput
+     */
+    'task'?: string | null;
+    /**
+     * The path of the folder in the task\'s container. (mandatory)
+     * @type {string}
+     * @memberof WorkflowStorageRefInput
+     */
+    'mountPath'?: string | null;
+}
+/**
+ * The type of the storage. (mandatory)
+ * @export
+ * @enum {string}
+ */
+
+export const WorkflowStorageType = {
+    S3: 's3'
+} as const;
+
+export type WorkflowStorageType = typeof WorkflowStorageType[keyof typeof WorkflowStorageType];
+
+
+/**
+ * 
+ * @export
+ * @interface WorkflowTask
+ */
+export interface WorkflowTask {
+    /**
+     * Set of annotations to populate into the container running the workload.
+     * @type {Array<Annotation>}
+     * @memberof WorkflowTask
+     */
+    'annotations'?: Array<Annotation> | null;
+    /**
+     * Arguments to the command that the container running the workload executes.
+     * @type {string}
+     * @memberof WorkflowTask
+     */
+    'args'?: string | null;
+    /**
+     * A command to the server as the entry point of the container running the workload.
+     * @type {string}
+     * @memberof WorkflowTask
+     */
+    'command'?: string | null;
+    /**
+     * The name of the profile, which tasks use to reference it. It must be unique among the profiles of its kind. (mandatory)
+     * @type {string}
+     * @memberof WorkflowTask
+     */
+    'computeRef'?: string | null;
+    /**
+     * When set to `true`, creates a home directory for the container.
+     * @type {boolean}
+     * @memberof WorkflowTask
+     */
+    'createHomeDir'?: boolean | null;
+    /**
+     * Set of environment variables to populate into the container running the workload.
+     * @type {Array<EnvironmentVariable>}
+     * @memberof WorkflowTask
+     */
+    'environmentVariables'?: Array<EnvironmentVariable> | null;
+    /**
+     * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
+     * @type {string}
+     * @memberof WorkflowTask
+     */
+    'image'?: string | null;
+    /**
+     * 
+     * @type {ImagePullPolicy}
+     * @memberof WorkflowTask
+     */
+    'imagePullPolicy'?: ImagePullPolicy | null;
+    /**
+     * A list of references to Kubernetes secrets in the same namespace used for pulling container images.
+     * @type {Array<ImagePullSecret>}
+     * @memberof WorkflowTask
+     */
+    'imagePullSecrets'?: Array<ImagePullSecret> | null;
+    /**
+     * Set of labels to populate into the container running the workload.
+     * @type {Array<Label>}
+     * @memberof WorkflowTask
+     */
+    'labels'?: Array<Label> | null;
+    /**
+     * The name of the task. It must be unique in its group, and begin with a letter. It can be omitted in a group with a single task, which then takes the group\'s name.
+     * @type {string}
+     * @memberof WorkflowTask
+     */
+    'name'?: string | null;
+    /**
+     * The name of the profile, which tasks use to reference it. It must be unique among the profiles of its kind. (mandatory)
+     * @type {string}
+     * @memberof WorkflowTask
+     */
+    'placementRef'?: string | null;
+    /**
+     * 
+     * @type {Probes}
+     * @memberof WorkflowTask
+     */
+    'probes'?: Probes | null;
+    /**
+     * 
+     * @type {TaskRetry}
+     * @memberof WorkflowTask
+     */
+    'retry'?: TaskRetry | null;
+    /**
+     * 
+     * @type {WorkspaceSpecSpecAllOfSecurity}
+     * @memberof WorkflowTask
+     */
+    'security'?: WorkspaceSpecSpecAllOfSecurity | null;
+    /**
+     * Whether this container should allocate a buffer for stdin in the container runtime. If this is not set, reads from stdin in the container will always result in EOF
+     * @type {boolean}
+     * @memberof WorkflowTask
+     */
+    'stdin'?: boolean | null;
+    /**
+     * 
+     * @type {WorkflowTaskStorage}
+     * @memberof WorkflowTask
+     */
+    'storage'?: WorkflowTaskStorage | null;
+    /**
+     * The storages of the workflow, in the workflow\'s `storage`, that the task uses.
+     * @type {Array<WorkflowS3StorageRef>}
+     * @memberof WorkflowTask
+     */
+    'storageRef'?: Array<WorkflowS3StorageRef> | null;
+    /**
+     * Ranges of exit codes that end the task as succeeded, in addition to 0. A non-zero exit code that isn\'t in this list or in `retry.onExitCodes` fails the task.
+     * @type {Array<TaskExitCodeRange>}
+     * @memberof WorkflowTask
+     */
+    'successExitCodes'?: Array<TaskExitCodeRange> | null;
+    /**
+     * Duration in seconds the pod needs to terminate gracefully upon probe failure. The grace period is the duration in seconds after the processes running in the pod are sent a termination signal and the time when the processes are forcibly halted with a kill signal. Set this value longer than the expected cleanup time for your process. Value must be non-negative integer. The value zero indicates stop immediately via the kill signal (no opportunity to shut down).
+     * @type {number}
+     * @memberof WorkflowTask
+     */
+    'terminationGracePeriodSeconds'?: number | null;
+    /**
+     * Whether this container should allocate a TTY for itself, also requires \'stdin\' to be true.
+     * @type {boolean}
+     * @memberof WorkflowTask
+     */
+    'tty'?: boolean | null;
+    /**
+     * Container\'s working directory. If not specified, the container runtime default will be used. This may be configured in the container image.
+     * @type {string}
+     * @memberof WorkflowTask
+     */
+    'workingDir'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface WorkflowTaskStorage
+ */
+export interface WorkflowTaskStorage {
+    /**
+     * Set of config map volumes to use in the workload
+     * @type {Array<ConfigMapInstance>}
+     * @memberof WorkflowTaskStorage
+     */
+    'configMapVolume'?: Array<ConfigMapInstance> | null;
+    /**
+     * A list of emptyDir volumes to mount in the workload.
+     * @type {Array<EmptyDirInstance>}
+     * @memberof WorkflowTaskStorage
+     */
+    'emptyDirVolume'?: Array<EmptyDirInstance> | null;
+    /**
+     * Set of host paths to use in the workload.
+     * @type {Array<HostPathInstance>}
+     * @memberof WorkflowTaskStorage
+     */
+    'hostPath'?: Array<HostPathInstance> | null;
+    /**
+     * Set of secret volumes to use in the workload
+     * @type {Array<SecretInstance>}
+     * @memberof WorkflowTaskStorage
+     */
+    'secretVolume'?: Array<SecretInstance> | null;
 }
 /**
  * 
@@ -33448,6 +34317,257 @@ export class UnifiedApi extends BaseAPI {
      */
     public getUnifiedWorkload(unifiedWorkloadRequest?: UnifiedWorkloadRequest, options?: AxiosRequestConfig) {
         return UnifiedApiFp(this.configuration).getUnifiedWorkload(unifiedWorkloadRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+/**
+ * WorkflowsApi - axios parameter creator
+ * @export
+ */
+export const WorkflowsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Create a workflow using container related fields.
+         * @summary Create a workflow.
+         * @param {WorkflowCreationRequest} [workflowCreationRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createWorkflow: async (workflowCreationRequest?: WorkflowCreationRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/workflows`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(workflowCreationRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Delete a workflow using a workflow id.
+         * @summary Delete a workflow.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteWorkflow: async (workloadId: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'workloadId' is not null or undefined
+            assertParamExists('deleteWorkflow', 'workloadId', workloadId)
+            const localVarPath = `/api/v1/workflows/{workloadId}`
+                .replace(`{${"workloadId"}}`, encodeURIComponent(String(workloadId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve workflow details using a workflow id.
+         * @summary Get workflow data.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getWorkflow: async (workloadId: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'workloadId' is not null or undefined
+            assertParamExists('getWorkflow', 'workloadId', workloadId)
+            const localVarPath = `/api/v1/workflows/{workloadId}`
+                .replace(`{${"workloadId"}}`, encodeURIComponent(String(workloadId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * WorkflowsApi - functional programming interface
+ * @export
+ */
+export const WorkflowsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = WorkflowsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Create a workflow using container related fields.
+         * @summary Create a workflow.
+         * @param {WorkflowCreationRequest} [workflowCreationRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createWorkflow(workflowCreationRequest?: WorkflowCreationRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Workflow>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createWorkflow(workflowCreationRequest, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Delete a workflow using a workflow id.
+         * @summary Delete a workflow.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteWorkflow(workloadId: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<HttpResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteWorkflow(workloadId, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Retrieve workflow details using a workflow id.
+         * @summary Get workflow data.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getWorkflow(workloadId: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Workflow>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkflow(workloadId, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+    }
+};
+
+/**
+ * WorkflowsApi - factory interface
+ * @export
+ */
+export const WorkflowsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = WorkflowsApiFp(configuration)
+    return {
+        /**
+         * Create a workflow using container related fields.
+         * @summary Create a workflow.
+         * @param {WorkflowCreationRequest} [workflowCreationRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createWorkflow(workflowCreationRequest?: WorkflowCreationRequest, options?: any): AxiosPromise<Workflow> {
+            return localVarFp.createWorkflow(workflowCreationRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Delete a workflow using a workflow id.
+         * @summary Delete a workflow.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteWorkflow(workloadId: string, options?: any): AxiosPromise<HttpResponse> {
+            return localVarFp.deleteWorkflow(workloadId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Retrieve workflow details using a workflow id.
+         * @summary Get workflow data.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getWorkflow(workloadId: string, options?: any): AxiosPromise<Workflow> {
+            return localVarFp.getWorkflow(workloadId, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * WorkflowsApi - object-oriented interface
+ * @export
+ * @class WorkflowsApi
+ * @extends {BaseAPI}
+ */
+export class WorkflowsApi extends BaseAPI {
+    /**
+     * Create a workflow using container related fields.
+     * @summary Create a workflow.
+     * @param {WorkflowCreationRequest} [workflowCreationRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WorkflowsApi
+     */
+    public createWorkflow(workflowCreationRequest?: WorkflowCreationRequest, options?: AxiosRequestConfig) {
+        return WorkflowsApiFp(this.configuration).createWorkflow(workflowCreationRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Delete a workflow using a workflow id.
+     * @summary Delete a workflow.
+     * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WorkflowsApi
+     */
+    public deleteWorkflow(workloadId: string, options?: AxiosRequestConfig) {
+        return WorkflowsApiFp(this.configuration).deleteWorkflow(workloadId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve workflow details using a workflow id.
+     * @summary Get workflow data.
+     * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WorkflowsApi
+     */
+    public getWorkflow(workloadId: string, options?: AxiosRequestConfig) {
+        return WorkflowsApiFp(this.configuration).getWorkflow(workloadId, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

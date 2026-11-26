@@ -1,0 +1,12 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+properties:
+  name:
+    $ref: ../workloads_spec/workflows/WorkflowProfileName.yaml
+  nodeAffinityRequired:
+    $ref: ../workloads_spec/resources/NodeAffinityRequired.yaml
+  tolerations:
+    $ref: ../workloads_spec/advanced/Tolerations.yaml
+type: object

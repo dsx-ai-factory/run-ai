@@ -1,0 +1,9 @@
+description: The names of the groups that must finish successfully before this group starts.
+  If one of them fails, this group doesn't start.
+type: array
+items:
+  $ref: "./GroupName.yaml"
+maxItems: 1000
+example:
+  - prepare
+nullable: true

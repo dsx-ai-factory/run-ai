@@ -1,0 +1,6 @@
+description: The url of the S3 service provider. The default is the URL of the Amazon AWS S3 service.
+type: string
+minLength: 1
+example: https://s3.amazonaws.com
+nullable: true
+pattern: .*

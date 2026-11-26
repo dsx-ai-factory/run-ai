@@ -1,0 +1,12 @@
+description: Definitions of the workflow groups.
+type: array
+items:
+  allOf:
+    - $ref: "./WorkflowGroupFields.yaml"
+    - type: object
+      properties:
+        tasks:
+          type: array
+          items:
+            $ref: "./WorkflowTask.yaml"
+          maxItems: 1000

@@ -1,0 +1,5 @@
+description: Defines the workflow compute profiles.
+type: array
+items:
+  $ref: WorkflowComputeProfile.yaml
+maxItems: 100

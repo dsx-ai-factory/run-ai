@@ -1,0 +1,6 @@
+description: The storages of the workflow, in the workflow's `storage`, that the task uses.
+type: array
+items:
+  $ref: "./WorkflowS3StorageRef.yaml"
+maxItems: 1000
+nullable: true

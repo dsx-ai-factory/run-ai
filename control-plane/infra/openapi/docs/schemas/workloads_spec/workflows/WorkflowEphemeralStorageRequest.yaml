@@ -1,0 +1,7 @@
+description: The amount of local disk space (ephemeral storage) to allocate for the task (1G, 20M, etc.), including the space of its S3 inputs and outputs. The task will not be scheduled unless a node can guarantee this amount of disk space.
+type: string
+pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+example: 50G
+minLength: 1
+maxLength: 63
+nullable: true

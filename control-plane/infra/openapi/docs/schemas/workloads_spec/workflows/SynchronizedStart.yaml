@@ -1,0 +1,14 @@
+description: Makes all the tasks of the group start their commands at the same moment, once all of them are ready.
+properties:
+  enabled:
+    description: Turns on the synchronized start for the group. The default is false.
+    type: boolean
+    default: false
+    example: true
+    nullable: true
+  port:
+    $ref: "./SynchronizedStartPort.yaml"
+  timeoutSeconds:
+    $ref: "./SynchronizedStartTimeout.yaml"
+nullable: true
+type: object
