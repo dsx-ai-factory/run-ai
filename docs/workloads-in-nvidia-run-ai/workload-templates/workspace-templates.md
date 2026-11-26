@@ -1,24 +1,16 @@
 # Workspace Templates
 
-This guide explains how to create workspace templates for reuse during workload submission. To manage templates, see [Workload Templates](../README.md).
-
-<Note>
-
-**Note**
-
-Workload templates apply to flexible workload submission. If unavailable, contact your administrator to enable **Flexible workload submission** under **General settings** → **Workloads**.
-
-</Note>
+This guide explains how to create workspace templates for reuse during workload submission. To manage templates, see [Workload Templates](README.md).
 
 ## Before You Start <a href="#workload-priority-class" id="workload-priority-class"></a>
 
-If the image you are planning to use is hosted in NGC, make sure you have an NGC account with an active NGC API key. To obtain a key, go to [NGC](https://catalog.ngc.nvidia.com/) → Setup → API Keys, then generate or copy an existing key. In NVIDIA Run:ai, store the key either as a [shared secret](../../workload-assets/credentials.md#ngc-api-key) (created by an administrator) or a [user credential](../../../settings/user-settings/user-credentials.md) (created under User settings).
+If the image you are planning to use is hosted in NGC, make sure you have an NGC account with an active NGC API key. To obtain a key, go to [NGC](https://catalog.ngc.nvidia.com/) → Setup → API Keys, then generate or copy an existing key. In NVIDIA Run:ai, store the key either as a [shared secret](../workload-assets/credentials.md#ngc-api-key) (created by an administrator) or a [user credential](../../settings/user-settings/user-credentials.md) (created under User settings).
 
 ## Workload Priority and Preemption <a href="#workload-priority-class" id="workload-priority-class"></a>
 
 By default, workspaces are assigned a **High** priority and are **non-preemptible**. These defaults ensure that workspaces are scheduled ahead of lower-priority workloads and are not interrupted once running. Workspaces run strictly within the project’s deserved quota and do not consume over-quota resources.
 
-You can override the defaults by configuring priority and preemptibility. For more details, see [Workload priority and preemption](../../../platform-management/runai-scheduler/scheduling/workload-priority-control.md).
+You can override the defaults by configuring priority and preemptibility. For more details, see [Workload priority and preemption](../../platform-management/runai-scheduler/scheduling/workload-priority-control.md).
 
 ## Linking Assets
 
@@ -54,8 +46,8 @@ Linking data source assets is currently not supported.
 **Load from existing setup**
 
 1. Click the **load** icon. A side pane appears, displaying a list of available environments. Select an environment from the list.
-2. Alternatively, click the **➕** icon in the side pane to create a new environment. For step-by-step instructions, see [Environments](../../workload-assets/environments.md).
-3. Choose whether to **link** the environment when applying it to the template. See [Linking assets](./#linking-assets) for more details.
+2. Alternatively, click the **➕** icon in the side pane to create a new environment. For step-by-step instructions, see [Environments](../workload-assets/environments.md).
+3. Choose whether to **link** the environment when applying it to the template. See [Linking assets](#linking-assets) for more details.
 
 **Provide your own settings**
 
@@ -66,12 +58,12 @@ Manually configure the settings below as needed.
 1. Set the **environment image**:
    * Select **Custom image** and add the **Image URL** or update the URL of the existing setup.
    * **Select from the NGC catalog**, configure **access** to NGC, and then choose the **image name** and **tag** from the dropdown:
-     * Under **Source**, select [**Shared secret**](../../workload-assets/credentials.md#ngc-api-key) or [**My credentials**](../../../settings/user-settings/user-credentials.md).
+     * Under **Source**, select [**Shared secret**](../workload-assets/credentials.md#ngc-api-key) or [**My credentials**](../../settings/user-settings/user-credentials.md).
      * The **Type** field is fixed to **NGC API key**.
      * Under **Credential name**, select an existing credential from the dropdown. If you select **My credentials**, you can also create a new credential directly from the dropdown. The credential is also saved under **User settings** → Credentials.
    * **Select from the NGC private registry** and then set how to access the registry:
      * Select a **registry** from the dropdown.
-     * Under **Source**, select [**Shared secret**](../../workload-assets/credentials.md#ngc-api-key) or [**My credentials**](../../../settings/user-settings/user-credentials.md).
+     * Under **Source**, select [**Shared secret**](../workload-assets/credentials.md#ngc-api-key) or [**My credentials**](../../settings/user-settings/user-credentials.md).
      * The **Type** field is fixed to **NGC API key**.
      * Under **Credential name**, select an existing credential from the dropdown. If you select **My credentials**, you can also create a new credential directly from the dropdown. The credential is also saved under **User settings** → Credentials.
 2. Set the condition for pulling the image by selecting the **image pull policy**. It is recommended to pull the image only if it's not already present on the host.
@@ -79,7 +71,7 @@ Manually configure the settings below as needed.
    * Select the connection type:
      * **Auto generate** - A unique URL / port is automatically created for each workload using the environment.
      * **Custom URL** / **Custom port** - Manually define the URL or port. For custom port, make sure to enter a port between `30000` and `32767.` If the node port is already in use, the workload will fail and display an error message.
-     * **Load Balancer** - Set the container port. Connection handling is managed by the load balancer. For more information, see [External access to containers](../../../installation-and-configuration/configuration/networking/external-access-to-containers.md).
+     * **Load Balancer** - Set the container port. Connection handling is managed by the load balancer. For more information, see [External access to containers](../../installation-and-configuration/configuration/networking/external-access-to-containers.md).
    * Modify who can **access** the tool:
      * By default, **All authenticated users and service accounts** is selected giving access to everyone within the organization’s account.
      * For **Specific group(s)**, enter **group names** as they appear in your identity provider. You must be a member of one of the groups listed to have access to the tool.
@@ -90,9 +82,9 @@ Manually configure the settings below as needed.
 5.  Set the **environment variable(s)**:
 
     * Modify the existing environment variable(s) or click **+ENVIRONMENT VARIABLE**. The existing environment variables may include instructions to guide you with entering the correct values.
-    * You can either select **Custom** to define a value manually, or choose an existing value from [**Shared secret**](../../workload-assets/credentials.md) or [**ConfigMap**](../../workload-assets/datasources.md#creating-configmaps-in-advance).
+    * You can either select **Custom** to define a value manually, or choose an existing value from [**Shared secret**](../workload-assets/credentials.md) or [**ConfigMap**](../workload-assets/datasources.md#creating-configmaps-in-advance).
 
-    Some environment variables are automatically injected by NVIDIA Run:ai. See [Built-in workload environment variables](../../workloads.md#built-in-workload-environment-variables) for more details.
+    Some environment variables are automatically injected by NVIDIA Run:ai. See [Built-in workload environment variables](../workloads.md#built-in-workload-environment-variables) for more details.
 6. Enter a path pointing to the **container's working directory**.
 7. Set where the UID, GID, and supplementary groups for the container should be taken from. If you select **Custom**, you’ll need to manually enter the **UID,** **GID and** **Supplementary groups values.**
 8. Select additional Linux capabilities for the container from the dropdown menu. This grants certain privileges to a container without granting all the root user's privileges.
@@ -111,8 +103,8 @@ Manually configure the settings below as needed.
 **Load from existing setup**
 
 1. Click the **load** icon. A side pane appears, displaying a list of available compute resources. Select a compute resource from the list.
-2. Alternatively, click the **➕** icon in the side pane to create a new compute resource. For step-by-step instructions, see [Compute resources](../../workload-assets/compute-resources.md).
-3. Choose whether to **link** the compute resource when applying it to the template. See [Linking assets](./#linking-assets) for more details.
+2. Alternatively, click the **➕** icon in the side pane to create a new compute resource. For step-by-step instructions, see [Compute resources](../workload-assets/compute-resources.md).
+3. Choose whether to **link** the compute resource when applying it to the template. See [Linking assets](#linking-assets) for more details.
 
 **Provide your own settings**
 
@@ -155,7 +147,7 @@ Manually configure the settings below as needed.
 2. Optionally, customize any of the data source's predefined fields as shown below. The changes will apply to this template only and will not affect the selected data source:
    * **Container path** - Enter the **container path** to set the **data target location**.
    * **ConfigMap** **sub-path** - Specify a **sub-path** (file/key) inside the ConfigMap to mount (for example, `app.properties`). This lets you mount a single file from an existing ConfigMap.
-3. Alternatively, click the **➕** icon in the side pane to create a new data source/data volume. For step-by-step instructions, see [Data sources](../../workload-assets/datasources.md) or [Data volumes](../../workload-assets/data-volumes.md).
+3. Alternatively, click the **➕** icon in the side pane to create a new data source/data volume. For step-by-step instructions, see [Data sources](../workload-assets/datasources.md) or [Data volumes](../workload-assets/data-volumes.md).
 
 **Configure data sources for a one-time configuration**
 
@@ -163,14 +155,14 @@ Manually configure the settings below as needed.
 
 **Note**
 
-[PVCs](../../workload-assets/datasources.md#pvc), [Secrets](../../workload-assets/datasources.md#secret), [ConfigMaps](../../workload-assets/datasources.md#configmap) and [Data volumes](../../workload-assets/data-volumes.md) cannot be added as a one-time configuration.
+[PVCs](../workload-assets/datasources.md#pvc), [Secrets](../workload-assets/datasources.md#secret), [ConfigMaps](../workload-assets/datasources.md#configmap) and [Data volumes](../workload-assets/data-volumes.md) cannot be added as a one-time configuration.
 
 </Note>
 
 1. Click the **➕** icon and choose the data source from the dropdown menu. You can add multiple data sources.
 2. Once selected, set the **data origin** according to the required fields and enter the **container path** to set the **data target location**.
 
-The required fields vary by data source. For detailed configuration options and usage guidelines for each data source type, see [Data sources](../../workload-assets/datasources.md).
+The required fields vary by data source. For detailed configuration options and usage guidelines for each data source type, see [Data sources](../workload-assets/datasources.md).
 
 **Configure EmptyDir for a one-time configuration**
 
@@ -186,7 +178,7 @@ Use **EmptyDir** to allocate temporary storage that exists only for the lifetime
 
 Select **Volume** to allocate a storage space to your workspace that is persistent across restarts:
 
-1. Set the **Storage class** to **None** or select an existing storage class from the list. To add new storage classes, and for additional information, see [Kubernetes storage classes](../../../installation-and-configuration/configuration/shared-storage.md). If the administrator defined the storage class configuration, the rest of the fields will appear accordingly.
+1. Set the **Storage class** to **None** or select an existing storage class from the list. To add new storage classes, and for additional information, see [Kubernetes storage classes](../../installation-and-configuration/configuration/shared-storage.md). If the administrator defined the storage class configuration, the rest of the fields will appear accordingly.
 2. Select one or more **access mode(s)** and define the **claim size** and its **units**.
 3. Select the **volume mode**:
    1. **Filesystem** (default) - The volume will be mounted as a filesystem, enabling the usage of directories and files.

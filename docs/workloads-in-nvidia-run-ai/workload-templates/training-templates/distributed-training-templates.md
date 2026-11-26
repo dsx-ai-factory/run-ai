@@ -2,14 +2,6 @@
 
 This guide explains how to create distributed training templates for reuse during workload submission. To manage templates, see [Workload Templates](../README.md).
 
-<Note>
-
-**Note**
-
-Workload templates apply to flexible workload submission. If unavailable, contact your administrator to enable **Flexible workload submission** under **General settings** → **Workloads**.
-
-</Note>
-
 ## Before You Start
 If the image you are planning to use is hosted in NGC, make sure you have an NGC account with an active NGC API key. To obtain a key, go to [NGC](https://catalog.ngc.nvidia.com/) → Setup → API Keys, then generate or copy an existing key. In NVIDIA Run:ai, store the key either as a [shared secret](../../workload-assets/credentials.md#ngc-api-key) (created by an administrator) or a [user credential](../../../settings/user-settings/user-credentials.md) (created under User settings).
 
