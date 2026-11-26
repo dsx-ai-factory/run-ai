@@ -18078,7 +18078,7 @@ Components:
   cloud.google.com/go/monitoring v1.29.0
   cloud.google.com/go/monitoring v1.32.1
   cloud.google.com/go/storage v1.62.2
-  cloud.google.com/go/storage v1.71.0
+  cloud.google.com/go/storage v1.71.1
   dompurify 3.4.16
   echarts 6.1.0
   github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.34.0
