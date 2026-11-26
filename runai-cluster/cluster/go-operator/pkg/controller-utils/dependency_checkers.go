@@ -98,19 +98,14 @@ func componentMatches(name, namespace string, componentNameRegex *regexp.Regexp,
 // dcgmExporterServiceSelectors lists the label key/value pairs that identify a
 // DCGM exporter Service. The "-dra" value is what the GPU Operator uses in
 // GPUCluster (DRA) mode.
-const appLabel = "app"
-
 var dcgmExporterServiceSelectors = []struct{ key, value string }{
-	{appLabel, "nvidia-dcgm-exporter"},
-	{appLabel, "dcgm-exporter"},
-	{appLabel, "nvidia-dcgm-exporter-dra"},
-	{"app.kubernetes.io/name", "nvidia-dcgm-exporter"},
-	{"app.kubernetes.io/name", "dcgm-exporter"},
+	{consts.AppLabelKey, consts.NvidiaDCGMExporterLabelValue},
+	{consts.AppLabelKey, consts.DCGMExporterLabelValue},
+	{consts.AppLabelKey, consts.NvidiaDCGMExporterDRALabelValue},
+	{consts.AppKubernetesNameLabelKey, consts.NvidiaDCGMExporterLabelValue},
+	{consts.AppKubernetesNameLabelKey, consts.DCGMExporterLabelValue},
 }
 
-// GetDCGMExporterService searches all namespaces. A Service can match several
-// selectors (e.g. it carries both "app" and "app.kubernetes.io/name"), so
-// results are collected in a set keyed by namespace/name.
 func GetDCGMExporterService(ctx context.Context, k8sReader client.Reader) (*v1.Service, error) {
 	found := map[types.NamespacedName]v1.Service{}
 
@@ -143,8 +138,6 @@ func GetDCGMExporterService(ctx context.Context, k8sReader client.Reader) (*v1.S
 	return nil, fmt.Errorf("dcgm-exporter service not found in the cluster")
 }
 
-// DCGMExporterPort returns the first port of the exporter Service, or an
-// explicit error when the Service defines none.
 func DCGMExporterPort(svc *v1.Service) (v1.ServicePort, error) {
 	if len(svc.Spec.Ports) == 0 {
 		return v1.ServicePort{}, fmt.Errorf("dcgm-exporter service %s/%s has no ports", svc.Namespace, svc.Name)
