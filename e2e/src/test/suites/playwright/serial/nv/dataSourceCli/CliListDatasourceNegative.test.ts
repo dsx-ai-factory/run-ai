@@ -59,7 +59,7 @@ test.describe(`CLI List Datasource - Negative Tests, tags: ${tags.resource.datas
             });
         });
 
-        test('T5585451: List data sources with invalid project name', function () {
+        test('T5585451: Reject listing data sources for a missing project', function () {
             test.step('Attempt to list with non-existent project', function () {
                 logger.info('Attempting to list data sources with invalid project name');
                 const nonExistentProject = 'non-existent-project-xyz';
