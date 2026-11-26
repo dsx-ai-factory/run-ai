@@ -40,16 +40,33 @@
       :hide-right-breakpoint="WIDE_LAYOUT_MIN_WIDTH"
       @step-click="onStepClick"
     >
-      <scope-name-step
-        v-if="currentStep?.name === EStepNames.ScopeName"
-        v-model:name="localDepartment.name"
-        v-model:description="localDepartment.description"
-        :department="localDepartment"
-        :is-new-department="isNewDepartment"
-        :cluster-id="localDepartment.clusterId"
-        :read-only="readOnly"
-        @update-scope="handleScopeUpdate"
-      />
+      <template v-if="currentStep?.name === EStepNames.ScopeName">
+        <scope-name-step
+          v-model:name="localDepartment.name"
+          v-model:description="localDepartment.description"
+          :department="localDepartment"
+          :is-new-department="isNewDepartment"
+          :cluster-id="localDepartment.clusterId"
+          :read-only="readOnly"
+          @update-scope="handleScopeUpdate"
+        />
+        <runai-expansion-item
+          v-if="isNewDepartment && localDepartment.clusterId"
+          label="Administrators"
+          default-opened
+          disable-closing
+          prevent-top-padding-when-open
+        >
+          <org-unit-administrators-fields
+            ref="administratorsRef"
+            title="Set the department administrator(s)"
+            :tooltip="EOrgUnitFormTooltip.DepartmentAdministrators"
+            default-role="Department administrator"
+            :disable="isDepartmentSubmitting"
+            @update:count="administratorsCount = $event"
+          />
+        </runai-expansion-item>
+      </template>
 
       <node-pools-priority-list
         v-else-if="isNodePoolStep"
@@ -105,6 +122,8 @@
       <template #right-sidebar>
         <org-unit-wizard-summary-v3
           :entity-type="EQuotaEntity.department"
+          :cluster-name="clusterName"
+          :administrators-count="isAdministratorsCountKnown ? administratorsCount : undefined"
           :scheduling-rules="localDepartment.schedulingRules"
           :access-rules-count="accessRulesCount"
         />
@@ -118,6 +137,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useQuasar } from "quasar";
 import { usePermissionStore } from "@/stores/permissions.store";
+import { useClusterStore } from "@/stores/cluster.store";
 import { RunaiFormWrapper } from "@/components/common/runai-form-wrapper";
 import { RunaiWizardLayout } from "@/components/common/runai-wizard-layout/";
 import { RunaiExpansionItem } from "@/components/common/runai-expansion-item";
@@ -130,6 +150,7 @@ import { NodePoolsPriorityList } from "@/components/org-unit/v2/common/node-pool
 import { SchedulingRulesStep } from "@/components/org-unit/v2/common/scheduling-rules-step";
 import { AccessRulesStep } from "@/components/org-unit/v2/common/access-rules-step";
 import { ScopeNameStep } from "@/components/org-unit/v2/department/steps/scope-name-step";
+import { OrgUnitAdministratorsFields } from "@/components/org-unit/v2/common/org-unit-administrators-fields";
 import { useWizardLayout } from "@/composables/use-wizard-layout.composable";
 import { provideUnsavedChangesGuard } from "@/composables/org-unit/use-unsaved-changes-guard.composable";
 import { provideWizardPreview } from "@/composables/org-unit/use-wizard-preview.composable";
@@ -160,6 +181,7 @@ import { deepCopy } from "@/utils/common.util";
 import { storageUtil } from "@/utils/storage.util";
 import { filterUtil } from "@/utils/filter.util/filter.util";
 import { ErrorAlert } from "@/utils/error-alert.util";
+import { alertUtil } from "@/utils/alert.util/alert.util";
 import { filterDepartmentFormV3Steps } from "@/utils/wizard-steps.util/wizard-steps.util";
 import { DEPARTMENT_CREATION_WARNING_DIALOG_DONT_SHOW } from "@/common/storage.constant";
 
@@ -193,6 +215,7 @@ const WIDE_LAYOUT_MIN_WIDTH = 1680;
 const route = useRoute();
 const $q = useQuasar();
 const permissionStore = usePermissionStore();
+const clusterStore = useClusterStore();
 
 const localDepartment = ref<Department | DepartmentCreationRequest>(deepCopy(props.department));
 const formWrapperRef = ref<InstanceType<typeof RunaiFormWrapper> | null>(null);
@@ -214,6 +237,15 @@ const isNodePoolOrderDirty = computed(
 );
 
 const accessRulesCount = ref(0);
+const administratorsRef = ref<InstanceType<typeof OrgUnitAdministratorsFields> | null>(null);
+const administratorsCount = ref(0);
+// Known for a department created in this form; an existing department's administrators aren't loaded.
+const isAdministratorsCountKnown = ref(props.isNewDepartment);
+const clusterName = computed(() =>
+  localDepartment.value.clusterId
+    ? (clusterStore.getClusterById(localDepartment.value.clusterId)?.name ?? localDepartment.value.clusterId)
+    : "None",
+);
 const submittingAction = ref<SubmittingAction>(null);
 const showWarningDialog = ref(false);
 
@@ -417,11 +449,30 @@ const handleNext = async (): Promise<void> => {
   });
 };
 
+const createAdministrators = async (
+  saved: Department | DepartmentCreationRequest,
+  { refreshAccessRulesCount }: { refreshAccessRulesCount: boolean },
+): Promise<void> => {
+  if (!administratorsRef.value?.hasAdministrator) return;
+  const scopeId = (saved as Department).id;
+  try {
+    await administratorsRef.value.save({ scopeId, scopeType: ScopeType.Department, clusterId: saved.clusterId });
+    $q.notify(alertUtil.getSuccess("Administrator saved"));
+  } catch {
+    isAdministratorsCountKnown.value = false;
+    $q.notify(alertUtil.getError("Administrator couldn't be saved"));
+  }
+  if (refreshAccessRulesCount) await loadAccessRulesCount(scopeId);
+};
+
+const isAdministratorsValid = (): boolean => administratorsRef.value?.validate().valid ?? true;
+
 const proceedWithSaveAndClose = (): void => {
   submittingAction.value = "close";
   emit("on-save", {
     department: localDepartment.value,
     action: ESaveOrgUnitAction.Close,
+    onCreated: (saved) => createAdministrators(saved, { refreshAccessRulesCount: false }),
     onComplete: () => {
       submittingAction.value = null;
     },
@@ -433,7 +484,7 @@ const proceedWithSaveAndClose = (): void => {
 
 const handleSubmitAndClose = async (): Promise<void> => {
   await runGuardedAction(async () => {
-    if (!(await validate())) return;
+    if (!(await validate()) || !isAdministratorsValid()) return;
 
     if (props.isNewDepartment && storageUtil.get<boolean>(DEPARTMENT_CREATION_WARNING_DIALOG_DONT_SHOW) !== true) {
       showWarningDialog.value = true;
@@ -445,12 +496,13 @@ const handleSubmitAndClose = async (): Promise<void> => {
 
 const handleSubmitAndContinue = async (): Promise<void> => {
   await runGuardedAction(async () => {
-    if (!(await validate())) return;
+    if (!(await validate()) || !isAdministratorsValid()) return;
 
     submittingAction.value = "continue";
     emit("on-save", {
       department: localDepartment.value,
       action: ESaveOrgUnitAction.Continue,
+      onCreated: (saved) => createAdministrators(saved, { refreshAccessRulesCount: true }),
       onComplete: () => {
         submittingAction.value = null;
         handleNext();

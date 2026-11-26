@@ -15,6 +15,7 @@ export enum EOrgUnitFormTooltip {
   GpuQuotaAvailabilityDepartment = "Unassigned: The number of GPUs not assigned to subordinate projects. Total: The total number of GPUs assigned to the department in this node pool.",
   NodePoolsPriorityOrder = "Set the default order in which workloads are scheduled onto node pools. Workloads try the first (top) pool, then move to the next available one. Use the arrows to reorder. Workload submitters can override this order",
   NodePoolsPriorityOrderReadOnly = "The node pool order can't be changed in view mode",
+  DepartmentAdministrators = "Department administrators can manage the department and its projects. Adding them here enables an access rule scoped to the department. It can be edited later in the department.",
 }
 
 /**
@@ -52,6 +53,8 @@ export interface ISaveOrgUnitPayload<T> {
   action: ESaveOrgUnitAction;
   onComplete?: () => void;
   onError?: () => void;
+  // Runs once a create succeeds and before the page moves on, so follow-up requests finish first.
+  onCreated?: (saved: T) => Promise<void>;
 }
 
 /**

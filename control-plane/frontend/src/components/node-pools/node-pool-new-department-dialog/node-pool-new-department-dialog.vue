@@ -28,64 +28,12 @@
             v-model:description="description"
             :cluster-id="clusterId"
           />
-          <runai-section-title
-            flat
-            class="administrator-title"
+          <org-unit-administrators-fields
+            ref="administratorsRef"
             title="Set the department administrator(s)"
-            tooltip-text="Department administrators can manage the department and its projects. Adding them here enables an access rule scoped to the department. It can be edited later in the department."
-          />
-          <div v-if="administrator" class="administrator-rule">
-            <runai-btn
-              icon-button
-              aid="remove-department-administrator"
-              icon="ph-bold ph-x"
-              size="sm"
-              tooltip="Remove administrator"
-              class="remove-administrator"
-              aria-label="Remove administrator"
-              @click="administrator = false"
-            />
-            <runai-select
-              v-model="subject"
-              :options="subjectOptions"
-              :rules="[requiredSubject]"
-              hide-bottom-space
-              label="Subject"
-              class="subject-select"
-              :disable="fieldsDisabled"
-              @update:model-value="subjects = []"
-            />
-            <subject-addable-multi-select
-              v-if="subject && subject.value !== SubjectTypeExtended.AllAuthenticatedUsers"
-              :subject-type="subject"
-              :disable="fieldsDisabled"
-              :selected-subjects-options="subjects"
-              @update:selected-subjects="subjects = $event"
-              @add-subject="subjects = [...subjects, $event]"
-            />
-            <runai-select
-              v-model="role"
-              :options="roleOptions"
-              :rules="[validateRole]"
-              :loading="rolesLoading"
-              :disable="fieldsDisabled || !canAssignRoles || rolesLoading || !!rolesError"
-              label="Role"
-              class="role-select"
-            />
-            <p v-if="rolesError" role="alert" class="text-negative">
-              {{ rolesError }} <runai-btn aid="retry-department-roles" flat label="Retry" @click="loadRoleOptions" />
-            </p>
-          </div>
-          <runai-btn
-            v-else
-            flat
-            color="primary"
-            icon="ph-bold ph-plus"
-            label="Administrator"
-            class="add-administrator"
-            aid="add-department-administrator"
-            :disable="!canAssignRoles"
-            @click="administrator = true"
+            :tooltip="EOrgUnitFormTooltip.DepartmentAdministrators"
+            default-role="Department administrator"
+            :disable="fieldsDisabled"
           />
         </fieldset>
       </q-form>
@@ -111,67 +59,31 @@
   </runai-base-dialog>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
-import { useAccessRuleRoles } from "@/composables/node-pool/use-access-rule-roles.composable";
-import { useAuthStore } from "@/stores/auth.store/index";
-import { errorMessages } from "@/common/error-message.constant";
+import { computed, ref } from "vue";
 import { QForm, useQuasar } from "quasar";
 import { alertUtil } from "@/utils/alert.util";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
-import { accessRuleService } from "@/services/control-plane/rbac/access-rule.service/access-rule.service";
 import { usePermissionStore } from "@/stores/permissions.store/index";
-import type { SubjectType } from "@/swagger-models/authorization-client/index";
 import { Action, ResourceType, ScopeType } from "@/swagger-models/authorization-client/index";
 import type { Department } from "@/swagger-models/org-unit-service-client/index";
 import { extractErrorMessages } from "@/utils/error-alert.util/index";
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog/index";
 import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
-import { RunaiSectionTitle } from "@/components/common/runai-section-title/index";
-import { RunaiSelect } from "@/components/common/runai-select/index";
 import { SchedulingDepartmentNameFields } from "@/components/node-pools/scheduling-department-name-fields";
-import { SubjectAddableMultiSelect } from "@/components/rbac/common/subject-addable-multi-select/index";
-import { subjectTypeOptions, subjectTypeOptionsWithSSO } from "@/models/access-rule.model/index";
-import { SubjectTypeExtended } from "@/swagger-models/authorization-client/index";
-import type { ISelectOption } from "@/models/global.model";
+import { OrgUnitAdministratorsFields } from "@/components/org-unit/v2/common/org-unit-administrators-fields";
+import { EOrgUnitFormTooltip } from "@/models/org-unit-forms.model";
 const props = defineProps<{ clusterId: string; clusterName?: string }>();
 const emit = defineEmits<{ close: []; created: [department: Department]; saving: [value: boolean] }>();
 const $q = useQuasar();
 const name = ref(""),
-  description = ref(""),
-  administrator = ref(false);
+  description = ref("");
 const saving = ref(false);
 const saveError = ref("");
 const createdDepartment = ref<Department>();
 const fieldsDisabled = computed(() => saving.value || !!createdDepartment.value);
-const completedSubjects = new Set<string>();
 const permissionStore = usePermissionStore();
 const canCreateDepartment = computed(() => permissionStore.hasPermission(ResourceType.Department, Action.Create));
-const authStore = useAuthStore();
-const subjectOptions = computed(() => (authStore.isSSO ? subjectTypeOptionsWithSSO : subjectTypeOptions));
-const subject = ref<ISelectOption | null>(
-  subjectOptions.value.find((option) => option.value === SubjectTypeExtended.User) ?? null,
-);
-const subjects = ref<ISelectOption[]>([]);
-const { roleOptions, canAssignRoles, loadRoles, validateRole, loading: rolesLoading } = useAccessRuleRoles();
-const role = ref<ISelectOption | null>(null);
-watch(
-  roleOptions,
-  (options) => {
-    if (!role.value) role.value = options.find((option) => option.label === "Department administrator") ?? null;
-  },
-  { immediate: true },
-);
-const rolesError = ref("");
-const requiredSubject = (value: ISelectOption | null) => !!value || errorMessages.SUBJECT_NOT_EMPTY;
-async function loadRoleOptions() {
-  rolesError.value = "";
-  try {
-    await loadRoles();
-  } catch {
-    rolesError.value = "Could not load roles.";
-  }
-}
-onMounted(loadRoleOptions);
+const administratorsRef = ref<InstanceType<typeof OrgUnitAdministratorsFields>>();
 const form = ref<QForm>();
 async function createDepartment() {
   if (saving.value || !canCreateDepartment.value) return;
@@ -180,17 +92,9 @@ async function createDepartment() {
   saveError.value = "";
   try {
     if (!createdDepartment.value && !(await form.value?.validate())) return;
-    if (
-      administrator.value &&
-      (!canAssignRoles.value || rolesLoading.value || rolesError.value || validateRole(role.value) !== true)
-    )
-      return;
-    if (
-      administrator.value &&
-      subject.value?.value !== SubjectTypeExtended.AllAuthenticatedUsers &&
-      !subjects.value.length
-    ) {
-      saveError.value = "Select at least one subject.";
+    const administrators = administratorsRef.value?.validate();
+    if (administrators && !administrators.valid) {
+      if (administrators.message) saveError.value = administrators.message;
       return;
     }
     if (!createdDepartment.value) {
@@ -202,28 +106,11 @@ async function createDepartment() {
       });
       emit("created", createdDepartment.value);
     }
-    if (administrator.value && role.value && subject.value) {
-      const scope = {
-        scopeId: createdDepartment.value.id,
-        scopeType: ScopeType.Department,
-        clusterId: props.clusterId,
-        roleId: Number(role.value.value),
-      };
-      if (subject.value.value === SubjectTypeExtended.AllAuthenticatedUsers) {
-        await accessRuleService.createAuthenticatedUsersAccessRule(scope);
-      } else {
-        for (const selected of subjects.value) {
-          const subjectId = String(selected.value);
-          if (completedSubjects.has(subjectId)) continue;
-          await accessRuleService.createAccessRule({
-            ...scope,
-            subjectId,
-            subjectType: subject.value.value as SubjectType,
-          });
-          completedSubjects.add(subjectId);
-        }
-      }
-    }
+    await administratorsRef.value?.save({
+      scopeId: createdDepartment.value.id,
+      scopeType: ScopeType.Department,
+      clusterId: props.clusterId,
+    });
     emit("close");
   } catch (error) {
     if (createdDepartment.value) {
@@ -356,47 +243,6 @@ async function createDepartment() {
 }
 .new-department-form .runai-section-title {
   font-weight: 400;
-}
-.administrator-rule {
-  position: relative;
-  box-shadow: inset 0 0 0 1px var(--border-subtle);
-  padding: 16px;
-  margin-top: 26px;
-}
-.administrator-rule .subject-select,
-.administrator-rule .role-select {
-  width: 380px;
-  max-width: 100%;
-}
-.administrator-rule .subject-addable-multi-select {
-  margin: 26px 0;
-  width: 90%;
-}
-.administrator-rule .remove-administrator {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  min-height: 32px;
-  padding: 0;
-}
-.add-administrator {
-  margin-top: 26px;
-  height: 38px;
-  min-height: 38px;
-  padding: 0 10px;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-  letter-spacing: 0;
-}
-.add-administrator .q-icon {
-  width: 20px;
-  height: 20px;
-  font-size: 20px;
-  margin-right: 10px;
 }
 .department-fields {
   border: 0;

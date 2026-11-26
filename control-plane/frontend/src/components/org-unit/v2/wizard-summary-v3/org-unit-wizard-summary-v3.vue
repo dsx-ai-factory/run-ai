@@ -27,6 +27,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { RunaiTooltip } from "@/components/common/runai-tooltip";
+import { stringUtil } from "@/utils/string.util";
 import { useWizardPreview } from "@/composables/org-unit/use-wizard-preview.composable";
 import type { SchedulingRules } from "@/swagger-models/org-unit-service-client";
 import type { EQuotaEntity } from "@/models/resource.model";
@@ -43,6 +44,8 @@ export interface IProps {
   entityType: EQuotaEntity;
   accessRulesCount: number;
   schedulingRules?: SchedulingRules | null;
+  clusterName?: string;
+  administratorsCount?: number;
 }
 
 const props = defineProps<IProps>();
@@ -58,9 +61,20 @@ const schedulingRulesCount = computed(() => {
 });
 
 const sections = computed<ISummarySection[]>(() => [
-  { aid: "cluster", title: "Cluster", value: NOT_SET },
-  { aid: "administrators", title: "Administrator(s)", value: NOT_SET, isCount: true },
-  { aid: "resources", title: "Resources", value: NOT_SET },
+  { aid: "cluster", title: "Cluster", value: props.clusterName ?? NOT_SET },
+  {
+    aid: "administrators",
+    title: "Administrator(s)",
+    tooltip: `${stringUtil.capitalizeString(props.entityType)} administrators can manage the ${props.entityType} and its projects`,
+    value: props.administratorsCount === undefined ? NOT_SET : String(props.administratorsCount),
+    isCount: true,
+  },
+  {
+    aid: "resources",
+    title: "Resources",
+    tooltip: "All the resources available for matching labeled nodes within the node pool",
+    value: NOT_SET,
+  },
   { aid: "projects", title: "Projects", value: NOT_SET, isCount: true },
   {
     aid: "scheduling-rules",
