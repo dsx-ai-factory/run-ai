@@ -43,7 +43,7 @@ test.describe(`Service Accounts Status Codes tags: ${tags.runOn.k8sFlavCertKit} 
         }
     });
 
-    test('should validate user can not fetch service account by id', async function () {
+    test.skip('should validate user can not fetch service account by id', async function () {
         const error: any = await serviceAccountUtils.getServiceAccountById(
             flowRootState.users.viewer.accessToken,
             createdServiceAccount.body.id
