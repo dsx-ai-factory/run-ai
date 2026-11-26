@@ -1,6 +1,6 @@
 # Running AI Agents with NVIDIA OpenShell on NVIDIA Run:ai
 
-This tutorial demonstrates how to run autonomous AI agents in NVIDIA OpenShell sandboxes on an NVIDIA Run:ai-managed Kubernetes cluster, with an OpenShell workspace for an [NVIDIA Run:ai project](../../platform-management/aiinitiatives/organization/projects.md). Agents are scheduled under their NVIDIA Run:ai project's [quota](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#quota). You can adapt this workflow for other teams, NVIDIA Run:ai projects, model endpoints, and agent harnesses.
+This tutorial demonstrates how to run autonomous AI agents in NVIDIA OpenShell sandboxes on an NVIDIA Run:ai-managed Kubernetes cluster, with an OpenShell workspace for an [NVIDIA Run:ai project](../../../platform-management/aiinitiatives/organization/projects.md). Agents are scheduled under their NVIDIA Run:ai project's [quota](../../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#quota). You can adapt this workflow for other teams, NVIDIA Run:ai projects, model endpoints, and agent harnesses.
 
 In this tutorial, you will learn how to:
 
@@ -23,10 +23,10 @@ Each part of the setup is responsible for the following:
   - **OpenShell workspaces and permissions.** A Platform Admin decides who can use which OpenShell workspace, and workspace membership is the access control. For more details, refer to [Workspaces](https://docs.nvidia.com/openshell/latest/how-it-works/workspaces).
   - **Sandboxes.** Each agent runs in a sandbox in the NVIDIA Run:ai project namespace, where the OpenShell supervisor enforces the sandbox policy and keeps real credentials away from the agent. For more details, refer to [Manage Sandboxes](https://docs.nvidia.com/openshell/latest/how-it-works/sandboxes/overview).
 - **NVIDIA Run:ai** schedules the agents' workloads and monitors them. It is responsible for:
-  - **Scheduling.** NVIDIA Run:ai schedules every pod in a project namespace under the NVIDIA Run:ai project's [quota](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#quota), [fairness](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#fairness-fair-resource-distribution), and [node pools](../../platform-management/aiinitiatives/resources/node-pools.md).
+  - **Scheduling.** NVIDIA Run:ai schedules every pod in a project namespace under the NVIDIA Run:ai project's [quota](../../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#quota), [fairness](../../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#fairness-fair-resource-distribution), and [node pools](../../../platform-management/aiinitiatives/resources/node-pools.md).
   - **Workload monitoring.** The agents' pods appear as workloads in NVIDIA Run:ai, where administrators can monitor them.
 
-<img src="../../assets/openshell-on-runai-architecture.svg" alt="OpenShell on NVIDIA Run:ai: the user's openshell CLI signs in through the identity provider and calls the OpenShell gateway over gRPC with an OIDC token through the ingress. The gateway runs in the openshell namespace and checks the token's groups claim. OpenShell workspace runai-team-a maps to the project namespace runai-team-a, the namespace of NVIDIA Run:ai project team-a, where the agent pod and supervisor pod run, all scheduled and monitored by the NVIDIA Run:ai scheduler. The supervisor pod sends the agent's model requests to a model endpoint, which is an inference workload served on NVIDIA Run:ai. A Platform Admin creates the OpenShell workspace and adds each user to it." />
+<img src="../../../assets/openshell-on-runai-architecture.svg" alt="OpenShell on NVIDIA Run:ai: the user's openshell CLI signs in through the identity provider and calls the OpenShell gateway over gRPC with an OIDC token through the ingress. The gateway runs in the openshell namespace and checks the token's groups claim. OpenShell workspace runai-team-a maps to the project namespace runai-team-a, the namespace of NVIDIA Run:ai project team-a, where the agent pod and supervisor pod run, all scheduled and monitored by the NVIDIA Run:ai scheduler. The supervisor pod sends the agent's model requests to a model endpoint, which is an inference workload served on NVIDIA Run:ai. A Platform Admin creates the OpenShell workspace and adds each user to it." />
 
 ## Who Does What
 
@@ -55,9 +55,9 @@ Before you install OpenShell in [Step 1](#step-1-installing-openshell), make sur
 
 Make sure the following are set up in NVIDIA Run:ai:
 
-- **A project.** An NVIDIA Run:ai [project](../../platform-management/aiinitiatives/organization/projects.md) for the team that runs agents, with the quota you want to limit its agents to. This tutorial uses the NVIDIA Run:ai project `team-a`. In [Step 3](#step-3-creating-an-openshell-workspace-for-the-nvidia-runai-project), the Platform Admin creates an OpenShell workspace that matches the NVIDIA Run:ai project, and in [Step 4](#step-4-adding-users-to-the-openshell-workspace) adds the team's users to it.
-- **A service account.** A [service account](../../platform-management/authentication/service-accounts.md) has a client ID and a client secret. In [Step 5](#step-5-giving-agents-model-access), the OpenShell gateway uses them to get access tokens for the model endpoint.
-- **The sandbox workload type.** An administrator registers the OpenShell sandbox as a workload type, so that NVIDIA Run:ai can schedule and monitor the sandbox workloads. Use the [sandbox workload type](https://github.com/dsx-ai-factory/workload-map/blob/main/docs/catalog/agents-x-k8s-io-sandbox-v1beta1.yaml) from the workload-map repository, and follow [Registering New Workload Types](../../workloads-in-nvidia-run-ai/supported-workload-types/extending-workload-support/README.md#registering-new-workload-types).
+- **A project.** An NVIDIA Run:ai [project](../../../platform-management/aiinitiatives/organization/projects.md) for the team that runs agents, with the quota you want to limit its agents to. This tutorial uses the NVIDIA Run:ai project `team-a`. In [Step 3](#step-3-creating-an-openshell-workspace-for-the-nvidia-runai-project), the Platform Admin creates an OpenShell workspace that matches the NVIDIA Run:ai project, and in [Step 4](#step-4-adding-users-to-the-openshell-workspace) adds the team's users to it.
+- **A service account.** A [service account](../../../platform-management/authentication/service-accounts.md) has a client ID and a client secret. In [Step 5](#step-5-giving-agents-model-access), the OpenShell gateway uses them to get access tokens for the model endpoint.
+- **The sandbox workload type.** An administrator registers the OpenShell sandbox as a workload type, so that NVIDIA Run:ai can schedule and monitor the sandbox workloads. Use the [sandbox workload type](https://github.com/dsx-ai-factory/workload-map/blob/main/docs/catalog/agents-x-k8s-io-sandbox-v1beta1.yaml) from the workload-map repository, and follow [Registering New Workload Types](../../supported-workload-types/extending-workload-support/README.md#registering-new-workload-types).
 
   <Accordion title="Register the sandbox workload type and grant permissions">
 
@@ -258,7 +258,7 @@ Make sure the following are set up in NVIDIA Run:ai:
 
   </Accordion>
 
-- **A language model for the agents to call.** In [Step 5](#step-5-giving-agents-model-access), the Platform Admin connects the agents to the model, and the agents use it in [Step 6](#step-6-running-an-agent-that-pushes-to-github). Deploy the model on NVIDIA Run:ai as an inference workload, as described in [Deploy Inference Workloads with vLLM](../../workloads-in-nvidia-run-ai/using-inference/hugging-face-inference.md) or [Deploy Inference Workloads with NVIDIA NIM](../../workloads-in-nvidia-run-ai/using-inference/nim-inference.md). When you set who can access the inference serving endpoint, select **Specific user(s) and service account(s)** and enter the service account that you created above, so that only this service account can call the model. For how to get a token, refer to [Accessing the inference workload](../../workloads-in-nvidia-run-ai/using-inference/hugging-face-inference.md#accessing-the-inference-workload).
+- **A language model for the agents to call.** In [Step 5](#step-5-giving-agents-model-access), the Platform Admin connects the agents to the model, and the agents use it in [Step 6](#step-6-running-an-agent-that-pushes-to-github). Deploy the model on NVIDIA Run:ai as an inference workload, as described in [Deploy Inference Workloads with vLLM](../../using-inference/hugging-face-inference.md) or [Deploy Inference Workloads with NVIDIA NIM](../../using-inference/nim-inference.md). When you set who can access the inference serving endpoint, select **Specific user(s) and service account(s)** and enter the service account that you created above, so that only this service account can call the model. For how to get a token, refer to [Accessing the inference workload](../../using-inference/hugging-face-inference.md#accessing-the-inference-workload).
 
   <Accordion title="Model requirements and example">
 
@@ -470,7 +470,7 @@ Platform Admins and Workspace Users sign in to OpenShell through your identity p
 
 </Note>
 
-This tutorial creates one OpenShell workspace, for the [NVIDIA Run:ai project](../../platform-management/aiinitiatives/organization/projects.md) `team-a`. To give another NVIDIA Run:ai project agents, repeat this step, and the chart install in [Step 1](#step-1-installing-openshell), for that NVIDIA Run:ai project.
+This tutorial creates one OpenShell workspace, for the [NVIDIA Run:ai project](../../../platform-management/aiinitiatives/organization/projects.md) `team-a`. To give another NVIDIA Run:ai project agents, repeat this step, and the chart install in [Step 1](#step-1-installing-openshell), for that NVIDIA Run:ai project.
 
 As a **Platform Admin** (a user in the `openshell-admin` group), create the [OpenShell workspace](https://docs.nvidia.com/openshell/latest/how-it-works/workspaces) for the NVIDIA Run:ai project. In operator mode, the OpenShell workspace name must equal the NVIDIA Run:ai project namespace name.
 
@@ -530,11 +530,11 @@ export OPENSHELL_WORKSPACE=runai-team-a
 
 </Note>
 
-A model served on NVIDIA Run:ai accepts only requests with a valid NVIDIA Run:ai token. A token lasts about 30 minutes, so the gateway uses the client ID and client secret of an NVIDIA Run:ai [service account](../../platform-management/authentication/service-accounts.md) to fetch and renew it, and never gives them to the agent. For how providers work, refer to the OpenShell [Providers](https://docs.nvidia.com/openshell/latest/how-it-works/providers/overview) documentation.
+A model served on NVIDIA Run:ai accepts only requests with a valid NVIDIA Run:ai token. A token lasts about 30 minutes, so the gateway uses the client ID and client secret of an NVIDIA Run:ai [service account](../../../platform-management/authentication/service-accounts.md) to fetch and renew it, and never gives them to the agent. For how providers work, refer to the OpenShell [Providers](https://docs.nvidia.com/openshell/latest/how-it-works/providers/overview) documentation.
 
 The model and the service account are already set up, as described in [Prerequisites](#nvidia-runai-prerequisites). In this step, you create the provider profile and the provider in OpenShell.
 
-1. **In OpenShell, create the provider profile** in the OpenShell workspace that uses the model. Take `<model-host>` from the endpoint URL in the workload's **Connections** column in the NVIDIA Run:ai UI under [**Workload manager → Workloads**](../../workloads-in-nvidia-run-ai/workloads.md#connections-associated-with-the-workload).
+1. **In OpenShell, create the provider profile** in the OpenShell workspace that uses the model. Take `<model-host>` from the endpoint URL in the workload's **Connections** column in the NVIDIA Run:ai UI under [**Workload manager → Workloads**](../../workloads.md#connections-associated-with-the-workload).
 
    ```yaml
    id: runai-model
@@ -646,10 +646,10 @@ A Platform Admin can list the agents in every OpenShell workspace. For how, refe
 
 ### Viewing Agents in NVIDIA Run:ai
 
-In the NVIDIA Run:ai UI, [**Workload manager → Workloads**](../../workloads-in-nvidia-run-ai/workloads.md) lists the agents' pods as workloads in their NVIDIA Run:ai project. From there you can:
+In the NVIDIA Run:ai UI, [**Workload manager → Workloads**](../../workloads.md) lists the agents' pods as workloads in their NVIDIA Run:ai project. From there you can:
 
 - **See consumption:** CPU, memory, and (when requested with `openshell sandbox create --gpu`) GPU allocation per agent, rolled up to the NVIDIA Run:ai project and department.
-- **Manage capacity:** agents are scheduled under the NVIDIA Run:ai project's [quota](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#quota), [fairness](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#fairness-fair-resource-distribution) and [over-quota](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#over-quota) rules.
+- **Manage capacity:** agents are scheduled under the NVIDIA Run:ai project's [quota](../../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#quota), [fairness](../../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#fairness-fair-resource-distribution) and [over-quota](../../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#over-quota) rules.
 
 ### Watching Enforcement in OpenShell
 

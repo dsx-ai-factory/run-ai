@@ -24,9 +24,9 @@ In this tutorial, you will learn how to:
 Before you start, make sure the following requirements are met:
 
 * Your administrator has:
-  * Created a [project](../../platform-management/aiinitiatives/organization/projects.md) for you.
-  * Installed and configured [LWS](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#distributed-inference) (Leader-Worker Set) on the cluster.
-  * Configured external access if needed. Endpoints ending with `.svc.cluster.local` are accessible only inside the cluster; external access must be enabled by your administrator as described in the [inference requirements](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#standard-inference) section.
+  * Created a [project](../../../platform-management/aiinitiatives/organization/projects.md) for you.
+  * Installed and configured [LWS](../../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#distributed-inference) (Leader-Worker Set) on the cluster.
+  * Configured external access if needed. Endpoints ending with `.svc.cluster.local` are accessible only inside the cluster; external access must be enabled by your administrator as described in the [inference requirements](../../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#standard-inference) section.
 * You have:
   * A Hugging Face account with an active personal access token, available under [Account Settings](https://huggingface.co/) → Access Tokens in your Hugging Face profile.
   * Accepted the model license for the [Llama-3.1-405B-Instruct](https://huggingface.co/meta-llama/Llama-3.1-405B-Instruct) model or for any other model you plan to use.
@@ -103,7 +103,7 @@ Creating user credentials is not available via API.
 
 </Note>
 
-User credentials allow users to securely store private authentication secrets, which are accessible only to the user who created them. See [User credentials](../../settings/user-settings/user-credentials.md) for more details.
+User credentials allow users to securely store private authentication secrets, which are accessible only to the user who created them. See [User credentials](../../../settings/user-settings/user-credentials.md) for more details.
 
 In the NVIDIA Run:ai user interface:
 
@@ -134,7 +134,7 @@ The first time a workload is launched using a new PVC, it will take longer to st
 
 1. To create a PVC, go to Workload manager → Data sources.
 2. Click +**NEW DATA SOURCE** and select **PVC** from the dropdown menu.
-3. Within the new form, set the [scope](../../workloads-in-nvidia-run-ai/workload-assets/overview.md#asset-scope).
+3. Within the new form, set the [scope](../../workload-assets/overview.md#asset-scope).
 
 <Note>
 
@@ -363,7 +363,7 @@ curl -L 'https://<COMPANY-URL>/api/v1/workloads/distributed-inferences' \
 
 <Tab title="CLI v2">
 
-Copy the following command to your terminal. Make sure to update the below with the name of your project and workload. For more details, see [CLI reference](../../reference/cli/runai/runai_inference_distributed_submit.md):
+Copy the following command to your terminal. Make sure to update the below with the name of your project and workload. For more details, see [CLI reference](../../../reference/cli/runai/runai_inference_distributed_submit.md):
 
 ```sh
 runai inference distributed submit <workload-name> \
@@ -390,7 +390,7 @@ runai inference distributed submit <workload-name> \
 
 ## Step 6: Verifying the Workload Status
 
-After submitting the workload, wait for it to reach the Running status in the [Workloads](../../workloads-in-nvidia-run-ai/workloads.md) table. A workload becomes Ready to accept inference requests only after all its pods have fully initialized, including model loading.
+After submitting the workload, wait for it to reach the Running status in the [Workloads](../../workloads.md) table. A workload becomes Ready to accept inference requests only after all its pods have fully initialized, including model loading.
 
 Large models may require several minutes to load their weights, especially when the model is stored on a PVC. During this time, the workload may remain in **Initializing** even though pods are already running.
 
@@ -403,7 +403,7 @@ Once the workload reaches **Running** and shows an available **Connection**, you
 
 ## Step 7: Accessing the Inference Workload
 
-You can programmatically consume an inference workload via API by making direct calls to the serving endpoint, typically from other workloads or external integrations. Once an inference workload is deployed, the serving endpoint URL appears in the **Connections** column of the [Workloads](../../workloads-in-nvidia-run-ai/workloads.md) table. To retrieve the service endpoint programmatically, use the [Get Workloads](api:main-api:GET/api/v1/workloads) API. The endpoint URL will be available in the response body under `endpoints`.
+You can programmatically consume an inference workload via API by making direct calls to the serving endpoint, typically from other workloads or external integrations. Once an inference workload is deployed, the serving endpoint URL appears in the **Connections** column of the [Workloads](../../workloads.md) table. To retrieve the service endpoint programmatically, use the [Get Workloads](api:main-api:GET/api/v1/workloads) API. The endpoint URL will be available in the response body under `endpoints`.
 
 <Note>
 

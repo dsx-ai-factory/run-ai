@@ -1,6 +1,6 @@
 # Running NVIDIA OSMO Workflows on NVIDIA Run:ai
 
-This tutorial demonstrates how to run NVIDIA OSMO workflows on an NVIDIA Run:ai-managed Kubernetes cluster, with an OSMO backend and pool for each [NVIDIA Run:ai project](../../platform-management/aiinitiatives/organization/projects.md). OSMO runs each workflow task as a Kubernetes pod, and NVIDIA Run:ai schedules those pods under the [quota](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#quota) of the project. You can adapt this workflow for other teams, NVIDIA Run:ai projects, and OSMO pools.
+This tutorial demonstrates how to run NVIDIA OSMO workflows on an NVIDIA Run:ai-managed Kubernetes cluster, with an OSMO backend and pool for each [NVIDIA Run:ai project](../../../platform-management/aiinitiatives/organization/projects.md). OSMO runs each workflow task as a Kubernetes pod, and NVIDIA Run:ai schedules those pods under the [quota](../../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#quota) of the project. You can adapt this workflow for other teams, NVIDIA Run:ai projects, and OSMO pools.
 
 <Note>
 
@@ -32,7 +32,7 @@ Each part of the setup is responsible for the following:
 - **NVIDIA Run:ai** schedules the pods and enforces limits. It is responsible for:
   - **Access to projects.** NVIDIA Run:ai administrators manage access to the projects. This is separate from how OSMO manages its users.
   - **Projects and namespaces.** Each NVIDIA Run:ai project has its own Kubernetes namespace, which OSMO uses as a backend.
-  - **Quota and priority.** NVIDIA Run:ai schedules every pod under the [quota](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#quota), [priority, and preemption](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#priority-and-preemption) rules of the project.
+  - **Quota and priority.** NVIDIA Run:ai schedules every pod under the [quota](../../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#quota), [priority, and preemption](../../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#priority-and-preemption) rules of the project.
   - **Pod placement.** NVIDIA Run:ai decides which nodes the pods run on.
 
 Each NVIDIA Run:ai project maps to one OSMO backend, one OSMO pool, and one backend-operator Helm release. The following example shows the mapping:
@@ -44,7 +44,7 @@ Each NVIDIA Run:ai project maps to one OSMO backend, one OSMO pool, and one back
 
 The following diagram shows how users reach OSMO, and how each backend operator creates pods in the namespace of its NVIDIA Run:ai project:
 
-<img src="../../assets/osmo-on-runai-architecture.svg" alt="OSMO on NVIDIA Run:ai: the OSMO CLI connects to the OSMO service over HTTPS and WSS. The OSMO service includes the OSMO API and UI, the osmo-router, and the data stores. A backend operator for each backend, osmo-high and osmo-low, creates pods in the namespace of the matching NVIDIA Run:ai project, runai-osmo-high or runai-osmo-low. Both projects use the runai-scheduler." />
+<img src="../../../assets/osmo-on-runai-architecture.svg" alt="OSMO on NVIDIA Run:ai: the OSMO CLI connects to the OSMO service over HTTPS and WSS. The OSMO service includes the OSMO API and UI, the osmo-router, and the data stores. A backend operator for each backend, osmo-high and osmo-low, creates pods in the namespace of the matching NVIDIA Run:ai project, runai-osmo-high or runai-osmo-low. Both projects use the runai-scheduler." />
 
 ## Prerequisites
 
@@ -64,7 +64,7 @@ Before you start, make sure the following requirements are met:
 
 ### NVIDIA Run:ai Prerequisites
 
-- **Administrator access.** You need NVIDIA Run:ai administrator access to create projects and change the Scheduler settings. For the roles that can create projects, refer to [Roles](../../platform-management/authentication/roles.md).
+- **Administrator access.** You need NVIDIA Run:ai administrator access to create projects and change the Scheduler settings. For the roles that can create projects, refer to [Roles](../../../platform-management/authentication/roles.md).
 
 ## Step 1: Creating the NVIDIA Run:ai Projects
 
@@ -78,8 +78,8 @@ The project names are examples. If you use other names, replace `osmo-high`, `os
 
 </Note>
 
-1. **Create the projects.** Create `osmo-high` and `osmo-low`, as described in [Adding a New Project](../../platform-management/aiinitiatives/organization/projects.md#adding-a-new-project). NVIDIA Run:ai creates the namespace of each project, `runai-osmo-high` and `runai-osmo-low`.
-2. **Set the quota.** Give each project the GPU and CPU quota that you want to guarantee for its pool, as described in [Assigning GPU Quota](../../platform-management/aiinitiatives/organization/projects.md#assigning-gpu-quota) and [Assigning CPU Quota](../../platform-management/aiinitiatives/organization/projects.md#assigning-cpu-quota). How much quota each project needs depends on the priority of its OSMO workflows:
+1. **Create the projects.** Create `osmo-high` and `osmo-low`, as described in [Adding a New Project](../../../platform-management/aiinitiatives/organization/projects.md#adding-a-new-project). NVIDIA Run:ai creates the namespace of each project, `runai-osmo-high` and `runai-osmo-low`.
+2. **Set the quota.** Give each project the GPU and CPU quota that you want to guarantee for its pool, as described in [Assigning GPU Quota](../../../platform-management/aiinitiatives/organization/projects.md#assigning-gpu-quota) and [Assigning CPU Quota](../../../platform-management/aiinitiatives/organization/projects.md#assigning-cpu-quota). How much quota each project needs depends on the priority of its OSMO workflows:
 
    * OSMO workflows with the `NORMAL` or `HIGH` priority are non-preemptible. They run only within the quota of the project, so give `osmo-high` enough quota for them.
    * OSMO workflows with the `LOW` priority are preemptible. They can also run on unused capacity beyond the quota of `osmo-low`, and NVIDIA Run:ai takes that capacity back when another project needs it within its quota.
@@ -90,7 +90,7 @@ The project names are examples. If you use other names, replace `osmo-high`, `os
    kubectl get namespace runai-osmo-high runai-osmo-low -o yaml
    ```
 
-   Each namespace must be associated with its NVIDIA Run:ai project and queue: `runai-osmo-high` with `osmo-high`, and `runai-osmo-low` with `osmo-low`. Pods that third-party tools create in either namespace must receive or keep `schedulerName: runai-scheduler`. NVIDIA Run:ai [enforces the Scheduler at the namespace level](../../platform-management/runai-scheduler/scheduling/default-scheduler.md#enforce-the-scheduler-at-the-namespace-level) for third-party Kubernetes workloads.
+   Each namespace must be associated with its NVIDIA Run:ai project and queue: `runai-osmo-high` with `osmo-high`, and `runai-osmo-low` with `osmo-low`. Pods that third-party tools create in either namespace must receive or keep `schedulerName: runai-scheduler`. NVIDIA Run:ai [enforces the Scheduler at the namespace level](../../../platform-management/runai-scheduler/scheduling/default-scheduler.md#enforce-the-scheduler-at-the-namespace-level) for third-party Kubernetes workloads.
 4. **Label the compute nodes (only if your pod template uses a node selector).** The OSMO pod template `default_compute`, which you define in [Step 2](#step-2-connecting-osmo-to-each-project), selects compute nodes with the node selector `osmo-compute: "true"`. If your pod template does not set a node selector, skip this item. Otherwise, label each node that can run OSMO workflows, replacing `<node-name>` with the name of the node:
 
    ```bash
@@ -345,7 +345,7 @@ Submit a small workflow to each pool, and check the pods that OSMO creates.
 
    </Note>
 
-4. **Monitor the workflows in NVIDIA Run:ai.** NVIDIA Run:ai provides full monitoring for externally submitted Kubernetes workloads, including event history, metrics, and logs. Each task pod appears in the project of its namespace, named after the pod. For more details, refer to [Supported Features](../../workloads-in-nvidia-run-ai/workload-types/supported-features.md#externally-submitted-kubernetes-workloads).
+4. **Monitor the workflows in NVIDIA Run:ai.** NVIDIA Run:ai provides full monitoring for externally submitted Kubernetes workloads, including event history, metrics, and logs. Each task pod appears in the project of its namespace, named after the pod. For more details, refer to [Supported Features](../../workload-types/supported-features.md#externally-submitted-kubernetes-workloads).
 
 5. **Cancel the workflows** when you finish checking. Use the workflow IDs that OSMO returned when you submitted them:
 

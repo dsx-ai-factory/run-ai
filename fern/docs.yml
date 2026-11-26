@@ -158,6 +158,54 @@ redirects:
   - source: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/workload-types/extending-workload-support/quick-start-templates
     destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/supported-workload-types/extending-workload-support/quick-start-templates
     permanent: true
+  - source: /run-ai/self-hosted/documentation/tutorials/agent-tutorials/openshell-on-runai
+    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/supported-workload-types/tutorials/openshell-on-runai
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/tutorials/blueprint-tutorials/rag-blueprint-deployment
+    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/ai-applications/tutorials/rag-blueprint-deployment
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/tutorials/inference-tutorials/aggregated-dynamo
+    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-inference/tutorials/aggregated-dynamo
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/tutorials/inference-tutorials/disaggregated-dynamo
+    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-inference/tutorials/disaggregated-dynamo
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/tutorials/inference-tutorials/hugging-face-distributed
+    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-inference/tutorials/hugging-face-distributed
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/tutorials/inference-tutorials/nim-service
+    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-inference/tutorials/nim-service
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/tutorials/inference-tutorials/nvidia-nim-distributed
+    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-inference/tutorials/nvidia-nim-distributed
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/tutorials/pipeline-tutorials/osmo-on-runai
+    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-training/tutorials/osmo-on-runai
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/tutorials/training-tutorials/deploying-slurm
+    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-training/tutorials/deploying-slurm
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/tutorials/training-tutorials/distributed-pytorch
+    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-training/tutorials/distributed-pytorch
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/tutorials/training-tutorials/nccl-tests
+    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-training/tutorials/nccl-tests
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-workspaces/quick-starts/jupyter-quickstart
+    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-workspaces/tutorials/jupyter-quickstart
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-training/quick-starts/standard-training-quickstart
+    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-training/tutorials/standard-training-quickstart
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-training/quick-starts/distributed-training-quickstart
+    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-training/tutorials/distributed-training-quickstart
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-inference/quick-starts/inference-quickstart
+    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-inference/tutorials/inference-quickstart
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-inference/tutorials/openshell-on-runai
+    destination: /run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/supported-workload-types/tutorials/openshell-on-runai
+    permanent: true
   - source: /self-hosted/v2.26/:slug*
     destination: https://run-ai-docs.nvidia.com/self-hosted
     permanent: false

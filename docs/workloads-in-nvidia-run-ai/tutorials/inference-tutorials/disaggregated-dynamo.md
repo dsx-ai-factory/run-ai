@@ -46,11 +46,11 @@ The following steps must be performed by your administrator.
 Before you start, make sure the following requirements are met:
 
 * Your administrator has:
-  * Created a [project](../../platform-management/aiinitiatives/organization/projects.md) for you.
-  * Enabled network topology-aware scheduling in the relevant [node pool](../../platform-management/aiinitiatives/resources/node-pools.md#adding-a-new-node-pool), allowing the NVIDIA Run:ai Scheduler to place distributed pods close to each other in the network for optimal performance. For more details, see [Accelerating workloads with network topology-aware scheduling](../../platform-management/aiinitiatives/resources/topology-aware-scheduling/README.md).
+  * Created a [project](../../../platform-management/aiinitiatives/organization/projects.md) for you.
+  * Enabled network topology-aware scheduling in the relevant [node pool](../../../platform-management/aiinitiatives/resources/node-pools.md#adding-a-new-node-pool), allowing the NVIDIA Run:ai Scheduler to place distributed pods close to each other in the network for optimal performance. For more details, see [Accelerating workloads with network topology-aware scheduling](../../../platform-management/aiinitiatives/resources/topology-aware-scheduling/README.md).
   * For GB200 NVL72 and Multi-Node NVLink (MNNVL) systems:
-    * Enabled GB200 NVL72 and Multi-Node NVLink (MNNVL) support in the relevant [node pool](../../platform-management/aiinitiatives/resources/node-pools.md#adding-a-new-node-pool), ensuring that distributed workloads can leverage high-bandwidth interconnects and topology-aware scheduling. For more details, see [Using GB200 NVL72 and Multi-Node NVLink domains](../../platform-management/aiinitiatives/resources/using-gb200.md).
-    * Enabled GPU network acceleration in the cluster configuration by setting the appropriate flag, `anyworkload-controller.GPUNetworkAccelerationEnabled=true`. For details on how to configure this value using Helm or `runaiconfig`, see [Advanced cluster configurations](../../installation-and-configuration/configuration/cluster-config.md).
+    * Enabled GB200 NVL72 and Multi-Node NVLink (MNNVL) support in the relevant [node pool](../../../platform-management/aiinitiatives/resources/node-pools.md#adding-a-new-node-pool), ensuring that distributed workloads can leverage high-bandwidth interconnects and topology-aware scheduling. For more details, see [Using GB200 NVL72 and Multi-Node NVLink domains](../../../platform-management/aiinitiatives/resources/using-gb200.md).
+    * Enabled GPU network acceleration in the cluster configuration by setting the appropriate flag, `anyworkload-controller.GPUNetworkAccelerationEnabled=true`. For details on how to configure this value using Helm or `runaiconfig`, see [Advanced cluster configurations](../../../installation-and-configuration/configuration/cluster-config.md).
 * You have:
   * Access to the model if you are using a gated Hugging Face model that requires an `HF_TOKEN`. Generate a token from your [Hugging Face account](https://huggingface.co/) and provide it to the workload as an environment variable. The model used in this tutorial is not gated and does not require authentication.
 
@@ -134,7 +134,7 @@ The first time a workload is launched using a new PVC, it will take longer to st
 
 1. To create a PVC, go to Workload manager → Data sources.
 2. Click +**NEW DATA SOURCE** and select **PVC** from the dropdown menu.
-3. Within the new form, set the [scope](../../workloads-in-nvidia-run-ai/workload-assets/overview.md#asset-scope).
+3. Within the new form, set the [scope](../../workload-assets/overview.md#asset-scope).
 
 <Note>
 
@@ -227,7 +227,7 @@ For more details, see the [NVIDIA Dynamo documentation](https://docs.nvidia.com/
    * `<your-hf-token>` - Required only for gated Hugging Face models. Generate a token from your [Hugging Face account](https://huggingface.co/) and provide it to the workload as an environment variable.
    * `<INGRESS-CLASS>` - The ingress controller class name configured in your cluster (for example, `haproxy`). Contact your administrator to obtain the correct value.
    * `<DEPLOYMENT-PREFIX>` - A unique prefix for the deployment endpoint (for example, `llama3-agg`).
-   * `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../installation-and-configuration/system-requirements/networking-setup.md#fqdn-and-dns). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](api:main-api:GET/api/v1/clusters/minimal) API - use the `domain` field in the response.
+   * `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../../installation-and-configuration/system-requirements/networking-setup.md#fqdn-and-dns). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](api:main-api:GET/api/v1/clusters/minimal) API - use the `domain` field in the response.
 
 ```yaml
 apiVersion: nvidia.com/v1alpha1
@@ -341,7 +341,7 @@ Copy the following command to your terminal. Make sure to update the following p
 * `<your-hf-token>` - Required only for gated Hugging Face models. Generate a token from your [Hugging Face account](https://huggingface.co/) and provide it to the workload as an environment variable.
 * `<INGRESS-CLASS>` - The ingress controller class name configured in your cluster (for example, `haproxy`). Contact your administrator to obtain the correct value.
 * `<DEPLOYMENT-PREFIX>` - A unique prefix for the deployment endpoint (for example, `llama3-agg`).
-* `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../installation-and-configuration/system-requirements/networking-setup.md#fqdn-and-dns). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](api:main-api:GET/api/v1/clusters/minimal) API - use the `domain` field in the response.
+* `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../../installation-and-configuration/system-requirements/networking-setup.md#fqdn-and-dns). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](api:main-api:GET/api/v1/clusters/minimal) API - use the `domain` field in the response.
 
 ```bash
 curl -L 'https://<COMPANY-URL>/api/v2/workloads' \
@@ -516,7 +516,7 @@ curl -L 'https://<COMPANY-URL>/api/v2/workloads' \
 
 <Tab title="CLI v2">
 
-Follow the below steps. For more details, see [CLI reference](../../reference/cli/runai/runai_workload_submit.md):
+Follow the below steps. For more details, see [CLI reference](../../../reference/cli/runai/runai_workload_submit.md):
 
 1.  Save the following YAML file. Before submitting, update the following fields in the manifest:
 
@@ -524,7 +524,7 @@ Follow the below steps. For more details, see [CLI reference](../../reference/cl
     * `<your-hf-token>` - Required only for gated Hugging Face models. Generate a token from your [Hugging Face account](https://huggingface.co/) and provide it to the workload as an environment variable.
     * `<INGRESS-CLASS>` - The ingress controller class name configured in your cluster (for example, `haproxy`). Contact your administrator to obtain the correct value.
     * `<DEPLOYMENT-PREFIX>` - A unique prefix for the deployment endpoint (for example, `llama3-agg`).
-    * `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../installation-and-configuration/system-requirements/networking-setup.md#fqdn-and-dns). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](api:main-api:GET/api/v1/clusters/minimal) API - use the `domain` field in the response.
+    * `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../../installation-and-configuration/system-requirements/networking-setup.md#fqdn-and-dns). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](api:main-api:GET/api/v1/clusters/minimal) API - use the `domain` field in the response.
 
     ```yaml
     apiVersion: nvidia.com/v1alpha1
@@ -635,7 +635,7 @@ Follow the below steps. For more details, see [CLI reference](../../reference/cl
 
 ## Step 5: Verifying the Workload Status
 
-After submitting the workload, wait for it to reach the Running status in the [Workloads](../../workloads-in-nvidia-run-ai/workloads.md) table. A workload becomes Ready to accept inference requests only after all its pods have fully initialized, including model loading.
+After submitting the workload, wait for it to reach the Running status in the [Workloads](../../workloads.md) table. A workload becomes Ready to accept inference requests only after all its pods have fully initialized, including model loading.
 
 Large models may require several minutes to load their weights, especially when the model is stored on a PVC. During this time, the workload may remain in **Initializing** even though pods are already running.
 
@@ -645,7 +645,7 @@ Once the workload reaches **Running** and shows an available **Connection**, you
 
 ## Step 6: Accessing the Inference Workload
 
-You can programmatically consume an inference workload via API by making direct calls to the serving endpoint, typically from other workloads or external integrations. Once an inference workload is deployed, the serving endpoint URL appears in the **Connections** column of the [Workloads](../../workloads-in-nvidia-run-ai/workloads.md) table. To retrieve the service endpoint programmatically, use the [Get Workloads](api:main-api:GET/api/v1/workloads) API. The endpoint URL will be available in the response body under `endpoints`.
+You can programmatically consume an inference workload via API by making direct calls to the serving endpoint, typically from other workloads or external integrations. Once an inference workload is deployed, the serving endpoint URL appears in the **Connections** column of the [Workloads](../../workloads.md) table. To retrieve the service endpoint programmatically, use the [Get Workloads](api:main-api:GET/api/v1/workloads) API. The endpoint URL will be available in the response body under `endpoints`.
 
 <Note>
 

@@ -114,6 +114,22 @@ Decision rules:
 - A persona quick start onboards a role to the platform. A feature quick start
   teaches one capability to someone already onboarded.
 
+### Tutorials and Quick Starts
+
+- Keep tutorials under `docs/workloads-in-nvidia-run-ai/tutorials/`, in the
+  existing subfolder for their topic (for example `inference-tutorials/`).
+  Keep exactly one Markdown source file for each tutorial. Do not copy a
+  tutorial into a workload folder.
+- To show a tutorial in more than one workload section, reference the same file
+  from each section in `fern/products/self-hosted.yml`. Fern serves each
+  placement at its own URL and sets the canonical URL to the first placement in
+  the navigation. Links to the file stay in the section the reader is in.
+- Each workload section lists its quick starts and tutorials together under one
+  **Tutorials** group, quick starts first. Prefix quick start navigation labels
+  with `Quick Start:` in the YAML file only. Do not change the page title.
+- Feature quick starts stay next to the feature page they teach. The Scheduling
+  section keeps its own **Quick Starts** group.
+
 ## Repository Structure
 
 Place new files under `docs/` in the subdirectory that matches the topic area.

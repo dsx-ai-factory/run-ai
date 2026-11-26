@@ -31,6 +31,6 @@ Administrators can register additional workload types. Refer to [Extending workl
 
 For end-to-end examples, refer to the following tutorials:
 
-* [NVIDIA Dynamo Aggregated Inference Deployment](../../tutorials/inference-tutorials/aggregated-dynamo.md)
-* [NVIDIA Dynamo Disaggregated Inference Deployment](../../tutorials/inference-tutorials/disaggregated-dynamo.md)
-* [Model-Free NIM Service Deployment](../../tutorials/inference-tutorials/nim-service.md)
+* [NVIDIA Dynamo Aggregated Inference Deployment](../tutorials/inference-tutorials/aggregated-dynamo.md)
+* [NVIDIA Dynamo Disaggregated Inference Deployment](../tutorials/inference-tutorials/disaggregated-dynamo.md)
+* [Model-Free NIM Service Deployment](../tutorials/inference-tutorials/nim-service.md)

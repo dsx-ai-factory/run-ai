@@ -7,7 +7,7 @@ This tutorial demonstrates how to run a distributed training workload with PyTor
 **Note**
 
 * Before running the example, verify the supported[ CUDA version of PyTorch](https://github.com/pytorch/pytorch/blob/main/RELEASE.md#release-compatibility-matrix) is compatible with your target [GPU hardware](https://developer.nvidia.com/cuda/gpus).
-* While the walkthrough uses PyTorch as the framework, the same principles apply to other distributed training [frameworks](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#distributed-training) supported by NVIDIA Run:ai.
+* While the walkthrough uses PyTorch as the framework, the same principles apply to other distributed training [frameworks](../../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#distributed-training) supported by NVIDIA Run:ai.
 
 </Note>
 
@@ -21,7 +21,7 @@ In this tutorial, you will learn how to:
 
 ## Prerequisites
 
-* Before you start, make sure you have created a [project](../../platform-management/aiinitiatives/organization/projects.md) or have one created for you.
+* Before you start, make sure you have created a [project](../../../platform-management/aiinitiatives/organization/projects.md) or have one created for you.
 * To run a distributed PyTorch training workload, you must first build a custom Docker container. This allows you to package the required code into a container that can be run and shared for future workloads.
   * The Docker runtime must be installed on a local machine with the **same CPU architecture** as the target hosts. For example, if the hosts use AMD64 CPUs, build the container on an AMD64 machine. If the hosts use ARM CPUs, build it on an ARM-based machine. Follow the [Docker Engine installation guide](https://docs.docker.com/engine/install/) to install Docker locally.
   * To store and pull the image from your own private Docker registry, create your own Docker registry credential as detailed in [Step 4](distributed-pytorch.md#step-4-creating-a-user-credential).
@@ -155,7 +155,7 @@ curl -X POST \
 
 </Note>
 
-User credentials allow users to securely store private authentication secrets, which are accessible only to the user who created them. See [User credentials](../../settings/user-settings/user-credentials.md) for more details.
+User credentials allow users to securely store private authentication secrets, which are accessible only to the user who created them. See [User credentials](../../../settings/user-settings/user-credentials.md) for more details.
 
 In the NVIDIA Run:ai user interface:
 
@@ -184,7 +184,7 @@ The first time a workload is launched using a new PVC, it will take longer to st
 
 1. To create a PVC, go to Workload manager → Data sources.
 2. Click +**NEW DATA SOURCE** and select **PVC** from the dropdown menu.
-3. Within the new form, set the [scope](../../workloads-in-nvidia-run-ai/workload-assets/overview.md#asset-scope).
+3. Within the new form, set the [scope](../../workload-assets/overview.md#asset-scope).
 
 <Note>
 
@@ -273,7 +273,7 @@ Flexible workload submission is enabled by default. If unavailable, contact your
 3. Within the new training form, select the **cluster** and **project**.
 4. Set the training workload **architecture** to **Distributed** workload**.** This runs multiple processes that can span across different nodes. Distributed workloads are supported only in environments where distributed training is enabled.
 5. Select **Start from scratch** to launch a new workload quickly.
-6. Set the framework for the distributed workload to **PyTorch**. If PyTorch isn’t available, see [Distributed training prerequisites](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#distributed-training) for details on enabling.
+6. Set the framework for the distributed workload to **PyTorch**. If PyTorch isn’t available, see [Distributed training prerequisites](../../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#distributed-training) for details on enabling.
 7. Set the **distributed workload configuration**, which defines how distributed training workloads are divided across multiple machines or processes. For this example, select **Workers & master**, which enables coordination between pods during distributed training.
    * Choose **Workers & master** or **Workers only** based on training requirements and infrastructure.
    * A **master pod** is typically required for multi-node training workloads that must coordinate across nodes, such as workloads that perform `all_reduce` operations.
@@ -305,7 +305,7 @@ Flexible workload submission is enabled by default. If unavailable, contact your
 2. Click **+NEW WORKLOAD** and select **Training** from the dropdown menu**.**
 3. Within the new training form, select the **cluster** and **project**.
 4. Set the training workload **architecture** to **Distributed** workload**.** This runs multiple processes that can span across different nodes. Distributed workloads are supported only in environments where distributed training is enabled.
-5. Set the framework for the distributed workload to **PyTorch**. If PyTorch isn’t available, see [Distributed training prerequisites](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#distributed-training) for details on enabling.
+5. Set the framework for the distributed workload to **PyTorch**. If PyTorch isn’t available, see [Distributed training prerequisites](../../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#distributed-training) for details on enabling.
 6. Set the **distributed workload configuration**, which defines how distributed training workloads are divided across multiple machines or processes. For this example, select **Workers & master**, which enables coordination between pods during distributed training.
    * Choose **Workers & master** or **Workers only** based on training requirements and infrastructure.
    * A **master pod** is typically required for multi-node training workloads that must coordinate across nodes, such as workloads that perform `all_reduce` operations.
@@ -399,7 +399,7 @@ curl -L 'https://<COMPANY-URL>/api/v1/workloads/distributed' \
 
 <Tab title="CLI v2">
 
-Copy the following command to your terminal. Make sure to update the below with the name of your project and workload. For more details, see [CLI reference](../../reference/cli/runai/runai_training_pytorch_submit.md):
+Copy the following command to your terminal. Make sure to update the below with the name of your project and workload. For more details, see [CLI reference](../../../reference/cli/runai/runai_training_pytorch_submit.md):
 
 ```bash
 runai project set "project-name"
@@ -416,7 +416,7 @@ runai training pytorch submit <workload-name> \
 
 ## Step 7: Monitoring
 
-After the training workload is created, it is added to the [Workloads](../../workloads-in-nvidia-run-ai/workloads.md) table, where it can be viewed, monitored, and managed throughout its lifecycle.
+After the training workload is created, it is added to the [Workloads](../../workloads.md) table, where it can be viewed, monitored, and managed throughout its lifecycle.
 
 ## Step 8: Getting the Checkpoint
 

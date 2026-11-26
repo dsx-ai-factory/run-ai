@@ -41,4 +41,4 @@ Once you understand the supported workload types and configuration options, proc
 
 ## Tutorials for End-to-End Workflows
 
-Full end-to-end tutorials are available for deeper learning. These guides provide complete, practical examples that walk through development, training, and deployment workflows, showing how NVIDIA Run:ai features work together in real-world scenarios. See [Tutorials](../../tutorials/inference-tutorials/nvidia-nim-distributed.md) for more details.
+Full end-to-end tutorials are available for deeper learning. These guides provide complete, practical examples that walk through development, training, and deployment workflows, showing how NVIDIA Run:ai features work together in real-world scenarios. See [Tutorials](../../workloads-in-nvidia-run-ai/tutorials/inference-tutorials/nvidia-nim-distributed.md) for more details.

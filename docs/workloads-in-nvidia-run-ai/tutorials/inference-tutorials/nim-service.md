@@ -23,8 +23,8 @@ In this tutorial, you will learn how to:
 Before you start, make sure the following requirements are met:
 
 * Your administrator has:
-  * Installed the [NVIDIA NIM Operator](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#nim-operator) on the cluster.
-  * Created a [project](../../platform-management/aiinitiatives/organization/projects.md) for you.
+  * Installed the [NVIDIA NIM Operator](../../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#nim-operator) on the cluster.
+  * Created a [project](../../../platform-management/aiinitiatives/organization/projects.md) for you.
 * You have:
   * An NGC account with an active NGC API key. To obtain a key, go to [NGC](https://catalog.ngc.nvidia.com/) → Setup → API Keys, then generate or copy an existing key.
   * A Hugging Face account with an active access token and an accepted license for [Llama 3.2 1B Instruct](https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct). The token is required only because this tutorial's example model is gated; public models and other model sources do not need one.
@@ -93,40 +93,40 @@ curl -X POST \
 
 ## Step 3: Creating the NGC API Key Credential
 
-This [credential](../../workloads-in-nvidia-run-ai/workload-assets/credentials.md) stores your NGC API key for authenticating with the NGC catalog.
+This [credential](../../workload-assets/credentials.md) stores your NGC API key for authenticating with the NGC catalog.
 
 <Note>
 
 **Note**
 
-[User credentials](../../settings/user-settings/user-credentials.md) cannot be used with NIM Service workloads. If you do not have permission to create credentials, contact your administrator.
+[User credentials](../../../settings/user-settings/user-credentials.md) cannot be used with NIM Service workloads. If you do not have permission to create credentials, contact your administrator.
 
 </Note>
 
 1. Go to Workload manager → Credentials.
 2. Click **+NEW CREDENTIAL** and select **NGC API key**.
-3. Select a [**scope**](../../workloads-in-nvidia-run-ai/workload-assets/overview.md#asset-scope) covering the project you will submit the workload to.
+3. Select a [**scope**](../../workload-assets/overview.md#asset-scope) covering the project you will submit the workload to.
 4. Enter a **name** for the credential. The name must be unique.
 5. Enter your **NGC API key**.
 6. Click **CREATE CREDENTIAL**.
 
-Once created, note the **Kubernetes name** from the [Credentials](../../workloads-in-nvidia-run-ai/workload-assets/credentials.md#credentials-table) table - you will need it when submitting the workload in Step 5.
+Once created, note the **Kubernetes name** from the [Credentials](../../workload-assets/credentials.md#credentials-table) table - you will need it when submitting the workload in Step 5.
 
 ## Step 4: Creating the Docker Registry Credential
 
-This [credential](../../workloads-in-nvidia-run-ai/workload-assets/credentials.md) authenticates image pulls from `nvcr.io` so the workload can fetch the NIM container image.
+This [credential](../../workload-assets/credentials.md) authenticates image pulls from `nvcr.io` so the workload can fetch the NIM container image.
 
 <Note>
 
 **Note**
 
-[User credentials](../../settings/user-settings/user-credentials.md) cannot be used with NIM Service workloads. If you do not have permission to create credentials, contact your administrator.
+[User credentials](../../../settings/user-settings/user-credentials.md) cannot be used with NIM Service workloads. If you do not have permission to create credentials, contact your administrator.
 
 </Note>
 
 1. Go to Workload manager → Credentials.
 2. Click **+NEW CREDENTIAL** and select **Docker registry**.
-3. Select the same [**scope**](../../workloads-in-nvidia-run-ai/workload-assets/overview.md#asset-scope) used for the NGC API key credential in Step 3.
+3. Select the same [**scope**](../../workload-assets/overview.md#asset-scope) used for the NGC API key credential in Step 3.
 4. Enter a **name** for the credential. The name must be unique.
 5. Select **New secret** and enter:
    * **Username**: `$oauthtoken`
@@ -134,7 +134,7 @@ This [credential](../../workloads-in-nvidia-run-ai/workload-assets/credentials.m
    * **Docker registry URL**: `nvcr.io`
 6. Click **CREATE CREDENTIAL**.
 
-Once created, note the **Kubernetes name** from the [Credentials](../../workloads-in-nvidia-run-ai/workload-assets/credentials.md#credentials-table) table - you will need it when submitting the workload in Step 5.
+Once created, note the **Kubernetes name** from the [Credentials](../../workload-assets/credentials.md#credentials-table) table - you will need it when submitting the workload in Step 5.
 
 ## Step 5: Creating the Workload
 
@@ -293,7 +293,7 @@ curl -L 'https://<COMPANY-URL>/api/v2/workloads/nim-services' \
 
 <Tab title="CLI v2">
 
-Copy the following command to your terminal. Make sure to update the parameters below with the name of your project, workload, credentials (from Steps 3 and 4), and Hugging Face token. For more details, see the [CLI reference](../../reference/cli/runai/runai_inference_nim_submit.md):
+Copy the following command to your terminal. Make sure to update the parameters below with the name of your project, workload, credentials (from Steps 3 and 4), and Hugging Face token. For more details, see the [CLI reference](../../../reference/cli/runai/runai_inference_nim_submit.md):
 
 ```sh
 runai inference nim submit <workload-name> \
@@ -316,7 +316,7 @@ runai inference nim submit <workload-name> \
 
 ## Step 6: Verifying the Workload Status
 
-After submitting the workload, wait for it to reach the **Running** status in the [Workloads](../../workloads-in-nvidia-run-ai/workloads.md) table. A workload becomes ready to accept inference requests only after all its pods have fully initialized, including model loading.
+After submitting the workload, wait for it to reach the **Running** status in the [Workloads](../../workloads.md) table. A workload becomes ready to accept inference requests only after all its pods have fully initialized, including model loading.
 
 The first startup takes longer because the model weights are downloaded to the PVC. During this time, the workload may remain in **Initializing** even though the pod is already running. Subsequent restarts reuse the cached weights and start much faster.
 
@@ -329,7 +329,7 @@ Once the workload reaches **Running** and shows an available **Connection**, you
 
 ## Step 7: Accessing the Inference Workload
 
-You can programmatically consume an inference workload via API by making direct calls to the serving endpoint, typically from other workloads or external integrations. Once an inference workload is deployed, the serving endpoint URL appears in the **Connections** column of the [Workloads](../../workloads-in-nvidia-run-ai/workloads.md) table. To retrieve the service endpoint programmatically, use the [Get Workloads](api:main-api:GET/api/v1/workloads) API. The endpoint URL will be available in the response body under `endpoints`.
+You can programmatically consume an inference workload via API by making direct calls to the serving endpoint, typically from other workloads or external integrations. Once an inference workload is deployed, the serving endpoint URL appears in the **Connections** column of the [Workloads](../../workloads.md) table. To retrieve the service endpoint programmatically, use the [Get Workloads](api:main-api:GET/api/v1/workloads) API. The endpoint URL will be available in the response body under `endpoints`.
 
 <Note>
 

@@ -22,7 +22,7 @@ This tutorial does not cover `slurm-bridge`, which enables Slurm to schedule nat
 
 Before you begin, make sure you have:
 
-* A [project](../../platform-management/aiinitiatives/organization/projects.md) and its Kubernetes namespace. This tutorial uses the `slurm` namespace. Creating a project with `--namespace slurm` does not create the namespace. If it is missing, the project is `NotReady` with `Can't find namespace for project` until you create it with `kubectl create ns slurm`.
+* A [project](../../../platform-management/aiinitiatives/organization/projects.md) and its Kubernetes namespace. This tutorial uses the `slurm` namespace. Creating a project with `--namespace slurm` does not create the namespace. If it is missing, the project is `NotReady` with `Can't find namespace for project` until you create it with `kubectl create ns slurm`.
 * `kubectl` and Helm access to the cluster.
 * GPU-enabled nodes, if you plan to test GPU scheduling. Size the project GPU quota for the NodeSet request. NVIDIA Run:ai enforces this quota for NodeSets. An insufficient quota leaves the GPU NodeSet in `Pending`.
 
@@ -136,7 +136,7 @@ The `nodesets` and `partitions.all.enabled` settings create the default worker N
 
 ## Step 4: Viewing Slurm Workloads in NVIDIA Run:ai
 
-After installation, NVIDIA Run:ai shows the controller, login service, REST API, and worker NodeSets in the `slurm` project. Slinky NodeSets are a natively supported NVIDIA Run:ai [workload type](../../workloads-in-nvidia-run-ai/supported-workload-types/list-of-supported-workload-types.md). No workload-type registration is required. NVIDIA Run:ai schedules the NodeSet pod through a pod group and enforces the project's GPU quota.
+After installation, NVIDIA Run:ai shows the controller, login service, REST API, and worker NodeSets in the `slurm` project. Slinky NodeSets are a natively supported NVIDIA Run:ai [workload type](../../supported-workload-types/list-of-supported-workload-types.md). No workload-type registration is required. NVIDIA Run:ai schedules the NodeSet pod through a pod group and enforces the project's GPU quota.
 
 The following example uses the CLI:
 
@@ -258,7 +258,7 @@ curl -L 'https://<COMPANY-URL>/api/v2/workloads' \
 
 <Tab title="CLI v2">
 
-Follow the below steps. For more details, see the [CLI reference](../../reference/cli/runai/runai_workload_submit.md).
+Follow the below steps. For more details, see the [CLI reference](../../../reference/cli/runai/runai_workload_submit.md).
 
 1.  Save the following manifest as `nodeset-gpu.yaml`:
 

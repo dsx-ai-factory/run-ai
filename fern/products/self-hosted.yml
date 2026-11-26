@@ -433,9 +433,10 @@ navigation:
       - page: Running Workspaces
         slug: running-workspace
         path: ../../docs/workloads-in-nvidia-run-ai/using-workspaces/running-workspace.md
-      - section: Quick Starts
+      - section: Tutorials
+        slug: tutorials
         contents:
-        - page: Running Jupyter Notebooks Using Workspaces
+        - page: 'Quick Start: Jupyter Notebooks'
           slug: jupyter-quickstart
           path: ../../docs/workloads-in-nvidia-run-ai/using-workspaces/quick-starts/jupyter-quickstart.md
     - section: Train Models Using Training
@@ -450,32 +451,30 @@ navigation:
       - page: Train Models Using a Distributed Training Workload
         slug: distributed-training-models
         path: ../../docs/workloads-in-nvidia-run-ai/using-training/distributed-training-models.md
-      - section: Quick Starts
-        contents:
-        - page: Run Your First Standard Training
-          slug: standard-training-quickstart
-          path: ../../docs/workloads-in-nvidia-run-ai/using-training/quick-starts/standard-training-quickstart.md
-        - page: Run Your First Distributed Training
-          slug: distributed-training-quickstart
-          path: ../../docs/workloads-in-nvidia-run-ai/using-training/quick-starts/distributed-training-quickstart.md
       - page: 'Best Practices: Checkpointing Preemptible Training Workloads'
         slug: checkpointing-preemptible-workloads
         path: ../../docs/workloads-in-nvidia-run-ai/using-training/checkpointing-preemptible-workloads.md
       - section: Tutorials
         slug: tutorials
         contents:
+        - page: 'Quick Start: Standard Training'
+          slug: standard-training-quickstart
+          path: ../../docs/workloads-in-nvidia-run-ai/using-training/quick-starts/standard-training-quickstart.md
+        - page: 'Quick Start: Distributed Training'
+          slug: distributed-training-quickstart
+          path: ../../docs/workloads-in-nvidia-run-ai/using-training/quick-starts/distributed-training-quickstart.md
         - page: Distributed Training with PyTorch
           slug: distributed-pytorch
-          path: ../../docs/tutorials/training-tutorials/distributed-pytorch.md
+          path: ../../docs/workloads-in-nvidia-run-ai/tutorials/training-tutorials/distributed-pytorch.md
         - page: Validating GPU Cluster Communication with NCCL Tests
           slug: nccl-tests
-          path: ../../docs/tutorials/training-tutorials/nccl-tests.md
+          path: ../../docs/workloads-in-nvidia-run-ai/tutorials/training-tutorials/nccl-tests.md
         - page: Deploying a Slurm Cluster with Slinky
           slug: deploying-slurm
-          path: ../../docs/tutorials/training-tutorials/deploying-slurm.md
+          path: ../../docs/workloads-in-nvidia-run-ai/tutorials/training-tutorials/deploying-slurm.md
         - page: Running NVIDIA OSMO Workflows on NVIDIA Run:ai
           slug: osmo-on-runai
-          path: ../../docs/tutorials/pipeline-tutorials/osmo-on-runai.md
+          path: ../../docs/workloads-in-nvidia-run-ai/tutorials/pipeline-tutorials/osmo-on-runai.md
     - section: Deploy Models Using Inference
       slug: using-inference
       contents:
@@ -497,23 +496,27 @@ navigation:
       - page: Deploy NVIDIA Cloud Functions (NVCF) in NVIDIA Run:ai
         slug: nvcf
         path: ../../docs/workloads-in-nvidia-run-ai/using-inference/nvcf.md
-      - section: Quick Starts
-        contents:
-        - page: Run Your First Custom Inference Workload
-          slug: inference-quickstart
-          path: ../../docs/workloads-in-nvidia-run-ai/using-inference/quick-starts/inference-quickstart.md
       - section: Tutorials
         slug: tutorials
         contents:
+        - page: 'Quick Start: Custom Inference'
+          slug: inference-quickstart
+          path: ../../docs/workloads-in-nvidia-run-ai/using-inference/quick-starts/inference-quickstart.md
         - page: Hugging Face Distributed Inference Deployment
           slug: hugging-face-distributed
-          path: ../../docs/tutorials/inference-tutorials/hugging-face-distributed.md
+          path: ../../docs/workloads-in-nvidia-run-ai/tutorials/inference-tutorials/hugging-face-distributed.md
         - page: NVIDIA NIM Distributed Inference Deployment
           slug: nvidia-nim-distributed
-          path: ../../docs/tutorials/inference-tutorials/nvidia-nim-distributed.md
-        - page: Running AI Agents with NVIDIA OpenShell on NVIDIA Run:ai
-          slug: openshell-on-runai
-          path: ../../docs/tutorials/agent-tutorials/openshell-on-runai.md
+          path: ../../docs/workloads-in-nvidia-run-ai/tutorials/inference-tutorials/nvidia-nim-distributed.md
+        - page: NVIDIA Dynamo Aggregated Inference Deployment
+          slug: aggregated-dynamo
+          path: ../../docs/workloads-in-nvidia-run-ai/tutorials/inference-tutorials/aggregated-dynamo.md
+        - page: NVIDIA Dynamo Disaggregated Inference Deployment
+          slug: disaggregated-dynamo
+          path: ../../docs/workloads-in-nvidia-run-ai/tutorials/inference-tutorials/disaggregated-dynamo.md
+        - page: Model-Free NIM Service Deployment
+          slug: nim-service
+          path: ../../docs/workloads-in-nvidia-run-ai/tutorials/inference-tutorials/nim-service.md
     - section: Supported Workload Types
       slug: supported-workload-types
       contents:
@@ -538,13 +541,19 @@ navigation:
         contents:
         - page: NVIDIA Dynamo Aggregated Inference Deployment
           slug: aggregated-dynamo
-          path: ../../docs/tutorials/inference-tutorials/aggregated-dynamo.md
+          path: ../../docs/workloads-in-nvidia-run-ai/tutorials/inference-tutorials/aggregated-dynamo.md
         - page: NVIDIA Dynamo Disaggregated Inference Deployment
           slug: disaggregated-dynamo
-          path: ../../docs/tutorials/inference-tutorials/disaggregated-dynamo.md
+          path: ../../docs/workloads-in-nvidia-run-ai/tutorials/inference-tutorials/disaggregated-dynamo.md
         - page: Model-Free NIM Service Deployment
           slug: nim-service
-          path: ../../docs/tutorials/inference-tutorials/nim-service.md
+          path: ../../docs/workloads-in-nvidia-run-ai/tutorials/inference-tutorials/nim-service.md
+        - page: Deploying a Slurm Cluster with Slinky
+          slug: deploying-slurm
+          path: ../../docs/workloads-in-nvidia-run-ai/tutorials/training-tutorials/deploying-slurm.md
+        - page: Running AI Agents with NVIDIA OpenShell on NVIDIA Run:ai
+          slug: openshell-on-runai
+          path: ../../docs/workloads-in-nvidia-run-ai/tutorials/agent-tutorials/openshell-on-runai.md
     - section: AI Applications
       slug: ai-applications
       contents:
@@ -558,7 +567,7 @@ navigation:
         contents:
         - page: RAG Blueprint Deployment from NGC Catalog
           slug: rag-blueprint-deployment
-          path: ../../docs/tutorials/blueprint-tutorials/rag-blueprint-deployment.md
+          path: ../../docs/workloads-in-nvidia-run-ai/tutorials/blueprint-tutorials/rag-blueprint-deployment.md
     - section: Configure Workload Scheduling
       slug: configure-workload-scheduling
       contents:

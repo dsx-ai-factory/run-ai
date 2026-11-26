@@ -15,7 +15,7 @@ In this tutorial, you will learn how to:
 Before you start, make sure the following requirements are met:
 
 * Your administrator has:
-  * Created a [project](../../platform-management/aiinitiatives/organization/projects.md) for you.
+  * Created a [project](../../../platform-management/aiinitiatives/organization/projects.md) for you.
 * You have:
   * An NGC account with an active NGC API key. To obtain a key, go to [NGC](https://catalog.ngc.nvidia.com/) → Setup → API Keys, then generate or copy an existing key.
 
@@ -85,7 +85,7 @@ The RAG Blueprint chart requires access to NVIDIA's private container registry (
 
 1. Go to Workload manager → Credentials
 2. Click **+NEW CREDENTIAL** and select **Docker registry**
-3. Select a [scope](../../workloads-in-nvidia-run-ai/workload-assets/overview.md#asset-scope)
+3. Select a [scope](../../workload-assets/overview.md#asset-scope)
 4. Enter a **name** for the credential (for example, `ngc-secret`)
 5. Select **New secret**
 6. Enter the following:
@@ -94,7 +94,7 @@ The RAG Blueprint chart requires access to NVIDIA's private container registry (
    * **Docker registry URL**: `nvcr.io`
 7. Click **CREATE CREDENTIAL**
 
-Once created, note the **Kubernetes name** from the [Credentials](../../workloads-in-nvidia-run-ai/workload-assets/credentials.md#credentials-table) table - you will need it when deploying the RAG blueprint.
+Once created, note the **Kubernetes name** from the [Credentials](../../workload-assets/credentials.md#credentials-table) table - you will need it when deploying the RAG blueprint.
 
 ## Step 4: Creating the Generic Secret Credential
 
@@ -102,7 +102,7 @@ The RAG Blueprint chart requires an NGC API key to authenticate with NGC during 
 
 1. Go to Workload manager → Credentials
 2. Click **+NEW CREDENTIAL** and select **Generic secret**
-3. Select a [scope](../../workloads-in-nvidia-run-ai/workload-assets/overview.md#asset-scope)
+3. Select a [scope](../../workload-assets/overview.md#asset-scope)
 4. Enter a **name** for the credential (for example, `ngc-api`)
 5. Optional: Provide a description of the credential
 6. Add the following key-value pairs:
@@ -110,7 +110,7 @@ The RAG Blueprint chart requires an NGC API key to authenticate with NGC during 
    * Key: `NVIDIA_API_KEY` - Value: your `<NGC API key>`
 7. Click **CREATE CREDENTIAL**
 
-Once created, note the **Kubernetes name** from the [Credentials](../../workloads-in-nvidia-run-ai/workload-assets/credentials.md#credentials-table) table - you will need it when deploying the RAG blueprint.
+Once created, note the **Kubernetes name** from the [Credentials](../../workload-assets/credentials.md#credentials-table) table - you will need it when deploying the RAG blueprint.
 
 ## Step 5: Deploying the RAG Blueprint
 
