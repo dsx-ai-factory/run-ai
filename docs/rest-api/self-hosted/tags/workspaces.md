@@ -5,3 +5,5 @@ images, data sets, resource requests, as well as all tools are included. for the
 It answers the research needs while ensuring infrastructure owners keep control and allocation efficiency.
 A workspace is associated with a specific NVIDIA Run:ai project and you can have multiple workspaces under a specific project.
 For more information, see [Workspaces](/run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-workspaces/running-workspace).
+
+Use these endpoints to create, retrieve, and delete workspaces, and to suspend and resume them.

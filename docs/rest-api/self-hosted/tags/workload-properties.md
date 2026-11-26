@@ -2,3 +2,17 @@ Workload properties define the behavioral and scheduling characteristics of a wo
 - Type - Defines the functional behavior of a workload, such as training or inference, and serves as the foundation for how it is classified within the platform. Each workload type includes a default category (used for monitoring) and a default priority (used for scheduling within a project).
 - Category - Represents the role or purpose of a workload, such as  Build, Train, Deploy. Each workload type is assigned a default category to ensure consistent classification across the platform for monitoring purposes. See [Monitor workloads by category](/run-ai/self-hosted/documentation/platform-management/monitor-performance/workload-categories).
 - Priority - Determines the scheduling order of workloads within a project and whether a workload can be preempted. Higher-priority workloads are scheduled first and may become non-preemptible, preventing interruption by lower-priority workloads. See [Workload priority control](/run-ai/self-hosted/documentation/platform-management/runai-scheduler/scheduling/workload-priority-control).
+
+Use these endpoints to manage workload types and to view workload categories and priorities.
+
+## Workload Types
+
+List, retrieve, and update workload types, for example to change the default category or priority of a type. You can also create and delete workload types.
+
+## Workload Categories
+
+List and retrieve workload categories.
+
+## Workload Priorities
+
+List workload priorities.

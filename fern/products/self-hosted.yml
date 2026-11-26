@@ -652,7 +652,8 @@ navigation:
             summary: ../../docs/rest-api/self-hosted/tags/clusters.md
         - departments:
             summary: ../../docs/rest-api/self-hosted/tags/departments.md
-        - reports
+        - reports:
+            summary: ../../docs/rest-api/self-hosted/tags/reports.md
         - nodePools:
             summary: ../../docs/rest-api/self-hosted/tags/node-pools.md
         - nodes:
