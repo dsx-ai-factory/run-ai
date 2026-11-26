@@ -47,7 +47,7 @@ Within the form, you have two options:
 * Within the new form, select the **cluster** and **project**. To create a new project, click **+NEW PROJECT** and refer to [Projects](../../platform-management/aiinitiatives/organization/projects.md) for a step-by-step guide.
 * Set the inference workload architecture as **Standard.** This workload will only be able to use environments that support standard workloads. A standard workload consists of a single process.
 * Select a [**template**](../workload-templates/inference-templates/hugging-face-inference-templates.md) or **Start from scratch** to launch a new workload quickly. You can use a workload template to populate the workload advanced setup form with predefined configuration values. You can still modify the populated fields before submitting the workload. Any changes you make will apply only to the workload and will not be saved back to the original template.
-* Set the inference server to [**vLLM** ](https://docs.vllm.ai/en/latest/models/supported_models.html)or [**TGI**](https://huggingface.co/docs/text-generation-inference/en/supported_models)**.**
+* Set the inference server to [**vLLM**](https://docs.vllm.ai/en/latest/models/supported_models.html)**.**
 * Enter a unique **name** for the workload. If the name already exists in the project, you will be requested to submit a different name.
 * Click **CONTINUE**
 

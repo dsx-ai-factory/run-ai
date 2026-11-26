@@ -38,7 +38,7 @@ Linking data source assets is currently not supported.
 1. To add a new template, go to Workload manager → Templates.
 2. Click **+NEW TEMPLATE** and select **Inference** from the dropdown menu**.**
 3. Within the new inference template form, select the **scope**.
-4. Set the inference server to [**vLLM** ](https://docs.vllm.ai/en/latest/models/supported_models.html)or [**TGI**](https://huggingface.co/docs/text-generation-inference/en/supported_models)**.**
+4. Set the inference server to [**vLLM**](https://docs.vllm.ai/en/latest/models/supported_models.html)**.**
 5. Enter a unique **name** for the inference template. If the name already exists in the project, you will be requested to submit a different name.
 6. Click **CONTINUE**
 
