@@ -12,9 +12,19 @@
 # The Dockerfile relies on BuildKit (heredocs, BUILDPLATFORM stages).
 export DOCKER_BUILDKIT = 1
 
+# start.sh requires CONTROL_PLANE_URL, CLUSTER_NAME_PREFIX and CLUSTER_URL; the
+# admin credentials have defaults. `make run` forwards them with `-e NAME`, so
+# export them to the recipe environment (this keeps the password off the docker
+# command line). They may come from the shell or from `make run NAME=value`.
+export CONTROL_PLANE_URL CLUSTER_NAME_PREFIX CLUSTER_URL \
+	CONTROL_PLANE_ADMIN_USERNAME CONTROL_PLANE_ADMIN_PASSWORD
+
 help:
 	@bash $(dir $(abspath $(lastword $(MAKEFILE_LIST))))../kit-common/print-help.sh "Workloads Kit"
 	@echo "The image is built from this checkout of the e2e suite (build context: e2e/)."
+	@echo "make run also requires CONTROL_PLANE_URL, CLUSTER_NAME_PREFIX and CLUSTER_URL;"
+	@echo "CONTROL_PLANE_ADMIN_USERNAME / CONTROL_PLANE_ADMIN_PASSWORD are optional."
+	@echo "The make run flow securely stages mode-0600 kubeconfigs for uid 65532."
 
 build:
 	@echo "» Building Run:AI Workloads Kit image..."
@@ -103,13 +113,26 @@ build-both-tar: setup-buildx
 	@echo "  docker tag runai/runai-workloads-kit-<arch>:latest runai/runai-workloads-kit:latest"
 	@echo ""
 
+# The runtime is fixed at uid 65532, so a host-owned mode-0600 kubeconfig
+# cannot be bind-mounted directly. Stage it through a short-lived Docker volume
+# with the runtime uid/mode, then mount that volume at the configured path.
 run:
 	@echo "» Run:AI Workloads Kit"
 	@echo ""
-	@if [ -z "$(KUBECONFIG_PATH)" ]; then \
-		echo "✘ KUBECONFIG_PATH is required"; \
+	@missing=""; \
+	[ -n "$(KUBECONFIG_PATH)" ] || missing="$$missing KUBECONFIG_PATH"; \
+	[ -n "$(CONTROL_PLANE_URL)" ] || missing="$$missing CONTROL_PLANE_URL"; \
+	[ -n "$(CLUSTER_NAME_PREFIX)" ] || missing="$$missing CLUSTER_NAME_PREFIX"; \
+	[ -n "$(CLUSTER_URL)" ] || missing="$$missing CLUSTER_URL"; \
+	if [ -n "$$missing" ]; then \
+		echo "✘ Missing required variables:$$missing"; \
 		echo ""; \
-		echo "  Usage: make run KUBECONFIG_PATH=/path/to/your/kubeconfig"; \
+		echo "  Usage: make run KUBECONFIG_PATH=/path/to/your/kubeconfig \\"; \
+		echo "           CONTROL_PLANE_URL=https://runai.example.com \\"; \
+		echo "           CLUSTER_NAME_PREFIX=my-cluster \\"; \
+		echo "           CLUSTER_URL=https://k8s.example.com \\"; \
+		echo "           [CONTROL_PLANE_ADMIN_USERNAME=admin@example.com] \\"; \
+		echo "           [CONTROL_PLANE_ADMIN_PASSWORD=yourpassword]"; \
 		echo ""; \
 		exit 1; \
 	fi
@@ -127,9 +150,26 @@ run:
 	@echo ""
 	@echo "  Starting tests..."
 	@echo ""
-	@docker run --rm -it \
-		-v $(PWD)/results:/app/e2e/results \
-		-v $(KUBECONFIG_PATH):/kubeconfig/config:ro \
+	@set -eu; \
+	KUBECONFIG_VOLUME="runai-workloads-kit-kubeconfig-$$$$"; \
+	cleanup() { docker volume rm "$$KUBECONFIG_VOLUME" >/dev/null 2>&1 || true; }; \
+	trap cleanup 0 1 2 15; \
+	docker volume create "$$KUBECONFIG_VOLUME" >/dev/null; \
+	docker run --rm \
+		--user 0:0 \
+		--entrypoint /bin/bash \
+		-v "$(abspath $(KUBECONFIG_PATH)):/source/config:ro" \
+		--mount "type=volume,source=$$KUBECONFIG_VOLUME,target=/home/runai/.kube" \
+		runai/runai-workloads-kit:latest \
+		-ec 'cp /source/config /home/runai/.kube/config && chown 65532:65532 /home/runai/.kube/config && chmod 0600 /home/runai/.kube/config'; \
+	docker run --rm -it \
+		-e CONTROL_PLANE_URL \
+		-e CLUSTER_NAME_PREFIX \
+		-e CLUSTER_URL \
+		$(if $(CONTROL_PLANE_ADMIN_USERNAME),-e CONTROL_PLANE_ADMIN_USERNAME) \
+		$(if $(CONTROL_PLANE_ADMIN_PASSWORD),-e CONTROL_PLANE_ADMIN_PASSWORD) \
+		-v "$(PWD)/results:/app/e2e/results" \
+		--mount "type=volume,source=$$KUBECONFIG_VOLUME,target=/home/runai/.kube" \
 		runai/runai-workloads-kit:latest
 	@echo ""
 	@echo "✔ Run complete"
