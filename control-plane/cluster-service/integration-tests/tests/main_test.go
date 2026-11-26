@@ -14,13 +14,6 @@ import (
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 )
 
-func getenv(key, fallback string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return fallback
-}
-
 var (
 	host    = getenv("CS_HOST", "localhost")
 	port    = getenv("CS_PORT", "8080")
@@ -44,4 +37,11 @@ func TestMain(m *testing.M) {
 	initClients()
 
 	os.Exit(m.Run())
+}
+
+func getenv(key, fallback string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return fallback
 }

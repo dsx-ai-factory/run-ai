@@ -26,5 +26,6 @@ RUNAI_CLUSTER_DOMAIN_SUFFIX: localhost.example.com
 # Pubsub
 PUBSUB_TYPE: nats
 SERVICE_NAME: cluster-service
+SERVER_HEALTH_ENDPOINT: /
 PUBSUB_URL: nats://n1:4222
 PUBSUB_REPLICAS: 1

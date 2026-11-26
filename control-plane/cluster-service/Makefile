@@ -25,21 +25,20 @@ GINKGO_COMMAND+=--skip-package=integration-tests
 
 ##@ Basic Commands
 
-test: build test-ginkgo docker-compose-integration-tests-up ## Run unit tests + integration tests.
+test: build test-ginkgo integration-tests ## Run unit tests + integration tests.
 .PHONY: test
 
-unit-test: test-ginkgo ## Run unit tests only.
-.PHONY: unit-test
-
-integ-tests: build docker-compose-integration-tests-up ## Run integration tests.
-.PHONY: integ-tests
-
 build-integration-tests: build build-integration-tests-generic
-	docker compose --profile "*" -f ./integration-tests/docker-compose.yaml build
+	docker compose --profile tests -f ./integration-tests/docker-compose.yaml build
 
-docker-compose-integration-tests-up: build-integration-tests
-	docker compose --profile "*" -f ./integration-tests/docker-compose.yaml up -V --remove-orphans --force-recreate --abort-on-container-exit || ${FAILURE_MESSAGE_HANDLER}
-.PHONY: docker-compose-integration-tests-up
+integration-tests: build-integration-tests ## Build and run the docker-compose environment and the integration tests.
+	docker compose --profile tests -f ./integration-tests/docker-compose.yaml up -V --remove-orphans --force-recreate --abort-on-container-exit || ${FAILURE_MESSAGE_HANDLER}
+.PHONY: integration-tests
+
+# Starts the environment without the tests container, so the tests can be run from an IDE.
+integration-tests-debug: build-integration-tests ## Build and run the docker-compose environment only.
+	docker compose -f ./integration-tests/docker-compose.yaml up -V --remove-orphans --force-recreate --abort-on-container-exit
+.PHONY: integration-tests-debug
 
 lint: lint-go ## Run linter.
 .PHONY: lint
