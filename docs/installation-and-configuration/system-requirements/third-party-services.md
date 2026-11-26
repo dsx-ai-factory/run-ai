@@ -37,7 +37,7 @@ PostgreSQL is the centralized database for the NVIDIA Run:ai control plane. It i
 
 To replace the deployed PostgreSQL with an external managed database, set `postgresql.enabled: false` and configure `global.postgresql.auth.*` with the external server connection details.
 
-PostgreSQL versions 16, 17, and 18 are supported for an external instance.
+PostgreSQL versions 16, 17, and 18 are supported for an external instance. Versions 17 and 18 are supported for new NVIDIA Run:ai installations only. Upgrading an existing installation to version 17 or 18 is not supported.
 
 Before installing, provision the database and role on your external PostgreSQL server:
 
