@@ -7,7 +7,8 @@ import { createMemoryHistory, createRouter, RouterView } from "vue-router";
 import { createTestingPinia } from "@pinia/testing";
 import { Notify, Quasar } from "quasar";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import View from "./node-pool-scheduling.vue";
+import NodePoolScheduling from "./node-pool-scheduling.vue";
+import NodePoolEdit from "../node-pool-edit/node-pool-edit.vue";
 import { NodePoolSchedulingStep as Step } from "@/components/node-pools/node-pool-scheduling-step";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
@@ -22,6 +23,10 @@ import { usePermissionStore } from "@/stores/permissions.store";
 import { useAppStore } from "@/stores/app.store";
 import { NODE_POOL_ROUTE_NAMES } from "@/router/node-pool.routes/node-pool.routes.names";
 
+vi.mock("@/constants/node-pool.constants", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  ENABLE_NODE_POOL_CREATE_FLOW: true,
+}));
 vi.mock("@/services/control-plane/cluster.service/cluster.service", () => ({
   clusterService: {
     getNodepoolMetrics: vi.fn().mockResolvedValue({ measurements: [] }),
@@ -53,16 +58,11 @@ async function render(realStep = false, access?: "editor" | "pool-only") {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
-      { path: "/:id", name: NODE_POOL_ROUTE_NAMES.NODE_POOL_SCHEDULING, component: View },
-      {
-        path: "/edit/:id",
-        name: NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT,
-        component: { template: "<div>Topology step</div>" },
-      },
+      { path: "/node-pools/edit/:id", name: NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT, component: NodePoolEdit },
       { path: "/", name: NODE_POOL_ROUTE_NAMES.NODE_POOL_INDEX, component: { template: "<div>Pool list</div>" } },
     ],
   });
-  await router.push("/one");
+  await router.push("/node-pools/edit/one?stepName=scheduling");
   await router.isReady();
   const pinia = createTestingPinia({ createSpy: vi.fn });
   if (access) {
@@ -74,7 +74,11 @@ async function render(realStep = false, access?: "editor" | "pool-only") {
     global: {
       plugins: [router, [Quasar, { plugins: { Notify } }], pinia],
       directives: { "click-outside": {}, permission: {} },
-      stubs: realStep ? {} : { NodePoolSchedulingStep: true },
+      stubs: {
+        NodePoolScheduling,
+        NodePoolTopology: { template: "<div>Topology step</div>" },
+        ...(realStep ? {} : { NodePoolSchedulingStep: true }),
+      },
     },
   });
   return { wrapper, router };
@@ -184,7 +188,7 @@ describe("scheduling route", () => {
     await flushPromises();
     (document.querySelector('[aid="leave-page-modal-stay-btn"]') as HTMLButtonElement).click();
     await flushPromises();
-    expect(router.currentRoute.value.name).toBe(NODE_POOL_ROUTE_NAMES.NODE_POOL_SCHEDULING);
+    expect(router.currentRoute.value.fullPath).toBe("/node-pools/edit/one?stepName=scheduling");
     expect(wrapper.get('[aid="mode-guaranteed"]').attributes("aria-checked")).toBe("true");
     await topology.trigger("click");
     await flushPromises();
@@ -226,7 +230,7 @@ describe("scheduling route", () => {
     await flushPromises();
     wrapper.findComponent(Step).vm.$emit("pool-saved", { ...pool, name: "partially saved" });
     await flushPromises();
-    expect(router.currentRoute.value.name).toBe(NODE_POOL_ROUTE_NAMES.NODE_POOL_SCHEDULING);
+    expect(router.currentRoute.value.fullPath).toBe("/node-pools/edit/one?stepName=scheduling");
     expect(wrapper.findComponent(Step).props("pool").name).toBe("partially saved");
     wrapper.unmount();
   });
@@ -292,7 +296,7 @@ describe("scheduling route", () => {
       )
       .mockResolvedValueOnce({ ...pool, id: "two", name: "second" });
     const { wrapper, router } = await render();
-    await router.push("/two");
+    await router.push("/node-pools/edit/two?stepName=scheduling");
     await flushPromises();
     resolveFirst(pool);
     await flushPromises();
