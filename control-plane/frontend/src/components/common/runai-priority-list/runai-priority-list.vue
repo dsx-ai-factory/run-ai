@@ -72,7 +72,6 @@
           <div class="item-arrows column no-wrap">
             <runai-btn
               icon-button
-              class="runai-icon-btn--xsmall"
               :icon="moveUpIcon"
               :aid="`${aid}-move-up-${item}`"
               :aria-label="`Move ${item} up`"
@@ -82,7 +81,6 @@
             />
             <runai-btn
               icon-button
-              class="runai-icon-btn--xsmall"
               :icon="moveDownIcon"
               :aid="`${aid}-move-down-${item}`"
               :aria-label="`Move ${item} down`"
@@ -333,16 +331,35 @@ const showTitleTooltipIfTruncated = (event: Event, item: string): void => {
 
 .item-arrows {
   flex-shrink: 0;
-  // Two 24px buttons are taller than the row's content box, so they reach into its padding.
-  margin: calc(var(--space-xs) * -1) 0;
+  gap: var(--space-2xs);
 
   :deep(.q-btn) {
-    width: 24px;
-    min-width: 24px;
-    height: 24px;
-    min-height: 24px;
+    position: relative;
+    width: 12px;
+    min-width: 12px;
+    height: 12px;
+    min-height: 12px;
     padding: 0;
     color: var(--icon-default);
+
+    // The arrows keep Figma's 12px size; this invisible area gives each one a larger click target without moving them.
+    &::after {
+      content: "";
+      position: absolute;
+      inset: -6px -6px -2px;
+    }
+
+    .q-icon {
+      font-size: 12px;
+    }
+
+    .q-btn__content {
+      min-height: 12px;
+    }
+  }
+
+  :deep(.q-btn:last-child::after) {
+    inset: -2px -6px -6px;
   }
 
   :deep(.q-btn.disabled) {
