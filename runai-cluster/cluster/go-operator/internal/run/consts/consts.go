@@ -35,4 +35,10 @@ const (
 
 	// Service Names
 	DCGMExporterServiceName = "dcgm-exporter"
+
+	AppLabelKey                     = "app"
+	AppKubernetesNameLabelKey       = "app.kubernetes.io/name"
+	NvidiaDCGMExporterLabelValue    = "nvidia-dcgm-exporter"
+	DCGMExporterLabelValue          = "dcgm-exporter"
+	NvidiaDCGMExporterDRALabelValue = "nvidia-dcgm-exporter-dra"
 )
