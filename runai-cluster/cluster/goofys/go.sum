@@ -16,8 +16,8 @@ cloud.google.com/go/longrunning v1.5.0 h1:aGonu6LHQl38DyozLs2jxGieI4Ixk+7GTnmHVc
 cloud.google.com/go/longrunning v1.5.0/go.mod h1:vjM1U85ZQuTv8lJoUBSA44HLWvM6BBFeaSJYGFF1Q00=
 cloud.google.com/go/monitoring v1.32.1 h1:DzNqsbCCyMJ+Oq+McBHaR5qqqxCvdNCIgfJug/YM0Ys=
 cloud.google.com/go/monitoring v1.32.1/go.mod h1:JkJhVXtTcGh6KQuvProJ9olvu2p37Ay29CinCDFKHHg=
-cloud.google.com/go/storage v1.71.0 h1:vv4wBFygNlKtSmDMcCIz/ATVv9iIJMkZGjk17uzXMv4=
-cloud.google.com/go/storage v1.71.0/go.mod h1:axUlps/Uy9usUkUNd14db8SbV7s+dNV+BU/xkvPmzrU=
+cloud.google.com/go/storage v1.71.1 h1:VV+UWTHX07FLnwNi2cGL9ECRHEnA9UzIMC6D88DrQgk=
+cloud.google.com/go/storage v1.71.1/go.mod h1:S4Fb7xUi2nm0TSlnl8V3Cc+Q0+g6AOBpzt57j5/jY8U=
 cloud.google.com/go/trace v1.17.0 h1:7+RAkTVGq3rmO2G74BdhpP1Bvbk3rFWzGt1MfMfHBt8=
 cloud.google.com/go/trace v1.17.0/go.mod h1:GTuZUt8sliPaEYVumjlXAjc4ClYld/nxWBALepV7Mx4=
 github.com/Azure/azure-pipeline-go v0.2.3 h1:7U9HBg1JFK3jHl5qmo4CTZKFTVgMwdFHMVtCdfBE21U=
