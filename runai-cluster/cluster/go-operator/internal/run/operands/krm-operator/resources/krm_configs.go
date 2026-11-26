@@ -8,6 +8,7 @@ package resources
 import (
 	"context"
 	"fmt"
+	"os"
 
 	runv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	kaicommon "github.com/kai-scheduler/KAI-scheduler/pkg/apis/kai/v1/common"
@@ -24,6 +25,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
 	outils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands/utils"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
+	runaicommon "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/common"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/global"
 	runv1internal "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/runai-internal"
 )
@@ -104,6 +106,28 @@ func convertFipsMode(runaiConfig *runaiv1.RunaiConfig) *kaiv1alpha1.FipsMode {
 		return ptr.To(kaiv1alpha1.FipsMode(runaiConfig.Spec.Internal.Global.FipsMode))
 	}
 	return nil
+}
+
+// krmServiceImage passes a KRM service's tag and digest through, and nothing else.
+// The repository, name and default tag of these images belong to KRM, which
+// resolves them from its own chart. RunaiConfig's tag defaults to the Run:ai
+// version, which is not a KRM version, so a tag equal to that default means
+// "unset" and is not sent; a service with neither an explicit tag nor a digest
+// stays untouched. The digest travels on the tag because KRM's image type has no
+// digest field: KRM renders repository/name:tag@digest and the runtime pulls by
+// digest alone.
+func krmServiceImage(image *runaicommon.Image) *kaicommon.Image {
+	if image == nil {
+		return nil
+	}
+	if ptr.Deref(image.Digest, "") != "" {
+		return &kaicommon.Image{Tag: ptr.To(image.TagWithDigest())}
+	}
+	tag := ptr.Deref(image.Tag, "")
+	if tag == "" || tag == os.Getenv(runaicommon.DefaultVersionEnvVarName) {
+		return nil
+	}
+	return &kaicommon.Image{Tag: ptr.To(tag)}
 }
 
 func convertVPA(vpa *global.VPASpec) *kaicommon.VPASpec {

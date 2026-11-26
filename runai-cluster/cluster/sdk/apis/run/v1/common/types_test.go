@@ -78,4 +78,53 @@ var _ = Describe("common", func() {
 		Expect(*image.Tag).To(Equal("v4.4.0"))
 		Expect(image.PullPolicy).To(Equal(v1.PullIfNotPresent))
 	})
+
+	Context("digest", func() {
+		const digest = "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+
+		newImage := func(d *string) *Image {
+			return &Image{
+				Registry: ptr.To("registry.example"),
+				Name:     ptr.To("agent"),
+				Tag:      ptr.To("3.0.20"),
+				Digest:   d,
+			}
+		}
+
+		It("is never defaulted, since it is only valid for the image it was computed from", func() {
+			image := &Image{}
+			image.SetDefaultsWhereNeeded(&Image{Name: ptr.To("agent")})
+			Expect(image.Digest).To(BeNil())
+		})
+
+		It("keeps a digest set on the image through defaulting", func() {
+			image := &Image{Digest: ptr.To(digest)}
+			image.SetDefaultsWhereNeeded(&Image{Name: ptr.To("agent")})
+			Expect(image.Digest).To(Equal(ptr.To(digest)))
+		})
+
+		DescribeTable("renders the pullable reference",
+			func(d *string, expected string) {
+				Expect(newImage(d).Reference()).To(Equal(expected))
+			},
+			Entry("by tag alone when no digest is set", nil, "registry.example/agent:3.0.20"),
+			Entry("treating an empty digest as unset", ptr.To(""), "registry.example/agent:3.0.20"),
+			Entry("with the digest after the tag", ptr.To(digest), "registry.example/agent:3.0.20@"+digest),
+		)
+
+		It("omits the colon before the digest when the tag is explicitly empty", func() {
+			image := &Image{
+				Registry: ptr.To("registry.example"),
+				Name:     ptr.To("agent"),
+				Tag:      ptr.To(""),
+				Digest:   ptr.To(digest),
+			}
+			Expect(image.Reference()).To(Equal("registry.example/agent@" + digest))
+		})
+
+		It("renders the tag with the digest for APIs that carry no digest field", func() {
+			Expect(newImage(nil).tag()).To(Equal("3.0.20"))
+			Expect(newImage(ptr.To(digest)).tag()).To(Equal("3.0.20@" + digest))
+		})
+	})
 })

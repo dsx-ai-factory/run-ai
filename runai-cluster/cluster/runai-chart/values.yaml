@@ -92,8 +92,19 @@ runai-operator:
   image:
     name: go-operator
     registry: nvcr.io/nvidia/runai
-    # Overrides the image tag during creation
+    # Overrides the image tag during creation. Also the default tag of every
+    # operand (IMG_DEFAULT_VERSION), so keep it a bare version.
     tag: 0.0.0-dev
+    # Pins the operator image only, as sha256:<64 hex characters>. Kept apart from
+    # tag so operands are not handed the operator's digest. Operand digests are set
+    # per operand: <operand>.image.digest under runai-operator.config, or under
+    # clusterConfig when controlPlane.url and cluster.uid are set (the control
+    # plane then creates the RunaiConfig). Example:
+    #   clusterConfig:
+    #     agent:
+    #       image:
+    #         digest: sha256:...
+    digest: ""
     pullPolicy: Always
   resources:
     limits:

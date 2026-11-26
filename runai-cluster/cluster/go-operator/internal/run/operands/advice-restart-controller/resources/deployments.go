@@ -108,7 +108,7 @@ func (d *DeploymentResource) Object(ctx context.Context) (client.Object, error) 
 			{
 				Name:            DeploymentName,
 				SecurityContext: outils.GlobalSecurityContext(d.runaiConfig),
-				Image:           fmt.Sprintf("%s/%s:%s", *image.Registry, *image.Name, *image.Tag),
+				Image:           image.Reference(),
 				ImagePullPolicy: image.PullPolicy,
 				VolumeMounts:    allVolumeMounts,
 				Env:             handleEnvVars(d.runaiConfig),

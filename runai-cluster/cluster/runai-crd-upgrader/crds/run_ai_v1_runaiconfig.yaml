@@ -459,6 +459,11 @@ spec:
                     description: Image is the configuration of the accessrule-controller
                       image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -590,6 +595,11 @@ spec:
                     description: Image is the configuration of the admission controller
                       image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -704,6 +714,11 @@ spec:
                     description: Image is the configuration of the advice-restart-controller
                       image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -872,6 +887,11 @@ spec:
                   image:
                     description: Image is the configuration of the agent image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -1160,6 +1180,11 @@ spec:
                     description: GitSyncImage specifies the image used by the git-sync
                       injected container.
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -1187,6 +1212,11 @@ spec:
                     description: Image is the configuration of the anyworkload-controller
                       image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -1315,6 +1345,11 @@ spec:
                     description: RunaiOauth2ProxyImage specifies the image of oauth2-proxy,
                       which is used to authenticate users for external URL workloads.
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -1351,6 +1386,11 @@ spec:
                       image of the username loader side container that is used by
                       oauth2-proxy.
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -1382,6 +1422,11 @@ spec:
                     description: S3FileSystemImage specifies the image used by the
                       S3 filesystem injected container.
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -1439,6 +1484,11 @@ spec:
                     description: Image is the configuration of the application-controller
                       image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -1624,6 +1674,11 @@ spec:
                   image:
                     description: Image is the configuration of the binder image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -1655,6 +1710,11 @@ spec:
                         description: Image specifies the configuration of the resource-reservation
                           image
                         properties:
+                          digest:
+                            description: Digest pins the image by content digest,
+                              in the form sha256:<64 hex characters>.
+                            pattern: ^sha256:[a-f0-9]{64}$
+                            type: string
                           env:
                             description: |-
                               DEPRECATED: Use Registry instead
@@ -1935,6 +1995,11 @@ spec:
                   image:
                     description: Image is the configuration of the cluster-api image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -2269,6 +2334,11 @@ spec:
                   image:
                     description: Image specifies the redis image to use
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -2534,6 +2604,11 @@ spec:
                   image:
                     description: Image is the configuration of the cluster-sync image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -2895,6 +2970,11 @@ spec:
                   image:
                     description: ImageSpec is a struct describing a container image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -3141,6 +3221,11 @@ spec:
                     description: Image is the configuration of the external-workload-integrator
                       image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -5121,6 +5206,11 @@ spec:
                   image:
                     description: ImageSpec is a struct describing a container image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -5242,6 +5332,11 @@ spec:
                   image:
                     description: Image is the configuration of the init-ca image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -5423,6 +5518,11 @@ spec:
                     description: Image is the configuration of the metrics-exporter
                       image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -5674,6 +5774,11 @@ spec:
                   image:
                     description: Image specifies the mps server image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -5726,6 +5831,11 @@ spec:
                     description: Image is the configuration of the node scale adjuster
                       image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -5813,6 +5923,11 @@ spec:
                     description: ScalingPodImage is the image to use for the scaling
                       pod
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -5861,6 +5976,11 @@ spec:
                     description: Image is the configuration of the nodepool-controller
                       image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -7253,6 +7373,11 @@ spec:
                     description: Image is the configuration of the project controller
                       image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -7515,6 +7640,11 @@ spec:
                     description: Image is the configuration of the pod-group-controller
                       image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -7753,6 +7883,11 @@ spec:
                   image:
                     description: Image is the configuration of the pod-grouper image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -8045,6 +8180,11 @@ spec:
                     description: Image is the configuration of the project controller
                       image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -21713,6 +21853,11 @@ spec:
                     description: Image is the configuration of the queue-controller
                       image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -22013,6 +22158,11 @@ spec:
                     description: Image is the configuration of the researcher-service
                       image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -22345,6 +22495,11 @@ spec:
                   image:
                     description: ImageSpec is a struct describing a container image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -22371,6 +22526,11 @@ spec:
                   init-container-image:
                     description: ImageSpec is a struct describing a container image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -22493,6 +22653,11 @@ spec:
                   sidecar-image:
                     description: ImageSpec is a struct describing a container image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -22536,6 +22701,11 @@ spec:
                   image:
                     description: ImageSpec is a struct describing a container image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -22562,6 +22732,11 @@ spec:
                   reservation-pod-image:
                     description: ImageSpec is a struct describing a container image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -22661,6 +22836,11 @@ spec:
                   image:
                     description: ImageSpec is a struct describing a container image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -22846,6 +23026,11 @@ spec:
                   image:
                     description: Image specifies the image configuration for the runai-scheduler
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -23119,6 +23304,11 @@ spec:
                   image:
                     description: Image is the configuration of the runtime-rules image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -23377,6 +23567,11 @@ spec:
                     description: Image is the configuration of the shared-objects-controller
                       image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -23659,6 +23854,11 @@ spec:
                     description: Image is the configuration of the project controller
                       image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead
@@ -23896,6 +24096,11 @@ spec:
                     description: Image is the configuration of the workload-exporter
                       image
                     properties:
+                      digest:
+                        description: Digest pins the image by content digest, in the
+                          form sha256:<64 hex characters>.
+                        pattern: ^sha256:[a-f0-9]{64}$
+                        type: string
                       env:
                         description: |-
                           DEPRECATED: Use Registry instead

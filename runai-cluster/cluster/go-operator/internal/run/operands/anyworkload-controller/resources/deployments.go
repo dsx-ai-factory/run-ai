@@ -121,7 +121,7 @@ func (d *DeploymentResource) Object(ctx context.Context) (client.Object, error) 
 			{
 				Name:            name,
 				SecurityContext: outils.GlobalSecurityContext(d.runaiConfig),
-				Image:           fmt.Sprintf("%s/%s:%s", *image.Registry, *image.Name, *image.Tag),
+				Image:           image.Reference(),
 				ImagePullPolicy: image.PullPolicy,
 				VolumeMounts:    allVolumeMounts,
 				Env:             envVars,
@@ -296,11 +296,8 @@ func (d *DeploymentResource) buildEnvVars(config *anyworkload_controller.Anywork
 
 	if config.RunaiOauth2ProxyImage != nil {
 		envVars = append(envVars, v1.EnvVar{
-			Name: "RUNAI_OAUTH2_PROXY_IMAGE",
-			Value: fmt.Sprintf("%s/%s:%s",
-				*config.RunaiOauth2ProxyImage.Registry,
-				*config.RunaiOauth2ProxyImage.Name,
-				*config.RunaiOauth2ProxyImage.Tag),
+			Name:  "RUNAI_OAUTH2_PROXY_IMAGE",
+			Value: config.RunaiOauth2ProxyImage.Reference(),
 		})
 	}
 	envVars = append(envVars, v1.EnvVar{
@@ -331,11 +328,8 @@ func (d *DeploymentResource) buildEnvVars(config *anyworkload_controller.Anywork
 
 	if config.RunaiOauth2ProxyUsernameLoaderImage != nil {
 		envVars = append(envVars, v1.EnvVar{
-			Name: "RUNAI_OAUTH2_PROXY_USERNAME_LOADER_IMAGE",
-			Value: fmt.Sprintf("%s/%s:%s",
-				*config.RunaiOauth2ProxyUsernameLoaderImage.Registry,
-				*config.RunaiOauth2ProxyUsernameLoaderImage.Name,
-				*config.RunaiOauth2ProxyUsernameLoaderImage.Tag),
+			Name:  "RUNAI_OAUTH2_PROXY_USERNAME_LOADER_IMAGE",
+			Value: config.RunaiOauth2ProxyUsernameLoaderImage.Reference(),
 		})
 	}
 

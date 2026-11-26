@@ -73,7 +73,7 @@ func DeploymentForRunaiConfig(ctx context.Context, k8sReader client.Reader,
 			{
 				Name:            deploymentName,
 				SecurityContext: outils.GlobalSecurityContext(runaiConfig),
-				Image:           fmt.Sprintf("%s/%s:%s", *image.Registry, *image.Name, *image.Tag),
+				Image:           image.Reference(),
 				ImagePullPolicy: image.PullPolicy,
 				VolumeMounts: append(outils.GlobalVolumeMounts(runaiConfig),
 					v1.VolumeMount{

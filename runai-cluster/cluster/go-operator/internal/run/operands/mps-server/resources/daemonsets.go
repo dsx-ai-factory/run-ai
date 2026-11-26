@@ -79,7 +79,7 @@ func DaemonSetForRunaiConfig(ctx context.Context, k8sReader client.Reader,
 		Containers: []v1.Container{
 			{
 				Name:    "mps-server-dev",
-				Image:   fmt.Sprintf("%s/%s:%s", *image.Registry, *image.Name, *image.Tag),
+				Image:   image.Reference(),
 				Command: []string{"nvidia-cuda-mps-control"},
 				Args:    []string{"-f"},
 				Env: []v1.EnvVar{
