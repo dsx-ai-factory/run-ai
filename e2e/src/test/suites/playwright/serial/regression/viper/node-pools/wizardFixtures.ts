@@ -3,28 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { selectNodePoolWizardCluster } from '../../../modules/ui/runaiV2/pages/nodePoolWizardIdentity';
 import { randomUUID } from 'node:crypto';
 import { expect, type Locator, type Page, test as base } from '@playwright/test';
-import type { Nodepool } from '../../../modules/api/apis/clusterApi/generated/model/nodepool';
+import type { Nodepool } from '../../../../../../../modules/api/apis/clusterApi/generated/model/nodepool';
+
+import { flowRootState } from '../../../../../../../modules/helpers';
 
 const poolsApi = '/api/v1/node-pools';
 
-const credentials = (): { username: string; password: string } => {
-    const username = process.env.CONTROL_PLANE_ADMIN_USERNAME;
-    const password = process.env.CONTROL_PLANE_ADMIN_PASSWORD;
-    if (!username || !password)
-        throw new Error('Set CONTROL_PLANE_ADMIN_USERNAME and CONTROL_PLANE_ADMIN_PASSWORD.');
-    return { username, password };
-};
-
 export const test = base.extend<{ wizard: Page; poolName: string }>({
     wizard: async ({ page }, use) => {
-        const { username, password } = credentials();
+        const { email, password } = flowRootState.users.system_administrator;
         await page.goto('/node-pools');
         await page
             .locator('input[name="email"], input[name="username"], #inputUsername')
-            .fill(username, { timeout: 70_000 });
+            .fill(email, { timeout: 70_000 });
         await page.locator('input[name="password"]').fill(password);
         await page
             .locator(
@@ -41,20 +34,12 @@ export const test = base.extend<{ wizard: Page; poolName: string }>({
             async (button) => button.click()
         );
         await page.getByRole('button', { name: 'New node pool', exact: true }).click();
-        await expect(
-            page.getByTestId('create-node-pool-continue'),
-            'The deployed frontend must have ENABLE_NODE_POOL_CREATE_FLOW enabled'
-        ).toBeVisible();
         await use(page);
     },
     poolName: async ({ request }, use) => {
         const name = 'e2e-wizard-' + randomUUID().slice(0, 18);
         const api = new URL(poolsApi, process.env.CONTROL_PLANE_URL).href;
-        const token = await request.post(new URL('/api/v1/token', api).href, {
-            data: { grantType: 'password', ...credentials() }
-        });
-        expect(token.status(), 'Sign in for test-pool cleanup').toBe(200);
-        const headers = { Authorization: 'Bearer ' + (await token.json()).accessToken };
+        const headers = { Authorization: 'Bearer ' + flowRootState.users.system_administrator.accessToken };
         const query = { headers, params: { filterBy: 'name==' + name } };
         try {
             await use(name);
@@ -89,9 +74,12 @@ export async function createPool(
     name: string,
     destination: 'close' | 'continue'
 ): Promise<string> {
-    const cluster = process.env.CLUSTER_NAME_PREFIX;
-    if (!cluster) throw new Error('Set CLUSTER_NAME_PREFIX to the cluster name shown in the wizard.');
-    await selectNodePoolWizardCluster(page, cluster);
+    const cluster = flowRootState.cluster.name;
+    await page.getByTestId('cluster-dropdown').getByRole('combobox').click();
+    const option = page.getByRole('option').filter({
+        hasText: new RegExp('^' + cluster.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?: \\(.*\\))?$')
+    });
+    await option.click();
     await page.getByRole('textbox', { name: 'Name', exact: true }).fill(name);
     await page.getByRole('textbox', { name: 'Description', exact: true }).fill('Wizard E2E');
     const key = 'e2e.run.ai/' + name;

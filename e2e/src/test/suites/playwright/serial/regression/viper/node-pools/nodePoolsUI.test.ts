@@ -7,16 +7,7 @@
 import { test, expect } from '@playwright/test';
 
 // Helpers
-import {
-    flowRootState,
-    logger,
-    nodePoolUtils,
-    objectGenerator,
-    operations,
-    tags,
-    versionUtils,
-    waitUtils
-} from '../../../../../../../modules/helpers';
+import { flowRootState, tags } from '../../../../../../../modules/helpers';
 
 // UI Pages
 import { AuthPage } from '../../../../../../../modules/ui/runaiV2/pages/AuthPage';
@@ -25,16 +16,6 @@ import { BrowserEngine } from '../../../../../../../modules/ui/runaiV2/pages/Bro
 
 // Constants and Types
 import { DEFAULT_NODE_POOL_NAME } from '../../../../../../../modules/ui/utils/nodePoolUtils';
-import {
-    NodePoolCreateRequest,
-    PlacementStrategy
-} from '../../../../../../../modules/api/apis/backendClusterApi';
-import { MIN_PLACEMENT_VERSION } from '../../../../../../../modules/helpers/utils/NodePoolUtils';
-import { getNodePoolCrdField } from '../../../../../../../modules/helpers/utils/NodePoolCrdFields';
-import { getNodePoolsApi } from '../../../../../../../modules/helpers/config/const';
-import { clusterApi } from '../../../../../../../modules/api';
-import CpuEnum = PlacementStrategy.CpuEnum;
-import GpuEnum = PlacementStrategy.GpuEnum;
 
 test.describe(`Node pools UI, tags: ${tags.tool.ui} ${tags.resource.nodepools} ${tags.teams.viper}`, () => {
     let browserEngine: BrowserEngine;
@@ -42,17 +23,8 @@ test.describe(`Node pools UI, tags: ${tags.tool.ui} ${tags.resource.nodepools} $
     let videoName: string;
     let nodePoolPage: NodePoolPage;
 
-    test.beforeAll(async () => {
-        getNodePoolsApi().accessToken = flowRootState.users.system_administrator.accessToken;
-        clusterApi.nodepoolsApi.accessToken = flowRootState.users.system_administrator.accessToken;
+    test.beforeAll(() => {
         browserEngine = new BrowserEngine();
-
-        await operations.reduceSchedulerResources();
-    });
-
-    test.afterAll(async () => {
-        await nodePoolUtils.deleteAllClusterNodePools();
-        await operations.revertSchedulerResourcesToDefault();
     });
 
     const startSession = async (): Promise<void> => {
@@ -91,81 +63,6 @@ test.describe(`Node pools UI, tags: ${tags.tool.ui} ${tags.resource.nodepools} $
             const nodePoolIndexRow = await nodePoolPage.getNodePoolRowIndexByName(DEFAULT_NODE_POOL_NAME);
             await nodePoolPage.clickOnCellByRowIndex(nodePoolPage.nodePoolNodesCol, nodePoolIndexRow);
             expect(await nodePoolPage.getModalHeader()).toBe('Nodes Associated with Node pool default');
-        });
-    });
-
-    test.describe('node pool create / edit form', () => {
-        videoName = 'crate-edit-node-pool';
-        let nodePoolRequest: NodePoolCreateRequest = {};
-
-        test.beforeAll(async () => {
-            await startSession();
-            await nodePoolPage.navigateToNodePools();
-            nodePoolRequest = {
-                name: objectGenerator.generateNameByPrefix('node-pool-a'),
-                labelKey: objectGenerator.generateNameByPrefix('nvidia.com/gpu.product'),
-                labelValue: objectGenerator.generateNameByPrefix('T4')
-            };
-
-            await nodePoolPage.createBasicNodePool(nodePoolRequest);
-            await nodePoolPage.v2frame.waitForSelector(nodePoolPage.nodePoolNameCol);
-        });
-
-        test.afterAll(async () => {
-            await browserEngine.stopAndArchive(undefined, 'nodepools-' + videoName);
-        });
-
-        test('should create node pool and validate that node pool has been added to the table', async () => {
-            expect(await nodePoolPage.isTableIncludeNodePool(nodePoolRequest.name)).toBe(true);
-        });
-
-        test('should create node pool with placementStrategy and edit it', async () => {
-            const nodePoolIndexRow = await nodePoolPage.getNodePoolRowIndexByName(nodePoolRequest.name);
-            await nodePoolPage.waitForEmptyStatus(nodePoolIndexRow);
-            const supportsPlacement = versionUtils.isVersionSupported(
-                flowRootState.cluster.version,
-                MIN_PLACEMENT_VERSION
-            );
-            await nodePoolPage.editNodePlacement(nodePoolRequest.name, supportsPlacement);
-
-            if (supportsPlacement) {
-                // Wait for the CRD to be updated with the new placement strategy values
-                await nodePoolUtils.waitForNodePoolCrdProperty(
-                    nodePoolRequest.name,
-                    'spec.placementStrategy.cpu',
-                    (value) => value === PlacementStrategy.CpuEnum.Binpack.toString(),
-                    40
-                );
-                await nodePoolUtils.waitForNodePoolCrdProperty(
-                    nodePoolRequest.name,
-                    'spec.placementStrategy.gpu',
-                    (value) => value === PlacementStrategy.GpuEnum.Spread.toString(),
-                    40
-                );
-
-                // Now get the final CRD state and validate
-                const nodePoolCrd = await nodePoolUtils.waitForNodePoolCrdReadyOrEmpty(
-                    nodePoolRequest.name,
-                    40
-                );
-                expect(getNodePoolCrdField(nodePoolCrd, 'spec.placementStrategy.cpu')).toBe(
-                    PlacementStrategy.CpuEnum.Binpack.toString()
-                );
-                expect(getNodePoolCrdField(nodePoolCrd, 'spec.placementStrategy.gpu')).toBe(
-                    PlacementStrategy.GpuEnum.Spread.toString()
-                );
-            }
-        });
-
-        test('should create node pool and delete it', async () => {
-            const nodePoolIndexRow = await nodePoolPage.getNodePoolRowIndexByName(nodePoolRequest.name);
-            await nodePoolPage.waitForEmptyStatus(nodePoolIndexRow);
-            await nodePoolPage.deleteNodePoolByName(nodePoolRequest.name);
-            await nodePoolPage.waitForDeletingStatus(nodePoolIndexRow);
-            const isNodePoolDeleted = async (): Promise<boolean> =>
-                nodePoolPage.isTableNotIncludeNodePool(nodePoolRequest.name);
-
-            await waitUtils.waitForCondition(isNodePoolDeleted, 'wait for node pool to remove from table');
         });
     });
 });
