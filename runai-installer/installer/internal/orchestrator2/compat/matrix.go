@@ -75,7 +75,7 @@ const latest = "3.0"
 var matrix = map[string]Locks{
 	"3.0": {
 		// renovate: datasource=helm depName=kube-prometheus-stack registryUrl=https://prometheus-community.github.io/helm-charts allow=major
-		Prometheus:          "93.11.0",
+		Prometheus:          "94.1.0",
 		GPUOperator:         "v26.7.1",
 		GPUOperatorFake:     "0.0.62",
 		NetworkOperator:     "v26.7.0",
