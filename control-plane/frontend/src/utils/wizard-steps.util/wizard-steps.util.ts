@@ -5,7 +5,7 @@
 
 import type { IRunaiWizardLayoutStep } from "@/models/runai-wizard-layout.model";
 import type { ISelectOption } from "@/models/global.model";
-import { EStepNames } from "@/models/org-unit-forms.model";
+import { DEPARTMENT_FORM_V3_WIZARD_STEPS, EStepNames } from "@/models/org-unit-forms.model";
 import { Action, ResourceType } from "@/swagger-models/authorization-client";
 
 export interface INodepoolCapabilities {
@@ -48,6 +48,16 @@ export function filterOrgUnitSteps(
       return context.hasPermission(ResourceType.AccessRules, Action.Read);
     }
     return true;
+  });
+}
+
+/**
+ * The V3 department form shows GPU quota in every scheduling mode, not only when a node pool has quota on.
+ */
+export function filterDepartmentFormV3Steps(context: IStepFilterContext): IRunaiWizardLayoutStep[] {
+  return filterOrgUnitSteps(DEPARTMENT_FORM_V3_WIZARD_STEPS, {
+    ...context,
+    nodepoolCapabilities: { cpuQuota: !!context.nodepoolCapabilities?.cpuQuota, quota: true },
   });
 }
 

@@ -177,7 +177,13 @@ import { EColumnFilterType, type IFreeTextFilterModel } from "@/models/filter.mo
 import { ETableFilters } from "@/models/table.model";
 import { filterService } from "@/services/filter.service/filter.service";
 import type { ISelectOption } from "@/models/global.model";
-import { filterOrgUnitSteps, stepsToSelectOptions } from "@/utils/wizard-steps.util/wizard-steps.util";
+import {
+  filterDepartmentFormV3Steps,
+  filterOrgUnitSteps,
+  stepsToSelectOptions,
+  type IStepFilterContext,
+} from "@/utils/wizard-steps.util/wizard-steps.util";
+import { ENABLE_ORG_UNIT_FORMS_V3 } from "@/constants/org-unit.constants";
 import { DEPARTMENT_FORM_WIZARD_STEPS } from "@/models/org-unit-forms.model";
 import { useNodepoolSchedulingCapabilities } from "@/composables/org-unit/use-nodepool-scheduling-capabilities.composable";
 
@@ -499,20 +505,26 @@ export default defineComponent({
     availableEditSteps(): ISelectOption[] {
       if (!this.selectedDepartment?.clusterId) return [];
 
-      const filteredSteps = filterOrgUnitSteps(DEPARTMENT_FORM_WIZARD_STEPS, {
+      const context: IStepFilterContext = {
         nodepoolCapabilities: this.nodepoolCapabilitiesByClusterId[this.selectedDepartment.clusterId],
         hasPermission: (r, a) => this.permissionStore.hasPermission(r, a),
-      });
+      };
+      const filteredSteps = ENABLE_ORG_UNIT_FORMS_V3
+        ? filterDepartmentFormV3Steps(context)
+        : filterOrgUnitSteps(DEPARTMENT_FORM_WIZARD_STEPS, context);
 
       return stepsToSelectOptions(filteredSteps);
     },
     availableReviewSteps(): ISelectOption[] {
       if (!this.selectedDepartment?.clusterId) return [];
 
-      const filteredSteps = filterOrgUnitSteps(DEPARTMENT_FORM_WIZARD_STEPS, {
+      const context: IStepFilterContext = {
         nodepoolCapabilities: this.nodepoolCapabilitiesByClusterId[this.selectedDepartment.clusterId],
         hasPermission: (r, a) => this.permissionStore.hasPermission(r, a),
-      });
+      };
+      const filteredSteps = ENABLE_ORG_UNIT_FORMS_V3
+        ? filterDepartmentFormV3Steps(context)
+        : filterOrgUnitSteps(DEPARTMENT_FORM_WIZARD_STEPS, context);
 
       return stepsToSelectOptions(filteredSteps);
     },

@@ -14,6 +14,8 @@
     :collapsed-left-width="collapsedLeftWidth"
     :hide-right-on-small-screen="hideRightOnSmallScreen"
     :collapse-left-on-small-screen="collapseLeftOnSmallScreen"
+    :hide-right-breakpoint="hideRightBreakpoint"
+    :collapse-left-breakpoint="collapseLeftBreakpoint"
   >
     <template #left="{ collapsed, expanded }">
       <runai-panel-container width="100%" :transparent="transparentStepsPanel && !expanded">

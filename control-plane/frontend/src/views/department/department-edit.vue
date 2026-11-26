@@ -4,7 +4,8 @@
 -->
 
 <template>
-  <department-edit-form-v2
+  <component
+    :is="ENABLE_ORG_UNIT_FORMS_V3 ? DepartmentEditFormV3 : DepartmentEditFormV2"
     v-if="!initialLoading && department"
     :key="formKey"
     :department="department"
@@ -27,6 +28,7 @@ import { DEPARTMENT_ROUTE_NAMES } from "@/router/department.routes/department.ro
 
 // cmps
 import { DepartmentEditFormV2 } from "@/components/org-unit/v2/department/department-edit-form-v2";
+import { DepartmentEditFormV3 } from "@/components/org-unit/v2/department/department-edit-form-v3";
 
 // services
 import { requestToLeave } from "@/services/infra/router.service/router.service";
@@ -58,6 +60,7 @@ import { ENodeTelemetryGroupBy } from "@/models/cluster.model";
 import { ErrorAlert } from "@/utils/error-alert.util";
 import { ESaveOrgUnitAction, type ISaveOrgUnitPayload, type INodePoolTotals } from "@/models/org-unit-forms.model";
 import type { INodePoolsNameAndId } from "@/models/node-pool.model";
+import { ENABLE_ORG_UNIT_FORMS_V3 } from "@/constants/org-unit.constants";
 
 const route = useRoute();
 const router = useRouter();
@@ -360,7 +363,7 @@ const handleSaveError = (error: unknown): void => {
 // ==================== Main Save Handler ====================
 
 const onSave = async (payload: ISaveOrgUnitPayload<Department | DepartmentCreationRequest>) => {
-  const { department: departmentData, action, onComplete } = payload;
+  const { department: departmentData, action, onComplete, onError } = payload;
 
   if (!departmentData) return;
 
@@ -374,6 +377,7 @@ const onSave = async (payload: ISaveOrgUnitPayload<Department | DepartmentCreati
     onComplete?.();
   } catch (error: unknown) {
     handleSaveError(error);
+    onError?.();
   } finally {
     isDepartmentSubmitting.value = false;
   }

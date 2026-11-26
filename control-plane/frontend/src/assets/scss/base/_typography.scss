@@ -153,6 +153,15 @@
   text-transform: uppercase;
 }
 
+.text-b-overline-caps {
+  color: var(--b-text-main);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .text-b-body2 {
   color: var(--b-text-main);
   font-size: 10px;

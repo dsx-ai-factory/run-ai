@@ -13,6 +13,8 @@ export enum EOrgUnitFormTooltip {
   StepsDisabledUntilScopeComplete = "Complete the first step to enable the steps that follow",
   GpuQuotaAvailabilityProject = "Unassigned: The number of GPUs not assigned as quota to subordinate projects. Total: The total GPU quota assigned to the department in this node pool.",
   GpuQuotaAvailabilityDepartment = "Unassigned: The number of GPUs not assigned to subordinate projects. Total: The total number of GPUs assigned to the department in this node pool.",
+  NodePoolsPriorityOrder = "Set the default order in which workloads are scheduled onto node pools. Workloads try the first (top) pool, then move to the next available one. Use the arrows to reorder. Workload submitters can override this order",
+  NodePoolsPriorityOrderReadOnly = "The node pool order can't be changed in view mode",
 }
 
 /**
@@ -48,7 +50,8 @@ export interface ISaveOrgUnitPayload<T> {
   project?: T;
   department?: T;
   action: ESaveOrgUnitAction;
-  onComplete?: () => void; // Callback to execute after save completes (success or error)
+  onComplete?: () => void;
+  onError?: () => void;
 }
 
 /**
@@ -69,6 +72,7 @@ export enum EStepNames {
   CPUQuota = "cpu-quota",
   SchedulingRules = "scheduling-rules",
   AccessRules = "access-rules",
+  Projects = "projects",
 }
 
 export const DEPARTMENT_FORM_WIZARD_STEPS: IRunaiWizardLayoutStep[] = [
@@ -76,6 +80,21 @@ export const DEPARTMENT_FORM_WIZARD_STEPS: IRunaiWizardLayoutStep[] = [
   { name: EStepNames.GpuQuota, title: "GPU quota", done: false, disabled: true, editTitle: "GPU quota" },
   { name: EStepNames.OverQuota, title: "GPU over quota", done: false, disabled: true, editTitle: "GPU over quota" },
   { name: EStepNames.CPUQuota, title: "CPU quota", done: false, disabled: true, editTitle: "CPU quota" },
+  {
+    name: EStepNames.SchedulingRules,
+    title: "Scheduling rules",
+    done: false,
+    disabled: true,
+    editTitle: "Scheduling rules",
+  },
+  { name: EStepNames.AccessRules, title: "Access rules", done: false, disabled: true, editTitle: "Access rules" },
+];
+
+export const DEPARTMENT_FORM_V3_WIZARD_STEPS: IRunaiWizardLayoutStep[] = [
+  { name: EStepNames.ScopeName, title: "Cluster & name", done: false, disabled: false, editTitle: "Description" },
+  { name: EStepNames.GpuQuota, title: "GPU quota", done: false, disabled: true, editTitle: "GPU quota" },
+  { name: EStepNames.CPUQuota, title: "CPU quota", done: false, disabled: true, editTitle: "CPU quota" },
+  { name: EStepNames.Projects, title: "Projects", done: false, disabled: true, editTitle: "Projects" },
   {
     name: EStepNames.SchedulingRules,
     title: "Scheduling rules",

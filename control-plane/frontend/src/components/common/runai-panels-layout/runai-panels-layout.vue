@@ -67,6 +67,8 @@ const props = withDefaults(defineProps<IRunaiPanelsLayoutProps>(), {
   collapsedLeftWidth: "56px",
   hideRightOnSmallScreen: false,
   collapseLeftOnSmallScreen: false,
+  hideRightBreakpoint: 1460,
+  collapseLeftBreakpoint: 1230,
 });
 
 // using computed instead of calc() scss method due to some caveats:
@@ -79,8 +81,8 @@ const stickyTop = computed(() => {
 });
 
 const $q = useQuasar();
-const hideRight = computed(() => props.hideRightOnSmallScreen && $q.screen.width < 1460);
-const collapseLeft = computed(() => props.collapseLeftOnSmallScreen && $q.screen.width < 1230);
+const hideRight = computed(() => props.hideRightOnSmallScreen && $q.screen.width < props.hideRightBreakpoint);
+const collapseLeft = computed(() => props.collapseLeftOnSmallScreen && $q.screen.width < props.collapseLeftBreakpoint);
 const leftHovered = ref(false);
 const leftFocused = ref(false);
 const expandLeft = computed(() => collapseLeft.value && (leftHovered.value || leftFocused.value));

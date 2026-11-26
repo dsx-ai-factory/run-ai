@@ -55,6 +55,25 @@ describe("responsive panel layout", () => {
     expect(wrapper.get(".panel-right").isVisible()).toBe(summary);
   });
 
+  it.each([
+    { width: 1679, compact: true, summary: false },
+    { width: 1680, compact: false, summary: true },
+  ])(
+    "uses compact=$compact and summary=$summary at $width px with custom breakpoints",
+    async ({ width, compact, summary }) => {
+      const wrapper = render({
+        hideRightOnSmallScreen: true,
+        collapseLeftOnSmallScreen: true,
+        hideRightBreakpoint: 1680,
+        collapseLeftBreakpoint: 1680,
+      });
+      Screen.width = width;
+      await nextTick();
+      expect(wrapper.get(".panel-left").text()).toBe(compact ? "Icon" : "Step title");
+      expect(wrapper.get(".panel-right").isVisible()).toBe(summary);
+    },
+  );
+
   it("collapses independently of right panel visibility and expands on hover", async () => {
     Screen.width = 1229;
     const wrapper = render({ collapseLeftOnSmallScreen: true });
