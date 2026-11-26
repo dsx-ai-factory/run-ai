@@ -16,7 +16,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/clusterservice"
-	clusterconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 )
 
 const (
@@ -77,26 +76,20 @@ func resolveWorkloadAccelerators(ctx context.Context, getProject func() *orgapi.
 				continue
 			}
 			selection.UnsetDeviceLabelKey()
+			warnings = append(warnings, workloadsApi.SubmissionWarning{
+				Field: role.field + ".accelerator.resourceName", Code: gpuInventoryUnavailable,
+				Message: "Project inventory cannot verify a resource-only request. The requested resource was preserved.",
+			})
+			continue
 		}
-		var modelValue *string
-		if model != "" {
-			modelValue = &model
-		}
-		resource, requirement, validationErr := composer.ResolveGPUSelection(modelValue, selection)
+		_, requirement, validationErr := composer.ResolveGPUSelection(&model, selection)
 		if validationErr != nil {
 			return nil, workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, role.field+"."+validationErr.Message)
 		}
-		labels := map[string]string{clusterconstants.AcceleratorResourceNodeLabel(resource): "true"}
-		warning := workloadsApi.SubmissionWarning{Field: role.field + ".accelerator.resourceName", Code: gpuTypeNotFound,
-			Message: fmt.Sprintf("Resource %s was not found in the selected project pools.", resource)}
-		if requirement != nil {
-			warning.Field = role.field + ".gpuType"
-			warning.Message = fmt.Sprintf("No %s with label %s=%s was found in the selected project pools.", resource, requirement.Key, model)
-			if existing, ok := labels[requirement.Key]; ok && existing != model {
-				warnings = append(warnings, warning)
-				continue
-			}
-			labels[requirement.Key] = model
+		labels := map[string]string{requirement.Key: model}
+		warning := workloadsApi.SubmissionWarning{
+			Field: role.field + ".gpuType", Code: gpuTypeNotFound,
+			Message: fmt.Sprintf("No node with label %s=%s was found in the selected project pools.", requirement.Key, model),
 		}
 		project := getProject()
 		if project == nil {

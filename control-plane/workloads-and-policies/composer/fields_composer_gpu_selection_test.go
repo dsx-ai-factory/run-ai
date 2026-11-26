@@ -12,7 +12,6 @@ import (
 	clusterapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	api "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -20,12 +19,11 @@ import (
 )
 
 func TestGPUSelectionChoosesResourceAndModelInMixedPool(t *testing.T) {
-	fc := FieldsComposer{Options: FieldsComposerOptions{NodeAffinitySupported: true}}
 	const amd = "amd.com/gpu"
 	const amdLabel = "hardware.example.com/model"
-	amdNode := corev1.Node{ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{commonconstants.AcceleratorResourceNodeLabel(amd): "true", amdLabel: "MI300X"}}}
-	h100 := corev1.Node{ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{commonconstants.AcceleratorResourceNodeLabel(NvidiaResourceName): "true", NvidiaProductLabel: "H100"}}}
-	a100 := corev1.Node{ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{commonconstants.AcceleratorResourceNodeLabel(NvidiaResourceName): "true", NvidiaProductLabel: "A100"}}}
+	amdNode := corev1.Node{ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{amdLabel: "MI300X"}}}
+	h100 := corev1.Node{ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{NvidiaProductLabel: "H100"}}}
+	a100 := corev1.Node{ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{NvidiaProductLabel: "A100"}}}
 	acc := &api.AcceleratorSelection{}
 	acc.SetResourceName(amd)
 	amdModel := *acc
@@ -38,11 +36,12 @@ func TestGPUSelectionChoosesResourceAndModelInMixedPool(t *testing.T) {
 		matches  []bool
 	}{
 		{"nvidia-default", convutils.Ref("H100"), nil, NvidiaResourceName, []bool{false, true, false}},
-		{"amd-any", nil, acc, amd, []bool{true, false, false}},
+		{"amd-resource-only-has-no-model-affinity", nil, acc, amd, []bool{true, true, true}},
 		{"amd-model", convutils.Ref("MI300X"), &amdModel, amd, []bool{true, false, false}},
 		{"amd-absent", convutils.Ref("MI325X"), &amdModel, amd, []bool{false, false, false}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
+			fc := FieldsComposer{Options: FieldsComposerOptions{NodeAffinitySupported: tc.model != nil}}
 			var pod corev1.Pod
 			if err := fc.ComposeGPUPlacement(tc.model, tc.acc, nil, &pod.Spec, &pod.ObjectMeta)(); err != nil {
 				t.Fatal(err.Message)
@@ -88,7 +87,7 @@ func TestGPUSelectionIntersectsPoolAndEmptySelectors(t *testing.T) {
 		intersectNodePools(pod.Spec.Affinity.NodeAffinity, []corev1.NodeSelectorRequirement{require(NvidiaProductLabel, "H100")})
 		for _, model := range []string{"A100", "H100"} {
 			for _, rack := range []string{"north", "south", "other"} {
-				node := corev1.Node{ObjectMeta: metav1.ObjectMeta{Labels: labels.Set{"rack": rack, NvidiaProductLabel: model, commonconstants.AcceleratorResourceNodeLabel(NvidiaResourceName): "true"}}}
+				node := corev1.Node{ObjectMeta: metav1.ObjectMeta{Labels: labels.Set{"rack": rack, NvidiaProductLabel: model}}}
 				match, err := nodeaffinity.GetRequiredNodeAffinity(&pod).Match(&node)
 				if err != nil || match {
 					t.Fatalf("conflict or empty selector matched %v, err=%v", node.Labels, err)

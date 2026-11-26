@@ -341,9 +341,11 @@ For typed workspace, training, and inference submissions, use the exact model va
 
 The default resource is `nvidia.com/gpu` and the default NVIDIA model label is `nvidia.com/gpu.product`. Omit the model to allow any model. On a supported update, set `gpuType` to `any` to clear a previous model.
 
-To use a different whole-device resource, set `accelerator.resourceName`, for example `amd.com/gpu`. To select a model on that resource, also set `accelerator.deviceLabelKey` to the node label your cluster uses for that model.
+For a custom whole-device accelerator, set `accelerator.resourceName` to its Kubernetes resource name. For example, `vendor.example/device` with `compute.gpuDevicesRequest: 2` puts two devices under that exact name in both container requests and limits. To select a model, supply `gpuType` and the existing node label key in `accelerator.deviceLabelKey`.
 
-The inventory check looks for the requested hardware in the selected project node pools, including pools with a GPU limit of zero. When the workload omits the pool list, the check uses the project defaults. If the hardware is missing, submission returns a warning and preserves the placement requirement. The workload stays Pending until a node with the requested resource, model, and capacity can run it.
+The inventory check looks for the model label in the selected project pools, including pools with a GPU limit of zero. An omitted or empty pool list uses the project defaults. A missing model returns a warning and submission preserves the placement requirement. For a resource-only request, the control plane accepts the request with `GPU_INVENTORY_UNAVAILABLE` because its node inventory cannot verify the resource.
+
+KAI v0.18.2 accounts for `amd.com/gpu` and `nvidia.com/gpu` in a shared GPU counter. On a mixed-vendor pool, a resource-only request for either name cannot guarantee the vendor. Select a vendor-specific pool or specify a model label that identifies the intended hardware. [KAI resource accounting](https://github.com/kai-scheduler/KAI-scheduler/blob/v0.18.2/pkg/scheduler/api/resource_info/resource_vector.go#L192)
 
 ## Stopping a Workload
 

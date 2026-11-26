@@ -22,16 +22,6 @@ rules:
       - list
       - get
       - watch
-  # Reconcile accelerator resource-presence labels from Node.status.allocatable.
-  - apiGroups:
-      - ""
-    resources:
-      - nodes
-    verbs:
-      - get
-      - list
-      - watch
-      - patch
   - apiGroups:
       - ""
     resources:

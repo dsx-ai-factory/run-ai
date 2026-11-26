@@ -174,21 +174,25 @@ var _ = Describe("Nodepool gpu types", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(res.Code).To(Equal(http.StatusNoContent))
 		}
-		put("nv", "placement", map[string]string{"resource": "nvidia", "model": "H100"})
-		put("other", "placement", map[string]string{"resource": "amd", "model": "X2"})
-		put("hidden", "hidden-placement", map[string]string{"resource": "amd", "model": "H100"})
-		check := func(ctx context.Context, cluster string, ids []string, resource, model string, want bool) {
-			res, err := nodeService.MatchGpuPlacement(ctx, cluster, api.GpuPlacementMatch{NodePoolIds: ids, Labels: map[string]string{"resource": resource, "model": model}})
+		const key = "nvidia.com/gpu.product"
+		put("nv", "placement", map[string]string{key: "H100"})
+		put("other", "placement", map[string]string{"vendor.example/model": "X2"})
+		put("hidden", "hidden-placement", map[string]string{"vendor.example/model": "X3"})
+		check := func(ctx context.Context, cluster string, ids []string, labels map[string]string, want bool) {
+			res, err := nodeService.MatchGpuPlacement(ctx, cluster, api.GpuPlacementMatch{NodePoolIds: ids, Labels: labels})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(res.Code).To(Equal(http.StatusOK))
 			Expect(res.Body).To(Equal(want))
 		}
-		check(testCtx, clusterID, []string{poolID}, "nvidia", "H100", true)
-		check(testCtx, clusterID, []string{poolID}, "amd", "H100", false)
-		check(testCtx, clusterID, []string{hiddenID}, "amd", "H100", true)
-		check(testCtx, clusterID, nil, "amd", "H100", false)
-		check(testCtx, otherCluster.ID.String(), []string{poolID}, "nvidia", "H100", false)
-		check(context.WithValue(testCtx, runaictx.CfTenantId, "715"), clusterID, []string{poolID}, "nvidia", "H100", false)
+		h100 := map[string]string{key: "H100"}
+		x3 := map[string]string{"vendor.example/model": "X3"}
+		check(testCtx, clusterID, []string{poolID}, h100, true)
+		check(testCtx, clusterID, []string{poolID}, x3, false)
+		check(testCtx, clusterID, []string{hiddenID}, x3, true)
+		check(testCtx, clusterID, []string{poolID}, map[string]string{key: "H100", "vendor.example/model": "X2"}, false)
+		check(testCtx, clusterID, nil, h100, false)
+		check(testCtx, otherCluster.ID.String(), []string{poolID}, h100, false)
+		check(context.WithValue(testCtx, runaictx.CfTenantId, "715"), clusterID, []string{poolID}, h100, false)
 	})
 	AfterAll(func() {
 		for _, id := range createdIds {

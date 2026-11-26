@@ -12,7 +12,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"slices"
-	"strings"
 
 	orgapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/authorization"
@@ -33,7 +32,6 @@ import (
 	manager "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 	checkerCluster "github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/clients/cluster"
-	clusterconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
@@ -125,9 +123,9 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 		}
 		clusterservice.SetMock(placementLookup{ClientInterface: clusterClient,
 			clusterID: project.ClusterId, nodes: []map[string]string{
-				{clusterconstants.AcceleratorResourceNodeLabel(nvidia): "true", nvidiaLabel: "H100"},
-				{clusterconstants.AcceleratorResourceNodeLabel(amd): "true", amdLabel: "MI300X"},
-				{clusterconstants.AcceleratorResourceNodeLabel("gpu.intel.com/i915"): "true", "hardware.example.com/model": "Flex170"},
+				{nvidiaLabel: "H100"},
+				{amdLabel: "MI300X"},
+				{"hardware.example.com/model": "Flex170"},
 			}})
 		projectInfo := GetProjectResponse(*project)
 		projectInfo.DefaultNodePools = []string{"cpu", "h100"}
@@ -174,7 +172,7 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 		return created
 	}
 
-	assertPlacement := func(resource, key, model string) []corev1.NodeSelectorTerm {
+	assertPlacement := func(resource, key, model string, devices int64) []corev1.NodeSelectorTerm {
 		GinkgoHelper()
 		var manifest struct {
 			Spec struct{ Template corev1.PodTemplateSpec }
@@ -188,7 +186,10 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 		for _, list := range []corev1.ResourceList{template.Spec.Containers[0].Resources.Requests, template.Spec.Containers[0].Resources.Limits} {
 			quantity, ok := list[corev1.ResourceName(resource)]
 			Expect(ok).To(BeTrue())
-			Expect(quantity.Value()).To(Equal(int64(1)))
+			Expect(quantity.Value()).To(Equal(devices))
+			if resource != nvidia {
+				Expect(list).NotTo(HaveKey(corev1.ResourceName(nvidia)))
+			}
 		}
 		Expect(template.Spec.NodeSelector).To(BeEmpty())
 		Expect(template.Spec.Affinity).NotTo(BeNil())
@@ -198,12 +199,14 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 		Expect(required.NodeSelectorTerms).NotTo(BeEmpty())
 		for _, term := range required.NodeSelectorTerms {
 			Expect(term.MatchFields).To(BeEmpty())
-			Expect(term.MatchExpressions).To(ContainElement(corev1.NodeSelectorRequirement{
-				Key: clusterconstants.AcceleratorResourceNodeLabel(resource), Operator: corev1.NodeSelectorOpIn, Values: []string{"true"},
-			}))
-			Expect(term.MatchExpressions).To(ContainElement(corev1.NodeSelectorRequirement{
-				Key: key, Operator: corev1.NodeSelectorOpIn, Values: []string{model},
-			}))
+			if model == "" {
+				Expect(term.MatchExpressions).To(HaveLen(1))
+			} else {
+				Expect(term.MatchExpressions).To(HaveLen(2))
+				Expect(term.MatchExpressions).To(ContainElement(corev1.NodeSelectorRequirement{
+					Key: key, Operator: corev1.NodeSelectorOpIn, Values: []string{model},
+				}))
+			}
 		}
 		return required.NodeSelectorTerms
 	}
@@ -244,7 +247,7 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 			if len(wantPools) == 0 {
 				wantPools = []string{"cpu", "h100"}
 			}
-			terms := assertPlacement(nvidia, nvidiaLabel, "H100")
+			terms := assertPlacement(nvidia, nvidiaLabel, "H100", 1)
 			Expect(terms).To(HaveLen(len(wantPools)))
 			for i, name := range wantPools {
 				Expect(terms[i].MatchExpressions).To(ContainElement(corev1.NodeSelectorRequirement{
@@ -265,13 +268,6 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 		Entry("H100 exists only outside the selected pool", []string{"cpu"}, true),
 	)
 
-	It("warns when the model contradicts the resource presence label", func() {
-		spec := map[string]any{"image": "ubuntu", "compute": map[string]int{"gpuDevicesRequest": 1},
-			"gpuType": "other", "accelerator": map[string]string{"deviceLabelKey": clusterconstants.AcceleratorResourceNodeLabel(nvidia)}}
-		created := submit("trainings", "conflicting-selector", spec)
-		Expect(created.Warnings).To(HaveLen(1))
-		Expect(created.Warnings[0].Code).To(Equal(gpuTypeNotFound))
-	})
 	It("requires an explicit label key for a non-NVIDIA model", func() {
 		raw := request(http.MethodPost, "/api/v1/workloads/trainings", map[string]any{
 			"name": "explicit-key", "clusterId": project.ClusterId, "projectId": project.ProjectIdStr,
@@ -284,7 +280,7 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 		created := submit("trainings", "inventory-unavailable", map[string]any{"image": "ubuntu", "compute": map[string]int{"gpuDevicesRequest": 1}, "gpuType": "H100"})
 		Expect(created.Warnings).To(HaveLen(1))
 		Expect(created.Warnings[0].Code).To(Equal(gpuInventoryUnavailable))
-		assertPlacement(nvidia, nvidiaLabel, "H100")
+		assertPlacement(nvidia, nvidiaLabel, "H100", 1)
 	})
 
 	DescribeTable("checks explicit device label keys and preserves unavailable selections",
@@ -298,26 +294,36 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 			} else {
 				Expect(created.Warnings).To(BeEmpty())
 			}
-			assertPlacement(amd, expectedKey, "MI300X")
+			assertPlacement(amd, expectedKey, "MI300X", 1)
 		},
 		Entry("explicit AMD product label", amdLabel, amdLabel, false),
 		Entry("valid unavailable label is preserved with a warning", "lab.example.com/model", "lab.example.com/model", true),
 	)
 
-	It("matches nonstandard explicit resources with and without a custom model", func() {
-		for _, model := range []string{"", "Flex170"} {
-			resource := map[string]string{"resourceName": "gpu.intel.com/i915"}
-			spec := map[string]any{"image": "ubuntu", "compute": map[string]int{"gpuDevicesRequest": 1}, "accelerator": resource}
+	DescribeTable("requests the exact custom resource and checks only the optional model label",
+		func(model, warning string) {
+			const device = "vendor.example/device"
+			const key = "hardware.example.com/model"
+			resource := map[string]string{"resourceName": device}
+			spec := map[string]any{"image": "ubuntu", "compute": map[string]int{"gpuDevicesRequest": 2}, "accelerator": resource}
 			if model != "" {
 				spec["gpuType"] = model
-				resource["deviceLabelKey"] = "hardware.example.com/model"
+				resource["deviceLabelKey"] = key
 			}
-			created := submit("trainings", "typed-custom-"+strings.ToLower(model)+"gpu", spec)
-			Expect(created.Warnings).To(BeEmpty())
-			selection := created.Spec.GetAccelerator()
-			Expect(selection.GetResourceName()).To(Equal("gpu.intel.com/i915"))
-		}
-	})
+			created := submit("trainings", "custom-device", spec)
+			Expect(created.Spec.Accelerator.Get().GetResourceName()).To(Equal(device))
+			if warning == "" {
+				Expect(created.Warnings).To(BeEmpty())
+			} else {
+				Expect(created.Warnings).To(HaveLen(1))
+				Expect(created.Warnings[0].Code).To(Equal(warning))
+			}
+			assertPlacement(device, key, model, 2)
+		},
+		Entry("resource only", "", gpuInventoryUnavailable),
+		Entry("matching label", "Flex170", ""),
+		Entry("missing label value", "MissingModel", gpuTypeNotFound),
+	)
 
 	DescribeTable("accepts JSON and submits the resolved Pod template",
 		func(collection, model, resource, key string, warning bool) {
@@ -340,7 +346,7 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 			} else {
 				Expect(created.Warnings).To(BeEmpty())
 			}
-			assertPlacement(resource, key, model)
+			assertPlacement(resource, key, model, 1)
 		},
 		Entry("workspace defaults an H100 to NVIDIA", "workspaces", "H100", nvidia, nvidiaLabel, false),
 		Entry("training honors the explicit AMD device label", "trainings", "MI300X", amd, amdLabel, false),
@@ -364,7 +370,7 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 		}, http.StatusAccepted)
 		var created workloadsapi.Workspace
 		Expect(json.Unmarshal(raw, &created)).To(Succeed())
-		assertPlacement(amd, amdLabel, "MI300X")
+		assertPlacement(amd, amdLabel, "MI300X", 1)
 		path := workspaces + "/" + created.WorkloadId
 		read := func() *workloadsapi.WorkspaceSpecSpec {
 			GinkgoHelper()
@@ -387,7 +393,7 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 		copied := submit("workspaces", "copied-workspace", read())
 		Expect(copied.WorkloadId).NotTo(Equal(created.WorkloadId))
 		Expect(copied.Warnings).To(BeEmpty())
-		assertPlacement(amd, amdLabel, "MI300X")
+		assertPlacement(amd, amdLabel, "MI300X", 1)
 	})
 
 	It("recomposes inference placement from the saved spec during a partial update", func() {
@@ -402,7 +408,7 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 		Expect(updated.Spec.GetImage()).To(Equal("ubuntu:next"))
 		Expect(updated.Spec.GetGpuType()).To(Equal("MI300X"))
 		Expect(updated.Spec.Accelerator.Get().GetDeviceLabelKey()).To(Equal(amdLabel))
-		assertPlacement(amd, amdLabel, "MI300X")
+		assertPlacement(amd, amdLabel, "MI300X", 1)
 	})
 
 	It("checks the saved GPU type when only the inference node pools change", func() {

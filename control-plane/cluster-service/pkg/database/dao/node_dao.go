@@ -721,7 +721,7 @@ func readNodeLabelOptions(query orm.DB) ([]string, *api.Error) {
 	return options, nil
 }
 
-// Match the same labels used by Pod admission on one node, including busy nodes.
+// Match the model labels used by pod affinity on one node, including busy nodes.
 func MatchGPUPlacement(ctx context.Context, tenantID int32, clusterID string, placement api.GpuPlacementMatch) (bool, *api.Error) {
 	if len(placement.NodePoolIds) == 0 || len(placement.Labels) == 0 {
 		return false, nil

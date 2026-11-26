@@ -2,11 +2,9 @@ suite: Test runai-operator RBAC
 
 templates:
   - templates/rbac.yaml
-  - templates/clusterroles/base.yaml
 
 tests:
   - it: should let the operator create and bind the accessrule-controller Role
-    template: templates/rbac.yaml
     documentSelector:
       path: kind
       value: Role
@@ -34,19 +32,3 @@ tests:
               - accessrule-controller
             verbs:
               - bind
-
-  - it: should let the operator reconcile resource labels on nodes
-    template: templates/clusterroles/base.yaml
-    documentIndex: 0
-    asserts:
-      - isKind:
-          of: ClusterRole
-      - equal:
-          path: metadata.name
-          value: runai-operator
-      - contains:
-          path: rules
-          content:
-            apiGroups: [""]
-            resources: ["nodes"]
-            verbs: ["get", "list", "watch", "patch"]

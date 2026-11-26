@@ -70,12 +70,12 @@ func (fc *FieldsComposer) ComposeGPUPlacement(model *string, accelerator *worklo
 		if model == nil && accelerator == nil {
 			return nil
 		}
-		resourceName, requirement, err := ResolveGPUSelection(model, accelerator)
+		_, requirement, err := ResolveGPUSelection(model, accelerator)
 		if err != nil {
 			return err
 		}
-		if !fc.Options.NodeAffinitySupported {
-			return workloadsApi.NewError(http.StatusBadRequest, "accelerator selection requires node affinity support")
+		if requirement != nil && !fc.Options.NodeAffinitySupported {
+			return workloadsApi.NewError(http.StatusBadRequest, "GPU model selection requires node affinity support")
 		}
 
 		if fc.WorkloadType == Inference {
@@ -89,11 +89,6 @@ func (fc *FieldsComposer) ComposeGPUPlacement(model *string, accelerator *worklo
 			pod.NodeSelector = nil
 		}
 
-		// KAI accounts NVIDIA and AMD in the same GPU slot. Constrain the
-		// physical resource advertised by each candidate node as well.
-		intersectGPURequirement(pod, corev1.NodeSelectorRequirement{
-			Key: commonconstants.AcceleratorResourceNodeLabel(resourceName), Operator: corev1.NodeSelectorOpIn, Values: []string{"true"},
-		})
 		if requirement != nil {
 			intersectGPURequirement(pod, *requirement)
 		}

@@ -21,7 +21,7 @@ func TestQualifiedAffinityKeysInWorkloadAndPodSync(t *testing.T) {
 		valid bool
 	}{
 		{"bare name", strings.Repeat("a", 63), true},
-		{"managed NVIDIA placement", "run.ai.node-restriction.kubernetes.io/accelerator-nvidia.com_gpu", true},
+		{"NVIDIA model", "nvidia.com/gpu.product", true},
 		{"maximum qualified label", domain + "/" + strings.Repeat("X", 63), true},
 		{"name too long", strings.Repeat("n", 64), false},
 		{"qualified name too long", "example.org/" + strings.Repeat("n", 64), false},

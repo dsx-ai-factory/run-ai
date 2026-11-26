@@ -12,7 +12,6 @@ import (
 	clusterapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
-	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
@@ -53,7 +52,7 @@ var _ = Describe("GPU selection in Knative inference", func() {
 		Expect(err.Message).To(ContainSubstring("duplicates"))
 	})
 
-	It("admits the Pod with nodeSelector disabled and requires the resource, pool and model", func() {
+	It("admits the Pod with nodeSelector disabled and requires the selected pool and model", func() {
 		options := composer.FieldsComposerOptions{NodeAffinitySupported: true}
 		c := NewInferenceToKnativeComposer("infer", "p1", "runai-p1", "user", nil, options)
 		var spec workloadsApi.InferenceSpecSpec
@@ -79,18 +78,17 @@ var _ = Describe("GPU selection in Knative inference", func() {
 		for _, term := range terms {
 			Expect(term.MatchFields).To(BeEmpty())
 		}
-		resourceKey := commonconstants.AcceleratorResourceNodeLabel("amd.com/gpu")
 		for _, tc := range []struct {
 			labels  map[string]string
 			matches bool
 		}{
-			{map[string]string{resourceKey: "true", "hardware.example.com/model": "MI300X", composer.NodePoolNameLabel: "research"}, true},
-			{map[string]string{resourceKey: "true", "hardware.example.com/model": "MI250", composer.NodePoolNameLabel: "research"}, false},
-			{map[string]string{"hardware.example.com/model": "MI300X", composer.NodePoolNameLabel: "research"}, false},
-			{map[string]string{resourceKey: "true", "hardware.example.com/model": "MI300X"}, true},
-			{map[string]string{"hardware.example.com/model": "MI300X"}, false},
-			{map[string]string{resourceKey: "true", "hardware.example.com/model": "MI250"}, false},
-			{map[string]string{resourceKey: "true", "hardware.example.com/model": "MI300X", composer.NodePoolNameLabel: "other"}, false},
+			{map[string]string{"hardware.example.com/model": "MI300X", composer.NodePoolNameLabel: "research"}, true},
+			{map[string]string{"hardware.example.com/model": "MI250", composer.NodePoolNameLabel: "research"}, false},
+			{map[string]string{composer.NodePoolNameLabel: "research"}, false},
+			{map[string]string{"hardware.example.com/model": "MI300X"}, true},
+			{map[string]string{}, false},
+			{map[string]string{"hardware.example.com/model": "MI250"}, false},
+			{map[string]string{"hardware.example.com/model": "MI300X", composer.NodePoolNameLabel: "other"}, false},
 		} {
 			node := &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: "gpu-node", Labels: tc.labels}}
 			matches, err := nodeaffinity.GetRequiredNodeAffinity(pod).Match(node)
