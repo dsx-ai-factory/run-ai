@@ -14,7 +14,9 @@
         :aria-label="`More information about ${title}`"
       />
     </div>
-    <div v-if="subtitle" class="priority-list-subtitle row items-center no-wrap">{{ subtitle }}</div>
+    <div v-if="subtitle" class="priority-list-subtitle text-b-overline-caps text-b-sub row items-center no-wrap">
+      {{ subtitle }}
+    </div>
     <vue-draggable
       :model-value="items"
       target=".priority-list-items"
@@ -45,7 +47,12 @@
           <q-item-section class="item-title-wrapper">
             <div class="row items-center no-wrap">
               <q-badge class="item-number" :aid="`${aid}-item-number-${item}`">{{ index + 1 }}</q-badge>
-              <div class="item-title ellipsis-2-lines">{{ item }}</div>
+              <div
+                class="item-title ellipsis-2-lines"
+                :class="item === modelValue ? 'text-b-subtitle1' : 'text-b-subtitle2 text-b-sub'"
+              >
+                {{ item }}
+              </div>
             </div>
             <q-tooltip
               :model-value="hoveredTruncatedItem === item"
@@ -201,17 +208,10 @@ const showTitleTooltipIfTruncated = (event: Event, item: string): void => {
 
 .priority-list-title {
   height: 48px;
-  color: var(--b-text-main);
 }
 
 .priority-list-subtitle {
   height: 34px;
-  color: var(--b-text-sub);
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 14px;
-  letter-spacing: 0.72px;
-  text-transform: uppercase;
 }
 
 .priority-list-items {
@@ -257,11 +257,12 @@ const showTitleTooltipIfTruncated = (event: Event, item: string): void => {
 .item-title {
   flex: 1;
   min-width: 0;
-  color: var(--b-text-sub);
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 21px;
   word-break: break-word;
+
+  // Figma's text-b-subtitle2 uses a 21px line height; the app's shared class still uses 19.5px.
+  &.text-b-subtitle2 {
+    line-height: 21px;
+  }
 }
 
 .priority-list-item--active {
@@ -272,8 +273,6 @@ const showTitleTooltipIfTruncated = (event: Event, item: string): void => {
 
   .item-title {
     color: var(--text-brand);
-    font-weight: 500;
-    line-height: 20px;
   }
 }
 
@@ -300,7 +299,7 @@ const showTitleTooltipIfTruncated = (event: Event, item: string): void => {
     height: 12px;
     min-height: 12px;
     padding: 0;
-    color: $black-54;
+    color: var(--icon-default);
   }
 
   :deep(.q-btn.disabled) {

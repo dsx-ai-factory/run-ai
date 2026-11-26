@@ -480,7 +480,7 @@ onMounted(async () => {
 
 <style scoped lang="scss">
 .department-edit-form-v3 {
-  padding: 0 20px 26px;
+  padding: 0 var(--space-l) var(--space-xl);
 }
 
 .node-pool-step {
