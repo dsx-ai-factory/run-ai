@@ -177,8 +177,6 @@ func validateFairShareSimulationRequest(request api.FairShareSimulationRequest) 
 		return errors.New("parent is required for projects")
 	case request.NodePool.Capacity.Gpu < 0:
 		return errors.New("nodePool.capacity.gpu must not be negative")
-	case capabilities.Limits && !capabilities.Quota:
-		return errors.New("schedulingCapabilities.limits can only be on when quota is on")
 	case len(request.OrgUnits) == 0 || len(request.OrgUnits) > maxSimulatedOrgUnits:
 		return fmt.Errorf("orgUnits must hold 1 to %d org units", maxSimulatedOrgUnits)
 	}

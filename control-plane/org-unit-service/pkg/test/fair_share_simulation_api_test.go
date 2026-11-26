@@ -247,6 +247,16 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 			expectResult(body.OrgUnits[0], a, expected{demand: 5, fairShare: 5, guaranteed: 4, unmet: 0, weightShare: 1})
 		})
 
+		It("caps the fair share at a limit while quota is off", func() {
+			limited := withDemand(a, 20)
+			limited.Gpu = &api.FairShareSimulationGpuSettings{Limit: ptr.To(5.0)}
+			sc := departmentsScenario(limited, withDemand(b, 20))
+			sc.capabilities = api.FairShareSimulationSchedulingCapabilities{AdjustableWeights: true, Limits: true}
+			body := simulate(fullAccess, sc)
+			expectResult(body.OrgUnits[0], a, expected{demand: 5, fairShare: 5, guaranteed: 0, unmet: 0, weightShare: 0.5})
+			expectResult(body.OrgUnits[1], b, expected{demand: 20, fairShare: 15, guaranteed: 0, unmet: 5, weightShare: 0.5})
+		})
+
 		It("refuses a department the caller can't read the same way as an unknown one", func() {
 			onlyB := serviceFor(authorization_api.PermittedScopes{Departments: []string{b}})
 			Expect(simulate(onlyB, departmentsScenario(row(b))).OrgUnits[0].FairShare.Gpu).To(Equal(10.0))
@@ -319,10 +329,6 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 			projectsWithoutParent := projectsScenario(a, row(a1))
 			projectsWithoutParent.parent = nil
 			expectBadRequest(fullAccess, projectsWithoutParent)
-
-			limitsWithoutQuota := departmentsScenario(row(a))
-			limitsWithoutQuota.capabilities = api.FairShareSimulationSchedulingCapabilities{Limits: true}
-			expectBadRequest(fullAccess, limitsWithoutQuota)
 
 			negativeCapacity := departmentsScenario(row(a))
 			negativeCapacity.capacity = -1
