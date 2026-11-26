@@ -72,6 +72,11 @@ func (s *ServiceMonitor) Object(ctx context.Context) (client.Object, error) {
 		return nil, err
 	}
 
+	port, err := controller_utils.DCGMExporterPort(dcgmExporterService)
+	if err != nil {
+		return nil, err
+	}
+
 	serviceMonitor.Spec.Selector.MatchLabels = dcgmExporterService.Labels
 
 	serviceMonitor.Spec.NamespaceSelector = monitoringv1.NamespaceSelector{
@@ -82,7 +87,7 @@ func (s *ServiceMonitor) Object(ctx context.Context) (client.Object, error) {
 
 	serviceMonitor.Spec.Endpoints = []monitoringv1.Endpoint{
 		{
-			Port:     dcgmExporterService.Spec.Ports[0].Name,
+			Port:     port.Name,
 			Path:     "/metrics",
 			Interval: monitoringv1.Duration(global.NvidiaDcgmExporter.ServiceMonitor.Interval),
 		},

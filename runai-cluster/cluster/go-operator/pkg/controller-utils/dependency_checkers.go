@@ -11,6 +11,7 @@ import (
 	"io"
 	"net/http"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -23,6 +24,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/installation/util"
@@ -93,50 +95,61 @@ func componentMatches(name, namespace string, componentNameRegex *regexp.Regexp,
 	return componentNameRegex.MatchString(name)
 }
 
+// dcgmExporterServiceSelectors lists the label key/value pairs that identify a
+// DCGM exporter Service. The "-dra" value is what the GPU Operator uses in
+// GPUCluster (DRA) mode.
+const appLabel = "app"
+
+var dcgmExporterServiceSelectors = []struct{ key, value string }{
+	{appLabel, "nvidia-dcgm-exporter"},
+	{appLabel, "dcgm-exporter"},
+	{appLabel, "nvidia-dcgm-exporter-dra"},
+	{"app.kubernetes.io/name", "nvidia-dcgm-exporter"},
+	{"app.kubernetes.io/name", "dcgm-exporter"},
+}
+
+// GetDCGMExporterService searches all namespaces. A Service can match several
+// selectors (e.g. it carries both "app" and "app.kubernetes.io/name"), so
+// results are collected in a set keyed by namespace/name.
 func GetDCGMExporterService(ctx context.Context, k8sReader client.Reader) (*v1.Service, error) {
-	svcList := &v1.ServiceList{}
-	var svcs []v1.Service
+	found := map[types.NamespacedName]v1.Service{}
 
-	err := k8sReader.List(ctx, svcList, client.MatchingLabels{"app": "nvidia-dcgm-exporter"})
-	if err != nil {
-		return nil, err
+	for _, selector := range dcgmExporterServiceSelectors {
+		svcList := &v1.ServiceList{}
+		if err := k8sReader.List(ctx, svcList, client.MatchingLabels{selector.key: selector.value}); err != nil {
+			return nil, fmt.Errorf("list dcgm-exporter services by label %s=%s: %w", selector.key, selector.value, err)
+		}
+		for _, svc := range svcList.Items {
+			found[client.ObjectKeyFromObject(&svc)] = svc
+		}
 	}
 
-	svcs = append(svcs, svcList.Items...)
-
-	svcList = &v1.ServiceList{}
-	err = k8sReader.List(ctx, svcList, client.MatchingLabels{"app": "dcgm-exporter"})
-	if err != nil {
-		return nil, err
-	}
-
-	svcs = append(svcs, svcList.Items...)
-
-	svcList = &v1.ServiceList{}
-	err = k8sReader.List(ctx, svcList, client.MatchingLabels{"app.kubernetes.io/name": "nvidia-dcgm-exporter"})
-	if err != nil {
-		return nil, err
-	}
-
-	svcs = append(svcs, svcList.Items...)
-
-	svcList = &v1.ServiceList{}
-	err = k8sReader.List(ctx, svcList, client.MatchingLabels{"app.kubernetes.io/name": "dcgm-exporter"})
-	if err != nil {
-		return nil, err
-	}
-
-	svcs = append(svcs, svcList.Items...)
-
-	if len(svcs) == 0 {
+	if len(found) == 0 {
 		return nil, fmt.Errorf("dcgm-exporter service not found in the cluster")
 	}
 
-	if len(svcs) > 1 {
-		return nil, fmt.Errorf("found more than one dcgm-exporter service in the cluster")
+	if len(found) > 1 {
+		names := make([]string, 0, len(found))
+		for key := range found {
+			names = append(names, key.String())
+		}
+		sort.Strings(names)
+		return nil, fmt.Errorf("found more than one dcgm-exporter service in the cluster: %s", strings.Join(names, ", "))
 	}
 
-	return &svcs[0], nil
+	for _, svc := range found {
+		return &svc, nil
+	}
+	return nil, fmt.Errorf("dcgm-exporter service not found in the cluster")
+}
+
+// DCGMExporterPort returns the first port of the exporter Service, or an
+// explicit error when the Service defines none.
+func DCGMExporterPort(svc *v1.Service) (v1.ServicePort, error) {
+	if len(svc.Spec.Ports) == 0 {
+		return v1.ServicePort{}, fmt.Errorf("dcgm-exporter service %s/%s has no ports", svc.Namespace, svc.Name)
+	}
+	return svc.Spec.Ports[0], nil
 }
 
 func GetPrometheusOperatorNamespace(ctx context.Context, k8sReader client.Reader) (string, error) {
@@ -184,10 +197,22 @@ func getMissingMetrics(resBodyStr string) []string {
 }
 
 func getMetricsFromExporterService(svc *v1.Service) (string, error) {
-	res, err := http.Get("http://" + svc.Spec.ClusterIP + ":" + strconv.Itoa(int(svc.Spec.Ports[0].Port)) + "/metrics")
+	port, err := DCGMExporterPort(svc)
+	if err != nil {
+		return "", err
+	}
+
+	url := "http://" + svc.Spec.ClusterIP + ":" + strconv.Itoa(int(port.Port)) + "/metrics"
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to build dcgm-exporter metrics request: %w", err)
+	}
+
+	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("failed to connect to dcgm-exporter service in the cluster")
 	}
+	defer func() { _ = res.Body.Close() }()
 
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil || res.StatusCode != http.StatusOK {

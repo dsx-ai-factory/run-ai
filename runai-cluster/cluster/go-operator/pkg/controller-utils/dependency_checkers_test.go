@@ -152,6 +152,62 @@ var _ = Describe("DependencyCheckers", func() {
 			_, err := GetDCGMExporterService(apiAccessContext, k8s)
 			Expect(err).To(HaveOccurred())
 		})
+
+		It("should find the GPUCluster (DRA) mode exporter service", func() {
+			Expect(k8s.Create(apiAccessContext, &v1.Service{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "nvidia-dcgm-exporter-dra",
+					Namespace: consts.GPUOperatorNamespace,
+					Labels: map[string]string{
+						"app":                         "nvidia-dcgm-exporter-dra",
+						"app.kubernetes.io/component": "nvidia-dcgm-exporter",
+					},
+				},
+			})).To(Succeed())
+
+			svc, err := GetDCGMExporterService(apiAccessContext, k8s)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(svc.Name).To(Equal("nvidia-dcgm-exporter-dra"))
+		})
+
+		It("should not count a service matching several label selectors twice", func() {
+			Expect(k8s.Create(apiAccessContext, &v1.Service{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      consts.DCGMExporterServiceName,
+					Namespace: consts.GPUOperatorNamespace,
+					Labels: map[string]string{
+						"app":                    "nvidia-dcgm-exporter",
+						"app.kubernetes.io/name": "nvidia-dcgm-exporter",
+					},
+				},
+			})).To(Succeed())
+
+			svc, err := GetDCGMExporterService(apiAccessContext, k8s)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(svc.Name).To(Equal(consts.DCGMExporterServiceName))
+		})
+
+		It("should fail when two distinct exporter services exist", func() {
+			for _, name := range []string{"nvidia-dcgm-exporter", "nvidia-dcgm-exporter-dra"} {
+				Expect(k8s.Create(apiAccessContext, &v1.Service{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      name,
+						Namespace: consts.GPUOperatorNamespace,
+						Labels:    map[string]string{"app": name},
+					},
+				})).To(Succeed())
+			}
+
+			_, err := GetDCGMExporterService(apiAccessContext, k8s)
+			Expect(err).To(MatchError(ContainSubstring("more than one dcgm-exporter service")))
+		})
+
+		It("should return an explicit error for a service without ports", func() {
+			_, err := DCGMExporterPort(&v1.Service{
+				ObjectMeta: metav1.ObjectMeta{Name: "nvidia-dcgm-exporter", Namespace: consts.GPUOperatorNamespace},
+			})
+			Expect(err).To(MatchError(ContainSubstring("has no ports")))
+		})
 	})
 
 	Context("DCGM exporter status check", func() {
