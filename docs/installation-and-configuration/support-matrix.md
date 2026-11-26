@@ -37,13 +37,16 @@ Each NVIDIA Run:ai release is tested and validated against a single minor versio
 | Component    | Deployed On                | Supported Version |
 | ------------ | --------------------------- | ----------------- |
 | Keycloak     | NVIDIA Run:ai control plane | 26.6              |
-| PostgreSQL   | NVIDIA Run:ai control plane | 16                |
+| PostgreSQL (built-in)  | NVIDIA Run:ai control plane | 16                |
+| PostgreSQL (external)  | Customer-managed            | 16, 17\*, 18\*    |
 | Traefik      | NVIDIA Run:ai control plane | 3.7               |
 | NATS         | NVIDIA Run:ai control plane | 2.11.8            |
 | Thanos       | NVIDIA Run:ai control plane | 0.38.0            |
 | Valkey       | NVIDIA Run:ai cluster       | 9.0.4             |
 | oauth2-proxy | NVIDIA Run:ai cluster       | 7.15.4            |
 | git-sync     | NVIDIA Run:ai cluster       | 4.7.0             |
+
+\* New NVIDIA Run:ai installations only. Upgrading an existing installation to this version is not supported.
 
 ## Supported NVIDIA GPUs
 
