@@ -50,7 +50,8 @@ export interface ISaveOrgUnitPayload<T> {
   project?: T;
   department?: T;
   action: ESaveOrgUnitAction;
-  onComplete?: () => void; // Callback to execute after save completes (success or error)
+  onComplete?: () => void;
+  onError?: () => void;
 }
 
 /**

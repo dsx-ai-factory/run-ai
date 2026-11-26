@@ -6,7 +6,9 @@
 import { flushPromises, mount } from "@vue/test-utils";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createTestingPinia } from "@pinia/testing";
-import { Quasar } from "quasar";
+import { Notify, Quasar } from "quasar";
+import { ResourceType } from "@/swagger-models/authorization-client";
+import { storageUtil } from "@/utils/storage.util";
 import { usePermissionStore } from "@/stores/permissions.store";
 import DepartmentEditFormV3 from "./department-edit-form-v3.vue";
 import { ScopeNameStep } from "@/components/org-unit/v2/department/steps/scope-name-step";
@@ -38,6 +40,10 @@ vi.mock("vue-router", () => ({
   useRouter: () => ({ push: vi.fn(), back: vi.fn(), replace: vi.fn() }),
 }));
 
+vi.mock("@/services/control-plane/org-unit.service/org-unit.service", () => ({
+  orgUnitService: { isDepartmentNameUnique: vi.fn().mockResolvedValue(true) },
+}));
+
 vi.mock("@/services/control-plane/rbac/access-rule.service/access-rule.service", () => ({
   accessRuleService: { getAccessRulesCount: vi.fn().mockResolvedValue(3) },
 }));
@@ -47,7 +53,7 @@ const twoPoolDepartment = {
   defaultNodePools: [mockCpuEnabledNodePool.name, mockCpuDisabledNodePool.name],
 } as Department;
 
-const mountForm = (props: Record<string, unknown> = {}) => {
+const mountForm = (props: Record<string, unknown> = {}, stubs: Record<string, unknown> = {}) => {
   const pinia = createTestingPinia({ createSpy: vi.fn });
   vi.mocked(usePermissionStore(pinia).hasPermission).mockReturnValue(true);
 
@@ -65,6 +71,7 @@ const mountForm = (props: Record<string, unknown> = {}) => {
         RunaiFormWrapper: RunaiFormWrapperStub,
         SchedulingRulesStep: true,
         AccessRulesStep: true,
+        ...stubs,
       },
     },
   });
@@ -184,7 +191,48 @@ describe("DepartmentEditFormV3", () => {
       const [payload] = wrapper.emitted("on-save")?.[0] as [ISaveOrgUnitPayload<Department>];
       expect(payload.action).toBe(ESaveOrgUnitAction.Save);
       expect(payload.department?.defaultNodePools).toEqual(reordered);
+      expect(wrapper.findComponent(SchedulingRulesStep).exists()).toBe(false);
+
+      payload.onComplete?.();
+      await flushPromises();
       expect(wrapper.findComponent(SchedulingRulesStep).exists()).toBe(true);
+    });
+
+    it("stays on the step with the order unsaved when the save fails", async () => {
+      const wrapper = await reorderThenOpenSchedulingRules(false);
+
+      wrapper.findComponent(UnsavedChangesDialog).vm.$emit("save");
+      await flushPromises();
+      const [payload] = wrapper.emitted("on-save")?.[0] as [ISaveOrgUnitPayload<Department>];
+      payload.onError?.();
+      await flushPromises();
+
+      expect(wrapper.findComponent(SchedulingRulesStep).exists()).toBe(false);
+      expect(wrapper.findComponent(NodePoolsPriorityList).props("nodePools")).toEqual(reordered);
+      expect(wrapper.findComponent(RunaiFormWrapper).props("initDirty")).toBe(true);
+    });
+
+    it("sends one save when Save changes is clicked again or the dialog is closed while saving", async () => {
+      const wrapper = await reorderThenOpenSchedulingRules(false);
+      const dialog = wrapper.findComponent(UnsavedChangesDialog);
+
+      dialog.vm.$emit("save");
+      dialog.vm.$emit("save");
+      await flushPromises();
+      dialog.vm.$emit("update:model-value", false);
+      await flushPromises();
+
+      expect(wrapper.emitted("on-save")).toHaveLength(1);
+      const [payload] = wrapper.emitted("on-save")?.[0] as [ISaveOrgUnitPayload<Department>];
+      payload.onComplete?.();
+      await flushPromises();
+      expect(wrapper.findComponent(SchedulingRulesStep).exists()).toBe(true);
+    });
+
+    it("locks reordering while a save is in progress", async () => {
+      const wrapper = await mountAtStep(EStepNames.GpuQuota, { isNewDepartment: false, isDepartmentSubmitting: true });
+
+      expect(wrapper.findComponent(NodePoolsPriorityList).props("disableReorder")).toBe(true);
     });
 
     it("restores the saved order when the user discards it", async () => {
@@ -258,32 +306,105 @@ describe("DepartmentEditFormV3", () => {
         disableReorderTooltip: EOrgUnitFormTooltip.NodePoolsPriorityOrderReadOnly,
       });
     });
+  });
 
-    it("doesn't ask for a new department, which saves the order on create", async () => {
-      const wrapper = await mountAtStep(EStepNames.GpuQuota, { isNewDepartment: true });
+  describe("step from the URL", () => {
+    it.each([
+      {
+        name: "opens a valid step of an existing department",
+        stepName: EStepNames.CPUQuota,
+        isNew: false,
+        want: EStepNames.CPUQuota,
+      },
+      {
+        name: "sends today's GPU over quota link to GPU quota",
+        stepName: EStepNames.OverQuota,
+        isNew: false,
+        want: EStepNames.GpuQuota,
+      },
+      {
+        name: "falls back to the first step for an unknown step",
+        stepName: "no-such-step",
+        isNew: false,
+        want: EStepNames.ScopeName,
+      },
+      {
+        name: "falls back to the first step while a new department's other steps are locked",
+        stepName: EStepNames.GpuQuota,
+        isNew: true,
+        want: EStepNames.ScopeName,
+      },
+      {
+        name: "doesn't mark Step 1 as done for a new department",
+        stepName: EStepNames.ScopeName,
+        isNew: true,
+        want: EStepNames.ScopeName,
+      },
+    ])("$name", async ({ stepName, isNew, want }) => {
+      const wrapper = await mountAtStep(stepName as EStepNames, { isNewDepartment: isNew });
 
-      wrapper.findComponent(NodePoolsPriorityList).vm.$emit("update:node-pools", reordered);
-      await flushPromises();
-      wrapper.findComponent(OrgUnitFormFooter).vm.$emit("next");
-      await flushPromises();
-
-      expect(wrapper.findComponent(UnsavedChangesDialog).props("modelValue")).toBe(false);
-      expect(wrapper.emitted("on-save")).toBeUndefined();
+      expect(wrapper.findComponent({ name: "RunaiWizardLayout" }).props("activeStep")).toBe(want);
+      if (isNew) expect(wizardSteps(wrapper)[0].done).toBe(false);
     });
+  });
 
-    it("sends the reordered node pools as defaultNodePools when saving from a node pool step", async () => {
-      const wrapper = await mountAtStep(EStepNames.GpuQuota, { isNewDepartment: true });
+  it("moves past Step 1 only once the department is saved", async () => {
+    const wrapper = mountForm({ isNewDepartment: false }, { ScopeNameStep: true });
+    await flushPromises();
 
-      wrapper.findComponent(NodePoolsPriorityList).vm.$emit("update:node-pools", reordered);
+    wrapper.findComponent(OrgUnitFormFooter).vm.$emit("submit-and-continue");
+    await flushPromises();
+    expect(wrapper.findComponent({ name: "RunaiWizardLayout" }).props("activeStep")).toBe(EStepNames.ScopeName);
+
+    const [payload] = wrapper.emitted("on-save")?.[0] as [ISaveOrgUnitPayload<Department>];
+    payload.onComplete?.();
+    await flushPromises();
+
+    expect(wrapper.findComponent({ name: "RunaiWizardLayout" }).props("activeStep")).toBe(EStepNames.GpuQuota);
+  });
+
+  describe("failed saves", () => {
+    it.each(["submit-and-continue", "submit-and-close"])("stops the busy state after a failed %s", async (event) => {
+      vi.spyOn(storageUtil, "get").mockReturnValue(true);
+      const wrapper = mountForm({}, { ScopeNameStep: true });
       await flushPromises();
 
-      wrapper.findComponent(OrgUnitFormFooter).vm.$emit("submit-and-continue");
+      wrapper.findComponent(OrgUnitFormFooter).vm.$emit(event);
       await flushPromises();
+      expect(wrapper.findComponent(OrgUnitFormFooter).props("submittingAction")).not.toBeNull();
 
       const [payload] = wrapper.emitted("on-save")?.[0] as [ISaveOrgUnitPayload<Department>];
-      expect(payload.action).toBe(ESaveOrgUnitAction.Continue);
-      expect(payload.department?.defaultNodePools).toEqual(reordered);
+      payload.onError?.();
+      await flushPromises();
+
+      expect(wrapper.findComponent(OrgUnitFormFooter).props("submittingAction")).toBeNull();
+      expect(wrapper.findComponent({ name: "RunaiWizardLayout" }).props("activeStep")).toBe(EStepNames.ScopeName);
     });
+  });
+
+  it("saves and closes when Scheduling rules is the last step", async () => {
+    const pinia = createTestingPinia({ createSpy: vi.fn });
+    vi.mocked(usePermissionStore(pinia).hasPermission).mockImplementation(
+      (resource) => resource !== ResourceType.AccessRules,
+    );
+    mockRouteQuery.stepName = EStepNames.SchedulingRules;
+    const wrapper = mount(DepartmentEditFormV3, {
+      props: { department: twoPoolDepartment, isNewDepartment: false, nodePoolsMinimal: [mockCpuEnabledNodePool] },
+      global: {
+        plugins: [[Quasar, { plugins: { Notify } }], pinia],
+        stubs: { RunaiFormWrapper: RunaiFormWrapperStub, SchedulingRulesStep: true },
+      },
+    });
+    await flushPromises();
+
+    const step = wrapper.findComponent(SchedulingRulesStep);
+    expect(step.props("isLastStep")).toBe(true);
+    step.vm.$emit("save-scheduling-rules", { schedulingRules: null, navigateAfterSave: true });
+    await flushPromises();
+    const [payload] = wrapper.emitted("on-save")?.[0] as [ISaveOrgUnitPayload<Department>];
+
+    expect(payload.action).toBe(ESaveOrgUnitAction.Close);
+    expect(payload.onComplete).toBeUndefined();
   });
 
   it("renders today's access rules step and the footer in the last step", async () => {

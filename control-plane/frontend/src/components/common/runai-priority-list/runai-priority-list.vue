@@ -4,7 +4,7 @@
 -->
 
 <template>
-  <section ref="listRef" class="runai-priority-list column no-wrap" :aria-label="title" :aid="aid">
+  <section class="runai-priority-list column no-wrap" :aria-label="title" :aid="aid">
     <div class="priority-list-title row items-center no-wrap">
       <span class="text-b-subtitle1">{{ title }}</span>
       <runai-tooltip
@@ -22,70 +22,75 @@
       target=".priority-list-items"
       :disabled="disableReorder"
       :animation="150"
+      force-fallback
       filter=".item-arrows"
       :prevent-on-filter="false"
       ghost-class="priority-list-item--ghost"
+      @start="itemsAtDragStart = [...items]"
+      @end="announceDraggedItem"
       @update:model-value="emit('update:items', $event)"
     >
-      <q-list class="priority-list-items">
+      <q-list class="priority-list-items" role="list">
         <q-item
           v-for="(item, index) in items"
           :key="item"
-          clickable
+          :ref="(row) => setRowRef(item, row)"
+          role="listitem"
           class="priority-list-item"
-          active-class="priority-list-item--active"
-          :active="item === modelValue"
+          :class="{ 'priority-list-item--active': item === modelValue }"
           :aid="`${aid}-item-${item}`"
-          :aria-current="item === modelValue ? 'true' : undefined"
-          :aria-describedby="showDisabledReason ? disabledReasonId : undefined"
-          @click="emit('update:model-value', item)"
           @mouseenter="showTitleTooltipIfTruncated($event, item)"
           @focusin="showTitleTooltipIfTruncated($event, item)"
           @mouseleave="hoveredTruncatedItem = null"
           @focusout="hoveredTruncatedItem = null"
         >
-          <q-item-section class="item-title-wrapper">
-            <div class="row items-center no-wrap">
-              <q-badge class="item-number" :aid="`${aid}-item-number-${item}`">{{ index + 1 }}</q-badge>
-              <div
-                class="item-title ellipsis-2-lines"
-                :class="item === modelValue ? 'text-b-subtitle1' : 'text-b-subtitle2 text-b-sub'"
-              >
-                {{ item }}
-              </div>
-            </div>
-            <q-tooltip
-              :model-value="hoveredTruncatedItem === item"
-              no-parent-event
-              anchor="bottom middle"
-              self="top middle"
-              max-width="300px"
+          <button
+            type="button"
+            class="item-select"
+            :aid="`${aid}-select-${item}`"
+            :aria-current="item === modelValue ? 'true' : undefined"
+            :aria-describedby="showDisabledReason ? disabledReasonId : undefined"
+            @click="emit('update:model-value', item)"
+          >
+            <q-badge class="item-number" :aid="`${aid}-item-number-${item}`">{{ index + 1 }}</q-badge>
+            <span
+              class="item-title ellipsis-2-lines"
+              :class="item === modelValue ? 'text-b-subtitle1' : 'text-b-subtitle2 text-b-sub'"
             >
               {{ item }}
-            </q-tooltip>
-          </q-item-section>
-          <q-item-section side class="item-arrows">
+            </span>
+          </button>
+          <q-tooltip
+            :model-value="hoveredTruncatedItem === item"
+            no-parent-event
+            anchor="bottom middle"
+            self="top middle"
+            max-width="300px"
+          >
+            {{ item }}
+          </q-tooltip>
+          <div class="item-arrows column no-wrap">
             <runai-btn
               icon-button
-              icon="ph-bold ph-arrow-up"
-              size="xs"
+              class="runai-icon-btn--xsmall"
+              :icon="moveUpIcon"
               :aid="`${aid}-move-up-${item}`"
               :aria-label="`Move ${item} up`"
               :disable="disableReorder || index === 0"
               :disabled-tooltip="arrowDisabledTooltip"
-              @click.stop="moveWithArrow(item, index, index - 1)"
+              @click="moveWithArrow(item, index, index - 1)"
             />
             <runai-btn
               icon-button
-              icon="ph-bold ph-arrow-down"
-              size="xs"
+              class="runai-icon-btn--xsmall"
+              :icon="moveDownIcon"
               :aid="`${aid}-move-down-${item}`"
               :aria-label="`Move ${item} down`"
               :disable="disableReorder || index === items.length - 1"
               :disabled-tooltip="arrowDisabledTooltip"
-              @click.stop="moveWithArrow(item, index, index + 1)"
+              @click="moveWithArrow(item, index, index + 1)"
             />
-          </q-item-section>
+          </div>
           <span v-if="item === modelValue" class="item-indicator" />
         </q-item>
       </q-list>
@@ -98,10 +103,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, useId } from "vue";
-import { VueDraggable } from "vue-draggable-plus";
+import { computed, nextTick, ref, useId, type ComponentPublicInstance } from "vue";
+import { VueDraggable, type DraggableEvent } from "vue-draggable-plus";
 import { RunaiBtn } from "@/components/common/runai-btn";
 import { RunaiTooltip } from "@/components/common/runai-tooltip";
+import { runaiIcons, toQuasarIconName } from "@/plugins/runai-icons.catalog";
 
 export interface Props {
   title: string;
@@ -124,13 +130,27 @@ const emit = defineEmits<{
   "update:items": [items: string[]];
 }>();
 
+const moveUpIcon = toQuasarIconName(runaiIcons.action.sortUp);
+const moveDownIcon = toQuasarIconName(runaiIcons.action.sortDown);
+
 const hoveredTruncatedItem = ref<string | null>(null);
-const listRef = ref<HTMLElement | null>(null);
 const moveAnnouncement = ref("");
+const itemsAtDragStart = ref<string[]>([]);
+const rowRefs = new Map<string, HTMLElement>();
 // Disabled buttons can't take focus, so keyboard users get the reason from the items instead of the tooltip.
 const disabledReasonId = useId();
 const showDisabledReason = computed(() => props.disableReorder && !!props.disableReorderTooltip);
 const arrowDisabledTooltip = computed(() => (props.disableReorder ? props.disableReorderTooltip : undefined));
+
+const setRowRef = (item: string, row: Element | ComponentPublicInstance | null): void => {
+  const element = row && "$el" in row ? row.$el : row;
+  if (element instanceof HTMLElement) rowRefs.set(item, element);
+  else rowRefs.delete(item);
+};
+
+const announceMove = (item: string, to: number): void => {
+  moveAnnouncement.value = `${item} moved to position ${to + 1} of ${props.items.length}`;
+};
 
 const move = (from: number, to: number): void => {
   if (props.disableReorder || to < 0 || to >= props.items.length) return;
@@ -145,20 +165,26 @@ const isFocusable = (element: HTMLElement | null | undefined): element is HTMLEl
 
 // Moving an item to either end disables the arrow that was just pressed, which would drop focus to the page.
 const focusMovedItem = (item: string, direction: "up" | "down"): void => {
-  const opposite = direction === "up" ? "down" : "up";
-  const candidates = [
-    `${props.aid}-move-${direction}-${item}`,
-    `${props.aid}-move-${opposite}-${item}`,
-    `${props.aid}-item-${item}`,
-  ].map((aid) => listRef.value?.querySelector<HTMLElement>(`[aid="${aid}"]`));
-  candidates.find(isFocusable)?.focus();
+  const row = rowRefs.get(item);
+  if (!row) return;
+  const [moveUp, moveDown] = Array.from(row.querySelectorAll<HTMLElement>(".item-arrows button"));
+  const pressed = direction === "up" ? moveUp : moveDown;
+  const opposite = direction === "up" ? moveDown : moveUp;
+  [pressed, opposite, row.querySelector<HTMLElement>(".item-select")].find(isFocusable)?.focus();
 };
 
 const moveWithArrow = async (item: string, from: number, to: number): Promise<void> => {
   move(from, to);
   await nextTick();
   focusMovedItem(item, to < from ? "up" : "down");
-  moveAnnouncement.value = `${item} moved to position ${to + 1} of ${props.items.length}`;
+  announceMove(item, to);
+};
+
+const announceDraggedItem = (event: DraggableEvent): void => {
+  const { oldIndex, newIndex } = event;
+  if (oldIndex === undefined || newIndex === undefined || oldIndex === newIndex) return;
+  const item = itemsAtDragStart.value.at(oldIndex);
+  if (item) announceMove(item, newIndex);
 };
 
 const showTitleTooltipIfTruncated = (event: Event, item: string): void => {
@@ -220,22 +246,41 @@ const showTitleTooltipIfTruncated = (event: Event, item: string): void => {
 
 .priority-list-item {
   position: relative;
+  align-items: center;
   height: 60px;
   min-height: 60px;
   gap: var(--space-s);
   padding: var(--space-s);
   box-shadow: inset 0 -1px 0 var(--border-subtle);
 
+  &:hover {
+    background: var(--bg-primary-hover);
+  }
+
   &--ghost {
     opacity: 0.4;
   }
 }
 
-.item-title-wrapper {
+.item-select {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  align-self: stretch;
+  gap: var(--space-m);
   min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 
-  > .row {
-    gap: var(--space-m);
+  &:focus-visible {
+    outline: 2px solid var(--border-strong);
+    outline-offset: 2px;
   }
 }
 
@@ -286,18 +331,16 @@ const showTitleTooltipIfTruncated = (event: Event, item: string): void => {
   background: var(--interactive-primary-default-bg);
 }
 
-.item-arrows.q-item__section--side {
-  flex-direction: column;
-  justify-content: center;
-  gap: var(--space-2xs);
-  padding: 0;
-  cursor: default;
+.item-arrows {
+  flex-shrink: 0;
+  // Two 24px buttons are taller than the row's content box, so they reach into its padding.
+  margin: calc(var(--space-xs) * -1) 0;
 
   :deep(.q-btn) {
-    width: 12px;
-    min-width: 12px;
-    height: 12px;
-    min-height: 12px;
+    width: 24px;
+    min-width: 24px;
+    height: 24px;
+    min-height: 24px;
     padding: 0;
     color: var(--icon-default);
   }
@@ -305,14 +348,6 @@ const showTitleTooltipIfTruncated = (event: Event, item: string): void => {
   :deep(.q-btn.disabled) {
     opacity: 1 !important;
     color: var(--icon-disabled);
-  }
-
-  :deep(.q-btn .q-icon) {
-    font-size: 12px;
-  }
-
-  :deep(.q-btn .q-btn__content) {
-    min-height: 12px;
   }
 }
 </style>

@@ -43,7 +43,7 @@ describe("NodePoolsPriorityList", () => {
   it("emits the selected node pool", async () => {
     const wrapper = mountList();
 
-    await wrapper.find('[aid="node-pools-priority-list-item-h100-pool"]').trigger("click");
+    await wrapper.find('[aid="node-pools-priority-list-select-h100-pool"]').trigger("click");
 
     expect(wrapper.emitted("update:model-value")).toEqual([["h100-pool"]]);
   });

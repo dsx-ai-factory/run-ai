@@ -5,6 +5,7 @@
 
 import { describe, it, expect } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
+import { nextTick } from "vue";
 import { Quasar, QItem } from "quasar";
 import { VueDraggable } from "vue-draggable-plus";
 import { RunaiTooltip } from "@/components/common/runai-tooltip";
@@ -45,8 +46,9 @@ describe("RunaiPriorityList", () => {
     const items = wrapper.findAllComponents(QItem);
     expect(items.map((item) => item.find(".item-title").text())).toEqual(ITEMS);
     expect(items.map((item) => item.find(".item-number").text())).toEqual(["1", "2", "3"]);
-    expect(items.map((item) => item.props("active"))).toEqual([false, true, false]);
-    expect(items[1].attributes("aria-current")).toBe("true");
+    expect(items.map((item) => item.classes().includes("priority-list-item--active"))).toEqual([false, true, false]);
+    expect(items[1].get(".item-select").attributes("aria-current")).toBe("true");
+    expect(items[0].get(".item-select").attributes("aria-current")).toBeUndefined();
     expect(items[1].find(".item-indicator").exists()).toBe(true);
     expect(items[0].find(".item-indicator").exists()).toBe(false);
   });
@@ -60,7 +62,7 @@ describe("RunaiPriorityList", () => {
   it("emits the selected item on click", async () => {
     const wrapper = mountList();
 
-    await wrapper.find('[aid="runai-priority-list-item-h100-pool"]').trigger("click");
+    await wrapper.find('[aid="runai-priority-list-select-h100-pool"]').trigger("click");
 
     expect(wrapper.emitted("update:model-value")).toEqual([["h100-pool"]]);
   });
@@ -85,6 +87,27 @@ describe("RunaiPriorityList", () => {
     wrapper.findComponent(VueDraggable).vm.$emit("update:modelValue", dragged);
 
     expect(wrapper.emitted("update:items")).toEqual([[dragged]]);
+  });
+
+  it("announces the new position of a dragged item", async () => {
+    const wrapper = mountList();
+    const draggable = wrapper.findComponent(VueDraggable);
+
+    draggable.vm.$emit("start", { oldIndex: 2 });
+    draggable.vm.$emit("end", { oldIndex: 2, newIndex: 0 });
+    await nextTick();
+
+    expect(wrapper.find('[aria-live="polite"]').text()).toBe("h100-pool moved to position 1 of 3");
+  });
+
+  it("gives selecting and moving an item separate controls", () => {
+    const wrapper = mountList();
+
+    const row = wrapper.findAllComponents(QItem)[1];
+    expect(row.props("clickable")).toBe(false);
+    expect(row.attributes("role")).toBe("listitem");
+    expect(row.get(".item-select").element.tagName).toBe("BUTTON");
+    expect(row.findAll(".item-arrows button")).toHaveLength(2);
   });
 
   it("does not change the items it was given", async () => {
@@ -126,7 +149,7 @@ describe("RunaiPriorityList", () => {
   it("tells keyboard users why reordering is disabled", () => {
     const wrapper = mountList({ disableReorder: true, disableReorderTooltip: "Reorder in the GPU quota step" });
 
-    const reasonId = wrapper.findAllComponents(QItem)[0].attributes("aria-describedby");
+    const reasonId = wrapper.findAllComponents(QItem)[0].get(".item-select").attributes("aria-describedby");
     expect(reasonId).toBeTruthy();
     expect(wrapper.find(`[id="${reasonId}"]`).text()).toBe("Reorder in the GPU quota step");
   });
@@ -138,7 +161,9 @@ describe("RunaiPriorityList", () => {
         title: "Node pools",
         items: ITEMS,
         modelValue: "default",
-        "onUpdate:items": (items: string[]) => wrapper.setProps({ items }),
+        "onUpdate:items": (items: string[]): void => {
+          void wrapper.setProps({ items });
+        },
       },
       global: { plugins: [Quasar] },
     });

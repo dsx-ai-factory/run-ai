@@ -4,6 +4,7 @@
  */
 
 import { mount, type VueWrapper } from "@vue/test-utils";
+import { Quasar } from "quasar";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { defineComponent, h, nextTick, reactive } from "vue";
 import type { ComponentPublicInstance } from "vue";
@@ -83,10 +84,13 @@ describe("SchedulingRulesStep", () => {
     parentNodeTypes?: NodeTypesPerWorkload;
     loading?: boolean;
     readOnly?: boolean;
+    isSingleNodePool?: boolean;
+    isLastStep?: boolean;
   }
 
   interface CreateWrapperOptions {
     props?: Partial<IStepProps>;
+    global?: { plugins: unknown[] };
   }
 
   type SavePayload = {
@@ -138,7 +142,7 @@ describe("SchedulingRulesStep", () => {
       },
     });
 
-    const wrapper = mount(TestHost);
+    const wrapper = mount(TestHost, { global: options.global as never });
 
     // Expose the reactive props from the VM so tests can modify them
     const hostVm = wrapper.vm as unknown as { stepProps: IStepProps };
@@ -330,6 +334,20 @@ describe("SchedulingRulesStep", () => {
       const payload = wrapper.emitted("save-scheduling-rules")?.[0]?.[0] as SavePayload;
       expect(payload.nodeTypes).toEqual(updatedNodeTypes);
       expect(payload.nodeTypes).not.toBe(updatedNodeTypes);
+    });
+  });
+
+  describe("single node pool footer", () => {
+    it.each([
+      { isLastStep: false, label: "Save & Continue" },
+      { isLastStep: true, label: "Save & Close" },
+    ])("labels the save button $label when isLastStep is $isLastStep", ({ isLastStep, label }) => {
+      const { wrapper } = createWrapper({
+        props: { isSingleNodePool: true, isLastStep },
+        global: { plugins: [Quasar] },
+      });
+
+      expect(wrapper.findAll("button").map((button) => button.text())).toContain(label);
     });
   });
 });

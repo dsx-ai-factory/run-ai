@@ -25,7 +25,12 @@
     <!-- Single node pool: show footer-style buttons (like first step) -->
     <q-card-section v-if="isSingleNodePool && !readOnly" class="row justify-end q-gutter-x-sm q-px-none">
       <q-btn flat color="primary" label="Close" @click="emit('close')" />
-      <q-btn color="primary" label="Save & Continue" :loading="loading" @click="handleSaveAndContinue" />
+      <q-btn
+        color="primary"
+        :label="isLastStep ? 'Save & Close' : 'Save & Continue'"
+        :loading="loading"
+        @click="handleSaveAndContinue"
+      />
     </q-card-section>
   </div>
 </template>
@@ -54,6 +59,8 @@ export interface Props {
   readOnly?: boolean;
   /** When true, hides the inner save button and shows footer-style buttons instead */
   isSingleNodePool?: boolean;
+  /** When true, the footer-style save button closes the form instead of continuing */
+  isLastStep?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -64,6 +71,7 @@ const props = withDefaults(defineProps<Props>(), {
   loading: false,
   readOnly: false,
   isSingleNodePool: false,
+  isLastStep: false,
 });
 
 const emit = defineEmits<{

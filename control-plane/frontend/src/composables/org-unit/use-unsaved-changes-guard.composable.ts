@@ -138,26 +138,28 @@ const createUnsavedChangesGuard = (): IUnsavedChangesGuard => {
   };
 
   const confirmAction = async (decision: UnsavedGuardDecision): Promise<void> => {
-    if (!pending) {
+    // An async save can outlast this request; a later confirm or cancel must not reach into it.
+    const current = pending;
+    if (!current) {
       return;
     }
 
     try {
       if (decision === "save") {
-        await pending.handler.save?.();
+        await current.handler.save?.();
       } else {
-        await pending.handler.discard?.();
+        await current.handler.discard?.();
       }
       // Flush reactive updates so downstream dirty-state checks
       // (e.g. requestToLeave → form-wrapper isDirty) see the saved state.
       await nextTick();
-      await pending.onProceed?.();
+      await current.onProceed?.();
       await nextTick();
-      pending.resolve(true);
+      current.resolve(true);
     } catch (error) {
-      pending.reject(error);
+      current.reject(error);
     } finally {
-      pending = null;
+      if (pending === current) pending = null;
       closeDialog();
     }
   };

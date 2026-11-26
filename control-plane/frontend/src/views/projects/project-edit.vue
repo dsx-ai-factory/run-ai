@@ -371,7 +371,7 @@ const handleSaveError = (error: unknown): void => {
 // ==================== Main Save Handler ====================
 
 const onSave = async (payload: ISaveOrgUnitPayload<Project | ProjectCreationRequest>) => {
-  const { project: projectData, action, onComplete } = payload;
+  const { project: projectData, action, onComplete, onError } = payload;
 
   if (!projectData) return;
 
@@ -390,6 +390,7 @@ const onSave = async (payload: ISaveOrgUnitPayload<Project | ProjectCreationRequ
     onComplete?.();
   } catch (error: unknown) {
     handleSaveError(error);
+    onError?.();
   } finally {
     isProjectSubmitting.value = false;
   }
