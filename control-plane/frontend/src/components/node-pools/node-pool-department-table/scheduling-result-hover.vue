@@ -3,7 +3,7 @@
   SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-  <div @pointerenter="trackPointer" @pointermove="trackPointer" @focusin="positionAtValue" @keyup="positionAtValue">
+  <div ref="anchor" @pointerenter="trackPointer" @pointermove="trackPointer" @focusin="positionAtValue">
     <slot />
     <q-tooltip
       ref="tooltip"
@@ -19,8 +19,9 @@
 </template>
 <script setup lang="ts">
 import { QTooltip } from "quasar";
-import { nextTick, ref } from "vue";
+import { nextTick, ref, watch } from "vue";
 const props = defineProps<{ verticalOffset: number; focusFraction: number }>();
+const anchor = ref<HTMLElement>();
 const tooltip = ref<QTooltip>();
 const anchorX = ref(0);
 function position(x: number, width: number) {
@@ -31,8 +32,16 @@ function trackPointer(event: PointerEvent) {
   const { left, width } = (event.currentTarget as HTMLElement).getBoundingClientRect();
   position(event.clientX - left, width);
 }
-function positionAtValue(event: Event) {
-  const width = (event.currentTarget as HTMLElement).getBoundingClientRect().width;
+function positionAtValue() {
+  if (!anchor.value) return;
+  const width = anchor.value.getBoundingClientRect().width;
   position(props.focusFraction * width, width);
 }
+watch(
+  () => props.focusFraction,
+  () => {
+    if (anchor.value?.contains(document.activeElement) && document.activeElement?.matches(":focus-visible"))
+      positionAtValue();
+  },
+);
 </script>

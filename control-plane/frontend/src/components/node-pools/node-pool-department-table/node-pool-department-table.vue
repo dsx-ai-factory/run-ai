@@ -77,6 +77,7 @@
         v-if="panelVisible"
         ref="settingsPanel"
         :id="settingsPanelId"
+        role="presentation"
         class="department-settings-panel"
         @keydown.esc.stop="emit('close-settings')"
       >
