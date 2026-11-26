@@ -1,0 +1,118 @@
+# Example with default values
+
+## Log level for the test runner - default debug
+
+LOG_LEVEL='info'
+
+## Timeout for each test in milliseconds - default 60000 (1 minute)
+
+TASK_TIMEOUT_MS=30000
+
+## After every ui interaction the tests creates a video, this is the path and file type to save the videos - default videos/ and .webm
+
+BROWSER_VIDEOS_PATH='videos/'
+BROWSER_VIDEOS_FILE_TYPE='.webm'
+
+## Package includes hooks and tests paths configured in mocharc.cjs - default default
+
+TEST_PACKAGE='default'
+
+## User and Password for the Run:AI Control Plane - required, no default
+
+CONTROL_PLANE_ADMIN_PASSWORD='<your-admin-password>'
+CONTROL_PLANE_ADMIN_USERNAME='user@example.com'
+
+## Run:AI Cluster Name Prefix, related to the name shown in the Run:AI UI - default runai-cluster
+
+CLUSTER_NAME_PREFIX='runai-cluster'
+
+## Run:AI Tenant URL - required, no default
+
+CONTROL_PLANE_URL='https://<your-control-plane-host>'
+
+## Run:AI Environment URL, if not set will use the CONTROL_PLANE_URL
+
+APP_URL='https://<your-control-plane-host>'
+
+## Base DNS domain of the test environment - required, no default (set in CI via the E2E_BASE_DOMAIN variable)
+
+E2E_BASE_DOMAIN='<your-base-domain>'
+
+## Kubernetes Platform to support additional flows, options: k8s, ocp - default k8s
+
+KUBERNETES_PLATFORM='k8s'
+
+## GPU Type options: real, fake - default fake
+
+GPU_TYPE='real'
+
+## Determine if the environment uses an SSO provider - default false
+
+ENABLE_SSO='false'
+
+## Hide/Show logs to the console - default hide
+
+ENABLE_CONSOLE_LOGS='true'
+
+## Enable/Disable authentication, refer to adding another layer of users and permissions to the tests - default true
+
+ENABLE_AUTH='true'
+
+## Enable/Disable debug info collection - default true
+COLLECT_DEBUG_INFO_ENABLED='true'
+
+## Path: kubeconfig path, if not set will use the default kubeconfig path (in the current console context)
+
+KUBECONFIG_PATH='<path-to-your-kubeconfig>'
+
+## If kubeconfig has more than one cluster, you must set the cluster name to use
+
+KUBECONFIG_CLUSTER_NAME='kind-runai-local'
+
+## Headless browser, if set to true will run the tests in a headless (hidden) browser - default false
+
+HEADLESS_BROWSER='true'
+
+## if SAVE_TAGS is set to true, the control plane & cluster tags of the env will be saved to tags.json file
+
+SAVE_TAGS='false'
+
+## local run, if set to true - reports won't be generated
+
+LOCAL_RUN='true'
+
+## defines the number of retries for Mocha/Playwright tests
+
+RETRIES='0'
+
+KEYCLOAK_ADMIN_PASSWORD = 'admin'
+
+# KEYCLOAK_ADMIN_PASSWORD is used to change the keycloak token expiration for test purposes
+
+UNLEASH_URL = 'url'
+
+# UNLEASH_URL - for feature toggles
+
+UNLEASH_API_TOKEN = 'token'
+
+# UNLEASH_API_TOKEN - used to interact with unleash
+
+# SSO_USERS_ENV - if set to true, the tests will use the SSO users and  install SSO IDP
+
+SSO_USERS_ENV='false'
+# Optional cluster endpoint override. Otherwise set CLUSTER_NAME_PREFIX and E2E_BASE_DOMAIN.
+# CLUSTER_URL='https://<your-cluster-endpoint>'
+# Optional OpenShift SSO API endpoint override, using the same cluster name/domain fallback.
+# OPENSHIFT_API_URL='https://<your-openshift-api-host>:6443'
+
+# Shared accounts that user cleanup must keep.
+# E2E_PRESERVED_USERS='shared-account@example.com'
+
+# Private Git test credentials are supplied by the environment.
+# PRIVATE_GIT_USERNAME='<your-private-git-user>'
+
+# Mailtrap test credentials have no source-code defaults.
+# MAILTRAP_USER='<your-mailtrap-user>'
+# MAILTRAP_PASSWORD='<your-mailtrap-password>'
+# MAILTRAP_INBOX_ID='<your-mailtrap-inbox-id>'
+# MAILTRAP_API_TOKEN='<your-mailtrap-api-token>'

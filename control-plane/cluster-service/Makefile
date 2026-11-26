@@ -21,10 +21,24 @@ SHARED_PACKAGES_PATH=pkg
 OPENAPI_CLIENT_NAME_GO=client
 SHARED_PACKAGES_PATH_ABS=control-plane/cluster-service/pkg
 
+GINKGO_COMMAND+=--skip-package=integration-tests
+
 ##@ Basic Commands
 
-test: test-ginkgo ## Run unit tests.
+test: build test-ginkgo integration-tests ## Run unit tests + integration tests.
 .PHONY: test
+
+build-integration-tests: build build-integration-tests-generic
+	docker compose --profile tests -f ./integration-tests/docker-compose.yaml build
+
+integration-tests: build-integration-tests ## Build and run the docker-compose environment and the integration tests.
+	docker compose --profile tests -f ./integration-tests/docker-compose.yaml up -V --remove-orphans --force-recreate --abort-on-container-exit || ${FAILURE_MESSAGE_HANDLER}
+.PHONY: integration-tests
+
+# Starts the environment without the tests container, so the tests can be run from an IDE.
+integration-tests-debug: build-integration-tests ## Build and run the docker-compose environment only.
+	docker compose -f ./integration-tests/docker-compose.yaml up -V --remove-orphans --force-recreate --abort-on-container-exit
+.PHONY: integration-tests-debug
 
 lint: lint-go ## Run linter.
 .PHONY: lint

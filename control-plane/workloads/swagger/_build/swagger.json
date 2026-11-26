@@ -16091,6 +16091,12 @@
           }
         }
       },
+      "LoadAwareRouting": {
+        "description": "Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.",
+        "type": "boolean",
+        "default": false,
+        "nullable": true
+      },
       "DistributedInferenceRestartPolicy": {
         "description": "Determines the behavior when a pod fails.\n- `RecreateGroupOnPodRestart`: Restarts all pods in the group if any pod fails.\n- `None`: No automatic restart behavior is applied.\n",
         "type": "string",
@@ -16249,6 +16255,14 @@
             "properties": {
               "category": {
                 "$ref": "#/components/schemas/Category"
+              },
+              "loadAwareRouting": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/LoadAwareRouting"
+                  }
+                ],
+                "x-internal": true
               },
               "nodePools": {
                 "$ref": "#/components/schemas/NodePools"
@@ -21522,6 +21536,14 @@
               "category": {
                 "$ref": "#/components/schemas/Category"
               },
+              "loadAwareRouting": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/LoadAwareRouting"
+                  }
+                ],
+                "x-internal": true
+              },
               "nodePools": {
                 "$ref": "#/components/schemas/NodePools"
               },
@@ -23363,6 +23385,14 @@
             "properties": {
               "category": {
                 "$ref": "#/components/schemas/StringRules"
+              },
+              "loadAwareRouting": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/BooleanRules"
+                  }
+                ],
+                "x-internal": true
               },
               "nodePools": {
                 "$ref": "#/components/schemas/ArrayRules"
@@ -25769,26 +25799,6 @@
           }
         }
       },
-      "GetEnableHybridSubmission": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "$ref": "#/components/schemas/GetEnableSettingsValue"
-          },
-          "displayName": {
-            "type": "string",
-            "readOnly": true
-          },
-          "description": {
-            "type": "string",
-            "readOnly": true
-          },
-          "stage": {
-            "type": "string",
-            "readOnly": true
-          }
-        }
-      },
       "GetGpuOverProvisioning": {
         "type": "object",
         "properties": {
@@ -25838,9 +25848,6 @@
           "workloadSubmissionV2Enabled": {
             "$ref": "#/components/schemas/GetWorkloadSubmissionV2Enabled"
           },
-          "enableHybridSubmission": {
-            "$ref": "#/components/schemas/GetEnableHybridSubmission"
-          },
           "gpuOverProvisioning": {
             "$ref": "#/components/schemas/GetGpuOverProvisioning"
           },
@@ -25854,7 +25861,6 @@
         "enum": [
           "enablePolicies",
           "workloadSubmissionV2Enabled",
-          "enableHybridSubmission",
           "gpuOverProvisioning",
           "applicationSubmission"
         ]
@@ -25958,14 +25964,6 @@
         }
       },
       "WorkloadSubmissionV2EnabledSetting": {
-        "type": "object",
-        "properties": {
-          "enabled": {
-            "type": "boolean"
-          }
-        }
-      },
-      "EnableHybridSubmissionSetting": {
         "type": "object",
         "properties": {
           "enabled": {

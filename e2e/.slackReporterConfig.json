@@ -1,0 +1,40 @@
+{
+    "reports": [
+        {
+            "targets": [
+                {
+                    "name": "slack",
+                    "inputs": {
+                        "url": "",
+                        "publish": "test-summary-slim",
+                        "title": "Tests Report"
+                    },
+                    "extensions": [
+                        {
+                            "name": "metadata",
+                            "inputs": {
+                                "data": []
+                            }
+                        },
+                        {
+                            "name": "hyperlinks",
+                            "condition": "passOrFail",
+                            "inputs": {
+                                "links": []
+                            }
+                        },
+                        {
+                            "name": "quick-chart-test-summary"
+                        }
+                    ]
+                }
+            ],
+            "results": [
+                {
+                    "type": "playwright",
+                    "files": ["reports/playwright-report.json"]
+                }
+            ]
+        }
+    ]
+}

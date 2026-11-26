@@ -42,6 +42,12 @@ type NodepoolGpuTypeDetails struct {
 	//TotalDevices int32 `json:"totalDevices"`
 	TotalDevices int32 `json:"totalDevices" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Largest installed GPU count on a single node for this exact GPU type and per-device memory capacity. Not a sum across nodes or a free-device count. Omitted when per-node count evidence is unavailable.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//MaxDevicesPerNode int64 `json:"maxDevicesPerNode,omitempty"`
+	MaxDevicesPerNode int64 `json:"maxDevicesPerNode,omitempty" gorm:"not null;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertNodepoolGpuTypeDetailsRequired checks if the required fields are not zero-ed
@@ -76,6 +82,14 @@ func AssertNodepoolGpuTypeDetailsConstraints(obj NodepoolGpuTypeDetails) error {
 	//////////////////////// RUNAI END //////////////////////////
 	if obj.TotalDevices < 0 {
 		return &ParsingError{Param: "TotalDevices", Err: errors.New(errMsgMinValueConstraint)}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.MaxDevicesPerNode < 1 {
+		return &ParsingError{Param: "MaxDevicesPerNode", Err: errors.New(errMsgMinValueConstraint)}
 	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////

@@ -16,6 +16,24 @@ import (
 )
 
 func TestSetDefaultsWhereNeeded(t *testing.T) {
+	t.Run("defaults to a single replica independently of global replica count", func(t *testing.T) {
+		for _, replicas := range []*int32{nil, ptr.To[int32](1), ptr.To[int32](2), ptr.To[int32](3)} {
+			config := &ClusterRedis{}
+
+			config.SetDefaultsWhereNeeded(&internal.Internal{}, &global.Global{ReplicaCount: replicas})
+
+			require.EqualValues(t, 1, *config.Replicas)
+		}
+	})
+
+	t.Run("preserves explicit replica override", func(t *testing.T) {
+		config := &ClusterRedis{Replicas: ptr.To[int32](2)}
+
+		config.SetDefaultsWhereNeeded(&internal.Internal{}, &global.Global{ReplicaCount: ptr.To[int32](2)})
+
+		require.EqualValues(t, 2, *config.Replicas)
+	})
+
 	t.Run("defaults image to chart-provided valkey", func(t *testing.T) {
 		t.Setenv("IMG_THIRD_PARTY_VALKEY_REGISTRY", "docker.io")
 		t.Setenv("IMG_THIRD_PARTY_VALKEY_REPOSITORY", "valkey/valkey")

@@ -31121,6 +31121,14 @@ components:
             if the number of workers is greater than 0.
           nullable: true
           type: object
+    LoadAwareRouting:
+      default: false
+      description: "Route requests to the serving port through the endpoint picker,\
+        \ which picks a Pod by load. It can be set only when the workload is created.\
+        \ Requires cluster version 3.1.0 or later, with the inference endpoint controller\
+        \ enabled and an administrator-enabled Gateway on the cluster."
+      nullable: true
+      type: boolean
     DistributedInferenceRestartPolicy:
       default: RecreateGroupOnPodRestart
       description: |
@@ -31280,6 +31288,10 @@ components:
         properties:
           category:
             $ref: '#/components/schemas/Category'
+          loadAwareRouting:
+            allOf:
+            - $ref: '#/components/schemas/LoadAwareRouting'
+            x-internal: true
           nodePools:
             $ref: '#/components/schemas/NodePools'
           preemptibility:
@@ -32555,6 +32567,7 @@ components:
             name: storage-instance-a
             readOnly: true
             exclude: false
+        loadAwareRouting: ""
         ports:
         - container: 8080
           serviceType: LoadBalancer
@@ -35771,6 +35784,7 @@ components:
               name: storage-instance-a
               readOnly: true
               exclude: false
+          loadAwareRouting: ""
           ports:
           - container: 8080
             serviceType: LoadBalancer
@@ -37731,6 +37745,7 @@ components:
                 name: storage-instance-a
                 readOnly: true
                 exclude: false
+            loadAwareRouting: ""
             ports:
             - container: 8080
               serviceType: LoadBalancer
@@ -39702,6 +39717,7 @@ components:
                   name: storage-instance-a
                   readOnly: true
                   exclude: false
+              loadAwareRouting: ""
               ports:
               - container: 8080
                 serviceType: LoadBalancer
@@ -41660,6 +41676,7 @@ components:
                   name: storage-instance-a
                   readOnly: true
                   exclude: false
+              loadAwareRouting: ""
               ports:
               - container: 8080
                 serviceType: LoadBalancer
@@ -49772,6 +49789,7 @@ components:
         - my-node-pool-a
         - my-node-pool-b
         category: null
+        loadAwareRouting: ""
         priorityClass: null
         worker: "{}"
         restartPolicy: RecreateGroupOnPodRestart
@@ -49827,6 +49845,7 @@ components:
           - my-node-pool-a
           - my-node-pool-b
           category: null
+          loadAwareRouting: ""
           priorityClass: null
           worker: "{}"
           restartPolicy: RecreateGroupOnPodRestart
@@ -49868,6 +49887,7 @@ components:
           - my-node-pool-a
           - my-node-pool-b
           category: null
+          loadAwareRouting: ""
           priorityClass: null
           worker: "{}"
           restartPolicy: RecreateGroupOnPodRestart
@@ -58082,6 +58102,7 @@ components:
               name: storage-instance-a
               readOnly: true
               exclude: false
+          loadAwareRouting: ""
           ports:
           - container: 8080
             serviceType: LoadBalancer
@@ -60010,6 +60031,7 @@ components:
               name: storage-instance-a
               readOnly: true
               exclude: false
+          loadAwareRouting: ""
           ports:
           - container: 8080
             serviceType: LoadBalancer
@@ -61983,6 +62005,7 @@ components:
                 name: storage-instance-a
                 readOnly: true
                 exclude: false
+            loadAwareRouting: ""
             ports:
             - container: 8080
               serviceType: LoadBalancer
@@ -63911,6 +63934,7 @@ components:
                 name: storage-instance-a
                 readOnly: true
                 exclude: false
+            loadAwareRouting: ""
             ports:
             - container: 8080
               serviceType: LoadBalancer
@@ -65863,6 +65887,7 @@ components:
                 name: storage-instance-a
                 readOnly: true
                 exclude: false
+            loadAwareRouting: ""
             ports:
             - container: 8080
               serviceType: LoadBalancer
@@ -67791,6 +67816,7 @@ components:
                 name: storage-instance-a
                 readOnly: true
                 exclude: false
+            loadAwareRouting: ""
             ports:
             - container: 8080
               serviceType: LoadBalancer
@@ -124466,6 +124492,7 @@ components:
         - my-node-pool-a
         - my-node-pool-b
         category: null
+        loadAwareRouting: ""
         priorityClass: null
         worker: "{}"
         restartPolicy: RecreateGroupOnPodRestart
@@ -124523,6 +124550,7 @@ components:
           - my-node-pool-a
           - my-node-pool-b
           category: null
+          loadAwareRouting: ""
           priorityClass: null
           worker: "{}"
           restartPolicy: RecreateGroupOnPodRestart
@@ -124548,6 +124576,7 @@ components:
           - my-node-pool-a
           - my-node-pool-b
           category: null
+          loadAwareRouting: ""
           priorityClass: null
           worker: "{}"
           restartPolicy: RecreateGroupOnPodRestart
@@ -124602,6 +124631,7 @@ components:
           - my-node-pool-a
           - my-node-pool-b
           category: null
+          loadAwareRouting: ""
           priorityClass: null
           worker: "{}"
           restartPolicy: RecreateGroupOnPodRestart
@@ -124627,6 +124657,7 @@ components:
           - my-node-pool-a
           - my-node-pool-b
           category: null
+          loadAwareRouting: ""
           priorityClass: null
           worker: "{}"
           restartPolicy: RecreateGroupOnPodRestart
@@ -124679,6 +124710,7 @@ components:
             - my-node-pool-a
             - my-node-pool-b
             category: null
+            loadAwareRouting: ""
             priorityClass: null
             worker: "{}"
             restartPolicy: RecreateGroupOnPodRestart
@@ -124704,6 +124736,7 @@ components:
             - my-node-pool-a
             - my-node-pool-b
             category: null
+            loadAwareRouting: ""
             priorityClass: null
             worker: "{}"
             restartPolicy: RecreateGroupOnPodRestart
@@ -124753,6 +124786,7 @@ components:
             - my-node-pool-a
             - my-node-pool-b
             category: null
+            loadAwareRouting: ""
             priorityClass: null
             worker: "{}"
             restartPolicy: RecreateGroupOnPodRestart
@@ -124778,6 +124812,7 @@ components:
             - my-node-pool-a
             - my-node-pool-b
             category: null
+            loadAwareRouting: ""
             priorityClass: null
             worker: "{}"
             restartPolicy: RecreateGroupOnPodRestart
@@ -124827,6 +124862,7 @@ components:
           - my-node-pool-a
           - my-node-pool-b
           category: null
+          loadAwareRouting: ""
           priorityClass: null
           worker: "{}"
           restartPolicy: RecreateGroupOnPodRestart
@@ -124863,6 +124899,7 @@ components:
           - my-node-pool-a
           - my-node-pool-b
           category: null
+          loadAwareRouting: ""
           priorityClass: null
           worker: "{}"
           restartPolicy: RecreateGroupOnPodRestart
@@ -124903,6 +124940,7 @@ components:
           - my-node-pool-a
           - my-node-pool-b
           category: null
+          loadAwareRouting: ""
           priorityClass: null
           worker: "{}"
           restartPolicy: RecreateGroupOnPodRestart
@@ -125417,6 +125455,10 @@ components:
         properties:
           category:
             $ref: '#/components/schemas/Category'
+          loadAwareRouting:
+            allOf:
+            - $ref: '#/components/schemas/LoadAwareRouting'
+            x-internal: true
           nodePools:
             $ref: '#/components/schemas/NodePools'
           preemptibility:
@@ -126596,6 +126638,10 @@ components:
         properties:
           category:
             $ref: '#/components/schemas/StringRules'
+          loadAwareRouting:
+            allOf:
+            - $ref: '#/components/schemas/BooleanRules'
+            x-internal: true
           nodePools:
             $ref: '#/components/schemas/ArrayRules'
           preemptibility:
@@ -129157,26 +129203,6 @@ components:
           readOnly: true
           type: string
       type: object
-    GetEnableHybridSubmission:
-      example:
-        stage: stage
-        displayName: displayName
-        description: description
-        value:
-          enabled: true
-      properties:
-        value:
-          $ref: '#/components/schemas/GetEnableSettingsValue'
-        displayName:
-          readOnly: true
-          type: string
-        description:
-          readOnly: true
-          type: string
-        stage:
-          readOnly: true
-          type: string
-      type: object
     GetGpuOverProvisioning:
       example:
         stage: stage
@@ -129219,12 +129245,6 @@ components:
       type: object
     WorkloadsSettingsGetResponse:
       example:
-        enableHybridSubmission:
-          stage: stage
-          displayName: displayName
-          description: description
-          value:
-            enabled: true
         workloadSubmissionV2Enabled:
           stage: stage
           displayName: displayName
@@ -129254,8 +129274,6 @@ components:
           $ref: '#/components/schemas/GetEnablePolicies'
         workloadSubmissionV2Enabled:
           $ref: '#/components/schemas/GetWorkloadSubmissionV2Enabled'
-        enableHybridSubmission:
-          $ref: '#/components/schemas/GetEnableHybridSubmission'
         gpuOverProvisioning:
           $ref: '#/components/schemas/GetGpuOverProvisioning'
         applicationSubmission:
@@ -129265,7 +129283,6 @@ components:
       enum:
       - enablePolicies
       - workloadSubmissionV2Enabled
-      - enableHybridSubmission
       - gpuOverProvisioning
       - applicationSubmission
       type: string
@@ -129357,11 +129374,6 @@ components:
           type: boolean
       type: object
     WorkloadSubmissionV2EnabledSetting:
-      properties:
-        enabled:
-          type: boolean
-      type: object
-    EnableHybridSubmissionSetting:
       properties:
         enabled:
           type: boolean

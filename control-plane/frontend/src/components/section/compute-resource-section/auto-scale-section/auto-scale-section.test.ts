@@ -8,7 +8,7 @@ import { describe, it, expect } from "vitest";
 import AutoScaleSection from "./auto-scale-section.vue";
 import { METRIC_LATENCY } from "./threshold-metric-section/threshold-metric-section.model";
 import { Quasar } from "quasar";
-import type { AutoScalingRules } from "@/swagger-models/assets-service-client";
+import type { AutoScalingRules } from "@/swagger-models/policy-service-client";
 import { EAutoScaleSectionEvents, type IAutoScaleData, type IAutoScaleOptions } from "./auto-scale-section.model";
 import { errorMessages } from "@/common/error-message.constant";
 import { DEFAULT_SCALE_DOWN_TO_ZERO_ID } from "./scale-down-section/scale-down-section.model";

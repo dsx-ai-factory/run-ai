@@ -5,30 +5,18 @@
 
 // Stores
 import { defineStore } from "pinia";
-import { useWorkloadStore } from "./workload.store";
 import { useClusterStore } from "./cluster.store";
 
 // Models
+import type { IUISuperWorkloadCreationRequest } from "@/models/workload.model";
 import {
-  type AssetsDefaults,
-  type Inference,
-  type InferenceCreationRequestV2,
-  type InferenceV2,
-  type PolicyInfo,
-  type InferenceSpecificRunParams,
-  Scope,
-} from "@/swagger-models/assets-service-client";
-import { EWorkloadType, type IUISuperWorkloadCreationRequest, type IUIInferenceCreation } from "@/models/workload.model";
+  getEmptyInferenceNewModel,
+  type IInferenceNewModel,
+} from "@/views/inference/creation/inference-new/inference-new.model";
 import { ResourceType, type Action, type PermittedScopes } from "@/swagger-models/authorization-client";
 import { EServerType } from "@/models/inference.model";
 
-// utils
-import { inferenceWorkloadUtil } from "@/utils/inference-workload.util/inference-workload.util";
-import { deepCopy } from "@/utils/common.util";
-
 // services
-import { inferenceService } from "@/services/control-plane/inference.service/inference.service";
-import { dataSourceService } from "@/services/control-plane/data-source.service/data-source.service";
 import { permissionService } from "@/services/authorization/permission.service/permission.service";
 
 // constants
@@ -69,9 +57,7 @@ export interface IInferenceDistributedState {
 
 export const useInferenceStore = defineStore("Inference", {
   state: () => ({
-    inference: inferenceWorkloadUtil.getEmptyUIInferenceCreation() as IUIInferenceCreation,
-    loadedInferenceModelWithDefaultsAndPolicy: null as InferenceV2 | null,
-    selectedInference: null as Inference | null,
+    inference: getEmptyInferenceNewModel(),
 
     // flat submission data ONLY
     flatFormState: null as THybridFormState | null,
@@ -88,23 +74,9 @@ export const useInferenceStore = defineStore("Inference", {
   getters: {
     isHuggingFaceOrNimModel(): boolean {
       return (
-        this.inferenceFormUIState.modelBasedOn === EServerType.TGI ||
         this.inferenceFormUIState.modelBasedOn === EServerType.VLLM ||
         this.inferenceFormUIState.modelBasedOn === EServerType.Nim
       );
-    },
-    inferenceName(): string {
-      return this.inference.name || "";
-    },
-    loadedPolicyInfo(): PolicyInfo | null | undefined {
-      return this.loadedInferenceModelWithDefaultsAndPolicy?.policyInfo || null;
-    },
-    // these details are treated as read only after setting (saving the origin model with policies set)
-    loadedSpecificRunParamsWithDefaults(): InferenceSpecificRunParams | null {
-      return deepCopy(this.loadedInferenceModelWithDefaultsAndPolicy?.specificRunParams || null);
-    },
-    loadedAssetsAttributesDefaults(): AssetsDefaults | null {
-      return this.loadedInferenceModelWithDefaultsAndPolicy?.policyInfo?.attributeDefaults?.assets || null;
     },
     supportingServingPortAccess:
       () =>
@@ -118,36 +90,11 @@ export const useInferenceStore = defineStore("Inference", {
       if (Object.keys(this.actionPermissionsByScopes).length > 0) return;
       this.actionPermissionsByScopes = await permissionService.getPermittedScopesForAction(ResourceType.Inferences);
     },
-    async createInference(inference: IUIInferenceCreation): Promise<Inference | InferenceV2> {
-      const workloadStore = useWorkloadStore();
-
-      let workloadVolumes: Array<string> | undefined;
-      if (inference.assets.uiVolumes?.length) {
-        workloadVolumes = await dataSourceService.createWorkloadVolumes(inference.name, inference.assets.uiVolumes, {
-          scope: Scope.Project,
-          projectId: inference.projectId,
-        });
-      }
-
-      const workloadCreationRequest: InferenceCreationRequestV2 = inferenceWorkloadUtil.getInferenceCreationRequestV2(
-        inference,
-        this.supportingServingPortAccess(inference.clusterId),
-        workloadVolumes,
-      );
-      const workloadCreated = await inferenceService.createInferenceV2(workloadCreationRequest);
-
-      workloadStore.setWorkloadAdded(workloadCreated, EWorkloadType.Inference);
-      return workloadCreated;
-    },
-    setInference(inference: IUIInferenceCreation): void {
+    setInference(inference: IInferenceNewModel): void {
       this.inference = inference;
     },
     resetCreateInferenceData(): void {
-      this.inference = inferenceWorkloadUtil.getEmptyUIInferenceCreation();
-      this.loadedInferenceModelWithDefaultsAndPolicy = null;
-    },
-    setLoadedInferenceModelWithDefaults(inference: InferenceV2): void {
-      this.loadedInferenceModelWithDefaultsAndPolicy = inference;
+      this.inference = getEmptyInferenceNewModel();
     },
     setFlatFormState(flatData: THybridFormState | null): void {
       this.flatFormState = flatData;

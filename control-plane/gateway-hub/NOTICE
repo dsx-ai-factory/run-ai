@@ -30,7 +30,7 @@ Dependencies
 | `github.com/Rican7/retry` | v0.3.1 | MIT | https://github.com/Rican7/retry/blob/v0.3.1/LICENSE |
 | `github.com/ThreeDotsLabs/watermill` | v1.5.3 | MIT | https://github.com/ThreeDotsLabs/watermill/blob/v1.5.3/LICENSE |
 | `github.com/ThreeDotsLabs/watermill-redisstream/pkg/redisstream` | v1.4.5 | MIT | https://github.com/ThreeDotsLabs/watermill-redisstream/blob/v1.4.5/LICENSE |
-| `github.com/aws/smithy-go/ptr` | v1.28.9 | Apache-2.0 | https://github.com/aws/smithy-go/blob/v1.28.9/LICENSE |
+| `github.com/aws/smithy-go/ptr` | v1.28.10 | Apache-2.0 | https://github.com/aws/smithy-go/blob/v1.28.10/LICENSE |
 | `github.com/beorn7/perks/quantile` | v1.0.1 | MIT | https://github.com/beorn7/perks/blob/v1.0.1/LICENSE |
 | `github.com/cenkalti/backoff/v4` | v4.3.0 | MIT | https://pkg.go.dev/github.com/cenkalti/backoff/v4@v4.3.0?tab=licenses |
 | `github.com/cenkalti/backoff/v5` | v5.0.3 | MIT | https://pkg.go.dev/github.com/cenkalti/backoff/v5@v5.0.3?tab=licenses |
@@ -47,17 +47,17 @@ Dependencies
 | `github.com/go-viper/mapstructure/v2` | v2.5.0 | MIT | https://pkg.go.dev/github.com/go-viper/mapstructure/v2@v2.5.0?tab=licenses |
 | `github.com/golang-jwt/jwt/v5` | v5.3.1 | MIT | https://pkg.go.dev/github.com/golang-jwt/jwt/v5@v5.3.1?tab=licenses |
 | `github.com/google/uuid` | v1.6.0 | BSD-3-Clause | https://github.com/google/uuid/blob/v1.6.0/LICENSE |
-| `github.com/grpc-ecosystem/grpc-gateway/v2` | v2.33.0 | BSD-3-Clause | https://pkg.go.dev/github.com/grpc-ecosystem/grpc-gateway/v2@v2.33.0?tab=licenses |
+| `github.com/grpc-ecosystem/grpc-gateway/v2` | v2.34.0 | BSD-3-Clause | https://pkg.go.dev/github.com/grpc-ecosystem/grpc-gateway/v2@v2.34.0?tab=licenses |
 | `github.com/jackc/pgpassfile` | v1.0.0 | MIT | https://github.com/jackc/pgpassfile/blob/v1.0.0/LICENSE |
 | `github.com/jackc/pgservicefile` | v0.0.0-20240606120523-5a60cdf6a761 | MIT | https://github.com/jackc/pgservicefile/blob/5a60cdf6a761/LICENSE |
 | `github.com/jackc/pgx/v5` | v5.13.0 | MIT | https://pkg.go.dev/github.com/jackc/pgx/v5@v5.13.0?tab=licenses |
 | `github.com/jinzhu/inflection` | v1.0.0 | MIT | https://github.com/jinzhu/inflection/blob/v1.0.0/LICENSE |
 | `github.com/jinzhu/now` | v1.1.5 | MIT | https://github.com/jinzhu/now/blob/v1.1.5/License |
-| `github.com/klauspost/compress` | v1.20.4 | Apache-2.0 | https://github.com/klauspost/compress/blob/v1.20.4/LICENSE |
-| `github.com/klauspost/compress/internal/snapref` | v1.20.4 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.4/internal/snapref/LICENSE |
-| `github.com/klauspost/compress/s2` | v1.20.4 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.4/s2/LICENSE |
-| `github.com/klauspost/compress/snappy` | v1.20.4 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.4/snappy/LICENSE |
-| `github.com/klauspost/compress/zstd/internal/xxhash` | v1.20.4 | MIT | https://github.com/klauspost/compress/blob/v1.20.4/zstd/internal/xxhash/LICENSE.txt |
+| `github.com/klauspost/compress` | v1.20.5 | Apache-2.0 | https://github.com/klauspost/compress/blob/v1.20.5/LICENSE |
+| `github.com/klauspost/compress/internal/snapref` | v1.20.5 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.5/internal/snapref/LICENSE |
+| `github.com/klauspost/compress/s2` | v1.20.5 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.5/s2/LICENSE |
+| `github.com/klauspost/compress/snappy` | v1.20.5 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.5/snappy/LICENSE |
+| `github.com/klauspost/compress/zstd/internal/xxhash` | v1.20.5 | MIT | https://github.com/klauspost/compress/blob/v1.20.5/zstd/internal/xxhash/LICENSE.txt |
 | `github.com/leodido/go-urn` | v1.5.0 | MIT | https://github.com/leodido/go-urn/blob/v1.5.0/LICENSE |
 | `github.com/lithammer/shortuuid/v3` | v3.0.7 | MIT | https://pkg.go.dev/github.com/lithammer/shortuuid/v3@v3.0.7?tab=licenses |
 | `github.com/lithammer/shortuuid/v4` | v4.3.0 | MIT | https://pkg.go.dev/github.com/lithammer/shortuuid/v4@v4.3.0?tab=licenses |
@@ -66,19 +66,19 @@ Dependencies
 | `github.com/maypok86/otter/v2` | v2.4.0 | Apache-2.0 | https://pkg.go.dev/github.com/maypok86/otter/v2@v2.4.0?tab=licenses |
 | `github.com/mitchellh/mapstructure` | v1.5.0 | MIT | https://github.com/mitchellh/mapstructure/blob/v1.5.0/LICENSE |
 | `github.com/munnerz/goautoneg` | v0.0.0-20191010083416-a7dc8b61c822 | BSD-3-Clause | https://github.com/munnerz/goautoneg/blob/a7dc8b61c822/LICENSE |
-| `github.com/nats-io/nats.go` | v1.55.0 | Apache-2.0 | https://github.com/nats-io/nats.go/blob/v1.55.0/LICENSE |
+| `github.com/nats-io/nats.go` | v1.56.0 | Apache-2.0 | https://github.com/nats-io/nats.go/blob/v1.56.0/LICENSE |
 | `github.com/nats-io/nkeys` | v0.4.17 | Apache-2.0 | https://github.com/nats-io/nkeys/blob/v0.4.17/LICENSE |
 | `github.com/nats-io/nuid` | v1.0.1 | Apache-2.0 | https://github.com/nats-io/nuid/blob/v1.0.1/LICENSE |
 | `github.com/oklog/ulid` | v1.3.1 | Apache-2.0 | https://github.com/oklog/ulid/blob/v1.3.1/LICENSE |
 | `github.com/pelletier/go-toml/v2` | v2.4.3 | MIT | https://pkg.go.dev/github.com/pelletier/go-toml/v2@v2.4.3?tab=licenses |
-| `github.com/pierrec/lz4/v4` | v4.1.33 | BSD-3-Clause | https://pkg.go.dev/github.com/pierrec/lz4/v4@v4.1.33?tab=licenses |
+| `github.com/pierrec/lz4/v4` | v4.1.34 | BSD-3-Clause | https://pkg.go.dev/github.com/pierrec/lz4/v4@v4.1.34?tab=licenses |
 | `github.com/pkg/errors` | v0.9.1 | BSD-2-Clause | https://github.com/pkg/errors/blob/v0.9.1/LICENSE |
 | `github.com/prometheus/client_golang/internal/github.com/golang/gddo/httputil` | v1.25.0 | BSD-3-Clause | https://github.com/prometheus/client_golang/blob/v1.25.0/internal/github.com/golang/gddo/LICENSE |
 | `github.com/prometheus/client_golang/prometheus` | v1.25.0 | Apache-2.0 | https://github.com/prometheus/client_golang/blob/v1.25.0/LICENSE |
 | `github.com/prometheus/client_model/go` | v0.6.3 | Apache-2.0 | https://github.com/prometheus/client_model/blob/v0.6.3/LICENSE |
 | `github.com/prometheus/common` | v0.72.1 | Apache-2.0 | https://github.com/prometheus/common/blob/v0.72.1/LICENSE |
 | `github.com/prometheus/procfs` | v0.22.0 | Apache-2.0 | https://github.com/prometheus/procfs/blob/v0.22.0/LICENSE |
-| `github.com/redis/go-redis/v9` | v9.23.0 | BSD-2-Clause | https://pkg.go.dev/github.com/redis/go-redis/v9@v9.23.0?tab=licenses |
+| `github.com/redis/go-redis/v9` | v9.24.0 | BSD-2-Clause | https://pkg.go.dev/github.com/redis/go-redis/v9@v9.24.0?tab=licenses |
 | `github.com/rs/zerolog` | v1.35.1 | MIT | https://github.com/rs/zerolog/blob/v1.35.1/LICENSE |
 | `github.com/sagikazarmark/locafero` | v0.12.0 | MIT | https://github.com/sagikazarmark/locafero/blob/v0.12.0/LICENSE |
 | `github.com/segmentio/kafka-go` | v0.4.51 | MIT | https://github.com/segmentio/kafka-go/blob/v0.4.51/LICENSE |
@@ -94,8 +94,8 @@ Dependencies
 | `github.com/subosito/gotenv` | v1.6.0 | MIT | https://github.com/subosito/gotenv/blob/v1.6.0/LICENSE |
 | `github.com/vmihailenco/msgpack` | v4.0.4+incompatible | BSD-2-Clause | https://github.com/vmihailenco/msgpack/blob/v4.0.4/LICENSE |
 | `github.com/xdg-go/scram` | v1.4.0 | Apache-2.0 | https://github.com/xdg-go/scram/blob/v1.4.0/LICENSE |
-| `github.com/xdg-go/stringprep` | v1.0.4 | Apache-2.0 | https://github.com/xdg-go/stringprep/blob/v1.0.4/LICENSE |
-| `go.opentelemetry.io/auto/sdk` | v1.2.1 | Apache-2.0 | https://pkg.go.dev/go.opentelemetry.io/auto/sdk@v1.2.1?tab=licenses |
+| `github.com/xdg-go/stringprep` | v1.0.5 | Apache-2.0 | https://github.com/xdg-go/stringprep/blob/v1.0.5/LICENSE |
+| `go.opentelemetry.io/auto/sdk` | v1.2.2 | Apache-2.0 | https://pkg.go.dev/go.opentelemetry.io/auto/sdk@v1.2.2?tab=licenses |
 | `go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp` | v0.72.0 | Apache-2.0 | https://pkg.go.dev/go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp@v0.72.0?tab=licenses |
 | `go.opentelemetry.io/otel` | v1.47.0 | Apache-2.0 | https://pkg.go.dev/go.opentelemetry.io/otel@v1.47.0?tab=licenses |
 | `go.opentelemetry.io/otel/exporters/otlp/otlptrace` | v1.47.0 | Apache-2.0 | https://pkg.go.dev/go.opentelemetry.io/otel/exporters/otlp/otlptrace@v1.47.0?tab=licenses |
@@ -108,12 +108,12 @@ Dependencies
 | `go.uber.org/atomic` | v1.12.0 | MIT | https://pkg.go.dev/go.uber.org/atomic@v1.12.0?tab=licenses |
 | `go.yaml.in/yaml/v3` | v3.0.6 | MIT | https://pkg.go.dev/go.yaml.in/yaml/v3@v3.0.6?tab=licenses |
 | `golang.org/x/crypto` | v0.59.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/crypto@v0.59.0?tab=licenses |
-| `golang.org/x/exp/slices` | v0.0.0-20261109185158-a52e3aef5920 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/exp@v0.0.0-20261109185158-a52e3aef5920?tab=licenses |
-| `golang.org/x/net` | v0.62.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/net@v0.62.0?tab=licenses |
+| `golang.org/x/exp/slices` | v0.0.0-20261124000051-d6646c509b6d | BSD-3-Clause | https://pkg.go.dev/golang.org/x/exp@v0.0.0-20261124000051-d6646c509b6d?tab=licenses |
+| `golang.org/x/net` | v0.63.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/net@v0.63.0?tab=licenses |
 | `golang.org/x/sys` | v0.50.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sys@v0.50.0?tab=licenses |
 | `golang.org/x/text` | v0.44.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/text@v0.44.0?tab=licenses |
-| `google.golang.org/genproto/googleapis/api/httpbody` | v0.0.0-20261110000943-09e21b237f2c | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/api@v0.0.0-20261110000943-09e21b237f2c?tab=licenses |
-| `google.golang.org/genproto/googleapis/rpc` | v0.0.0-20261110000943-09e21b237f2c | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/rpc@v0.0.0-20261110000943-09e21b237f2c?tab=licenses |
+| `google.golang.org/genproto/googleapis/api/httpbody` | v0.0.0-20261123191846-1e707ab9fbc2 | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/api@v0.0.0-20261123191846-1e707ab9fbc2?tab=licenses |
+| `google.golang.org/genproto/googleapis/rpc` | v0.0.0-20261123191846-1e707ab9fbc2 | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/rpc@v0.0.0-20261123191846-1e707ab9fbc2?tab=licenses |
 | `google.golang.org/grpc` | v1.85.0 | Apache-2.0 | https://pkg.go.dev/google.golang.org/grpc@v1.85.0?tab=licenses |
 | `google.golang.org/protobuf` | v1.36.12 | BSD-3-Clause | https://pkg.go.dev/google.golang.org/protobuf@v1.36.12?tab=licenses |
 | `gorm.io/gorm` | v1.31.2 | MIT | https://pkg.go.dev/gorm.io/gorm@v1.31.2?tab=licenses |
@@ -3058,7 +3058,7 @@ section 4(d) of the Apache License, Version 2.0 requires.
 
 --------------------------------------------------------------------------------
 Notice of:
-  - `github.com/aws/smithy-go` v1.28.9
+  - `github.com/aws/smithy-go` v1.28.10
 --------------------------------------------------------------------------------
 
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.

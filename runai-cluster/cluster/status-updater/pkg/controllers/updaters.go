@@ -43,13 +43,14 @@ func (e *gpuCalcError) Unwrap() error {
 
 // updatePod writes the calculated status and GPU allocation annotations of the pod. When the GPU calculation
 // fails, it still writes the status annotation, leaves the GPU annotations untouched and returns a *gpuCalcError.
-func updatePod(ctx context.Context, pod *v1.Pod, kubeClient client.Client) error {
+func updatePod(ctx context.Context, pod *v1.Pod, kubeClient client.Client,
+	draResolver podmetacalc.DRAGpuResolver) error {
 	logger := log.FromContext(ctx)
 
 	podMeta := metadata.PodMetadata{}
 	podMeta.Status = podmetacalc.TranslatePodStatus(pod)
 
-	err := podmetacalc.CalcPodGpuResources(ctx, pod, &podMeta, kubeClient)
+	err := podmetacalc.CalcPodGpuResources(ctx, pod, &podMeta, kubeClient, draResolver)
 	if err != nil {
 		return updatePodStatusOnGpuCalcError(ctx, pod, podMeta.Status, err, kubeClient)
 	}

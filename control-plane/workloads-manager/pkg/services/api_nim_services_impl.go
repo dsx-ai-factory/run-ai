@@ -103,6 +103,12 @@ func (nsi *NimServicesImpl) CreateNimService(ctx context.Context, request api.Ni
 	if err := validateNimServingPortAuthFieldsConsistency(request.Spec.ServingPort); err != nil {
 		return nil, ToSubmissionError(err)
 	}
+	inferenceRouting := nimInferenceRouting(request.Spec)
+	if inferenceRouting != nil {
+		if err := validateNimInferenceRouting(request.Spec.ServingPort); err != nil {
+			return nil, ToSubmissionError(err)
+		}
+	}
 
 	manifest, netInfo, err := nsi.composeNimServiceManifest(ctx, &request.Metadata, request.Spec, false)
 	if err != nil {
@@ -117,12 +123,13 @@ func (nsi *NimServicesImpl) CreateNimService(ctx context.Context, request api.Ni
 			Priority:             request.Spec.PriorityClass,
 			Category:             request.Spec.Category,
 			Preemptibility:       request.Spec.Preemptibility,
+			Configuration:        api.WorkloadV2Configuration{InferenceRouting: inferenceRouting},
 		},
 		Manifest: manifest,
 	}
 
 	if netInfo.UseWorkloadV2Networking {
-		netCfg, err := nimServingPortToNetworkingConfig(request.Metadata.Name, request.Spec.ServingPort, netInfo)
+		netCfg, err := nimServingPortToNetworkingConfig(request.Metadata.Name, request.Spec.ServingPort, netInfo, inferenceRouting != nil)
 		if err != nil {
 			return nil, ToSubmissionError(err)
 		}
@@ -140,11 +147,19 @@ func (nsi *NimServicesImpl) CreateNimService(ctx context.Context, request api.Ni
 		compute.GpuComputeMode = request.Spec.Compute.GpuComputeMode
 		submittedSpec.Compute = &compute
 	}
+	// Updates do not apply the project policy again, so persist the resolved routing
+	// fields; otherwise an opt-in from policy defaults would be lost on update.
+	if inferenceRouting != nil {
+		submittedSpec.LoadAwareRouting = inferenceRouting.LoadAwareRouting
+	}
 	ctx, ctxErr := nsi.updateContextWithMergedSpec(ctx, &request.Metadata, submittedSpec)
 	if ctxErr != nil {
 		return nil, NewSubmissionError(http.StatusInternalServerError, "failed to save NIM request with resolved GPU mode", ctxErr)
 	}
-	workloadV2Response, submissionErrors := nsi.workloadsImpl.CreateWorkloadV2(ctx, workloadRequest, false)
+	workloadV2Response, submissionErrors := nsi.workloadsImpl.CreateWorkloadV2WithDryRun(ctx, workloadRequest, CreateWorkloadV2Options{
+		RecordAction:      recordAction,
+		TrustedNIMService: true,
+	})
 	if len(submissionErrors) > 0 {
 		return nil, &submissionErrors[0]
 	}
@@ -453,6 +468,15 @@ func (nsi *NimServicesImpl) UpdateNimServiceSpec(ctx context.Context, id string,
 	if err := validateNimServingPortAuthFieldsConsistency(mergedSpec.ServingPort); err != nil {
 		return nil, err
 	}
+	inferenceRouting := nimInferenceRouting(mergedSpec)
+	if routingErr := validateInferenceRoutingUnchanged(qRecord.Configuration, inferenceRouting); routingErr != nil {
+		return nil, SubmissionErrorToApiError(routingErr)
+	}
+	if inferenceRouting != nil {
+		if err := validateNimInferenceRouting(mergedSpec.ServingPort); err != nil {
+			return nil, err
+		}
+	}
 
 	metadata := &api.NimServiceMetadataCreateParams{
 		Name:      existingNimService.Metadata.Name,
@@ -478,15 +502,19 @@ func (nsi *NimServicesImpl) UpdateNimServiceSpec(ctx context.Context, id string,
 
 	var modifiers []RecordModifier
 	if netInfo.UseWorkloadV2Networking {
-		netCfg, err := nimServingPortToNetworkingConfig(existingNimService.Metadata.Name, mergedSpec.ServingPort, netInfo)
+		netCfg, err := nimServingPortToNetworkingConfig(existingNimService.Metadata.Name, mergedSpec.ServingPort, netInfo, inferenceRouting != nil)
 		if err != nil {
 			return nil, err
+		}
+		networking, routingErr := resolveNIMServiceInferenceRouting(ctx, inferenceRouting, qRecord.ClusterId, existingNimService.Metadata.Name, netCfg)
+		if routingErr != nil {
+			return nil, SubmissionErrorToApiError(routingErr)
 		}
 		modifiers = append(modifiers, func(record *models.WorkloadsQueueRecord) {
 			if record.Configuration == nil {
 				record.Configuration = &models.WorkloadConfiguration{}
 			}
-			record.Configuration.Networking = cloneNetworkingConfig(netCfg)
+			record.Configuration.Networking = networking
 		})
 	}
 

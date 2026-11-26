@@ -31,7 +31,6 @@ import { usePermissionStore } from "./permissions.store";
 import { Action, ResourceType } from "@/swagger-models/authorization-client";
 import { MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION } from "@/common/version.constant";
 import { useClusterStore } from "./cluster.store";
-import { useSettingStore } from "./setting.store";
 import { workloadTemplateService } from "@/services/control-plane/workload-template.service/workload-template.service";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 
@@ -984,7 +983,6 @@ export const useGuidedTourStore = defineStore("GuidedTour", {
     },
     async setWorkloadTourAllowed(): Promise<void> {
       const permissionStore = usePermissionStore();
-      const settingStore = useSettingStore();
       const hasCreateWorkloadPermission = permissionStore.hasPermission(ResourceType.Workloads, Action.Create);
       const hasReadProjectPermission = permissionStore.hasPermission(ResourceType.Project, Action.Read);
       const hasReadTemplatesPermission = permissionStore.hasPermission(ResourceType.Templates, Action.Read);
@@ -994,11 +992,7 @@ export const useGuidedTourStore = defineStore("GuidedTour", {
         return;
       }
 
-      const flexSubmissionSupported =
-        useClusterStore().isAllClustersSupportSpecificVersion(MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION) &&
-        settingStore.isHybridSubmissionEnabled;
-
-      if (!flexSubmissionSupported) {
+      if (!useClusterStore().isAllClustersSupportSpecificVersion(MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION)) {
         this.workloadTourAllowed = false;
         return;
       }

@@ -114,6 +114,7 @@ func TestUpdateSystemSettingsInput_Validate(t *testing.T) {
 		{name: "happy_catalog", in: updateSystemSettingsInput{Category: "catalog", Key: "enableNgcIntegration", Enabled: bptr(true)}},
 		{name: "bad_category", in: updateSystemSettingsInput{Category: "nope", Key: "x", Enabled: bptr(true)}, wantErr: "category must be one of"},
 		{name: "key_not_in_category", in: updateSystemSettingsInput{Category: "workloads", Key: "enableScopedAuthorization", Enabled: bptr(true)}, wantErr: "not a workloads setting"},
+		{name: "retired_flexible_submission", in: updateSystemSettingsInput{Category: "workloads", Key: "enableHybridSubmission", Enabled: bptr(true)}, wantErr: "not a workloads setting"},
 		{name: "key_wrong_service", in: updateSystemSettingsInput{Category: "catalog", Key: "enableDataVolumes", Enabled: bptr(true)}, wantErr: "not a catalog setting"},
 		{name: "missing_enabled", in: updateSystemSettingsInput{Category: "workloads", Key: "enablePolicies"}, wantErr: "enabled is required"},
 	}
@@ -263,12 +264,13 @@ func TestListSystemSettings(t *testing.T) {
 	out, err := listSystemSettingsRun(context.Background(), client, listSystemSettingsInput{})
 	require.NoError(t, err)
 	assert.Empty(t, out.Warnings)
-	// 6 workloads + 1 authorization + 1 cluster + 1 org-unit + 1 catalog + 1 datavolumes + 2 node-pool + 4 workloads-manager
-	assert.Len(t, out.Settings, 16)
+	// 4 workloads + 1 authorization + 1 cluster + 1 org-unit + 1 catalog + 1 datavolumes + 2 node-pool + 4 workloads-manager
+	assert.Len(t, out.Settings, 15)
 	byKey := map[string]systemSetting{}
 	for _, s := range out.Settings {
 		byKey[s.Key] = s
 	}
+	assert.NotContains(t, byKey, "enableHybridSubmission")
 	require.NotNil(t, byKey["enablePolicies"].Enabled)
 	assert.True(t, *byKey["enablePolicies"].Enabled) // workloads value-wrapper unwrapped
 	require.NotNil(t, byKey["enableNgcIntegration"].Enabled)

@@ -339,6 +339,7 @@ var _ = Describe("template validations", Serial, func() {
 			Expect(dbErr).To(BeNil())
 			Expect(rec.Name).To(Equal(preset.template.Meta.Name))
 			Expect(rec.Description).To(Equal(preset.template.Meta.Description))
+			Expect(rec.Spec.Image).To(Equal(convutils.Ref("quay.io/jupyter/scipy-notebook")))
 		})
 	})
 

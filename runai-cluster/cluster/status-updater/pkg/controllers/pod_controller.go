@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	clusterrelations "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/status-updater/pkg/controllers/cluster_relations"
+	podmetacalc "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/status-updater/pkg/controllers/metadata_calculator/pod"
 	"github.com/go-logr/logr"
 	kaiv2alpha2 "github.com/kai-scheduler/KAI-scheduler/pkg/apis/scheduling/v2alpha2"
 	v1 "k8s.io/api/core/v1"
@@ -38,6 +39,8 @@ type PodReconciler struct {
 	DiscoveryClient discovery.DiscoveryInterface
 	EventRecorder   record.EventRecorder
 	Scheme          *runtime.Scheme
+	// DRAGpuResolver resolves GPUs requested through DRA claims. Optional: when nil, DRA GPUs are not counted.
+	DRAGpuResolver podmetacalc.DRAGpuResolver
 }
 
 // +kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch;create;update;patch;delete
@@ -62,7 +65,7 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 		}
 	}
 
-	updateErr := updatePod(ctx, pod, r.Client)
+	updateErr := updatePod(ctx, pod, r.Client, r.DRAGpuResolver)
 	if updateErr != nil {
 		logger.V(0).Error(updateErr,
 			fmt.Sprintf("Failed to update pod status: <%v/%v>", pod.Namespace, pod.Name))
