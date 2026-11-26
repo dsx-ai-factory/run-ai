@@ -14,7 +14,7 @@ build/scripts/generate-notice.py — do not edit by hand.
 Summary
 ================================================================================
 
-366 third-party packages:
+365 third-party packages:
 
   - MIT: 278
   - ISC: 32
@@ -22,7 +22,7 @@ Summary
   - BSD-3-Clause: 8
   - BlueOak-1.0.0: 7
   - BSD-2-Clause: 4
-  - MIT-0: 3
+  - MIT-0: 2
   - Unlicense: 2
   - (AFL-2.1 OR BSD-3-Clause): 1
   - (BSD-3-Clause OR GPL-2.0): 1
@@ -80,7 +80,7 @@ Dependencies
 | `aws-sign2` | 0.7.0 | Apache-2.0 | https://www.npmjs.com/package/aws-sign2/v/0.7.0 |
 | `aws-ssl-profiles` | 1.1.2 | MIT | https://www.npmjs.com/package/aws-ssl-profiles/v/1.1.2 |
 | `aws4` | 1.13.2 | MIT | https://www.npmjs.com/package/aws4/v/1.13.2 |
-| `axios` | 0.33.0 | MIT | https://www.npmjs.com/package/axios/v/0.33.0 |
+| `axios` | 0.34.0 | MIT | https://www.npmjs.com/package/axios/v/0.34.0 |
 | `form-data` | 2.5.6 | MIT | https://www.npmjs.com/package/form-data/v/4.0.6 |
 | `b4a` | 1.8.0 | Apache-2.0 | https://www.npmjs.com/package/b4a/v/1.8.0 |
 | `balanced-match` | 4.0.4 | MIT | https://www.npmjs.com/package/balanced-match/v/4.0.4 |
@@ -94,7 +94,7 @@ Dependencies
 | `bcrypt-pbkdf` | 1.0.2 | BSD-3-Clause | https://www.npmjs.com/package/bcrypt-pbkdf/v/1.0.2 |
 | `bl` | 4.1.0 | MIT | https://www.npmjs.com/package/bl/v/4.1.0 |
 | `readable-stream` | 3.6.2 | MIT | https://www.npmjs.com/package/readable-stream/v/3.6.2 |
-| `brace-expansion` | 5.0.9 | MIT | https://www.npmjs.com/package/brace-expansion/v/5.0.9 |
+| `brace-expansion` | 5.1.0 | MIT | https://www.npmjs.com/package/brace-expansion/v/5.1.0 |
 | `braces` | 3.0.3 | MIT | https://www.npmjs.com/package/braces/v/3.0.3 |
 | `buffer` | 6.0.3 | MIT | https://www.npmjs.com/package/buffer/v/5.7.1 |
 | `buffer-crc32` | 1.0.0 | MIT | https://www.npmjs.com/package/buffer-crc32/v/1.0.0 |
@@ -125,7 +125,6 @@ Dependencies
 | `crypto-js` | 4.2.0 | MIT | https://www.npmjs.com/package/crypto-js/v/4.2.0 |
 | `dashdash` | 1.14.1 | MIT | https://www.npmjs.com/package/dashdash/v/1.14.1 |
 | `debug` | 4.4.3 | MIT | https://www.npmjs.com/package/debug/v/4.4.3 |
-| `decode-uri-component` | 0.2.2 | MIT | https://www.npmjs.com/package/decode-uri-component/v/0.2.2 |
 | `deep-eql` | 4.1.4 | MIT | https://www.npmjs.com/package/deep-eql/v/4.1.4 |
 | `delayed-stream` | 1.0.0 | MIT | https://www.npmjs.com/package/delayed-stream/v/1.0.0 |
 | `denque` | 2.1.0 | Apache-2.0 | https://www.npmjs.com/package/denque/v/2.1.0 |
@@ -213,7 +212,7 @@ Dependencies
 | `jackspeak` | 3.4.3 | BlueOak-1.0.0 | https://www.npmjs.com/package/jackspeak/v/3.4.3 |
 | `jose` | 4.15.9 | MIT | https://www.npmjs.com/package/jose/v/4.15.9 |
 | `js-sha256` | 0.9.0 | MIT | https://www.npmjs.com/package/js-sha256/v/0.9.0 |
-| `js-yaml` | 4.3.1 | MIT | https://www.npmjs.com/package/js-yaml/v/4.3.1 |
+| `js-yaml` | 4.3.2 | MIT | https://www.npmjs.com/package/js-yaml/v/4.3.2 |
 | `jsbn` | 0.1.1 | MIT | https://www.npmjs.com/package/jsbn/v/0.1.1 |
 | `jsep` | 1.4.0 | MIT | https://www.npmjs.com/package/jsep/v/1.4.0 |
 | `json-schema` | 0.4.0 | (AFL-2.1 OR BSD-3-Clause) | https://www.npmjs.com/package/json-schema/v/0.4.0 |
@@ -250,9 +249,9 @@ Dependencies
 | `named-placeholders` | 1.1.6 | MIT | https://www.npmjs.com/package/named-placeholders/v/1.1.6 |
 | `node-addon-api` | 7.1.1 | MIT | https://www.npmjs.com/package/node-addon-api/v/7.1.1 |
 | `node-fetch` | 2.7.0 | MIT | https://www.npmjs.com/package/node-fetch/v/2.7.0 |
-| `node-forge` | 1.4.0 | (BSD-3-Clause OR GPL-2.0) | https://www.npmjs.com/package/node-forge/v/1.4.0 |
+| `node-forge` | 1.4.4 | (BSD-3-Clause OR GPL-2.0) | https://www.npmjs.com/package/node-forge/v/1.4.4 |
 | `node-pty` | 1.1.0 | MIT | https://www.npmjs.com/package/node-pty/v/1.1.0 |
-| `nodemailer` | 9.0.3 | MIT-0 | https://www.npmjs.com/package/nodemailer/v/9.0.4 |
+| `nodemailer` | 10.1.7 | MIT-0 | https://www.npmjs.com/package/nodemailer/v/10.1.7 |
 | `normalize-path` | 3.0.0 | MIT | https://www.npmjs.com/package/normalize-path/v/3.0.0 |
 | `oauth-sign` | 0.9.0 | Apache-2.0 | https://www.npmjs.com/package/oauth-sign/v/0.9.0 |
 | `oauth4webapi` | 3.8.5 | MIT | https://www.npmjs.com/package/oauth4webapi/v/3.8.5 |
@@ -304,6 +303,7 @@ Dependencies
 | `punycode.js` | 2.3.1 | MIT | https://www.npmjs.com/package/punycode.js/v/2.3.1 |
 | `qs` | 6.14.1 | BSD-3-Clause | https://www.npmjs.com/package/qs/v/6.14.1 |
 | `query-string` | 6.14.1 | MIT | https://www.npmjs.com/package/query-string/v/6.14.1 |
+| `decode-uri-component` | 1.0.1 | MIT | https://www.npmjs.com/package/decode-uri-component/v/1.0.1 |
 | `readable-stream` | 3.6.2 | MIT | https://www.npmjs.com/package/readable-stream/v/4.7.0 |
 | `buffer` | 6.0.3 | MIT | https://www.npmjs.com/package/buffer/v/6.0.3 |
 | `readdir-glob` | 1.1.3 | Apache-2.0 | https://www.npmjs.com/package/readdir-glob/v/1.1.3 |
@@ -333,8 +333,7 @@ Dependencies
 | `side-channel-weakmap` | 1.0.2 | MIT | https://www.npmjs.com/package/side-channel-weakmap/v/1.0.2 |
 | `signal-exit` | 4.1.0 | ISC | https://www.npmjs.com/package/signal-exit/v/4.1.0 |
 | `smart-buffer` | 4.2.0 | MIT | https://www.npmjs.com/package/smart-buffer/v/4.2.0 |
-| `smtp-server` | 3.19.2 | MIT-0 | https://www.npmjs.com/package/smtp-server/v/3.19.2 |
-| `nodemailer` | 9.0.3 | MIT-0 | https://www.npmjs.com/package/nodemailer/v/9.0.3 |
+| `smtp-server` | 3.20.2 | MIT-0 | https://www.npmjs.com/package/smtp-server/v/3.20.2 |
 | `socks` | 2.8.7 | MIT | https://www.npmjs.com/package/socks/v/2.8.7 |
 | `socks-proxy-agent` | 8.0.5 | MIT | https://www.npmjs.com/package/socks-proxy-agent/v/8.0.5 |
 | `split-on-first` | 1.1.0 | MIT | https://www.npmjs.com/package/split-on-first/v/1.1.0 |
@@ -2932,15 +2931,29 @@ Applies to:
   - decode-uri-component
 --------------------------------------------------------------------------------
 
-The MIT License (MIT)
+MIT License
 
-Copyright (c) 2017, Sam Verschueren <sam.verschueren@gmail.com> (github.com/SamVerschueren)
+Copyright (c) 2018 Tomas Della Vedova
+Copyright (c) 2017 Justin Ridgewell
+Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 --------------------------------------------------------------------------------
 Applies to:
@@ -6276,7 +6289,6 @@ SOFTWARE.
 
 --------------------------------------------------------------------------------
 Applies to:
-  - nodemailer
   - nodemailer
 --------------------------------------------------------------------------------
 
