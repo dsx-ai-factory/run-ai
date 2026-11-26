@@ -385,8 +385,10 @@ func clonePtr[T any](in *T) *T {
 
 // WorkloadConfiguration represents all workload configuration
 type WorkloadConfiguration struct {
-	Mnnvl      *MnnvlConfiguration      `json:"mnnvl,omitempty"`
-	Networking *NetworkingConfiguration `json:"networking,omitempty"`
+	// PodOwnershipLabelsStamped records creation-time stamping so old templates remain unchanged on edits.
+	PodOwnershipLabelsStamped bool                     `json:"podOwnershipLabelsStamped,omitempty"`
+	Mnnvl                     *MnnvlConfiguration      `json:"mnnvl,omitempty"`
+	Networking                *NetworkingConfiguration `json:"networking,omitempty"`
 	// NetworkingOwnershipContract is set only when Workloads Manager applies
 	// the binding during creation. It remains nil for older records so an
 	// update cannot add a selector that their existing Pods do not carry.
