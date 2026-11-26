@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { fillNodePoolWizardIdentity } from './nodePoolWizardIdentity';
 import { BaseV2Page } from './BaseV2Page';
 import { Page } from 'playwright';
 import { NodePoolCreateRequest, PlacementStrategy } from '../../../api/apis/backendClusterApi';
-import { logger, nodePoolUtils } from '../../../helpers';
+import { flowRootState, logger, nodePoolUtils } from '../../../helpers';
 import { MENU_SUB_ITEMS, MENU_SUBJECT_NAMES } from '../../utils/sidenavUtils';
 import { waitUtils } from '../../../helpers';
 import { QTable } from '../components/QTable';
@@ -134,15 +135,58 @@ export class NodePoolPage extends BaseV2Page {
 
     async createBasicNodePool(request: NodePoolCreateRequest): Promise<void> {
         await this.page.locator(this.addNewNodePoolBtn).click();
-        await this.page.waitForSelector(this.nodePoolNameInput);
-        await this.fillInputBySelector(this.nodePoolNameInput, request.name);
-        if (request.labelValue && request.labelKey) {
-            await this.fillInputBySelector(this.nodePoolLabelKeyInput, request.labelKey);
-            await this.fillInputBySelector(this.nodePoolLabelValueInput, request.labelValue);
+        const wizardCreate = this.page.locator('[aid="create-node-pool-close"]');
+        const legacySave = this.page.locator(this.saveNodePoolBtn);
+        await wizardCreate.or(legacySave).waitFor();
+        if (await wizardCreate.isVisible()) {
+            await fillNodePoolWizardIdentity(
+                this.page,
+                flowRootState.cluster.name,
+                request.name,
+                request.labelKey,
+                request.labelValue
+            );
+            await wizardCreate.click();
+        } else {
+            await this.page.waitForSelector(this.nodePoolNameInput);
+            await this.fillInputBySelector(this.nodePoolNameInput, request.name);
+            if (request.labelValue && request.labelKey) {
+                await this.fillInputBySelector(this.nodePoolLabelKeyInput, request.labelKey);
+                await this.fillInputBySelector(this.nodePoolLabelValueInput, request.labelValue);
+            }
+            await this.submitNodePoolForm();
         }
-        await this.submitNodePoolForm();
         logger.debug(`Node pool ${request.name} created successfully`);
-        await nodePoolUtils.waitForNodePoolCrdReadyOrEmpty(request.name, 40);
+        await nodePoolUtils.waitForNodePoolCrdReadyOrEmpty(request.name, 120);
+    }
+
+    async editNodePlacement(name: string, supportsPlacement: boolean): Promise<void> {
+        await this.clickOnNodePoolRowByName(name);
+        await this.clickOnEditButton();
+        const topology = this.page.getByRole('menuitem', { name: 'Topology & placement', exact: true });
+        await topology.or(this.page.locator(this.saveNodePoolBtn)).waitFor();
+        if (await topology.isVisible()) {
+            await topology.click();
+            if (supportsPlacement) {
+                await this.page.locator('[aid="topology-placement-toggle"]').click();
+                await this.page
+                    .locator('[aid="topology-cpu-node-placement"]')
+                    .getByRole('radio', { name: 'Bin-pack', exact: true })
+                    .click();
+                await this.page
+                    .locator('[aid="topology-gpu-node-placement"]')
+                    .getByRole('radio', { name: 'Spread', exact: true })
+                    .click();
+            }
+            await this.page.locator('[aid="topology-save-close"]').click();
+        } else {
+            if (supportsPlacement) {
+                await this.openSchedulingSection();
+                await this.fillCpuPlacementRadio(PlacementStrategy.CpuEnum.Binpack);
+                await this.fillGpuPlacementRadio(PlacementStrategy.GpuEnum.Spread);
+            }
+            await this.submitNodePoolForm();
+        }
     }
 
     async createNodePoolWithGpuStrategy(request: NodePoolCreateRequest): Promise<void> {

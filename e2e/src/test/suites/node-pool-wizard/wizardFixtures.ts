@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { fillNodePoolWizardIdentity } from '../../../modules/ui/runaiV2/pages/nodePoolWizardIdentity';
 import { randomUUID } from 'node:crypto';
 import { expect, type Locator, type Page, test as base } from '@playwright/test';
 import type { Nodepool } from '../../../modules/api/apis/clusterApi/generated/model/nodepool';
@@ -90,18 +91,9 @@ export async function createPool(
 ): Promise<string> {
     const cluster = process.env.CLUSTER_NAME_PREFIX;
     if (!cluster) throw new Error('Set CLUSTER_NAME_PREFIX to the cluster name shown in the wizard.');
-    await page.getByTestId('cluster-dropdown').getByRole('combobox').click();
-    const option = page.getByRole('option').filter({
-        hasText: new RegExp('^' + cluster.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?: \\(.*\\))?$')
-    });
-    await option.click();
-    await page.getByRole('textbox', { name: 'Name', exact: true }).fill(name);
-    await page.getByRole('textbox', { name: 'Description', exact: true }).fill('Wizard E2E');
     const key = 'e2e.run.ai/' + name;
-    await page.getByRole('combobox', { name: 'Key', exact: true }).fill(key);
-    await page.getByRole('option', { name: key + ' (new key)', exact: true }).click();
-    await page.getByRole('combobox', { name: 'Value', exact: true }).fill(name);
-    await page.getByRole('option', { name: name + ' (new value)', exact: true }).click();
+    await fillNodePoolWizardIdentity(page, cluster, name, key, name);
+    await page.getByRole('textbox', { name: 'Description', exact: true }).fill('Wizard E2E');
     const [created] = await Promise.all([
         page.waitForResponse(
             (response) =>

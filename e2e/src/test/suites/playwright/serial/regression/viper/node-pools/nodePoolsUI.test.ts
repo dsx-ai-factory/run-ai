@@ -122,19 +122,13 @@ test.describe(`Node pools UI, tags: ${tags.tool.ui} ${tags.resource.nodepools} $
         test('should create node pool with placementStrategy and edit it', async () => {
             const nodePoolIndexRow = await nodePoolPage.getNodePoolRowIndexByName(nodePoolRequest.name);
             await nodePoolPage.waitForEmptyStatus(nodePoolIndexRow);
-            await nodePoolPage.clickOnNodePoolRowByName(nodePoolRequest.name);
-            await nodePoolPage.clickOnEditButton();
-            if (versionUtils.isVersionSupported(flowRootState.cluster.version, MIN_PLACEMENT_VERSION)) {
-                await nodePoolPage.openSchedulingSection();
-                await nodePoolPage.fillCpuPlacementRadio(CpuEnum.Binpack);
-                await nodePoolPage.fillGpuPlacementRadio(GpuEnum.Spread);
-            }
+            const supportsPlacement = versionUtils.isVersionSupported(
+                flowRootState.cluster.version,
+                MIN_PLACEMENT_VERSION
+            );
+            await nodePoolPage.editNodePlacement(nodePoolRequest.name, supportsPlacement);
 
-            await nodePoolPage.submitNodePoolForm();
-
-            logger.debug(`Node pool ${nodePoolRequest.name} edited successfully`);
-
-            if (versionUtils.isVersionSupported(flowRootState.cluster.version, MIN_PLACEMENT_VERSION)) {
+            if (supportsPlacement) {
                 // Wait for the CRD to be updated with the new placement strategy values
                 await nodePoolUtils.waitForNodePoolCrdProperty(
                     nodePoolRequest.name,

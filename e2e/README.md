@@ -107,7 +107,7 @@ Run the wizard tests against a frontend built with `ENABLE_NODE_POOL_CREATE_FLOW
 npx playwright test --config playwright-config/node-pool-wizard.config.ts
 ```
 
-The suite creates uniquely named empty pools and deletes them after each test. The standard regression run continues to exercise the legacy form.
+The suite creates uniquely named empty pools and deletes them after each test. The standard regression suite runs its create, placement-edit, and delete tests against whichever node pool form the frontend presents.
 
 ## Layout
 
