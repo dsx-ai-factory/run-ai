@@ -17719,7 +17719,7 @@ Components:
   cloud.google.com/go/monitoring v1.29.0
   cloud.google.com/go/monitoring v1.32.1
   cloud.google.com/go/storage v1.62.2
-  cloud.google.com/go/storage v1.71.0
+  cloud.google.com/go/storage v1.71.1
   dompurify 3.4.16
   echarts 6.1.0
   github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.34.0
@@ -17922,6 +17922,7 @@ Components:
   k8s.io/kubelet/pkg/apis v0.36.2
   k8s.io/kubernetes/pkg v1.35.4
   k8s.io/kubernetes/pkg v1.36.2
+  k8s.io/kubernetes/pkg/apis v1.35.4
   k8s.io/kubernetes/pkg/apis v1.37.3
   k8s.io/streaming/pkg v0.36.2
   k8s.io/streaming/pkg v0.37.3
@@ -20811,9 +20812,9 @@ Components:
   golang.org/x/crypto/sha3 v0.58.0
   golang.org/x/crypto/sha3 v0.59.0
   golang.org/x/exp v0.0.0-20250103183323-7d7fa50e5329
+  golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f
   golang.org/x/exp v0.0.0-20261014143641-f0251eb4aa3e
   golang.org/x/exp v0.0.0-20261124000051-d6646c509b6d
-  golang.org/x/exp/slices v0.0.0-20260410095643-746e56fc9e2f
   golang.org/x/exp/slices v0.0.0-20261014143641-f0251eb4aa3e
   golang.org/x/exp/slices v0.0.0-20261124000051-d6646c509b6d
   golang.org/x/mod/semver v0.42.0
