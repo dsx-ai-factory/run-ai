@@ -36,7 +36,7 @@
             flat
             aria-label="Close editor"
             icon="ph-bold ph-x"
-            class="q-pa-xs runai-icon-btn--default"
+            class="q-pa-xs runai-icon-btn--default text-icon-default"
             round
             v-close-popup
           />

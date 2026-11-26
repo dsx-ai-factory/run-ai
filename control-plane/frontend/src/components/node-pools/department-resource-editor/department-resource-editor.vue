@@ -346,9 +346,6 @@ p {
   border-radius: 5px;
   box-shadow: none;
 }
-.scheduling-resource-popup--weight .popup-card [aria-label="Close editor"] {
-  color: var(--icon-default);
-}
 .scheduling-resource-popup--weight .popup-card {
   width: 274px;
 }
