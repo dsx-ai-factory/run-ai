@@ -149,6 +149,13 @@
       "group": {
         "commitMessageTopic": "kube-prometheus-stack"
       }
+    },
+    {
+      "description": "Disable major updates across the repository.",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
     }
   ],
   "customManagers": [
