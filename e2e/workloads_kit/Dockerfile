@@ -41,10 +41,10 @@
 #
 # artifact-metadata.json sets skip_container_validation, as control-plane/
 # frontend does, so the policies in common/opa-policies/dockerfile are not run
-# against this file. That is what lets the node and Temurin images below serve
-# as COPY --from sources, kubectl build in a golang stage, and stages chain via
-# `FROM base`. Nothing enforces the final image's base any more: keep the final
-# and rootfs stages on ubi9/ubi-micro.
+# against this file. That is what lets the node image below serve as a
+# COPY --from source, kubectl and helm build in golang stages, and stages chain
+# via `FROM base`. Nothing enforces the final image's base any more: keep the
+# final and rootfs stages on ubi9/ubi-micro.
 #
 # The suite comes from the build context. This file lives in the repository it
 # packages, so the image carries the e2e/ tree of the checkout it is built
@@ -59,18 +59,25 @@
 #
 # compatibility_kit/Dockerfile is built the same way; keep the two in step.
 
+# The Go toolchain and the golang.org/x modules that kubectl and helm are both
+# built with (see their stages). One set of pins, so the two binaries cannot
+# drift apart. go1.26.11 is past the fixed versions for the go1.26.9 and
+# go1.26.10 standard library advisories (CVE-2026-97033 to CVE-2026-97039 and
+# CVE-2026-97043); x/net 0.63.0 is past GO-2026-6860 and GO-2026-6866 (both
+# fixed in 0.62.0) and needs x/text >= 0.44.0.
+ARG GO_VERSION=1.26.11
+ARG X_TEXT_VERSION=0.44.0
+ARG X_NET_VERSION=0.63.0
+
 # ---------------------------------------------------------------------------
-# Upstream tool images. COPY --from sources only -- nothing runs in them and
-# none of their packages reach the final image.
+# Upstream tool image. A COPY --from source only -- nothing runs in it and
+# none of its packages reach the final image.
 # ---------------------------------------------------------------------------
-# The official image installs the nodejs.org release tarball. Its npm 11.17.0
-# carries glob ^13, outside CVE-2025-64756's vulnerable ranges.
-FROM node:24.22.2-bookworm-slim AS node
-# Java for allure-commandline's report generation. The JRE RPM would pull
-# python3, python3-libs, python3-pip-wheel and expat into the rpmdb through nss
-# -> crypto-policies-scripts, with open CVE rows and no runtime use here; the
-# Temurin build is self-contained (its own cacerts, no rpm dependencies).
-FROM eclipse-temurin:17.0.20.1_1-jre-ubi9-minimal AS jre
+# The official image installs the nodejs.org release tarball. Its npm 11.19.1
+# carries glob ^13, outside CVE-2025-64756's vulnerable ranges. 24.22.3 is
+# past the fixed version for the 24.22.2 advisories (CVE-2026-123863 to
+# CVE-2026-123866, CVE-2026-123872, CVE-2026-123874 and CVE-2026-126051).
+FROM node:24.22.3-bookworm-slim AS node
 
 # ---------------------------------------------------------------------------
 # kubectl: built from source rather than copied from registry.k8s.io/kubectl.
@@ -78,25 +85,25 @@ FROM eclipse-temurin:17.0.20.1_1-jre-ubi9-minimal AS jre
 # ---------------------------------------------------------------------------
 # The official v1.37.1 binary is built with go1.26.8 and golang.org/x/text
 # v0.40.0 / x/net v0.57.0, which are affected by GO-2026-6629 (x/text, HIGH;
-# fixed in 0.41.0) and by advisories fixed in go1.26.9 and x/net 0.60.0.
+# fixed in 0.41.0), by GO-2026-6860 (x/net, HIGH; fixed in 0.62.0) and by the
+# standard library advisories named above.
 # kubectl upstream is a 10-line main over published modules, so
 # this compiles that exact main.go (kubernetes/cmd/kubectl/kubectl.go at
 # v1.37.1) against k8s.io/kubectl, component-base and client-go v0.37.1 with
-# only the golang.org/x modules raised: x/net 0.60.0 needs x/text >= 0.42.0,
-# and pulls x/sys 0.48, x/sync 0.23 and x/term 0.46 with it. Every other
-# module matches the official binary; govulncheck -scan=module reports 16
-# vulnerabilities in it and none in this build.
+# only the golang.org/x modules raised to the pins above, and whatever other
+# golang.org/x modules those pins require. Every other module matches the
+# official binary.
 #
 # Cross-compiled on the build platform (CGO off, like upstream), so an
 # emulated arm64 build does not run the Go compiler under QEMU. Bump
 # KUBECTL_VERSION and the x/ pins together; `go get` fails the build if a pin
 # is lower than what the k8s modules require.
-FROM --platform=$BUILDPLATFORM golang:1.26.10 AS kubectl
+FROM --platform=$BUILDPLATFORM golang:${GO_VERSION} AS kubectl
 ARG TARGETOS
 ARG TARGETARCH
+ARG X_TEXT_VERSION
+ARG X_NET_VERSION
 ARG KUBECTL_VERSION=1.37.1
-ARG X_TEXT_VERSION=0.42.0
-ARG X_NET_VERSION=0.60.0
 WORKDIR /src
 COPY <<'EOF' main.go
 /*
@@ -163,6 +170,55 @@ RUN V="v${KUBECTL_VERSION}" && MINOR="$(echo "$KUBECTL_VERSION" | cut -d. -f2)" 
     && grep -E "golang.org/x/net[[:space:]]+v${X_NET_VERSION}([[:space:]]|$)" /tmp/buildinfo
 
 # ---------------------------------------------------------------------------
+# helm: built from source rather than downloaded from get.helm.sh.
+# Throwaway stage -- only /out/helm is promoted.
+# ---------------------------------------------------------------------------
+# 3.22.1 is the newest Helm 3 release. Its official binary is built with
+# go1.26.9 and golang.org/x/net v0.60.0, which are affected by GO-2026-6860
+# (x/net, HIGH; fixed in 0.62.0) and by the standard library advisories named
+# above, and no Helm 3 release carries the fixes. So this compiles the v3.22.1
+# source -- the helm.sh/helm/v3 module, which `go mod download` checks against
+# the Go checksum database -- with the same toolchain and golang.org/x pins as
+# kubectl. The pins raise the other golang.org/x modules they depend on with
+# them (x/crypto to 0.59.0, x/sync, x/sys and x/term); every other module is
+# the one the release's go.mod selects, including oras-go 2.6.2 (past
+# GHSA-fxhp-mv3v-67qp, the tar hardlink escape).
+#
+# The version strings are the ones the release build stamps, so `helm version`
+# still reports v3.22.1 and its commit. HELM_COMMIT is the commit the v3.22.1
+# tag points at: the build fails if the module proxy recorded a different one
+# for that version. Bump HELM_VERSION and HELM_COMMIT together. Cross-compiled
+# on the build platform, like kubectl.
+FROM --platform=$BUILDPLATFORM golang:${GO_VERSION} AS helm
+ARG TARGETOS
+ARG TARGETARCH
+ARG X_TEXT_VERSION
+ARG X_NET_VERSION
+ARG HELM_VERSION=3.22.1
+ARG HELM_COMMIT=d6c1a0e4027caa6abc7892e7ea9f0cda7447baa3
+WORKDIR /src
+RUN go mod download "helm.sh/helm/v3@v${HELM_VERSION}" \
+    && grep -q "\"Hash\":\"${HELM_COMMIT}\"" \
+         "$(go env GOMODCACHE)/cache/download/helm.sh/helm/v3/@v/v${HELM_VERSION}.info" \
+    && cp -r "$(go env GOMODCACHE)/helm.sh/helm/v3@v${HELM_VERSION}/." . \
+    && chmod -R u+w . \
+    && go get golang.org/x/text@v${X_TEXT_VERSION} golang.org/x/net@v${X_NET_VERSION}
+# LDFLAGS as helm's Makefile sets them for a release: the version, the commit,
+# and the Kubernetes minor of the client-go module helm is built against.
+RUN P=helm.sh/helm/v3 && \
+    K8S_MINOR="$(go list -f '{{.Version}}' -m k8s.io/client-go | cut -d. -f2)" && \
+    LD="-s -w -X $P/internal/version.version=v${HELM_VERSION} -X $P/internal/version.metadata=" && \
+    LD="$LD -X $P/internal/version.gitCommit=${HELM_COMMIT} -X $P/internal/version.gitTreeState=clean" && \
+    for p in pkg/lint/rules pkg/chartutil; do \
+      LD="$LD -X $P/$p.k8sVersionMajor=1 -X $P/$p.k8sVersionMinor=$K8S_MINOR"; \
+    done && \
+    CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
+      go build -trimpath -ldflags "$LD" -o /out/helm ./cmd/helm \
+    && go version -m /out/helm > /tmp/buildinfo \
+    && grep -E "golang.org/x/text[[:space:]]+v${X_TEXT_VERSION}([[:space:]]|$)" /tmp/buildinfo \
+    && grep -E "golang.org/x/net[[:space:]]+v${X_NET_VERSION}([[:space:]]|$)" /tmp/buildinfo
+
+# ---------------------------------------------------------------------------
 # base: ubi-minimal plus node and npm under /usr/local -- the build stages'
 # toolchain. deps builds on it, and the final image copies the same node
 # binary, so node-pty's native addon (built in deps, tied to that binary's
@@ -202,7 +258,7 @@ RUN ln -s ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm && \
 # the target platform, so npm would still run under QEMU. Keep the tag in step
 # with the `node` stage above: the npm that writes node_modules should be the
 # one the kit's node binary ships.
-FROM --platform=$BUILDPLATFORM node:24.22.2-bookworm-slim AS deps-js
+FROM --platform=$BUILDPLATFORM node:24.22.3-bookworm-slim AS deps-js
 ARG TARGETARCH
 
 # Keep browser binaries out of the image: this kit runs API-only tests, and
@@ -253,39 +309,45 @@ RUN npm rebuild node-pty && \
     node -e "require('node-pty')"
 
 # ---------------------------------------------------------------------------
-# tools: helm and allure-commandline, prepared where curl, tar and npm exist so
-# the final image needs none of them. Throwaway stage -- only /usr/local/bin/helm
-# and the allure-commandline package are promoted.
+# tools: the Temurin JRE and allure-commandline, prepared where curl, tar and
+# npm exist so the final image needs none of them. Throwaway stage -- only
+# /opt/java/openjdk and the allure-commandline package are promoted.
 # ---------------------------------------------------------------------------
 FROM base AS tools
 
-# curl is already in ubi-minimal; tar and gzip unpack helm, findutils drives
+# curl is already in ubi-minimal; tar and gzip unpack the JRE, findutils drives
 # the jackson swap.
 RUN microdnf install -y --nodocs tar gzip findutils \
     && microdnf clean all \
     && rm -rf /var/cache/yum
 
-# helm, pinned by version and per-arch SHA-256 (sums from the release's
-# .sha256sum assets). There is no official helm image to copy from. 3.22.1 is
-# built with go1.26.9 and carries oras-go 2.6.2, golang.org/x/net 0.60.0,
-# x/text 0.42.0 and x/crypto 0.57.0 -- past the fixed versions for
-# GHSA-fxhp-mv3v-67qp (oras-go tar hardlink escape), the go1.26.6 stdlib
-# advisories (GO-2026-5026/5942/5972/6088/6089/6090) and GO-2026-6354/6355
-# (x/crypto, fixed in 0.56.0) that affect earlier helm releases.
-ARG HELM_VERSION=3.22.1
+# Java for allure-commandline's report generation. The JRE RPM would pull
+# python3, python3-libs, python3-pip-wheel and expat into the rpmdb through nss
+# -> crypto-policies-scripts, with open CVE rows and no runtime use here; the
+# Temurin build is self-contained (its own cacerts, no rpm dependencies).
+#
+# This is the Eclipse Temurin release archive, pinned by version and per-arch
+# SHA-256: the same files and sums the eclipse-temurin image's own Dockerfile
+# installs. It is downloaded rather than copied out of
+# eclipse-temurin:17.0.21.1_2-jre-ubi9-minimal because that tag was published
+# without a linux/arm64 image. 17.0.21.1+2 is past the fixed versions for the
+# 17.0.20.1 advisories (CVE-2026-91415, fixed in 17.0.21; CVE-2026-114938,
+# CVE-2026-114939, CVE-2026-114940 and CVE-2026-114942, fixed in 17.0.21.1).
+ARG TEMURIN_VERSION=17.0.21.1_2
 RUN ARCH="$(uname -m)" && \
     case "$ARCH" in \
-      x86_64) ARCH=amd64; SHA256=896cf63684a42a723d61c980369d6e588330927deb13676ca0d85006dd6da0ea ;; \
-      aarch64) ARCH=arm64; SHA256=4c29e286b279d170fa048ddfc3e4e83dcd069ca9c52102766ba672d7149e694d ;; \
+      x86_64) ARCH=x64; SHA256=5a092a0bc21de4c3d855480edd7945be9cfe157b38cdb84dac280511893bb009 ;; \
+      aarch64) SHA256=ed968eb2cde06ba38c3d957956cab7faced9181aaeebed4904f89e2e6efa8d11 ;; \
       *) echo "Unsupported architecture: $ARCH" >&2; exit 1 ;; \
     esac && \
-    curl -fsSLo /tmp/helm.tar.gz \
-      "https://get.helm.sh/helm-v${HELM_VERSION}-linux-${ARCH}.tar.gz" && \
-    printf '%s  %s\n' "$SHA256" /tmp/helm.tar.gz | sha256sum --check - && \
-    tar -xzf /tmp/helm.tar.gz -C /usr/local/bin --strip-components=1 \
-      "linux-${ARCH}/helm" && \
-    rm -f /tmp/helm.tar.gz && \
-    helm version --short
+    RELEASE="jdk-$(echo "$TEMURIN_VERSION" | sed 's/_/%2B/')" && \
+    curl -fsSLo /tmp/jre.tar.gz \
+      "https://github.com/adoptium/temurin17-binaries/releases/download/${RELEASE}/OpenJDK17U-jre_${ARCH}_linux_hotspot_${TEMURIN_VERSION}.tar.gz" && \
+    printf '%s  %s\n' "$SHA256" /tmp/jre.tar.gz | sha256sum --check - && \
+    mkdir -p /opt/java/openjdk && \
+    tar -xzf /tmp/jre.tar.gz -C /opt/java/openjdk --strip-components=1 --no-same-owner && \
+    rm -f /tmp/jre.tar.gz && \
+    /opt/java/openjdk/bin/java -version
 
 # Allure commandline for report generation. Only its package directory ships;
 # the final image runs it with node and the Temurin JRE.
@@ -401,9 +463,9 @@ WORKDIR /app
 
 # node only -- npm and npx stay behind in the base stage.
 COPY --from=node /usr/local/bin/node /usr/local/bin/node
-COPY --from=jre /opt/java/openjdk /opt/java/openjdk
+COPY --from=tools /opt/java/openjdk /opt/java/openjdk
 COPY --from=kubectl /out/kubectl /usr/local/bin/kubectl
-COPY --from=tools /usr/local/bin/helm /usr/local/bin/helm
+COPY --from=helm /out/helm /usr/local/bin/helm
 COPY --from=tools /usr/local/lib/node_modules/allure-commandline /usr/local/lib/node_modules/allure-commandline
 RUN ln -s ../lib/node_modules/allure-commandline/bin/allure /usr/local/bin/allure
 
