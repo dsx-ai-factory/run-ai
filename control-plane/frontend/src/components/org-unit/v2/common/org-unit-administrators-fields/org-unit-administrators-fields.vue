@@ -80,7 +80,7 @@ import type { ISelectOption } from "@/models/global.model";
 
 export interface IAdministratorsScope {
   scopeId: string;
-  scopeType: ScopeType;
+  scopeType: typeof ScopeType.Department | typeof ScopeType.Project;
   clusterId: string;
 }
 
