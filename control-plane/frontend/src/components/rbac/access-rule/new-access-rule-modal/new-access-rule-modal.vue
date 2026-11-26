@@ -81,6 +81,7 @@
 </template>
 
 <script lang="ts">
+import { rolesService } from "@/services/control-plane/rbac/roles.service/roles.service";
 import { defineComponent, ref, type PropType } from "vue";
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
 import { errorMessages } from "@/common/error-message.constant";
@@ -155,11 +156,7 @@ export default defineComponent({
       return this.isAllAuthenticatedUsers ? "Select a single scope" : `Select up to ${SCOPE_MAX_AMOUNT} scopes`;
     },
     roleOptions(): ISelectOption[] {
-      return this.roles.map((role) => ({
-        label: role.name,
-        value: role.id,
-        roleStageBadge: role.name,
-      }));
+      return rolesService.toSelectOptions(this.roles);
     },
   },
   methods: {
