@@ -55,8 +55,8 @@
           size="sm"
           icon="ph-bold ph-arrow-counter-clockwise"
           label="Reset"
-          :disable="readonly || loading"
-          @click="emit('reset')" />
+          :disable="readonly || loading || !canDiscard"
+          @click="emit('discard')" />
         <q-btn
           v-if="canView"
           ref="settingsTrigger"
@@ -394,6 +394,7 @@ const props = withDefaults(
     readonly: boolean;
     canView?: boolean;
     settingsOpen?: boolean;
+    canDiscard?: boolean;
     totalsComplete?: boolean;
     rawWeightsAvailable?: boolean;
     canEditDepartment?: (id: string) => boolean;
@@ -409,7 +410,7 @@ const emit = defineEmits<{
   edit: [IDepartmentSchedulingEdit];
   search: [string];
   "filter-rank": [string | undefined];
-  reset: [];
+  discard: [];
   "new-department": [];
   "advanced-settings": [];
   "close-settings": [];

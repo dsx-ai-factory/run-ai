@@ -77,6 +77,13 @@ export function useNodePoolSchedulingSave(getPool: () => Nodepool) {
     get poolSettingsSaved() {
       return poolSettingsSaved;
     },
+    clearSaveProgress() {
+      poolKey = "";
+      savedPool = undefined;
+      poolSettingsSaved = false;
+      completed.clear();
+      // An unfinished server-side weight reset must still resume on the next save.
+    },
     async save(draft: SchedulingDraft): Promise<Nodepool> {
       if (busy) throw new Error("A save is already in progress.");
       busy = true;

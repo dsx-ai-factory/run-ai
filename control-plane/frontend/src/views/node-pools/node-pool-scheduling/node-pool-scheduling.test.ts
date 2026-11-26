@@ -14,7 +14,8 @@ import { clusterService } from "@/services/control-plane/cluster.service/cluster
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
 const { createNodePoolDraft } = nodePoolUtil;
-import { PROPORTIONAL_CAPABILITIES } from "@/models/node-pool.model";
+import { NodePoolDepartmentTable as Table } from "@/components/node-pools/node-pool-department-table";
+import { GUARANTEED_QUOTA_CAPABILITIES, PROPORTIONAL_CAPABILITIES } from "@/models/node-pool.model";
 import type { Nodepool } from "@/swagger-models/cluster-service-client";
 import { ForbiddenError, NotFoundError } from "@/models/http-response.model";
 import { requestToLeave } from "@/services/infra/router.service/router.service";
@@ -85,11 +86,17 @@ async function render(realStep = false, access?: "editor" | "pool-only") {
 }
 beforeEach(() => vi.clearAllMocks());
 describe("scheduling route", () => {
-  it("resets the draft and filters to the saved scheduling state without writing", async () => {
+  it("discards edits in place while preserving filters, scroll and the settings panel", async () => {
     vi.mocked(clusterService.getNodepool).mockResolvedValue(proportionalPool);
     const { wrapper } = await render(true, "editor");
     try {
       await flushPromises();
+      const reset = wrapper.get('[aid="reset-scheduling"]');
+      expect(reset.text()).toBe("Reset");
+      expect(reset.attributes("disabled")).toBeDefined();
+      await wrapper.get('[aid="advanced-settings"]').trigger("click");
+      const table = wrapper.get(".department-table-content").element;
+      table.scrollTop = 120;
       await wrapper.get('[aid="mode-guaranteed"]').trigger("click");
       const step = wrapper.getComponent(Step);
       step.vm.$emit("search", "department");
@@ -99,11 +106,77 @@ describe("scheduling route", () => {
       await wrapper.get('[aid="reset-scheduling"]').trigger("click");
       await flushPromises();
       const restored = wrapper.getComponent(Step);
-      expect(restored.props("searchTerm")).toBe("");
-      expect(restored.props("rankFilter")).toBeUndefined();
+      expect(restored.element).toBe(step.element);
+      expect(restored.props("searchTerm")).toBe("department");
+      expect(restored.props("rankFilter")).toBe("Low");
+      expect(wrapper.get(".department-table-content").element).toBe(table);
+      expect(table.scrollTop).toBe(120);
+      expect(wrapper.get('[aid="advanced-settings"]').attributes("aria-expanded")).toBe("true");
+      expect(reset.attributes("disabled")).toBeDefined();
+      expect(clusterService.getNodepool).toHaveBeenCalledTimes(1);
       expect(wrapper.get('[aid="mode-proportional"]').attributes("aria-checked")).toBe("true");
       expect(clusterService.patchNodepool).not.toHaveBeenCalled();
       expect(orgUnitService.batchPatchDepartmentNodePoolResources).not.toHaveBeenCalled();
+      expect(await requestToLeave()).toBe(true);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it("reloads partially saved values in place and keeps the draft if the read needs a retry", async () => {
+    const customPool = {
+      ...pool,
+      schedulingCapabilities: { ...GUARANTEED_QUOTA_CAPABILITIES, adjustableWeights: true },
+    };
+    const row = (id: string, weight: number) => ({
+      id,
+      orgUnitId: id,
+      orgUnitName: id,
+      clusterId: pool.clusterId,
+      nodePoolId: pool.id,
+      nodePoolName: pool.name,
+      rank: "High",
+      resources: { gpu: { overQuotaWeight: weight } },
+    });
+    vi.mocked(clusterService.getNodepool).mockResolvedValue(customPool);
+    vi.mocked(clusterService.patchNodepool).mockResolvedValue(customPool);
+    vi.mocked(orgUnitService.getDepartmentNodePoolResources)
+      .mockResolvedValueOnce({ nodePoolResources: [row("a", 2), row("b", 2)] })
+      .mockResolvedValueOnce({ nodePoolResources: [row("a", 8), row("b", 2)] });
+    vi.mocked(orgUnitService.batchPatchDepartmentNodePoolResources).mockResolvedValueOnce({
+      id: "batch",
+      totalRequested: 2,
+      succeeded: [row("a", 8)],
+      failed: [{ message: "conflict" }],
+      totalFailed: 1,
+      totalSuccessful: 1,
+    });
+    const { wrapper } = await render(true, "editor");
+    try {
+      await flushPromises();
+      await wrapper.get('[aid="advanced-settings"]').trigger("click");
+      const table = wrapper.getComponent(Table);
+      table.vm.$emit("edit", { id: "a", weight: 8 });
+      table.vm.$emit("edit", { id: "b", weight: 6 });
+      await wrapper.get('[aid="scheduling-save-continue"]').trigger("click");
+      await flushPromises();
+      expect(wrapper.text()).toContain("remain unsaved");
+      const reset = wrapper.get('[aid="reset-scheduling"]');
+      vi.mocked(clusterService.getNodepool).mockRejectedValueOnce(new Error("Connection interrupted"));
+      await reset.trigger("click");
+      await flushPromises();
+      expect(wrapper.text()).toContain("Connection interrupted");
+      expect(table.props("draft").departments.b.weight).toBe(6);
+      expect(reset.attributes("disabled")).toBeUndefined();
+      await reset.trigger("click");
+      await flushPromises();
+      expect(wrapper.getComponent(Table).element).toBe(table.element);
+      expect(table.props("settingsOpen")).toBe(true);
+      expect(table.props("draft").departments).toEqual({});
+      expect(table.props("rows").map((r) => r.resources.gpu?.overQuotaWeight)).toEqual([8, 2]);
+      expect(reset.attributes("disabled")).toBeDefined();
+      expect(clusterService.patchNodepool).toHaveBeenCalledTimes(1);
+      expect(orgUnitService.batchPatchDepartmentNodePoolResources).toHaveBeenCalledTimes(1);
       expect(await requestToLeave()).toBe(true);
     } finally {
       wrapper.unmount();

@@ -121,6 +121,11 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
     loadNext,
     loadAll,
   }));
+  function clearRows() {
+    baselineRows.value = [];
+    aggregates.value = {};
+    rankCounts.value = {};
+  }
   function resetScheduling(poolChanged: boolean) {
     scopeVersion++;
     nextOffset.value = undefined;
@@ -130,10 +135,8 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
     if (poolChanged) {
       search.value = "";
       rank.value = undefined;
+      clearRows();
     }
-    baselineRows.value = [];
-    aggregates.value = {};
-    rankCounts.value = {};
     quotaPolicy.value = undefined;
     departmentScopes.value = {};
     projectScopes.value = {};
@@ -155,8 +158,13 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
       }
     };
     const departments = async () => {
-      if (!permissions.value.view) return;
-      const [total, page, scopes, projects] = await Promise.all([
+      if (!permissions.value.view) {
+        clearRows();
+        return;
+      }
+      // Keep already visible pages mounted until their replacement is ready.
+      const previousRowCount = baselineRows.value.length;
+      const [total, firstPage, scopes, projects] = await Promise.all([
         loadSchedulingTotals(scope),
         loadSchedulingDepartmentPage(scope, 0),
         permissionService.getPermittedScopesForAction(ResourceType.Department),
@@ -165,14 +173,20 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
       if (scopeVersion !== current) return;
       departmentScopes.value = scopes;
       projectScopes.value = projects;
+      const rows = [...firstPage.nodePoolResources];
+      let next = firstPage.next;
+      while (next != null && rows.length < previousRowCount) {
+        const page = await loadSchedulingDepartmentPage(scope, next);
+        if (scopeVersion !== current) return;
+        rows.push(...page.nodePoolResources);
+        next = page.next;
+      }
       const rawWeightsAvailable = pool.schedulingCapabilities?.adjustableWeights === true;
       const ranks = ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => option.value);
-      const rowsComplete = page.next == null && coversCluster(scopes[Action.Read]);
-      const snapshotTotals = rowsComplete
-        ? schedulingSnapshotTotals(page.nodePoolResources, rawWeightsAvailable)
-        : undefined;
+      const rowsComplete = next == null && coversCluster(scopes[Action.Read]);
+      const snapshotTotals = rowsComplete ? schedulingSnapshotTotals(rows, rawWeightsAvailable) : undefined;
       const visibleCounts: Record<string, number> = {};
-      for (const row of page.nodePoolResources) visibleCounts[row.rank] = (visibleCounts[row.rank] ?? 0) + 1;
+      for (const row of rows) visibleCounts[row.rank] = (visibleCounts[row.rank] ?? 0) + 1;
       const perRank = await Promise.all(
         ranks.map(async (rank) => {
           if (snapshotTotals) {
@@ -207,20 +221,22 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
           unlimitedQuotaCount: value.deservedSum >= 0 ? 0 : undefined,
         };
       }
-      baselineRows.value = page.nodePoolResources;
+      baselineRows.value = rows;
       aggregates.value = Object.fromEntries([
         ["all", serverTotals(total)],
         ...ranks.map((rank, i) => [rank, serverTotals(perRank[i].totals)]),
       ]);
       rankCounts.value = Object.fromEntries(ranks.map((rank, i) => [rank, perRank[i].count]));
-      if (page.next == null) applySnapshotTotals(pool);
-      nextOffset.value = page.next;
+      if (next == null) applySnapshotTotals(pool);
+      nextOffset.value = next;
     };
     try {
       await Promise.all([policy(), departments()]);
     } catch (error) {
-      if (scopeVersion === current)
+      if (scopeVersion === current) {
+        clearRows();
         loadError.value = extractErrorMessages(error, "Failed to load scheduling data.").join(" ");
+      }
     }
   }
   const {

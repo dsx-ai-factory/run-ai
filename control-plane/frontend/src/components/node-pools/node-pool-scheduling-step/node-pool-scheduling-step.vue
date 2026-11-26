@@ -18,12 +18,12 @@
     @step-click="onStepClick"
   >
     <runai-form-wrapper
-      :form-state="{ pool: previewPool, scheduling: draft, saving }"
-      :prevent-leave="saving || creatingDepartment"
+      :form-state="{ hasChanges }"
+      :prevent-leave="saving || discarding || creatingDepartment"
       full-width
       @leave-page="emit('leave-approved')"
     >
-      <fieldset :disabled="saving" class="scheduling-fields">
+      <fieldset :disabled="saving || discarding" class="scheduling-fields">
         <runai-expansion-wrapper no-first-top-padding>
           <runai-expansion-item
             class="scheduling-mode-section"
@@ -129,9 +129,10 @@
                   :ranks="ranks"
                   :rank-counts="rankCounts"
                   :capacity="resources?.gpus"
-                  :readonly="saving || departmentsReadOnly"
+                  :readonly="saving || discarding || departmentsReadOnly"
                   :can-view="canViewDepartments"
                   :settings-open="showSettings"
+                  :can-discard="hasChanges"
                   :totals-complete="totalsComplete"
                   :raw-weights-available="pool.schedulingCapabilities?.adjustableWeights === true"
                   :can-edit-department="canEditDepartment"
@@ -143,7 +144,7 @@
                   @edit="applyEdit"
                   @search="emit('search', $event)"
                   @filter-rank="emit('filter-rank', $event)"
-                  @reset="emit('reset')"
+                  @discard="discardChanges"
                   @automatic-weights="draft.automaticWeights = $event"
                   @advanced-settings="showSettings = !showSettings"
                   @close-settings="showSettings = false"
@@ -153,7 +154,7 @@
                     ><node-pool-scheduling-settings
                       v-if="showSettings"
                       :draft="draft"
-                      :readonly="saving || departmentsReadOnly"
+                      :readonly="saving || discarding || departmentsReadOnly"
                       :can-reset-resources="canResetResources"
                       :load-has-gpu-limits="loadHasGpuLimits"
                       :saved-max-allocation="!!pool.schedulingCapabilities?.limits"
@@ -243,6 +244,7 @@ import {
   switchingToCustomWeights,
   useNodePoolSchedulingSave,
 } from "@/composables/node-pool/use-node-pool-scheduling-save.composable";
+import { isEqual } from "@/utils/common.util";
 import { extractErrorMessages } from "@/utils/error-alert.util";
 import { schedulingDurationToFields } from "@/utils/node-pool-scheduling.util/scheduling-duration.util";
 import NotificationAlertBar from "@/components/common/notification-alert-bar/notification-alert-bar.vue";
@@ -252,6 +254,7 @@ import { NodePoolSchedulingSettings } from "@/components/node-pools/node-pool-sc
 import { NodePoolNewDepartmentDialog } from "@/components/node-pools/node-pool-new-department-dialog";
 import { useNodePoolSchedulingDraft } from "@/composables/node-pool/use-node-pool-scheduling-draft.composable";
 import {
+  createSchedulingDraft,
   toSchedulingCapabilities,
   weightFromGuaranteedQuota,
   isDepartmentLimitBelowQuota,
@@ -286,6 +289,7 @@ const props = withDefaults(
     canEditDepartments?: boolean;
     canSavePool?: boolean;
     canResetResources?: boolean;
+    refreshSavedScheduling?: () => Promise<boolean>;
     loadHasGpuLimits?: () => Promise<boolean>;
     totalsComplete?: boolean;
     canEditDepartment?: (id: string) => boolean;
@@ -313,7 +317,6 @@ const emit = defineEmits<{
   "open-identity": [];
   saving: [boolean];
   refresh: [];
-  reset: [];
   search: [string];
   "filter-rank": [string | undefined];
 }>();
@@ -386,31 +389,27 @@ const modeIcons: Record<string, string> = {
   [ESchedulingMode.Ranked]: "ph ph-ranking",
   [ESchedulingMode.Guaranteed]: "ph ph-shield-check",
 };
-const savedMode = getSchedulingMode(props.pool.schedulingCapabilities);
-const mode = isSupportedSchedulingMode(savedMode) ? savedMode : undefined;
-const { draft, requestMode } = useNodePoolSchedulingDraft({
-  mode,
-  automaticWeights:
-    mode === ESchedulingMode.Guaranteed ? props.pool.schedulingCapabilities?.adjustableWeights === false : true,
-  cpuQuota: props.pool.schedulingCapabilities?.cpuQuota === true,
-  maxAllocation: props.pool.schedulingCapabilities?.limits === true,
-  timeFairshare: props.pool.schedulingConfiguration?.timeBasedFairShare?.enabled === true,
-  historicalWeight: props.pool.schedulingConfiguration?.timeBasedFairShare?.historicalUsageWeight ?? 1,
-  historicalWindow: schedulingDurationToFields(
-    props.pool.schedulingConfiguration?.timeBasedFairShare?.windowDuration ?? "7d",
-    false,
-  ),
-  minimumRuntime: schedulingDurationToFields(props.pool.schedulingConfiguration?.minGuaranteedRuntime),
-  capabilities: props.pool.schedulingCapabilities,
-  departments: {},
+const savedDraft = computed(() => {
+  const savedMode = getSchedulingMode(props.pool.schedulingCapabilities);
+  const mode = isSupportedSchedulingMode(savedMode) ? savedMode : undefined;
+  return createSchedulingDraft({
+    mode,
+    automaticWeights:
+      mode === ESchedulingMode.Guaranteed ? props.pool.schedulingCapabilities?.adjustableWeights === false : true,
+    cpuQuota: props.pool.schedulingCapabilities?.cpuQuota === true,
+    maxAllocation: props.pool.schedulingCapabilities?.limits === true,
+    timeFairshare: props.pool.schedulingConfiguration?.timeBasedFairShare?.enabled === true,
+    historicalWeight: props.pool.schedulingConfiguration?.timeBasedFairShare?.historicalUsageWeight ?? 1,
+    historicalWindow: schedulingDurationToFields(
+      props.pool.schedulingConfiguration?.timeBasedFairShare?.windowDuration ?? "7d",
+      false,
+    ),
+    minimumRuntime: schedulingDurationToFields(props.pool.schedulingConfiguration?.minGuaranteedRuntime),
+    capabilities: props.pool.schedulingCapabilities,
+    departments: {},
+  });
 });
-watch(
-  () => draft.value.mode,
-  (mode, previous) => {
-    if (mode === ESchedulingMode.Proportional && previous && previous !== ESchedulingMode.Proportional)
-      emit("filter-rank", undefined);
-  },
-);
+const { draft, requestMode } = useNodePoolSchedulingDraft(savedDraft.value);
 watch(
   () => draft.value.automaticWeights,
   (automatic) => {
@@ -477,22 +476,48 @@ const previewPool = computed(() => ({
 }));
 function selectMode(value: string | number | boolean | null) {
   if (saving.value || (nonQuotaModesDisabled.value && value !== ESchedulingMode.Guaranteed)) return;
-  if (value === ESchedulingMode.Proportional || value === ESchedulingMode.Ranked || value === ESchedulingMode.Guaranteed)
+  if (
+    value === ESchedulingMode.Proportional ||
+    value === ESchedulingMode.Ranked ||
+    value === ESchedulingMode.Guaranteed
+  ) {
+    if (value === ESchedulingMode.Proportional && draft.value.mode !== value) emit("filter-rank", undefined);
     requestMode(value);
+  }
 }
 function applyEdit(edit: IDepartmentSchedulingEdit) {
   if (saving.value || departmentsReadOnly.value) return;
   const next = { ...draft.value.departments[edit.id], ...edit };
   if (edit.weight !== undefined) delete next.weightFromQuota;
-  if (edit.limit !== undefined) {
-    const saved = (props.baselineRows ?? props.rows).find((row) => row.orgUnitId === edit.id);
-    if (saved && (edit.limit ?? -1) === (saved.resources.gpu?.limit ?? -1)) delete next.limit;
+  const saved = (props.baselineRows ?? props.rows).find((row) => row.orgUnitId === edit.id);
+  if (saved) {
+    if (next.rank === saved.rank) delete next.rank;
+    if (next.quota === saved.resources.gpu?.deserved) delete next.quota;
+    if (props.pool.schedulingCapabilities?.adjustableWeights && next.weight === saved.resources.gpu?.overQuotaWeight)
+      delete next.weight;
+    if ((next.limit ?? -1) === (saved.resources.gpu?.limit ?? -1)) delete next.limit;
   }
   if (Object.keys(next).length === 1) delete draft.value.departments[edit.id];
   else draft.value.departments[edit.id] = next;
 }
 
 const saving = ref(false);
+const discarding = ref(false);
+const needsSavedRefresh = ref(false);
+const hasChanges = computed(() => needsSavedRefresh.value || !isEqual(draft.value, savedDraft.value));
+async function discardChanges() {
+  if (saving.value || discarding.value || props.loading || !hasChanges.value) return;
+  discarding.value = true;
+  try {
+    if (needsSavedRefresh.value && !(await props.refreshSavedScheduling?.())) return;
+    draft.value = createSchedulingDraft(savedDraft.value);
+    saver.clearSaveProgress();
+    needsSavedRefresh.value = false;
+    saveError.value = "";
+  } finally {
+    discarding.value = false;
+  }
+}
 const creatingDepartment = ref(false);
 function onDepartmentSaving(value: boolean) {
   creatingDepartment.value = value;
@@ -545,7 +570,9 @@ watch(
   },
   { deep: true },
 );
-const navigationDisabled = computed(() => saving.value || creatingDepartment.value || !props.canSavePool);
+const navigationDisabled = computed(
+  () => saving.value || discarding.value || creatingDepartment.value || !props.canSavePool,
+);
 const editedRowsPending = computed(
   () =>
     props.departmentPages?.nextOffset != null &&
@@ -581,7 +608,10 @@ async function save(destination: "close" | "continue" = "close") {
     emit("saving", false);
     emit("saved", pool, destination);
   } catch (error) {
-    if (saver.savedPool) emit("pool-saved", saver.savedPool);
+    if (saver.savedPool) {
+      needsSavedRefresh.value = true;
+      emit("pool-saved", saver.savedPool);
+    }
     saveError.value =
       (saver.poolSettingsSaved && saver.resetPending
         ? "Pool settings were saved. Retry to finish initializing weights for departments and projects. "

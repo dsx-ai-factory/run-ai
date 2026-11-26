@@ -103,6 +103,12 @@ describe("scoped scheduling reads", () => {
       Math.ceil(rows.length / DEPARTMENT_PAGE_SIZE),
     );
     expect(data.aggregates.value.High.rawWeightsSum).toBe(316);
+    const visibleRows = data.baselineRows.value;
+    const refresh = data.refresh();
+    expect(data.baselineRows.value).toBe(visibleRows);
+    await refresh;
+    expect(data.baselineRows.value).toEqual(rows);
+    expect(data.departmentPages.value.nextOffset).toBeUndefined();
   });
   it("treats an explicit empty department child list as zero project quota", async () => {
     vi.mocked(orgUnitService.getDepartment).mockResolvedValue({ clusterId: "c", children: [] } as never);
