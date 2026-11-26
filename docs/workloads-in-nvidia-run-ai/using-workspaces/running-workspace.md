@@ -52,7 +52,7 @@ You can create a new workload using either the **Flexible** or **Original** subm
 3. Within the new workspace form, select the **cluster** and **project**. To create a new project, click **+NEW PROJECT** and refer to [Projects](../../platform-management/aiinitiatives/organization/projects.md) for a step-by-step guide.
 4. Select one of the following options to launch a workspace:
    * **Start from scratch** - Opens the full workspace form. You’ll need to configure all required fields. Click **CONTINUE** to proceed.
-   * **Template** - Choose a predefined [template](../workload-templates/workspace-templates/) to populate the workspace form. After selecting a template:
+   * **Template** - Choose a predefined [template](../workload-templates/workspace-templates.md) to populate the workspace form. After selecting a template:
      * Click **CREATE WORKSPACE** to launch immediately using the template settings.
      *   Click **Advanced setup** to open the full workspace form with fields populated by the template. You can adjust the predefined configuration values before submitting. Any changes you make will apply only to the workspace and will not be saved back to the original template.
 
