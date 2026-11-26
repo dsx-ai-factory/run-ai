@@ -390,6 +390,48 @@ describe("DepartmentEdit", () => {
       });
     });
 
+    it("runs the form's follow-up for a created department before navigating away", async () => {
+      await mountComponent();
+
+      const form = wrapper.findComponent({ name: "DepartmentEditFormV2" });
+      const steps: string[] = [];
+      vi.mocked(mockRouter.push).mockImplementationOnce(() => {
+        steps.push("navigate");
+        return Promise.resolve();
+      });
+      const onCreated = vi.fn(async (saved: Department) => {
+        steps.push(`created ${saved.id}`);
+      });
+
+      form.vm.$emit("on-save", {
+        department: { name: "New Department", clusterId: CLUSTER_ID },
+        action: ESaveOrgUnitAction.Close,
+        onCreated,
+      });
+      await flushPromises();
+
+      expect(steps).toEqual([`created ${DEPARTMENT_ID}`, "navigate"]);
+    });
+
+    it("reports the department as created even when the form's follow-up fails", async () => {
+      await mountComponent();
+
+      const form = wrapper.findComponent({ name: "DepartmentEditFormV2" });
+      const onComplete = vi.fn();
+      const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+      form.vm.$emit("on-save", {
+        department: { name: "New Department", clusterId: CLUSTER_ID },
+        action: ESaveOrgUnitAction.Continue,
+        onCreated: vi.fn().mockRejectedValue(new Error("follow-up failed")),
+        onComplete,
+      });
+      await flushPromises();
+
+      expect(onComplete).toHaveBeenCalled();
+      expect(orgUnitService.createDepartment).toHaveBeenCalledTimes(1);
+      consoleError.mockRestore();
+    });
+
     it("does not navigate after create with Continue action", async () => {
       await mountComponent();
 
@@ -470,6 +512,21 @@ describe("DepartmentEdit", () => {
       expect(orgUnitService.updateDepartment).toHaveBeenCalled();
       expect(notifyMock).toHaveBeenCalled();
       expect(onCompleteMock).toHaveBeenCalled();
+    });
+
+    it("doesn't run the create follow-up when updating", async () => {
+      await mountComponent({
+        name: DEPARTMENT_ROUTE_NAMES.DEPARTMENT_EDIT,
+        params: { id: DEPARTMENT_ID },
+      });
+
+      const form = wrapper.findComponent({ name: "DepartmentEditFormV2" });
+      const onCreated = vi.fn();
+      form.vm.$emit("on-save", { department: mockDepartment, action: ESaveOrgUnitAction.Save, onCreated });
+      await flushPromises();
+
+      expect(orgUnitService.updateDepartment).toHaveBeenCalled();
+      expect(onCreated).not.toHaveBeenCalled();
     });
 
     it("navigates after update with Close action", async () => {

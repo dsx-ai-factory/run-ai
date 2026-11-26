@@ -363,7 +363,7 @@ const handleSaveError = (error: unknown): void => {
 // ==================== Main Save Handler ====================
 
 const onSave = async (payload: ISaveOrgUnitPayload<Department | DepartmentCreationRequest>) => {
-  const { department: departmentData, action, onComplete } = payload;
+  const { department: departmentData, action, onComplete, onCreated } = payload;
 
   if (!departmentData) return;
 
@@ -373,6 +373,14 @@ const onSave = async (payload: ISaveOrgUnitPayload<Department | DepartmentCreati
     const preparedDepartment = prepareDepartmentForSave(departmentData);
 
     const savedDepartment = await saveDepartment(preparedDepartment);
+    if (!(departmentData as Department).id) {
+      try {
+        await onCreated?.(savedDepartment);
+      } catch (error) {
+        // The department exists by now, so a follow-up failure mustn't be reported as a failed create.
+        console.error("Department created, but its follow-up failed:", error);
+      }
+    }
     handleSaveSuccess(savedDepartment, action);
     onComplete?.();
   } catch (error: unknown) {

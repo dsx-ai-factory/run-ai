@@ -41,12 +41,19 @@ describe("OrgUnitWizardSummaryV3", () => {
     ]);
   });
 
-  it("leaves the sections that later steps fill unset", () => {
+  it("leaves the sections that aren't filled yet unset", () => {
     const wrapper = mountSummary();
 
     for (const aid of ["cluster", "administrators", "resources", "projects"]) {
       expect(sectionValue(wrapper, aid)).toBe("-");
     }
+  });
+
+  it("shows the cluster and how many administrators are set", () => {
+    const wrapper = mountSummary({ clusterName: "tokyo", administratorsCount: 2 });
+
+    expect(sectionValue(wrapper, "cluster")).toBe("tokyo");
+    expect(sectionValue(wrapper, "administrators")).toBe("2");
   });
 
   it("counts the scheduling rules that are set and shows the access rules count", () => {
@@ -68,10 +75,12 @@ describe("OrgUnitWizardSummaryV3", () => {
     expect(sectionValue(wrapper, "scheduling-rules")).toBe("2");
   });
 
-  it("explains the scheduling rules and access rules sections for the entity", () => {
+  it("explains the sections for the entity", () => {
     const wrapper = mountSummary();
 
     expect(wrapper.findAllComponents(RunaiTooltip).map((tooltip) => tooltip.props("tooltipText"))).toEqual([
+      "Department administrators can manage the department and its projects",
+      "All the resources available for matching labeled nodes within the node pool",
       "Apply resource and runtime restrictions to all workloads associated with the department",
       "Authorize access to this department",
     ]);

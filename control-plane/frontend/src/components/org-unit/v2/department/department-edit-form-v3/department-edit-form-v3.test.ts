@@ -6,8 +6,14 @@
 import { flushPromises, mount } from "@vue/test-utils";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createTestingPinia } from "@pinia/testing";
-import { Quasar } from "quasar";
+import { Notify, Quasar } from "quasar";
+import { defineComponent, h } from "vue";
 import { usePermissionStore } from "@/stores/permissions.store";
+import { useClusterStore } from "@/stores/cluster.store";
+import { accessRuleService } from "@/services/control-plane/rbac/access-rule.service/access-rule.service";
+import { ScopeType } from "@/swagger-models/authorization-client";
+import { OrgUnitWizardSummaryV3 } from "@/components/org-unit/v2/wizard-summary-v3";
+import { storageUtil } from "@/utils/storage.util";
 import DepartmentEditFormV3 from "./department-edit-form-v3.vue";
 import { ScopeNameStep } from "@/components/org-unit/v2/department/steps/scope-name-step";
 import { SchedulingRulesStep } from "@/components/org-unit/v2/common/scheduling-rules-step";
@@ -38,6 +44,10 @@ vi.mock("vue-router", () => ({
   useRouter: () => ({ push: vi.fn(), back: vi.fn(), replace: vi.fn() }),
 }));
 
+vi.mock("@/services/control-plane/org-unit.service/org-unit.service", () => ({
+  orgUnitService: { isDepartmentNameUnique: vi.fn().mockResolvedValue(true) },
+}));
+
 vi.mock("@/services/control-plane/rbac/access-rule.service/access-rule.service", () => ({
   accessRuleService: { getAccessRulesCount: vi.fn().mockResolvedValue(3) },
 }));
@@ -47,9 +57,31 @@ const twoPoolDepartment = {
   defaultNodePools: [mockCpuEnabledNodePool.name, mockCpuDisabledNodePool.name],
 } as Department;
 
-const mountForm = (props: Record<string, unknown> = {}) => {
+const administrators = {
+  validation: { valid: true } as { valid: boolean; message?: string },
+  hasAdministrator: true,
+  save: vi.fn(),
+};
+
+const AdministratorsFieldsStub = defineComponent({
+  name: "OrgUnitAdministratorsFields",
+  emits: ["update:count"],
+  setup(_, { expose }) {
+    expose({
+      validate: () => administrators.validation,
+      save: (scope: unknown) => administrators.save(scope),
+      get hasAdministrator() {
+        return administrators.hasAdministrator;
+      },
+    });
+    return () => h("div", { class: "administrators-fields-stub" });
+  },
+});
+
+const mountForm = (props: Record<string, unknown> = {}, stubs: Record<string, unknown> = {}) => {
   const pinia = createTestingPinia({ createSpy: vi.fn });
   vi.mocked(usePermissionStore(pinia).hasPermission).mockReturnValue(true);
+  vi.mocked(useClusterStore(pinia).getClusterById).mockReturnValue({ uuid: "cluster-1", name: "tokyo" } as never);
 
   return mount(DepartmentEditFormV3, {
     props: {
@@ -59,9 +91,11 @@ const mountForm = (props: Record<string, unknown> = {}) => {
       ...props,
     },
     global: {
-      plugins: [Quasar, pinia],
+      plugins: [[Quasar, { plugins: { Notify } }], pinia],
       mocks: { $route: { query: {} }, $router: { push: vi.fn() } },
       stubs: {
+        OrgUnitAdministratorsFields: AdministratorsFieldsStub,
+        ...stubs,
         RunaiFormWrapper: RunaiFormWrapperStub,
         SchedulingRulesStep: true,
         AccessRulesStep: true,
@@ -91,6 +125,9 @@ describe("DepartmentEditFormV3", () => {
   beforeEach(() => {
     delete mockRouteQuery.stepName;
     vi.clearAllMocks();
+    administrators.validation = { valid: true };
+    administrators.hasAdministrator = true;
+    administrators.save.mockReset().mockResolvedValue(undefined);
   });
 
   it("shows the six steps with Steps 2–6 disabled until Step 1 is done", async () => {
@@ -158,6 +195,94 @@ describe("DepartmentEditFormV3", () => {
     const panel = wrapper.findComponent(NodePoolsPriorityList);
     expect(panel.props("nodePools")).toEqual(nodePools);
     expect(panel.props("modelValue")).toBe(mockCpuEnabledNodePool.name);
+  });
+
+  describe("administrators", () => {
+    const createFromStep1 = async () => {
+      const wrapper = mountForm({}, { ScopeNameStep: true });
+      await flushPromises();
+      wrapper.findComponent(OrgUnitFormFooter).vm.$emit("submit-and-continue");
+      await flushPromises();
+      return wrapper;
+    };
+
+    it("shows the administrators card for a new department with a cluster, not when editing", async () => {
+      const wrapper = mountForm();
+      await flushPromises();
+      expect(wrapper.find(".administrators-fields-stub").exists()).toBe(true);
+
+      const editWrapper = mountForm({ isNewDepartment: false });
+      await flushPromises();
+      expect(editWrapper.find(".administrators-fields-stub").exists()).toBe(false);
+    });
+
+    it("doesn't create the department while the administrators are incomplete", async () => {
+      administrators.validation = { valid: false, message: "Select at least one subject." };
+      const wrapper = await createFromStep1();
+
+      expect(wrapper.emitted("on-save")).toBeUndefined();
+    });
+
+    it("creates the administrators once the department exists, then refreshes the access rules count", async () => {
+      const wrapper = await createFromStep1();
+      const [payload] = wrapper.emitted("on-save")?.[0] as [ISaveOrgUnitPayload<Department>];
+      vi.mocked(accessRuleService.getAccessRulesCount).mockResolvedValueOnce(2);
+
+      await payload.onCreated?.({ ...mockDepartment, id: "dep-9", clusterId: "cluster-1" } as Department);
+      await flushPromises();
+
+      expect(administrators.save).toHaveBeenCalledWith({
+        scopeId: "dep-9",
+        scopeType: ScopeType.Department,
+        clusterId: "cluster-1",
+      });
+      expect(wrapper.findComponent(OrgUnitWizardSummaryV3).props("accessRulesCount")).toBe(2);
+    });
+
+    it("doesn't reload the access rules count when creating and closing", async () => {
+      const wrapper = mountForm({}, { ScopeNameStep: true });
+      await flushPromises();
+      vi.spyOn(storageUtil, "get").mockReturnValue(true);
+      wrapper.findComponent(OrgUnitFormFooter).vm.$emit("submit-and-close");
+      await flushPromises();
+      const [payload] = wrapper.emitted("on-save")?.[0] as [ISaveOrgUnitPayload<Department>];
+      vi.mocked(accessRuleService.getAccessRulesCount).mockClear();
+
+      await payload.onCreated?.({ ...mockDepartment, id: "dep-9", clusterId: "cluster-1" } as Department);
+
+      expect(administrators.save).toHaveBeenCalled();
+      expect(accessRuleService.getAccessRulesCount).not.toHaveBeenCalled();
+    });
+
+    it("keeps showing the administrators count after the department is created", async () => {
+      const wrapper = mountForm();
+      await flushPromises();
+      wrapper.findComponent(AdministratorsFieldsStub).vm.$emit("update:count", 2);
+      await wrapper.setProps({ isNewDepartment: false, department: { ...twoPoolDepartment, id: "dep-9" } });
+      await flushPromises();
+
+      expect(wrapper.findComponent(OrgUnitWizardSummaryV3).props("administratorsCount")).toBe(2);
+    });
+
+    it("keeps the department when the administrators can't be saved", async () => {
+      administrators.save.mockRejectedValueOnce(new Error("failed"));
+      const wrapper = await createFromStep1();
+      const [payload] = wrapper.emitted("on-save")?.[0] as [ISaveOrgUnitPayload<Department>];
+
+      await expect(payload.onCreated?.({ ...mockDepartment, id: "dep-9" } as Department)).resolves.toBeUndefined();
+    });
+
+    it("shows the cluster name and the administrators count in the summary", async () => {
+      const wrapper = mountForm();
+      await flushPromises();
+      wrapper.findComponent(AdministratorsFieldsStub).vm.$emit("update:count", 3);
+      await flushPromises();
+
+      expect(wrapper.findComponent(OrgUnitWizardSummaryV3).props()).toMatchObject({
+        clusterName: "tokyo",
+        administratorsCount: 3,
+      });
+    });
   });
 
   describe("node pool reorder", () => {
