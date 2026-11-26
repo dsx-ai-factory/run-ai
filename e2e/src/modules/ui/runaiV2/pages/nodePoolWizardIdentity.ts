@@ -29,16 +29,23 @@ export async function fillNodePoolWizardIdentity(
             exact: true
         });
         const option = existing.or(create).first();
-        await input.click();
-        await input.fill(value);
-        // Opening the label picker can reset its search while the initial options load.
+        // Loading options can reset an in-progress search. Retry until the form commits the selection.
         await expect(async () => {
-            if (await option.isVisible()) return;
+            await input.click();
             await input.press('ControlOrMeta+a');
             await page.keyboard.insertText(value);
-            if ((await input.getAttribute('aria-expanded')) !== 'true') await input.press('ArrowDown');
-            await expect(option).toBeVisible({ timeout: 2500 });
-        }).toPass({ timeout: 15000 });
-        await option.click();
+            await option.click({ timeout: 3000 });
+            if (label === 'Key') {
+                await expect(page.getByRole('combobox', { name: 'Value', exact: true })).toBeVisible({
+                    timeout: 2000
+                });
+            } else {
+                await input.blur();
+                await expect(input).toHaveValue(value);
+                await expect(
+                    page.getByText('Select a value or press Escape to discard your edit.')
+                ).toBeHidden();
+            }
+        }).toPass({ timeout: 20000 });
     }
 }
