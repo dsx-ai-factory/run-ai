@@ -84,7 +84,7 @@ describe("new department creation", () => {
   });
   it("defaults the administrator row to the eligible API-backed department administrator role", async () => {
     await render();
-    (document.querySelector('[aid="add-department-administrator"]') as HTMLButtonElement).click();
+    (document.querySelector('[aid="add-administrator"]') as HTMLButtonElement).click();
     await flushPromises();
     const role = wrapper.findAllComponents(RunaiSelect).find((select) => select.props("label") === "Role");
     expect(role?.props("modelValue")).toEqual({ label: "Department administrator", value: 7 });
@@ -135,7 +135,7 @@ describe("new department creation", () => {
     const name = await render();
     await name.setValue("department-preview");
     await new Promise((resolve) => setTimeout(resolve, 350));
-    (document.querySelector('[aid="add-department-administrator"]') as HTMLButtonElement).click();
+    (document.querySelector('[aid="add-administrator"]') as HTMLButtonElement).click();
     await flushPromises();
     const selects = wrapper.findAllComponents(RunaiSelect);
     selects[0].vm.$emit("update:modelValue", { label: "User", value: "user" });
