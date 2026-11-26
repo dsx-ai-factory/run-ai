@@ -1,0 +1,7 @@
+groups:
+- name: hello
+  tasks:
+  - name: hello
+    image: busybox:1.37
+    command: echo
+    args: hello world

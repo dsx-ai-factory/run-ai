@@ -4819,7 +4819,7 @@
         "x-service": "workloads",
         "x-internal": true,
         "x-test-coverage": [
-          "control-plane/workloads/pkg/services_crud/workflow_service_test.go"
+          "control-plane/workloads/pkg/services_crud/workflows_service_test.go"
         ],
         "x-authorize": {
           "resource-type": "workflows",
@@ -4871,7 +4871,7 @@
         "x-service": "workloads",
         "x-internal": true,
         "x-test-coverage": [
-          "control-plane/workloads/pkg/services_crud/workflow_service_test.go"
+          "control-plane/workloads/pkg/services_crud/workflows_service_test.go"
         ],
         "x-authorize": {
           "resource-type": "workflows",
@@ -4914,7 +4914,7 @@
         "x-service": "workloads",
         "x-internal": true,
         "x-test-coverage": [
-          "control-plane/workloads/pkg/services_crud/workflow_service_test.go"
+          "control-plane/workloads/pkg/services_crud/workflows_service_test.go"
         ],
         "x-authorize": {
           "resource-type": "workflows",

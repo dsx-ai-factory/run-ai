@@ -14,6 +14,7 @@ import (
 	authorization_client "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/orgunit"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/policies"
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/go_migrations"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/metrics_exporter"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services_crud"
 	runai_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
@@ -36,7 +37,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/config"
-	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/go_migrations"
 	pubsub "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/pubsub"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/router"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2"

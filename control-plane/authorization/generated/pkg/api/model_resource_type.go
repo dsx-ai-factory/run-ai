@@ -75,6 +75,7 @@ const (
 	RESOURCETYPE_NODEPOOLS_MINIMAL            ResourceType = "nodepools-minimal"
 	RESOURCETYPE_CLUSTERS_MINIMAL             ResourceType = "clusters-minimal"
 	RESOURCETYPE_USERS_MINIMAL                ResourceType = "users-minimal"
+	RESOURCETYPE_WORKFLOWS                    ResourceType = "workflows"
 )
 
 // AllowedResourceTypeEnumValues is all the allowed values of ResourceType enum
@@ -125,6 +126,7 @@ var AllowedResourceTypeEnumValues = []ResourceType{
 	"nodepools-minimal",
 	"clusters-minimal",
 	"users-minimal",
+	"workflows",
 }
 
 // validResourceTypeEnumValue provides a map of ResourceTypes for fast verification of use input
@@ -175,6 +177,7 @@ var validResourceTypeEnumValues = map[ResourceType]struct{}{
 	"nodepools-minimal":            {},
 	"clusters-minimal":             {},
 	"users-minimal":                {},
+	"workflows":                    {},
 }
 
 // IsValid return true if the value is valid for the enum, false otherwise

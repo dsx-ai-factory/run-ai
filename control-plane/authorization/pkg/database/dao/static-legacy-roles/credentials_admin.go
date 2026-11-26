@@ -62,6 +62,10 @@ var CredentialsAdmin = models.Role{
 			Read:         true,
 		},
 		{
+			ResourceType: api.RESOURCETYPE_WORKFLOWS,
+			Read:         true,
+		},
+		{
 			ResourceType: api.RESOURCETYPE_ENVIRONMENTS,
 			Read:         true,
 		},

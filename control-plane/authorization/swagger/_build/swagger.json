@@ -2693,7 +2693,8 @@
           "workload-integration-metrics",
           "nodepools-minimal",
           "clusters-minimal",
-          "users-minimal"
+          "users-minimal",
+          "workflows"
         ]
       },
       "PermissionAction": {

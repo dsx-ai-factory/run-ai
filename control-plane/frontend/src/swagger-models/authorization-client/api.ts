@@ -1835,7 +1835,8 @@ export const ResourceType = {
     WorkloadIntegrationMetrics: 'workload-integration-metrics',
     NodepoolsMinimal: 'nodepools-minimal',
     ClustersMinimal: 'clusters-minimal',
-    UsersMinimal: 'users-minimal'
+    UsersMinimal: 'users-minimal',
+    Workflows: 'workflows'
 } as const;
 
 export type ResourceType = typeof ResourceType[keyof typeof ResourceType];

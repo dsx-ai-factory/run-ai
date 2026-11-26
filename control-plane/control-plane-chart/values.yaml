@@ -3133,6 +3133,7 @@ workloads:
     - PathPrefix(`/api/v1/workload-priorities`)
     - PathPrefix(`/api/v1/workload-cluster-priorities`)
     - PathPrefix(`/api/v1/workload-templates`)
+    - PathPrefix(`/api/v1/workflows`)
     - PathPrefix(`/api/v1/ai-applications`)
     - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/jobs`)
     - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/podGroups`)

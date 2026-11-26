@@ -75,6 +75,7 @@ const (
 	Distributed          = "Distributed"
 	Inference            = "Inference"
 	DistributedInference = "DistributedInference"
+	Workflow             = "Workflow"
 
 	RunaiNsPrefix = "runai-"
 
@@ -140,77 +141,15 @@ func createWorkload(ctx context.Context, backendClient clients.TenantSettingsCli
 	if err := gpucompat.ValidateMemoryRequestInput(params.Spec); err != nil {
 		return workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, err.Error())
 	}
-	tenantId, apiErr := services_utils.ParseTenantId(ctx)
-	if apiErr != nil {
-		return ToSubmissionError(apiErr)
+
+	target, targetErr := resolveSubmissionTarget(ctx, params.Response.ProjectId, params.Response.ClusterId)
+	if targetErr != nil {
+		return targetErr
 	}
+	tenantId, project, namespace, ancestors := target.tenantId, target.project, target.namespace, target.ancestors
 
-	project, orgUnitErr := orgUnitClient.Get().GetProjectById(ctx, params.Response.ProjectId)
-	if orgUnitErr != nil {
-		return NewSubmissionErrorWithDetails(orgUnitErr.Code, orgUnitErr.Message, nil)
-	}
-
-	namespace := convutils.Deref(project.RequestedNamespace.Get(), "")
-	if namespace == "" {
-		namespace = RunaiNsPrefix + project.Name
-	}
-
-	ancestors := orgUnitApi.NewAncestors(strconv.Itoa(int(tenantId)))
-	ancestors.SetClusterUuid(project.ClusterId)
-	ancestors.SetDepartmentId(project.ParentId)
-	ancestors.SetProjectId(project.Id)
-
-	_, authErr := validateCreationAuth(ctx, ancestors, params.Response.ProjectId)
-	if authErr != nil {
-		return authErr
-	}
-
-	//
-	//   make sure the cluster provided by the user is correct. in the future the cluster id may be optional
-	//   but for now we are requesting the user to provide it and need to make sure it is correct.
-	//
-	if ancestors.ClusterUuid.IsSet() {
-		clusterId := *ancestors.ClusterUuid.Get()
-		if clusterId != params.Response.ClusterId {
-			return workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, fmt.Sprintf("project %s is not associated with cluster %s",
-				params.Response.ProjectId, params.Response.ClusterId))
-		}
-	}
-
-	params.TenantId = int32(tenantId)
-	params.WorkloadId = uuid.New()
-
-	params.Response.CreatedAt = time.Now().Truncate(time.Microsecond)
-	params.Response.CreatedBy = convutils.Deref(runaictx.GetString(ctx, runaictx.CfSubjectID), "")
-	params.Response.WorkloadId = params.WorkloadId.String()
-
-	if ancestors.DepartmentId.IsSet() {
-		params.Response.DepartmentId = ancestors.DepartmentId.Get()
-	}
-
-	if params.UseGivenNameAsPrefix {
-		params.Response.Name = GenerateJobNameByPrefix(params.Response.RequestedName)
-	} else {
-		params.Response.Name = params.Response.RequestedName
-	}
-
-	namingErrs := validation.IsDNS1035Label(params.Response.Name)
-	if len(namingErrs) > 0 {
-		return workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, "The workload name must consist of lower case alphanumeric characters or '-', and start with an alphabetic character.")
-	}
-	if len(params.Response.Name) > MaxWorkloadLength {
-		return workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, fmt.Sprintf("The length of a workload name must not exceed %d characters", MaxWorkloadLength))
-	}
-
-	//
-	//   check if such name already exists in the cluster. if cannot check it, do not fail the workload just log
-	//
-	nameInUse, validationErr := services_integration.IsWorkloadNameInUse(ctx, params.Response.ClusterId, params.Response.ProjectId, params.WorkloadType, params.Response.Name)
-	if validationErr != nil {
-		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to validate if name %s is taken: %v", params.Response.Name, validationErr.Message)
-	} else if nameInUse {
-		return workloadsApi.NewSubmissionErrorV2(http.StatusConflict, fmt.Sprintf("%s named '%s' already exists in the project",
-			params.WorkloadType, params.Response.Name))
+	if identityErr := assignWorkloadIdentity(ctx, params, target); identityErr != nil {
+		return identityErr
 	}
 
 	effectivePolicy, policyErr := policy_compliance.GetEffectivePolicyOfProject(ctx, policies.Get().Client(), params.Response.ProjectId, workloadsApi.WorkloadType(params.WorkloadType))
@@ -314,7 +253,7 @@ func createWorkload(ctx context.Context, backendClient clients.TenantSettingsCli
 		return workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, scErr.Error())
 	}
 
-	assetsMapping, credentialsProcessErr := processCredentials(ctx, params.Response.ClusterId, responseSpec, responseMasterSpec)
+	assetsMapping, credentialsProcessErr := processCredentials(ctx, params.Response.ClusterId, specSecretReferences(responseSpec, responseMasterSpec)...)
 	if credentialsProcessErr != nil {
 		return credentialsProcessErr
 	}
@@ -352,16 +291,9 @@ func createWorkload(ctx context.Context, backendClient clients.TenantSettingsCli
 		return NewSubmissionErrorWithDetails(scopeErr.Code, scopeErr.Message, scopeErr.Details)
 	}
 
-	client := clusterservice.Get()
-
-	actualNodePoolsResponse, getErr := client.GetNodePoolsInternalByCluster(ctx, params.Response.ClusterId)
-	if getErr != nil {
-		return workloadsApi.NewSubmissionErrorV2(http.StatusInternalServerError, getErr.Error())
-	}
-
-	actualNodePools := []clusterApi.Nodepool{}
-	if actualNodePoolsResponse != nil {
-		actualNodePools = actualNodePoolsResponse.Nodepools
+	actualNodePools, nodePoolsFetchErr := getClusterNodePools(ctx, params.Response.ClusterId)
+	if nodePoolsFetchErr != nil {
+		return nodePoolsFetchErr
 	}
 
 	setDefaultNodepoolsIfNecessary(ctx, &params.Response, project)
@@ -523,6 +455,101 @@ func createWorkload(ctx context.Context, backendClient clients.TenantSettingsCli
 	return persistAndRespondNative(ctx, wc, assetsMapping)
 }
 
+type submissionTarget struct {
+	tenantId  uint
+	project   *orgUnitApi.Project
+	namespace string
+	ancestors *orgUnitApi.Ancestors
+}
+
+// resolveSubmissionTarget loads the project a workload is submitted to and verifies the caller may create in it.
+func resolveSubmissionTarget(ctx context.Context, projectId string, clusterId string) (*submissionTarget, *workloadsApi.SubmissionErrorV2) {
+	tenantId, apiErr := services_utils.ParseTenantId(ctx)
+	if apiErr != nil {
+		return nil, ToSubmissionError(apiErr)
+	}
+
+	project, orgUnitErr := orgUnitClient.Get().GetProjectById(ctx, projectId)
+	if orgUnitErr != nil {
+		return nil, NewSubmissionErrorWithDetails(orgUnitErr.Code, orgUnitErr.Message, nil)
+	}
+
+	namespace := convutils.Deref(project.RequestedNamespace.Get(), "")
+	if namespace == "" {
+		namespace = RunaiNsPrefix + project.Name
+	}
+
+	ancestors := orgUnitApi.NewAncestors(strconv.Itoa(int(tenantId)))
+	ancestors.SetClusterUuid(project.ClusterId)
+	ancestors.SetDepartmentId(project.ParentId)
+	ancestors.SetProjectId(project.Id)
+
+	_, authErr := validateCreationAuth(ctx, ancestors, projectId)
+	if authErr != nil {
+		return nil, authErr
+	}
+
+	//
+	//   make sure the cluster provided by the user is correct. in the future the cluster id may be optional
+	//   but for now we are requesting the user to provide it and need to make sure it is correct.
+	//
+	if ancestors.ClusterUuid.IsSet() {
+		projectClusterId := *ancestors.ClusterUuid.Get()
+		if projectClusterId != clusterId {
+			return nil, workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, fmt.Sprintf("project %s is not associated with cluster %s",
+				projectId, clusterId))
+		}
+	}
+
+	return &submissionTarget{
+		tenantId:  tenantId,
+		project:   project,
+		namespace: namespace,
+		ancestors: ancestors,
+	}, nil
+}
+
+// assignWorkloadIdentity sets the ids, creation metadata and final name of a new workload and validates the name.
+func assignWorkloadIdentity(ctx context.Context, params *createWorkloadParams, target *submissionTarget) *workloadsApi.SubmissionErrorV2 {
+	params.TenantId = int32(target.tenantId)
+	params.WorkloadId = uuid.New()
+
+	params.Response.CreatedAt = time.Now().Truncate(time.Microsecond)
+	params.Response.CreatedBy = convutils.Deref(runaictx.GetString(ctx, runaictx.CfSubjectID), "")
+	params.Response.WorkloadId = params.WorkloadId.String()
+
+	if target.ancestors.DepartmentId.IsSet() {
+		params.Response.DepartmentId = target.ancestors.DepartmentId.Get()
+	}
+
+	if params.UseGivenNameAsPrefix {
+		params.Response.Name = GenerateJobNameByPrefix(params.Response.RequestedName)
+	} else {
+		params.Response.Name = params.Response.RequestedName
+	}
+
+	namingErrs := validation.IsDNS1035Label(params.Response.Name)
+	if len(namingErrs) > 0 {
+		return workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, "The workload name must consist of lower case alphanumeric characters or '-', and start with an alphabetic character.")
+	}
+	if len(params.Response.Name) > MaxWorkloadLength {
+		return workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, fmt.Sprintf("The length of a workload name must not exceed %d characters", MaxWorkloadLength))
+	}
+
+	//
+	//   check if such name already exists in the cluster. if cannot check it, do not fail the workload just log
+	//
+	nameInUse, validationErr := services_integration.IsWorkloadNameInUse(ctx, params.Response.ClusterId, params.Response.ProjectId, params.WorkloadType, params.Response.Name)
+	if validationErr != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to validate if name %s is taken: %v", params.Response.Name, validationErr.Message)
+	} else if nameInUse {
+		return workloadsApi.NewSubmissionErrorV2(http.StatusConflict, fmt.Sprintf("%s named '%s' already exists in the project",
+			params.WorkloadType, params.Response.Name))
+	}
+
+	return nil
+}
+
 func persistWorkloadV2Snapshot(ctx context.Context, wc *workloadContext) {
 	if wc == nil || wc.create == nil || wc.create.createParams == nil || wc.create.createParams.Response.Spec == nil {
 		return
@@ -647,29 +674,35 @@ func applyPriorityClassLabelWorkaround(ctx context.Context, responseSpec *worklo
 }
 
 func setPreemptibilityFromPriority(spec *workloadsApi.SupersetSpec, priorityValues map[string]int32) {
-	if spec == nil || spec.Preemptibility.IsSet() || !convutils.HasValue(spec.PriorityClass) {
+	if spec == nil || spec.Preemptibility.IsSet() {
 		return
 	}
-	if value, found := priorityValues[*spec.PriorityClass.Get()]; found {
-		if value < services.PriorityPreemptionThreshold {
-			spec.SetPreemptibility(workloadsApi.PREEMPTIBILITY_PREEMPTIBLE)
-		} else {
-			spec.SetPreemptibility(workloadsApi.PREEMPTIBILITY_NON_PREEMPTIBLE)
-		}
+	if preemptibility, found := preemptibilityOfPriority(spec.PriorityClass, priorityValues); found {
+		spec.SetPreemptibility(preemptibility)
 	}
 }
 
 func setMasterPreemptibilityFromPriority(spec *workloadsApi.MasterSpec, priorityValues map[string]int32) {
-	if spec == nil || spec.Preemptibility.IsSet() || !convutils.HasValue(spec.PriorityClass) {
+	if spec == nil || spec.Preemptibility.IsSet() {
 		return
 	}
-	if value, found := priorityValues[*spec.PriorityClass.Get()]; found {
-		if value < services.PriorityPreemptionThreshold {
-			spec.SetPreemptibility(workloadsApi.PREEMPTIBILITY_PREEMPTIBLE)
-		} else {
-			spec.SetPreemptibility(workloadsApi.PREEMPTIBILITY_NON_PREEMPTIBLE)
-		}
+	if preemptibility, found := preemptibilityOfPriority(spec.PriorityClass, priorityValues); found {
+		spec.SetPreemptibility(preemptibility)
 	}
+}
+
+func preemptibilityOfPriority(priorityClass workloadsApi.NullableString, priorityValues map[string]int32) (workloadsApi.Preemptibility, bool) {
+	if !convutils.HasValue(priorityClass) {
+		return "", false
+	}
+	value, found := priorityValues[*priorityClass.Get()]
+	if !found {
+		return "", false
+	}
+	if value < services.PriorityPreemptionThreshold {
+		return workloadsApi.PREEMPTIBILITY_PREEMPTIBLE, true
+	}
+	return workloadsApi.PREEMPTIBILITY_NON_PREEMPTIBLE, true
 }
 
 // Distributed inference stores security inside each replica rather than at spec.security.
@@ -955,7 +988,7 @@ func preValidateSpec(ctx context.Context, params *createWorkloadParams,
 		return nil, nil, dataVolumeErr
 	}
 
-	imagePullSecretErr := preValidateImagePullSecrets(ctx, params.Response.ClusterId, params.Response.ProjectId, spec, masterSpec)
+	imagePullSecretErr := preValidateImagePullSecrets(ctx, params.Response.ClusterId, params.Response.ProjectId, specSecretReferences(spec, masterSpec)...)
 	if imagePullSecretErr != nil {
 		return nil, nil, imagePullSecretErr
 	}
@@ -1038,10 +1071,26 @@ func preValidateDataVolumes(ctx context.Context, projectId string, spec *workloa
 	return dataVolumeClaimName, nil
 }
 
+// secretReferences holds the fields of a container that can reference secrets: environment variables and image pull secrets.
+type secretReferences struct {
+	environmentVariables []workloadsApi.EnvironmentVariable
+	imagePullSecrets     []workloadsApi.ImagePullSecret
+}
+
+func specSecretReferences(spec *workloadsApi.SupersetSpec, masterSpec *workloadsApi.MasterSpec) []secretReferences {
+	var references []secretReferences
+	if spec != nil {
+		references = append(references, secretReferences{environmentVariables: spec.EnvironmentVariables, imagePullSecrets: spec.ImagePullSecrets})
+	}
+	if masterSpec != nil {
+		references = append(references, secretReferences{environmentVariables: masterSpec.EnvironmentVariables, imagePullSecrets: masterSpec.ImagePullSecrets})
+	}
+	return references
+}
+
 // preValidateImagePullSecrets validates that the image pull secrets are supported, valid and exist in the cluster
-func preValidateImagePullSecrets(ctx context.Context, clusterId string, projectId string, spec *workloadsApi.SupersetSpec, masterSpec *workloadsApi.MasterSpec) *workloadsApi.SubmissionErrorV2 {
-	// Collect image pull secrets from both spec and masterSpec
-	workloadSecretNames := collectImagePullSecretNames(spec, masterSpec)
+func preValidateImagePullSecrets(ctx context.Context, clusterId string, projectId string, references ...secretReferences) *workloadsApi.SubmissionErrorV2 {
+	workloadSecretNames := collectImagePullSecretNames(references...)
 	if len(workloadSecretNames) == 0 {
 		return nil
 	}
@@ -1086,23 +1135,13 @@ func collectDataVolumeIds(instances []workloadsApi.DataVolumeInstance) []string 
 	return ids
 }
 
-// collectImagePullSecretNames collects and deduplicates image pull secret names from both spec and masterSpec
-func collectImagePullSecretNames(spec *workloadsApi.SupersetSpec, masterSpec *workloadsApi.MasterSpec) []string {
+// collectImagePullSecretNames collects and deduplicates image pull secret names from all the given containers
+func collectImagePullSecretNames(references ...secretReferences) []string {
 	secretNamesSet := datastructs.NewSet[string]()
 
-	// Collect from spec
-	if spec != nil && spec.ImagePullSecrets != nil {
-		for _, secret := range spec.ImagePullSecrets {
+	for _, reference := range references {
+		for _, secret := range reference.imagePullSecrets {
 			// No need to collect imagePullSecrets that are using user credential since we don't know their cluster resource name.
-			if secret.Name != nil && convutils.BoolIsFalse(secret.UserCredential.Get()) {
-				secretNamesSet.Add(*secret.Name)
-			}
-		}
-	}
-
-	// Collect from masterSpec
-	if masterSpec != nil && masterSpec.ImagePullSecrets != nil {
-		for _, secret := range masterSpec.ImagePullSecrets {
 			if secret.Name != nil && convutils.BoolIsFalse(secret.UserCredential.Get()) {
 				secretNamesSet.Add(*secret.Name)
 			}
@@ -1299,6 +1338,19 @@ func setDefaultNodepoolsIfNecessary(ctx context.Context, response *workloadsApi.
 	}
 }
 
+func getClusterNodePools(ctx context.Context, clusterId string) ([]clusterApi.Nodepool, *workloadsApi.SubmissionErrorV2) {
+	actualNodePoolsResponse, getErr := clusterservice.Get().GetNodePoolsInternalByCluster(ctx, clusterId)
+	if getErr != nil {
+		return nil, workloadsApi.NewSubmissionErrorV2(http.StatusInternalServerError, getErr.Error())
+	}
+
+	actualNodePools := []clusterApi.Nodepool{}
+	if actualNodePoolsResponse != nil {
+		actualNodePools = actualNodePoolsResponse.Nodepools
+	}
+	return actualNodePools, nil
+}
+
 func getDefaultNodepools(project *orgUnitApi.Project) []string {
 	if project != nil && len(project.DefaultNodePools) > 0 {
 		return project.DefaultNodePools
@@ -1307,8 +1359,8 @@ func getDefaultNodepools(project *orgUnitApi.Project) []string {
 	return []string{runv1.DefaultNodePoolName}
 }
 
-// extractUserCredentialsFromSpec returns a deduplicated list of user credentials for spec and masterSpec.
-func extractUserCredentialsFromSpec(spec *workloadsApi.SupersetSpec, masterSpec *workloadsApi.MasterSpec) ([]string, error) {
+// extractUserCredentials returns a deduplicated list of user credentials for all the given containers.
+func extractUserCredentials(references ...secretReferences) ([]string, error) {
 	// Helper function to collect credential names from environment variables
 	checkEnvVars := func(envVars []workloadsApi.EnvironmentVariable) ([]string, error) {
 		var names []string
@@ -1334,27 +1386,14 @@ func extractUserCredentialsFromSpec(spec *workloadsApi.SupersetSpec, masterSpec 
 		return names
 	}
 
-	// Collect credential names from both worker and master specs
 	var names []string
-	if spec != nil && (spec.EnvironmentVariables != nil || spec.ImagePullSecrets != nil) {
-		specCreds, err := checkEnvVars(spec.EnvironmentVariables)
-		if spec.ImagePullSecrets != nil {
-			specCreds = append(specCreds, checkImagePullSecrets(spec.ImagePullSecrets)...)
-		}
+	for _, reference := range references {
+		envVarCreds, err := checkEnvVars(reference.environmentVariables)
 		if err != nil {
 			return nil, err
 		}
-		names = append(names, specCreds...)
-	}
-	if masterSpec != nil && (masterSpec.EnvironmentVariables != nil || masterSpec.ImagePullSecrets != nil) {
-		masterCreds, err := checkEnvVars(masterSpec.EnvironmentVariables)
-		if masterSpec.ImagePullSecrets != nil {
-			masterCreds = append(masterCreds, checkImagePullSecrets(masterSpec.ImagePullSecrets)...)
-		}
-		if err != nil {
-			return nil, err
-		}
-		names = append(names, masterCreds...)
+		names = append(names, envVarCreds...)
+		names = append(names, checkImagePullSecrets(reference.imagePullSecrets)...)
 	}
 
 	if names == nil {
@@ -1367,8 +1406,8 @@ func extractUserCredentialsFromSpec(spec *workloadsApi.SupersetSpec, masterSpec 
 	return dedupedNames.Keys(), nil
 }
 
-func processCredentials(ctx context.Context, clusterId string, spec *workloadsApi.SupersetSpec, masterSpec *workloadsApi.MasterSpec) ([]workloadsApi.AssetsMapping, *workloadsApi.SubmissionErrorV2) {
-	credentials, err := extractUserCredentialsFromSpec(spec, masterSpec)
+func processCredentials(ctx context.Context, clusterId string, references ...secretReferences) ([]workloadsApi.AssetsMapping, *workloadsApi.SubmissionErrorV2) {
+	credentials, err := extractUserCredentials(references...)
 	if err != nil {
 		return nil, workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, err.Error())
 	}

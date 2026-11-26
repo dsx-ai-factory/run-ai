@@ -7,7 +7,11 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/pkg/constants"
@@ -24,6 +28,21 @@ import (
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+const (
+	workflowTaskType            = "Task"
+	workflowTaskAdditionalField = "workflowTask"
+)
+
+var argoNodeRetryPattern = regexp.MustCompile(`^(.+)\((\d+)\)$`)
+
+type workflowTask struct {
+	Workflow    string `json:"workflow"`
+	Group       string `json:"group"`
+	Task        string `json:"task"`
+	Attempt     int    `json:"attempt"`
+	TaskAttempt *int   `json:"taskAttempt,omitempty"`
+}
 
 type PodTopOwnerHandler struct {
 	cachedClient client.Client
@@ -59,7 +78,60 @@ func (h *PodTopOwnerHandler) Parse(ctx context.Context, object client.Object,
 
 	setPodObservedStatus(&pod.Status, &externalWorkload.Status.ObservedStatus)
 
+	if pod.Labels[constants.WorkflowLabelKey] != "" && len(pod.OwnerReferences) > 0 {
+		externalWorkload.Spec.Type = workflowTaskType
+		// Argo's node name holds the task and its retry, e.g. <workflow>.<task>(<retry>), while the pod name holds a hash
+		if nodeName := pod.Annotations[constants.ArgoNodeNameAnnotationKey]; nodeName != "" {
+			externalWorkload.Spec.OriginalWorkloadName = nodeName
+			setWorkflowTaskAdditionalFields(pod.Labels[constants.ArgoWorkflowLabelKey], nodeName, externalWorkload)
+		}
+		// the workload id labels of a workflow pod belong to the workflow; they're set when the pod is handled as owned
+		return nil
+	}
 	return h.addTopOwnerWorkloadIdLabelIfNeeded(ctx, pod, pod.UID, pod.Annotations)
+}
+
+// setWorkflowTaskAdditionalFields parses Argo's node name, <workflow>.<group>(<retry>).<task>(<retry>), where a single
+// task is its own group and a node without a retry strategy has no (<retry>). Argo's task names can't contain dots or
+// parentheses, so the path after the workflow's name splits unambiguously. Attempts count from 1, while Argo's retries
+// count from 0.
+func setWorkflowTaskAdditionalFields(workflowName, nodeName string, externalWorkload *v1alpha1.ExternalWorkload) {
+	path, found := strings.CutPrefix(nodeName, workflowName+".")
+	if workflowName == "" || !found || path == "" {
+		return
+	}
+	elements := strings.Split(path, ".")
+	group, groupRetry := parseArgoNodeElement(elements[0])
+	task, taskRetry := parseArgoNodeElement(elements[len(elements)-1])
+
+	details := workflowTask{
+		Workflow: workflowName,
+		Group:    group,
+		Task:     task,
+		Attempt:  ptr.Deref(groupRetry, 0) + 1,
+	}
+	if len(elements) > 1 && taskRetry != nil {
+		details.TaskAttempt = ptr.To(*taskRetry + 1)
+	}
+
+	raw, err := json.Marshal(map[string]workflowTask{workflowTaskAdditionalField: details})
+	if err != nil {
+		log.Error().Msgf("Failed to marshal workflow task details of node <%s>, error: %s", nodeName, err.Error())
+		return
+	}
+	externalWorkload.Spec.AdditionalFields = ptr.To(string(raw))
+}
+
+func parseArgoNodeElement(element string) (string, *int) {
+	match := argoNodeRetryPattern.FindStringSubmatch(element)
+	if match == nil {
+		return element, nil
+	}
+	retry, err := strconv.Atoi(match[2])
+	if err != nil {
+		return element, nil
+	}
+	return match[1], &retry
 }
 
 func setPodObservedStatus(podStatus *corev1.PodStatus,

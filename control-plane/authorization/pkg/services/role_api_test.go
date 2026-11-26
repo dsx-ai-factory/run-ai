@@ -303,7 +303,7 @@ var _ = Describe("Roles API tests", Ordered, func() {
 		Expect(len(role.Permissions)).To(Equal(len(api.AllowedResourceTypeEnumValues)))
 		for _, permission := range role.Permissions {
 			switch permission.ResourceType {
-			case api.RESOURCETYPE_PROJECT, api.RESOURCETYPE_WORKLOAD_PROPERTIES, api.RESOURCETYPE_INFERENCES, api.RESOURCETYPE_TRAININGS, api.RESOURCETYPE_WORKSPACES, api.RESOURCETYPE_WORKLOADS, api.RESOURCETYPE_NODEPOOLS_MINIMAL, api.RESOURCETYPE_CLUSTERS_MINIMAL:
+			case api.RESOURCETYPE_PROJECT, api.RESOURCETYPE_WORKLOAD_PROPERTIES, api.RESOURCETYPE_INFERENCES, api.RESOURCETYPE_TRAININGS, api.RESOURCETYPE_WORKFLOWS, api.RESOURCETYPE_WORKSPACES, api.RESOURCETYPE_WORKLOADS, api.RESOURCETYPE_NODEPOOLS_MINIMAL, api.RESOURCETYPE_CLUSTERS_MINIMAL:
 				Expect(len(permission.Actions)).To(Equal(1))
 				Expect(string(permission.Actions[0])).To(Equal("read"))
 			default:
@@ -413,7 +413,7 @@ var _ = Describe("Roles API tests", Ordered, func() {
 		Expect(len(role.Permissions)).To(Equal(len(api.AllowedResourceTypeEnumValues)))
 		for _, permission := range role.Permissions {
 			switch permission.ResourceType {
-			case api.RESOURCETYPE_PROJECT, api.RESOURCETYPE_WORKLOAD_PROPERTIES, api.RESOURCETYPE_INFERENCES, api.RESOURCETYPE_TRAININGS, api.RESOURCETYPE_WORKSPACES, api.RESOURCETYPE_WORKLOADS, api.RESOURCETYPE_NODEPOOLS_MINIMAL, api.RESOURCETYPE_CLUSTERS_MINIMAL:
+			case api.RESOURCETYPE_PROJECT, api.RESOURCETYPE_WORKLOAD_PROPERTIES, api.RESOURCETYPE_INFERENCES, api.RESOURCETYPE_TRAININGS, api.RESOURCETYPE_WORKFLOWS, api.RESOURCETYPE_WORKSPACES, api.RESOURCETYPE_WORKLOADS, api.RESOURCETYPE_NODEPOOLS_MINIMAL, api.RESOURCETYPE_CLUSTERS_MINIMAL:
 				Expect(len(permission.Actions)).To(Equal(1))
 				Expect(string(permission.Actions[0])).To(Equal("read"))
 			default:

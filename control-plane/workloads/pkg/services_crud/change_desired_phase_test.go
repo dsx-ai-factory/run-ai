@@ -41,6 +41,7 @@ import (
 // It records the last BatchWorkloads call so tests can assert on it.
 type workloadsMgrMock struct {
 	createResponse *workloads_mgr_api.WorkloadV2
+	createRequest  *workloads_mgr_api.WorkloadV2CreateRequest
 	batchResponse  *workloads_mgr_api.BatchResponse
 	lastAction     workloads_mgr_api.WorkloadsV2BatchAction
 	lastIds        []string
@@ -66,7 +67,8 @@ func (m *workloadsMgrMock) BatchWorkloads(_ context.Context, batch workloads_mgr
 	return &workloads_mgr_api.BatchResponse{Succeeded: succeeded}, nil
 }
 
-func (m *workloadsMgrMock) CreateWorkloadV2(_ context.Context, _ workloads_mgr_api.WorkloadV2CreateRequest) (*workloads_mgr_api.WorkloadV2, *workloads_mgr_api.Error) {
+func (m *workloadsMgrMock) CreateWorkloadV2(_ context.Context, req workloads_mgr_api.WorkloadV2CreateRequest) (*workloads_mgr_api.WorkloadV2, *workloads_mgr_api.Error) {
+	m.createRequest = &req
 	return m.createResponse, m.returnErr
 }
 

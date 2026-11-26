@@ -20,6 +20,17 @@ const (
 )
 
 type WorkloadV2Snapshot struct {
+	SnapshotBase `gorm:"embedded"`
+
+	Spec       *workloadsApi.SupersetSpec `gorm:"serializer:json; type:jsonb"`
+	MasterSpec *workloadsApi.MasterSpec   `gorm:"serializer:json; type:jsonb"`
+
+	MasterSameAsWorker *bool
+
+	AssetsMapping []workloadsApi.AssetsMapping `gorm:"serializer:json; type:jsonb"`
+}
+
+type SnapshotBase struct {
 	ID uuid.UUID `gorm:"type:uuid;primaryKey"`
 
 	CreatedAt time.Time
@@ -38,16 +49,23 @@ type WorkloadV2Snapshot struct {
 
 	Name      string
 	Namespace string
+}
 
-	Spec       *workloadsApi.SupersetSpec `gorm:"serializer:json; type:jsonb"`
-	MasterSpec *workloadsApi.MasterSpec   `gorm:"serializer:json; type:jsonb"`
+func (WorkloadV2Snapshot) TableName() string {
+	return WorkloadV2SnapshotsTableName
+}
 
-	MasterSameAsWorker *bool
+// WorkflowSnapshot is a workflow's row in the workloads_v2_snapshots table, with the workflow spec in the spec column.
+// Snapshot reads filter by workload type, so a workflow's spec is never decoded as a SupersetSpec.
+type WorkflowSnapshot struct {
+	SnapshotBase `gorm:"embedded"`
+
+	Spec *workloadsApi.WorkflowSpecSpec `gorm:"serializer:json; type:jsonb"`
 
 	AssetsMapping []workloadsApi.AssetsMapping `gorm:"serializer:json; type:jsonb"`
 }
 
-func (WorkloadV2Snapshot) TableName() string {
+func (WorkflowSnapshot) TableName() string {
 	return WorkloadV2SnapshotsTableName
 }
 

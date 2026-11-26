@@ -63,6 +63,13 @@ var Researcher = models.Role{
 			Delete:       true,
 		},
 		{
+			ResourceType: api.RESOURCETYPE_WORKFLOWS,
+			Create:       true,
+			Read:         true,
+			Update:       true,
+			Delete:       true,
+		},
+		{
 			ResourceType: api.RESOURCETYPE_INFERENCES,
 			Read:         true,
 		},
