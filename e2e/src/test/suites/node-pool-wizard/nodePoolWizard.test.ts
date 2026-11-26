@@ -6,7 +6,7 @@
 import { expect } from '@playwright/test';
 import { createPool, editFromGrid, expectTooltip, test } from './wizardFixtures';
 
-const lockedMessage = 'This can’t be modified once a node pool has been created.';
+const lockedMessage = /^This can’t be modified once a node pool has been created\.?$/;
 
 test.describe('Node pool wizard', () => {
     test('creation keeps later steps locked until the identity is saved', async ({ wizard: page }) => {

@@ -5,6 +5,14 @@
 
 import { expect, type Page } from '@playwright/test';
 
+export async function selectNodePoolWizardCluster(page: Page, cluster: string): Promise<void> {
+    await page.locator('[aid="cluster-dropdown"]').getByRole('combobox').click();
+    const clusterOption = page.getByRole('option').filter({
+        hasText: new RegExp('^' + cluster.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?: \\(.*\\))?$')
+    });
+    await clusterOption.click();
+}
+
 export async function fillNodePoolWizardIdentity(
     page: Page,
     cluster: string,
@@ -12,11 +20,7 @@ export async function fillNodePoolWizardIdentity(
     labelKey: string,
     labelValue: string
 ): Promise<void> {
-    await page.locator('[aid="cluster-dropdown"]').getByRole('combobox').click();
-    const clusterOption = page.getByRole('option').filter({
-        hasText: new RegExp('^' + cluster.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?: \\(.*\\))?$')
-    });
-    await clusterOption.click();
+    await selectNodePoolWizardCluster(page, cluster);
     await page.getByRole('textbox', { name: 'Name', exact: true }).fill(name);
     for (const [label, value] of [
         ['Key', labelKey],

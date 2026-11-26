@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { fillNodePoolWizardIdentity } from '../../../modules/ui/runaiV2/pages/nodePoolWizardIdentity';
+import { selectNodePoolWizardCluster } from '../../../modules/ui/runaiV2/pages/nodePoolWizardIdentity';
 import { randomUUID } from 'node:crypto';
 import { expect, type Locator, type Page, test as base } from '@playwright/test';
 import type { Nodepool } from '../../../modules/api/apis/clusterApi/generated/model/nodepool';
@@ -91,9 +91,14 @@ export async function createPool(
 ): Promise<string> {
     const cluster = process.env.CLUSTER_NAME_PREFIX;
     if (!cluster) throw new Error('Set CLUSTER_NAME_PREFIX to the cluster name shown in the wizard.');
-    const key = 'e2e.run.ai/' + name;
-    await fillNodePoolWizardIdentity(page, cluster, name, key, name);
+    await selectNodePoolWizardCluster(page, cluster);
+    await page.getByRole('textbox', { name: 'Name', exact: true }).fill(name);
     await page.getByRole('textbox', { name: 'Description', exact: true }).fill('Wizard E2E');
+    const key = 'e2e.run.ai/' + name;
+    await page.getByRole('combobox', { name: 'Key', exact: true }).fill(key);
+    await page.getByRole('option', { name: key + ' (new key)', exact: true }).click();
+    await page.getByRole('combobox', { name: 'Value', exact: true }).fill(name);
+    await page.getByRole('option', { name: name + ' (new value)', exact: true }).click();
     const [created] = await Promise.all([
         page.waitForResponse(
             (response) =>
@@ -125,7 +130,7 @@ export async function editFromGrid(
     await editMenu.getByRole('menuitem', { name: destination, exact: true }).click();
 }
 
-export async function expectTooltip(page: Page, target: Locator, message: string): Promise<void> {
+export async function expectTooltip(page: Page, target: Locator, message: string | RegExp): Promise<void> {
     await page.mouse.move(0, 0);
     const tooltip = page.getByRole('tooltip').filter({ hasText: message });
     await expect(tooltip).toBeHidden();
