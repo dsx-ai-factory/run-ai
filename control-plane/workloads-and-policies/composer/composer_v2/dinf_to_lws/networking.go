@@ -41,12 +41,12 @@ func (dinfComposer *DistributedInferenceToLWSComposer) processNetworkingFields(
 		}
 
 		cookie := lwsNetworkingCookie{
-			config:              config,
-			projectName:         dinfComposer.fc.ProjectName,
-			workloadName:        dinfComposer.fc.WorkloadName,
-			lwsName:             dinfComposer.leaderWorkerSetName(),
-			serviceName:         fmt.Sprintf("dinfw-%s-sp-0", dinfComposer.fc.WorkloadName),
-			standaloneAuthProxy: loadAwareRouting,
+			config:           config,
+			projectName:      dinfComposer.fc.ProjectName,
+			workloadName:     dinfComposer.fc.WorkloadName,
+			lwsName:          dinfComposer.leaderWorkerSetName(),
+			serviceName:      fmt.Sprintf("dinfw-%s-sp-0", dinfComposer.fc.WorkloadName),
+			loadAwareRouting: loadAwareRouting,
 		}
 
 		runner := &composer.StepRunner{}
@@ -96,8 +96,10 @@ func (dinfComposer *DistributedInferenceToLWSComposer) composeServingPort(
 
 // buildAuthProxySidecar returns a batch step that installs an oauth2-proxy
 // sidecar next to the leader container when the serving port is not public.
-// No-op for public serving ports. Must run after composeServingPort so that
-// cookie.servingURL and authInfo have been populated.
+// No-op for public serving ports and for a serving Service with an
+// authorization block, which the standalone auth proxy protects. Must run after
+// composeServingPort so that cookie.servingURL, authInfo, and the serving
+// Service have been populated.
 func (dinfComposer *DistributedInferenceToLWSComposer) buildAuthProxySidecar(
 	src *workloadsApi.SupersetServingPort,
 	target *LeaderWorkerSetTarget,
@@ -107,7 +109,7 @@ func (dinfComposer *DistributedInferenceToLWSComposer) buildAuthProxySidecar(
 	return func() *workloadsApi.Error {
 		if authInfo.AuthorizationType == nil ||
 			*authInfo.AuthorizationType == composer.ConnectionAuthorizationType_PUBLIC ||
-			cookie.standaloneAuthProxy {
+			servingServiceHasAuthorization(target, cookie.serviceName) {
 			return nil
 		}
 		port := src.Port.Get()
@@ -130,4 +132,19 @@ func (dinfComposer *DistributedInferenceToLWSComposer) buildAuthProxySidecar(
 			},
 		)
 	}
+}
+
+// servingServiceHasAuthorization reports whether the serving Service carries an
+// authorization block. The networking plugin puts its standalone auth proxy in
+// front of such a Service, so the leader needs no auth sidecar.
+func servingServiceHasAuthorization(target *LeaderWorkerSetTarget, serviceName string) bool {
+	for _, endpoint := range target.Config.Networking {
+		for _, service := range endpoint.Services {
+			spec := service.GetSpec()
+			if spec.GetName() == serviceName && service.HasAuthorization() {
+				return true
+			}
+		}
+	}
+	return false
 }

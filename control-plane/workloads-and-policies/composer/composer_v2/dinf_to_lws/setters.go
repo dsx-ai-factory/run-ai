@@ -31,9 +31,10 @@ type lwsNetworkingCookie struct {
 	lwsName      string
 	serviceName  string
 	servingURL   string
-	// standaloneAuthProxy moves a protected serving port's auth check from the
-	// leader sidecar to the standalone auth proxy of the networking plugin.
-	standaloneAuthProxy bool
+	// loadAwareRouting gives a protected serving port's Service an authorization
+	// block, so the networking plugin's standalone auth proxy runs the auth check
+	// instead of the leader sidecar.
+	loadAwareRouting bool
 }
 
 func servingPortToLWS(src *composer.ServingPortInfo, target any, rawCookie any) *workloadsApi.Error {
@@ -54,8 +55,16 @@ func servingPortToLWS(src *composer.ServingPortInfo, target any, rawCookie any) 
 
 	authEnabled := src.AuthInfo.AuthorizationType != nil &&
 		*src.AuthInfo.AuthorizationType != composer.ConnectionAuthorizationType_PUBLIC
+	service := workloadsManagerApi.NewNetworkingService()
+	if authEnabled && cookie.loadAwareRouting {
+		authorization, err := standaloneAuthorization(src.AuthInfo)
+		if err != nil {
+			return err
+		}
+		service.SetAuthorization(*authorization)
+	}
 	targetPort := *port
-	if authEnabled && !cookie.standaloneAuthProxy {
+	if authEnabled && !service.HasAuthorization() {
 		targetPort = composer.Oauth2ContainerDefaultPort
 	}
 	servicePort := workloadsManagerApi.NewServicePort(servingPortServicePort)
@@ -78,15 +87,7 @@ func servingPortToLWS(src *composer.ServingPortInfo, target any, rawCookie any) 
 		serviceLabels[constants.LabelWorkloadKind] = constants.KindDistributedInferenceWorkload
 		serviceSpec.SetLabels(serviceLabels)
 	}
-	service := workloadsManagerApi.NewNetworkingService()
 	service.SetSpec(*serviceSpec)
-	if authEnabled && cookie.standaloneAuthProxy {
-		authorization, err := standaloneAuthorization(src.AuthInfo)
-		if err != nil {
-			return err
-		}
-		service.SetAuthorization(*authorization)
-	}
 
 	endpoint := workloadsManagerApi.NetworkingEndpoint{
 		Services: []workloadsManagerApi.NetworkingService{*service},
