@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-FROM registry.access.redhat.com/ubi9/ubi-minimal:8.10
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.9
 USER 65532:65532
 
 LABEL description="Run integration tests for cluster-service"
