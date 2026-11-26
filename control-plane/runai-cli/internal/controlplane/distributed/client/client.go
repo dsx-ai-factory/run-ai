@@ -7,6 +7,7 @@ package client
 
 import (
 	"context"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api/httputils"
 	"net/http"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api/config"
@@ -115,5 +116,6 @@ func handleSubmitResponse(distributed *openapi.DistributedWorkload, response *ht
 		defer response.Body.Close()
 	}
 
+	httputils.PrintSubmissionWarnings(distributed.Warnings)
 	return distributed.Name, nil
 }

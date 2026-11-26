@@ -96,6 +96,7 @@ func (bdc *BackendDistributedInferenceClient) Submit(ctx context.Context, name, 
 	if response != nil && response.Body != nil {
 		defer response.Body.Close()
 	}
+	httputils.PrintSubmissionWarnings(inference.Warnings)
 	return inference.Name, nil
 }
 

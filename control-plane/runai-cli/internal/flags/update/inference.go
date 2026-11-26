@@ -51,6 +51,7 @@ func InferenceUpdateComputeFlagSet(flagsCompute *pflag.FlagSet, specCompute *sub
 }
 
 func InferenceUpdateNodeSelectionFlagSet(flagsScheduling *pflag.FlagSet, specScheduling *submit.Scheduling, completionFnsToRegister map[string]completion.CompletionFn) {
+	submit.AcceleratorFlagSet(flagsScheduling, specScheduling, completionFnsToRegister)
 	flagsScheduling.StringArrayVar(&specScheduling.NodePools, consts.AttributeNameNodePools, []string{}, consts.AttributeUsageNodePools)
 	flagsScheduling.StringArrayVar(&specScheduling.ExcludeNodes, consts.AttributeNameExcludeNode, []string{}, consts.AttributeUsageExcludeNode)
 	completionFnsToRegister[consts.AttributeNameExcludeNode] = node.GetNodeNamesForFlag

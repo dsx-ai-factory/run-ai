@@ -67,6 +67,7 @@ func (bwc *BackendInferenceClient) Update(ctx context.Context, uuid string, clus
 		return "", err
 	}
 
+	httputils.PrintSubmissionWarnings(workload.Warnings)
 	return workload.Name, err
 }
 
@@ -120,5 +121,6 @@ func handleBackendResponse(inference *openapi.Inference, response *http.Response
 		defer response.Body.Close()
 	}
 
+	httputils.PrintSubmissionWarnings(inference.Warnings)
 	return inference.Name, nil
 }

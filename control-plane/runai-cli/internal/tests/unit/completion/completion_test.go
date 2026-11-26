@@ -7,7 +7,10 @@ package completion
 
 import (
 	"fmt"
+	"io"
+	"net/http"
 	"os"
+	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api/filter"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/auth"
@@ -36,6 +39,10 @@ const (
 	WorkloadName01 = "workload-01"
 	WorkloadName02 = "workload-02"
 )
+
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f roundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) { return f(req) }
 
 var _ = Describe("Completion Tests", Ordered, func() {
 	var (
@@ -111,6 +118,34 @@ var _ = Describe("Completion Tests", Ordered, func() {
 				output, err := cli.RunCommand(factories.ConvertToCompletionTestCmd(FlagCompletionCmd, "bla"), envMap)
 				Expect(err).To(BeNil())
 				factories.AssertCompletionOptions(output, nil)
+				factories.AssertCompletionResponseStatus(output, false)
+			})
+
+			It("suggests unique GPU models from the selected project's GPU-enabled pools", func() {
+				const inventory = `{"nodepools":[{"id":"p1","gpuTypes":[{"type":"H100"},{"type":"A100"}]},{"id":"p2","gpuTypes":[{"type":"H100"},{"type":"MI300X"}]},{"id":"hidden","gpuTypes":[{"type":"V100"}]}]}`
+				original := http.DefaultClient
+				http.DefaultClient = &http.Client{Transport: roundTripFunc(func(req *http.Request) (*http.Response, error) {
+					var body string
+					switch req.URL.Path {
+					case "/api/v1/cli-exposer/version":
+						return nil, fmt.Errorf("CLI version service unavailable in completion fixture")
+					case "/api/v1/org-unit/projects/node-pool-resources":
+						Expect(req.URL.Query().Get("filterBy")).To(ContainSubstring("orgUnitId==" + clients.ProjectOneID))
+						Expect(req.URL.Query().Get("filterBy")).To(ContainSubstring("gpuAccessible==true"))
+						body = `{"nodePoolResources":[{"orgUnitId":"301","nodePoolId":"p1"},{"orgUnitId":"301","nodePoolId":"p2"}]}`
+					case "/api/v1/node-pools/minimal":
+						body = inventory
+					default:
+						return nil, fmt.Errorf("unexpected completion request %s", req.URL.Path)
+					}
+					return &http.Response{StatusCode: http.StatusOK, Header: http.Header{"Content-Type": {"application/json"}}, Body: io.NopCloser(strings.NewReader(body)), Request: req}, nil
+				})}
+				DeferCleanup(func() { http.DefaultClient = original })
+				command := "training submit -p " + clients.ProjectOneName + " --gpu-type"
+				output, err := cli.RunCommand(factories.ConvertToCompletionTestCmd(command, ""), envMap)
+				Expect(err).NotTo(HaveOccurred())
+				options, _, _ := strings.Cut(output, ":")
+				Expect(strings.Fields(options)).To(Equal([]string{"A100", "H100", "MI300X"}))
 				factories.AssertCompletionResponseStatus(output, false)
 			})
 
