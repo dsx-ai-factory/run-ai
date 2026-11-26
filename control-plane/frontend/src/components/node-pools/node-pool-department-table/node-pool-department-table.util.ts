@@ -8,8 +8,11 @@ import { entityPriorityMap } from "@/models/org-unit.model";
 import { weightPercentage, type IDepartmentSchedulingEdit } from "@/models/node-pool-scheduling.model";
 import { completePeerSchedulingTotals } from "@/utils/node-pool-scheduling.util/node-pool-scheduling-totals.util";
 
-export function departmentTableColumns(mode: ESchedulingMode | undefined, maxAllocation: boolean): QTableColumn[] {
-  const ranked = mode === ESchedulingMode.Ranked || mode === ESchedulingMode.Guaranteed;
+export function departmentTableColumns(
+  mode: ESchedulingMode | undefined,
+  maxAllocation: boolean,
+  ranked: boolean,
+): QTableColumn[] {
   return [
     { name: "selection", label: "", field: "id", align: "left" },
     ...(mode === ESchedulingMode.Guaranteed
@@ -21,13 +24,15 @@ export function departmentTableColumns(mode: ESchedulingMode | undefined, maxAll
     { name: "result", label: "Result", field: "id", align: "left" },
   ];
 }
-export function schedulingColumnOrder(name: string, mode: ESchedulingMode | undefined) {
-  const ranked = mode === ESchedulingMode.Ranked || mode === ESchedulingMode.Guaranteed;
-  if (name === "quota") return "#1";
-  if (name === "department") return ranked ? (mode === ESchedulingMode.Guaranteed ? "#2" : "#1") : "";
-  if (name === "weight") return mode === ESchedulingMode.Guaranteed ? "#3" : ranked ? "#2" : "#1";
-  if (name === "limit") return mode === ESchedulingMode.Guaranteed ? "#4" : ranked ? "#3" : "#2";
-  return "";
+export function schedulingColumnOrder(name: string, mode: ESchedulingMode | undefined, ranked: boolean) {
+  const order = [
+    ...(mode === ESchedulingMode.Guaranteed ? ["quota"] : []),
+    ...(ranked ? ["department"] : []),
+    "weight",
+    "limit",
+  ];
+  const index = order.indexOf(name);
+  return index >= 0 ? `#${index + 1}` : "";
 }
 export function rankedDepartmentRows<T extends IDepartmentSchedulingEdit>(
   effectiveRows: T[],

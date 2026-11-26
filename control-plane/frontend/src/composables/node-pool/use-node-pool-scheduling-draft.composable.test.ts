@@ -14,6 +14,11 @@ const snapshot = () => ({
   departments: {},
 });
 describe("scheduling draft", () => {
+  it.each([false, true])("round-trips a Guaranteed pool with ranks set to %s", (ranks) => {
+    const capabilities = { quota: true, ranks, adjustableWeights: true, limits: false, cpuQuota: false };
+    const draft = createSchedulingDraft({ ...snapshot(), mode: ESchedulingMode.Guaranteed, capabilities });
+    expect(toSchedulingCapabilities(draft)).toEqual(capabilities);
+  });
   it("maps each mode to capabilities", () => {
     const draft = createSchedulingDraft(snapshot());
     expect(toSchedulingCapabilities(draft)).toEqual({

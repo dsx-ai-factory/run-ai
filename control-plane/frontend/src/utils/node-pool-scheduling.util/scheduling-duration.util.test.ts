@@ -11,6 +11,10 @@ import {
 
 describe("saved scheduling durations", () => {
   it.each([
+    [".5h", { Days: 0, Hours: 0, Minutes: 30, Seconds: 0 }],
+    ["1.h", { Days: 0, Hours: 1, Minutes: 0, Seconds: 0 }],
+    ["+0", { Days: 0, Hours: 0, Minutes: 0, Seconds: 0 }],
+    ["-0s", { Days: 0, Hours: 0, Minutes: 0, Seconds: 0 }],
     ["0.5h", { Days: 0, Hours: 0, Minutes: 30, Seconds: 0 }],
     ["1.5d", { Days: 1, Hours: 12, Minutes: 0, Seconds: 0 }],
     ["2w", { Days: 14, Hours: 0, Minutes: 0, Seconds: 0 }],
@@ -23,7 +27,7 @@ describe("saved scheduling durations", () => {
     expect(schedulingDurationToFields("0.5m", false)).toEqual({ Days: 0, Hours: 0, Minutes: 0.5, Seconds: 0 });
   });
 
-  it.each(["1hgarbage", "1.2.3s", "1.h"])(
+  it.each(["1hgarbage", "1.2.3s", ".h", "-.5h"])(
     "rejects invalid duration %s instead of partially interpreting it",
     (value) => {
       expect(() => schedulingDurationSeconds(value)).toThrow(/valid nonnegative duration/);

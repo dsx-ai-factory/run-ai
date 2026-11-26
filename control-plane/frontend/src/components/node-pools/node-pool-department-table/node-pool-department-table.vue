@@ -374,6 +374,7 @@ import {
   weightFromGuaranteedQuota,
   weightPercentage,
   type SchedulingDraft,
+  toSchedulingCapabilities,
   type IDepartmentPages,
   type IDepartmentSchedulingEdit,
   type ISchedulingTotals,
@@ -426,8 +427,11 @@ const knownRows = ref<Record<string, DepartmentNodePoolResources>>({});
 watch(
   [() => props.baselineRows, () => props.rows],
   ([snapshot, rows]) => {
-    for (const row of snapshot ?? []) knownRows.value[row.orgUnitId] = row;
-    for (const row of rows) knownRows.value[row.orgUnitId] = row;
+    if (snapshot) {
+      knownRows.value = Object.fromEntries(snapshot.map((row) => [row.orgUnitId, row]));
+    } else {
+      for (const row of rows) knownRows.value[row.orgUnitId] = row;
+    }
   },
   { immediate: true },
 );
@@ -456,7 +460,7 @@ const expanded = ref(new Set<string>([ENTITY_PRIORITY_DEFAULT_VALUE]));
 const showMove = ref(false);
 const maxAllocation = computed(() => isSupportedSchedulingMode(props.draft.mode) && !!props.draft.maxAllocation);
 const ranked = computed(
-  () => props.draft.mode === ESchedulingMode.Ranked || props.draft.mode === ESchedulingMode.Guaranteed,
+  () => isSupportedSchedulingMode(props.draft.mode) && !!toSchedulingCapabilities(props.draft).ranks,
 );
 const automatic = computed(() => props.draft.mode === ESchedulingMode.Guaranteed && props.draft.automaticWeights);
 const hasMore = computed(() => props.departmentPages?.nextOffset != null);
@@ -505,7 +509,7 @@ function updateFilters(value: IFilterBy) {
   if (value.searchTerm !== props.searchTerm) emit("search", value.searchTerm ?? "");
 }
 const panelVisible = computed(() => props.canView && props.settingsOpen);
-const columns = computed(() => departmentTableColumns(props.draft.mode, maxAllocation.value));
+const columns = computed(() => departmentTableColumns(props.draft.mode, maxAllocation.value, ranked.value));
 const simulation = ref(false);
 const capacityHintId = useId();
 const settingsPanelId = useId();
@@ -555,7 +559,7 @@ const headerTooltips = computed<Record<string, string>>(() => ({
   result:
     "View a visual summary of each department’s resource settings. Turn on Simulate workload demand to see how GPUs would be allocated based on real-time demand.",
 }));
-const order = (name: string) => schedulingColumnOrder(name, props.draft.mode);
+const order = (name: string) => schedulingColumnOrder(name, props.draft.mode, ranked.value);
 const effectiveRows = computed(() => {
   const source = filters.value.advancedFilters?.length ? (props.baselineRows ?? props.rows) : props.rows;
   const visible = new Map(source.map((row) => [row.orgUnitId, row]));

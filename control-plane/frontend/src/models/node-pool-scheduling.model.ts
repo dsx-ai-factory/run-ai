@@ -54,7 +54,10 @@ export function toSchedulingCapabilities(draft: SchedulingDraft): SchedulingCapa
   return {
     adjustableWeights: draft.mode !== ESchedulingMode.Guaranteed || !draft.automaticWeights,
     quota: draft.mode === ESchedulingMode.Guaranteed,
-    ranks: draft.mode !== ESchedulingMode.Proportional,
+    ranks:
+      draft.mode === ESchedulingMode.Guaranteed && draft.capabilities?.quota
+        ? (draft.capabilities.ranks ?? true)
+        : draft.mode !== ESchedulingMode.Proportional,
     limits: !!draft.maxAllocation,
     cpuQuota: draft.mode === ESchedulingMode.Guaranteed && draft.cpuQuota,
   };

@@ -17,7 +17,7 @@
     >
       <runai-form-wrapper
         ref="form"
-        :form-state="draft"
+        :form-state="{ draft, labelEdits }"
         :prevent-leave="validating || submitting"
         full-width
         greedy
@@ -60,8 +60,13 @@
           <runai-expansion-item label="Label" default-opened disable-closing>
             <runai-section-title title="Set the label for the nodes that belong to this node pool" />
             <q-select
-              :model-value="draft.labelKey"
-              @update:model-value="draft.labelKey = $event ?? ''"
+              :key="`key-${draft.clusterId}`"
+              ref="labelKeySelect"
+              :model-value="labelEdits.labelKey === undefined ? draft.labelKey : null"
+              @input.capture="editLabel('labelKey', $event)"
+              @update:model-value="selectLabel('labelKey', $event)"
+              @blur="restoreLabelInput('labelKey', labelEdits.labelKey)"
+              @keyup.esc="discardLabelEdit('labelKey')"
               clearable
               clear-icon="ph-bold ph-x"
               class="label-field"
@@ -84,7 +89,10 @@
               map-options
               input-debounce="250"
               :disable="locked || !draft.clusterId"
-              :rules="[nodePoolUtil.validateLabelKey]"
+              :rules="[
+                () => labelEdits.labelKey === undefined || 'Select a key or press Escape to discard your edit.',
+                nodePoolUtil.validateLabelKey,
+              ]"
               no-error-icon
               @filter="filterKeys"
               @new-value="addKey"
@@ -97,8 +105,13 @@
             </q-select>
             <q-select
               v-if="draft.labelKey"
-              :model-value="draft.labelValue"
-              @update:model-value="draft.labelValue = $event ?? ''"
+              :key="`value-${draft.labelKey}`"
+              ref="labelValueSelect"
+              :model-value="labelEdits.labelValue === undefined ? draft.labelValue : null"
+              @input.capture="editLabel('labelValue', $event)"
+              @update:model-value="selectLabel('labelValue', $event)"
+              @blur="restoreLabelInput('labelValue', labelEdits.labelValue)"
+              @keyup.esc="discardLabelEdit('labelValue')"
               clearable
               clear-icon="ph-bold ph-x"
               class="label-field"
@@ -121,7 +134,11 @@
               map-options
               input-debounce="250"
               :disable="locked"
-              :rules="[nodePoolUtil.validateLabelValue, uniqueLabel]"
+              :rules="[
+                () => labelEdits.labelValue === undefined || 'Select a value or press Escape to discard your edit.',
+                nodePoolUtil.validateLabelValue,
+                uniqueLabel,
+              ]"
               reactive-rules
               no-error-icon
               @filter="filterValues"
@@ -172,8 +189,8 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onScopeDispose, ref, toRef, watch } from "vue";
-import { useQuasar } from "quasar";
+import { computed, nextTick, onScopeDispose, reactive, ref, toRef, watch } from "vue";
+import { type QSelect, useQuasar } from "quasar";
 import NodePoolWizardSummary from "@/components/node-pools/node-pool-wizard-summary/node-pool-wizard-summary.vue";
 import RunaiWizardLayout from "@/components/common/runai-wizard-layout/runai-wizard-layout.vue";
 import RunaiFormWrapper from "@/components/common/runai-form-wrapper/runai-form-wrapper.vue";
@@ -241,6 +258,8 @@ const unregisterGuard = unsavedGuard.registerStepGuard("identity", {
     if (!created.value) throw new Error(errorMessages.NODE_POOL_SAVE_FAILED);
   },
   discard: () => {
+    delete labelEdits.labelKey;
+    delete labelEdits.labelValue;
     Object.assign(draft, deepCopy(initialDraft));
     form.value?.initFirstState();
     form.value?.updateDirtyState();
@@ -262,6 +281,43 @@ async function saveStepChanges() {
   } catch {
     /* Validation keeps the user on the current step. */
   }
+}
+type LabelField = "labelKey" | "labelValue";
+const labelEdits = reactive<Partial<Record<LabelField, string>>>({});
+const labelKeySelect = ref<QSelect>();
+const labelValueSelect = ref<QSelect>();
+watch(
+  () => draft.clusterId,
+  () => {
+    delete labelEdits.labelKey;
+    delete labelEdits.labelValue;
+  },
+);
+watch(
+  () => draft.labelKey,
+  () => delete labelEdits.labelValue,
+);
+
+function editLabel(field: LabelField, event: Event) {
+  if (!(event.target instanceof HTMLInputElement)) return;
+  if (event.target.value === draft[field]) delete labelEdits[field];
+  else labelEdits[field] = event.target.value;
+}
+function selectLabel(field: LabelField, value: string | null) {
+  delete labelEdits[field];
+  draft[field] = value ?? "";
+}
+async function restoreLabelInput(field: LabelField, text?: string) {
+  if (text === undefined) return;
+  // QSelect restores its model after emitting blur, even when the user has only typed a replacement.
+  await nextTick();
+  const select = field === "labelKey" ? labelKeySelect.value : labelValueSelect.value;
+  select?.updateInputValue(text, true);
+}
+function discardLabelEdit(field: LabelField) {
+  if (labelEdits[field] === undefined) return;
+  delete labelEdits[field];
+  void restoreLabelInput(field, draft[field]);
 }
 const labels = useNodeLabelOptions(toRef(draft, "clusterId"), toRef(draft, "labelKey"));
 const keySearch = ref("");

@@ -14,7 +14,7 @@
     <template #header>New Department</template>
     <template #body>
       <q-form ref="form" class="new-department-form" @submit.prevent="createDepartment">
-        <fieldset :disabled="saving || !!createdDepartment" class="department-fields">
+        <fieldset :disabled="fieldsDisabled" class="department-fields">
           <p>The department will be created under the following cluster and can use all of its node pools</p>
           <q-input
             :model-value="clusterName || clusterId"
@@ -52,11 +52,13 @@
               hide-bottom-space
               label="Subject"
               class="subject-select"
+              :disable="fieldsDisabled"
               @update:model-value="subjects = []"
             />
             <subject-addable-multi-select
               v-if="subject && subject.value !== SubjectTypeExtended.AllAuthenticatedUsers"
               :subject-type="subject"
+              :disable="fieldsDisabled"
               :selected-subjects-options="subjects"
               @update:selected-subjects="subjects = $event"
               @add-subject="subjects = [...subjects, $event]"
@@ -66,7 +68,7 @@
               :options="roleOptions"
               :rules="[validateRole]"
               :loading="rolesLoading"
-              :disable="!canAssignRoles || rolesLoading || !!rolesError"
+              :disable="fieldsDisabled || !canAssignRoles || rolesLoading || !!rolesError"
               label="Role"
               class="role-select"
             />
@@ -140,6 +142,7 @@ const name = ref(""),
 const saving = ref(false);
 const saveError = ref("");
 const createdDepartment = ref<Department>();
+const fieldsDisabled = computed(() => saving.value || !!createdDepartment.value);
 const completedSubjects = new Set<string>();
 const permissionStore = usePermissionStore();
 const canCreateDepartment = computed(() => permissionStore.hasPermission(ResourceType.Department, Action.Create));

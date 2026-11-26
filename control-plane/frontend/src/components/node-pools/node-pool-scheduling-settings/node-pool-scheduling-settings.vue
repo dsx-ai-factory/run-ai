@@ -65,7 +65,7 @@
         </scheduling-section-title>
         <runai-toggle
           :model-value="!!draft.maxAllocation"
-          :disable="readonly || checkingLimits || (!canResetResources && (savedMaxAllocation ?? draft.maxAllocation))"
+          :disable="readonly || resetPending || (!canResetResources && (savedMaxAllocation ?? draft.maxAllocation))"
           aid="max-allocation-toggle"
           @update:model-value="setMax"
         />
@@ -235,7 +235,7 @@
           </scheduling-section-title>
           <runai-toggle
             :model-value="draft.cpuQuota"
-            :disable="readonly || (!canResetResources && (savedCpuQuota ?? draft.cpuQuota))"
+            :disable="readonly || resetPending || (!canResetResources && (savedCpuQuota ?? draft.cpuQuota))"
             aid="cpu-quota-toggle"
             @update:model-value="setCpu"
           />
@@ -342,6 +342,7 @@ function setDuration(field: "historicalWindow" | "minimumRuntime", unit: string,
   patch({ [field]: { ...props.draft[field], [unit]: number(value, `${field}.${unit}`) } });
 }
 const checkingLimits = ref(false);
+const resetPending = computed(() => checkingLimits.value || !!confirmation.value);
 const maxAllocationError = ref("");
 let limitCheckVersion = 0;
 function invalidateLimitCheck() {
@@ -366,7 +367,7 @@ async function setMax(value: boolean) {
   if (
     !isSupportedSchedulingMode(props.draft.mode) ||
     props.readonly ||
-    checkingLimits.value ||
+    resetPending.value ||
     (!value && (props.savedMaxAllocation ?? props.draft.maxAllocation) && !props.canResetResources)
   )
     return;
@@ -398,11 +399,17 @@ async function setMax(value: boolean) {
   }
 }
 function setCpu(value: boolean) {
-  if (props.readonly || (!value && (props.savedCpuQuota ?? props.draft.cpuQuota) && !props.canResetResources)) return;
+  if (
+    props.readonly ||
+    resetPending.value ||
+    (!value && (props.savedCpuQuota ?? props.draft.cpuQuota) && !props.canResetResources)
+  )
+    return;
   if (!value && (props.savedCpuQuota ?? props.draft.cpuQuota)) confirmation.value = "cpuQuota";
   else patch({ cpuQuota: value });
 }
 function confirmDisable() {
+  if (!confirmation.value) return;
   if (confirmation.value === "cpuQuota") patch({ cpuQuota: false });
   else {
     const departments = { ...props.draft.departments };

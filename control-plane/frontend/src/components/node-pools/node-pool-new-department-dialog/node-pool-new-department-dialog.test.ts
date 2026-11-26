@@ -5,7 +5,7 @@
 import { mount, flushPromises, type VueWrapper } from "@vue/test-utils";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia } from "pinia";
-import { Quasar, Notify } from "quasar";
+import { Quasar, Notify, QSelect } from "quasar";
 import Dialog from "@/components/node-pools/node-pool-new-department-dialog/node-pool-new-department-dialog.vue";
 import { SchedulingDepartmentNameFields } from "@/components/node-pools/scheduling-department-name-fields";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
@@ -125,6 +125,13 @@ describe("new department creation", () => {
     expect(wrapper.emitted("close")).toHaveLength(1);
   });
   it("retries only incomplete role assignments without creating another department", async () => {
+    let finishCreation!: () => void;
+    vi.mocked(orgUnitService.createDepartment).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finishCreation = () => resolve({ id: "new", name: "department-preview", clusterId: "cluster" } as never);
+        }),
+    );
     const name = await render();
     await name.setValue("department-preview");
     await new Promise((resolve) => setTimeout(resolve, 350));
@@ -142,10 +149,18 @@ describe("new department creation", () => {
       .mockResolvedValueOnce({} as never)
       .mockRejectedValueOnce(new Error("Role failed"));
     await flushPromises();
+    const assignmentControls = wrapper.findAllComponents(QSelect);
+    expect(assignmentControls).toHaveLength(3);
+    expect(assignmentControls.every((select) => !select.props("disable"))).toBe(true);
     (document.querySelector('[aid="create-department"]') as HTMLButtonElement).click();
+    await flushPromises();
+    expect(orgUnitService.createDepartment).toHaveBeenCalledOnce();
+    expect(assignmentControls.every((select) => select.props("disable"))).toBe(true);
+    finishCreation();
     await flushPromises();
     expect(wrapper.emitted("close")).toBeUndefined();
     expect(document.querySelector(".department-save-error")?.textContent).toContain("Department created");
+    expect(assignmentControls.every((select) => select.props("disable"))).toBe(true);
     (document.querySelector('[aid="create-department"]') as HTMLButtonElement).click();
     await flushPromises();
     expect(orgUnitService.createDepartment).toHaveBeenCalledTimes(1);

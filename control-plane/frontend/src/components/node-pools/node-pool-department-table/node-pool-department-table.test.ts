@@ -1002,6 +1002,20 @@ describe("scheduling department table", () => {
     expect(displayedWeights()).toEqual(["Unknown"]);
     wrapper.unmount();
   });
+  it("shows unranked departments for a saved Guaranteed pool with ranks off", async () => {
+    const wrapper = renderSimulation(8);
+    try {
+      await wrapper.setProps({
+        draft: { ...draft, mode: ESchedulingMode.Guaranteed, capabilities: { quota: true, ranks: false } },
+      });
+      expect(wrapper.find(".rank-header").exists()).toBe(false);
+      expect(wrapper.get(".department-name").text()).toBe("Alpha");
+      expect(wrapper.get(".order-weight").text()).toBe("#2");
+      expect(wrapper.text()).not.toContain("Weight within rank");
+    } finally {
+      wrapper.unmount();
+    }
+  });
   it("counts draft rank moves and shows all matching departments", async () => {
     const wrapper = mount(Table, {
       props: {
@@ -1023,6 +1037,12 @@ describe("scheduling department table", () => {
     expect(wrapper.text()).toContain("Alpha");
     expect(wrapper.text()).toContain("Beta");
     expect(wrapper.find('[aid="load-rank-High"]').exists()).toBe(false);
+    const beta = wrapper.props("rows")[1];
+    await wrapper.setProps({ rows: [beta], baselineRows: [...rows, beta], rankFilter: "High" });
+    expect(wrapper.text()).toContain("Alpha");
+    await wrapper.setProps({ baselineRows: [beta] });
+    expect(wrapper.text()).not.toContain("Alpha");
+    expect(wrapper.text()).toContain("Beta");
     wrapper.unmount();
   });
   it("uses the reference zero-state copy and uses Show settings during search, including matching rows", async () => {

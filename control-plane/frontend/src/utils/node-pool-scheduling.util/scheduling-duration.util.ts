@@ -23,20 +23,25 @@ const secondsPerUnit: Record<string, number> = {
   ns: 0.000000001,
 };
 // Match the API's duration units as complete tokens, including fractional values.
-const durationToken = /(\d[\d.]*)(ns|us|µs|μs|ms|s|m|h|d|w)/guy;
+const durationToken = /([\d.]+)(ns|us|µs|μs|ms|s|m|h|d|w)/guy;
 const roundSeconds = (value: number) => roundToDecimal(value, 9);
 
 export function schedulingDurationSeconds(value: string | null | undefined): number {
-  if (!value || value === "0") return 0;
-  const source = value.startsWith("+") ? value.slice(1) : value;
+  if (!value) return 0;
+  const negative = value.startsWith("-");
+  const source = negative || value.startsWith("+") ? value.slice(1) : value;
+  if (source === "0") return 0;
   let offset = 0;
   let seconds = 0;
   for (const match of source.matchAll(durationToken)) {
-    if (match.index !== offset || match[1].endsWith(".")) throw new Error("Enter a valid nonnegative duration.");
-    seconds += Number(match[1]) * secondsPerUnit[match[2]];
+    if (match.index !== offset) throw new Error("Enter a valid nonnegative duration.");
+    const amount = Number(match[1]) * secondsPerUnit[match[2]];
+    if (!Number.isFinite(amount)) throw new Error("Enter a valid nonnegative duration.");
+    // The API truncates each token to nanoseconds, so a signed sub-nanosecond token can represent zero.
+    if (amount >= 1e-9) seconds += amount;
     offset += match[0].length;
   }
-  if (offset !== source.length || !offset || !Number.isFinite(seconds))
+  if (offset !== source.length || !offset || !Number.isFinite(seconds) || (negative && seconds > 0))
     throw new Error("Enter a valid nonnegative duration.");
   return roundSeconds(seconds);
 }

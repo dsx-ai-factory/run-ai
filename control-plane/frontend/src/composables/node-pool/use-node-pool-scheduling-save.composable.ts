@@ -2,6 +2,7 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
+import { ref } from "vue";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 import { ResourcesResetAction } from "@/swagger-models/org-unit-service-client";
@@ -25,7 +26,7 @@ async function normalizeResetGpuWeights(pool: Nodepool, kind: OrgUnitKind) {
       : orgUnitService.batchPatchProjectNodePoolResources;
   const filters = [`clusterId==${pool.clusterId}`, `nodePoolId==${pool.id}`];
   let offset = 0;
-  while (true) {
+  for (;;) {
     // Sort by a stable ID; updating weights must not move rows between pages.
     const page = await list(filters, "orgUnitId", "asc", offset, 100);
     const patchRequests = page.nodePoolResources.flatMap(({ orgUnitId, nodePoolId, resources }) => {
@@ -46,16 +47,29 @@ async function normalizeResetGpuWeights(pool: Nodepool, kind: OrgUnitKind) {
   }
 }
 
-export function useNodePoolSchedulingSave() {
+const resetPhases = ["departments", "projects", "departmentWeights", "projectWeights"] as const;
+type ResetPhase = (typeof resetPhases)[number];
+
+export function useNodePoolSchedulingSave(getPool: () => Nodepool) {
+  // The scheduling step is mounted per pool. Keep its recovery record across reloads in this tab.
+  const { clusterId, id } = getPool();
+  const resetKey = `node-pool-weight-reset:${clusterId}:${id}`;
+  const storedPhase = sessionStorage.getItem(resetKey);
+  const pendingReset = ref(resetPhases.find((phase) => phase === storedPhase));
+  function setPendingReset(phase?: ResetPhase) {
+    if (phase) sessionStorage.setItem(resetKey, phase);
+    else sessionStorage.removeItem(resetKey);
+    pendingReset.value = phase;
+  }
+
   let busy = false;
   let poolKey = "";
   let savedPool: Nodepool | undefined;
   let poolSettingsSaved = false;
-  let pendingReset: OrgUnitKind | "departmentWeights" | "projectWeights" | undefined;
   const completed = new Map<string, string>();
   return {
     get resetPending() {
-      return pendingReset !== undefined;
+      return pendingReset.value !== undefined;
     },
     get savedPool() {
       return savedPool;
@@ -63,16 +77,21 @@ export function useNodePoolSchedulingSave() {
     get poolSettingsSaved() {
       return poolSettingsSaved;
     },
-    async save(pool: Nodepool, draft: SchedulingDraft): Promise<Nodepool> {
+    async save(draft: SchedulingDraft): Promise<Nodepool> {
       if (busy) throw new Error("A save is already in progress.");
       busy = true;
       poolSettingsSaved = false;
       try {
-        const latest = savedPool?.id === pool.id ? savedPool : pool;
+        const pool = getPool();
+        const latest = savedPool ?? pool;
         const plan = buildSchedulingSave(latest, draft);
         const settings = { ...draft, departments: undefined };
         const key = JSON.stringify([pool.id, settings]);
         if (poolKey !== key) {
+          poolKey = "";
+          // A reload can interrupt the response after the server has already enabled custom weights.
+          if (switchingToCustomWeights(latest.schedulingCapabilities, plan.pool.schedulingCapabilities))
+            setPendingReset("departments");
           const updated = await clusterService.patchNodepool(pool.id, plan.pool);
           if (
             Object.entries(plan.pool.schedulingCapabilities ?? {}).some(
@@ -84,39 +103,36 @@ export function useNodePoolSchedulingSave() {
             throw new Error(
               "The backend did not apply the requested scheduling capabilities. Department changes were not sent.",
             );
-          if (switchingToCustomWeights(latest.schedulingCapabilities, updated.schedulingCapabilities))
-            pendingReset = "departments";
-          else if (
-            savedPool?.id !== pool.id ||
-            !updated.schedulingCapabilities?.adjustableWeights ||
-            !updated.schedulingCapabilities.quota
+          if (
+            pendingReset.value &&
+            !(updated.schedulingCapabilities?.quota && updated.schedulingCapabilities.adjustableWeights)
           )
-            pendingReset = undefined;
+            setPendingReset();
           savedPool = updated;
           poolKey = key;
           completed.clear();
         }
         poolSettingsSaved = true;
-        if (pendingReset) {
+        if (pendingReset.value) {
           const request = {
             clusterId: pool.clusterId,
             nodePoolIds: [pool.id],
             action: ResourcesResetAction.WeightsToDeserved,
           };
-          if (pendingReset === "departments") {
+          if (pendingReset.value === "departments") {
             await orgUnitService.resetDepartmentResources(request);
-            pendingReset = "projects";
+            setPendingReset("projects");
           }
-          if (pendingReset === "projects") {
+          if (pendingReset.value === "projects") {
             await orgUnitService.resetProjectResources(request);
-            pendingReset = "departmentWeights";
+            setPendingReset("departmentWeights");
           }
-          if (pendingReset === "departmentWeights") {
+          if (pendingReset.value === "departmentWeights") {
             await normalizeResetGpuWeights(pool, "departments");
-            pendingReset = "projectWeights";
+            setPendingReset("projectWeights");
           }
           await normalizeResetGpuWeights(pool, "projects");
-          pendingReset = undefined;
+          setPendingReset();
         }
         const pending = plan.departments.filter((row) => completed.get(row.orgUnitId) !== JSON.stringify(row));
         for (let start = 0; start < pending.length; start += 100) {

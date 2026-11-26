@@ -3,20 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { ENodePoolSchedulingMode as ESchedulingMode } from "@/models/node-pool.model";
-import { describe, it, expect, vi } from "vitest";
+import { assert, describe, it, expect, vi } from "vitest";
 import { buildSchedulingSave } from "@/utils/node-pool-scheduling.util/node-pool-scheduling-save.util";
 import type { Nodepool } from "@/swagger-models/cluster-service-client/index";
 import type { SchedulingDraft } from "@/models/node-pool-scheduling.model";
 import { useNodePoolSchedulingSave } from "@/composables/node-pool/use-node-pool-scheduling-save.composable";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
-function createSchedulingSaver(transport: {
-  patchPool: typeof clusterService.patchNodepool;
-  patchDepartments: typeof orgUnitService.batchPatchDepartmentNodePoolResources;
-}) {
+function createSchedulingSaver(
+  transport: {
+    patchPool: typeof clusterService.patchNodepool;
+    patchDepartments: typeof orgUnitService.batchPatchDepartmentNodePoolResources;
+  },
+  initialPool = pool,
+) {
   vi.spyOn(clusterService, "patchNodepool").mockImplementation(transport.patchPool);
   vi.spyOn(orgUnitService, "batchPatchDepartmentNodePoolResources").mockImplementation(transport.patchDepartments);
-  return useNodePoolSchedulingSave();
+  return useNodePoolSchedulingSave(() => initialPool);
 }
 const pool = {
   id: "17",
@@ -79,11 +82,11 @@ describe("scheduling persistence", () => {
         totalSuccessful: patchRequests.length,
       }));
     const patchDepartments = vi.fn(async () => success(["a"]));
-    const saver = createSchedulingSaver({ patchPool, patchDepartments });
-    await expect(saver.save(automatic, input)).rejects.toThrow("try again");
+    const saver = createSchedulingSaver({ patchPool, patchDepartments }, automatic);
+    await expect(saver.save(input)).rejects.toThrow("try again");
     expect(patchDepartments).not.toHaveBeenCalled();
     expect(saver.resetPending).toBe(true);
-    await saver.save(saver.savedPool!, input);
+    await saver.save(input);
     const request = { clusterId: "cluster", nodePoolIds: ["17"], action: "WEIGHTS_TO_DESERVED" };
     expect(resetDepartments).toHaveBeenCalledExactlyOnceWith(request);
     expect(resetProjects).toHaveBeenCalledTimes(2);
@@ -102,6 +105,66 @@ describe("scheduling persistence", () => {
     patchProjects.mockRestore();
     resetDepartments.mockRestore();
     resetProjects.mockRestore();
+  });
+  it.each([0, 1, 2, 3])("resumes from failed reset phase %i in a new saver after reload", async (failedPhase) => {
+    const automatic = {
+      ...pool,
+      clusterId: "cluster",
+      schedulingCapabilities: { ranks: true, limits: false, cpuQuota: false, quota: true, adjustableWeights: false },
+    };
+    const input = { ...draft(), mode: ESchedulingMode.Guaranteed, departments: {} };
+    const patchPool = vi.fn(async (_id, update) => ({ ...automatic, ...update }));
+    const phases = [
+      vi.spyOn(orgUnitService, "resetDepartmentResources").mockResolvedValue(undefined),
+      vi.spyOn(orgUnitService, "resetProjectResources").mockResolvedValue(undefined),
+      vi.spyOn(orgUnitService, "getDepartmentNodePoolResources").mockResolvedValue({ nodePoolResources: [] }),
+      vi.spyOn(orgUnitService, "getProjectNodePoolResources").mockResolvedValue({ nodePoolResources: [] }),
+    ];
+    phases.at(failedPhase)?.mockRejectedValueOnce(new Error("interrupted"));
+    try {
+      const first = createSchedulingSaver({ patchPool, patchDepartments: vi.fn() }, automatic);
+      await expect(first.save(input)).rejects.toThrow("interrupted");
+      const custom = first.savedPool;
+      assert.isDefined(custom);
+      expect(custom.schedulingCapabilities?.adjustableWeights).toBe(true);
+      expect(useNodePoolSchedulingSave(() => ({ ...custom, clusterId: "other" })).resetPending).toBe(false);
+      expect(useNodePoolSchedulingSave(() => ({ ...custom, id: "other" })).resetPending).toBe(false);
+
+      const reloaded = useNodePoolSchedulingSave(() => custom);
+      expect(reloaded.resetPending).toBe(true);
+      await reloaded.save(input);
+      for (const [index, phase] of phases.entries()) {
+        expect(phase).toHaveBeenCalledTimes(index === failedPhase ? 2 : 1);
+      }
+      expect(useNodePoolSchedulingSave(() => custom).resetPending).toBe(false);
+    } finally {
+      for (const phase of phases) phase.mockRestore();
+      sessionStorage.clear();
+    }
+  });
+  it("clears an unconfirmed switch when the user saves Automatic again", async () => {
+    const automatic = {
+      ...pool,
+      clusterId: "cluster",
+      schedulingCapabilities: { ranks: true, limits: false, cpuQuota: false, quota: true, adjustableWeights: false },
+    };
+    const input = { ...draft(), mode: ESchedulingMode.Guaranteed, automaticWeights: true, departments: {} };
+    const patchPool = vi.fn(async (_id, update) => ({ ...automatic, ...update }));
+    const resetDepartments = vi.spyOn(orgUnitService, "resetDepartmentResources");
+    try {
+      const saver = createSchedulingSaver({ patchPool, patchDepartments: vi.fn() }, automatic);
+      await saver.save(input);
+      patchPool.mockRejectedValueOnce(new Error("connection lost"));
+      await expect(saver.save({ ...input, automaticWeights: false })).rejects.toThrow("connection lost");
+      expect(useNodePoolSchedulingSave(() => automatic).resetPending).toBe(true);
+      await saver.save(input);
+      expect(patchPool).toHaveBeenCalledTimes(3);
+      expect(resetDepartments).not.toHaveBeenCalled();
+      expect(useNodePoolSchedulingSave(() => automatic).resetPending).toBe(false);
+    } finally {
+      resetDepartments.mockRestore();
+      sessionStorage.clear();
+    }
   });
   it.each(["saved-topology", null, undefined])(
     "omits topology from a scheduling-only PATCH even when the form loaded %s",
@@ -183,8 +246,8 @@ describe("scheduling persistence", () => {
     const value = draft();
     value.departments.b = { id: "b", weight: 4 };
     const before = JSON.stringify(value);
-    await expect(saver.save(pool, value)).rejects.toThrow(/quota conflict/);
-    await saver.save(pool, value);
+    await expect(saver.save(value)).rejects.toThrow(/quota conflict/);
+    await saver.save(value);
     expect(update).toHaveBeenCalledTimes(1);
     expect(batch.mock.calls[1][0].patchRequests.map((row: { orgUnitId: string }) => row.orgUnitId)).toEqual(["b"]);
     expect(update.mock.invocationCallOrder[0]).toBeLessThan(batch.mock.invocationCallOrder[0]);
@@ -205,9 +268,9 @@ describe("scheduling persistence", () => {
         success(request.patchRequests.map((r: { orgUnitId: string }) => r.orgUnitId)),
       );
     const saver = createSchedulingSaver({ patchPool: update, patchDepartments: batch });
-    await expect(saver.save(pool, value)).rejects.toThrow(/permission denied/);
+    await expect(saver.save(value)).rejects.toThrow(/permission denied/);
     expect(batch).not.toHaveBeenCalled();
-    await saver.save(pool, value);
+    await saver.save(value);
     expect(batch.mock.calls.map((c) => c[0].patchRequests.length)).toEqual([100, 100, 1]);
   });
   it("rejects a server that ignores capabilities and suppresses duplicate submissions", async () => {
@@ -216,8 +279,8 @@ describe("scheduling persistence", () => {
     const batch = vi.fn();
     const saver = createSchedulingSaver({ patchPool: update, patchDepartments: batch });
     const value = { ...draft(), mode: ESchedulingMode.Ranked as const };
-    const pending = saver.save(pool, value);
-    await expect(saver.save(pool, value)).rejects.toThrow(/already/);
+    const pending = saver.save(value);
+    await expect(saver.save(value)).rejects.toThrow(/already/);
     finish(pool);
     await expect(pending).rejects.toThrow(/capabilities/);
     expect(batch).not.toHaveBeenCalled();

@@ -2,13 +2,13 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-import type { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
+import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 import type { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { mount, flushPromises } from "@vue/test-utils";
 import { Quasar } from "quasar";
 import * as nodePoolFlags from "@/constants/node-pool.constants";
 import { PROPORTIONAL_CAPABILITIES } from "@/models/node-pool.model";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { assert, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestingPinia } from "@pinia/testing";
 import { requestToLeave } from "@/services/infra/router.service/router.service";
 import { NodePoolSchedulingSettings as Settings } from "@/components/node-pools/node-pool-scheduling-settings";
@@ -364,6 +364,55 @@ describe("scheduling step with all modes enabled", () => {
       expect(wrapper.get('[aid="scheduling-save-close"]').attributes("disabled")).toBeUndefined();
     } finally {
       wrapper.unmount();
+    }
+  });
+
+  it("requires reset permission before resuming unfinished weights after reloading a Custom pool", async () => {
+    const automatic = {
+      ...pool,
+      schedulingCapabilities: { quota: true, ranks: true, adjustableWeights: false, cpuQuota: false, limits: false },
+    };
+    const resetDepartments = vi.spyOn(orgUnitService, "resetDepartmentResources").mockResolvedValue(undefined);
+    const resetProjects = vi
+      .spyOn(orgUnitService, "resetProjectResources")
+      .mockRejectedValueOnce(new Error("project reset failed"))
+      .mockResolvedValue(undefined);
+    const departments = vi
+      .spyOn(orgUnitService, "getDepartmentNodePoolResources")
+      .mockResolvedValue({ nodePoolResources: [] });
+    const projects = vi
+      .spyOn(orgUnitService, "getProjectNodePoolResources")
+      .mockResolvedValue({ nodePoolResources: [] });
+    saveMocks.patchPool.mockReset().mockImplementation(async (_id, payload) => ({ ...automatic, ...payload }));
+    let wrapper = render(automatic);
+    try {
+      await wrapper.setProps({ canSavePool: true, canResetResources: true });
+      await wrapper.get('[aid="advanced-settings"]').trigger("click");
+      wrapper.findComponent(Settings).vm.$emit("patch", { automaticWeights: false });
+      await wrapper.vm.$nextTick();
+      await wrapper.get('[aid="scheduling-save-close"]').trigger("click");
+      await flushPromises();
+      const saved = wrapper.emitted<[Nodepool]>("pool-saved")?.[0][0];
+      assert.isDefined(saved);
+      expect(saved.schedulingCapabilities?.adjustableWeights).toBe(true);
+      wrapper.unmount();
+
+      wrapper = render(saved);
+      await wrapper.setProps({ canSavePool: true, canResetResources: false });
+      expect(wrapper.get('[role="alert"]').text()).toContain("Switching weights to Custom requires update permission");
+      expect(wrapper.get('[aid="scheduling-save-close"]').attributes("disabled")).toBeDefined();
+      await wrapper.setProps({ canResetResources: true });
+      expect(wrapper.get('.scheduling-footer [role="status"]').text()).toContain("Save to finish initializing weights");
+      await wrapper.get('[aid="scheduling-save-close"]').trigger("click");
+      await flushPromises();
+      expect(resetDepartments).toHaveBeenCalledTimes(1);
+      expect(resetProjects).toHaveBeenCalledTimes(2);
+      expect(wrapper.emitted("saved")).toHaveLength(1);
+      expect(wrapper.find('.scheduling-footer [role="status"]').exists()).toBe(false);
+    } finally {
+      wrapper.unmount();
+      for (const spy of [resetDepartments, resetProjects, departments, projects]) spy.mockRestore();
+      sessionStorage.clear();
     }
   });
 

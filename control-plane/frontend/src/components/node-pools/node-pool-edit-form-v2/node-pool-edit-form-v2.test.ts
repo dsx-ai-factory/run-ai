@@ -44,9 +44,10 @@ describe("Step 1 form", () => {
     expect(wrapper.find('[aid="node-pool-label-value"]').exists()).toBe(true);
     wrapper.unmount();
   });
-  function renderForm(initialClusterId = "") {
+  function renderForm(initialClusterId = "", attachTo?: HTMLElement) {
     return mount(NodePoolEditFormV2, {
       props: { initialClusterId },
+      attachTo,
       global: {
         plugins: [[Quasar, { plugins: { Notify } }], createTestingPinia({ createSpy: vi.fn })],
         mocks: { $route: { query: {} } },
@@ -82,6 +83,53 @@ describe("Step 1 form", () => {
     expect(key.props("hint")).toContain("manually");
     expect(key.props("options")).toContainEqual({ label: "custom-key (new key)", value: "custom-key", disable: false });
     wrapper.unmount();
+  });
+  it.each([
+    { field: "value", replacement: "H100", discard: false },
+    { field: "key", replacement: "other-type", discard: true },
+  ])("blocks Create after typing over a label $field and blurring", async ({ field, replacement, discard }) => {
+    const wrapper = renderForm("cluster", document.body);
+    const notify = vi.spyOn(wrapper.vm.$q, "notify").mockImplementation(() => () => {});
+    try {
+      await flushPromises();
+      wrapper.getComponent(RunaiNameValidation).vm.$emit("update:modelValue", "valid-pool");
+      const key = wrapper.findAllComponents(QSelect).find((select) => select.props("label") === "Key");
+      if (!key) throw new Error("Key selector missing");
+      key.vm.add("gpu-type");
+      await flushPromises();
+      const value = wrapper.findAllComponents(QSelect).find((select) => select.props("label") === "Value");
+      if (!value) throw new Error("Value selector missing");
+      value.vm.add("T4");
+      await flushPromises();
+
+      const select = field === "value" ? value : key;
+      const input = select.get("input");
+      input.element.focus();
+      await input.setValue(replacement);
+      input.element.blur();
+      await vi.waitFor(() => expect(select.emitted("blur")).toHaveLength(1));
+      const create = wrapper.get('[aid="create-node-pool-continue"]');
+      await create.trigger("click");
+      await flushPromises();
+      expect(clusterService.createNodepool).not.toHaveBeenCalled();
+      expect(input.element.value).toBe(replacement);
+
+      input.element.focus();
+      await input.trigger(
+        discard ? "keyup" : "keydown",
+        discard ? { key: "Escape", keyCode: 27 } : { key: "Enter", keyCode: 13 },
+      );
+      await flushPromises();
+      vi.mocked(clusterService.createNodepool).mockResolvedValueOnce({ id: "new" } as Nodepool);
+      await create.trigger("click");
+      await flushPromises();
+      expect(clusterService.createNodepool).toHaveBeenCalledWith(
+        expect.objectContaining({ labelKey: "gpu-type", labelValue: discard ? "T4" : "H100" }),
+      );
+    } finally {
+      notify.mockRestore();
+      wrapper.unmount();
+    }
   });
   it("keeps labels editable after a pool lookup failure and rechecks duplicates on Create", async () => {
     const authError = new Error("Authentication failed - unable to refresh token");

@@ -180,6 +180,18 @@
     <template #content-footer>
       <div class="scheduling-footer">
         <p v-if="saveError || validationError" class="text-negative" role="alert">{{ saveError || validationError }}</p>
+        <p
+          v-else-if="
+            saver.resetPending &&
+            !departmentsReadOnly &&
+            previewPool.schedulingCapabilities?.quota &&
+            previewPool.schedulingCapabilities.adjustableWeights &&
+            !saving
+          "
+          role="status"
+        >
+          Save to finish initializing weights for departments and projects.
+        </p>
         <div class="row justify-end q-gutter-md">
           <runai-btn
             v-if="!departmentsReadOnly"
@@ -488,7 +500,7 @@ function onDepartmentSaving(value: boolean) {
   emit("saving", saving.value || value);
 }
 const saveError = ref("");
-const saver = useNodePoolSchedulingSave();
+const saver = useNodePoolSchedulingSave(() => props.pool);
 function usesWeightsWithoutQuota(capabilities?: SchedulingCapabilitiesNullable): boolean {
   return capabilities?.adjustableWeights === true && capabilities.quota === false;
 }
@@ -565,14 +577,14 @@ async function save(destination: "close" | "continue" = "close") {
           throw new Error("Guaranteed GPUs cannot be below the child project quota sum.");
       }
     }
-    const pool = await saver.save(props.pool, draft.value);
+    const pool = await saver.save(draft.value);
     saving.value = false;
     emit("saving", false);
     emit("saved", pool, destination);
   } catch (error) {
     if (saver.savedPool) emit("pool-saved", saver.savedPool);
     saveError.value =
-      (saver.resetPending
+      (saver.poolSettingsSaved && saver.resetPending
         ? "Pool settings were saved. Retry to finish initializing weights for departments and projects. "
         : saver.poolSettingsSaved
           ? "Pool settings were saved, but some department changes remain unsaved. "

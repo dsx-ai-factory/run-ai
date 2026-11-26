@@ -59,6 +59,52 @@ describe("scheduling settings draft interactions", () => {
     ]);
     wrapper.unmount();
   });
+  it("keeps each resource reset in control until its confirmation closes", async () => {
+    let resolveCheck!: (value: boolean) => void;
+    const loadHasGpuLimits = vi.fn(() => new Promise<boolean>((resolve) => (resolveCheck = resolve)));
+    const wrapper = mount(Settings, {
+      props: {
+        draft: { ...draft, cpuQuota: true },
+        savedCpuQuota: true,
+        savedMaxAllocation: true,
+        canResetResources: true,
+        loadHasGpuLimits,
+      },
+      global: { plugins: [Quasar] },
+    });
+    try {
+      const toggles = wrapper.findAllComponents(RunaiToggle);
+      const gpu = toggles.find((toggle) => toggle.props("aid") === "max-allocation-toggle");
+      const cpu = toggles.find((toggle) => toggle.props("aid") === "cpu-quota-toggle");
+      if (!gpu || !cpu) throw new Error("Missing a resource toggle");
+      gpu.vm.$emit("update:model-value", false);
+      cpu.vm.$emit("update:model-value", false);
+      await flushPromises();
+      expect(wrapper.findComponent(RunaiBaseDialog).exists()).toBe(false);
+      expect(cpu.props("disable")).toBe(true);
+      resolveCheck(true);
+      await flushPromises();
+      cpu.vm.$emit("update:model-value", false);
+      await flushPromises();
+      expect(document.body.textContent).toContain("Disable Max GPU Allocation?");
+      (document.querySelector('[aid="keep-setting-enabled"]') as HTMLButtonElement).click();
+      await flushPromises();
+      expect(cpu.props("disable")).toBe(false);
+
+      cpu.vm.$emit("update:model-value", false);
+      gpu.vm.$emit("update:model-value", false);
+      await flushPromises();
+      expect(loadHasGpuLimits).toHaveBeenCalledOnce();
+      expect(gpu.props("disable")).toBe(true);
+      expect(document.body.textContent).toContain("Disable CPU Quota?");
+      (document.querySelector('[aid="confirm-disable-setting"]') as HTMLButtonElement).click();
+      await flushPromises();
+      expect(wrapper.emitted("patch")).toEqual([[{ cpuQuota: false }]]);
+      expect(gpu.props("disable")).toBe(false);
+    } finally {
+      wrapper.unmount();
+    }
+  });
   it("keeps allocation enabled after a failed check and allows retry", async () => {
     const loadHasGpuLimits = vi.fn().mockRejectedValueOnce(new Error("Unavailable")).mockResolvedValueOnce(false);
     const wrapper = mount(Settings, {
