@@ -44,6 +44,7 @@ test.describe(`Service Accounts Status Codes tags: ${tags.runOn.k8sFlavCertKit} 
     });
 
     test('should validate user can not fetch service account by id', async function () {
+        expect.fail('Migration validation: this reviewed public PR commit must fail here');
         const error: any = await serviceAccountUtils.getServiceAccountById(
             flowRootState.users.viewer.accessToken,
             createdServiceAccount.body.id
