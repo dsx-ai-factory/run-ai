@@ -2,14 +2,6 @@
 
 A workload template is a reusable setup that defines all the required configuration fields for submitting a workload. Templates simplify the submission process by allowing users to predefine settings. Researchers can quickly submit workloads using a saved template or adjust the values before submission as needed.
 
-<Note>
-
-**Note**
-
-Workload templates apply to flexible workload submission. If unavailable, contact your administrator to enable **Flexible workload submission** under **General settings** → **Workloads**.
-
-</Note>
-
 ## Templates Table
 
 The Templates table can be found under **Workload manager** in the NVIDIA Run:ai User Interface.
@@ -61,7 +53,7 @@ To create a new template:
 
 1. Click **+NEW TEMPLATE**
 2. Select a workload type - Follow the links below to view the step-by-step guide for each workload type:
-   * [Workspace](workspace-templates/README.md) - Used for data preparation and model-building tasks.
+   * [Workspace](workspace-templates.md) - Used for data preparation and model-building tasks.
    * [Training](../using-training/train-models.md) - Used for standard training or distributed training tasks of all sorts
    * [Inference](inference-templates/nvidia-nim-inference-templates.md) - Used for inference and serving tasks
 3. Click **CREATE TEMPLATE**
@@ -104,8 +96,6 @@ Legacy asset-based templates and their automatic migration process have been rem
 Templates migrated previously remain available as flexible workload templates. Legacy templates that were not migrated are no longer accessible and are not migrated during upgrade.
 
 Before upgrading from a version that still supports legacy templates, save the definitions of any legacy templates you need. On that version, you can retrieve them with `GET /api/v1/asset/workload-template` and save the response. Use the saved definitions to manually recreate the templates using [Adding a New Template](#adding-a-new-template).
-
-The legacy `/api/v1/asset/workload-template` endpoints are no longer available. Use the workload templates API linked below.
 
 ## Using APIs
 
