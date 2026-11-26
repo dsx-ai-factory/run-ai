@@ -123,7 +123,8 @@ describe("network topology selection", () => {
     await modal.get('[aid="network-topology-add-label-btn"]').trigger("click");
     const [filled, missing] = modal.findAll<HTMLInputElement>('input[aid="network-topology-label-key-input"]');
     await filled.setValue("zone");
-    const field = missing.element.closest<HTMLElement>(".q-field")!;
+    const field = missing.element.closest<HTMLElement>(".q-field");
+    if (!field) throw new Error("Expected the missing label key input to be inside a Quasar field.");
     field.scrollIntoView = vi.fn();
     const save = modal.get('[aid="network-topologies-modal-save-button"]');
 
