@@ -69,6 +69,7 @@ const createSchedulingCapabilities = (quota: boolean, cpuQuota: boolean): Schedu
   cpuQuota,
   adjustableWeights: false,
   ranks: false,
+  limits: quota,
 });
 
 const createNodePool = (

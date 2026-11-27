@@ -102,10 +102,24 @@ func validateEndpointsConfig(runner *dromosv1alpha1.WorkloadRunner, cfg *endpoin
 	}
 
 	tracker := newEndpointNameTracker(runner)
+	inferenceIdx := -1
 	for i := range cfg.Endpoints {
 		endpoint := &cfg.Endpoints[i]
 		endpointPath := basePath.Child("endpoints").Index(i)
 		errs = append(errs, validateEndpoint(endpoint, endpointPath, tracker, i)...)
+		if ea := endpoint.ExternalAccess; ea != nil && ea.Inference != nil {
+			inferencePath := endpointPath.Child("externalAccess", "inference")
+			if inferenceIdx >= 0 {
+				errs = append(errs, field.Forbidden(inferencePath, fmt.Sprintf(
+					"%s; endpoints[%d] already sets it", errMultipleInferenceEndpoints.Error(), inferenceIdx,
+				)))
+				continue
+			}
+			inferenceIdx = i
+			if err := validateInferenceEndpointShape(endpoint); err != nil {
+				errs = append(errs, field.Invalid(inferencePath, "<inference routing>", err.Error()))
+			}
+		}
 	}
 
 	return errs
@@ -163,7 +177,7 @@ func validateEndpointServices(
 		}
 
 		if svc.Ref != nil {
-			errs = append(errs, validateEndpointServiceRef(svc, svcPath)...)
+			errs = append(errs, validateEndpointServiceRef(endpoint, svc, svcPath)...)
 		}
 		if svc.Create != nil {
 			errs = append(errs, validateEndpointServiceCreate(svc, svcPath)...)
@@ -334,9 +348,16 @@ func validateMetricsService(
 	return errs
 }
 
-func validateEndpointServiceRef(svc *endpoints.Service, svcPath *field.Path) field.ErrorList {
+func validateEndpointServiceRef(
+	endpoint *endpoints.Endpoint,
+	svc *endpoints.Service,
+	svcPath *field.Path,
+) field.ErrorList {
 	var errs field.ErrorList
-	if svc.Auth == nil {
+	// Inference routing targets a public NIM Service through its own Gateway
+	// route, so it is the one reference that needs no auth proxy.
+	inference := endpoint.ExternalAccess != nil && endpoint.ExternalAccess.Inference != nil
+	if svc.Auth == nil && !inference {
 		errs = append(errs, field.Required(
 			svcPath.Child("auth"),
 			"auth is required when using service reference; "+

@@ -5,28 +5,46 @@
     "skip-env-setup"
   ],
   "baseBranchPatterns": [
-    "NOTE: this list is replaced at run time. runai-actions .github/workflows/renovate.yml runs renovate/scan_candidates, which finds the newest release branches in this repository and starts one Renovate run per branch, each scoped to its own. This line is not a branch pattern and matches nothing, so a run that skips that step scans nothing rather than everything."
+    "NOTE: this list is replaced at run time. repo-housekeeper .github/workflows/renovate.yml runs renovate/scan_candidates, which finds the newest release branches in this repository and starts one Renovate run per branch, each scoped to its own. This line is not a branch pattern and matches nothing, so a run that skips that step scans nothing rather than everything."
   ],
   "extends": [
     "config:recommended",
     "mergeConfidence:all-badges",
-    "github>run-ai/runai-actions//renovate/presets/go-common",
-    "github>run-ai/runai-actions//renovate/presets/custom_annotation",
-    "github>run-ai/runai-actions//renovate/presets/runai-internal",
-    "github>run-ai/runai-actions//renovate/presets/mockery",
-    "github>run-ai/runai-actions//renovate/presets/notice(NVIDIA Run:ai)",
-    "github>run-ai/runai-actions//renovate/presets/copyright"
+    "github>run-ai/repo-housekeeper//renovate/presets/go-common",
+    "github>run-ai/repo-housekeeper//renovate/presets/custom_annotation",
+    "github>run-ai/repo-housekeeper//renovate/presets/runai-internal",
+    "github>run-ai/repo-housekeeper//renovate/presets/mockery",
+    "github>run-ai/repo-housekeeper//renovate/presets/notice(NVIDIA Run:ai)",
+    "github>run-ai/repo-housekeeper//renovate/presets/copyright"
   ],
   "includePaths": [
-    "NOTE: the rest of this list is added at run time. runai-actions .github/workflows/renovate.yml runs renovate/scan_candidates, which adds every Go module it finds safe to bump. Keep only entries it cannot work out from the module layout, such as a folder holding no Go module. This line is not a path and is dropped before the list reaches Renovate.",
+    "NOTE: the rest of this list is added at run time. repo-housekeeper .github/workflows/renovate.yml runs renovate/scan_candidates, which adds every Go module it finds safe to bump. Keep only entries it cannot work out from the module layout, such as a folder holding no Go module. This line is not a path and is dropped before the list reaches Renovate.",
     "control-plane/frontend/**",
     "control-plane/keycloak-extensions/**",
     "control-plane/control-plane-chart/**",
-    "build/makefile/**"
+    "build/makefile/**",
+    "control-plane/infra/openapi/scripts/openapi-scanner/**",
+    "control-plane/infra/openapi/scripts/stringvalidator/**",
+    "control-plane/infra/openapi/scripts/xtestcoverage/**"
   ],
   "prConcurrentLimit": 60,
   "prHourlyLimit": 40,
+  "dependencyDashboard": false,
   "packageRules": [
+    {
+      "enabled": true,
+      "major": {
+        "enabled": false
+      },
+      "description": "Python bumps are grouped by the file they change, not by package: one PR per pyproject.toml or requirements.txt.",
+      "matchManagers": [
+        "poetry",
+        "pip_requirements"
+      ],
+      "branchName": "{{{branchPrefix}}}-{{{packageFileDir}}}-dependencies",
+      "groupName": "{{{packageFileDir}}} dependencies",
+      "groupSlug": "{{{packageFileDir}}}-dependencies"
+    },
     {
       "description": "frontend and frontend-v2 are two separate npm apps that happen to share a folder. Keep them in separate PRs rather than letting the folder-based group key merge them.",
       "matchFileNames": [
@@ -104,7 +122,10 @@
       "groupName": "keycloak",
       "groupSlug": "keycloak",
       "automerge": false,
-      "branchName": "{{{branchPrefix}}}keycloak"
+      "branchName": "{{{branchPrefix}}}keycloak",
+      "group": {
+        "commitMessageTopic": "keycloak"
+      }
     },
     {
       "matchPackageNames": [
@@ -117,6 +138,28 @@
       "major": {
         "enabled": false
       }
+    },
+    {
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "matchPackageNames": [
+        "kube-prometheus-stack"
+      ],
+      "group": {
+        "commitMessageTopic": "kube-prometheus-stack"
+      }
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^runai-installer/installer/internal/orchestrator2/compat/matrix\\.go$/"
+      ],
+      "matchStrings": [
+        "// renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?(?: allow=(?<depType>patch|minor|major))?\\s+\\w+\\s*[:=]\\s*\"(?<currentValue>[^\"]+)\""
+      ]
     }
   ]
 }

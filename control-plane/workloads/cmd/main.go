@@ -101,9 +101,6 @@ func init() {
 	if err := setting.Register[*workload_settings.WorkloadSubmissionV2Enabled](); err != nil {
 		logging.Errorf("Failed to register WorkloadSubmissionV2Enabled setting: %v", err)
 	}
-	if err := setting.Register[*workload_settings.EnableHybridSubmission](); err != nil {
-		logging.Errorf("Failed to register EnableHybridSubmission setting: %v", err)
-	}
 	if err := setting.Register[*workload_settings.GpuOverProvisioning](); err != nil {
 		logging.Errorf("Failed to register GpuOverProvisioning setting: %v", err)
 	}
@@ -165,9 +162,6 @@ func runSettingsMigration() {
 	}
 	if err := setting.Migrate[*workload_settings.WorkloadSubmissionV2Enabled](); err != nil {
 		logging.Fatalf("failed to migrate WorkloadSubmissionV2Enabled: %v", err)
-	}
-	if err := setting.Migrate[*workload_settings.EnableHybridSubmission](); err != nil {
-		logging.Fatalf("failed to migrate EnableHybridSubmission: %v", err)
 	}
 	if err := setting.Migrate[*workload_settings.GpuOverProvisioning](); err != nil {
 		logging.Fatalf("failed to migrate GpuOverProvisioning: %v", err)

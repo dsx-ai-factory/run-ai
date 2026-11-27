@@ -12,8 +12,10 @@ import (
 	kubeaischedv2alpha2 "github.com/kai-scheduler/KAI-scheduler/pkg/apis/scheduling/v2alpha2"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/kubernetes"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	runaiv2alpha2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/scheduling/v2alpha2"
 
@@ -90,12 +92,21 @@ func main() {
 		os.Exit(1)
 	}
 
+	kubeClient, err := kubernetes.NewForConfig(mgr.GetConfig())
+	if err != nil {
+		setupLog.Error(err, "unable to create kubernetes client")
+		os.Exit(1)
+	}
+	// Claims and templates are read through the manager's cache, instead of an API request for each pod lookup.
+	draParser := dra.NewDRAParser(mgr.GetClient(), kubeClient)
+
 	if err = (&controllers.PodReconciler{
 		Client:          mgr.GetClient(),
 		DynamicClient:   dynamic.NewForConfigOrDie(mgr.GetConfig()),
 		DiscoveryClient: discovery.NewDiscoveryClientForConfigOrDie(mgr.GetConfig()),
 		EventRecorder:   mgr.GetEventRecorderFor("status-updater"),
 		Scheme:          mgr.GetScheme(),
+		DRAGpuResolver:  draParser,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Pod")
 		os.Exit(1)

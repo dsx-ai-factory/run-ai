@@ -33,6 +33,15 @@ rules:
       - list
       - watch
   - apiGroups:
+      - resource.k8s.io
+    resources:
+      - resourceclaims
+      - resourceclaimtemplates
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
       - ""
     resources:
       - pods/status
@@ -178,6 +187,15 @@ rules:
       - ""
     resources:
       - nodes
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - resource.k8s.io
+    resources:
+      - resourceclaims
+      - resourceclaimtemplates
     verbs:
       - get
       - list

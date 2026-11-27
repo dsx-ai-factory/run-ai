@@ -73,6 +73,12 @@ type NimServiceDefaults struct {
 	Labels *LabelsDefaults `json:"labels,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. Requires cluster version 3.1.0 or later, with the inference endpoint controller enabled and an administrator-enabled Gateway on the cluster.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//LoadAwareRouting *bool `json:"loadAwareRouting,omitempty"`
+	LoadAwareRouting *bool `json:"loadAwareRouting,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//ModelStore *NimServiceDefaultsAllOfModelStore `json:"modelStore,omitempty"`
 	ModelStore *NimServiceDefaultsAllOfModelStore `json:"modelStore,omitempty" gorm:"serializer:json; type:jsonb;"`
@@ -293,6 +299,11 @@ func AssertNimServiceDefaultsConstraints(obj NimServiceDefaults) error {
 			return err
 		}
 	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////

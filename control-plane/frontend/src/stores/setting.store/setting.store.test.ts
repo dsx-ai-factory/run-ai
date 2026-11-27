@@ -50,8 +50,6 @@ vi.mock("@/services/control-plane/workloads-service-settings.service/workloads-s
     getAll: vi.fn(),
     getEnablePolicies: vi.fn(),
     updateEnablePolicies: vi.fn(),
-    getEnableHybridSubmission: vi.fn(),
-    updateEnableHybridSubmission: vi.fn(),
     getGpuOverProvisioning: vi.fn(),
     updateGpuOverProvisioning: vi.fn(),
   },
@@ -93,7 +91,6 @@ vi.mock("@/services/control-plane/node-pool-settings.service/node-pool-settings.
 
 vi.mock("@/services/infra/unleash.service/unleash.service", () => ({
   unleashService: {
-    showHybridSubmission: vi.fn(() => true),
     showNgcIntegration: vi.fn(() => true),
   },
 }));
@@ -614,7 +611,6 @@ describe("setting.store", () => {
       const store = useSettingStore();
       const mockSettings = {
         enablePolicies: { value: true, displayName: "Policies", description: "desc" },
-        enableHybridSubmission: { value: true, displayName: "Flexible submission", description: "desc" },
         gpuOverProvisioning: { value: false, displayName: "GPU opt", description: "desc", stage: "Beta" },
       };
       vi.mocked(workloadsServiceSettingsService.getAll).mockResolvedValue(mockSettings);
@@ -623,7 +619,6 @@ describe("setting.store", () => {
 
       expect(workloadsServiceSettingsService.getAll).toHaveBeenCalled();
       expect(store.enablePolicies).toEqual(mockSettings.enablePolicies);
-      expect(store.enableHybridSubmission).toEqual(mockSettings.enableHybridSubmission);
       expect(store.gpuOverProvisioning).toEqual(mockSettings.gpuOverProvisioning);
     });
 
@@ -713,17 +708,6 @@ describe("setting.store", () => {
       expect(store.enablePolicies).toEqual(original);
     });
 
-    it("should update enableHybridSubmission via updateSetting", async () => {
-      const store = useSettingStore();
-      store.enableHybridSubmission = { value: false };
-      vi.mocked(workloadsServiceSettingsService.updateEnableHybridSubmission).mockResolvedValue();
-
-      await store.updateSetting(SettingKeys.EnableHybridSubmission, true);
-
-      expect(workloadsServiceSettingsService.updateEnableHybridSubmission).toHaveBeenCalledWith(true);
-      expect(store.enableHybridSubmission.value).toBe(true);
-    });
-
     it("should update enableNgcIntegration and call catalog service", async () => {
       const store = useSettingStore();
       store.enableNgcIntegration = { value: false };
@@ -807,15 +791,6 @@ describe("setting.store", () => {
 
       store.gpuOverProvisioning = { value: false };
       expect(store.isGPUOverProvisioningEnabled).toBe(false);
-    });
-
-    it("isHybridSubmissionEnabled should read from dedicated state", () => {
-      const store = useSettingStore();
-      store.enableHybridSubmission = { value: true };
-      expect(store.isHybridSubmissionEnabled).toBe(true);
-
-      store.enableHybridSubmission = { value: false };
-      expect(store.isHybridSubmissionEnabled).toBe(false);
     });
 
     it("isDataVolumeEnabled should read from dedicated state", () => {

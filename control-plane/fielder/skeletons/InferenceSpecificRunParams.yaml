@@ -1,7 +1,0 @@
-allOf:
-  - $ref: "../Workload/SpecificRunConnections.yaml"
-  - $ref: "../Workload/SpecificRunAutoScaling.yaml"
-  - $ref: "../Workload/SpecificRunServingPortAccess.yaml"
-  - replace: me
-nullable: true
-type: object

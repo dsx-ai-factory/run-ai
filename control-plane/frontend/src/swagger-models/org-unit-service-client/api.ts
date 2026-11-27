@@ -1786,7 +1786,8 @@ export const DepartmentNodePoolResourcesFilterSortFields = {
     OrgUnitName: 'orgUnitName',
     ClusterId: 'clusterId',
     GpuDeserved: 'gpuDeserved',
-    GpuOverQuotaWeight: 'gpuOverQuotaWeight'
+    GpuOverQuotaWeight: 'gpuOverQuotaWeight',
+    GpuLimit: 'gpuLimit'
 } as const;
 
 export type DepartmentNodePoolResourcesFilterSortFields = typeof DepartmentNodePoolResourcesFilterSortFields[keyof typeof DepartmentNodePoolResourcesFilterSortFields];
@@ -2349,6 +2350,374 @@ export interface FailedNodePoolResourcesPatchRequest {
      * @memberof FailedNodePoolResourcesPatchRequest
      */
     'message'?: string;
+}
+/**
+ * GPU settings that replace the stored ones. An omitted or null field keeps its stored value; unlike the org unit APIs, null doesn\'t mean unlimited here: send -1. 
+ * @export
+ * @interface FairShareSimulationGpuSettings
+ */
+export interface FairShareSimulationGpuSettings {
+    /**
+     * The GPU quota; -1 means unlimited. Values between -1 and 0 are rejected. Ignored while quota is off.
+     * @type {number}
+     * @memberof FairShareSimulationGpuSettings
+     */
+    'deserved'?: number | null;
+    /**
+     * The maximum GPU allocation; -1 means unlimited. Values between -1 and 0 are rejected. Only while limits is on, and not below the quota. 
+     * @type {number}
+     * @memberof FairShareSimulationGpuSettings
+     */
+    'limit'?: number | null;
+    /**
+     * The over-quota weight within the rank. Ignored while adjustableWeights is off, where the weight is the quota.
+     * @type {number}
+     * @memberof FairShareSimulationGpuSettings
+     */
+    'overQuotaWeight'?: number | null;
+}
+/**
+ * The node pool to simulate, saved or not.
+ * @export
+ * @interface FairShareSimulationNodePool
+ */
+export interface FairShareSimulationNodePool {
+    /**
+     * 
+     * @type {FairShareSimulationNodePoolCapacity}
+     * @memberof FairShareSimulationNodePool
+     */
+    'capacity': FairShareSimulationNodePoolCapacity | null;
+    /**
+     * 
+     * @type {FairShareSimulationNodePoolSchedulingCapabilities}
+     * @memberof FairShareSimulationNodePool
+     */
+    'schedulingCapabilities': FairShareSimulationNodePoolSchedulingCapabilities | null;
+}
+/**
+ * GPUs to split. 0 is valid; quotas are still granted, as the scheduler does, and nothing is given above them. Required; null is rejected. 
+ * @export
+ * @interface FairShareSimulationNodePoolCapacity
+ */
+export interface FairShareSimulationNodePoolCapacity {
+    /**
+     * 
+     * @type {number}
+     * @memberof FairShareSimulationNodePoolCapacity
+     */
+    'gpu': number;
+}
+/**
+ * Required; null is rejected.
+ * @export
+ * @interface FairShareSimulationNodePoolSchedulingCapabilities
+ */
+export interface FairShareSimulationNodePoolSchedulingCapabilities {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof FairShareSimulationNodePoolSchedulingCapabilities
+     */
+    'quota': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof FairShareSimulationNodePoolSchedulingCapabilities
+     */
+    'ranks': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof FairShareSimulationNodePoolSchedulingCapabilities
+     */
+    'adjustableWeights': boolean;
+    /**
+     * Whether GPU limits apply.
+     * @type {boolean}
+     * @memberof FairShareSimulationNodePoolSchedulingCapabilities
+     */
+    'limits': boolean;
+}
+/**
+ * A requested org unit with its unsaved changes. Each field replaces the stored value on its own; omitted fields keep it. `demand` is the GPUs the org unit asks for, capped by its limit; without it, half the node pool\'s capacity. 
+ * @export
+ * @interface FairShareSimulationOrgUnit
+ */
+export interface FairShareSimulationOrgUnit {
+    /**
+     * 
+     * @type {string}
+     * @memberof FairShareSimulationOrgUnit
+     */
+    'id': string;
+    /**
+     * An unsaved rank. Only while ranks is on. Omitted or null keeps the stored rank.
+     * @type {FairShareSimulationRank}
+     * @memberof FairShareSimulationOrgUnit
+     */
+    'rank'?: FairShareSimulationRank | null;
+    /**
+     * 
+     * @type {FairShareSimulationOrgUnitGpu}
+     * @memberof FairShareSimulationOrgUnit
+     */
+    'gpu'?: FairShareSimulationOrgUnitGpu | null;
+    /**
+     * 
+     * @type {FairShareSimulationOrgUnitDemand}
+     * @memberof FairShareSimulationOrgUnit
+     */
+    'demand'?: FairShareSimulationOrgUnitDemand | null;
+}
+/**
+ * The GPUs the org unit asks for, capped by its limit. Omitted or null asks for half the capacity.
+ * @export
+ * @interface FairShareSimulationOrgUnitDemand
+ */
+export interface FairShareSimulationOrgUnitDemand {
+    /**
+     * 
+     * @type {number}
+     * @memberof FairShareSimulationOrgUnitDemand
+     */
+    'gpu': number;
+}
+/**
+ * 
+ * @export
+ * @interface FairShareSimulationOrgUnitGpu
+ */
+export interface FairShareSimulationOrgUnitGpu {
+    /**
+     * The GPU quota; -1 means unlimited. Values between -1 and 0 are rejected. Ignored while quota is off.
+     * @type {number}
+     * @memberof FairShareSimulationOrgUnitGpu
+     */
+    'deserved'?: number | null;
+    /**
+     * The maximum GPU allocation; -1 means unlimited. Values between -1 and 0 are rejected. Only while limits is on, and not below the quota. 
+     * @type {number}
+     * @memberof FairShareSimulationOrgUnitGpu
+     */
+    'limit'?: number | null;
+    /**
+     * The over-quota weight within the rank. Ignored while adjustableWeights is off, where the weight is the quota.
+     * @type {number}
+     * @memberof FairShareSimulationOrgUnitGpu
+     */
+    'overQuotaWeight'?: number | null;
+}
+/**
+ * The department whose projects are simulated, with its stored settings. Required when orgUnitType is project; not allowed for departments. It needn\'t be readable by the caller. 
+ * @export
+ * @interface FairShareSimulationParent
+ */
+export interface FairShareSimulationParent {
+    /**
+     * 
+     * @type {string}
+     * @memberof FairShareSimulationParent
+     */
+    'id': string;
+}
+/**
+ * An unsaved rank. Only while ranks is on.
+ * @export
+ * @enum {string}
+ */
+
+export const FairShareSimulationRank = {
+    Highest: 'Highest',
+    VeryHigh: 'VeryHigh',
+    High: 'High',
+    MediumHigh: 'MediumHigh',
+    Medium: 'Medium',
+    MediumLow: 'MediumLow',
+    Low: 'Low',
+    VeryLow: 'VeryLow',
+    Lowest: 'Lowest'
+} as const;
+
+export type FairShareSimulationRank = typeof FairShareSimulationRank[keyof typeof FairShareSimulationRank];
+
+
+/**
+ * A scenario to simulate: the node pool and the org units to return, with their unsaved changes. Every org unit without a demand asks for half the node pool\'s capacity, capped by its limit. For departments, every department competes. For projects, the other departments ask for nothing, and the parent asks for the sum of its projects\' demand, capped by its limit. 
+ * @export
+ * @interface FairShareSimulationRequest
+ */
+export interface FairShareSimulationRequest {
+    /**
+     * 
+     * @type {FairShareSimulationRequestNodePool}
+     * @memberof FairShareSimulationRequest
+     */
+    'nodePool': FairShareSimulationRequestNodePool | null;
+    /**
+     * The type of the requested org units. One type per request.
+     * @type {string}
+     * @memberof FairShareSimulationRequest
+     */
+    'orgUnitType': FairShareSimulationRequestOrgUnitTypeEnum;
+    /**
+     * 
+     * @type {FairShareSimulationRequestParent}
+     * @memberof FairShareSimulationRequest
+     */
+    'parent'?: FairShareSimulationRequestParent | null;
+    /**
+     * The org units to return, with their unsaved changes. Every org unit with an unsaved change must be sent: a change that isn\'t sent isn\'t simulated. 
+     * @type {Array<FairShareSimulationOrgUnit>}
+     * @memberof FairShareSimulationRequest
+     */
+    'orgUnits': Array<FairShareSimulationOrgUnit>;
+}
+
+export const FairShareSimulationRequestOrgUnitTypeEnum = {
+    Department: 'department',
+    Project: 'project'
+} as const;
+
+export type FairShareSimulationRequestOrgUnitTypeEnum = typeof FairShareSimulationRequestOrgUnitTypeEnum[keyof typeof FairShareSimulationRequestOrgUnitTypeEnum];
+
+/**
+ * Required; null is rejected.
+ * @export
+ * @interface FairShareSimulationRequestNodePool
+ */
+export interface FairShareSimulationRequestNodePool {
+    /**
+     * 
+     * @type {FairShareSimulationNodePoolCapacity}
+     * @memberof FairShareSimulationRequestNodePool
+     */
+    'capacity': FairShareSimulationNodePoolCapacity | null;
+    /**
+     * 
+     * @type {FairShareSimulationNodePoolSchedulingCapabilities}
+     * @memberof FairShareSimulationRequestNodePool
+     */
+    'schedulingCapabilities': FairShareSimulationNodePoolSchedulingCapabilities | null;
+}
+/**
+ * Required for projects; not allowed for departments.
+ * @export
+ * @interface FairShareSimulationRequestParent
+ */
+export interface FairShareSimulationRequestParent {
+    /**
+     * 
+     * @type {string}
+     * @memberof FairShareSimulationRequestParent
+     */
+    'id': string;
+}
+/**
+ * 
+ * @export
+ * @interface FairShareSimulationResources
+ */
+export interface FairShareSimulationResources {
+    /**
+     * 
+     * @type {number}
+     * @memberof FairShareSimulationResources
+     */
+    'gpu': number;
+}
+/**
+ * 
+ * @export
+ * @interface FairShareSimulationResponse
+ */
+export interface FairShareSimulationResponse {
+    /**
+     * One result per requested org unit, in the request\'s order.
+     * @type {Array<FairShareSimulationResult>}
+     * @memberof FairShareSimulationResponse
+     */
+    'orgUnits': Array<FairShareSimulationResult>;
+}
+/**
+ * The simulated result of one org unit, in GPUs. Values may be fractional, as in the scheduler; the client rounds. - `demand`: what the org unit asked for, after the default demand and the limit were applied. - `fairShare`: what the scheduler would give it, the sum of `guaranteed` and `overQuota`. - `guaranteed`: the part of the fair share within its quota. - `overQuota`: the part of the fair share above its quota. - `unmet`: `demand` minus `fairShare`, never below 0. 
+ * @export
+ * @interface FairShareSimulationResult
+ */
+export interface FairShareSimulationResult {
+    /**
+     * 
+     * @type {string}
+     * @memberof FairShareSimulationResult
+     */
+    'id': string;
+    /**
+     * 
+     * @type {FairShareSimulationResources}
+     * @memberof FairShareSimulationResult
+     */
+    'demand': FairShareSimulationResources;
+    /**
+     * 
+     * @type {FairShareSimulationResources}
+     * @memberof FairShareSimulationResult
+     */
+    'fairShare': FairShareSimulationResources;
+    /**
+     * 
+     * @type {FairShareSimulationResources}
+     * @memberof FairShareSimulationResult
+     */
+    'guaranteed': FairShareSimulationResources;
+    /**
+     * 
+     * @type {FairShareSimulationResources}
+     * @memberof FairShareSimulationResult
+     */
+    'overQuota': FairShareSimulationResources;
+    /**
+     * 
+     * @type {FairShareSimulationResources}
+     * @memberof FairShareSimulationResult
+     */
+    'unmet': FairShareSimulationResources;
+    /**
+     * The org unit\'s effective over-quota weight (the quota while adjustableWeights is off) divided by the total of its rank among its siblings, including ones the caller can\'t read. With ranks off, among all siblings. 
+     * @type {number}
+     * @memberof FairShareSimulationResult
+     */
+    'weightShareInRank': number;
+}
+/**
+ * The node pool\'s scheduling capabilities to simulate, saved or not.
+ * @export
+ * @interface FairShareSimulationSchedulingCapabilities
+ */
+export interface FairShareSimulationSchedulingCapabilities {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof FairShareSimulationSchedulingCapabilities
+     */
+    'quota': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof FairShareSimulationSchedulingCapabilities
+     */
+    'ranks': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof FairShareSimulationSchedulingCapabilities
+     */
+    'adjustableWeights': boolean;
+    /**
+     * Whether GPU limits apply.
+     * @type {boolean}
+     * @memberof FairShareSimulationSchedulingCapabilities
+     */
+    'limits': boolean;
 }
 /**
  * 
@@ -3435,7 +3804,9 @@ export interface NodeTypesPerWorkload {
  */
 
 export const NodepoolResourcesResetAction = {
-    CpuQuotasToDefault: 'CPU_QUOTAS_TO_DEFAULT'
+    CpuQuotasToDefault: 'CPU_QUOTAS_TO_DEFAULT',
+    LimitsToDefault: 'LIMITS_TO_DEFAULT',
+    NegativeWeightsToDefault: 'NEGATIVE_WEIGHTS_TO_DEFAULT'
 } as const;
 
 export type NodepoolResourcesResetAction = typeof NodepoolResourcesResetAction[keyof typeof NodepoolResourcesResetAction];
@@ -3736,7 +4107,8 @@ export type OrgUnitsNodepoolSummaryInnerTypeEnum = typeof OrgUnitsNodepoolSummar
 
 export const OrgUnitsNodepoolSummaryType = {
     HasQuota: 'HAS_QUOTA',
-    NonDefaultRank: 'NON_DEFAULT_RANK'
+    NonDefaultRank: 'NON_DEFAULT_RANK',
+    HasLimit: 'HAS_LIMIT'
 } as const;
 
 export type OrgUnitsNodepoolSummaryType = typeof OrgUnitsNodepoolSummaryType[keyof typeof OrgUnitsNodepoolSummaryType];
@@ -4669,7 +5041,8 @@ export const ProjectNodePoolResourcesFilterSortFields = {
     OrgUnitName: 'orgUnitName',
     ClusterId: 'clusterId',
     GpuDeserved: 'gpuDeserved',
-    GpuOverQuotaWeight: 'gpuOverQuotaWeight'
+    GpuOverQuotaWeight: 'gpuOverQuotaWeight',
+    GpuLimit: 'gpuLimit'
 } as const;
 
 export type ProjectNodePoolResourcesFilterSortFields = typeof ProjectNodePoolResourcesFilterSortFields[keyof typeof ProjectNodePoolResourcesFilterSortFields];
@@ -6900,7 +7273,8 @@ export const ResourcesResetAction = {
     QuotasToDefault: 'QUOTAS_TO_DEFAULT',
     RanksToDefault: 'RANKS_TO_DEFAULT',
     WeightsToDefault: 'WEIGHTS_TO_DEFAULT',
-    WeightsToDeserved: 'WEIGHTS_TO_DESERVED'
+    WeightsToDeserved: 'WEIGHTS_TO_DESERVED',
+    LimitsToDefault: 'LIMITS_TO_DEFAULT'
 } as const;
 
 export type ResourcesResetAction = typeof ResourcesResetAction[keyof typeof ResourcesResetAction];
@@ -7336,7 +7710,7 @@ export const DepartmentsApiAxiosParamCreator = function (configuration?: Configu
         /**
          * Count departments node pool resources
          * @summary Count departments node pool resources
-         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
          * @param {string} [search] Filter results by a free text search.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -7691,7 +8065,7 @@ export const DepartmentsApiAxiosParamCreator = function (configuration?: Configu
         /**
          * List departments node pool resources
          * @summary Get departments node pool resources
-         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
          * @param {DepartmentNodePoolResourcesFilterSortFields} [sortBy] Sort results by a parameters.
          * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
          * @param {number} [offset] The offset of the first item returned in the collection.
@@ -8282,7 +8656,7 @@ export const DepartmentsApiFp = function(configuration?: Configuration) {
         /**
          * Count departments node pool resources
          * @summary Count departments node pool resources
-         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
          * @param {string} [search] Filter results by a free text search.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -8377,7 +8751,7 @@ export const DepartmentsApiFp = function(configuration?: Configuration) {
         /**
          * List departments node pool resources
          * @summary Get departments node pool resources
-         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
          * @param {DepartmentNodePoolResourcesFilterSortFields} [sortBy] Sort results by a parameters.
          * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
          * @param {number} [offset] The offset of the first item returned in the collection.
@@ -8543,7 +8917,7 @@ export const DepartmentsApiFactory = function (configuration?: Configuration, ba
         /**
          * Count departments node pool resources
          * @summary Count departments node pool resources
-         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
          * @param {string} [search] Filter results by a free text search.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -8630,7 +9004,7 @@ export const DepartmentsApiFactory = function (configuration?: Configuration, ba
         /**
          * List departments node pool resources
          * @summary Get departments node pool resources
-         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
          * @param {DepartmentNodePoolResourcesFilterSortFields} [sortBy] Sort results by a parameters.
          * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
          * @param {number} [offset] The offset of the first item returned in the collection.
@@ -8787,7 +9161,7 @@ export class DepartmentsApi extends BaseAPI {
     /**
      * Count departments node pool resources
      * @summary Count departments node pool resources
-     * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
+     * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
      * @param {string} [search] Filter results by a free text search.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -8890,7 +9264,7 @@ export class DepartmentsApi extends BaseAPI {
     /**
      * List departments node pool resources
      * @summary Get departments node pool resources
-     * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
+     * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
      * @param {DepartmentNodePoolResourcesFilterSortFields} [sortBy] Sort results by a parameters.
      * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
      * @param {number} [offset] The offset of the first item returned in the collection.
@@ -10424,6 +10798,50 @@ export const OrgUnitApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
+         * Computes the GPUs the scheduler would give org units of a node pool for a scenario: a node pool capacity and scheduling capabilities, saved or not, and the org units to return with their unsaved changes. The calculation covers every department of the node pool, and for projects every project of the parent, including ones the caller can\'t read; the response holds only the requested org units. Org units not in the request keep their stored settings and ask for half the capacity. Nothing is saved. The same scenario gives the same result for every caller.  Only saved org units can be simulated; an org unit that doesn\'t exist yet can\'t be part of the scenario.  400 covers, besides the schema: `parent` missing for projects or set for departments; limits on while quota is off; a rank or limit the capabilities turn off (a quota is ignored while quota is off, and a weight while adjustableWeights is off); a quota or limit between -1 and 0; a limit below the quota; a duplicate id; and an org unit that isn\'t on the node pool, isn\'t readable by the caller, or (for projects) isn\'t the parent\'s. These all return the same message as an unknown id, so hidden org units aren\'t revealed: an unreadable org unit is a 400, not a 403.  Authorization: simulating departments requires read on departments, and simulating projects requires read on projects, in some scope; otherwise 403. The handler checks it, since the required permission depends on `orgUnitType`. 
+         * @summary Simulate the fair share of a node pool\'s org units
+         * @param {string} nodepoolId The unique id identifying the Node Pool.
+         * @param {FairShareSimulationRequest} fairShareSimulationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        simulateNodePoolFairShare: async (nodepoolId: string, fairShareSimulationRequest: FairShareSimulationRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'nodepoolId' is not null or undefined
+            assertParamExists('simulateNodePoolFairShare', 'nodepoolId', nodepoolId)
+            // verify required parameter 'fairShareSimulationRequest' is not null or undefined
+            assertParamExists('simulateNodePoolFairShare', 'fairShareSimulationRequest', fairShareSimulationRequest)
+            const localVarPath = `/api/v1/org-unit/node-pools/{nodepoolId}/fair-share-simulation`
+                .replace(`{${"nodepoolId"}}`, encodeURIComponent(String(nodepoolId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(fairShareSimulationRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * 
          * @param {OrgUnitSingleSetting} orgUnitSingleSetting 
          * @param {*} [options] Override http request option.
@@ -10549,6 +10967,18 @@ export const OrgUnitApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
+         * Computes the GPUs the scheduler would give org units of a node pool for a scenario: a node pool capacity and scheduling capabilities, saved or not, and the org units to return with their unsaved changes. The calculation covers every department of the node pool, and for projects every project of the parent, including ones the caller can\'t read; the response holds only the requested org units. Org units not in the request keep their stored settings and ask for half the capacity. Nothing is saved. The same scenario gives the same result for every caller.  Only saved org units can be simulated; an org unit that doesn\'t exist yet can\'t be part of the scenario.  400 covers, besides the schema: `parent` missing for projects or set for departments; limits on while quota is off; a rank or limit the capabilities turn off (a quota is ignored while quota is off, and a weight while adjustableWeights is off); a quota or limit between -1 and 0; a limit below the quota; a duplicate id; and an org unit that isn\'t on the node pool, isn\'t readable by the caller, or (for projects) isn\'t the parent\'s. These all return the same message as an unknown id, so hidden org units aren\'t revealed: an unreadable org unit is a 400, not a 403.  Authorization: simulating departments requires read on departments, and simulating projects requires read on projects, in some scope; otherwise 403. The handler checks it, since the required permission depends on `orgUnitType`. 
+         * @summary Simulate the fair share of a node pool\'s org units
+         * @param {string} nodepoolId The unique id identifying the Node Pool.
+         * @param {FairShareSimulationRequest} fairShareSimulationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async simulateNodePoolFairShare(nodepoolId: string, fairShareSimulationRequest: FairShareSimulationRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FairShareSimulationResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.simulateNodePoolFairShare(nodepoolId, fairShareSimulationRequest, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
          * 
          * @param {OrgUnitSingleSetting} orgUnitSingleSetting 
          * @param {*} [options] Override http request option.
@@ -10636,6 +11066,17 @@ export const OrgUnitApiFactory = function (configuration?: Configuration, basePa
          */
         orgsNodePoolSummary(nodepoolId: string, nodepoolSummaryType: OrgUnitsNodepoolSummaryType, options?: any): AxiosPromise<OrgsNodePoolSummary200Response> {
             return localVarFp.orgsNodePoolSummary(nodepoolId, nodepoolSummaryType, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Computes the GPUs the scheduler would give org units of a node pool for a scenario: a node pool capacity and scheduling capabilities, saved or not, and the org units to return with their unsaved changes. The calculation covers every department of the node pool, and for projects every project of the parent, including ones the caller can\'t read; the response holds only the requested org units. Org units not in the request keep their stored settings and ask for half the capacity. Nothing is saved. The same scenario gives the same result for every caller.  Only saved org units can be simulated; an org unit that doesn\'t exist yet can\'t be part of the scenario.  400 covers, besides the schema: `parent` missing for projects or set for departments; limits on while quota is off; a rank or limit the capabilities turn off (a quota is ignored while quota is off, and a weight while adjustableWeights is off); a quota or limit between -1 and 0; a limit below the quota; a duplicate id; and an org unit that isn\'t on the node pool, isn\'t readable by the caller, or (for projects) isn\'t the parent\'s. These all return the same message as an unknown id, so hidden org units aren\'t revealed: an unreadable org unit is a 400, not a 403.  Authorization: simulating departments requires read on departments, and simulating projects requires read on projects, in some scope; otherwise 403. The handler checks it, since the required permission depends on `orgUnitType`. 
+         * @summary Simulate the fair share of a node pool\'s org units
+         * @param {string} nodepoolId The unique id identifying the Node Pool.
+         * @param {FairShareSimulationRequest} fairShareSimulationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        simulateNodePoolFairShare(nodepoolId: string, fairShareSimulationRequest: FairShareSimulationRequest, options?: any): AxiosPromise<FairShareSimulationResponse> {
+            return localVarFp.simulateNodePoolFairShare(nodepoolId, fairShareSimulationRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -10737,6 +11178,19 @@ export class OrgUnitApi extends BaseAPI {
      */
     public orgsNodePoolSummary(nodepoolId: string, nodepoolSummaryType: OrgUnitsNodepoolSummaryType, options?: AxiosRequestConfig) {
         return OrgUnitApiFp(this.configuration).orgsNodePoolSummary(nodepoolId, nodepoolSummaryType, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Computes the GPUs the scheduler would give org units of a node pool for a scenario: a node pool capacity and scheduling capabilities, saved or not, and the org units to return with their unsaved changes. The calculation covers every department of the node pool, and for projects every project of the parent, including ones the caller can\'t read; the response holds only the requested org units. Org units not in the request keep their stored settings and ask for half the capacity. Nothing is saved. The same scenario gives the same result for every caller.  Only saved org units can be simulated; an org unit that doesn\'t exist yet can\'t be part of the scenario.  400 covers, besides the schema: `parent` missing for projects or set for departments; limits on while quota is off; a rank or limit the capabilities turn off (a quota is ignored while quota is off, and a weight while adjustableWeights is off); a quota or limit between -1 and 0; a limit below the quota; a duplicate id; and an org unit that isn\'t on the node pool, isn\'t readable by the caller, or (for projects) isn\'t the parent\'s. These all return the same message as an unknown id, so hidden org units aren\'t revealed: an unreadable org unit is a 400, not a 403.  Authorization: simulating departments requires read on departments, and simulating projects requires read on projects, in some scope; otherwise 403. The handler checks it, since the required permission depends on `orgUnitType`. 
+     * @summary Simulate the fair share of a node pool\'s org units
+     * @param {string} nodepoolId The unique id identifying the Node Pool.
+     * @param {FairShareSimulationRequest} fairShareSimulationRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrgUnitApi
+     */
+    public simulateNodePoolFairShare(nodepoolId: string, fairShareSimulationRequest: FairShareSimulationRequest, options?: AxiosRequestConfig) {
+        return OrgUnitApiFp(this.configuration).simulateNodePoolFairShare(nodepoolId, fairShareSimulationRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -10845,7 +11299,7 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
         /**
          * Count projects node pool resources
          * @summary Count projects node pool resources
-         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
          * @param {string} [search] Filter results by a free text search.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -11246,7 +11700,7 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
         /**
          * List projects node pool resources
          * @summary Get projects node pool resources
-         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
          * @param {ProjectNodePoolResourcesFilterSortFields} [sortBy] Sort results by a parameters.
          * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
          * @param {number} [offset] The offset of the first item returned in the collection.
@@ -11963,7 +12417,7 @@ export const ProjectsApiFp = function(configuration?: Configuration) {
         /**
          * Count projects node pool resources
          * @summary Count projects node pool resources
-         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
          * @param {string} [search] Filter results by a free text search.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -12067,7 +12521,7 @@ export const ProjectsApiFp = function(configuration?: Configuration) {
         /**
          * List projects node pool resources
          * @summary Get projects node pool resources
-         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
          * @param {ProjectNodePoolResourcesFilterSortFields} [sortBy] Sort results by a parameters.
          * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
          * @param {number} [offset] The offset of the first item returned in the collection.
@@ -12273,7 +12727,7 @@ export const ProjectsApiFactory = function (configuration?: Configuration, baseP
         /**
          * Count projects node pool resources
          * @summary Count projects node pool resources
-         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
          * @param {string} [search] Filter results by a free text search.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -12369,7 +12823,7 @@ export const ProjectsApiFactory = function (configuration?: Configuration, baseP
         /**
          * List projects node pool resources
          * @summary Get projects node pool resources
-         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
          * @param {ProjectNodePoolResourcesFilterSortFields} [sortBy] Sort results by a parameters.
          * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
          * @param {number} [offset] The offset of the first item returned in the collection.
@@ -12566,7 +13020,7 @@ export class ProjectsApi extends BaseAPI {
     /**
      * Count projects node pool resources
      * @summary Count projects node pool resources
-     * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
+     * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
      * @param {string} [search] Filter results by a free text search.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -12678,7 +13132,7 @@ export class ProjectsApi extends BaseAPI {
     /**
      * List projects node pool resources
      * @summary Get projects node pool resources
-     * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
+     * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;. gpuLimit treats a missing limit as -1 (unlimited), so gpuLimit!&#x3D;-1 matches only org units with a GPU limit.
      * @param {ProjectNodePoolResourcesFilterSortFields} [sortBy] Sort results by a parameters.
      * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
      * @param {number} [offset] The offset of the first item returned in the collection.

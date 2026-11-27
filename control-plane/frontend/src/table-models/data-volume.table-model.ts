@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import DOCS from "@/constants/docs";
 import { CLUSTER_COLUMN_FILTER_NAME, EColumnFilterType } from "@/models/filter.model";
 import { autocompleteUtil } from "@/utils/autocomplete.util";
 import {
@@ -94,7 +95,13 @@ export const allDataVolumeColumnsMap: Record<string, ITableColumn> = {
       }
 
       const transformedMessage = _transformDataVolumePhaseMessage(status.phaseMessage);
-      return assetsUtil.getStatusColOptions({ status: assetStatus, message: transformedMessage }, row.createdAt || "");
+      // The data volumes API has no status url (unlike assets-service); a truthy url is what makes
+      // getStatusColOptions append the support link, so request it for the red "Issues found" state only.
+      const url = status.phase === DatavolumePhase.NotReady ? DOCS.SUPPORT.URL : undefined;
+      return assetsUtil.getStatusColOptions(
+        { status: assetStatus, message: transformedMessage, url },
+        row.createdAt || "",
+      );
     },
     hideFilter: true,
     sort: (a, b, rowA, rowB) => {

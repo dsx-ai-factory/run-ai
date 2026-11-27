@@ -59,7 +59,7 @@ import { errorMessages } from "@/common/error-message.constant";
 import { isMaxEqualOrHigherThenMin, isValueLowerOrEqualToMax } from "@/common/form.validators";
 
 // models
-import { type AutoScalingRules } from "@/swagger-models/assets-service-client";
+import type { AutoScalingRules } from "@/swagger-models/policy-service-client";
 import {
   type IReplicaScalingSection,
   MAX_REPLICAS_ALLOWED,

@@ -33,6 +33,7 @@ const (
 	RESOURCESRESETACTION_RANKS_TO_DEFAULT    ResourcesResetAction = "RANKS_TO_DEFAULT"
 	RESOURCESRESETACTION_WEIGHTS_TO_DEFAULT  ResourcesResetAction = "WEIGHTS_TO_DEFAULT"
 	RESOURCESRESETACTION_WEIGHTS_TO_DESERVED ResourcesResetAction = "WEIGHTS_TO_DESERVED"
+	RESOURCESRESETACTION_LIMITS_TO_DEFAULT   ResourcesResetAction = "LIMITS_TO_DEFAULT"
 )
 
 // AllowedResourcesResetActionEnumValues is all the allowed values of ResourcesResetAction enum
@@ -41,6 +42,7 @@ var AllowedResourcesResetActionEnumValues = []ResourcesResetAction{
 	"RANKS_TO_DEFAULT",
 	"WEIGHTS_TO_DEFAULT",
 	"WEIGHTS_TO_DESERVED",
+	"LIMITS_TO_DEFAULT",
 }
 
 // validResourcesResetActionEnumValue provides a map of ResourcesResetActions for fast verification of use input
@@ -49,6 +51,7 @@ var validResourcesResetActionEnumValues = map[ResourcesResetAction]struct{}{
 	"RANKS_TO_DEFAULT":    {},
 	"WEIGHTS_TO_DEFAULT":  {},
 	"WEIGHTS_TO_DESERVED": {},
+	"LIMITS_TO_DEFAULT":   {},
 }
 
 // IsValid return true if the value is valid for the enum, false otherwise

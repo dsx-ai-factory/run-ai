@@ -83,9 +83,6 @@ func CreateRouter() chi.Router {
 	inferencesApiService := NewInferencesApiService()
 	inferencesApiController := api.NewInferencesAPIController(inferencesApiService)
 
-	modelInferenceApiService := NewModelInferenceApiService(&modelApiService, &inferencesApiService)
-	modelInferenceController := api.NewModelInferenceAPIController(modelInferenceApiService)
-
 	eventsApiService := NewEventsAPIService()
 	eventsApiController := api.NewEventsAPIController(eventsApiService)
 
@@ -126,7 +123,6 @@ func CreateRouter() chi.Router {
 			syncController,
 			registryController,
 			modelController,
-			modelInferenceController,
 			configMapController,
 			secretVolumeController,
 			eventsApiController,

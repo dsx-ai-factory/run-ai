@@ -11,7 +11,7 @@ import {
   type IReplicaScalingSection,
 } from "@/components/section/compute-resource-section/auto-scale-section/replica-scaling-section/replica-scaling-section.model";
 import { Quasar } from "quasar";
-import { type AutoScalingRules } from "@/swagger-models/assets-service-client";
+import type { AutoScalingRules } from "@/swagger-models/policy-service-client";
 import { errorMessages } from "@/common/error-message.constant";
 
 interface IReplicaScalingProps {
