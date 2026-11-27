@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	podStatusAnnotationName             = "runai-calculated-status"
+	PodStatusAnnotationName             = "runai-calculated-status"
 	PodAllocatedGPUsAnnotationName      = "runai-allocated-gpus"
 	PodAllocatedGpuMemoryAnnotationName = "runai-allocated-gpu-memory"
 	PodAllocatedMigGPUsAnnotationName   = "runai-allocated-mig-gpus"
@@ -50,9 +50,21 @@ func UpdatePodAnnotations(ctx context.Context, pod *v1.Pod, podMetrics metametri
 	return kubeClient.Patch(ctx, newPod, client.MergeFrom(pod))
 }
 
+// UpdatePodStatusAnnotation patches only the calculated status annotation of the pod. It is used when the GPU
+// allocation of the pod could not be calculated, so the GPU annotations are not overwritten with made-up values.
+func UpdatePodStatusAnnotation(ctx context.Context, pod *v1.Pod, status string, kubeClient client.Client) error {
+	newPod := pod.DeepCopy()
+	if newPod.Annotations == nil {
+		newPod.Annotations = map[string]string{}
+	}
+	newPod.Annotations[PodStatusAnnotationName] = status
+
+	return kubeClient.Patch(ctx, newPod, client.MergeFrom(pod))
+}
+
 func transformToPodAnnotations(podMetrics metametrics.PodMetadata) map[string]string {
 	return map[string]string{
-		podStatusAnnotationName:             podMetrics.Status,
+		PodStatusAnnotationName:             podMetrics.Status,
 		PodAllocatedGPUsAnnotationName:      strconv.FormatFloat(podMetrics.GPUs, 'f', -1, 64),
 		PodAllocatedGpuMemoryAnnotationName: strconv.FormatInt(podMetrics.GpuMemory, 10),
 		PodAllocatedMigGPUsAnnotationName:   strconv.FormatFloat(podMetrics.MigGPUs, 'f', -1, 64),
