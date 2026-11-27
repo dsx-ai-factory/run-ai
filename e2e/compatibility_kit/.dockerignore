@@ -77,9 +77,9 @@ Makefile
 .mocharc.cjs
 .reporterConfig.json
 
-# Certificate kit build artifacts
-certificate_kit/*.tar.gz
-certificate_kit/*.zip
+# Compatibility kit build artifacts
+compatibility_kit/*.tar.gz
+compatibility_kit/*.zip
 
 # Other internal files
 globalState.json

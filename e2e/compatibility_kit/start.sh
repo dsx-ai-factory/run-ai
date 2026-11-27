@@ -8,18 +8,27 @@
 # Capture all output to a log file while still showing on console
 # Uses line buffering to ensure logs are written immediately
 # ============================================================
-LOG_FILE="/tmp/certification-kit-run.log"
-RESULTS_LOG_FILE="/app/e2e/results/certification-kit-run.log"
+LOG_FILE="/tmp/compatibility-kit-run.log"
+RESULTS_LOG_FILE="/app/e2e/results/compatibility-kit-run.log"
 
 # Clean up any existing log file
 > "$LOG_FILE"
 
+# Shared helpers: credential masking (redact_secrets, redact_secrets_in_dir)
+# and the report counters (allure_stat). Sourcing only defines functions.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/kit-common/kit-utils.sh" || {
+    echo "ERROR: cannot load ${SCRIPT_DIR}/kit-common/kit-utils.sh" >&2
+    exit 1
+}
+
 # Create a named pipe for capturing output with line buffering
-# Using stdbuf to reduce buffering issues
+# Using stdbuf to reduce buffering issues. Credentials are masked on the way
+# to both the console and the log.
 if command -v stdbuf >/dev/null 2>&1; then
-    exec > >(stdbuf -oL tee -a "$LOG_FILE") 2>&1
+    exec > >(redact_secrets | stdbuf -oL tee -a "$LOG_FILE") 2>&1
 else
-    exec > >(tee -a "$LOG_FILE") 2>&1
+    exec > >(redact_secrets | tee -a "$LOG_FILE") 2>&1
 fi
 
 # Function to sync and copy logs to results directory
@@ -37,7 +46,7 @@ sync_logs() {
 # Set up trap to sync logs on exit (ensures logs are captured even on errors)
 trap 'sync_logs' EXIT
 
-echo "🚀 Starting Run:AI Certification Kit..."
+echo "🚀 Starting Run:AI Compatibility Kit..."
 echo "📝 All output is being logged to: $LOG_FILE"
 
 # Skip .env file loading - we require environment variables to be passed
@@ -96,7 +105,7 @@ KUBECONFIG_CONTENT=$(cat /kubeconfig/config)
 # Update the .env file with user inputs
 echo "📝 Updating .env file with user inputs..."
 cat > /app/e2e/.env << EOF
-# Run:AI Certification Kit Configuration
+# Run:AI Compatibility Kit Configuration
 # Updated from user inputs
 
 # Control Plane Configuration
@@ -174,7 +183,7 @@ echo ""
 echo "🔍 Validating kubeconfig..."
 if [ ! -f "${KUBECONFIG:-${HOME:-/root}/.kube/config}" ]; then
     echo "❌ CRITICAL: No kubeconfig file found at ${KUBECONFIG:-${HOME:-/root}/.kube/config}"
-    echo "Cannot proceed with certification tests without cluster access"
+    echo "Cannot proceed with compatibility tests without cluster access"
     exit 1
 fi
 
@@ -216,7 +225,7 @@ if kubectl cluster-info --request-timeout=10s > /dev/null 2>&1; then
     fi
     
     echo ""
-    echo "✅ Pre-flight validation PASSED - proceeding with certification tests"
+    echo "✅ Pre-flight validation PASSED - proceeding with compatibility tests"
     echo ""
 else
     echo "❌ CRITICAL: Cannot connect to Kubernetes cluster"
@@ -292,15 +301,17 @@ echo "   RETRIES: $RETRIES"
 cd /app/e2e
 
 # Run Playwright tests by tag
-echo "🧪 Running certification tests from E2E suite..."
+echo "🧪 Running compatibility tests from E2E suite..."
 echo "📋 Running tests tagged with @k8s-flav-cert-kit..."
 echo "📁 Working directory: $(pwd)"
 echo "📁 Test directory: src/test/suites/playwright/"
 
-# Run only tests with the k8s-flav-cert-kit-temp tag using our custom certification kit config
+# Run only tests with the k8s-flav-cert-kit-temp tag using our custom compatibility kit config
 # Set Node.js options to handle TypeScript config files properly and OpenSSL legacy provider
 export NODE_OPTIONS="--openssl-legacy-provider --loader ts-node/esm"
-npx playwright test --grep="@k8s-flav-cert-kit-temp" --config=playwright-config/certification-kit.config.ts
+# Call the suite's own playwright binary rather than npx: the kit image ships
+# no npm/npx.
+./node_modules/.bin/playwright test --grep="@k8s-flav-cert-kit-temp" --config=playwright-config/compatibility-kit.config.ts
 
 # Check if tests ran and results were generated
 echo "🔍 Checking test results..."
@@ -319,7 +330,10 @@ if [ -d "allure-results" ]; then
     # Unset NODE_OPTIONS for Allure to avoid ts-node loader conflicts
     echo "   Unsetting NODE_OPTIONS for Allure compatibility..."
     unset NODE_OPTIONS
-    
+
+    # The raw results are masked before the report is built from them, so no
+    # copy of the report ever holds a credential.
+    redact_secrets_in_dir allure-results
     allure generate allure-results --clean -o allure-report
     echo "✅ Allure report generated successfully"
 else
@@ -327,6 +341,7 @@ else
     # Try to find results in other locations
     if [ -d "/app/allure-results" ]; then
         echo "📁 Found results in /app/allure-results, generating report from there..."
+        redact_secrets_in_dir /app/allure-results
         allure generate /app/allure-results --clean -o /app/allure-report
     else
         echo "❌ No Allure results found anywhere!"
@@ -375,8 +390,10 @@ if [ -d /app/e2e/results ]; then
     
     # Generate executive summary
     echo "📊 Generating executive summary..."
-    cat > executive-summary.md << 'EOF'
-# Run:AI Certification Kit - Executive Summary
+    # The delimiter is unquoted so the values below are filled in; the
+    # backticks further down are escaped for the same reason.
+    cat > executive-summary.md << EOF
+# Run:AI Compatibility Kit - Executive Summary
 
 ## Test Execution Overview
 - **Execution Date**: $(date '+%Y-%m-%d %H:%M:%S UTC')
@@ -385,16 +402,17 @@ if [ -d /app/e2e/results ]; then
 - **Platform**: ${KUBERNETES_PLATFORM}
 
 ## Test Results Summary
-- **Total Tests**: $(find allure-report/data/test-cases -name "*.json" 2>/dev/null | wc -l)
-- **Passed**: $(grep -r '"status":"passed"' allure-report/data/test-cases/ 2>/dev/null | wc -l)
-- **Failed**: $(grep -r '"status":"failed"' allure-report/data/test-cases/ 2>/dev/null | wc -l)
-- **Skipped**: $(grep -r '"status":"skipped"' allure-report/data/test-cases/ 2>/dev/null | wc -l)
+- **Total Tests**: $(allure_stat total)
+- **Passed**: $(allure_stat passed)
+- **Failed**: $(allure_stat failed)
+- **Broken**: $(allure_stat broken)
+- **Skipped**: $(allure_stat skipped)
 
 ## Environment Information
 - **Cluster Name**: ${CLUSTER_NAME_PREFIX}
 - **Control Plane URL**: ${CONTROL_PLANE_URL}
 - **Kubernetes Platform**: ${KUBERNETES_PLATFORM}
-- **Test Environment**: Certification Kit Container
+- **Test Environment**: Compatibility Kit Container
 
 ## Package Contents
 - **Allure HTML Report**: Complete interactive test report
@@ -403,12 +421,12 @@ if [ -d /app/e2e/results ]; then
 - **Executive Summary**: This file with high-level overview
 
 ## How to Use This Package
-1. **For Run:AI Team**: Extract the ZIP file and open `allure-report/index.html`
-2. **For Analysis**: Use the JSON files in `allure-report/data/` for programmatic analysis
-3. **For Investigation**: Check `allure-report/data/attachments/` for detailed logs and errors
+1. **For Run:AI Team**: Extract the ZIP file and open \`allure-report/index.html\`
+2. **For Analysis**: Use the JSON files in \`allure-report/data/\` for programmatic analysis
+3. **For Investigation**: Check \`allure-report/data/attachments/\` for detailed logs and errors
 
 ## Contact Information
-- **Generated by**: Run:AI Certification Kit
+- **Generated by**: Run:AI Compatibility Kit
 - **For Support**: Contact Run:AI Support Team
 EOF
 
@@ -422,6 +440,9 @@ EOF
     if [ -d "allure-report/data/test-cases" ]; then
         for test_file in allure-report/data/test-cases/*.json; do
             if [ -f "$test_file" ]; then
+                # A retried test has one file per attempt; list the final one only
+                grep -q '"hidden":true' "$test_file" && continue
+
                 # Extract test information using jq-like parsing (basic sed/awk approach)
                 test_name=$(grep -o '"name":"[^"]*"' "$test_file" | head -1 | sed 's/"name":"//;s/"//')
                 status=$(grep -o '"status":"[^"]*"' "$test_file" | head -1 | sed 's/"status":"//;s/"//')
@@ -437,9 +458,9 @@ EOF
     # Create README for the package
     echo "📖 Creating package README..."
     cat > README.md << 'EOF'
-# Run:AI Certification Kit Results Package
+# Run:AI Compatibility Kit Results Package
 
-This package contains the complete results from a Run:AI Certification Kit execution.
+This package contains the complete results from a Run:AI Compatibility Kit execution.
 
 ## Quick Start
 1. **Open the HTML Report**: Navigate to `allure-report/index.html` and open in your browser
@@ -452,7 +473,7 @@ results-package/
 ├── README.md                    # This file
 ├── executive-summary.md         # High-level test summary
 ├── test-results-summary.csv     # Test results in CSV format
-├── certification-kit-run.log   # Complete console output from the run
+├── compatibility-kit-run.log   # Complete console output from the run
 ├── allure-report/              # Complete Allure HTML report
 │   ├── index.html              # Main report entry point
 │   ├── data/                   # Raw test data (JSON)
@@ -468,7 +489,7 @@ EOF
   "cluster_name": "${CLUSTER_NAME_PREFIX}",
   "control_plane_url": "${CONTROL_PLANE_URL}",
   "kubernetes_platform": "${KUBERNETES_PLATFORM}",
-  "test_environment": "certification-kit",
+  "test_environment": "compatibility-kit",
   "package_version": "1.0"
 }
 EOF
@@ -487,7 +508,7 @@ EOF
     fi
     
     # Create the archive package name
-    ARCHIVE_NAME="runai-certification-results-$(date +%Y%m%d-%H%M%S)"
+    ARCHIVE_NAME="runai-compatibility-results-$(date +%Y%m%d-%H%M%S)"
     
     # Create the ZIP package
     echo "🗜️ Creating ZIP package..."
@@ -534,13 +555,13 @@ EOF
     echo ""
     echo "🔍 Verifying log file is included in archive..."
     if [ -f "${ARCHIVE_NAME}.zip" ]; then
-        if unzip -l "${ARCHIVE_NAME}.zip" | grep -q "certification-kit-run.log"; then
+        if unzip -l "${ARCHIVE_NAME}.zip" | grep -q "compatibility-kit-run.log"; then
             echo "✅ Run log verified in ZIP archive"
         else
             echo "⚠️ Warning: Run log may not be in the archive"
         fi
     elif [ -f "${ARCHIVE_NAME}.tar.gz" ]; then
-        if tar -tzf "${ARCHIVE_NAME}.tar.gz" | grep -q "certification-kit-run.log"; then
+        if tar -tzf "${ARCHIVE_NAME}.tar.gz" | grep -q "compatibility-kit-run.log"; then
             echo "✅ Run log verified in TAR.GZ archive"
         else
             echo "⚠️ Warning: Run log may not be in the archive"
@@ -552,7 +573,7 @@ EOF
     echo "📦 Package contains:"
     echo "   • Executive Summary (executive-summary.md)"
     echo "   • Test Results Summary (test-results-summary.csv)"
-    echo "   • Complete Run Log (certification-kit-run.log)"
+    echo "   • Complete Run Log (compatibility-kit-run.log)"
     echo "   • Complete Allure HTML Report (allure-report/)"
     echo "   • Environment Information (environment-info.json)"
     echo "   • Package Documentation (README.md)"
@@ -565,7 +586,7 @@ else
 fi
 
 echo ""
-echo "🎉 Run:AI Certification Kit completed!"
+echo "🎉 Run:AI Compatibility Kit completed!"
 echo "📊 Check the generated Allure report for detailed results."
 
 # Final log sync to capture completion message

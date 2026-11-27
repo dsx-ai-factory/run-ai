@@ -9,6 +9,80 @@
 # ============================================================
 
 # ---------------------------------------------------------------
+# Secret redaction
+#
+# A failed API call prints its whole request, Authorization header and body
+# included, and the same text lands in the test report. The results package
+# is meant to be handed to someone else, so credentials are masked before
+# they reach the console, the run log or the report.
+#
+# Masked: Bearer/Basic credentials, JWTs anywhere, and the string value of
+# Authorization, Cookie and any JSON field whose name ends in password,
+# secret or token, in plain JSON ("key":"value") and in JSON quoted inside a
+# string (\"key\":\"value\"). Each replacement keeps the surrounding quotes
+# and adds none, so a JSON file stays valid.
+# ---------------------------------------------------------------
+REDACT_KEYS='[Aa]uthorization|[Cc]ookie|[A-Za-z_]*([Pp]assword|[Ss]ecret|[Tt]oken)'
+# The delimiter is "#" so that no "/" needs a backslash: inside a bracket
+# expression a backslash is a literal character, and a class that contains
+# one would swallow the backslash of a closing \" and break the JSON.
+REDACT_SED_SCRIPT='
+s#(Bearer|Basic) [A-Za-z0-9._~+/=-]{20,}#\1 [REDACTED]#g
+s#eyJ[A-Za-z0-9_-]{8,}\.eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]*#[REDACTED]#g
+s#("('"$REDACT_KEYS"')" *: *")([^"\\]|\\.)+"#\1[REDACTED]"#g
+s#(\\"('"$REDACT_KEYS"')\\" *: *\\")[^"\\]+#\1[REDACTED]#g
+'
+
+# redact_secrets
+# Filters stdin to stdout, one line at a time.
+redact_secrets() {
+    LC_ALL=C sed -u -E "$REDACT_SED_SCRIPT"
+}
+
+# redact_secrets_in_dir <dir>
+# Masks credentials in every text file under <dir>, in place. Binary files
+# are left alone.
+redact_secrets_in_dir() {
+    local dir="$1"
+    [ -d "$dir" ] || return 0
+
+    LC_ALL=C grep -rlIE "Bearer |Basic |eyJ|$REDACT_KEYS" "$dir" 2>/dev/null |
+        while IFS= read -r file; do
+            LC_ALL=C sed -i -E "$REDACT_SED_SCRIPT" "$file" ||
+                echo "Warning: could not redact ${file}"
+        done
+}
+
+# redact_self_test
+# Returns non-zero if the mask does not behave as described above with the
+# sed on PATH. The image builds run it, so a broken mask fails the build
+# instead of shipping.
+redact_self_test() {
+    local input expected
+    input='Authorization: Bearer xxxxxxxxxxxxxxxxxxxxxxxx
+{"headers":{"Authorization":"Bearer xxxxxxxxxxxxxxxxxxxxxxxx"},"body":{"password":"x\"y","name":"kept"}}
+"message":"{\"clientSecret\":\"xxxx\",\"name\":\"kept\"}"'
+    expected='Authorization: Bearer [REDACTED]
+{"headers":{"Authorization":"[REDACTED]"},"body":{"password":"[REDACTED]","name":"kept"}}
+"message":"{\"clientSecret\":\"[REDACTED]\",\"name\":\"kept\"}"'
+
+    [ "$(printf '%s\n' "$input" | redact_secrets)" = "$expected" ]
+}
+
+# ---------------------------------------------------------------
+# allure_stat <total|passed|failed|broken|skipped>
+# Prints one counter from the generated report's own summary, so the numbers
+# match the HTML report: a retried test counts once, with its final status.
+# Must be called from the directory that holds allure-report/.
+# ---------------------------------------------------------------
+allure_stat() {
+    local value
+    value=$(grep -o '"statistic":{[^}]*}' allure-report/widgets/summary.json 2>/dev/null |
+        head -1 | grep -o "\"$1\":[0-9]*" | cut -d: -f2)
+    echo "${value:-n/a}"
+}
+
+# ---------------------------------------------------------------
 # setup_log_capture <kit-name>
 # Sets LOG_FILE, RESULTS_LOG_FILE, redirects stdout/stderr to tee,
 # and registers sync_logs on EXIT.
@@ -21,11 +95,12 @@ setup_log_capture() {
     # Clean up any existing log file
     > "$LOG_FILE"
 
-    # Redirect all output through tee so it appears on console AND in log
+    # Redirect all output through tee so it appears on console AND in log,
+    # with credentials masked on the way to both
     if command -v stdbuf >/dev/null 2>&1; then
-        exec > >(stdbuf -oL tee -a "$LOG_FILE") 2>&1
+        exec > >(redact_secrets | stdbuf -oL tee -a "$LOG_FILE") 2>&1
     else
-        exec > >(tee -a "$LOG_FILE") 2>&1
+        exec > >(redact_secrets | tee -a "$LOG_FILE") 2>&1
     fi
 
     # Ensure logs are synced to results on any exit
@@ -319,7 +394,9 @@ run_playwright_tests() {
     echo "Config: ${config_file}"
 
     export NODE_OPTIONS="--openssl-legacy-provider --loader ts-node/esm"
-    npx playwright test --grep="${grep_tag}" --config="${config_file}"
+    # Call the suite's own playwright binary rather than npx: the kit images
+    # ship no npm/npx.
+    ./node_modules/.bin/playwright test --grep="${grep_tag}" --config="${config_file}"
     local exit_code=$?
     unset NODE_OPTIONS
 
@@ -345,11 +422,15 @@ check_and_generate_allure_report() {
     # Unset NODE_OPTIONS so ts-node loader doesn't interfere with Allure (Java)
     unset NODE_OPTIONS
 
+    # The raw results are masked before the report is built from them, so no
+    # copy of the report ever holds a credential.
     if [ -d "allure-results" ]; then
+        redact_secrets_in_dir allure-results
         allure generate allure-results --clean -o allure-report
         echo "Allure report generated successfully"
     elif [ -d "/app/allure-results" ]; then
         echo "Found results in /app/allure-results, generating from there..."
+        redact_secrets_in_dir /app/allure-results
         allure generate /app/allure-results --clean -o /app/allure-report
     else
         echo "ERROR: No Allure results found anywhere"
@@ -427,10 +508,11 @@ package_results() {
 - **Platform**: ${KUBERNETES_PLATFORM}
 
 ## Test Results Summary
-- **Total Tests**: $(find allure-report/data/test-cases -name "*.json" 2>/dev/null | wc -l)
-- **Passed**: $(grep -r '"status":"passed"' allure-report/data/test-cases/ 2>/dev/null | wc -l)
-- **Failed**: $(grep -r '"status":"failed"' allure-report/data/test-cases/ 2>/dev/null | wc -l)
-- **Skipped**: $(grep -r '"status":"skipped"' allure-report/data/test-cases/ 2>/dev/null | wc -l)
+- **Total Tests**: $(allure_stat total)
+- **Passed**: $(allure_stat passed)
+- **Failed**: $(allure_stat failed)
+- **Broken**: $(allure_stat broken)
+- **Skipped**: $(allure_stat skipped)
 
 ## Environment Information
 - **Cluster Name**: ${CLUSTER_NAME_PREFIX}
@@ -459,6 +541,9 @@ CSVHEADER
     if [ -d "allure-report/data/test-cases" ]; then
         for test_file in allure-report/data/test-cases/*.json; do
             if [ -f "$test_file" ]; then
+                # A retried test has one file per attempt; list the final one only
+                grep -q '"hidden":true' "$test_file" && continue
+
                 test_name=$(grep -o '"name":"[^"]*"' "$test_file" | head -1 | sed 's/"name":"//;s/"//')
                 status=$(grep -o '"status":"[^"]*"' "$test_file" | head -1 | sed 's/"status":"//;s/"//')
                 duration=$(grep -o '"duration":[0-9]*' "$test_file" | head -1 | sed 's/"duration"://')

@@ -8,7 +8,7 @@ import { defineConfig } from '@playwright/test';
 import * as path from 'path';
 
 // ESM equivalent of __dirname - using process.cwd() for better compatibility
-const __filename = process.cwd() + '/playwright-config/certification-kit.config.ts';
+const __filename = process.cwd() + '/playwright-config/compatibility-kit.config.ts';
 const __dirname = process.cwd() + '/playwright-config';
 dotenv.config();
 // Point to the e2e root directory where playwright runs
@@ -65,6 +65,6 @@ export default defineConfig({
     ],
 
     // ESM equivalent of require.resolve()
-    globalSetup: path.resolve(__dirname, './certification-kit-global-setup.ts'),
-    globalTeardown: path.resolve(__dirname, './certification-kit-global-teardown.ts')
+    globalSetup: path.resolve(__dirname, './compatibility-kit-global-setup.ts'),
+    globalTeardown: path.resolve(__dirname, './compatibility-kit-global-teardown.ts')
 });
