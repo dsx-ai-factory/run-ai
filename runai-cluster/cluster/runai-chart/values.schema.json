@@ -1690,6 +1690,9 @@
         },
         "namespace": {
           "type": "string"
+        },
+        "sectionName": {
+          "type": "string"
         }
       },
       "type": "object"
@@ -1700,6 +1703,9 @@
           "type": "string"
         },
         "namespace": {
+          "type": "string"
+        },
+        "sectionName": {
           "type": "string"
         }
       },

@@ -794,6 +794,11 @@ type GatewayAPI struct {
 
 	// Namespace is the namespace of the Gateway resource.
 	Namespace string `json:"namespace,omitempty"`
+
+	// SectionName is the name of the Gateway listener to attach routes to.
+	// When empty, routes attach to every compatible listener of the Gateway.
+	// +optional
+	SectionName string `json:"sectionName,omitempty"`
 }
 
 func (g *GatewayAPI) SetDefaultsWhereNeeded() {
