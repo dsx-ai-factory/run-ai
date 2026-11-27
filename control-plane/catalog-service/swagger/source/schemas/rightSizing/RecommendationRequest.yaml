@@ -1,0 +1,18 @@
+type: object
+required: [clusterId, image, tag]
+properties:
+  clusterId:
+    type: string
+    format: uuid
+    description: Cluster whose node-pool hardware metadata is evaluated.
+  image:
+    type: string
+    description: Untagged public nvcr.io/nim/organization/model image reference.
+  tag:
+    type: string
+    minLength: 1
+    description: Exact image tag. NGC does not automatically refresh latest metadata.
+  gpuType:
+    type: string
+    nullable: true
+    description: Exact inventory GPU type. Omitted or null evaluates all reported types and capacities.

@@ -75,11 +75,11 @@ func TestSpecRun_TextOutput(t *testing.T) {
 	// The text UI renders human-readable titles, not the machine names. The
 	// machine names remain the identity in JSON/NDJSON (asserted elsewhere).
 	stdout := out.String()
-	assert.Contains(t, stdout, "# Preflight checks", "pipeline heading uses the human title")
+	assert.Regexp(t, `(?m)^\S+ Preflight checks$`, stdout, "pipeline heading uses the human title")
 	assert.Contains(t, stdout, "Node CPU capacity", "preflight step uses a human title, not preflight-node-cpu")
 	assert.Contains(t, stdout, "Preflight checks: 9 passed", "summary uses the human label")
-	assert.Contains(t, stdout, "# Prerequisites")
-	assert.Contains(t, stdout, "# NVIDIA Run:ai")
+	assert.Regexp(t, `(?m)^\S+ Prerequisites$`, stdout)
+	assert.Regexp(t, `(?m)^\S+ NVIDIA Run:ai$`, stdout)
 	assert.Contains(t, stdout, "Control plane", "flow uses a human title, not control-plane")
 	assert.Contains(t, stdout, "Installing control plane", "step uses a human title, not install-control-plane-chart")
 	assert.Contains(t, stdout, "Installing Run:ai cluster")

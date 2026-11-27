@@ -29,7 +29,7 @@ The following steps must be performed by your administrator.
 
     ```bash
     export NAMESPACE=dynamo-system
-    export RELEASE_VERSION=1.5.0
+    export RELEASE_VERSION=1.6.2
     ```
 2.  Install the Dynamo platform:
 
@@ -38,8 +38,18 @@ The following steps must be performed by your administrator.
     helm install dynamo-platform dynamo-platform-${RELEASE_VERSION}.tgz \
       --namespace ${NAMESPACE} \
       --create-namespace \
-      --set "grove.enabled=true"
+      --set global.grove.install=true \
+      --set global.kai-scheduler.enabled=true
     ```
+
+This tutorial uses Dynamo 1.6.2 and `nvidia.com/v1beta1`. NVIDIA Run:ai also supports `nvidia.com/v1alpha1` while the installed operator serves it. Check the available API versions:
+
+```bash
+kubectl get crd dynamographdeployments.nvidia.com \
+  -o jsonpath='{.spec.versions[?(@.served==true)].name}'
+```
+
+When migrating from v1alpha1, update the manifest structure, including `services` to `components` and `extraPodSpec` to `podTemplate`, as shown below. Changing only `apiVersion` is not sufficient.
 
 ### NVIDIA Run:ai Prerequisites
 
@@ -105,10 +115,8 @@ In the NVIDIA Run:ai user interface:
 To request an API access token, use the client credentials to get a token to access NVIDIA Run:ai using the [Tokens](api:main-api:POST/api/v2/token) API. For example:
 
 ```bash
-curl -X POST \
-  # Replace <COMPANY_URL> below with:
-  # For self-hosted use the NVIDIA Run:ai user interface URL.
-  'https://<COMPANY_URL>/api/v2/token' \
+# Replace <COMPANY_URL> with the NVIDIA Run:ai user interface hostname.
+curl -X POST 'https://<COMPANY_URL>/api/v2/token' \
   --header 'Accept: */*' \
   --header 'Content-Type: application/x-www-form-urlencoded' \
   --data-urlencode 'grant_type=client_credentials' \
@@ -197,17 +205,17 @@ curl -L 'https://<COMPANY-URL>/api/v1/asset/datasource/pvc' \
 
 ## Step 4: Creating the Workload
 
-The configuration below submits a DynamoGraphDeployment that defines a disaggregated, multi-node inference pipeline composed of multiple Dynamo services, each responsible for a distinct stage of inference execution.
+The configuration below submits a DynamoGraphDeployment that defines a disaggregated, multi-node inference pipeline composed of multiple Dynamo components, each responsible for a distinct stage of inference execution.
 
 ### How the Configuration Works
 
 * Defines a Dynamo-based inference workload that is registered and managed by NVIDIA Run:ai.
 * Uses vLLM as the backend framework for model execution.
 * Deploys a single frontend service that exposes an HTTP endpoint for inference requests.
-* Deploys two worker services:
+* Deploys two worker components:
   * `VllmPrefillWorker` for the prefill stage
   * `VllmDecodeWorker` for the decode stage
-* Configures the workload as a disaggregated, multi-node deployment, where prefill and decode run as independent worker services and can be scheduled on different nodes.
+* Configures the workload as a disaggregated, multi-node deployment, where prefill and decode run as independent worker components and can be scheduled on different nodes.
 * Each worker runs as one replica and requests 8 GPUs per replica, enabling parallel execution across stages.
 * Configures shared memory (80 Gi) for each worker to support performance-sensitive inference execution.
 
@@ -225,103 +233,136 @@ For more details, see the [NVIDIA Dynamo documentation](https://docs.nvidia.com/
 4. Upload or paste your YAML manifest. To upload a file, click **UPLOAD YAML FILE** and choose your YAML. To **paste the YAML**, insert it directly into the editor. Before submitting, update the following fields in the manifest:
    * `<pvc-claim-name>` - The claim name associated with the PVC created in [Step 3](disaggregated-dynamo.md#step-3-creating-a-pvc-data-source).
    * `<your-hf-token>` - Required only for gated Hugging Face models. Generate a token from your [Hugging Face account](https://huggingface.co/) and provide it to the workload as an environment variable.
-   * `<INGRESS-CLASS>` - The ingress controller class name configured in your cluster (for example, `haproxy`). Contact your administrator to obtain the correct value.
-   * `<DEPLOYMENT-PREFIX>` - A unique prefix for the deployment endpoint (for example, `llama3-agg`).
-   * `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../installation-and-configuration/system-requirements/networking-setup.md#fqdn-and-dns). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](api:main-api:GET/api/v1/clusters/minimal) API - use the `domain` field in the response.
 
 ```yaml
-apiVersion: nvidia.com/v1alpha1
+apiVersion: nvidia.com/v1beta1
 kind: DynamoGraphDeployment
 metadata:
   name: llama3-70b-disagg-mn
 spec:
   backendFramework: vllm
-  pvcs:
-    - name: <pvc-claim-name>
-      create: false
-  services:
-    Frontend:
-      componentType: frontend
-      volumeMounts:
-        - name: <pvc-claim-name>
-          mountPoint: /opt/models
-      extraPodSpec:
-        mainContainer:
-          image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.5.0
+  components:
+  - name: Frontend
+    type: frontend
+    replicas: 1
+    podTemplate:
+      spec:
+        containers:
+        - name: main
+          image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.6.2
           workingDir: /workspace/examples/backends/vllm
-      envs:
-        - name: HF_HOME
-          value: /opt/models
-        - name: HF_TOKEN
-          value: <your-hf-token>
-      replicas: 1
-      ingress:
-        enabled: true
-        ingressControllerClassName: <INGRESS-CLASS>
-        host: <DEPLOYMENT-PREFIX>
-        hostSuffix: <INFERENCE-DOMAIN>
-    VllmPrefillWorker:
-      componentType: worker
-      volumeMounts:
-        - name: <pvc-claim-name>
-          mountPoint: /opt/models
-      sharedMemory:
-        size: 80Gi
-      extraPodSpec:
-        mainContainer:
           env:
-            - name: SERVED_MODEL_NAME
-              value: "RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic"
-            - name: MODEL_PATH
-              value: "/opt/models/hub/models--RedHatAI--Llama-3.3-70B-Instruct-FP8-dynamic/snapshots/ddb4128556dfcff99e0c41aee159ea6c3e655dcd"
-            - name: HF_HOME
-              value: /opt/models
-            - name: HF_TOKEN
-              value: <your-hf-token>
-          args:
-          - "python3 -m dynamo.vllm --model $MODEL_PATH --served-model-name $SERVED_MODEL_NAME --tensor-parallel-size 8 --data-parallel-size 1 --disable-log-requests --is-prefill-worker --gpu-memory-utilization 0.95 --no-enable-prefix-caching --block-size 128"
+          - name: HF_HOME
+            value: /opt/models
+          - name: HF_TOKEN
+            value: <your-hf-token>
+          volumeMounts:
+          - name: model-cache
+            mountPath: /opt/models
+        volumes:
+        - name: model-cache
+          persistentVolumeClaim:
+            claimName: <pvc-claim-name>
+  - name: VllmPrefillWorker
+    type: prefill
+    replicas: 1
+    sharedMemorySize: 80Gi
+    podTemplate:
+      spec:
+        containers:
+        - name: main
+          image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.6.2
           command:
-          - /bin/sh
-          - -c
-          image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.5.0
+          - python3
+          - -m
+          - dynamo.vllm
+          args:
+          - --model
+          - RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic
+          - --served-model-name
+          - RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic
+          - --tensor-parallel-size
+          - '8'
+          - --data-parallel-size
+          - '1'
+          - --disable-log-requests
+          - --gpu-memory-utilization
+          - '0.95'
+          - --no-enable-prefix-caching
+          - --block-size
+          - '128'
+          - --disaggregation-mode
+          - prefill
+          - --kv-transfer-config
+          - '{"kv_connector":"NixlConnector","kv_role":"kv_producer"}'
           workingDir: /workspace/examples/backends/vllm
-      replicas: 1
-      resources:
-        limits:
-          gpu: "8"
-        requests:
-          gpu: "8"
-    VllmDecodeWorker:
-      componentType: worker
-      volumeMounts:
-        - name: <pvc-claim-name>
-          mountPoint: /opt/models
-      sharedMemory:
-        size: 80Gi
-      extraPodSpec:
-        mainContainer:
           env:
-            - name: SERVED_MODEL_NAME
-              value: "RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic"
-            - name: MODEL_PATH
-              value: "/opt/models/hub/models--RedHatAI--Llama-3.3-70B-Instruct-FP8-dynamic/snapshots/ddb4128556dfcff99e0c41aee159ea6c3e655dcd"
-            - name: HF_HOME
-              value: /opt/models
-            - name: HF_TOKEN
-              value: <your-hf-token>
-          args:
-          - "python3 -m dynamo.vllm --model $MODEL_PATH --served-model-name $SERVED_MODEL_NAME --tensor-parallel-size 8 --data-parallel-size 1 --disable-log-requests --gpu-memory-utilization 0.90 --no-enable-prefix-caching --block-size 128"
+          - name: HF_HOME
+            value: /opt/models
+          - name: HF_TOKEN
+            value: <your-hf-token>
+          resources:
+            limits:
+              nvidia.com/gpu: '8'
+            requests:
+              nvidia.com/gpu: '8'
+          volumeMounts:
+          - name: model-cache
+            mountPath: /opt/models
+        volumes:
+        - name: model-cache
+          persistentVolumeClaim:
+            claimName: <pvc-claim-name>
+  - name: VllmDecodeWorker
+    type: decode
+    replicas: 1
+    sharedMemorySize: 80Gi
+    podTemplate:
+      spec:
+        containers:
+        - name: main
+          image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.6.2
           command:
-          - /bin/sh
-          - -c
-          image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.5.0
+          - python3
+          - -m
+          - dynamo.vllm
+          args:
+          - --model
+          - RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic
+          - --served-model-name
+          - RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic
+          - --tensor-parallel-size
+          - '8'
+          - --data-parallel-size
+          - '1'
+          - --disable-log-requests
+          - --gpu-memory-utilization
+          - '0.90'
+          - --no-enable-prefix-caching
+          - --block-size
+          - '128'
+          - --disaggregation-mode
+          - decode
+          - --kv-transfer-config
+          - '{"kv_connector":"NixlConnector","kv_role":"kv_consumer"}'
           workingDir: /workspace/examples/backends/vllm
-      replicas: 1
-      resources:
-        limits:
-          gpu: "8"
-        requests:
-          gpu: "8"
+          env:
+          - name: HF_HOME
+            value: /opt/models
+          - name: HF_TOKEN
+            value: <your-hf-token>
+          resources:
+            limits:
+              nvidia.com/gpu: '8'
+            requests:
+              nvidia.com/gpu: '8'
+          volumeMounts:
+          - name: model-cache
+            mountPath: /opt/models
+        volumes:
+        - name: model-cache
+          persistentVolumeClaim:
+            claimName: <pvc-claim-name>
 ```
 
 5. Select a **project**. If the `namespace` is not defined in the YAML, select a **project** from the submission form.
@@ -339,177 +380,220 @@ Copy the following command to your terminal. Make sure to update the following p
 * `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](api:main-api:GET/api/v1/org-unit/projects) API.
 * `<pvc-claim-name>` - The claim name associated with the PVC created in [Step 3](disaggregated-dynamo.md#step-3-creating-a-pvc-data-source).
 * `<your-hf-token>` - Required only for gated Hugging Face models. Generate a token from your [Hugging Face account](https://huggingface.co/) and provide it to the workload as an environment variable.
-* `<INGRESS-CLASS>` - The ingress controller class name configured in your cluster (for example, `haproxy`). Contact your administrator to obtain the correct value.
-* `<DEPLOYMENT-PREFIX>` - A unique prefix for the deployment endpoint (for example, `llama3-agg`).
-* `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../installation-and-configuration/system-requirements/networking-setup.md#fqdn-and-dns). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](api:main-api:GET/api/v1/clusters/minimal) API - use the `domain` field in the response.
 
 ```bash
 curl -L 'https://<COMPANY-URL>/api/v2/workloads' \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Bearer <TOKEN>' \
   -d '{
+  "metadata": {
+    "name": "llama3-70b-disagg-mn",
+    "projectId": "<PROJECT-ID>",
+    "configuration": {
+      "mnnvl": "Required"
+    }
+  },
+  "manifest": {
+    "apiVersion": "nvidia.com/v1beta1",
+    "kind": "DynamoGraphDeployment",
     "metadata": {
-      "name": "llama3-disagg-mn",
-      "projectId": "<PROJECT-ID>",
-      "configuration": {
-            "mnnvl": "Required"
-      }
+      "name": "llama3-70b-disagg-mn"
     },
-    "manifest": {
-      "apiVersion": "nvidia.com/v1alpha1",
-      "kind": "DynamoGraphDeployment",
-      "metadata": {
-        "name": "llama3-70b-disagg-mn"
-      },
-      "spec": {
-        "backendFramework": "vllm",
-        "pvcs": [
-          {
-            "name": "<pvc-claim-name>",
-            "create": false
+    "spec": {
+      "backendFramework": "vllm",
+      "components": [
+        {
+          "name": "Frontend",
+          "type": "frontend",
+          "replicas": 1,
+          "podTemplate": {
+            "spec": {
+              "containers": [
+                {
+                  "name": "main",
+                  "image": "nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.6.2",
+                  "workingDir": "/workspace/examples/backends/vllm",
+                  "env": [
+                    {
+                      "name": "HF_HOME",
+                      "value": "/opt/models"
+                    },
+                    {
+                      "name": "HF_TOKEN",
+                      "value": "<your-hf-token>"
+                    }
+                  ],
+                  "volumeMounts": [
+                    {
+                      "name": "model-cache",
+                      "mountPath": "/opt/models"
+                    }
+                  ]
+                }
+              ],
+              "volumes": [
+                {
+                  "name": "model-cache",
+                  "persistentVolumeClaim": {
+                    "claimName": "<pvc-claim-name>"
+                  }
+                }
+              ]
+            }
           }
-        ],
-        "services": {
-          "Frontend": {
-            "componentType": "frontend",
-            "volumeMounts": [
-              {
-                "name": "<pvc-claim-name>",
-                "mountPoint": "/opt/models"
-              }
-            ],
-            "extraPodSpec": {
-              "mainContainer": {
-                "image": "nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.5.0",
-                "workingDir": "/workspace/examples/backends/vllm"
-              }
-            },
-            "envs": [
-              {
-                "name": "HF_HOME",
-                "value": "/opt/models"
-              },
-              {
-                "name": "HF_TOKEN",
-                "value": "<your-hf-token>"
-              }
-            ],
-            "replicas": 1,
-            "ingress": {
-              "enabled": true,
-              "ingressControllerClassName": "<INGRESS-CLASS>",
-              "host": "<DEPLOYMENT-PREFIX>",
-              "hostSuffix": "<INFERENCE-DOMAIN>"
-            }
-          },
-          "VllmPrefillWorker": {
-            "componentType": "worker",
-            "volumeMounts": [
-              {
-                "name": "<pvc-claim-name>",
-                "mountPoint": "/opt/models"
-              }
-            ],
-            "sharedMemory": {
-              "size": "80Gi"
-            },
-            "extraPodSpec": {
-              "mainContainer": {
-                "env": [
-                  {
-                    "name": "SERVED_MODEL_NAME",
-                    "value": "RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic"
+        },
+        {
+          "name": "VllmPrefillWorker",
+          "type": "prefill",
+          "replicas": 1,
+          "sharedMemorySize": "80Gi",
+          "podTemplate": {
+            "spec": {
+              "containers": [
+                {
+                  "name": "main",
+                  "image": "nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.6.2",
+                  "command": [
+                    "python3",
+                    "-m",
+                    "dynamo.vllm"
+                  ],
+                  "args": [
+                    "--model",
+                    "RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic",
+                    "--served-model-name",
+                    "RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic",
+                    "--tensor-parallel-size",
+                    "8",
+                    "--data-parallel-size",
+                    "1",
+                    "--disable-log-requests",
+                    "--gpu-memory-utilization",
+                    "0.95",
+                    "--no-enable-prefix-caching",
+                    "--block-size",
+                    "128",
+                    "--disaggregation-mode",
+                    "prefill",
+                    "--kv-transfer-config",
+                    "{\"kv_connector\":\"NixlConnector\",\"kv_role\":\"kv_producer\"}"
+                  ],
+                  "workingDir": "/workspace/examples/backends/vllm",
+                  "env": [
+                    {
+                      "name": "HF_HOME",
+                      "value": "/opt/models"
+                    },
+                    {
+                      "name": "HF_TOKEN",
+                      "value": "<your-hf-token>"
+                    }
+                  ],
+                  "resources": {
+                    "limits": {
+                      "nvidia.com/gpu": "8"
+                    },
+                    "requests": {
+                      "nvidia.com/gpu": "8"
+                    }
                   },
-                  {
-                    "name": "MODEL_PATH",
-                    "value": "/opt/models/hub/models--RedHatAI--Llama-3.3-70B-Instruct-FP8-dynamic/snapshots/ddb4128556dfcff99e0c41aee159ea6c3e655dcd"
-                  },
-                  {
-                    "name": "HF_HOME",
-                    "value": "/opt/models"
-                  },
-                  {
-                    "name": "HF_TOKEN",
-                    "value": "<your-hf-token>"
+                  "volumeMounts": [
+                    {
+                      "name": "model-cache",
+                      "mountPath": "/opt/models"
+                    }
+                  ]
+                }
+              ],
+              "volumes": [
+                {
+                  "name": "model-cache",
+                  "persistentVolumeClaim": {
+                    "claimName": "<pvc-claim-name>"
                   }
-                ],
-                "args": [
-                  "python3 -m dynamo.vllm --model $MODEL_PATH --served-model-name $SERVED_MODEL_NAME --tensor-parallel-size 8 --data-parallel-size 1 --disable-log-requests --is-prefill-worker --gpu-memory-utilization 0.80 --no-enable-prefix-caching --block-size 128"
-                ],
-                "command": [
-                  "/bin/sh",
-                  "-c"
-                ],
-                "image": "nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.5.0",
-                "workingDir": "/workspace/examples/backends/vllm"
-              }
-            },
-            "replicas": 1,
-            "resources": {
-              "limits": {
-                "gpu": "8"
-              },
-              "requests": {
-                "gpu": "8"
-              }
+                }
+              ]
             }
-          },
-          "VllmDecodeWorker": {
-            "componentType": "worker",
-            "volumeMounts": [
-              {
-                "name": "<pvc-claim-name>",
-                "mountPoint": "/opt/models"
-              }
-            ],
-            "sharedMemory": {
-              "size": "80Gi"
-            },
-            "extraPodSpec": {
-              "mainContainer": {
-                "env": [
-                  {
-                    "name": "SERVED_MODEL_NAME",
-                    "value": "RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic"
+          }
+        },
+        {
+          "name": "VllmDecodeWorker",
+          "type": "decode",
+          "replicas": 1,
+          "sharedMemorySize": "80Gi",
+          "podTemplate": {
+            "spec": {
+              "containers": [
+                {
+                  "name": "main",
+                  "image": "nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.6.2",
+                  "command": [
+                    "python3",
+                    "-m",
+                    "dynamo.vllm"
+                  ],
+                  "args": [
+                    "--model",
+                    "RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic",
+                    "--served-model-name",
+                    "RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic",
+                    "--tensor-parallel-size",
+                    "8",
+                    "--data-parallel-size",
+                    "1",
+                    "--disable-log-requests",
+                    "--gpu-memory-utilization",
+                    "0.90",
+                    "--no-enable-prefix-caching",
+                    "--block-size",
+                    "128",
+                    "--disaggregation-mode",
+                    "decode",
+                    "--kv-transfer-config",
+                    "{\"kv_connector\":\"NixlConnector\",\"kv_role\":\"kv_consumer\"}"
+                  ],
+                  "workingDir": "/workspace/examples/backends/vllm",
+                  "env": [
+                    {
+                      "name": "HF_HOME",
+                      "value": "/opt/models"
+                    },
+                    {
+                      "name": "HF_TOKEN",
+                      "value": "<your-hf-token>"
+                    }
+                  ],
+                  "resources": {
+                    "limits": {
+                      "nvidia.com/gpu": "8"
+                    },
+                    "requests": {
+                      "nvidia.com/gpu": "8"
+                    }
                   },
-                  {
-                    "name": "MODEL_PATH",
-                    "value": "/opt/models/hub/models--RedHatAI--Llama-3.3-70B-Instruct-FP8-dynamic/snapshots/ddb4128556dfcff99e0c41aee159ea6c3e655dcd"
-                  },
-                  {
-                    "name": "HF_HOME",
-                    "value": "/opt/models"
-                  },
-                  {
-                    "name": "HF_TOKEN",
-                    "value": "<your-hf-token>"
+                  "volumeMounts": [
+                    {
+                      "name": "model-cache",
+                      "mountPath": "/opt/models"
+                    }
+                  ]
+                }
+              ],
+              "volumes": [
+                {
+                  "name": "model-cache",
+                  "persistentVolumeClaim": {
+                    "claimName": "<pvc-claim-name>"
                   }
-                ],
-                "args": [
-                  "python3 -m dynamo.vllm --model $MODEL_PATH --served-model-name $SERVED_MODEL_NAME --tensor-parallel-size 8 --data-parallel-size 1 --disable-log-requests --gpu-memory-utilization 0.80 --no-enable-prefix-caching --block-size 128"
-                ],
-                "command": [
-                  "/bin/sh",
-                  "-c"
-                ],
-                "image": "nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.5.0",
-                "workingDir": "/workspace/examples/backends/vllm"
-              }
-            },
-            "replicas": 1,
-            "resources": {
-              "limits": {
-                "gpu": "8"
-              },
-              "requests": {
-                "gpu": "8"
-              }
+                }
+              ]
             }
           }
         }
-      }
+      ]
     }
-  }'
+  }
+}'
 ```
 
 </Tab>
@@ -522,116 +606,190 @@ Follow the below steps. For more details, see [CLI reference](../../reference/cl
 
     * `<pvc-claim-name>` - The claim name associated with the PVC created in [Step 3](disaggregated-dynamo.md#step-3-creating-a-pvc-data-source).
     * `<your-hf-token>` - Required only for gated Hugging Face models. Generate a token from your [Hugging Face account](https://huggingface.co/) and provide it to the workload as an environment variable.
-    * `<INGRESS-CLASS>` - The ingress controller class name configured in your cluster (for example, `haproxy`). Contact your administrator to obtain the correct value.
-    * `<DEPLOYMENT-PREFIX>` - A unique prefix for the deployment endpoint (for example, `llama3-agg`).
-    * `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../installation-and-configuration/system-requirements/networking-setup.md#fqdn-and-dns). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](api:main-api:GET/api/v1/clusters/minimal) API - use the `domain` field in the response.
 
     ```yaml
-    apiVersion: nvidia.com/v1alpha1
+    apiVersion: nvidia.com/v1beta1
     kind: DynamoGraphDeployment
     metadata:
       name: llama3-70b-disagg-mn
     spec:
       backendFramework: vllm
-      pvcs:
-        - name: <pvc-claim-name>
-          create: false
-      services:
-        Frontend:
-          componentType: frontend
-          volumeMounts:
-            - name: <pvc-claim-name>
-              mountPoint: /opt/models
-          extraPodSpec:
-            mainContainer:
-              image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.5.0
+      components:
+      - name: Frontend
+        type: frontend
+        replicas: 1
+        podTemplate:
+          spec:
+            containers:
+            - name: main
+              image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.6.2
               workingDir: /workspace/examples/backends/vllm
-          envs:
-            - name: HF_HOME
-              value: /opt/models
-            - name: HF_TOKEN
-              value: <your-hf-token>
-          replicas: 1
-          ingress:
-            enabled: true
-            ingressControllerClassName: <INGRESS-CLASS>
-            host: <DEPLOYMENT-PREFIX>
-            hostSuffix: <INFERENCE-DOMAIN>
-        VllmPrefillWorker:
-          componentType: worker
-          volumeMounts:
-            - name: <pvc-claim-name>
-              mountPoint: /opt/models
-          sharedMemory:
-            size: 80Gi
-          extraPodSpec:
-            mainContainer:
               env:
-                - name: SERVED_MODEL_NAME
-                  value: "RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic"
-                - name: MODEL_PATH
-                  value: "/opt/models/hub/models--RedHatAI--Llama-3.3-70B-Instruct-FP8-dynamic/snapshots/ddb4128556dfcff99e0c41aee159ea6c3e655dcd"
-                - name: HF_HOME
-                  value: /opt/models
-                - name: HF_TOKEN
-                  value: <your-hf-token>
-              args:
-              - "python3 -m dynamo.vllm --model $MODEL_PATH --served-model-name $SERVED_MODEL_NAME --tensor-parallel-size 8 --data-parallel-size 1 --disable-log-requests --is-prefill-worker --gpu-memory-utilization 0.95 --no-enable-prefix-caching --block-size 128"
+              - name: HF_HOME
+                value: /opt/models
+              - name: HF_TOKEN
+                value: <your-hf-token>
+              volumeMounts:
+              - name: model-cache
+                mountPath: /opt/models
+            volumes:
+            - name: model-cache
+              persistentVolumeClaim:
+                claimName: <pvc-claim-name>
+      - name: VllmPrefillWorker
+        type: prefill
+        replicas: 1
+        sharedMemorySize: 80Gi
+        podTemplate:
+          spec:
+            containers:
+            - name: main
+              image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.6.2
               command:
-              - /bin/sh
-              - -c
-              image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.5.0
+              - python3
+              - -m
+              - dynamo.vllm
+              args:
+              - --model
+              - RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic
+              - --served-model-name
+              - RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic
+              - --tensor-parallel-size
+              - '8'
+              - --data-parallel-size
+              - '1'
+              - --disable-log-requests
+              - --gpu-memory-utilization
+              - '0.95'
+              - --no-enable-prefix-caching
+              - --block-size
+              - '128'
+              - --disaggregation-mode
+              - prefill
+              - --kv-transfer-config
+              - '{"kv_connector":"NixlConnector","kv_role":"kv_producer"}'
               workingDir: /workspace/examples/backends/vllm
-          replicas: 1
-          resources:
-            limits:
-              gpu: "8"
-            requests:
-              gpu: "8"
-        VllmDecodeWorker:
-          componentType: worker
-          volumeMounts:
-            - name: <pvc-claim-name>
-              mountPoint: /opt/models
-          sharedMemory:
-            size: 80Gi
-          extraPodSpec:
-            mainContainer:
               env:
-                - name: SERVED_MODEL_NAME
-                  value: "RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic"
-                - name: MODEL_PATH
-                  value: "/opt/models/hub/models--RedHatAI--Llama-3.3-70B-Instruct-FP8-dynamic/snapshots/ddb4128556dfcff99e0c41aee159ea6c3e655dcd"
-                - name: HF_HOME
-                  value: /opt/models
-                - name: HF_TOKEN
-                  value: <your-hf-token>
-              args:
-              - "python3 -m dynamo.vllm --model $MODEL_PATH --served-model-name $SERVED_MODEL_NAME --tensor-parallel-size 8 --data-parallel-size 1 --disable-log-requests --gpu-memory-utilization 0.90 --no-enable-prefix-caching --block-size 128"
+              - name: HF_HOME
+                value: /opt/models
+              - name: HF_TOKEN
+                value: <your-hf-token>
+              resources:
+                limits:
+                  nvidia.com/gpu: '8'
+                requests:
+                  nvidia.com/gpu: '8'
+              volumeMounts:
+              - name: model-cache
+                mountPath: /opt/models
+            volumes:
+            - name: model-cache
+              persistentVolumeClaim:
+                claimName: <pvc-claim-name>
+      - name: VllmDecodeWorker
+        type: decode
+        replicas: 1
+        sharedMemorySize: 80Gi
+        podTemplate:
+          spec:
+            containers:
+            - name: main
+              image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.6.2
               command:
-              - /bin/sh
-              - -c
-              image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.5.0
+              - python3
+              - -m
+              - dynamo.vllm
+              args:
+              - --model
+              - RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic
+              - --served-model-name
+              - RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic
+              - --tensor-parallel-size
+              - '8'
+              - --data-parallel-size
+              - '1'
+              - --disable-log-requests
+              - --gpu-memory-utilization
+              - '0.90'
+              - --no-enable-prefix-caching
+              - --block-size
+              - '128'
+              - --disaggregation-mode
+              - decode
+              - --kv-transfer-config
+              - '{"kv_connector":"NixlConnector","kv_role":"kv_consumer"}'
               workingDir: /workspace/examples/backends/vllm
-          replicas: 1
-          resources:
-            limits:
-              gpu: "8"
-            requests:
-              gpu: "8"
+              env:
+              - name: HF_HOME
+                value: /opt/models
+              - name: HF_TOKEN
+                value: <your-hf-token>
+              resources:
+                limits:
+                  nvidia.com/gpu: '8'
+                requests:
+                  nvidia.com/gpu: '8'
+              volumeMounts:
+              - name: model-cache
+                mountPath: /opt/models
+            volumes:
+            - name: model-cache
+              persistentVolumeClaim:
+                claimName: <pvc-claim-name>
     ```
-2.  Run the the following command. Make sure to update the below with the name of your project:
+2.  Run the following command. Make sure to update the below with the name of your project:
 
     ```bash
     runai workload submit \
       --file <name>.yaml \
-      --project <project-name>
+      --project <project-name> \
       --mnnvl Required
     ```
 
 </Tab>
 
 </Tabs>
+
+### Exposing the Frontend
+
+To expose the frontend in Dynamo v1beta1, create a separate Ingress. Update the following fields:
+
+* `<INGRESS-CLASS>` - The ingress controller class name configured in your cluster (for example, `haproxy`). Contact your administrator to obtain the correct value.
+* `<DEPLOYMENT-PREFIX>` - A unique prefix for the deployment endpoint (for example, `llama3-disagg`).
+* `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../installation-and-configuration/system-requirements/networking-setup.md#fqdn-and-dns). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](api:main-api:GET/api/v1/clusters/minimal) API - use the `domain` field in the response.
+* `<tls-secret-name>` - The name of a TLS Secret in the workload namespace that covers the endpoint hostname.
+
+Save the following as `ingress.yaml`:
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: llama3-70b-disagg-mn
+spec:
+  ingressClassName: <INGRESS-CLASS>
+  tls:
+  - hosts:
+    - <DEPLOYMENT-PREFIX>.<INFERENCE-DOMAIN>
+    secretName: <tls-secret-name>
+  rules:
+  - host: <DEPLOYMENT-PREFIX>.<INFERENCE-DOMAIN>
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: llama3-70b-disagg-mn-frontend
+            port:
+              number: 8000
+```
+
+Apply it in the workload namespace. The TLS Secret must exist in that namespace, and the hostname must resolve to the Ingress controller:
+
+```bash
+kubectl apply --namespace <project-namespace> -f ingress.yaml
+```
 
 ## Step 5: Verifying the Workload Status
 

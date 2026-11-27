@@ -77,7 +77,7 @@ The environments listed below are available based on your cluster settings. Some
 | ----------------------------------------------------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | gpt2 | `ghcr.io/huggingface/text-generation-inference:3.3.6-intel-cpu` | A lightweight GPT-2 text generation server that runs on CPU, useful for trying out inference workloads |
 | huggingface-chat-ui | `ghcr.io/run-ai/chat-ui-db:0.20` | A chat interface for interacting with LLMs, using unique subdomains for each workspace. Requires wildcard DNS support |
-| jupyter-scipy | `jupyter/scipy-notebook`                           | An interactive development environment for Jupyter notebooks, code, and data visualization                                                                                             |
+| jupyter-scipy | `quay.io/jupyter/scipy-notebook`                           | An interactive development environment for Jupyter notebooks, code, and data visualization                                                                                             |
 | jupyter-tensorboard                                                                             | `nvcr.io/nvidia/pytorch:26.09-py3`                 | An integrated combination of the interactive Jupyter development environment and TensorFlow's visualization toolkit for monitoring and analyzing ML models                             |
 | llm-server                                                                                      | `vllm/vllm-openai:v0.6.4`                          | A vLLM-based server that hosts and serves large language models for inference, enabling API-based access to AI models                                                                  |
 | openwebui | `ghcr.io/open-webui/open-webui:v0.6.42` | A feature-rich web interface for LLM interactions with RAG support, model management, and user authentication. Supports OpenAI API compatible endpoints |
@@ -108,7 +108,10 @@ To add a new environment:
 6. Optional: Provide a **description** of the essence of the environment
 7. Set the **environment image**:
    * Select **Custom image** and enter the **Image URL**. If a token or secret is required to pull the image, it is possible to create it via [user credentials](../../settings/user-settings/user-credentials.md) of type docker registry. These credentials are automatically used once the image is pulled (which happens when the workload is submitted)
-   * **Select from the NGC catalog** and choose the **image name** and **tag** from the dropdown.
+   * **Select from the NGC catalog**, select an NGC API key credential, and then choose the **image name** and **tag** from the dropdown:
+     * Under **Source**, select [**Shared secret**](credentials.md#ngc-api-key).
+     * The **Type** field is fixed to **NGC API key**.
+     * Under **Credential name**, select an existing credential from the dropdown.
    * **Select from the NGC private registry** and then set how to access the registry:
      * Select a **registry** from the dropdown.
      * Under **Source**, select [**Shared secret**](credentials.md#ngc-api-key).

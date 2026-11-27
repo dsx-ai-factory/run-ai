@@ -111,7 +111,7 @@ import { RunaiActionButton } from "@/components/common/runai-page-actions/runai-
 import { RunaiTooltipWrapper } from "@/components/common/runai-tooltip-wrapper";
 import { ToolsSelect } from "@/components/tools/tools-select";
 //model
-import { Phase, type Workload, type Connection, Source, SourceApi } from "@/swagger-models/workloads-client";
+import { Phase, type Workload, type Connection, Source } from "@/swagger-models/workloads-client";
 import { Action, ResourceType } from "@/swagger-models/authorization-client";
 import { EWorkloadAction, EWorkloadEntity, EWorkloadErrorMessage, EWorkloadType } from "@/models/workload.model";
 import type { IToolItem } from "@/models/workload.model";
@@ -125,7 +125,6 @@ import { openNewWindow } from "@/utils/common.util";
 //store
 import { usePermissionStore } from "@/stores/permissions.store";
 import { useAuthStore } from "@/stores/auth.store";
-import { useSettingStore } from "@/stores/setting.store";
 import { useClusterStore } from "@/stores/cluster.store";
 import {
   MIN_CLUSTER_VERSION_FOR_MULTIPLE_WORKLOAD_ACTIONS,
@@ -170,7 +169,6 @@ export default defineComponent({
       permissionStore: usePermissionStore(),
       authStore: useAuthStore(),
       clusterStore: useClusterStore(),
-      settingStore: useSettingStore(),
       actionTooltipOffset: [-20, 0] as number[],
     };
   },
@@ -212,8 +210,7 @@ export default defineComponent({
         !this.isCopySupportedWorkloadType ||
         !this.isClusterConnected ||
         !this.canCreateWorkload ||
-        !this.isSelectedWorkloadProjectExists ||
-        this.requiresFlexibleSubmissionEnabled
+        !this.isSelectedWorkloadProjectExists
       );
     },
     isUpdateWorkloadDisabled(): boolean {
@@ -451,10 +448,6 @@ export default defineComponent({
         return EWorkloadErrorMessage.ProjectNoLongerExists;
       }
 
-      if (this.requiresFlexibleSubmissionEnabled) {
-        return EWorkloadErrorMessage.RequiresFlexibleSubmissionForm;
-      }
-
       if (!this.isRunaiWorkload || !this.isCopySupportedWorkloadType) {
         return EWorkloadErrorMessage.ActionNotSupported;
       }
@@ -508,15 +501,6 @@ export default defineComponent({
     },
     isFlatWorkload(): boolean {
       return !this.workload?.environments?.[0]?.id;
-    },
-    requiresFlexibleSubmissionEnabled(): boolean {
-      if (this.isFlatWorkload && this.workload.type === EWorkloadType.Inference) return false;
-      return (
-        this.isFlatWorkload &&
-        !this.settingStore.isHybridSubmissionEnabled &&
-        this.workload.source !== Source.Cli &&
-        this.workload.sourceApi !== SourceApi.WorkloadsV2
-      );
     },
     selectedStoppableWorkloads(): Array<Workload> {
       return this.selectedWorkloads.filter(

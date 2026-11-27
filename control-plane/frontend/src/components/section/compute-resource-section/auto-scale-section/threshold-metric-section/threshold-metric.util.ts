@@ -4,7 +4,7 @@
  */
 
 import { DEFAULT_THRESHOLD_VALUE, thresholdMetricOptions } from "./threshold-metric-section.model";
-import type { AutoScalingRules } from "@/swagger-models/assets-service-client";
+import type { AutoScalingRules } from "@/swagger-models/policy-service-client";
 import type { AutoScaling } from "@/swagger-models/workloads-client";
 
 export const thresholdMetricUtils = {

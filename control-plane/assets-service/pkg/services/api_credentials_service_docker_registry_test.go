@@ -123,10 +123,6 @@ func (c *DockerRegistryTestFactory) validateListContent(listRequest *http.Reques
 	tg.validateListContent(c.router, listRequest, expectedUsedBy, createdSpecs)
 }
 
-func (c *DockerRegistryTestFactory) addToWorkloadCreationReq(*api.WorkloadCreationRequest, *api.AssetMeta) bool {
-	return false // docker registry cannot be part of workload creation request
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 //    Asset Builders
 /////////////////////////////////////////////////////////////////////////////////////////////

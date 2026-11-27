@@ -26,3 +26,8 @@ const (
 	// disagreed the API server would call a path nothing answers.
 	SnapshotRestoreWebhookPath = "/mutate-pod-snapshot-restore"
 )
+
+// SnapshotCaptureFailedMessage is in the snapshot plugin's issue for a failed
+// capture. The external-workload-integrator finds the issue by it, among the
+// plugin's others, for the message of the Degraded workload.
+const SnapshotCaptureFailedMessage = "the snapshot capture failed, so replicas start cold"

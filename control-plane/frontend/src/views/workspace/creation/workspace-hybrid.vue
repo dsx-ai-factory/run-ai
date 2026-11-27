@@ -144,12 +144,12 @@ import { deepCopy } from "@/utils/common.util";
 import { policyUtil, clearWorkloadBlockedFields } from "@/utils/policy.util";
 import { ErrorAlert } from "@/utils/error-alert.util";
 // Models
-import { AssetKind, Scope, type StringOption } from "@/swagger-models/assets-service-client";
+import { AssetKind, Scope } from "@/swagger-models/assets-service-client";
+import type { StringOption, WorkspacePolicyDefaultsAndRulesV2 } from "@/swagger-models/policy-service-client";
 import { EWorkloadTypeSupportedInAssetsService } from "@/models/workload.model";
 import { WORKLOAD_ROUTE_NAMES } from "@/router/workloads.routes/workloads.routes.names";
 import { WORKSPACE_ROUTE_NAMES } from "@/router/workspace.routes/workspace.routes.names";
 import { getPolicyViewDetails, type IPolicyViewDetails } from "@/utils/policy.util/policy-view.util";
-import type { WorkspacePolicyDefaultsAndRulesV2 } from "@/swagger-models/policy-service-client";
 import { EWorkloadFormType, EWorkloadName } from "@/models/workload.model";
 import {
   MIN_CLUSTER_VERSION_FOR_CONFIG_MAP_ENV_VAR,

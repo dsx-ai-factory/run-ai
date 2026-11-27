@@ -1,0 +1,22 @@
+# Track A step 1 · ✅ admin-owned. The controller only references this Gateway by name.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: model-serving
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: inference-agw
+  namespace: model-serving
+spec:
+  gatewayClassName: agentgateway
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+    allowedRoutes:
+      namespaces:
+        from: Same
+# Kind has no LoadBalancer: the Gateway's Service will show <pending> for EXTERNAL-IP.
+# That is expected. All tests use kubectl port-forward to the Gateway Service.

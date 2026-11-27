@@ -4246,9 +4246,9 @@ components:
       enum:
         - realms
         - clients
-        - apps
-        - internalApps
-        - userApps
+        - serviceAccounts
+        - internalServiceAccounts
+        - accessKeys
         - workloadAuth
     RealmReconcileRequest:
       type: object

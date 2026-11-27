@@ -126,11 +126,6 @@ func (c *ComputeTestFactory) validateListContent(listRequest *http.Request, expe
 	tg.validateListContent(c.router, listRequest, expectedUsedBy, createdSpecs)
 }
 
-func (c *ComputeTestFactory) addToWorkloadCreationReq(request *api.WorkloadCreationRequest, assetMeta *api.AssetMeta) bool {
-	request.Assets.Compute = convutils.Ref(assetMeta.Id)
-	return true
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 //    Asset Builders
 /////////////////////////////////////////////////////////////////////////////////////////////

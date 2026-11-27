@@ -23,6 +23,7 @@ import type { PolicyMeta } from "@/swagger-models/policy-service-client";
 import { orgTreeService } from "@/services/control-plane/rbac/org-tree.service/org-tree.service";
 import type { OrgUnit } from "@/swagger-models/org-unit-service-client";
 import DOCS from "@/constants/docs";
+import { docsUtil } from "@/utils/docs.util/docs.util";
 
 export const assetsUtil = {
   filterById,
@@ -192,7 +193,7 @@ function getAssetStatusOptions(status: AssetClusterStatusInfo, createdAt: string
 
   if (status.url && colStatusOption.tooltipText) {
     if (DOCS.SUPPORT.URL) {
-      colStatusOption.tooltipText += `. <a href="${DOCS.SUPPORT.URL}" target="_blank">Contact NVIDIA Run:ai support.</a>`;
+      colStatusOption.tooltipText += `<br/>${docsUtil.getSupportAnchor(`Contact ${DOCS.SUPPORT.LABEL}.`)}`;
     } else if (!/[.!?]$/.test(colStatusOption.tooltipText)) {
       colStatusOption.tooltipText += ".";
     }

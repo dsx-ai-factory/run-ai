@@ -36,6 +36,7 @@ import { ECustomCell } from "@/models/table.model";
 // Components
 import {
   NameCol,
+  TemplateNameCol,
   ListCol,
   DefaultCol,
   ServiceAccountsStatusCol,
@@ -73,6 +74,7 @@ export default defineComponent({
     LinkCol,
     DefaultCol,
     NameCol,
+    TemplateNameCol,
     ListCol,
     ServiceAccountsStatusCol,
     ScopeCol,

@@ -20,6 +20,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 	uuid2 "github.com/google/uuid"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/generated/pkg/api"
@@ -139,43 +140,30 @@ func (s *AssetsAPIService) AssetFlatFormatImpl(ctx context.Context, assetFlatReq
 		allIds.Add(assetMeta.Id)
 	}
 
-	worker := CreateFlatWorkloadReplicaInfo{containedAssetIds: assetIds}
-	var master *CreateFlatWorkloadReplicaInfo
-
-	switch assetFlatRequest.WorkloadType {
-	case api.WORKLOADTYPE_DISTRIBUTED:
-		master = &worker
-	case api.WORKLOADTYPE_DISTRIBUTED_INFERENCE:
-		// For Distributed Inference, we need to populate both leader and worker
-		// Create a copy for the leader
-		leader := worker
-		master = &leader
+	assetsToTranslate, credentials, dbErr := dao.ListWorkloadAssets(assetIds, nil, runaidb.DB().WithContext(ctx))
+	if dbErr != nil {
+		return nil, api.NewError(int(dbErr.Code), dbErr.Message, nil)
 	}
+	fixPortionForNonFractionalIssue(assetsToTranslate)
 
-	//
-	//   use the create workload function for translating to the flat format. the create workload
-	//   does all the translation for both worker and optional master
-	//
-	asFlat, err := translateFlatWorkload(ctx, string(assetFlatRequest.WorkloadType), &worker, master, &flat_workloads.TranslateFlatWorkloadOptions{
-		DisableComplimentaryInfo: true,
-	})
-	if err != nil {
-		return nil, api.NewError(int(err.Code), err.Message, nil)
+	_, payload, translateErr := flat_workloads.TranslateToFlatWorkload(ctx, string(assetFlatRequest.WorkloadType),
+		assetsToTranslate, credentials, nil, nil, &flat_workloads.TranslateFlatWorkloadOptions{DisableComplimentaryInfo: true})
+	if translateErr != nil {
+		return nil, api.NewError(int(translateErr.Code), translateErr.Message, nil)
 	}
 
 	//
 	//   now compose the response based on the returned flat response
 	//
-	jsonErr := json.Unmarshal(asFlat.WorkerPayloadAsBytes, &response.Worker)
+	jsonErr := json.Unmarshal(payload, &response.Worker)
 	if jsonErr != nil {
 		return nil, api.NewError(http.StatusNotImplemented, jsonErr.Error(), nil)
 	}
 
-	if asFlat.MasterPayloadAsBytes != nil {
-		// For Distributed Training, populate master
+	if assetFlatRequest.WorkloadType == api.WORKLOADTYPE_DISTRIBUTED || assetFlatRequest.WorkloadType == api.WORKLOADTYPE_DISTRIBUTED_INFERENCE {
 		response.Master = &api.MasterSpec{}
 
-		jsonErr := json.Unmarshal(asFlat.MasterPayloadAsBytes, &response.Master)
+		jsonErr := json.Unmarshal(payload, &response.Master)
 		if jsonErr != nil {
 			return nil, api.NewError(http.StatusNotImplemented, jsonErr.Error(), nil)
 		}

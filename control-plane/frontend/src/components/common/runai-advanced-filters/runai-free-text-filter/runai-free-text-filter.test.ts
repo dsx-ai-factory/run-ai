@@ -10,6 +10,7 @@ import type { VueWrapper } from "@vue/test-utils";
 import { mount } from "@vue/test-utils";
 import RunaiFreeTextFilter from "@/components/common/runai-advanced-filters/runai-free-text-filter/runai-free-text-filter.vue";
 import { Quasar } from "quasar";
+import { RunaiPageFilterWrapper } from "@/components/common/runai-advanced-filters/runai-page-filter-wrapper";
 import { unitTestUtil } from "@/utils/unit-test.util";
 
 describe("RunaiFreeTextFilter", () => {
@@ -44,6 +45,9 @@ describe("RunaiFreeTextFilter", () => {
     expect(menuElement.find("[aid=free-text-filter-select]").text()).toBe(filterOperatorMap[EFilterOperator.Contains]);
     expect(menuElement.find("[aid=free-text-filter-input]").exists()).toBe(true);
     expect(wrapper.vm.term).eql(filter.term);
+    expect(wrapper.getComponent(RunaiPageFilterWrapper).props("maxWidth")).toBe("250px");
+    expect(wrapper.getComponent(RunaiPageFilterWrapper).props("width")).toBeUndefined();
+    expect(wrapper.getComponent({ name: "QSelect" }).props("popupContentStyle")).toBeUndefined();
   });
 
   test("it should validate that initial term is empty and default operator label is contains  ", async () => {

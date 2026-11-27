@@ -66,10 +66,7 @@ import {
 } from "./threshold-metric-section.model";
 import type { ISelectOption } from "@/models/global.model";
 import type { IGenericSelectPolicyRules } from "@/models/policy.model";
-import {
-  type AutoScalingMetricOptionsOptionsInner,
-  type AutoScalingRules,
-} from "@/swagger-models/assets-service-client";
+import type { AutoScalingMetricOptionsOptionsInner, AutoScalingRules } from "@/swagger-models/policy-service-client";
 import type { AutoScaling } from "@/swagger-models/workloads-client";
 import { thresholdMetricUtils } from "./threshold-metric.util";
 

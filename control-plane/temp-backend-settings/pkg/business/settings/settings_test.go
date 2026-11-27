@@ -82,7 +82,6 @@ func TestBuildSettingDefinitions_AllKeysPresent(t *testing.T) {
 		SettingKeyOptimizedAnalyticsQueries,
 		SettingKeyEnableModelCatalog,
 		SettingKeyEnableNIM,
-		SettingKeyEnableHybridSubmission,
 		SettingKeyEnableDataVolumes,
 		SettingKeyEnableNgcIntegration,
 		SettingKeyGpuOverProvisioning,
@@ -114,8 +113,8 @@ func TestBuildSettingDefinitions_SettingCounts(t *testing.T) {
 		}
 	}
 
-	assert.Equal(t, 29, len(settings), "total number of settings")
-	assert.Equal(t, 19, migrated, "number of migrated settings")
+	assert.Equal(t, 28, len(settings), "total number of settings")
+	assert.Equal(t, 18, migrated, "number of migrated settings")
 	assert.Equal(t, 10, nonMigrated, "number of non-migrated settings")
 }
 
@@ -135,7 +134,6 @@ func TestBuildSettingDefinitions_MigratedSettingsAreCorrect(t *testing.T) {
 		SettingKeyEnableDataVolumes,
 		SettingKeyEnablePolicies,
 		SettingKeyWorkloadSubmissionV2Enabled,
-		SettingKeyEnableHybridSubmission,
 		SettingKeyGpuOverProvisioning,
 		SettingKeyEnableAdvancedGPUMetrics,
 		SettingKeyEnableScopedAuthorization,

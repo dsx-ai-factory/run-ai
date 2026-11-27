@@ -663,7 +663,7 @@ export default defineComponent({
           this.authStore.tenant.id,
         );
 
-        this.workloadStore.setWorkloadAdded(workload, EWorkloadType.DistributedInference);
+        this.workloadStore.setWorkloadAdded(workload);
         this.clusterStore.setSelectedClusterById(distributedInferenceWorkload.clusterId);
         this.$q.notify(alertUtil.getSuccess(`Inference ${distributedInferenceWorkload.name} created`));
         this.$router.push({

@@ -59,8 +59,8 @@ func RouterContainer(locator workload.Locator, urlHandler map[string]router.UrlH
 	config *config.ClusterAPI, mgr manager.Manager,
 ) (router.Container, error) {
 	workloadMiddleware := workload.NewExistMiddleware(locator)
-	allowedOrigins := buildAllowedOrigins(config.ControlPlaneURL)
-	authMiddleware := auth.CreateAuthMiddleware(jwksFunc, oidcConfigurationProvider, userInfoProvider, allowedOrigins)
+	corsMiddleware := auth.CreateCORSMiddleware(buildAllowedOrigins(config.ControlPlaneURL))
+	authMiddleware := auth.CreateAuthMiddleware(jwksFunc, oidcConfigurationProvider, userInfoProvider)
 	authzMiddleware := InitAuthzMiddleware(config.ControlPlaneURL, locator)
 	namepsaceMiddleware := InitProjectMiddleware(mgr.GetClient())
 	attributesMiddleware := InitAttributeMiddleware()
@@ -78,6 +78,7 @@ func RouterContainer(locator workload.Locator, urlHandler map[string]router.UrlH
 
 	containerBuilder := router.NewContainerBuilder()
 	containerBuilder.WithRouter(chi.NewRouter())
+	containerBuilder.WithCORSMiddleware(corsMiddleware)
 	containerBuilder.WithWorkloadMiddleware(workloadMiddleware.Middleware)
 	containerBuilder.WithAuthMiddleware(authMiddleware)
 	containerBuilder.WithAuthzMiddleware(authzMiddleware.Middleware)

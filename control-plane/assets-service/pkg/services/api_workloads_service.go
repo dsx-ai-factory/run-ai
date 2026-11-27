@@ -10,97 +10,25 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
-	"time"
-
-	runai_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
-	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 
 	scope2 "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/services/scope"
 
-	"github.com/cenkalti/backoff/v4"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/generated/pkg/api"
-	workloadsServiceClient "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/clients/workloads-service"
-	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/dao"
-	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/dbmodel"
 	workloadsdb "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/workloads"
 	backend "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
-	workloadsService "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	scope "github.com/dsx-ai-factory/run-ai/runai-application-packages/scopeinfo"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
 
-var (
-	ReplicaTypeMaster = convutils.Ref(string(workloadsService.REPLICATYPE_MASTER))
-	ReplicaTypeWorker = convutils.Ref(string(workloadsService.REPLICATYPE_WORKER))
-)
-
 // WorkloadApiService is a service that implements the logic for the workloads service
 type WorkloadApiService struct{}
 
-// RUNAI_MODEL and RUNAI_MODEL_NAME are environment variables that are set to the model name in the assets contained in the workload.
-var (
-	MODEL_ASSET_ENV_VAR_RUNAI_MODEL      = "RUNAI_MODEL"
-	MODEL_ASSET_ENV_VAR_RUNAI_MODEL_NAME = "RUNAI_MODEL_NAME"
-)
-
 func NewWorkloadApiService() *WorkloadApiService {
 	return &WorkloadApiService{}
-}
-
-// ValidateWorkloadRequest validates the request's assets and returns a list of the contained assets and their
-// related credential and imposed assets
-func ValidateWorkloadRequest(ctx context.Context, workloadType string, containedAssetIds []string,
-	specificEnv *api.SpecificRunParams,
-) ([]dbmodel.AssetsContainedInWorkload, map[string]dbmodel.CredentialsAssetSpecs, *api.Error) {
-	var credentialsFromRunParams []string
-	if specificEnv != nil {
-		credentialsFromRunParams = dao.GetCredentialIdsFromEnvironmentVariables(specificEnv.EnvironmentVariables)
-	}
-
-	workloadAssets, credentialsAssets, dbError := dao.ListWorkloadAssets(containedAssetIds, credentialsFromRunParams, runaidb.DB().WithContext(ctx))
-	if dbError != nil {
-		return nil, nil, dbError
-	}
-
-	if specificEnv != nil {
-		validationError := validateSpecificEnv(workloadType, workloadAssets, specificEnv)
-		if validationError != nil {
-			return nil, nil, validationError
-		}
-	}
-
-	if workloadType != auth.WorkloadTypeTraining && specificEnv != nil {
-		if specificEnv.Parallelism != nil {
-			return nil, nil, api.NewError(http.StatusBadRequest, "parallelism is only supported for standard training workloads", nil)
-		}
-		if specificEnv.Completions != nil {
-			return nil, nil, api.NewError(http.StatusBadRequest, "completions is only supported for standard training workloads", nil)
-		}
-	}
-
-	return workloadAssets, credentialsAssets, nil
-}
-
-func GetWorkloadById(ctx context.Context, workloadType string, id string) (*dbmodel.GenericWorkload, *api.Error) {
-	genericWorkload, getError := workloadsdb.GetWorkloadById(ctx, workloadType, id)
-	if getError != nil {
-		return nil, getError
-	}
-
-	workloadTypeAsAssetKind := auth.WorkloadTypeToAssetKind[workloadType]
-
-	rbacErr := auth.ValidateAccessByActionAndAssetKind(ctx, ScopeInfoOfWorkload(genericWorkload.Meta.ProjectId), string(workloadTypeAsAssetKind), backend.ACTION_READ, false)
-	if rbacErr != nil {
-		return nil, api.NewError(int(rbacErr.Code), rbacErr.Message, errors.New(rbacErr.Details))
-	}
-
-	redactGenericWorkloadSensitiveValues(genericWorkload)
-
-	return genericWorkload, nil
 }
 
 func (s *WorkloadApiService) AssetNameConflictValidation(ctx context.Context, assetKind string, assetName string, scopeType string, scopeId string) (api.ImplResponse, error) {
@@ -151,34 +79,6 @@ func (s *WorkloadApiService) AssetNameConflictValidation(ctx context.Context, as
 		return api.Response(http.StatusConflict, api.NewError(http.StatusConflict, "the given asset name is not available", nil)), nil
 	}
 	return api.Response(http.StatusNoContent, nil), nil
-}
-
-func ScopeInfoOfWorkload(projectId int32) *scope.ScopeInfo {
-	// workloads are always project-scoped
-	return scope.ScopeInfoOf(scope.Project, &projectId, nil, nil, nil)
-}
-
-// notifyWorkloadService notifies the workloads service on the new workload
-// pass creation metadata by value to avoid sharing memory between go routine
-func notifyWorkloadService(ctx context.Context, notification workloadsService.WorkloadCreationFields) {
-	var err *workloadsService.Error
-	exponentialBackoff := backoff.NewExponentialBackOff()
-	sc := runai_config.Get[*config.ServerConfig]()
-	exponentialBackoff.MaxInterval = time.Duration(sc.RetryMaxIntervalSec) * time.Second
-	exponentialBackoff.MaxElapsedTime = time.Duration(sc.RetryMaxIntervalSec) * time.Second
-	ticker := backoff.NewTicker(exponentialBackoff)
-	for range ticker.C {
-		_, err = workloadsServiceClient.Get().Client().InternalCreateWorkload(ctx, &notification)
-		if err == nil {
-			return
-		}
-		// Retry only if the error is 5XX
-		if err.Code < 500 {
-			return
-		}
-	}
-	logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("failed to notify workloads service: workload %s workload type %s error %v", notification.Name,
-		notification.Type, err)
 }
 
 // the following methods are implementation of the old backend functions that handle updates

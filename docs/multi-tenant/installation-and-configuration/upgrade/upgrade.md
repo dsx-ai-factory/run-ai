@@ -66,7 +66,17 @@ helm search repo -l runai/control-plane
 
 **Note**
 
-If you are upgrading from a JFrog-based installation, prepare the NGC-based `runai-reg-creds` secret as described in [Software Artifacts](../installation/install-using-helm/preparations.md#software-artifacts).
+If you are upgrading from a JFrog-based installation, the existing `runai-reg-creds` secret in the `runai-backend` namespace still holds your JFrog credentials. Replace it with your NGC credentials before you upgrade the control plane. On OpenShift, use `oc` instead of `kubectl` in the steps below.
+
+1. Delete the existing secret:
+
+   ```bash
+   kubectl delete secret runai-reg-creds -n runai-backend
+   ```
+
+2. Create the secret again with your NGC Personal Key, as described in [Software Artifacts](../installation/install-using-helm/preparations.md#software-artifacts).
+
+You don't need to replace the secret in the `runai` namespace. Each cluster gets the updated secret from the control plane when you upgrade it.
 
 </Note>
 
