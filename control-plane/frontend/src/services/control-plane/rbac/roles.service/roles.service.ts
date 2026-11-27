@@ -6,11 +6,14 @@
 import type { Permission, Role } from "@/swagger-models/authorization-client";
 import { authorizationApi } from "@/services/infra/client-apis/authorization-api/authorization-api";
 
+import type { ISelectOption } from "@/models/global.model";
+
 const ROLES_PAGE_SIZE = 500;
 
 export const rolesService = {
   list,
   isPermittedRole,
+  toSelectOptions,
 };
 async function list(): Promise<Role[]> {
   const roles: Role[] = [];
@@ -43,3 +46,7 @@ function isPermittedRole(role: Role, permissions: Array<Permission>): boolean {
 }
 
 export default rolesService;
+
+function toSelectOptions(roles: Role[]): ISelectOption[] {
+  return roles.map((role) => ({ label: role.name, value: role.id, roleStageBadge: role.name }));
+}

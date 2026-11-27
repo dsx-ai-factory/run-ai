@@ -21,6 +21,7 @@ type Container struct {
 	AuthMiddleware               func(http.Handler) http.Handler
 	MetricsMiddleware            func(http.Handler) http.Handler
 	K8sObjectMiddleware          func(http.Handler) http.Handler
+	CORSMiddleware               func(http.Handler) http.Handler
 	K8sObjectService             openapi.K8sObjectAPIServicer
 	MapHandler                   map[string]UrlHandler
 }
@@ -93,6 +94,11 @@ func (b *ContainerBuilder) WithHandler(handlers map[string]UrlHandler) *Containe
 
 func (b *ContainerBuilder) WithK8sObjectMiddleware(middleware func(http.Handler) http.Handler) *ContainerBuilder {
 	b.container.K8sObjectMiddleware = middleware
+	return b
+}
+
+func (b *ContainerBuilder) WithCORSMiddleware(middleware func(http.Handler) http.Handler) *ContainerBuilder {
+	b.container.CORSMiddleware = middleware
 	return b
 }
 

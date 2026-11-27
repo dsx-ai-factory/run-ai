@@ -1,7 +1,0 @@
-properties:
-  assets:
-    $ref: "./AssetsDefaults.yaml"
-  specificRunParams:
-    $ref: "./SpecificRunParamAttrDefaults.yaml"
-nullable: true
-type: object

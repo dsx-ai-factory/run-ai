@@ -37,7 +37,7 @@ func TestNativeGpuMemoryAllocation(t *testing.T) {
 			node := &v1.Node{ObjectMeta: metav1.ObjectMeta{Name: "gpu-node", Labels: map[string]string{nodeGpuMemoryLabelName: "16384"}}}
 			client := fake.NewClientBuilder().WithObjects(node).Build()
 			metrics := &metadata.PodMetadata{}
-			require.NoError(t, CalcPodGpuResources(context.Background(), pod, metrics, client))
+			require.NoError(t, CalcPodGpuResources(context.Background(), pod, metrics, client, nil))
 			require.Equal(t, tc.memoryMb, metrics.GpuMemory)
 			require.InDelta(t, tc.gpus, metrics.GPUs, 1e-12)
 		})
@@ -78,7 +78,7 @@ func TestLegacyGpuMemoryAllocationWithPerContainerAnnotations(t *testing.T) {
 			node := &v1.Node{ObjectMeta: metav1.ObjectMeta{Name: "gpu-node", Labels: map[string]string{nodeGpuMemoryLabelName: "16384"}}}
 			kubeClient := fake.NewClientBuilder().WithObjects(node).Build()
 			metrics := &metadata.PodMetadata{}
-			require.NoError(t, CalcPodGpuResources(context.Background(), pod, metrics, kubeClient))
+			require.NoError(t, CalcPodGpuResources(context.Background(), pod, metrics, kubeClient, nil))
 			require.EqualValues(t, 500, metrics.GpuMemory)
 			require.InDelta(t, 500e6/(16384*1048576), metrics.GPUs, 1e-12)
 			require.Equal(t, original, pod)

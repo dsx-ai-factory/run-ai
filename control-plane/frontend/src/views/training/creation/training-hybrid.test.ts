@@ -151,6 +151,23 @@ describe("training-hybrid.vue", () => {
     vi.clearAllMocks();
   });
 
+  it("preserves image pull secrets when copying a training workload", async () => {
+    await flushPromises();
+    useTrainingStore(pinia).clearFlatFormState();
+    const imagePullSecrets = [{ name: "training-registry", userCredential: true }];
+    vi.mocked(workloadService.getUnifiedWorkload).mockResolvedValueOnce({
+      spec: { worker: { image: "training-image", imagePullSecrets } },
+    });
+    await remount({ fromCopyId: "source-training", clusterId: "priority-only-cluster", projectId: "123" });
+
+    wrapper.vm.onNameChanged("training-copy");
+    await wrapper.vm.onSubmit();
+
+    expect(trainingService.createTrainingFlat).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "training-copy", spec: expect.objectContaining({ imagePullSecrets }) }),
+    );
+  });
+
   it("updateGeneralModel - should preserve priority and omit unsupported preemptibility", async () => {
     await flushPromises();
 

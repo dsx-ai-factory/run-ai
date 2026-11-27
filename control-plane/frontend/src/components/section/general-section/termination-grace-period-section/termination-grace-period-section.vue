@@ -30,7 +30,7 @@ import { RunaiSection } from "@/components/common/runai-section";
 import { RunaiDurationInput } from "@/components/common/runai-duration-input";
 // Models
 import type { ValidationRule } from "quasar";
-import type { IntegerRules } from "@/swagger-models/assets-service-client";
+import type { IntegerRules } from "@/swagger-models/policy-service-client";
 // Utils
 import { isMaxEqualOrHigherThenMin, isValueLowerOrEqualToMax } from "@/common/form.validators";
 // Constants

@@ -8,14 +8,9 @@ import { storageUtil } from "@/utils/storage.util";
 import { dateUtil } from "@/utils/date.util";
 import { type Workspace as WorkspaceFlat } from "@/swagger-models/workloads-client";
 // models
-import type { WorkspaceCreationRequestV2, WorkspaceV2 } from "@/swagger-models/assets-service-client";
-import type { WorkspacePolicyV2 } from "@/swagger-models/policy-service-client";
 import type { ILocalStatus } from "@/models/global.model";
 
 // constants
-import { policyService } from "../policy.service/policy.service";
-import { ScopeType } from "@/swagger-models/authorization-client";
-import { assetsServiceApi } from "@/services/infra/client-apis/assets-service-api/assets-service-api";
 import { httpService } from "@/services/infra/https.service/http.service";
 import { workloadServiceApi } from "@/services/infra/client-apis/workloads-service-api/workloads-service-api";
 import type { HttpResponse, WorkspaceCreationRequest } from "@/swagger-models/workloads-client";
@@ -25,26 +20,13 @@ const WORKSPACE_STATUS = "workspaceStatus";
 export const workspaceService = {
   resumeV2,
   stopV2,
-  getById,
   stop,
-  getPolicy,
-  createWorkspaceV2,
-  getWorkspaceMergedWithPolicy,
   createWorkspaceFlat,
 };
 
 async function createWorkspaceFlat(wsCreationRequest: WorkspaceCreationRequest): Promise<WorkspaceFlat> {
   try {
     const response = await workloadServiceApi.workspacesApi.createWorkspace(wsCreationRequest);
-    return response.data;
-  } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
-  }
-}
-
-async function createWorkspaceV2(wsCreationRequest: WorkspaceCreationRequestV2): Promise<WorkspaceV2> {
-  try {
-    const response = await assetsServiceApi.workspaceApi.createWorkspaceV2(wsCreationRequest);
     return response.data;
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
@@ -66,28 +48,6 @@ async function stopV2(workspaceId: string): Promise<HttpResponse> {
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
   }
-}
-
-async function getById(workspaceId: string): Promise<WorkspaceV2> {
-  try {
-    const response = await assetsServiceApi.workspaceApi.getWorkspaceByIdV2(workspaceId);
-    return response.data;
-  } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
-  }
-}
-
-async function getWorkspaceMergedWithPolicy(projectId?: string, workloadId?: string): Promise<WorkspaceV2> {
-  try {
-    const response = await assetsServiceApi.workspaceApi.getWorkspaceMerged(projectId, workloadId);
-    return response.data;
-  } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
-  }
-}
-
-async function getPolicy(projectId: number): Promise<WorkspacePolicyV2> {
-  return policyService.getWorkspacePolicyByScope({ scope: ScopeType.Project, projectId });
 }
 
 function _cleanupStatus() {

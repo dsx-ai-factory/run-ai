@@ -1,0 +1,379 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+import { mount, flushPromises } from "@vue/test-utils";
+import { createMemoryHistory, createRouter, RouterView } from "vue-router";
+import { createTestingPinia } from "@pinia/testing";
+import { Notify, Quasar } from "quasar";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import NodePoolScheduling from "./node-pool-scheduling.vue";
+import NodePoolEdit from "../node-pool-edit/node-pool-edit.vue";
+import { NodePoolSchedulingStep as Step } from "@/components/node-pools/node-pool-scheduling-step";
+import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
+import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
+import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
+const { createNodePoolDraft } = nodePoolUtil;
+import { NodePoolDepartmentTable as Table } from "@/components/node-pools/node-pool-department-table";
+import { GUARANTEED_QUOTA_CAPABILITIES, PROPORTIONAL_CAPABILITIES } from "@/models/node-pool.model";
+import type { Nodepool } from "@/swagger-models/cluster-service-client";
+import { ForbiddenError, NotFoundError } from "@/models/http-response.model";
+import { requestToLeave } from "@/services/infra/router.service/router.service";
+import { ResourceType } from "@/swagger-models/authorization-client";
+import { usePermissionStore } from "@/stores/permissions.store";
+import { useAppStore } from "@/stores/app.store";
+import { NODE_POOL_ROUTE_NAMES } from "@/router/node-pool.routes/node-pool.routes.names";
+
+vi.mock("@/constants/node-pool.constants", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  ENABLE_NODE_POOL_CREATE_FLOW: true,
+}));
+vi.mock("@/services/control-plane/cluster.service/cluster.service", () => ({
+  clusterService: {
+    getNodepoolMetrics: vi.fn().mockResolvedValue({ measurements: [] }),
+    getNodepool: vi.fn(),
+    patchNodepool: vi.fn(),
+    createNodepool: vi.fn(),
+    updateNodepool: vi.fn(),
+  },
+}));
+vi.mock("@/services/control-plane/org-unit.service/org-unit.service", () => ({
+  orgUnitService: {
+    batchPatchDepartmentNodePoolResources: vi.fn(),
+    getDepartmentNodePoolResources: vi.fn().mockResolvedValue({ nodePoolResources: [] }),
+    countDepartmentNodePoolResources: vi.fn().mockResolvedValue(0),
+    sumDepartmentNodePoolResources: vi.fn().mockResolvedValue({ weightsSum: 0, deservedSum: 0 }),
+  },
+}));
+vi.mock("@/services/control-plane/org-unit-settings.service/org-unit-settings.service", () => ({
+  orgUnitSettingsService: { getLimitQuotaOverSubscription: vi.fn().mockResolvedValue({ value: false }) },
+}));
+vi.mock("@/services/authorization/permission.service/permission.service", () => ({
+  permissionService: {
+    getPermittedScopesForAction: vi.fn().mockResolvedValue({ read: { system: true }, update: { system: true } }),
+  },
+}));
+const pool = { ...createNodePoolDraft("cluster"), id: "one", name: "training", clusterName: "Tokyo" } as Nodepool;
+const proportionalPool = { ...pool, schedulingCapabilities: { ...PROPORTIONAL_CAPABILITIES } };
+async function render(realStep = false, access?: "editor" | "pool-only") {
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: "/node-pools/edit/:id", name: NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT, component: NodePoolEdit },
+      { path: "/", name: NODE_POOL_ROUTE_NAMES.NODE_POOL_INDEX, component: { template: "<div>Pool list</div>" } },
+    ],
+  });
+  await router.push("/node-pools/edit/one?stepName=scheduling");
+  await router.isReady();
+  const pinia = createTestingPinia({ createSpy: vi.fn });
+  if (access) {
+    vi.mocked(usePermissionStore(pinia).hasPermission).mockImplementation(
+      (resource) => resource === ResourceType.Nodepools || access === "editor",
+    );
+  }
+  const wrapper = mount(RouterView, {
+    global: {
+      plugins: [router, [Quasar, { plugins: { Notify } }], pinia],
+      directives: { "click-outside": {}, permission: {} },
+      stubs: {
+        NodePoolScheduling,
+        NodePoolTopology: { template: "<div>Topology step</div>" },
+        ...(realStep ? {} : { NodePoolSchedulingStep: true }),
+      },
+    },
+  });
+  return { wrapper, router };
+}
+beforeEach(() => vi.clearAllMocks());
+describe("scheduling route", () => {
+  it("discards edits in place while preserving filters, scroll and the settings panel", async () => {
+    vi.mocked(clusterService.getNodepool).mockResolvedValue(proportionalPool);
+    const { wrapper } = await render(true, "editor");
+    try {
+      await flushPromises();
+      const reset = wrapper.get('[aid="reset-scheduling"]');
+      expect(reset.text()).toBe("Reset");
+      expect(reset.attributes("disabled")).toBeDefined();
+      await wrapper.get('[aid="advanced-settings"]').trigger("click");
+      const table = wrapper.get(".department-table-content").element;
+      table.scrollTop = 120;
+      await wrapper.get('[aid="mode-guaranteed"]').trigger("click");
+      const step = wrapper.getComponent(Step);
+      step.vm.$emit("search", "department");
+      step.vm.$emit("filter-rank", "Low");
+      await wrapper.vm.$nextTick();
+      expect(step.props("searchTerm")).toBe("department");
+      await wrapper.get('[aid="reset-scheduling"]').trigger("click");
+      await flushPromises();
+      const restored = wrapper.getComponent(Step);
+      expect(restored.element).toBe(step.element);
+      expect(restored.props("searchTerm")).toBe("department");
+      expect(restored.props("rankFilter")).toBe("Low");
+      expect(wrapper.get(".department-table-content").element).toBe(table);
+      expect(table.scrollTop).toBe(120);
+      expect(wrapper.get('[aid="advanced-settings"]').attributes("aria-expanded")).toBe("true");
+      expect(reset.attributes("disabled")).toBeDefined();
+      expect(clusterService.getNodepool).toHaveBeenCalledTimes(1);
+      expect(wrapper.get('[aid="mode-proportional"]').attributes("aria-checked")).toBe("true");
+      expect(clusterService.patchNodepool).not.toHaveBeenCalled();
+      expect(orgUnitService.batchPatchDepartmentNodePoolResources).not.toHaveBeenCalled();
+      expect(await requestToLeave()).toBe(true);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it("reloads partially saved values in place and keeps the draft if the read needs a retry", async () => {
+    const customPool = {
+      ...pool,
+      schedulingCapabilities: { ...GUARANTEED_QUOTA_CAPABILITIES, adjustableWeights: true },
+    };
+    const row = (id: string, weight: number) => ({
+      id,
+      orgUnitId: id,
+      orgUnitName: id,
+      clusterId: pool.clusterId,
+      nodePoolId: pool.id,
+      nodePoolName: pool.name,
+      rank: "High",
+      resources: { gpu: { overQuotaWeight: weight } },
+    });
+    vi.mocked(clusterService.getNodepool).mockResolvedValue(customPool);
+    vi.mocked(clusterService.patchNodepool).mockResolvedValue(customPool);
+    vi.mocked(orgUnitService.getDepartmentNodePoolResources)
+      .mockResolvedValueOnce({ nodePoolResources: [row("a", 2), row("b", 2)] })
+      .mockResolvedValueOnce({ nodePoolResources: [row("a", 8), row("b", 2)] });
+    vi.mocked(orgUnitService.batchPatchDepartmentNodePoolResources).mockResolvedValueOnce({
+      id: "batch",
+      totalRequested: 2,
+      succeeded: [row("a", 8)],
+      failed: [{ message: "conflict" }],
+      totalFailed: 1,
+      totalSuccessful: 1,
+    });
+    const { wrapper } = await render(true, "editor");
+    try {
+      await flushPromises();
+      await wrapper.get('[aid="advanced-settings"]').trigger("click");
+      const table = wrapper.getComponent(Table);
+      table.vm.$emit("edit", { id: "a", weight: 8 });
+      table.vm.$emit("edit", { id: "b", weight: 6 });
+      await wrapper.get('[aid="scheduling-save-continue"]').trigger("click");
+      await flushPromises();
+      expect(wrapper.text()).toContain("remain unsaved");
+      const reset = wrapper.get('[aid="reset-scheduling"]');
+      vi.mocked(clusterService.getNodepool).mockRejectedValueOnce(new Error("Connection interrupted"));
+      await reset.trigger("click");
+      await flushPromises();
+      expect(wrapper.text()).toContain("Connection interrupted");
+      expect(table.props("draft").departments.b.weight).toBe(6);
+      expect(reset.attributes("disabled")).toBeUndefined();
+      await reset.trigger("click");
+      await flushPromises();
+      expect(wrapper.getComponent(Table).element).toBe(table.element);
+      expect(table.props("settingsOpen")).toBe(true);
+      expect(table.props("draft").departments).toEqual({});
+      expect(table.props("rows").map((r) => r.resources.gpu?.overQuotaWeight)).toEqual([8, 2]);
+      expect(reset.attributes("disabled")).toBeDefined();
+      expect(clusterService.patchNodepool).toHaveBeenCalledTimes(1);
+      expect(orgUnitService.batchPatchDepartmentNodePoolResources).toHaveBeenCalledTimes(1);
+      expect(await requestToLeave()).toBe(true);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it("uses the shared page loader while fetching the pool and keeps Close available", async () => {
+    let resolvePool!: (value: Nodepool) => void;
+    vi.mocked(clusterService.getNodepool).mockImplementationOnce(
+      () =>
+        new Promise<Nodepool>((resolve) => {
+          resolvePool = resolve;
+        }),
+    );
+    const { wrapper } = await render();
+    await flushPromises();
+    expect(wrapper.find(".runai-default-loader").exists()).toBe(true);
+    expect(wrapper.text()).not.toContain("Loading node pool");
+    expect(wrapper.findComponent(Step).exists()).toBe(false);
+    expect(await requestToLeave()).toBe(true);
+    resolvePool(pool);
+    await flushPromises();
+    expect(wrapper.find(".runai-default-loader").exists()).toBe(false);
+    expect(wrapper.findComponent(Step).props("pool").id).toBe("one");
+    wrapper.unmount();
+  });
+
+  it.each(["loading", "error"])("allows header Close in the %s state", async (state) => {
+    vi.mocked(clusterService.getNodepool).mockImplementation(() =>
+      state === "error" ? Promise.reject(new Error("Unavailable")) : new Promise(() => {}),
+    );
+    const { wrapper } = await render(true);
+    await flushPromises();
+    expect(useAppStore().setPageLoading).toHaveBeenCalledWith(false);
+    let allowed: boolean | undefined;
+    void requestToLeave().then((value) => {
+      allowed = value;
+    });
+    await flushPromises();
+    expect(allowed).toBe(true);
+    wrapper.unmount();
+  });
+
+  it("uses header leave approval once without asking again during navigation", async () => {
+    vi.mocked(clusterService.getNodepool).mockResolvedValue(proportionalPool);
+    const { wrapper, router } = await render(true, "editor");
+    await flushPromises();
+    await wrapper.get('[aid="mode-guaranteed"]').trigger("click");
+    const approved = requestToLeave();
+    await flushPromises();
+    (document.querySelector('[aid="leave-page-modal-cancel-btn"]') as HTMLButtonElement).click();
+    expect(await approved).toBe(true);
+    let navigated = false;
+    void router.push("/").then(() => {
+      navigated = true;
+    });
+    await flushPromises();
+    expect(navigated).toBe(true);
+    expect(wrapper.text()).toContain("Pool list");
+    wrapper.unmount();
+  });
+  it("opens topology for a pool-only editor without a department write", async () => {
+    vi.mocked(clusterService.getNodepool).mockResolvedValue(pool);
+    const { wrapper, router } = await render(true, "pool-only");
+    await flushPromises();
+    await wrapper.get('[aid="scheduling-continue"]').trigger("click");
+    await flushPromises();
+    expect(router.currentRoute.value.query.stepName).toBe("topology");
+    expect(router.currentRoute.value.params.id).toBe(pool.id);
+    expect(clusterService.patchNodepool).not.toHaveBeenCalled();
+    expect(orgUnitService.batchPatchDepartmentNodePoolResources).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
+  it("asks before leaving a dirty scheduling draft and navigates without saving on discard", async () => {
+    vi.mocked(clusterService.getNodepool).mockResolvedValue(proportionalPool);
+    const { wrapper, router } = await render(true, "editor");
+    await flushPromises();
+    await wrapper.get('[aid="mode-guaranteed"]').trigger("click");
+    const topology = wrapper.get('[aid="wizard-step-item-topology"]');
+    await topology.trigger("click");
+    await flushPromises();
+    (document.querySelector('[aid="leave-page-modal-stay-btn"]') as HTMLButtonElement).click();
+    await flushPromises();
+    expect(router.currentRoute.value.fullPath).toBe("/node-pools/edit/one?stepName=scheduling");
+    expect(wrapper.get('[aid="mode-guaranteed"]').attributes("aria-checked")).toBe("true");
+    await topology.trigger("click");
+    await flushPromises();
+    (document.querySelector('[aid="leave-page-modal-cancel-btn"]') as HTMLButtonElement).click();
+    await flushPromises();
+    expect(router.currentRoute.value.query.stepName).toBe("topology");
+    expect(clusterService.patchNodepool).not.toHaveBeenCalled();
+    expect(orgUnitService.batchPatchDepartmentNodePoolResources).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
+  it("opens topology with the successfully saved pool ID after Save & continue", async () => {
+    vi.mocked(clusterService.getNodepool).mockResolvedValue(pool);
+    const { wrapper, router } = await render();
+    await flushPromises();
+    wrapper.findComponent(Step).vm.$emit("saved", { ...pool, id: "saved-pool" }, "continue");
+    await flushPromises();
+    expect(router.currentRoute.value.name).toBe(NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT);
+    expect(router.currentRoute.value.params.id).toBe("saved-pool");
+    expect(router.currentRoute.value.query.stepName).toBe("topology");
+    expect(wrapper.text()).toContain("Topology step");
+    wrapper.unmount();
+  });
+
+  it("keeps Save & close returning to the node pool list", async () => {
+    vi.mocked(clusterService.getNodepool).mockResolvedValue(pool);
+    const { wrapper, router } = await render();
+    await flushPromises();
+    wrapper.findComponent(Step).vm.$emit("saved", pool, "close");
+    await flushPromises();
+    expect(router.currentRoute.value.name).toBe(NODE_POOL_ROUTE_NAMES.NODE_POOL_INDEX);
+    expect(wrapper.text()).toContain("Pool list");
+    wrapper.unmount();
+  });
+
+  it("does not navigate when partial persistence only updates the saved pool snapshot", async () => {
+    vi.mocked(clusterService.getNodepool).mockResolvedValue(pool);
+    const { wrapper, router } = await render();
+    await flushPromises();
+    wrapper.findComponent(Step).vm.$emit("pool-saved", { ...pool, name: "partially saved" });
+    await flushPromises();
+    expect(router.currentRoute.value.fullPath).toBe("/node-pools/edit/one?stepName=scheduling");
+    expect(wrapper.findComponent(Step).props("pool").name).toBe("partially saved");
+    wrapper.unmount();
+  });
+
+  it("loads by route ID without creating or updating a pool", async () => {
+    vi.mocked(clusterService.getNodepool).mockResolvedValue(pool);
+    const { wrapper } = await render();
+    await flushPromises();
+    expect(clusterService.getNodepool).toHaveBeenCalledWith("one");
+    expect(wrapper.findComponent(Step).props("pool")).toEqual(pool);
+    expect(clusterService.createNodepool).not.toHaveBeenCalled();
+    expect(clusterService.updateNodepool).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
+  it("shows a load failure and retries without a stale screen", async () => {
+    vi.mocked(clusterService.getNodepool)
+      .mockRejectedValueOnce(new Error("Service unavailable"))
+      .mockResolvedValueOnce(pool);
+    const { wrapper } = await render();
+    await flushPromises();
+    expect(wrapper.find('[role="alert"]').text()).toContain("Service unavailable");
+    expect(wrapper.findComponent(Step).exists()).toBe(false);
+    await wrapper.get('[aid="retry-scheduling-pool"]').trigger("click");
+    await flushPromises();
+    expect(wrapper.findComponent(Step).props("pool").id).toBe("one");
+    wrapper.unmount();
+  });
+
+  it.each([new ForbiddenError(), new NotFoundError()])(
+    "removes the saved editor when refreshing the same pool returns $statusCode",
+    async (error) => {
+      vi.mocked(clusterService.getNodepool).mockResolvedValueOnce(pool).mockRejectedValue(error);
+      const { wrapper } = await render(true);
+      await flushPromises();
+      expect(wrapper.get('[aid="scheduling-save-close"]').isVisible()).toBe(true);
+
+      wrapper.findComponent(Step).vm.$emit("refresh");
+      await flushPromises();
+      expect(wrapper.find('[aid="scheduling-save-close"]').exists()).toBe(false);
+      expect(wrapper.get('[role="alert"]').text()).toContain(error.message);
+      expect(useAppStore().setPageTitleOverride).toHaveBeenLastCalledWith(null);
+
+      await wrapper.get('[aid="retry-scheduling-pool"]').trigger("click");
+      await flushPromises();
+      expect(clusterService.getNodepool).toHaveBeenCalledTimes(3);
+      expect(clusterService.getNodepool).toHaveBeenLastCalledWith(pool.id);
+      expect(wrapper.get('[role="alert"]').text()).toContain(error.message);
+      expect(wrapper.find('[aid="scheduling-save-close"]').exists()).toBe(false);
+      expect(clusterService.updateNodepool).not.toHaveBeenCalled();
+      wrapper.unmount();
+    },
+  );
+
+  it("ignores a response for an older route", async () => {
+    let resolveFirst!: (value: Nodepool) => void;
+    vi.mocked(clusterService.getNodepool)
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveFirst = resolve;
+          }),
+      )
+      .mockResolvedValueOnce({ ...pool, id: "two", name: "second" });
+    const { wrapper, router } = await render();
+    await router.push("/node-pools/edit/two?stepName=scheduling");
+    await flushPromises();
+    resolveFirst(pool);
+    await flushPromises();
+    expect(wrapper.findComponent(Step).props("pool").id).toBe("two");
+    wrapper.unmount();
+  });
+});

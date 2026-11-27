@@ -1,0 +1,895 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+<template>
+  <runai-wizard-layout
+    class="node-pool-scheduling-wizard"
+    responsive
+    :steps="steps"
+    active-step="scheduling"
+    width="1000px"
+    margin-top="26px"
+    left-width="200px"
+    right-width="200px"
+    collapse-left-on-small-screen
+    hide-right-on-small-screen
+    :disable-navigation="navigationDisabled"
+    @step-click="onStepClick"
+  >
+    <runai-form-wrapper
+      :form-state="{ hasChanges }"
+      :prevent-leave="saving || discarding || creatingDepartment"
+      full-width
+      @leave-page="emit('leave-approved')"
+    >
+      <fieldset :disabled="saving || discarding" class="scheduling-fields">
+        <runai-expansion-wrapper no-first-top-padding>
+          <runai-expansion-item
+            class="scheduling-mode-section"
+            label="Scheduling mode"
+            default-opened
+            disable-closing
+            body-no-padding
+          >
+            <template #header
+              ><span>Scheduling mode</span
+              ><span v-if="departmentsReadOnly" class="view-only"
+                ><q-icon name="ph-fill ph-eye" /> View only</span
+              ></template
+            >
+            <div class="scheduling-overview">
+              <div class="capacity-label text-b-subtitle1">Total node pool capacity</div>
+              <div class="capacity" aid="pool-gpu-capacity">
+                <template v-if="resources?.gpus != null && resources.nodes !== 0">
+                  <span class="capacity-number">{{ resources.gpus }}</span> <span class="capacity-unit">GPUs</span>
+                </template>
+                <span v-else class="capacity-number">Empty</span>
+              </div>
+              <div class="mode-selector">
+                <runai-section-title
+                  title="Set how GPU capacity is split between departments in this node pool"
+                  tooltip-text="The scheduling mode determines each department’s share of GPU capacity in this node pool, including how unused capacity is shared. The selection applies to the projects within each department, too."
+                />
+                <div
+                  class="mode-hover-target"
+                  aid="scheduling-mode-hover-target"
+                  role="presentation"
+                  @mouseenter="openModeHelp"
+                  @mouseover="hoverModeHelp"
+                  @mouseleave="leaveModeHelp"
+                  @focusin="focusModeHelp"
+                  @focusout="blurModeHelp"
+                >
+                  <runai-segmented-button
+                    :model-value="selectedMode"
+                    :options="options"
+                    class="mode-cards"
+                    :class="{ 'mode-cards--expanded': modeHelpExpanded, 'mode-cards--notice': showGuaranteedNotice }"
+                    spread
+                    :disable="saving || departmentsReadOnly"
+                    aria-label="Scheduling mode"
+                    aid="scheduling-mode-options"
+                    @keydown.esc.stop="modeHelpDismissed = true"
+                    @update:model-value="selectMode"
+                  >
+                    <template #option-end="{ selected, option }">
+                      <q-icon class="mode-icon" :name="modeIcons[String(option.value)]" size="20px" aria-hidden="true" />
+                      <div class="mode-details">
+                        <q-slide-transition :duration="511">
+                          <div v-show="modeHelpExpanded" class="mode-explanation-transition">
+                            <div class="mode-explanation-content">
+                              <span class="mode-explanation">{{ modeExplanations[String(option.value)] }}</span>
+                            </div>
+                          </div>
+                        </q-slide-transition>
+                        <q-slide-transition :duration="511">
+                          <div
+                            v-show="option.value === ESchedulingMode.Guaranteed && showGuaranteedNotice"
+                            class="mode-warning-transition"
+                          >
+                            <div class="mode-warning-container">
+                              <notification-alert-bar
+                                class="mode-guarantee-warning"
+                                :variant="ENotificationBarVariant.Default"
+                                icon-override="ph ph-lock"
+                                >Mode can't be changed after saving</notification-alert-bar
+                              >
+                            </div>
+                          </div>
+                        </q-slide-transition>
+                      </div>
+                      <q-icon
+                        v-if="selected || option.disable || saving || departmentsReadOnly"
+                        name="ph-bold ph-check"
+                        size="16px"
+                        class="mode-check"
+                        :class="{ 'mode-check--hover-only': !selected }"
+                        aria-hidden="true"
+                      />
+                    </template>
+                  </runai-segmented-button>
+                </div>
+              </div>
+            </div>
+            <div class="department-scheduling-body">
+              <q-banner v-if="loadError" class="text-negative q-ma-md" role="alert"
+                >{{ loadError
+                }}<template #action
+                  ><runai-btn aid="retry-departments" flat label="Retry" @click="emit('refresh')" /></template
+              ></q-banner>
+              <div class="scheduling-content">
+                <node-pool-department-table
+                  :pool-id="pool.id"
+                  :department-pages="departmentPages"
+                  :rows="rows"
+                  :baseline-rows="baselineRows"
+                  :draft="draft"
+                  :aggregates="aggregates"
+                  :ranks="ranks"
+                  :rank-counts="rankCounts"
+                  :capacity="resources?.gpus"
+                  :readonly="saving || discarding || departmentsReadOnly"
+                  :can-view="canViewDepartments"
+                  :settings-open="showSettings"
+                  :can-discard="hasChanges"
+                  :totals-complete="totalsComplete"
+                  :raw-weights-available="pool.schedulingCapabilities?.adjustableWeights === true"
+                  :can-edit-department="canEditDepartment"
+                  :loading="!!loading"
+                  :has-error="!!loadError"
+                  :search-term="searchTerm"
+                  :rank-filter="rankFilter"
+                  :load-quota-context="loadQuotaContext"
+                  @edit="applyEdit"
+                  @search="emit('search', $event)"
+                  @filter-rank="emit('filter-rank', $event)"
+                  @discard="discardChanges"
+                  @automatic-weights="draft.automaticWeights = $event"
+                  @advanced-settings="showSettings = !showSettings"
+                  @close-settings="showSettings = false"
+                  @new-department="showNewDepartment = true"
+                >
+                  <template #settings
+                    ><node-pool-scheduling-settings
+                      v-if="showSettings"
+                      :draft="draft"
+                      :readonly="saving || discarding || departmentsReadOnly"
+                      :can-reset-resources="canResetResources"
+                      :load-has-gpu-limits="loadHasGpuLimits"
+                      :saved-max-allocation="!!pool.schedulingCapabilities?.limits"
+                      :saved-cpu-quota="!!pool.schedulingCapabilities?.cpuQuota"
+                      @close="showSettings = false"
+                      @patch="!saving && Object.assign(draft, $event)"
+                  /></template>
+                </node-pool-department-table>
+              </div>
+              <node-pool-new-department-dialog
+                v-if="showNewDepartment && ((canEditDepartments && canViewDepartments) || creatingDepartment)"
+                :cluster-id="pool.clusterId"
+                :cluster-name="pool.clusterName"
+                @close="showNewDepartment = false"
+                @created="emit('refresh')"
+                @saving="onDepartmentSaving"
+              />
+            </div>
+          </runai-expansion-item>
+        </runai-expansion-wrapper>
+      </fieldset>
+    </runai-form-wrapper>
+    <template #content-footer>
+      <div class="scheduling-footer">
+        <p v-if="saveError || validationError" class="text-negative" role="alert">{{ saveError || validationError }}</p>
+        <p
+          v-else-if="
+            saver.resetPending &&
+            !departmentsReadOnly &&
+            previewPool.schedulingCapabilities?.quota &&
+            previewPool.schedulingCapabilities.adjustableWeights &&
+            !saving
+          "
+          role="status"
+        >
+          Save to finish initializing weights for departments and projects.
+        </p>
+        <div class="row justify-end q-gutter-md">
+          <runai-btn
+            v-if="!departmentsReadOnly"
+            aid="scheduling-save-close"
+            label="Save & close"
+            flat
+            color="primary"
+            :loading="saving"
+            :disable="saveDisabled"
+            @click="save('close')"
+          />
+          <runai-btn
+            v-if="departmentsReadOnly"
+            aid="scheduling-continue"
+            label="Continue"
+            color="primary"
+            :disable="navigationDisabled"
+            @click="openTopology"
+          />
+          <runai-btn
+            v-else
+            aid="scheduling-save-continue"
+            label="Save & continue"
+            color="primary"
+            :loading="saving"
+            :disable="saveDisabled"
+            @click="save('continue')"
+          />
+        </div>
+      </div>
+    </template>
+    <template #right-sidebar>
+      <node-pool-wizard-summary :pool="previewPool" :resources="resources" :supports="topologySupport" />
+    </template>
+  </runai-wizard-layout>
+</template>
+
+<script setup lang="ts">
+import { ENABLE_NON_QUOTA_SCHEDULING_MODES } from "@/constants/node-pool.constants";
+import { useNodePoolTopologySupport } from "@/composables/node-pool/use-node-pool-topology-support.composable";
+import {
+  NODE_POOL_IMMUTABLE_TOOLTIP,
+  getNodePoolWizardSteps,
+  ENodePoolSchedulingMode as ESchedulingMode,
+} from "@/models/node-pool.model";
+
+import { computed, onBeforeUnmount, ref, watch } from "vue";
+import { buildSchedulingSave } from "@/utils/node-pool-scheduling.util/node-pool-scheduling-save.util";
+import {
+  switchingToCustomWeights,
+  useNodePoolSchedulingSave,
+} from "@/composables/node-pool/use-node-pool-scheduling-save.composable";
+import { isEqual } from "@/utils/common.util";
+import { extractErrorMessages } from "@/utils/error-alert.util";
+import { schedulingDurationToFields } from "@/utils/node-pool-scheduling.util/scheduling-duration.util";
+import NotificationAlertBar from "@/components/common/notification-alert-bar/notification-alert-bar.vue";
+import { ENotificationBarVariant } from "@/components/common/notification-alert-bar/notification-alert-bar.model";
+import { NodePoolDepartmentTable } from "@/components/node-pools/node-pool-department-table";
+import { NodePoolSchedulingSettings } from "@/components/node-pools/node-pool-scheduling-settings";
+import { NodePoolNewDepartmentDialog } from "@/components/node-pools/node-pool-new-department-dialog";
+import { useNodePoolSchedulingDraft } from "@/composables/node-pool/use-node-pool-scheduling-draft.composable";
+import {
+  createSchedulingDraft,
+  toSchedulingCapabilities,
+  weightFromGuaranteedQuota,
+  isDepartmentLimitBelowQuota,
+  type IDepartmentPages,
+  type IDepartmentSchedulingEdit,
+  type ISchedulingTotals,
+  type IDepartmentValidationContext,
+} from "@/models/node-pool-scheduling.model";
+import type { DepartmentNodePoolResources } from "@/swagger-models/org-unit-service-client";
+import RunaiWizardLayout from "@/components/common/runai-wizard-layout/runai-wizard-layout.vue";
+import RunaiFormWrapper from "@/components/common/runai-form-wrapper/runai-form-wrapper.vue";
+import RunaiExpansionWrapper from "@/components/common/runai-expansion-wrapper/runai-expansion-wrapper.vue";
+import RunaiExpansionItem from "@/components/common/runai-expansion-item/runai-expansion-item.vue";
+import RunaiSectionTitle from "@/components/common/runai-section-title/runai-section-title.vue";
+import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
+import { RunaiSegmentedButton } from "@/components/common/runai-segmented-button";
+import NodePoolWizardSummary from "../node-pool-wizard-summary/node-pool-wizard-summary.vue";
+import { isSupportedSchedulingMode, getSchedulingMode, type INodePoolSummaryResources } from "@/models/node-pool.model";
+import type { Nodepool, SchedulingCapabilitiesNullable } from "@/swagger-models/cluster-service-client";
+
+const props = withDefaults(
+  defineProps<{
+    pool: Nodepool;
+    resources?: INodePoolSummaryResources;
+    rows?: DepartmentNodePoolResources[];
+    departmentPages?: IDepartmentPages;
+    baselineRows?: DepartmentNodePoolResources[];
+    aggregates?: Record<string, ISchedulingTotals>;
+    ranks?: string[];
+    rankCounts?: Record<string, number>;
+    canViewDepartments?: boolean;
+    canEditDepartments?: boolean;
+    canSavePool?: boolean;
+    canResetResources?: boolean;
+    refreshSavedScheduling?: () => Promise<boolean>;
+    loadHasGpuLimits?: () => Promise<boolean>;
+    totalsComplete?: boolean;
+    canEditDepartment?: (id: string) => boolean;
+    loading?: boolean;
+    loadError?: string;
+    searchTerm?: string;
+    rankFilter?: string;
+    quotaPolicy?: boolean;
+    loadQuotaContext?: (id: string) => Promise<IDepartmentValidationContext>;
+  }>(),
+  {
+    rows: () => [],
+    aggregates: () => ({}),
+    ranks: () => [],
+    canViewDepartments: true,
+    canEditDepartments: true,
+    totalsComplete: true,
+  },
+);
+const emit = defineEmits<{
+  "leave-approved": [];
+  saved: [pool: Nodepool, destination?: "close" | "continue"];
+  "pool-saved": [Nodepool];
+  "open-topology": [];
+  "open-identity": [];
+  saving: [boolean];
+  refresh: [];
+  search: [string];
+  "filter-rank": [string | undefined];
+}>();
+const showSettings = ref(false);
+const showNewDepartment = ref(false);
+const modeExplanations: Record<string, string> = {
+  [ESchedulingMode.Proportional]:
+    "GPU resources are distributed proportionally according to each department's and project's weight.",
+  [ESchedulingMode.Ranked]:
+    "Higher-ranked departments and projects receive GPU resources first. Remaining capacity goes to lower-ranked ones, in rank order.",
+  [ESchedulingMode.Guaranteed]:
+    "Each department has a guaranteed GPU quota. Any unused quota is redistributed by rank and weight.",
+};
+const steps = getNodePoolWizardSteps("scheduling");
+const topologySupport = useNodePoolTopologySupport(() => props.pool.clusterId);
+const departmentsReadOnly = computed(() => !props.canViewDepartments || !props.canEditDepartments);
+function onStepClick({ name }: { name: string }) {
+  if (!navigationDisabled.value && name === "identity") emit("open-identity");
+  if (name === "topology") openTopology();
+}
+function openTopology() {
+  if (!navigationDisabled.value) emit("open-topology");
+}
+const modePermissionTooltip = computed(() =>
+  !props.canViewDepartments
+    ? "You do not have permission to view departments."
+    : !props.canEditDepartments
+      ? "You do not have permission to edit departments."
+      : undefined,
+);
+const nonQuotaModesDisabled = computed(
+  () => !ENABLE_NON_QUOTA_SCHEDULING_MODES || props.pool.schedulingCapabilities?.quota === true,
+);
+const nonQuotaModeTooltip = computed(
+  () =>
+    modePermissionTooltip.value ??
+    (props.pool.schedulingCapabilities?.quota
+      ? NODE_POOL_IMMUTABLE_TOOLTIP
+      : !ENABLE_NON_QUOTA_SCHEDULING_MODES
+        ? "Only Guaranteed quota is currently available."
+        : undefined),
+);
+const options = computed(() => [
+  {
+    value: ESchedulingMode.Proportional,
+    disable: nonQuotaModesDisabled.value,
+    disabledTooltip: nonQuotaModeTooltip.value,
+    label: "Proportional",
+    description: "Weight-based distribution",
+    aid: "mode-proportional",
+  },
+  {
+    value: ESchedulingMode.Ranked,
+    disable: nonQuotaModesDisabled.value,
+    disabledTooltip: nonQuotaModeTooltip.value,
+    label: "Ranked",
+    description: "Rank-based distribution",
+    aid: "mode-ranked",
+  },
+  {
+    value: ESchedulingMode.Guaranteed,
+    label: "Guaranteed quota",
+    description: "Guaranteed quota, redistribute unused",
+    disabledTooltip: modePermissionTooltip.value,
+    aid: "mode-guaranteed",
+  },
+]);
+const modeIcons: Record<string, string> = {
+  [ESchedulingMode.Proportional]: "ph ph-chart-pie-slice",
+  [ESchedulingMode.Ranked]: "ph ph-ranking",
+  [ESchedulingMode.Guaranteed]: "ph ph-shield-check",
+};
+const savedDraft = computed(() => {
+  const savedMode = getSchedulingMode(props.pool.schedulingCapabilities);
+  const mode = isSupportedSchedulingMode(savedMode) ? savedMode : undefined;
+  return createSchedulingDraft({
+    mode,
+    automaticWeights:
+      mode === ESchedulingMode.Guaranteed ? props.pool.schedulingCapabilities?.adjustableWeights === false : true,
+    cpuQuota: props.pool.schedulingCapabilities?.cpuQuota === true,
+    maxAllocation: props.pool.schedulingCapabilities?.limits === true,
+    timeFairshare: props.pool.schedulingConfiguration?.timeBasedFairShare?.enabled === true,
+    historicalWeight: props.pool.schedulingConfiguration?.timeBasedFairShare?.historicalUsageWeight ?? 1,
+    historicalWindow: schedulingDurationToFields(
+      props.pool.schedulingConfiguration?.timeBasedFairShare?.windowDuration ?? "7d",
+      false,
+    ),
+    minimumRuntime: schedulingDurationToFields(props.pool.schedulingConfiguration?.minGuaranteedRuntime),
+    capabilities: props.pool.schedulingCapabilities,
+    departments: {},
+  });
+});
+const { draft, requestMode } = useNodePoolSchedulingDraft(savedDraft.value);
+watch(
+  () => draft.value.automaticWeights,
+  (automatic) => {
+    if (!draft.value.capabilities?.quota || draft.value.capabilities.adjustableWeights !== false) return;
+    for (const edit of Object.values(draft.value.departments)) {
+      if (automatic) {
+        delete edit.weight;
+        delete edit.weightFromQuota;
+      } else if (edit.quota !== undefined) {
+        edit.weight = weightFromGuaranteedQuota(edit.quota);
+        edit.weightFromQuota = true;
+      }
+    }
+  },
+  { flush: "sync" },
+);
+const selectedMode = computed(() => draft.value.mode ?? null);
+const modeCardsHovered = ref(false);
+const modeCardsFocused = ref(false);
+const hoveredMode = ref<string>();
+const modeHelpDismissed = ref(false);
+const unsavedGuaranteedMode = computed(
+  () => draft.value.mode === ESchedulingMode.Guaranteed && !props.pool.schedulingCapabilities?.quota,
+);
+const modeHelpExpanded = computed(
+  () => !modeHelpDismissed.value && (modeCardsHovered.value || modeCardsFocused.value || unsavedGuaranteedMode.value),
+);
+const showGuaranteedNotice = computed(
+  () =>
+    modeHelpExpanded.value &&
+    !props.pool.schedulingCapabilities?.quota &&
+    (hoveredMode.value === ESchedulingMode.Guaranteed || draft.value.mode === ESchedulingMode.Guaranteed),
+);
+let modeHelpCloseTimer: ReturnType<typeof setTimeout> | undefined;
+onBeforeUnmount(() => clearTimeout(modeHelpCloseTimer));
+function openModeHelp() {
+  clearTimeout(modeHelpCloseTimer);
+  modeCardsHovered.value = true;
+  modeHelpDismissed.value = false;
+}
+function hoverModeHelp(event: MouseEvent) {
+  clearTimeout(modeHelpCloseTimer);
+  modeCardsHovered.value = true;
+  const aid = (event.target as Element).closest("[role=radio]")?.getAttribute("aid");
+  hoveredMode.value = options.value.find((option) => option.aid === aid)?.value;
+}
+function leaveModeHelp() {
+  clearTimeout(modeHelpCloseTimer);
+  modeHelpCloseTimer = setTimeout(() => {
+    modeCardsHovered.value = false;
+    hoveredMode.value = undefined;
+  }, 150);
+}
+function focusModeHelp(event: FocusEvent) {
+  modeCardsFocused.value = (event.target as Element).matches(":focus-visible");
+  modeHelpDismissed.value = false;
+}
+function blurModeHelp(event: FocusEvent) {
+  if (!(event.currentTarget as Element).contains(event.relatedTarget as Node | null)) modeCardsFocused.value = false;
+}
+const previewPool = computed(() => ({
+  ...props.pool,
+  schedulingCapabilities: draft.value.mode ? toSchedulingCapabilities(draft.value) : draft.value.capabilities,
+}));
+function selectMode(value: string | number | boolean | null) {
+  if (saving.value || (nonQuotaModesDisabled.value && value !== ESchedulingMode.Guaranteed)) return;
+  if (
+    value === ESchedulingMode.Proportional ||
+    value === ESchedulingMode.Ranked ||
+    value === ESchedulingMode.Guaranteed
+  ) {
+    if (value === ESchedulingMode.Proportional && draft.value.mode !== value) emit("filter-rank", undefined);
+    requestMode(value);
+  }
+}
+function applyEdit(edit: IDepartmentSchedulingEdit) {
+  if (saving.value || departmentsReadOnly.value) return;
+  const next = { ...draft.value.departments[edit.id], ...edit };
+  if (edit.weight !== undefined) delete next.weightFromQuota;
+  const saved = (props.baselineRows ?? props.rows).find((row) => row.orgUnitId === edit.id);
+  if (saved) {
+    if (next.rank === saved.rank) delete next.rank;
+    if (next.quota === saved.resources.gpu?.deserved) delete next.quota;
+    if (props.pool.schedulingCapabilities?.adjustableWeights && next.weight === saved.resources.gpu?.overQuotaWeight)
+      delete next.weight;
+    if ((next.limit ?? -1) === (saved.resources.gpu?.limit ?? -1)) delete next.limit;
+  }
+  if (Object.keys(next).length === 1) delete draft.value.departments[edit.id];
+  else draft.value.departments[edit.id] = next;
+}
+
+const saving = ref(false);
+const discarding = ref(false);
+const needsSavedRefresh = ref(false);
+const hasChanges = computed(() => needsSavedRefresh.value || !isEqual(draft.value, savedDraft.value));
+async function discardChanges() {
+  if (saving.value || discarding.value || props.loading || !hasChanges.value) return;
+  discarding.value = true;
+  try {
+    if (needsSavedRefresh.value && !(await props.refreshSavedScheduling?.())) return;
+    draft.value = createSchedulingDraft(savedDraft.value);
+    saver.clearSaveProgress();
+    needsSavedRefresh.value = false;
+    saveError.value = "";
+  } finally {
+    discarding.value = false;
+  }
+}
+const creatingDepartment = ref(false);
+function onDepartmentSaving(value: boolean) {
+  creatingDepartment.value = value;
+  emit("saving", saving.value || value);
+}
+const saveError = ref("");
+const saver = useNodePoolSchedulingSave(() => props.pool);
+function usesWeightsWithoutQuota(capabilities?: SchedulingCapabilitiesNullable): boolean {
+  return capabilities?.adjustableWeights === true && capabilities.quota === false;
+}
+const validationError = computed(() => {
+  if (
+    !ENABLE_NON_QUOTA_SCHEDULING_MODES &&
+    (draft.value.mode === ESchedulingMode.Proportional || draft.value.mode === ESchedulingMode.Ranked)
+  )
+    return "Select Guaranteed quota to save scheduling changes.";
+  try {
+    buildSchedulingSave(props.pool, draft.value);
+    const capabilities = toSchedulingCapabilities(draft.value);
+    if (!props.canResetResources) {
+      const saved = props.pool.schedulingCapabilities;
+      if (
+        switchingToCustomWeights(saved, capabilities) ||
+        (saver.resetPending && capabilities.quota && capabilities.adjustableWeights)
+      )
+        return "Switching weights to Custom requires update permission for all departments and projects in this cluster.";
+      if ((saved?.cpuQuota && !capabilities.cpuQuota) || (saved?.limits && !capabilities.limits))
+        return "Turning off CPU quota or Max GPU allocation requires update permission for all departments and projects in this cluster.";
+      if (usesWeightsWithoutQuota(capabilities) && !usesWeightsWithoutQuota(saved))
+        return "Using adjustable weights without GPU quota requires update permission for all departments and projects in this cluster.";
+    }
+    for (const edit of Object.values(draft.value.departments)) {
+      if (props.canEditDepartment?.(edit.id) === false)
+        return "You do not have permission to update one of the edited departments.";
+      const original = (props.baselineRows ?? props.rows).find((row) => row.orgUnitId === edit.id)?.resources.gpu;
+      const quota = edit.quota ?? original?.deserved;
+      const limit = edit.limit === undefined ? original?.limit : edit.limit;
+      if (capabilities.quota && capabilities.limits && isDepartmentLimitBelowQuota(limit, quota))
+        return "Maximum allocation must be at least guaranteed GPUs.";
+    }
+    return "";
+  } catch (error) {
+    return extractErrorMessages(error).join("; ");
+  }
+});
+watch(
+  draft,
+  () => {
+    saveError.value = "";
+  },
+  { deep: true },
+);
+const navigationDisabled = computed(
+  () => saving.value || discarding.value || creatingDepartment.value || !props.canSavePool,
+);
+const editedRowsPending = computed(
+  () =>
+    props.departmentPages?.nextOffset != null &&
+    Object.keys(draft.value.departments).some(
+      (id) => !(props.baselineRows ?? props.rows).some((row) => row.orgUnitId === id),
+    ),
+);
+const saveDisabled = computed(
+  () =>
+    navigationDisabled.value ||
+    props.loading ||
+    departmentsReadOnly.value ||
+    editedRowsPending.value ||
+    !!validationError.value,
+);
+async function save(destination: "close" | "continue" = "close") {
+  if (saveDisabled.value) return;
+  saving.value = true;
+  emit("saving", true);
+  saveError.value = "";
+  try {
+    if (draft.value.mode === ESchedulingMode.Guaranteed) {
+      for (const edit of Object.values(draft.value.departments)) {
+        if (edit.quota === undefined) continue;
+        if (!props.loadQuotaContext) throw new Error("Project quota validation is unavailable. Try again.");
+        const context = await props.loadQuotaContext(edit.id);
+        if (context.enforceChildQuota && (context.childQuotaSum == null || edit.quota < context.childQuotaSum))
+          throw new Error("Guaranteed GPUs cannot be below the child project quota sum.");
+      }
+    }
+    const pool = await saver.save(draft.value);
+    saving.value = false;
+    emit("saving", false);
+    emit("saved", pool, destination);
+  } catch (error) {
+    if (saver.savedPool) {
+      needsSavedRefresh.value = true;
+      emit("pool-saved", saver.savedPool);
+    }
+    saveError.value =
+      (saver.poolSettingsSaved && saver.resetPending
+        ? "Pool settings were saved. Retry to finish initializing weights for departments and projects. "
+        : saver.poolSettingsSaved
+          ? "Pool settings were saved, but some department changes remain unsaved. "
+          : saver.savedPool
+            ? "Current pool settings were not saved. Some changes were saved in an earlier attempt. "
+            : "") + extractErrorMessages(error, "Could not save scheduling.").join("; ");
+  } finally {
+    saving.value = false;
+    emit("saving", false);
+  }
+}
+</script>
+
+<style scoped lang="scss">
+.scheduling-fields {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.node-pool-scheduling-wizard :deep(.wizard-step-item) {
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+.node-pool-scheduling-wizard :deep(.wizard-step-title) {
+  white-space: nowrap;
+  font-weight: 500;
+  line-height: 20px !important;
+}
+.node-pool-scheduling-wizard :deep(.wizard-step--disabled .wizard-step-title) {
+  color: var(--text-disabled) !important;
+}
+.node-pool-scheduling-wizard :deep(.wizard-step--default.wizard-step--disabled .wizard-step-indicator) {
+  background-color: var(--text-disabled) !important;
+}
+.node-pool-scheduling-wizard :deep(.wizard-step-icon) {
+  color: var(--text-inverse) !important;
+}
+.node-pool-scheduling-wizard :deep(.wizard-step-number) {
+  font-weight: 800 !important;
+  line-height: 16.8px;
+  left: 50%;
+}
+.node-pool-scheduling-wizard :deep(.wizard-step-divider) {
+  margin-left: 27.5px;
+}
+.node-pool-scheduling-wizard :deep(.wizard-step--disabled .wizard-step-item) {
+  opacity: 1 !important;
+}
+.scheduling-overview {
+  container-type: inline-size;
+  padding: 18px 20px 20px;
+}
+.capacity-label {
+  color: var(--b-text-sub);
+}
+.capacity {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin-top: 16px;
+}
+.mode-selector {
+  margin-top: 30px;
+  margin-bottom: 0;
+}
+.scheduling-mode-section :deep(> .q-expansion-item__container) {
+  border: 0;
+}
+.scheduling-mode-section :deep(.runai-expansion-header) {
+  height: 48px;
+  min-height: 48px;
+  background: var(--bg-primary-default);
+  box-shadow: inset 0 -1px var(--border-subtle);
+}
+.scheduling-mode-section :deep(.runai-expansion-divider) {
+  height: 0;
+}
+.mode-selector :deep(.runai-section-title) {
+  margin-right: -3px;
+  margin-bottom: 20px;
+  margin-left: -3px;
+}
+.capacity-number {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  letter-spacing: 0.0703px;
+  color: var(--b-text-main);
+}
+.capacity-unit {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: -0.1504px;
+}
+.mode-hover-target {
+  margin-inline: -20px;
+  padding-inline: 20px;
+}
+.mode-cards {
+  align-items: flex-start;
+  border: 0;
+  padding: 0;
+  gap: 7px;
+
+  :deep(.runai-segment) {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr);
+    align-content: start;
+    position: relative;
+    min-width: 0;
+    min-height: 61px;
+    height: auto;
+    overflow: visible;
+    border: 1px solid var(--border-subtle);
+    border-radius: 5px;
+    padding: 9px 15px;
+    column-gap: 10px;
+    row-gap: 0;
+    text-align: left;
+    background: var(--bg-primary-default);
+    transition: none;
+  }
+  :deep(.runai-segment:hover:not(.runai-segment--selected):not(.runai-segment--disabled)) {
+    background: var(--bg-primary-hover);
+  }
+  :deep(.runai-segment--selected:hover:not(.runai-segment--disabled)) {
+    background: var(--bg-primary-pressed);
+  }
+  :deep(.mode-icon) {
+    grid-column: 1;
+    color: var(--b-text-sub);
+    grid-row: 1;
+    align-self: center;
+  }
+  :deep(.runai-segment--selected) {
+    border-color: var(--border-pressed);
+    box-shadow: inset 0 0 0 2px var(--border-pressed);
+  }
+  :deep(.runai-segment__label) {
+    white-space: normal;
+    font-weight: 500;
+    line-height: 20px;
+    padding-right: 8px;
+  }
+  :deep(.runai-segment__description) {
+    font-weight: 500;
+    color: var(--b-text-sub);
+    margin-top: 3px;
+    line-height: 18px;
+  }
+  :deep(.runai-segment__text) {
+    grid-column: 2;
+    grid-row: 1;
+    min-height: 41px;
+    align-items: flex-start;
+  }
+  :deep(.runai-segment--selected:not(.runai-segment--disabled) .mode-icon) {
+    color: var(--border-pressed);
+  }
+}
+.mode-check {
+  position: absolute;
+  top: 1px;
+  // Source MAX inset is 2.33334px; the card border contributes 1px.
+  right: 1.33334px;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  background: var(--border-pressed);
+  color: var(--text-inverse);
+}
+.scheduling-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 30px 0 8px;
+}
+.scheduling-footer > .row {
+  margin-left: auto;
+}
+.scheduling-content {
+  display: block;
+}
+.scheduling-content > .department-section {
+  flex: 1;
+  min-width: 0;
+}
+.mode-explanation {
+  grid-column: 1 / -1;
+  white-space: normal;
+  color: var(--b-text-sub);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16.8px;
+}
+.mode-details {
+  grid-column: 1 / -1;
+}
+.mode-explanation-content,
+.mode-warning-container {
+  padding-top: 10px;
+}
+.mode-cards :deep(.runai-segment:not([aid="mode-guaranteed"])) .mode-explanation-content {
+  min-height: 61px;
+}
+.mode-explanation {
+  display: block;
+}
+.mode-cards {
+  align-items: stretch;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mode-explanation-transition,
+  .mode-warning-transition {
+    transition-duration: 0.001ms !important;
+  }
+}
+.mode-guarantee-warning {
+  min-height: 40px;
+  padding: 10px 16px;
+  border-radius: 0;
+  text-align: left;
+  animation: none;
+  background-color: var(--b-bg-secondary-default);
+}
+.view-only {
+  margin-left: 10px;
+  border: 1px solid var(--border-default);
+  color: var(--b-text-sub);
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+.mode-cards :deep(.runai-segment--disabled) {
+  background: var(--bg-primary-hover);
+  opacity: 1 !important;
+}
+.mode-cards :deep(.runai-segment--disabled:not(.runai-segment--selected) .runai-segment__label) {
+  color: var(--text-disabled);
+}
+.mode-cards :deep(.runai-segment--disabled .runai-segment__description),
+.mode-cards :deep(.runai-segment--disabled .mode-explanation) {
+  color: var(--text-tertiary);
+}
+.mode-cards :deep(.runai-segment--disabled .mode-icon) {
+  color: var(--text-tertiary);
+}
+.mode-check--hover-only {
+  visibility: hidden;
+}
+.mode-cards :deep(.runai-segment--disabled:hover) {
+  border-color: var(--border-pressed);
+  box-shadow: inset 0 0 0 2px var(--border-pressed);
+}
+.mode-cards :deep(.runai-segment--disabled:hover .runai-segment__label) {
+  color: var(--interactive-secondary-hover-text);
+}
+.mode-cards :deep(.runai-segment--disabled:hover .mode-icon) {
+  color: var(--interactive-secondary-hover-text);
+}
+.mode-cards :deep(.runai-segment--disabled:hover .mode-check--hover-only) {
+  visibility: visible;
+}
+.mode-cards :deep(.runai-segment--selected.runai-segment--disabled) {
+  border-color: var(--border-pressed);
+  color: var(--interactive-secondary-default-text);
+}
+@container (max-width: 520px) {
+  .mode-cards {
+    flex-direction: column;
+    :deep(.runai-segment) {
+      width: 100%;
+    }
+  }
+}
+</style>

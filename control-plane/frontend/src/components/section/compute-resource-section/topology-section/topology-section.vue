@@ -83,7 +83,7 @@ import type { ISelectOption } from "@/models/global.model";
 // Components
 import { RunaiTooltip } from "@/components/common/runai-tooltip";
 import { RunaiSelect } from "@/components/common/runai-select";
-import { isEmpty, isValidTopologyKey } from "@/common/form.validators";
+import { isEmpty, isValidPodAffinityKey } from "@/common/form.validators";
 import { errorMessages } from "@/common/error-message.constant";
 import type { PodAffinityRules } from "@/swagger-models/policy-service-client";
 import { PolicyStringField } from "@/components/common/policy-string-field";
@@ -163,7 +163,7 @@ export default defineComponent({
       return !isEmpty(val) || errorMessages.KEY_NOT_EMPTY;
     },
     isValidKey(val: string): boolean | string {
-      return isValidTopologyKey(val) || errorMessages.VALID_K8S_KEY;
+      return isValidPodAffinityKey(val) || errorMessages.VALID_K8S_KEY;
     },
   },
 });

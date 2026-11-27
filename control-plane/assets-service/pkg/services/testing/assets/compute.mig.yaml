@@ -1,5 +1,0 @@
-spec:
-  gpuDevicesRequest: 1
-  gpuRequestType: memory
-  gpuMemoryRequest: 10M
-  gpuMemoryLimit: 20M

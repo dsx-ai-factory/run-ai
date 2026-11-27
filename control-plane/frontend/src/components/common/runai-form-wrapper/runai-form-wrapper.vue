@@ -64,6 +64,10 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    preventLeave: {
+      type: Boolean,
+      default: false,
+    },
     initDirty: {
       type: Boolean,
       default: false,
@@ -106,12 +110,16 @@ export default defineComponent({
       // Cancel the event as stated by the standard.
       // Chrome requires returnValue to be set.
 
-      if (this.isDirty) {
+      if (this.isDirty || this.preventLeave) {
         event.preventDefault();
       }
     },
     beforeLeave(action: LEAVE_REASON = LEAVE_REASON.LEAVE_PAGE): void {
       this.action = action;
+      if (this.preventLeave) {
+        this.sendDecision(false);
+        return;
+      }
       if (this.isDirty) {
         this.modalValue = true;
       } else {

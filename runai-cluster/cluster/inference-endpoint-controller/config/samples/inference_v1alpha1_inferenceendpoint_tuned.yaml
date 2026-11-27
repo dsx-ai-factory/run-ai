@@ -1,0 +1,28 @@
+# The llama3 endpoint with the scorer weights set.
+#
+#   epp.scheduling.scorers  → EPP ConfigMap; a change rolls the EPP Deployment (config-hash annotation),
+#                              because the EPP reads its configuration once at startup.
+apiVersion: inference.platform.run.ai/v1alpha1
+kind: InferenceEndpoint
+metadata:
+  name: llama3
+  namespace: model-serving
+spec:
+  workload:
+    selector:
+      matchLabels:
+        app: vllm-llama3
+    port: 8000
+  routing:
+    gatewayRef:
+      name: inference-agw
+    hostnames:
+    - llama3.test
+  epp:
+    profile: gie-v1.5           # pins the Track A image, configuration, ports and startup flags
+    scheduling:
+      scorers:                    # omit the whole block for the defaults: queue 30, kvCache 20, prefixCache 10
+      - type: queue
+        weight: 50
+      - type: prefixCache
+        weight: 50

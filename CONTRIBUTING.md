@@ -110,7 +110,7 @@ git push origin your-branch-name
 
 ### Step 7: Wait for CI
 
-CI runs automatically once your PR is open: Layer 1 runs immediately, Layer 2 (the full build and end-to-end pipeline) starts once a maintainer types `/ok-to-test`. See [CI for Contributors](#ci-for-contributors--what-runs-and-when) below for what each layer covers.
+CI runs automatically once your PR is open: Layer 1 runs immediately, Layer 2 (the full build and end-to-end pipeline) starts once someone with write access to the repository types `/ok-to-test`. See [CI for Contributors](#ci-for-contributors--what-runs-and-when) below for what each layer covers.
 
 ### Step 8: Address Review Feedback
 
@@ -144,7 +144,7 @@ We split CI into two layers:
   - These checks post results back to your PR within a few minutes.
   - They are informational: they help you fix obvious issues before a maintainer looks at the PR, but they do not block merge by themselves.
 - **Layer 2: Full build and end-to-end tests, has secrets.**
-  - This is the pipeline that produces the required `Validate Successful Run` status check, and it only runs after a maintainer reviews your PR and types `/ok-to-test` in a comment.
+  - This is the pipeline that produces the required `Validate Successful Run` status check, and it only runs after someone with write access to the repository reviews your PR and types `/ok-to-test` in a comment.
   - End-to-end tests take 30–90 minutes.
   - A failed Layer 2 run blocks merge for everyone, including maintainers.
   - If a maintainer hasn't reviewed your PR within a few business days and you'd like the full pipeline to run, feel free to ping in the PR.
@@ -170,7 +170,7 @@ Then run whichever language-level checks apply. These mirror the corresponding j
 | You changed | Run | Mirrors |
 |---|---|---|
 | Any service | `cd <service-dir> && make build test lint validate` | `targets` job in `pr-fast.yaml` |
-| Go code | `golangci-lint run` (v2.9.0)<br>`govulncheck ./...` | `go-lint`, `govulncheck` in `pr-checks.yaml` |
+| Go code | `make lint` in the service<br>`govulncheck ./...` | `targets` job in `pr-fast.yaml`, `govulncheck` in `pr-checks.yaml` |
 | Python | `ruff check <files>` (0.15.15) | `py-lint` in `pr-checks.yaml` |
 | JS/TS | `npx eslint <files>` | `js-lint` in `pr-checks.yaml` |
 | Helm charts | `helm dependency update control-plane/control-plane-chart`<br>`helm lint control-plane/control-plane-chart`<br>`helm template control-plane/control-plane-chart > /dev/null` | `helm` in `pr-checks.yaml` |
