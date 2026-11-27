@@ -611,6 +611,16 @@ func validatePvcSpec(ctx context.Context, meta *dbmodel.AssetMeta, pvc *api.PvcA
 	return nil
 }
 
+// validateChangeOfPvcSize checks a claimInfo.size change on a PVC asset update
+// and, when the PVC checks pass, writes the new size into spec.ClaimInfo.Size so
+// the caller persists it with the rest of the update.
+// A request without a size passes unchanged. A size change is allowed only for
+// assets with existingPvc=false, and the new size must be no less than the size
+// stored on the asset. An asset without a cluster returns at that point, before
+// the new size is written. Otherwise the PVC is looked up in the
+// k8s-objects-tracker: it must be Bound, and the new size must be no less than
+// its effective requested capacity. Validation messages print the requested size
+// first and the size it is compared with second.
 func validateChangeOfPvcSize(ctx context.Context, id string, meta *dbmodel.AssetMeta, spec *dbmodel.PVCAssetRec, request *api.PvcUpdateRequest) *api.Error {
 	// currently we validate only the size so no size no validation
 	if request == nil || request.Spec == nil || request.Spec.ClaimInfo == nil || request.Spec.ClaimInfo.Size == nil {
@@ -638,7 +648,7 @@ func validateChangeOfPvcSize(ctx context.Context, id string, meta *dbmodel.Asset
 	}
 
 	if toSize.Value() < fromSize.Value() {
-		return api.NewValidationError(fmt.Sprintf("requested size (%s) must be no less than the originakl requested size (%s) of the PVC", toSizeAsStr, fromSizeAsStr))
+		return api.NewValidationError(fmt.Sprintf("requested size (%s) must be no less than the originally requested size (%s) of the PVC", toSizeAsStr, fromSizeAsStr))
 	}
 
 	//
@@ -684,10 +694,10 @@ func validateChangeOfPvcSize(ctx context.Context, id string, meta *dbmodel.Asset
 
 		reqCapacity, convErr := resource.ParseQuantity(reqCapacityStr)
 		if convErr != nil {
-			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("invalid requested capqcity size %s", reqCapacityStr)
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("invalid requested capacity size %s", reqCapacityStr)
 		} else {
 			if toSize.Value() < reqCapacity.Value() {
-				return api.NewValidationError(fmt.Sprintf("requested size (%s) must be no less than the effective requested capacity (%s) of the PVC", reqCapacityStr, toSizeAsStr))
+				return api.NewValidationError(fmt.Sprintf("requested size (%s) must be no less than the effective requested capacity (%s) of the PVC", toSizeAsStr, reqCapacityStr))
 			}
 		}
 	}
