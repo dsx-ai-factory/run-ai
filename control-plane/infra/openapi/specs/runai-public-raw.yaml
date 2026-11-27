@@ -39507,6 +39507,13 @@ components:
         If not specified, authorization is determined by whether authorizedUsers
         or authorizedGroups is present. If both fields are set, this results in
         an error. If neither is set, any authenticatedUser can access.
+
+        On `exposedUrls`, this access control is applied by the NVIDIA Run:ai
+        OAuth2 proxy. When the cluster sets
+        `clusterConfig.anyworkload-controller.externalAuthUrlEnabled` to
+        `false`, the proxy is not added to exposed URLs, so authorizationType,
+        authorizedUsers and authorizedGroups are not enforced and the URL does
+        not require NVIDIA Run:ai authentication.
       nullable: true
     ExposedUrl:
       description: A URL for accessing the workload.
