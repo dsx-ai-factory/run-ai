@@ -94,6 +94,9 @@ export default defineComponent({
       isLoading: false as boolean,
       connectionClosed: false as boolean,
       errorOccurred: false as boolean,
+      streamId: 0 as number,
+      pendingReads: 0 as number,
+      pendingClose: null as CloseEvent | null,
     };
   },
   methods: {
@@ -102,9 +105,17 @@ export default defineComponent({
 
       if (event.data instanceof Blob) {
         const reader = new FileReader();
+        const streamId = this.streamId;
+        this.pendingReads++;
         reader.onload = (e) => {
+          if (streamId !== this.streamId) return;
           const textData = e.target?.result as string;
           this.processLogData(textData);
+        };
+        reader.onloadend = () => {
+          if (streamId !== this.streamId) return;
+          this.pendingReads--;
+          if (this.pendingReads === 0 && this.pendingClose) this.onClose(this.pendingClose);
         };
         reader.readAsText(event.data);
       } else {
@@ -127,6 +138,11 @@ export default defineComponent({
       }
     },
     handleInitLogReader(): void {
+      // The old socket shuts down asynchronously; its late messages and close must not reach the new stream.
+      if (this.wsSubscription) {
+        this.wsSubscription.onMessage = () => {};
+        this.wsSubscription.onClose = () => {};
+      }
       this.wsSubscription?.unsubscribe();
       this.isLoading = true;
       this.$emit("connecting", true);
@@ -134,6 +150,11 @@ export default defineComponent({
       this.error = false;
       this.connectionClosed = false;
       this.errorOccurred = false;
+      // A new stream drops the old stream's partial line and in-flight reads.
+      this.remainderLine = "";
+      this.streamId++;
+      this.pendingReads = 0;
+      this.pendingClose = null;
 
       const cluster = this.clusterStore.getClusterById(this.clusterId);
       if (!cluster) {
@@ -199,9 +220,20 @@ export default defineComponent({
       // Don't emit error immediately - let onClose handle it based on whether we have logs
     },
     onClose(closeEvent: CloseEvent): void {
+      // Finish decoding binary messages before finalizing; the last read calls onClose again.
+      if (this.pendingReads > 0) {
+        this.pendingClose = closeEvent;
+        return;
+      }
+      this.pendingClose = null;
       this.connectionClosed = true;
       this.isLoading = false;
       this.$emit("connecting", false);
+
+      // Flush a final line that had no trailing newline, except on critical errors.
+      if (this.remainderLine && !CRITICAL_ERROR_CODES.includes(closeEvent.code)) {
+        this.processLogData("\n");
+      }
 
       // Case 1: We have logs + critical error -> Hide logs (data might be corrupted)
       if (this.lines.length > 0 && CRITICAL_ERROR_CODES.includes(closeEvent.code)) {
