@@ -63,8 +63,12 @@ export default defineComponent({
   },
   methods: {
     async copyText(): Promise<void> {
-      await copyToClipboard(this.textToCopy);
-      this.$q.notify(alertUtil.getSuccess("Copied!"));
+      try {
+        await copyToClipboard(this.textToCopy);
+        this.$q.notify(alertUtil.getSuccess("Copied!"));
+      } catch {
+        this.$q.notify(alertUtil.getError("Failed to copy to clipboard"));
+      }
     },
   },
 });
