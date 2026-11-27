@@ -45,7 +45,6 @@ export enum SettingKeys {
 
   SmtpEnabled = "tenant.smtp_enabled",
   DeletedWorkloadsView = "tenant.deleted_workloads_view",
-  EnableHybridSubmission = "tenant.enable_hybrid_submission",
   EnableDataVolumes = "tenant.enable_data_volumes",
   AutoRedirectToSSO = "tenant.auto_redirect_to_sso",
   EnableNgcIntegration = "tenant.enable_ngc_integration",
@@ -143,8 +142,6 @@ export interface IEnableModelCatalogSetting extends IFlagSetting {}
 
 export interface IEnablePoliciesSetting extends IFlagSetting {}
 
-export interface IEnableHybridSubmissionSetting extends IFlagSetting {}
-
 export interface IGpuOverProvisioningSetting extends IFlagSetting {}
 
 export interface IEnableNgcIntegrationSetting extends IFlagSetting {}
@@ -170,7 +167,6 @@ export interface IWorkloadsSectionSettings {
 
   deletedWorkloadsView?: Setting;
   nim?: Setting;
-  hybridSubmission?: Setting;
   dataVolumes?: Setting;
   ngcIntegration?: Setting;
   yamlSubmission?: Setting;

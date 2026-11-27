@@ -1534,6 +1534,26 @@ components:
       - None
       example: Required
       type: string
+    ExternalAccessInference:
+      additionalProperties: false
+      description: |-
+        Server-resolved inference routing for this endpoint. Set only by the control plane; rejected in workload submissions.
+        Requires httpRoute and one created Service, or a reference to the NIMService's Service, on the same endpoint.
+        The cluster then creates an InferenceEndpoint instead of the HTTPRoute, and derives its workload selector, target port,
+        Gateway and hostnames from that Service and httpRoute.
+      example:
+        epp:
+          key: ""
+      nullable: true
+      properties:
+        epp:
+          additionalProperties: true
+          description: "InferenceEndpoint spec.epp, for example the EPP profile. Validated\
+            \ against the installed CRD when applied."
+          type: object
+      required:
+      - epp
+      type: object
     ExternalAccess:
       description: "External access configuration. Same shape as the networking plugin.\
         \ Include ingress (Kubernetes), route (OpenShift), or httpRoute (Gateway API).\
@@ -1541,6 +1561,9 @@ components:
       example:
         ingress: "{}"
         route: "{}"
+        inference:
+          epp:
+            key: ""
         httpRoute: "{}"
       nullable: true
       properties:
@@ -1559,6 +1582,8 @@ components:
             Used when cluster uses Gateway API.
           nullable: true
           type: object
+        inference:
+          $ref: '#/components/schemas/ExternalAccessInference'
       type: object
     ServiceType:
       default: ClusterIP
@@ -1909,6 +1934,9 @@ components:
         externalAccess:
           ingress: "{}"
           route: "{}"
+          inference:
+            epp:
+              key: ""
           httpRoute: "{}"
       properties:
         externalAccess:
@@ -2051,7 +2079,7 @@ components:
             storage: 1Gi
         accessModes:
         - ReadWriteOnce
-        volumeMode: ""
+        volumeMode: volumeMode
       properties:
         accessModes:
           description: Access modes the volume should support. At least one is required.
@@ -2079,6 +2107,7 @@ components:
           allOf:
           - $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcVolumeMode'
           nullable: true
+          type: string
       required:
       - accessModes
       - resources
@@ -2103,7 +2132,7 @@ components:
               storage: 1Gi
           accessModes:
           - ReadWriteOnce
-          volumeMode: ""
+          volumeMode: volumeMode
       properties:
         metadata:
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcMetadata'
@@ -2128,10 +2157,39 @@ components:
           nullable: true
           type: boolean
       type: object
+    LoadAwareRouting:
+      default: false
+      description: "Route requests to the serving port through the endpoint picker,\
+        \ which picks a Pod by load. It can be set only when the workload is created.\
+        \ Requires cluster version 3.1.0 or later, with the inference endpoint controller\
+        \ enabled and an administrator-enabled Gateway on the cluster."
+      nullable: true
+      type: boolean
+    WorkloadV2ConfigurationInferenceRouting:
+      additionalProperties: false
+      description: Inference routing fields from the policy-validated workload spec.
+        Set only by the workloads service on the internal create API; rejected in
+        public workload submissions. Workloads Manager resolves them into externalAccess.inference
+        on the serving endpoint.
+      example:
+        loadAwareRouting: false
+      nullable: true
+      properties:
+        loadAwareRouting:
+          default: false
+          description: "Route requests to the serving port through the endpoint picker,\
+            \ which picks a Pod by load. It can be set only when the workload is created.\
+            \ Requires cluster version 3.1.0 or later, with the inference endpoint\
+            \ controller enabled and an administrator-enabled Gateway on the cluster."
+          nullable: true
+          type: boolean
+      type: object
     WorkloadV2Configuration:
       description: Specifies the features configuration to apply to a workload.
       example:
         mnnvl: mnnvl
+        inferenceRouting:
+          loadAwareRouting: false
         pvcs:
         - metadata:
             name: my-pytorch-pvc
@@ -2146,7 +2204,7 @@ components:
                 storage: 1Gi
             accessModes:
             - ReadWriteOnce
-            volumeMode: ""
+            volumeMode: volumeMode
         - metadata:
             name: my-pytorch-pvc
             annotations:
@@ -2160,7 +2218,7 @@ components:
                 storage: 1Gi
             accessModes:
             - ReadWriteOnce
-            volumeMode: ""
+            volumeMode: volumeMode
         - metadata:
             name: my-pytorch-pvc
             annotations:
@@ -2174,7 +2232,7 @@ components:
                 storage: 1Gi
             accessModes:
             - ReadWriteOnce
-            volumeMode: ""
+            volumeMode: volumeMode
         - metadata:
             name: my-pytorch-pvc
             annotations:
@@ -2188,7 +2246,7 @@ components:
                 storage: 1Gi
             accessModes:
             - ReadWriteOnce
-            volumeMode: ""
+            volumeMode: volumeMode
         - metadata:
             name: my-pytorch-pvc
             annotations:
@@ -2202,7 +2260,7 @@ components:
                 storage: 1Gi
             accessModes:
             - ReadWriteOnce
-            volumeMode: ""
+            volumeMode: volumeMode
         userCredentials:
           sources:
           - ref: my-hf-token-abc1234567
@@ -2254,6 +2312,9 @@ components:
           externalAccess:
             ingress: "{}"
             route: "{}"
+            inference:
+              epp:
+                key: ""
             httpRoute: "{}"
         - services:
           - authorization:
@@ -2298,6 +2359,9 @@ components:
           externalAccess:
             ingress: "{}"
             route: "{}"
+            inference:
+              epp:
+                key: ""
             httpRoute: "{}"
         - services:
           - authorization:
@@ -2342,6 +2406,9 @@ components:
           externalAccess:
             ingress: "{}"
             route: "{}"
+            inference:
+              epp:
+                key: ""
             httpRoute: "{}"
         - services:
           - authorization:
@@ -2386,6 +2453,9 @@ components:
           externalAccess:
             ingress: "{}"
             route: "{}"
+            inference:
+              epp:
+                key: ""
             httpRoute: "{}"
         - services:
           - authorization:
@@ -2430,6 +2500,9 @@ components:
           externalAccess:
             ingress: "{}"
             route: "{}"
+            inference:
+              epp:
+                key: ""
             httpRoute: "{}"
         pvcsConfig:
           cleanupOnCompletion: true
@@ -2458,15 +2531,18 @@ components:
           maxItems: 1000
           nullable: true
           type: array
-          x-internal: true
         pvcsConfig:
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcsConfig'
+        inferenceRouting:
+          $ref: '#/components/schemas/WorkloadV2ConfigurationInferenceRouting'
       type: object
     WorkloadV2MetadataCreateParams:
       example:
         preemptibility: preemptible
         configuration:
           mnnvl: mnnvl
+          inferenceRouting:
+            loadAwareRouting: false
           pvcs:
           - metadata:
               name: my-pytorch-pvc
@@ -2481,7 +2557,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -2495,7 +2571,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -2509,7 +2585,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -2523,7 +2599,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -2537,7 +2613,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           userCredentials:
             sources:
             - ref: my-hf-token-abc1234567
@@ -2589,6 +2665,9 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                epp:
+                  key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -2633,6 +2712,9 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                epp:
+                  key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -2677,6 +2759,9 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                epp:
+                  key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -2721,6 +2806,9 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                epp:
+                  key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -2765,6 +2853,9 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                epp:
+                  key: ""
               httpRoute: "{}"
           pvcsConfig:
             cleanupOnCompletion: true
@@ -2861,6 +2952,8 @@ components:
           preemptibility: preemptible
           configuration:
             mnnvl: mnnvl
+            inferenceRouting:
+              loadAwareRouting: false
             pvcs:
             - metadata:
                 name: my-pytorch-pvc
@@ -2875,7 +2968,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -2889,7 +2982,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -2903,7 +2996,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -2917,7 +3010,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -2931,7 +3024,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             userCredentials:
               sources:
               - ref: my-hf-token-abc1234567
@@ -2983,6 +3076,9 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  epp:
+                    key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -3027,6 +3123,9 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  epp:
+                    key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -3071,6 +3170,9 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  epp:
+                    key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -3115,6 +3217,9 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  epp:
+                    key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -3159,6 +3264,9 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  epp:
+                    key: ""
                 httpRoute: "{}"
             pvcsConfig:
               cleanupOnCompletion: true
@@ -3424,6 +3532,8 @@ components:
         updatedBy: user@run.ai
         configuration:
           mnnvl: mnnvl
+          inferenceRouting:
+            loadAwareRouting: false
           pvcs:
           - metadata:
               name: my-pytorch-pvc
@@ -3438,7 +3548,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -3452,7 +3562,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -3466,7 +3576,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -3480,7 +3590,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -3494,7 +3604,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           userCredentials:
             sources:
             - ref: my-hf-token-abc1234567
@@ -3546,6 +3656,9 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                epp:
+                  key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -3590,6 +3703,9 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                epp:
+                  key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -3634,6 +3750,9 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                epp:
+                  key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -3678,6 +3797,9 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                epp:
+                  key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -3722,6 +3844,9 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                epp:
+                  key: ""
               httpRoute: "{}"
           pvcsConfig:
             cleanupOnCompletion: true
@@ -3776,6 +3901,8 @@ components:
           updatedBy: user@run.ai
           configuration:
             mnnvl: mnnvl
+            inferenceRouting:
+              loadAwareRouting: false
             pvcs:
             - metadata:
                 name: my-pytorch-pvc
@@ -3790,7 +3917,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -3804,7 +3931,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -3818,7 +3945,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -3832,7 +3959,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -3846,7 +3973,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             userCredentials:
               sources:
               - ref: my-hf-token-abc1234567
@@ -3898,6 +4025,9 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  epp:
+                    key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -3942,6 +4072,9 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  epp:
+                    key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -3986,6 +4119,9 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  epp:
+                    key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -4030,6 +4166,9 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  epp:
+                    key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -4074,6 +4213,9 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  epp:
+                    key: ""
                 httpRoute: "{}"
             pvcsConfig:
               cleanupOnCompletion: true
@@ -4237,6 +4379,8 @@ components:
             updatedBy: user@run.ai
             configuration:
               mnnvl: mnnvl
+              inferenceRouting:
+                loadAwareRouting: false
               pvcs:
               - metadata:
                   name: my-pytorch-pvc
@@ -4251,7 +4395,7 @@ components:
                       storage: 1Gi
                   accessModes:
                   - ReadWriteOnce
-                  volumeMode: ""
+                  volumeMode: volumeMode
               - metadata:
                   name: my-pytorch-pvc
                   annotations:
@@ -4265,7 +4409,7 @@ components:
                       storage: 1Gi
                   accessModes:
                   - ReadWriteOnce
-                  volumeMode: ""
+                  volumeMode: volumeMode
               - metadata:
                   name: my-pytorch-pvc
                   annotations:
@@ -4279,7 +4423,7 @@ components:
                       storage: 1Gi
                   accessModes:
                   - ReadWriteOnce
-                  volumeMode: ""
+                  volumeMode: volumeMode
               - metadata:
                   name: my-pytorch-pvc
                   annotations:
@@ -4293,7 +4437,7 @@ components:
                       storage: 1Gi
                   accessModes:
                   - ReadWriteOnce
-                  volumeMode: ""
+                  volumeMode: volumeMode
               - metadata:
                   name: my-pytorch-pvc
                   annotations:
@@ -4307,7 +4451,7 @@ components:
                       storage: 1Gi
                   accessModes:
                   - ReadWriteOnce
-                  volumeMode: ""
+                  volumeMode: volumeMode
               userCredentials:
                 sources:
                 - ref: my-hf-token-abc1234567
@@ -4359,6 +4503,9 @@ components:
                 externalAccess:
                   ingress: "{}"
                   route: "{}"
+                  inference:
+                    epp:
+                      key: ""
                   httpRoute: "{}"
               - services:
                 - authorization:
@@ -4403,6 +4550,9 @@ components:
                 externalAccess:
                   ingress: "{}"
                   route: "{}"
+                  inference:
+                    epp:
+                      key: ""
                   httpRoute: "{}"
               - services:
                 - authorization:
@@ -4447,6 +4597,9 @@ components:
                 externalAccess:
                   ingress: "{}"
                   route: "{}"
+                  inference:
+                    epp:
+                      key: ""
                   httpRoute: "{}"
               - services:
                 - authorization:
@@ -4491,6 +4644,9 @@ components:
                 externalAccess:
                   ingress: "{}"
                   route: "{}"
+                  inference:
+                    epp:
+                      key: ""
                   httpRoute: "{}"
               - services:
                 - authorization:
@@ -4535,6 +4691,9 @@ components:
                 externalAccess:
                   ingress: "{}"
                   route: "{}"
+                  inference:
+                    epp:
+                      key: ""
                   httpRoute: "{}"
               pvcsConfig:
                 cleanupOnCompletion: true
@@ -6318,6 +6477,10 @@ components:
             $ref: '#/components/schemas/ImagePullSecrets'
           labels:
             $ref: '#/components/schemas/Labels'
+          loadAwareRouting:
+            allOf:
+            - $ref: '#/components/schemas/LoadAwareRouting'
+            x-internal: true
           modelStore:
             $ref: '#/components/schemas/NimServiceSpec_allOf_modelStore'
           multiNode:
@@ -6392,6 +6555,7 @@ components:
         - name: billing
           exclude: false
           value: my-billing-unit
+        loadAwareRouting: ""
         priorityClass: null
         labels:
         - name: stage
@@ -6649,6 +6813,7 @@ components:
           - name: billing
             exclude: false
             value: my-billing-unit
+          loadAwareRouting: ""
           priorityClass: null
           labels:
           - name: stage
@@ -6865,6 +7030,8 @@ components:
           updatedBy: user@run.ai
           configuration:
             mnnvl: mnnvl
+            inferenceRouting:
+              loadAwareRouting: false
             pvcs:
             - metadata:
                 name: my-pytorch-pvc
@@ -6879,7 +7046,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -6893,7 +7060,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -6907,7 +7074,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -6921,7 +7088,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -6935,7 +7102,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             userCredentials:
               sources:
               - ref: my-hf-token-abc1234567
@@ -6987,6 +7154,9 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  epp:
+                    key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -7031,6 +7201,9 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  epp:
+                    key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -7075,6 +7248,9 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  epp:
+                    key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -7119,6 +7295,9 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  epp:
+                    key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -7163,6 +7342,9 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  epp:
+                    key: ""
                 httpRoute: "{}"
             pvcsConfig:
               cleanupOnCompletion: true
@@ -7237,6 +7419,7 @@ components:
           - name: billing
             exclude: false
             value: my-billing-unit
+          loadAwareRouting: ""
           priorityClass: null
           labels:
           - name: stage
@@ -7561,6 +7744,7 @@ components:
           - name: billing
             exclude: false
             value: my-billing-unit
+          loadAwareRouting: ""
           priorityClass: null
           labels:
           - name: stage

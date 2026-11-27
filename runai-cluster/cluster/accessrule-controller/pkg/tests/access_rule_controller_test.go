@@ -911,6 +911,45 @@ var _ = Describe("Access Rule Controller Tests", Ordered, func() {
 				testNamespaceA, rbName, testProjectA)
 		})
 	})
+
+	Describe("Access rule of a custom role", Ordered, func() {
+		It("ClusterRoles of the custom role don't exist - Ready with nothing bound", func() {
+			accessRuleName := generateAccessRuleName()
+			accessRule = createAccessRule(accessRuleName, &v1alpha1.AccessRuleSpec{
+				SubjectId:           userA,
+				SubjectType:         v1alpha1.UserSubject,
+				ScopeType:           v1alpha1.ClusterScope,
+				RoleName:            "un-existing-role",
+				ClusterRoleOptional: true,
+			}, k8sClient)
+
+			validateAccessRuleReady(accessRuleName, k8sClient)
+
+			rbName := rolebindingsutils.GetNamespacedRoleBindingName(accessRule.Spec.RoleName)
+			for testNamespace := range testNamespacesToProject {
+				Expect(getRoleBindingFromClient(rbName, testNamespace, k8sClient)).To(BeNil(),
+					"RoleBinding <%s/%s> shouldn't exist for a role with no ClusterRole", testNamespace, rbName)
+			}
+		})
+
+		It("ClusterRoles of the custom role exist - subject is bound", func() {
+			accessRuleName := generateAccessRuleName()
+			accessRule = createAccessRule(accessRuleName, &v1alpha1.AccessRuleSpec{
+				SubjectId:           userA,
+				SubjectType:         v1alpha1.UserSubject,
+				ScopeName:           testProjectA,
+				ScopeType:           v1alpha1.ProjectScope,
+				RoleName:            testClusterRoleA,
+				ClusterRoleOptional: true,
+			}, k8sClient)
+
+			eventuallyValidateRoleBindingsForAccessRule(accessRule, []string{testNamespaceA}, k8sClient)
+			rbName := rolebindingsutils.GetNamespacedRoleBindingName(accessRule.Spec.RoleName)
+			roleBindingsCreated = append(roleBindingsCreated, nsName(rbName, testNamespaceA))
+
+			validateAccessRuleReady(accessRuleName, k8sClient)
+		})
+	})
 })
 
 var _ = Describe("Access Rule Controller Tests - more", Ordered, func() {

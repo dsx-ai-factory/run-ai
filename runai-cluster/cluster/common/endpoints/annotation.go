@@ -68,10 +68,13 @@ type AuthConfig struct {
 
 // ExternalAccess is the per-Endpoint external access target. Ingress and Route are mutually exclusive;
 // HTTPRoute may be supplied alongside either one to support Gateway API migrations.
+// Inference requires HTTPRoute and replaces it: the networking plugin creates an
+// InferenceEndpoint from the HTTPRoute's Gateway and hostnames instead of the HTTPRoute.
 type ExternalAccess struct {
 	Ingress   *networkingv1.Ingress `json:"ingress,omitempty"`
 	Route     *openshiftv1.Route    `json:"route,omitempty"`
 	HTTPRoute *gatewayv1.HTTPRoute  `json:"httpRoute,omitempty"`
+	Inference *InferenceConfig      `json:"inference,omitempty"`
 }
 
 // AuthMode selects the auth-proxy topology for a Service that has Auth configured.

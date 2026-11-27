@@ -1,3 +1,0 @@
-spec:
-  configMap: my-config-map
-  mountPath: /my-path

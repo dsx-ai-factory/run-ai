@@ -15,6 +15,8 @@ type Service struct {
 	MaxWaitForClusterGracefulDelete        time.Duration `mapstructure:"max_wait_for_cluster_graceful_delete"`
 	ClusterCleanerRunTiming                time.Duration `mapstructure:"cluster_cleaner_run_timing"`
 	PubsubInitialized                      bool
+	// UseMocks swaps the authorization client for a permissive mock. Integration tests only.
+	UseMocks bool `mapstructure:"use_mocks"`
 }
 
 func (s *Service) SetDefaults() {

@@ -5,7 +5,7 @@ go 1.27.4
 require (
 	github.com/cert-manager/cert-manager v1.21.3
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cert-utils v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.6
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.8
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.44.0
 	github.com/spf13/pflag v1.1.0
@@ -22,8 +22,8 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0-00010101000000-000000000000 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.4 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.20 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.5 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.22 // indirect
 	github.com/emicklei/go-restful/v3 v3.14.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
@@ -31,7 +31,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/zapr v1.3.0 // indirect
-	github.com/go-openapi/jsonpointer v1.0.2 // indirect
+	github.com/go-openapi/jsonpointer v1.0.3 // indirect
 	github.com/go-openapi/jsonreference v0.21.6 // indirect
 	github.com/go-openapi/swag v0.29.2 // indirect
 	github.com/go-openapi/swag/cmdutils v0.29.2 // indirect
@@ -80,7 +80,7 @@ require (
 	go.yaml.in/yaml/v2 v2.4.5 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/crypto v0.59.0 // indirect
-	golang.org/x/net v0.62.0 // indirect
+	golang.org/x/net v0.63.0 // indirect
 	golang.org/x/oauth2 v0.38.0 // indirect
 	golang.org/x/sync v0.25.0 // indirect
 	golang.org/x/sys v0.50.0 // indirect

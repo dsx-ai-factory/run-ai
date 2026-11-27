@@ -1173,43 +1173,13 @@ const WorkloadIndex = defineComponent({
       const supportsHybridCLI =
         [EWorkloadType.Inference].includes(workload?.type as EWorkloadType) &&
         !!workload?.fullySaasWorkload &&
-        isFlatWorkload &&
-        this.settingStore.isHybridSubmissionEnabled;
+        isFlatWorkload;
 
       if (supportsHybridCLI) this.updateHybridWorkload(workload);
       else this.isCopyCliModalOpen = true;
     },
     cloneCLIWorkload(): void {
       this.isCopyCliModalOpen = true;
-
-      // Due to a mismatch between the API and the UI,
-      // we currently want to prevent users from opening the UI
-      // while a workload created via the CLI is being copied.
-
-      // const isFlatWorkload = !workload?.environments?.[0]?.id;
-      // const supportsHybridCLI =
-      //   [EWorkloadType.Workspace, EWorkloadType.Training, EWorkloadType.Distributed, EWorkloadType.Inference].includes(
-      //     workload?.type as EWorkloadType,
-      //   ) &&
-      //   !!workload?.fullySaasWorkload &&
-      //   isFlatWorkload &&
-      //   this.settingStore.isHybridSubmissionEnabled;
-
-      // if (supportsHybridCLI) this.cloneHybridWorkload(workload);
-      // else this.isCopyCliModalOpen = true;
-    },
-    cloneControlPlaneSourceWorkload(workload: Workload): void {
-      const isFlatWorkload = !workload?.environments?.[0]?.id;
-      const isHybridSubmission = isFlatWorkload && this.settingStore.isHybridSubmissionEnabled;
-      const isFlatInference =
-        (isFlatWorkload && workload.type === EWorkloadType.Inference) ||
-        workload.type === EWorkloadType.DistributedInference;
-
-      if (isHybridSubmission || isFlatInference) {
-        this.cloneHybridWorkload(workload);
-      } else {
-        this.cloneAssetBasedWorkload(workload);
-      }
     },
     updateHybridWorkload(workload: Workload): void {
       const isFlatWorkload = !workload?.environments?.[0]?.id;
@@ -1224,46 +1194,9 @@ const WorkloadIndex = defineComponent({
         query,
       });
     },
-    cloneAssetBasedWorkload(workload: Workload): void {
-      let routeName = "";
-
-      switch (workload.type) {
-        case EWorkloadType.Training:
-          routeName = TRAINING_ROUTE_NAMES.TRAINING_ASSETS_EDIT;
-          break;
-        case EWorkloadType.Distributed:
-        case EWorkloadType.DistributedTraining:
-        case EWorkloadType.TFJob:
-          routeName = TRAINING_ROUTE_NAMES.DISTRIBUTED_ASSETS_EDIT;
-          break;
-        case EWorkloadType.Workspace:
-          routeName = WORKSPACE_ROUTE_NAMES.WORKSPACE_ASSETS_EDIT;
-          break;
-        case EWorkloadType.Inference:
-          routeName = INFERENCE_ROUTE_NAMES.INFERENCE_ASSETS_EDIT;
-          break;
-        default:
-          console.error(`Type ${workload.type} not found`);
-      }
-
-      if (!routeName) return;
-
-      const query: LocationQueryRaw = {
-        fromCopyId: workload?.id,
-      };
-
-      this.$router.push({
-        name: routeName,
-        query,
-      });
-    },
-    cloneHybridWorkload(workload: Workload): void {
-      const isFlatWorkload = !workload?.environments?.[0]?.id;
-      const isHybridSubmission = isFlatWorkload && this.settingStore.isHybridSubmissionEnabled;
-      const isFlatInference = isFlatWorkload && workload.type === EWorkloadType.Inference;
-      if (!isHybridSubmission && !isFlatInference) return;
-
-      let routeName = "";
+    cloneControlPlaneSourceWorkload(workload: Workload): void {
+      const isFlatWorkload = !workload.environments?.[0]?.id;
+      let routeName: string;
       switch (workload.type) {
         case EWorkloadType.Training:
           routeName = TRAINING_ROUTE_NAMES.TRAINING_HYBRID;
@@ -1278,18 +1211,17 @@ const WorkloadIndex = defineComponent({
           routeName = INFERENCE_ROUTE_NAMES.INFERENCE_FLAT_HYBRID;
           break;
         case EWorkloadType.DistributedInference:
+          if (!isFlatWorkload) return;
           routeName = INFERENCE_ROUTE_NAMES.INFERENCE_DISTRIBUTED_EDIT;
           break;
         default:
-          console.error(`Type ${workload.type} not found`);
+          return;
       }
 
-      if (!routeName) return;
-
       const query: LocationQueryRaw = {
-        fromCopyId: workload?.id,
-        projectId: workload?.projectId,
-        clusterId: workload?.clusterId,
+        fromCopyId: workload.id,
+        projectId: workload.projectId,
+        clusterId: workload.clusterId,
       };
 
       this.$router.push({

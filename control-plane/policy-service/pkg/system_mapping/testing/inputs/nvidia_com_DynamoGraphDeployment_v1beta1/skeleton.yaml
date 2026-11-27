@@ -34,3 +34,31 @@ spec:
   - name: component-c
     replicas: 1
     type: worker
+  - name: component-d
+    type: worker
+    replicas: 1
+    multinode:
+      nodeCount: 2
+    roles:
+    - name: leader
+      podTemplate:
+        spec:
+          containers:
+          - name: main
+            image: placeholder
+          - name: sidecar
+            image: placeholder
+          initContainers:
+          - name: init
+            image: placeholder
+    - name: worker
+      podTemplate:
+        spec:
+          containers:
+          - name: main
+            image: placeholder
+          - name: sidecar
+            image: placeholder
+          initContainers:
+          - name: init
+            image: placeholder

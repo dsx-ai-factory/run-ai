@@ -14,7 +14,7 @@ import {
   DEFAULT_THRESHOLD_VALUE,
 } from "./threshold-metric-section.model";
 import { errorMessages } from "@/common/error-message.constant";
-import type { AutoScalingRules } from "@/swagger-models/assets-service-client";
+import type { AutoScalingRules } from "@/swagger-models/policy-service-client";
 import type { ISelectOption } from "@/models/global.model";
 
 interface IThresholdMetricProps {

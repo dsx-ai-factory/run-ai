@@ -1,0 +1,37 @@
+type: object
+description: |
+  The simulated result of one org unit, in GPUs. Values may be fractional, as in the scheduler; the client rounds.
+  - `demand`: what the org unit asked for, after the default demand and the limit were applied.
+  - `fairShare`: what the scheduler would give it, the sum of `guaranteed` and `overQuota`.
+  - `guaranteed`: the part of the fair share within its quota.
+  - `overQuota`: the part of the fair share above its quota.
+  - `unmet`: `demand` minus `fairShare`, never below 0.
+required:
+  - id
+  - demand
+  - fairShare
+  - guaranteed
+  - overQuota
+  - unmet
+  - weightShareInRank
+properties:
+  id:
+    type: string
+    example: "4500014"
+  demand:
+    $ref: "./FairShareSimulationResources.yaml"
+  fairShare:
+    $ref: "./FairShareSimulationResources.yaml"
+  guaranteed:
+    $ref: "./FairShareSimulationResources.yaml"
+  overQuota:
+    $ref: "./FairShareSimulationResources.yaml"
+  unmet:
+    $ref: "./FairShareSimulationResources.yaml"
+  weightShareInRank:
+    type: number
+    format: double
+    description: |
+      The org unit's effective over-quota weight (the quota while adjustableWeights is off) divided by the total of its
+      rank among its siblings, including ones the caller can't read. With ranks off, among all siblings.
+    example: 0.25

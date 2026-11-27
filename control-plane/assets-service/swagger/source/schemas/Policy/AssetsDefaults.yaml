@@ -1,5 +1,0 @@
-properties:
-  datasources:
-    $ref: "./DatasourceDefaults.yaml"
-nullable: true
-type: object

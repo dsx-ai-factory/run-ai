@@ -66,7 +66,7 @@ var _ = Describe("Nodepools tests", Ordered, func() {
 	orgClient.On("NodePoolDeleted", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	orgClient.On("DefaultNodePoolCreated", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
-	nodepoolService := services.NewNodePoolsApiService(tenantSettingsClient, orgClient)
+	nodepoolService := services.NewNodePoolsApiService(tenantSettingsClient, orgClient, nil)
 	createdNodepools := []api.Nodepool{}
 
 	AfterAll(func() {
@@ -3814,7 +3814,7 @@ var _ = Describe("Legacy nodepool routes tests", Ordered, func() {
 	orgClient.On("NodePoolDeleted", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	orgClient.On("DefaultNodePoolCreated", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
-	nodepoolService := services.NewNodePoolsApiService(tenantSettingsClient, orgClient)
+	nodepoolService := services.NewNodePoolsApiService(tenantSettingsClient, orgClient, nil)
 
 	var legacyClusterId, legacyClusterName string
 	var createdNodepool api.Nodepool

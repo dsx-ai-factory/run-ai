@@ -5,13 +5,13 @@
 
 import type { IWorkloadPriorityData } from "@/components/section/general-section/general-section.model";
 import type { IComputeSectionNodePoolsPolicy } from "@/components/section/compute-resource-section/node-pools-resource-section";
-import type { IntegerRules, StringOption } from "@/swagger-models/assets-service-client";
+import type { IntegerRules, StringOption } from "@/swagger-models/policy-service-client";
 import type {
   Preemptibility,
   DistributedInferenceStartupPolicy,
   WorkspaceSpecSpecAllOfCompute,
+  UnifiedPolicyInfoPerReplicaTypeRules,
 } from "@/swagger-models/workloads-client";
-import type { UnifiedPolicyInfoPerReplicaTypeRules } from "@/swagger-models/workloads-client";
 
 // Workload Setup Model - the main data model for the workload setup step
 export interface IWorkloadSetupModel {

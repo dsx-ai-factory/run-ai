@@ -116,10 +116,6 @@ func (c *GenericSecretsTestFactory) validateListContent(listRequest *http.Reques
 	tg.validateListContent(c.router, listRequest, expectedUsedBy, createdSpecs)
 }
 
-func (c *GenericSecretsTestFactory) addToWorkloadCreationReq(*api.WorkloadCreationRequest, *api.AssetMeta) bool {
-	return false // generic secret asset cannot be part of workload creation request
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 //    Asset Builders
 /////////////////////////////////////////////////////////////////////////////////////////////

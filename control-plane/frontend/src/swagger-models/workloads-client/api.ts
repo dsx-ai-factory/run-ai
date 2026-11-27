@@ -3163,6 +3163,12 @@ export interface DistributedInferenceCommonDefaultsV2 {
      */
     'category'?: string | null;
     /**
+     * 
+     * @type {boolean}
+     * @memberof DistributedInferenceCommonDefaultsV2
+     */
+    'loadAwareRouting'?: boolean;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof DistributedInferenceCommonDefaultsV2
@@ -3223,6 +3229,12 @@ export interface DistributedInferenceCommonRulesV2 {
      * @memberof DistributedInferenceCommonRulesV2
      */
     'category'?: StringRules | null;
+    /**
+     * 
+     * @type {BooleanRules}
+     * @memberof DistributedInferenceCommonRulesV2
+     */
+    'loadAwareRouting'?: BooleanRules;
     /**
      * 
      * @type {ArrayRules}
@@ -3286,6 +3298,12 @@ export interface DistributedInferenceCommonRulesV2AllOf {
     'category'?: StringRules | null;
     /**
      * 
+     * @type {BooleanRules}
+     * @memberof DistributedInferenceCommonRulesV2AllOf
+     */
+    'loadAwareRouting'?: BooleanRules;
+    /**
+     * 
      * @type {ArrayRules}
      * @memberof DistributedInferenceCommonRulesV2AllOf
      */
@@ -3327,6 +3345,12 @@ export interface DistributedInferenceCommonSpec {
      * @memberof DistributedInferenceCommonSpec
      */
     'category'?: string | null;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof DistributedInferenceCommonSpec
+     */
+    'loadAwareRouting'?: boolean;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -3388,6 +3412,12 @@ export interface DistributedInferenceCommonSpecAllOf {
      * @memberof DistributedInferenceCommonSpecAllOf
      */
     'category'?: string | null;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof DistributedInferenceCommonSpecAllOf
+     */
+    'loadAwareRouting'?: boolean;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -5207,6 +5237,12 @@ export interface DistributedInferenceSpecSpec {
      */
     'category'?: string | null;
     /**
+     * 
+     * @type {boolean}
+     * @memberof DistributedInferenceSpecSpec
+     */
+    'loadAwareRouting'?: boolean;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof DistributedInferenceSpecSpec
@@ -5476,6 +5512,12 @@ export interface DistributedInferenceTemplateSpec {
      * @memberof DistributedInferenceTemplateSpec
      */
     'category'?: string | null;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof DistributedInferenceTemplateSpec
+     */
+    'loadAwareRouting'?: boolean;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -7762,19 +7804,6 @@ export interface EmptyDirsRules {
 /**
  * 
  * @export
- * @interface EnableHybridSubmissionSetting
- */
-export interface EnableHybridSubmissionSetting {
-    /**
-     * 
-     * @type {boolean}
-     * @memberof EnableHybridSubmissionSetting
-     */
-    'enabled'?: boolean;
-}
-/**
- * 
- * @export
  * @interface EnablePoliciesSetting
  */
 export interface EnablePoliciesSetting {
@@ -8513,37 +8542,6 @@ export interface GetAvailablePrioritiesAndCategories200Response {
      * @memberof GetAvailablePrioritiesAndCategories200Response
      */
     'categories': Array<WorkloadCategory>;
-}
-/**
- * 
- * @export
- * @interface GetEnableHybridSubmission
- */
-export interface GetEnableHybridSubmission {
-    /**
-     * 
-     * @type {GetEnableSettingsValue}
-     * @memberof GetEnableHybridSubmission
-     */
-    'value'?: GetEnableSettingsValue;
-    /**
-     * 
-     * @type {string}
-     * @memberof GetEnableHybridSubmission
-     */
-    'displayName'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof GetEnableHybridSubmission
-     */
-    'description'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof GetEnableHybridSubmission
-     */
-    'stage'?: string;
 }
 /**
  * 
@@ -16495,6 +16493,12 @@ export interface SupersetDefaults {
      */
     'category'?: string | null;
     /**
+     * 
+     * @type {boolean}
+     * @memberof SupersetDefaults
+     */
+    'loadAwareRouting'?: boolean;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof SupersetDefaults
@@ -17307,6 +17311,12 @@ export interface SupersetRules {
      * @memberof SupersetRules
      */
     'category'?: StringRules | null;
+    /**
+     * 
+     * @type {BooleanRules}
+     * @memberof SupersetRules
+     */
+    'loadAwareRouting'?: BooleanRules;
     /**
      * 
      * @type {ArrayRules}
@@ -18277,6 +18287,12 @@ export interface SupersetSpec {
      * @memberof SupersetSpec
      */
     'category'?: string | null;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SupersetSpec
+     */
+    'loadAwareRouting'?: boolean;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -21251,6 +21267,12 @@ export interface UnifiedPolicyInfoPerReplicaTypeDefaults {
      */
     'category'?: string | null;
     /**
+     * 
+     * @type {boolean}
+     * @memberof UnifiedPolicyInfoPerReplicaTypeDefaults
+     */
+    'loadAwareRouting'?: boolean;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof UnifiedPolicyInfoPerReplicaTypeDefaults
@@ -21558,6 +21580,12 @@ export interface UnifiedPolicyInfoPerReplicaTypeRules {
      * @memberof UnifiedPolicyInfoPerReplicaTypeRules
      */
     'category'?: StringRules | null;
+    /**
+     * 
+     * @type {BooleanRules}
+     * @memberof UnifiedPolicyInfoPerReplicaTypeRules
+     */
+    'loadAwareRouting'?: BooleanRules;
     /**
      * 
      * @type {ArrayRules}
@@ -22095,6 +22123,12 @@ export interface UnifiedSpecWorker {
      * @memberof UnifiedSpecWorker
      */
     'category'?: string | null;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof UnifiedSpecWorker
+     */
+    'loadAwareRouting'?: boolean;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -25695,12 +25729,6 @@ export interface WorkloadsSettingsGetResponse {
     'workloadSubmissionV2Enabled'?: GetWorkloadSubmissionV2Enabled;
     /**
      * 
-     * @type {GetEnableHybridSubmission}
-     * @memberof WorkloadsSettingsGetResponse
-     */
-    'enableHybridSubmission'?: GetEnableHybridSubmission;
-    /**
-     * 
      * @type {GetGpuOverProvisioning}
      * @memberof WorkloadsSettingsGetResponse
      */
@@ -25721,7 +25749,6 @@ export interface WorkloadsSettingsGetResponse {
 export const WorkloadsSettingsKeyEnum = {
     EnablePolicies: 'enablePolicies',
     WorkloadSubmissionV2Enabled: 'workloadSubmissionV2Enabled',
-    EnableHybridSubmission: 'enableHybridSubmission',
     GpuOverProvisioning: 'gpuOverProvisioning',
     ApplicationSubmission: 'applicationSubmission'
 } as const;

@@ -16,6 +16,7 @@
     :options="combinedEmailOptions"
     :selected-options="selectedSubjectsOptions"
     :loading="loadingEmails"
+    :disable="disable"
     :max-values="subjectMaxAmount"
     :hint="hint"
     :can-search="canSearchSubjects"
@@ -76,6 +77,7 @@ export default defineComponent({
   components: { RunaiAddableMultiSelect },
   emits: ["update:selected-subjects", "add-subject"],
   props: {
+    disable: Boolean,
     subjectType: {
       type: Object as PropType<ISelectOption | null>,
       required: true,
@@ -144,6 +146,7 @@ export default defineComponent({
       manualOptions.value.push(newEmailOption);
 
       setTimeout(() => {
+        if (props.disable) return;
         emit("add-subject", newEmailOption);
         searchQuery.value = "";
       }, 0);

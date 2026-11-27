@@ -222,7 +222,7 @@ var dynamoGraphDeploymentV1beta1Config = gvkConfig{
 	inputDir:   "testing/inputs/nvidia_com_DynamoGraphDeployment_v1beta1",
 	schemaPath: "testing/crd/dynamographdeployment_nvidia_com_v1beta1_openapi.json",
 	schemaName: schemaNameDynamoGraphDeploymentV1b1,
-	caseNames:  []string{"workload", "component", "pod", "container", "named-containers", "defaults", "parameterized-dependency", "unknown-component"},
+	caseNames:  []string{"workload", "component", "pod", "container", "named-containers", "defaults", "parameterized-dependency", "unknown-component", "roles"},
 }
 
 var rayClusterConfig = gvkConfig{

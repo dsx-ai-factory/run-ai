@@ -145,9 +145,8 @@ describe("WorkloadsSection - sectionSubHeader counts", () => {
       models: { key: "models", value: "false" },
       deletedWorkloadsView: { key: "deletedWorkloadsView", value: "false" },
       nim: { key: "nim", value: "true" },
-      hybridSubmission: { key: "hybridSubmission", value: "false" },
     });
-    expect(wrapper.vm.sectionSubHeader).toBe("Enabled (2) / Disabled (3)");
+    expect(wrapper.vm.sectionSubHeader).toBe("Enabled (2) / Disabled (2)");
   });
 
   it("includes yamlSubmission as enabled when setting is enabled and cluster supports it", () => {
@@ -183,20 +182,15 @@ describe("WorkloadsSection - sectionSubHeader counts", () => {
     expect(wrapper.vm.sectionSubHeader).toBe("Enabled (1) / Disabled (0)");
   });
 
-  it("excludes dataVolumes from count when hybridSubmission is disabled", () => {
-    const wrapper = createWrapper({
-      hybridSubmission: { key: "hybridSubmission", value: "false" },
-      dataVolumes: { key: "dataVolumes", value: "false" },
-    });
-    expect(wrapper.vm.sectionSubHeader).toBe("Enabled (0) / Disabled (1)");
-  });
+  it.each([
+    ["true", "Enabled (1) / Disabled (0)"],
+    ["false", "Enabled (0) / Disabled (1)"],
+  ])("shows the data volumes toggle and counts its own value (%s)", (value, expectedCount) => {
+    const dataVolumes = { key: SettingKeys.EnableDataVolumes, value };
+    const wrapper = createWrapper({ dataVolumes });
 
-  it("includes dataVolumes in count when hybridSubmission is enabled", () => {
-    const wrapper = createWrapper({
-      hybridSubmission: { key: "hybridSubmission", value: "true" },
-      dataVolumes: { key: "dataVolumes", value: "false" },
-    });
-    expect(wrapper.vm.sectionSubHeader).toBe("Enabled (1) / Disabled (1)");
+    expect(wrapper.getComponent({ name: "ToggleSetting" }).props("setting")).toEqual(dataVolumes);
+    expect(wrapper.vm.sectionSubHeader).toBe(expectedCount);
   });
 
   it("includes applicationSubmission as enabled when setting is enabled and feature flag is on", () => {

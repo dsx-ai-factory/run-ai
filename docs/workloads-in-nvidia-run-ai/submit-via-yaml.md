@@ -125,29 +125,33 @@ After the workload is created, it is added to the [Workloads](workloads.md) tabl
 
 NVIDIA Run:ai automatically discovers and displays network endpoints for workloads that include Kubernetes networking resources. For more information, see [Kubernetes Services, Load Balancing, and Networking](https://kubernetes.io/docs/concepts/services-networking/).
 
-To expose endpoints, include the relevant networking configuration in your YAML. For example, the following Dynamo workload defines an Ingress that NVIDIA Run:ai will automatically discover:
+For example, this Ingress routes traffic to a Dynamo frontend Service named `secure-llm-frontend`:
 
 ```yaml
-apiVersion: nvidia.com/v1alpha1
-kind: DynamoGraphDeployment
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
   name: secure-llm
 spec:
-  services:
-    Frontend:
-      dynamoNamespace: secure-llm
-      componentType: frontend
-      replicas: 1
-      ingress:
-        enabled: true
-        host: api
-        hostPrefix: llm-
-        hostSuffix: example.com
-        ingressControllerClassName: haproxy
-      extraPodSpec:
-        mainContainer:
-          image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.2.0
+  ingressClassName: <ingress-class>
+  tls:
+    - hosts:
+        - <inference-hostname>
+      secretName: <tls-secret-name>
+  rules:
+    - host: <inference-hostname>
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: secure-llm-frontend
+                port:
+                  number: 8000
 ```
+
+For the full workload setup, refer to the [aggregated Dynamo tutorial](../tutorials/inference-tutorials/aggregated-dynamo.md).
 
 Once the workload is running, the **Connections** column shows the endpoint URL directly if there is one, or the number of endpoints if there are multiple. See [Connections associated with the workload](workloads.md#connections-associated-with-the-workload) for more details.
 

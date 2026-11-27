@@ -4,7 +4,14 @@
 -->
 
 <template>
-  <runai-page-filter-wrapper display :title="filter.label" @save="saveFilter" @close="$emit('close')" max-width="250px">
+  <runai-page-filter-wrapper
+    display
+    :title="filter.label"
+    @save="saveFilter"
+    @close="$emit('close')"
+    :max-width="width || '250px'"
+    :width="width"
+  >
     <template #body>
       <div class="row">
         <div class="col">
@@ -14,6 +21,8 @@
             v-model="selectedOption"
             :options="options"
             :disable="isOperatorSelectDisabled"
+            :menu-shrink="!!operatorMenuWidth"
+            :popup-content-style="operatorMenuWidth ? { width: operatorMenuWidth } : undefined"
             class="q-mb-lg"
           />
           <p class="text-black-54 filter-input-label">The following value:</p>
@@ -41,7 +50,7 @@ import {
   type IFreeTextFilterModel,
   type IFreeTextFilterSelectOption,
 } from "@/models/filter.model";
-import type { ISelectOption } from "@/models/global.model";
+type FilterOperatorOption = { label: string; value: EFilterOperator };
 
 const DEFAULT_SELECTED_OPTION: IFreeTextFilterSelectOption = {
   label: EFilterOperatorLabel.Contains,
@@ -52,6 +61,18 @@ export default defineComponent({
   components: { RunaiPageFilterWrapper, RunaiAutocompleteFilterInput },
   emits: ["save", "close"],
   props: {
+    width: {
+      type: String,
+      required: false,
+    },
+    operatorMenuWidth: {
+      type: String,
+      required: false,
+    },
+    formatOperatorLabel: {
+      type: Function as PropType<(label: string) => string>,
+      required: false,
+    },
     filter: {
       type: Object as PropType<IFreeTextFilterModel>,
       required: true,
@@ -60,20 +81,20 @@ export default defineComponent({
   data() {
     return {
       term: "" as string,
-      selectedOption: DEFAULT_SELECTED_OPTION as IFreeTextFilterSelectOption,
+      selectedOption: DEFAULT_SELECTED_OPTION as FilterOperatorOption,
     };
   },
   created() {
     this.initFilter();
   },
   computed: {
-    options(): IFreeTextFilterSelectOption[] {
-      if (!this.filter.excludeOperators) {
-        return freeTextFilterSelectOptions;
-      }
-      return freeTextFilterSelectOptions.filter((option: IFreeTextFilterSelectOption) => {
-        return !this.filter?.excludeOperators?.includes(option.value);
-      });
+    options(): FilterOperatorOption[] {
+      const options = freeTextFilterSelectOptions.filter(
+        (option) => !this.filter.excludeOperators?.includes(option.value),
+      );
+      return this.formatOperatorLabel
+        ? options.map((option) => ({ ...option, label: this.formatOperatorLabel?.(option.label) ?? option.label }))
+        : options;
     },
     isOperatorSelectDisabled(): boolean {
       return this.options.length <= 1;
@@ -86,9 +107,7 @@ export default defineComponent({
         this.selectedOption = this.options[0];
         return;
       }
-      const selectedOption: IFreeTextFilterSelectOption | undefined = this.options.find(
-        (option: ISelectOption) => option.value === this.filter.value,
-      );
+      const selectedOption = this.options.find((option) => option.value === this.filter.value);
       if (selectedOption) {
         this.selectedOption = selectedOption;
       } else if (this.filter.excludeOperators?.includes(DEFAULT_SELECTED_OPTION.value)) {
