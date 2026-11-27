@@ -771,3 +771,21 @@ func createConfigMap(visibleDeviceIndex string) *v1.ConfigMap {
 	}
 	return &cm
 }
+
+// On mig.strategy=mixed nodes the scheduler writes an empty runai-mig-device annotation, so the GPU index and the
+// GPU instance id are unknown, but that must not drop the pod_gpu_info metric of the pod.
+func TestGetGpuIndexAndInstanceIdMigPodEmptyDeviceAnnotation(t *testing.T) {
+	pod := createPod()
+	pod.Status.Phase = v1.PodRunning
+	pod.Annotations[receivedResourceTypeAnnotationName] = clustercommonconstants.ReceivedTypeMigInstance
+	pod.Annotations[allocatedMigDeviceAnnotationName] = ""
+
+	exporter := NewPodExporter(context.TODO(), nil, pod)
+	gpuIndex, err := exporter.GetGpuIndex()
+	assert.Nil(t, err)
+	assert.Equal(t, unknownDevice, gpuIndex)
+
+	gpuInstanceId, err := exporter.GetGpuInstanceId()
+	assert.Nil(t, err)
+	assert.Equal(t, unknownDevice, gpuInstanceId)
+}
