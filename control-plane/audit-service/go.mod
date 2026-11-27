@@ -4,7 +4,7 @@ go 1.27.4
 
 require (
 	github.com/Rican7/retry v0.3.1
-	github.com/aws/smithy-go v1.28.9
+	github.com/aws/smithy-go v1.28.10
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.16
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.1.1
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.8
@@ -88,7 +88,7 @@ require (
 	github.com/prometheus/client_model v0.6.3 // indirect
 	github.com/prometheus/common v0.72.1 // indirect
 	github.com/prometheus/procfs v0.22.0 // indirect
-	github.com/redis/go-redis/v9 v9.23.0 // indirect
+	github.com/redis/go-redis/v9 v9.24.0 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/segmentio/kafka-go v0.4.51 // indirect
