@@ -108,6 +108,53 @@ spec:
               routing:
                 description: routing describes the Gateway attachment.
                 properties:
+                  authProxy:
+                    description: |-
+                      authProxy protects the endpoint with an auth proxy. The route sends every
+                      request to the proxy, and the proxy forwards allowed requests to an Envoy
+                      container in the EPP Pod, which asks the EPP for a Pod. Omitted means the
+                      route sends requests to the InferencePool directly.
+                    properties:
+                      podSelector:
+                        description: |-
+                          podSelector selects the auth proxy Pods. Only they may reach the EPP's
+                          Envoy container.
+                        properties:
+                          matchLabels:
+                            additionalProperties:
+                              type: string
+                            description: matchLabels must all be present on a pod
+                              for it to be selected.
+                            minProperties: 1
+                            type: object
+                        required:
+                        - matchLabels
+                        type: object
+                      serviceRef:
+                        description: |-
+                          serviceRef is the auth proxy Service, in the endpoint namespace. The
+                          route sends every request to it.
+                        properties:
+                          name:
+                            description: name of the Service.
+                            maxLength: 63
+                            minLength: 1
+                            pattern: ^[a-z]([-a-z0-9]*[a-z0-9])?$
+                            type: string
+                          port:
+                            description: port of the Service.
+                            format: int32
+                            maximum: 65535
+                            minimum: 1
+                            type: integer
+                        required:
+                        - name
+                        - port
+                        type: object
+                    required:
+                    - podSelector
+                    - serviceRef
+                    type: object
                   gatewayRef:
                     description: gatewayRef is the Gateway the generated HTTPRoute
                       attaches to.

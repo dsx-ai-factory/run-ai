@@ -35,3 +35,16 @@ spec:
     ports:
     - protocol: TCP
       port: 9090
+{{- if .AuthProxy }}
+  # Protected endpoint: only the auth proxy Pods reach the Envoy container, so no
+  # request skips the auth check.
+  - from:
+    - podSelector:
+        matchLabels:
+{{- range $key, $value := .AuthProxy.PodLabels }}
+          {{ $key | toJSON }}: {{ $value | toJSON }}
+{{- end }}
+    ports:
+    - protocol: TCP
+      port: {{ envoyPort }}
+{{- end }}

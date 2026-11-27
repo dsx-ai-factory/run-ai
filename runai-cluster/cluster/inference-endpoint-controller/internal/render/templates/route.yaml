@@ -18,8 +18,13 @@ spec:
         type: PathPrefix
         value: "/"                    # every path, as the composed route it replaces
     backendRefs:
+{{- if .AuthProxy }}
+    - name: {{ .AuthProxy.ServiceName | toJSON }}   # protected: the auth proxy forwards to the EPP's Envoy
+      port: {{ .AuthProxy.ServicePort }}
+{{- else }}
     - group: inference.networking.k8s.io
       kind: InferencePool
       name: {{ printf "%s-pool" .Name | toJSON }}
+{{- end }}
     timeouts:
       request: 300s

@@ -40,6 +40,21 @@ func (r uidDefaultingReader) Get(
 	return nil
 }
 
+// createWithUID gives a created object the UID that uidDefaultingReader reports,
+// as the API server assigns one on create, so an object the plugin creates can
+// own other objects.
+func createWithUID(
+	ctx context.Context,
+	c client.WithWatch,
+	object client.Object,
+	options ...client.CreateOption,
+) error {
+	if object.GetUID() == "" {
+		object.SetUID(types.UID(fmt.Sprintf("test-%T-%s", object, object.GetName())))
+	}
+	return c.Create(ctx, object, options...)
+}
+
 func newOwnershipTestPlugin(reader client.Reader) *Plugin {
 	return newPlugin(reader, uidDefaultingReader{Reader: reader})
 }

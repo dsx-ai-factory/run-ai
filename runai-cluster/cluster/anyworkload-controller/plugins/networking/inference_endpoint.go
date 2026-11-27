@@ -13,6 +13,7 @@ import (
 	endpoints "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints"
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/plugin/framework"
+	corev1 "k8s.io/api/core/v1"
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -176,9 +177,6 @@ func validateInferenceEndpointShape(endpoint *endpoints.Endpoint) error {
 		return fmt.Errorf("externalAccess.inference requires a created Service with a selector and a port, " +
 			"or a referenced Service with a name and a port")
 	}
-	if service.Auth != nil {
-		return fmt.Errorf("externalAccess.inference does not support services[0].auth")
-	}
 	route := ea.HTTPRoute
 	if len(route.Spec.Hostnames) == 0 {
 		return fmt.Errorf("externalAccess.inference requires httpRoute.spec.hostnames")
@@ -195,6 +193,103 @@ func validateInferenceEndpointShape(endpoint *endpoints.Endpoint) error {
 	return nil
 }
 
+// inferenceAuthProxyUpstreamTimeoutSeconds matches the request timeout of the
+// InferenceEndpoint route. The oauth2-proxy default of 30 s ends non-streamed
+// answers that take longer with a 502.
+const inferenceAuthProxyUpstreamTimeoutSeconds = 300
+
+// reconcileInferenceRouting creates the InferenceEndpoint of an endpoint that
+// requests inference routing. A protected endpoint also gets its auth proxy, with
+// the EPP's Envoy as the upstream, so a request reaches the EPP only after the
+// auth check. The InferenceEndpoint owns the auth proxy, as it owns the EPP: with
+// the workload as owner, the scheduler puts the proxy Pod into the workload's
+// PodGroup, and a LeaderWorkerSet PodGroup has no subgroup for it.
+func (p *Plugin) reconcileInferenceRouting(
+	ctx context.Context,
+	runner *dromosv1alpha1.WorkloadRunner,
+	endpoint *endpoints.Endpoint,
+	svc *endpoints.Service,
+	workloadServiceName string,
+	workloadServicePort int32,
+	k8sClient client.Client,
+) error {
+	authProxy := inferenceAuthProxy(runner, endpoint)
+	if authProxy != nil && p.enforceOwnership && runner.DeletionTimestamp.IsZero() {
+		// The InferenceEndpoint's route sends every request to the auth proxy Service
+		// by name, so a same-name Service the runner does not own must stop the
+		// endpoint from being applied.
+		proxyService := &corev1.Service{ObjectMeta: objectMeta(runner.Namespace, authProxy.ServiceName)}
+		if _, err := p.readOwnedOrAbsent(ctx, runner, proxyService, "auth proxy service"); err != nil {
+			return fmt.Errorf("reconcile auth proxy: %w", p.denyInferenceAuthProxy(
+				ctx, runner, endpoint, authProxy.ServiceName,
+				ownershipEnforcementError("refuse to route to existing auth proxy service", err), k8sClient,
+			))
+		}
+	}
+	inferenceEndpoint, err := p.reconcileEndpointInference(
+		ctx, runner, endpoint, workloadServiceName, workloadServicePort, k8sClient,
+	)
+	if err != nil {
+		return fmt.Errorf("reconcile inference endpoint: %w", err)
+	}
+	// A nil endpoint is being deleted or was created by a concurrent reconcile;
+	// in the second case its watch event starts the reconcile that creates the proxy.
+	if authProxy == nil || inferenceEndpoint == nil {
+		return nil
+	}
+	upstreamURL, err := endpoints.InferenceEndpointUpstreamURL(runner)
+	if err != nil {
+		return fmt.Errorf("reconcile auth proxy: %w", err)
+	}
+	if err := p.createOrUpdateEndpointAuthProxy(
+		ctx, runner, endpoint, svc, authProxy.ServiceName, upstreamURL, inferenceAuthProxyUpstreamTimeoutSeconds,
+		inferenceEndpoint, k8sClient,
+	); err != nil {
+		return fmt.Errorf("reconcile auth proxy: %w", p.denyInferenceAuthProxy(
+			ctx, runner, endpoint, authProxy.ServiceName, err, k8sClient,
+		))
+	}
+	return nil
+}
+
+// denyInferenceAuthProxy cleans up after the auth proxy failed the ownership
+// check. Besides the resources the composed path removes, it deletes the runner's
+// InferenceEndpoint, whose route would otherwise keep sending requests to the
+// denied Service and skip the auth check.
+func (p *Plugin) denyInferenceAuthProxy(
+	ctx context.Context,
+	runner *dromosv1alpha1.WorkloadRunner,
+	endpoint *endpoints.Endpoint,
+	authProxyName string,
+	err error,
+	k8sClient client.Client,
+) error {
+	settled := isSettledOwnershipViolation(err)
+	err = p.cleanupAfterOwnershipError(
+		ctx, runner, err, p.buildEndpointExternalAccessResources(runner, endpoint), authProxyName, true, k8sClient,
+	)
+	if settled {
+		err = errors.Join(err, p.removeInferenceEndpoint(ctx, runner, k8sClient))
+	}
+	return err
+}
+
+// inferenceAuthProxy returns the auth proxy in front of a protected endpoint's EPP,
+// or nil for a public endpoint. The reconcile and the status pass both build the
+// desired InferenceEndpoint from it, so their specs match.
+func inferenceAuthProxy(runner *dromosv1alpha1.WorkloadRunner, endpoint *endpoints.Endpoint) *endpoints.InferenceAuthProxy {
+	svc := firstService(endpoint)
+	if svc == nil || svc.Auth == nil {
+		return nil
+	}
+	name := getEndpointAuthProxyName(endpointServiceName(svc))
+	return &endpoints.InferenceAuthProxy{
+		ServiceName: name,
+		ServicePort: AuthProxyServicePort,
+		PodLabels:   authProxyLabels(runner, name),
+	}
+}
+
 func (p *Plugin) reconcileEndpointInference(
 	ctx context.Context,
 	runner *dromosv1alpha1.WorkloadRunner,
@@ -202,43 +297,45 @@ func (p *Plugin) reconcileEndpointInference(
 	backendServiceName string,
 	backendServicePort int32,
 	k8sClient client.Client,
-) error {
+) (*unstructured.Unstructured, error) {
 	if !runner.DeletionTimestamp.IsZero() {
-		return nil
+		return nil, nil
 	}
 	if err := p.inferenceEndpointAvailable(); err != nil {
-		return err
+		return nil, err
 	}
 	workload, err := resolveInferenceWorkload(runner, endpoint)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	target, err := inferenceEndpointTarget(endpoint, workload)
 	if err != nil {
-		return err
+		return nil, err
 	}
+	target.AuthProxy = inferenceAuthProxy(runner, endpoint)
 	composed := p.buildHTTPRoute(runner, endpoint.ExternalAccess.HTTPRoute, backendServiceName, backendServicePort)
 	if p.enforceOwnership {
 		// The InferenceEndpoint controller attaches its route to this Gateway, so it
 		// gets the same configured-Gateway restriction as a composed HTTPRoute.
 		if err := validateGatewayParents(composed, configuredRoutingConstraints()); err != nil {
-			return ownershipEnforcementError("validate inference Gateway", err)
+			return nil, ownershipEnforcementError("validate inference Gateway", err)
 		}
 	}
 	desired, err := endpoints.BuildInferenceEndpoint(runner, endpoint.ExternalAccess.Inference, target)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if err := p.applyInferenceEndpoint(ctx, runner, desired, k8sClient); err != nil {
-		return err
+	applied, err := p.applyInferenceEndpoint(ctx, runner, desired, k8sClient)
+	if err != nil {
+		return nil, err
 	}
 	// The InferenceEndpoint's own HTTPRoute serves these hostnames. Remove the
 	// composed HTTPRoute left from before inference was requested. Without the
 	// HTTPRoute API there is no composed route to remove.
 	if err := p.deleteIfOwned(ctx, runner, composed, k8sClient, "HTTPRoute"); err != nil && !meta.IsNoMatchError(err) {
-		return err
+		return nil, err
 	}
-	return nil
+	return applied, nil
 }
 
 func (p *Plugin) applyInferenceEndpoint(
@@ -246,43 +343,43 @@ func (p *Plugin) applyInferenceEndpoint(
 	runner *dromosv1alpha1.WorkloadRunner,
 	desired *unstructured.Unstructured,
 	k8sClient client.Client,
-) error {
+) (*unstructured.Unstructured, error) {
 	live := &unstructured.Unstructured{}
 	live.SetGroupVersionKind(endpoints.InferenceEndpointGVK)
 	err := k8sClient.Get(ctx, client.ObjectKeyFromObject(desired), live)
 	if err != nil && !apierrors.IsNotFound(err) {
-		return fmt.Errorf("read InferenceEndpoint: %w", err)
+		return nil, fmt.Errorf("read InferenceEndpoint: %w", err)
 	}
 	if err == nil {
 		if !metav1.IsControlledBy(live, runner) {
-			return fmt.Errorf("InferenceEndpoint %s/%s is not controlled by runner %s", live.GetNamespace(), live.GetName(), runner.Name)
+			return nil, fmt.Errorf("InferenceEndpoint %s/%s is not controlled by runner %s", live.GetNamespace(), live.GetName(), runner.Name)
 		}
 		if !live.GetDeletionTimestamp().IsZero() {
-			return fmt.Errorf("InferenceEndpoint %s/%s is terminating", live.GetNamespace(), live.GetName())
+			return nil, fmt.Errorf("InferenceEndpoint %s/%s is terminating", live.GetNamespace(), live.GetName())
 		}
 		if apiequality.Semantic.DeepEqual(live.Object["spec"], desired.Object["spec"]) {
-			return nil
+			return live, nil
 		}
 		live.Object["spec"] = desired.Object["spec"]
 		// Update retains resourceVersion, so a concurrent change cannot be overwritten.
 		// Strict validation rejects fields the CRD would otherwise prune and cause us to reapply forever.
 		if err := k8sClient.Update(ctx, live, client.FieldValidation(metav1.FieldValidationStrict)); err != nil {
-			return fmt.Errorf("update InferenceEndpoint: %w", err)
+			return nil, fmt.Errorf("update InferenceEndpoint: %w", err)
 		}
-		return nil
+		return live, nil
 	}
 	if err := controllerutil.SetControllerReference(runner, desired, k8sClient.Scheme()); err != nil {
-		return fmt.Errorf("own InferenceEndpoint: %w", err)
+		return nil, fmt.Errorf("own InferenceEndpoint: %w", err)
 	}
 	if err := k8sClient.Create(ctx, desired, client.FieldValidation(metav1.FieldValidationStrict)); err != nil {
 		// Another reconcile created the endpoint between the Get above and this Create.
 		// The Owns watch delivers the object and the next reconcile converges.
 		if apierrors.IsAlreadyExists(err) {
-			return nil
+			return nil, nil
 		}
-		return fmt.Errorf("create InferenceEndpoint: %w", err)
+		return nil, fmt.Errorf("create InferenceEndpoint: %w", err)
 	}
-	return nil
+	return desired, nil
 }
 
 // deleteInferenceEndpoint removes the runner's InferenceEndpoint when no endpoint
@@ -304,6 +401,16 @@ func (p *Plugin) deleteInferenceEndpoint(
 	if !hasInferenceEndpointCondition(runner) {
 		return nil
 	}
+	return p.removeInferenceEndpoint(ctx, runner, k8sClient)
+}
+
+// removeInferenceEndpoint deletes the runner's InferenceEndpoint if this runner
+// controls it.
+func (p *Plugin) removeInferenceEndpoint(
+	ctx context.Context,
+	runner *dromosv1alpha1.WorkloadRunner,
+	k8sClient client.Client,
+) error {
 	name, err := endpoints.InferenceEndpointName(runner)
 	if err != nil {
 		// A runner without a saved identity cannot own an InferenceEndpoint.
@@ -312,7 +419,7 @@ func (p *Plugin) deleteInferenceEndpoint(
 	live := &unstructured.Unstructured{}
 	live.SetGroupVersionKind(endpoints.InferenceEndpointGVK)
 	if err := k8sClient.Get(ctx, client.ObjectKey{Namespace: runner.Namespace, Name: name}, live); err != nil {
-		if apierrors.IsNotFound(err) {
+		if apierrors.IsNotFound(err) || meta.IsNoMatchError(err) {
 			return nil
 		}
 		return fmt.Errorf("read InferenceEndpoint: %w", err)
@@ -381,6 +488,7 @@ func (p *Plugin) probeInferenceEndpoint(
 	if err != nil {
 		return fail(err, false)
 	}
+	target.AuthProxy = inferenceAuthProxy(runner, endpoint)
 	desired, err := endpoints.BuildInferenceEndpoint(runner, endpoint.ExternalAccess.Inference, target)
 	if err != nil {
 		return fail(err, false)

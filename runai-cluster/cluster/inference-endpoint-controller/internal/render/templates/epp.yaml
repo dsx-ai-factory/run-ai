@@ -37,6 +37,9 @@ data:
       - pluginRef: {{ .Plugin | toJSON }}
         weight: {{ .Weight }}
 {{- end }}
+{{- if .AuthProxy }}
+  envoy.yaml: {{ envoyConfig | toJSON }}
+{{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -104,6 +107,11 @@ spec:
   - name: http-metrics
     protocol: TCP
     port: 9090
+{{- if .AuthProxy }}
+  - name: http-envoy                 # protected: the auth proxy's upstream
+    protocol: TCP
+    port: {{ envoyPort }}
+{{- end }}
   type: ClusterIP
 ---
 apiVersion: apps/v1
@@ -193,6 +201,51 @@ spec:
         volumeMounts:
         - name: plugins-config-volume
           mountPath: /config
+{{- if .AuthProxy }}
+      # Protected endpoint: the auth proxy sends allowed requests here; Envoy asks
+      # the EPP over ext_proc on localhost and forwards to the Pod it picks (GIE
+      # standalone mode).
+      - name: envoy
+        image: {{ .EnvoyImage | toJSON }}
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
+        args:
+        - --service-node
+        - envoy-sidecar
+        - --log-level
+        - info
+        - --cpuset-threads
+        - --drain-strategy
+        - immediate
+        - --drain-time-s
+        - "60"
+        - -c
+        - /etc/envoy/envoy.yaml
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            memory: 1Gi
+        ports:
+        - name: http-envoy
+          containerPort: {{ envoyPort }}
+        - name: envoy-ready
+          containerPort: 19001
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 19001
+          periodSeconds: 2
+        volumeMounts:
+        - name: plugins-config-volume
+          mountPath: /etc/envoy
+          readOnly: true
+{{- end }}
       volumes:
       - name: plugins-config-volume
         configMap:

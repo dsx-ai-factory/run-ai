@@ -166,6 +166,33 @@ func TestBuildInferenceEndpointOmitsUnsetOptionalFields(t *testing.T) {
 	}
 }
 
+func TestBuildInferenceEndpointPutsTheAuthProxyInFront(t *testing.T) {
+	runner := &metav1.ObjectMeta{Namespace: "project", UID: "uid"}
+	target := testTarget()
+	target.AuthProxy = &InferenceAuthProxy{ServiceName: "model-auth-proxy", ServicePort: 80, PodLabels: map[string]string{"app": "model-auth-proxy"}}
+	endpoint, err := BuildInferenceEndpoint(runner, &InferenceConfig{Epp: json.RawMessage(`{"profile":"gie-v1.5"}`)}, target)
+	if err != nil {
+		t.Fatal(err)
+	}
+	jsonEqual(t, `{"serviceRef":{"name":"model-auth-proxy","port":80},"podSelector":{"matchLabels":{"app":"model-auth-proxy"}}}`,
+		endpoint.Object["spec"].(map[string]any)["routing"].(map[string]any)["authProxy"])
+
+	target.AuthProxy.PodLabels = nil
+	if _, err := BuildInferenceEndpoint(runner, &InferenceConfig{Epp: json.RawMessage(`{"profile":"gie-v1.5"}`)}, target); err == nil {
+		t.Fatal("accepted an auth proxy without Pod labels")
+	}
+}
+
+func TestInferenceEndpointUpstreamURLIsTheEPPEnvoyPort(t *testing.T) {
+	url, err := InferenceEndpointUpstreamURL(&metav1.ObjectMeta{Namespace: "project", UID: "uid"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if url != "http://inference-uid-epp.project.svc.cluster.local:8081" {
+		t.Fatalf("upstream URL = %q", url)
+	}
+}
+
 func TestBuildInferenceEndpointRejectsIncompleteInput(t *testing.T) {
 	cfg := &InferenceConfig{Epp: json.RawMessage(`{"profile":"gie-v1.5"}`)}
 	for _, runner := range []*metav1.ObjectMeta{{Namespace: "project"}, {UID: "uid"}, {Namespace: "project", UID: "INVALID/UID"}} {

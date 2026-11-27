@@ -73,10 +73,11 @@ func (p *Plugin) buildEndpointAuthProxyDeployment(
 	svc *endpoints.Service,
 	name string,
 	upstreamURL string,
+	upstreamTimeoutSeconds int,
 	externalHost string,
 	externalPath string,
 ) (*appsv1.Deployment, error) {
-	container, err := p.buildEndpointOAuth2ProxyContainer(svc, upstreamURL, name, externalHost, externalPath)
+	container, err := p.buildEndpointOAuth2ProxyContainer(svc, upstreamURL, upstreamTimeoutSeconds, name, externalHost, externalPath)
 	if err != nil {
 		return nil, err
 	}
@@ -108,6 +109,7 @@ func (p *Plugin) buildEndpointAuthProxyInitContainers(
 func (p *Plugin) buildEndpointOAuth2ProxyContainer(
 	svc *endpoints.Service,
 	upstreamURL string,
+	upstreamTimeoutSeconds int,
 	cookiePrefix string,
 	externalHost string,
 	externalPath string,
@@ -128,6 +130,6 @@ func (p *Plugin) buildEndpointOAuth2ProxyContainer(
 	}
 	return buildOAuth2ProxyContainerFromAuth(
 		upstreamURL, cookiePrefix, externalHost, externalPath,
-		authorizedUsers, authorizedGroups, forceJsonResponse,
+		authorizedUsers, authorizedGroups, forceJsonResponse, upstreamTimeoutSeconds,
 	)
 }

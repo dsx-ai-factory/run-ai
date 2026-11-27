@@ -46,6 +46,11 @@ const (
 //go:embed templates/*.yaml
 var templateFS embed.FS
 
+// envoyConfig is the Envoy configuration of a protected endpoint's EPP Pod.
+//
+//go:embed envoy/envoy.yaml
+var envoyConfig string
+
 var templates = template.Must(
 	template.New("").Option("missingkey=error").Funcs(template.FuncMap{
 		// JSON strings are valid YAML scalars and cannot introduce another document.
@@ -53,7 +58,9 @@ var templates = template.Must(
 			encoded, err := json.Marshal(value)
 			return string(encoded), err
 		},
-		"dnsLabel": DNSLabel,
+		"dnsLabel":    DNSLabel,
+		"envoyConfig": func() string { return envoyConfig },
+		"envoyPort":   func() int { return EnvoyPort },
 	}).ParseFS(templateFS, "templates/*.yaml"),
 )
 
@@ -123,7 +130,27 @@ type Input struct {
 	EppImage string
 	// Scorers and their weights. Empty means DefaultScorers.
 	Scorers []Scorer
+	// AuthProxy, when set, makes the endpoint protected: the route sends every
+	// request to the auth proxy Service, and the EPP Pod gets an Envoy container
+	// on EnvoyPort that only the auth proxy Pods may reach.
+	AuthProxy *AuthProxy
+	// EnvoyImage is the Envoy container image of a protected endpoint. The
+	// controller resolves epp.profile to its pinned image before rendering.
+	EnvoyImage string
 }
+
+// AuthProxy names the auth proxy of a protected endpoint.
+type AuthProxy struct {
+	// ServiceName and ServicePort are the route backend.
+	ServiceName string
+	ServicePort int32
+	// PodLabels select the auth proxy Pods in the EPP NetworkPolicy.
+	PodLabels map[string]string
+}
+
+// EnvoyPort is the EPP Service port that a protected endpoint's auth proxy
+// sends allowed requests to. envoy/envoy.yaml listens on it.
+const EnvoyPort = 8081
 
 func (in *Input) validate() error {
 	var errs []error
@@ -156,6 +183,20 @@ func (in *Input) validate() error {
 	}
 	if in.EppImage == "" {
 		errs = append(errs, errors.New("epp image is required"))
+	}
+	if p := in.AuthProxy; p != nil {
+		if msgs := validation.IsDNS1123Label(p.ServiceName); len(msgs) > 0 {
+			errs = append(errs, fmt.Errorf("routing.authProxy.serviceRef.name %q is not a DNS label: %s", p.ServiceName, strings.Join(msgs, "; ")))
+		}
+		if p.ServicePort < 1 || p.ServicePort > 65535 {
+			errs = append(errs, fmt.Errorf("routing.authProxy.serviceRef.port %d is outside 1-65535", p.ServicePort))
+		}
+		if len(p.PodLabels) == 0 {
+			errs = append(errs, errors.New("routing.authProxy.podSelector needs at least one label"))
+		}
+		if in.EnvoyImage == "" {
+			errs = append(errs, errors.New("envoy image is required for a protected endpoint"))
+		}
 	}
 	// DNSLabel collapses repeated dashes, so it cannot be used to check a namespace such as "a--b".
 	if msgs := validation.IsDNS1123Label(in.MetricsNamespace); len(msgs) > 0 {

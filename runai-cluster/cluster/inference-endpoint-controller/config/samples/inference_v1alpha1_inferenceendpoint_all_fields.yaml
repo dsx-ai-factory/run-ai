@@ -21,6 +21,13 @@ spec:
     hostnames: # Required, at least one hostname; entries must be unique.
     - llama3-all-fields.test
     - llama3-all-fields-alias.test
+    authProxy: # Optional; omitted = public. The route sends every request to this auth proxy.
+      serviceRef: # Required. Auth proxy Service in this namespace; its upstream is <endpoint>-epp:8081.
+        name: llama3-all-fields-auth-proxy
+        port: 80
+      podSelector: # Required. Only these Pods may reach the EPP's Envoy on 8081.
+        matchLabels:
+          app: llama3-all-fields-auth-proxy
 
   epp: # Required.
     profile: gie-v1.5 # Required. Pins the GIE v1.5.0 image, configuration, ports and startup flags.

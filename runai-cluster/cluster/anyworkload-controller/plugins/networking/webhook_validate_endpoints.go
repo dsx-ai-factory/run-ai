@@ -354,8 +354,8 @@ func validateEndpointServiceRef(
 	svcPath *field.Path,
 ) field.ErrorList {
 	var errs field.ErrorList
-	// Inference routing targets a public NIM Service through its own Gateway
-	// route, so it is the one reference that needs no auth proxy.
+	// Inference routing reaches a NIM Service through the InferenceEndpoint's own
+	// Gateway route, so it is the one reference that may be public.
 	inference := endpoint.ExternalAccess != nil && endpoint.ExternalAccess.Inference != nil
 	if svc.Auth == nil && !inference {
 		errs = append(errs, field.Required(

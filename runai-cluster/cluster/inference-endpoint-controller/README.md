@@ -61,6 +61,18 @@ allow-list is a follow-up. The metrics namespace defaults to `runai`, where the 
 `inference-endpoint-controller.metricsScrapeNamespace` in `RunaiConfig` (passed to the
 controller as `--metrics-scrape-namespace`) when Prometheus runs elsewhere.
 
+## Protected endpoints
+
+`spec.routing.authProxy` puts an auth proxy in front of the endpoint. The HTTPRoute then sends
+every request to `authProxy.serviceRef` instead of the InferencePool. The EPP Pod gets an Envoy
+container (`envoyproxy/envoy:distroless-v1.33.2`, the image of the GIE v1.5.0 standalone chart)
+on port 8081, exposed on the `<endpoint>-epp` Service: Envoy asks the EPP for a Pod over ext_proc
+on localhost and forwards the request to that Pod. The creator of the endpoint runs the proxy and
+sets its upstream to `http://<endpoint>-epp.<namespace>.svc.cluster.local:8081`. The NetworkPolicy
+admits 8081 only from the Pods that `authProxy.podSelector` selects. NetworkPolicies are additive:
+another policy that selects the EPP Pod and allows 8081 lets other Pods skip the proxy, so review
+the policies that select the EPP Pod in the endpoint's namespace.
+
 Use `config/samples/inference_v1alpha1_inferenceendpoint.yaml` for the baseline
 API and `_tuned.yaml` for scorer weights. The API group remains `inference.platform.run.ai/v1alpha1`.
 The controller manages routing resources; it does not create serving workloads.
@@ -121,8 +133,8 @@ Product E2E scenarios belong in the separate `runai-e2e-internal` repository.
 
 EPP configuration changes replace its single Pod using `Recreate`; this does not
 provide EPP high availability. Controller replicas use leader election independently.
-EPP images and external Gateway components require their own registry/mirror setup;
-changing the controller image registry does not rewrite endpoint-picker images.
+EPP and Envoy images and external Gateway components require their own registry/mirror setup;
+changing the controller image registry does not rewrite endpoint-picker or Envoy images.
 
 Imported from `NaelAsbi123/inference-networking-controller` at
 `253d8fb2ef3f495e4806d13de5d4f6dea631d35f`; research and presentation files remain there.

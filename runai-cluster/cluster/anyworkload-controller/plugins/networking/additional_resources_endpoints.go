@@ -186,15 +186,11 @@ func (p *Plugin) reconcileEndpoint(
 		return p.createEndpointExternalAccess(ctx, runner, endpoint, owner, k8sClient, "", 0)
 	}
 
-	if svc.Ref != nil && endpoint.ExternalAccess != nil && endpoint.ExternalAccess.Inference != nil {
+	inference := endpoint.ExternalAccess != nil && endpoint.ExternalAccess.Inference != nil
+	if svc.Ref != nil && inference {
 		// The InferenceEndpoint selects the Pods directly, so the NIM operator's
 		// Service does not need to exist yet.
-		if err := p.reconcileEndpointInference(
-			ctx, runner, endpoint, svc.Ref.Name, svc.Ref.Port, k8sClient,
-		); err != nil {
-			return fmt.Errorf("reconcile inference endpoint: %w", err)
-		}
-		return nil
+		return p.reconcileInferenceRouting(ctx, runner, endpoint, svc, svc.Ref.Name, svc.Ref.Port, k8sClient)
 	}
 
 	workloadServiceName, workloadServicePort, err := p.reconcileEndpointService(ctx, runner, svc, owner, k8sClient)
@@ -209,15 +205,18 @@ func (p *Plugin) reconcileEndpoint(
 		))
 	}
 
+	if inference {
+		return p.reconcileInferenceRouting(ctx, runner, endpoint, svc, workloadServiceName, workloadServicePort, k8sClient)
+	}
+
 	backendServiceName := workloadServiceName
 	backendServicePort := workloadServicePort
 
 	if svc.Auth != nil {
 		authProxyName := getEndpointAuthProxyName(workloadServiceName)
+		upstreamURL := fmt.Sprintf(upstreamURLFormat, workloadServiceName, runner.Namespace, workloadServicePort)
 		if err := p.createOrUpdateEndpointAuthProxy(
-			ctx, runner, endpoint, svc, authProxyName,
-			workloadServiceName, workloadServicePort,
-			owner, k8sClient,
+			ctx, runner, endpoint, svc, authProxyName, upstreamURL, 0, owner, k8sClient,
 		); err != nil {
 			return fmt.Errorf("reconcile auth proxy: %w", p.cleanupAfterOwnershipError(
 				ctx, runner, err, p.buildEndpointExternalAccessResources(runner, endpoint),
@@ -228,14 +227,6 @@ func (p *Plugin) reconcileEndpoint(
 		backendServicePort = AuthProxyServicePort
 	}
 
-	if endpoint.ExternalAccess != nil && endpoint.ExternalAccess.Inference != nil {
-		if err := p.reconcileEndpointInference(
-			ctx, runner, endpoint, backendServiceName, backendServicePort, k8sClient,
-		); err != nil {
-			return fmt.Errorf("reconcile inference endpoint: %w", err)
-		}
-		return nil
-	}
 	if endpoint.ExternalAccess != nil {
 		if err := p.createEndpointExternalAccess(
 			ctx, runner, endpoint, owner, k8sClient,
@@ -281,20 +272,26 @@ func (p *Plugin) createOrUpdateEndpointAuthProxy(
 	endpoint *endpoints.Endpoint,
 	svc *endpoints.Service,
 	authProxyName string,
-	workloadServiceName string,
-	workloadServicePort int32,
+	upstreamURL string,
+	upstreamTimeoutSeconds int,
 	owner client.Object,
 	k8sClient client.Client,
 ) error {
-	upstreamURL := fmt.Sprintf(upstreamURLFormat,
-		workloadServiceName, runner.Namespace, workloadServicePort)
 	externalHost, externalPath := getEndpointExternalHostAndPath(endpoint)
 
 	deployment, err := p.buildEndpointAuthProxyDeployment(
-		runner, svc, authProxyName, upstreamURL, externalHost, externalPath,
+		runner, svc, authProxyName, upstreamURL, upstreamTimeoutSeconds, externalHost, externalPath,
 	)
 	if err != nil {
 		return fmt.Errorf("build auth proxy deployment: %w", err)
+	}
+	if owner.GetObjectKind().GroupVersionKind() == endpoints.InferenceEndpointGVK {
+		// The workload is already reported through its own object; the label
+		// keeps the external-workload-integrator from reporting the proxy too.
+		if deployment.Labels == nil {
+			deployment.Labels = map[string]string{}
+		}
+		deployment.Labels[endpoints.InferenceEndpointLabel] = owner.GetName()
 	}
 	authSvc := p.buildAuthProxyService(runner, authProxyName)
 	if err := p.reconcileCreatedService(ctx, runner, owner, authSvc, k8sClient, "auth proxy service"); err != nil {

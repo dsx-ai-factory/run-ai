@@ -98,6 +98,12 @@ var _ = Describe("InferenceEndpoint CRD validation", func() {
 		Expect(ie.Spec.Epp.Scheduling).To(BeNil())
 	})
 
+	It("accepts an auth proxy", func() {
+		ie := validEndpoint()
+		ie.Spec.Routing.AuthProxy = validAuthProxy()
+		Expect(k8sClient.Create(ctx, ie)).To(Succeed())
+	})
+
 	It("accepts a wildcard hostname", func() {
 		ie := validEndpoint()
 		ie.Spec.Routing.Hostnames = []string{"*.models.example.com", "llama"}
@@ -156,6 +162,22 @@ var _ = Describe("InferenceEndpoint CRD validation", func() {
 				ie.Spec.Routing.Hostnames = append(ie.Spec.Routing.Hostnames, fmt.Sprintf("h%d.example.com", i))
 			}
 		}),
+		Entry("auth proxy without a Service name", func(ie *InferenceEndpoint) {
+			ie.Spec.Routing.AuthProxy = validAuthProxy()
+			ie.Spec.Routing.AuthProxy.ServiceRef.Name = ""
+		}),
+		Entry("auth proxy Service name that is not a DNS label", func(ie *InferenceEndpoint) {
+			ie.Spec.Routing.AuthProxy = validAuthProxy()
+			ie.Spec.Routing.AuthProxy.ServiceRef.Name = "Auth.Proxy"
+		}),
+		Entry("auth proxy port 0", func(ie *InferenceEndpoint) {
+			ie.Spec.Routing.AuthProxy = validAuthProxy()
+			ie.Spec.Routing.AuthProxy.ServiceRef.Port = 0
+		}),
+		Entry("auth proxy without Pod labels", func(ie *InferenceEndpoint) {
+			ie.Spec.Routing.AuthProxy = validAuthProxy()
+			ie.Spec.Routing.AuthProxy.PodSelector.MatchLabels = map[string]string{}
+		}),
 		Entry("no EPP profile", func(ie *InferenceEndpoint) { ie.Spec.Epp.Profile = "" }),
 		Entry("unsupported EPP profile", func(ie *InferenceEndpoint) { ie.Spec.Epp.Profile = "llm-d-v0.10" }),
 		Entry("unknown scorer type", func(ie *InferenceEndpoint) {
@@ -171,3 +193,11 @@ var _ = Describe("InferenceEndpoint CRD validation", func() {
 		}),
 	)
 })
+
+// validAuthProxy is an auth proxy that passes CRD validation.
+func validAuthProxy() *AuthProxySpec {
+	return &AuthProxySpec{
+		ServiceRef:  ServiceReference{Name: "llama-auth-proxy", Port: 80},
+		PodSelector: WorkloadSelector{MatchLabels: map[string]string{"app": "llama-auth-proxy"}},
+	}
+}
