@@ -9,6 +9,7 @@ import { Quasar } from "quasar";
 import { describe, expect, test, vi, beforeEach, afterEach } from "vitest";
 import { createTestingPinia, type TestingPinia } from "@pinia/testing";
 import { setActivePinia } from "pinia";
+import { nextTick } from "vue";
 
 import RunaiLogReader from "./runai-log-reader.vue";
 import type { ILogParams } from "@/models/logs.model";
@@ -601,6 +602,178 @@ describe("runai-log-reader.vue", () => {
       const errorEvents = logReader.emitted("error");
       expect(closeEvents?.[0]).toEqual([true]);
       expect(errorEvents).toBeUndefined();
+    });
+  });
+
+  describe("Bounded line buffer", () => {
+    // One line past the default limit of 10,000
+    const longFrame = Array.from({ length: 10001 }, (_, i) => `line ${i}`);
+
+    test.each([
+      {
+        name: "keeps the last lines of one frame",
+        maxLines: 3,
+        frames: ["one\ntwo\nthree\nfour\nfive\n"],
+        rows: ["three", "four", "five"],
+        omitted: 2,
+      },
+      { name: "trims across frames", maxLines: 2, frames: ["a\nb\n", "c\n"], rows: ["b", "c"], omitted: 1 },
+      { name: "keeps every line under the limit", maxLines: 10, frames: ["a\nb\n"], rows: ["a", "b"], omitted: 0 },
+      ...[
+        { label: "zero", maxLines: 0 },
+        { label: "negative", maxLines: -1 },
+        { label: "NaN", maxLines: NaN },
+        { label: "non-integer", maxLines: 2.5 },
+      ].map(({ label, maxLines }) => ({
+        name: `falls back to the default for a ${label} limit`,
+        maxLines,
+        frames: ["a\nb\n"],
+        rows: ["a", "b"],
+        omitted: 0,
+      })),
+      // Only this case renders 10,000 rows; it pins the default itself
+      {
+        name: "keeps the last 10,000 lines by default",
+        maxLines: undefined,
+        frames: [longFrame.join("\n") + "\n"],
+        rows: longFrame.slice(1),
+        omitted: 1,
+      },
+    ])(
+      "$name",
+      async ({ maxLines, frames, rows, omitted }) => {
+        const reader = factory({ maxLines });
+
+        for (const data of frames) {
+          reader.vm.wsSubscription?.onMessage(new MessageEvent("message", { data }));
+        }
+        await nextTick();
+
+        expect(reader.findAll(".log-row").map((row) => row.text())).toEqual(rows);
+        const notice = reader.find(".omitted-lines-notice");
+        expect(notice.exists()).toBe(omitted > 0);
+        if (omitted > 0) expect(notice.text()).toContain(String(omitted));
+      },
+      30_000,
+    ); // rendering 10,000 rows in jsdom is slow on a loaded runner
+
+    type Reader = VueWrapper<InstanceType<typeof RunaiLogReader>>;
+    const sendFrame = (reader: Reader, data: string) =>
+      reader.vm.wsSubscription?.onMessage(new MessageEvent("message", { data }));
+
+    test.each([
+      {
+        name: "a new frame drops the oldest row and keeps the others on their elements",
+        maxLines: 3,
+        act: (reader: Reader) => sendFrame(reader, "d\n"),
+        rows: ["b", "c", "d"],
+        omitted: 1,
+        kept: "c",
+      },
+      {
+        name: "lowering the limit drops the oldest rows at once",
+        maxLines: 3,
+        act: (reader: Reader) => reader.setProps({ maxLines: 2 }),
+        rows: ["b", "c"],
+        omitted: 1,
+        kept: "c",
+      },
+      {
+        name: "changing to an invalid limit keeps every row under the default",
+        maxLines: 3,
+        act: (reader: Reader) => reader.setProps({ maxLines: -1 }),
+        rows: ["a", "b", "c"],
+        omitted: 0,
+        kept: "c",
+      },
+      {
+        name: "switching to another pod clears the rows and the omitted count",
+        maxLines: 2,
+        act: (reader: Reader) => reader.setProps({ logParams: { ...mockLogParams, podName: "other-pod" } }),
+        rows: [],
+        omitted: 0,
+        kept: null,
+      },
+    ])("$name", async ({ maxLines, act, rows, omitted, kept }) => {
+      const reader = factory({ maxLines });
+      sendFrame(reader, "a\nb\nc\n");
+      await nextTick();
+      const keptRow = reader.findAll(".log-row").find((row) => row.text() === kept)?.element;
+
+      await act(reader);
+      await nextTick();
+
+      expect(reader.findAll(".log-row").map((row) => row.text())).toEqual(rows);
+      expect(reader.find(".omitted-lines-notice").exists()).toBe(omitted > 0);
+      if (omitted > 0) expect(reader.find(".omitted-lines-notice").text()).toContain(String(omitted));
+      // A retained row keeps its DOM element instead of being rewritten in place
+      if (kept) expect(keptRow && reader.element.contains(keptRow) && keptRow.textContent).toBe(kept);
+    });
+
+    // jsdom does no layout: give the list a writable scrollTop and a scrollHeight the test controls
+    const stubLayout = (el: Element) => {
+      let top = 0;
+      let height = 100;
+      Object.defineProperty(el, "scrollTop", { configurable: true, get: () => top, set: (v: number) => (top = v) });
+      Object.defineProperty(el, "scrollHeight", { configurable: true, get: () => height });
+      return { grow: () => (height += 100) };
+    };
+
+    test.each([
+      { name: "a new frame", act: (reader: Reader) => sendFrame(reader, "d\n") },
+      { name: "lowering the limit", act: (reader: Reader) => reader.setProps({ maxLines: 2 }) },
+    ])("a following reader keeps following after $name", async ({ act }) => {
+      const reader = factory({ maxLines: 3 });
+      const list = reader.find(".list-container");
+      const layout = stubLayout(list.element);
+      sendFrame(reader, "a\nb\nc\n");
+      layout.grow();
+      await nextTick();
+      // The browser fires a scroll event for each scrollTop change; jsdom does not, so fire it here
+      await list.trigger("scroll");
+
+      layout.grow();
+      await act(reader);
+      await nextTick();
+      await list.trigger("scroll");
+
+      expect(list.classes()).not.toContain("paused");
+      expect(reader.find(".resume-button").exists()).toBe(false);
+    });
+
+    test("a user scroll still pauses after raising the limit while already at the bottom", async () => {
+      const reader = factory({ maxLines: 3 });
+      const list = reader.find(".list-container");
+      stubLayout(list.element);
+      sendFrame(reader, "a\nb\nc\n");
+      await nextTick();
+      await list.trigger("scroll");
+
+      // Rows are unchanged and the list is at the bottom, so no scroll event follows
+      await reader.setProps({ maxLines: 5 });
+      await nextTick();
+      await list.trigger("scroll");
+
+      expect(list.classes()).toContain("paused");
+    });
+
+    test("resuming a paused reader with overflowing logs keeps following", async () => {
+      const reader = factory({ maxLines: 3 });
+      const list = reader.find(".list-container");
+      const layout = stubLayout(list.element);
+      sendFrame(reader, "a\nb\nc\n");
+      await nextTick();
+      await list.trigger("scroll");
+      await list.trigger("scroll"); // user scrolls up: pauses
+      expect(list.classes()).toContain("paused");
+
+      layout.grow();
+      await reader.find(".resume-button").trigger("click");
+      await nextTick();
+      // Resume scrolls once (moves) and once more via the watcher (no-op); the queued event arrives after both
+      await list.trigger("scroll");
+
+      expect(list.classes()).not.toContain("paused");
     });
   });
 });

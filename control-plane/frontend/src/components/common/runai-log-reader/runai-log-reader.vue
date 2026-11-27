@@ -13,8 +13,9 @@
       role="log"
       @scroll="handleScroll"
     >
+      <div class="omitted-lines-notice" v-if="omittedLines > 0">{{ omittedLines }} earlier lines omitted</div>
       <div class="logs-list">
-        <div class="log-row" v-for="(line, index) in lines" :key="index">{{ line }}</div>
+        <div class="log-row" v-for="(line, index) in lines" :key="omittedLines + index">{{ line }}</div>
       </div>
     </div>
     <div class="resume-button-wrapper">
@@ -64,6 +65,9 @@ const CRITICAL_ERROR_CODES = [
   WebSocketCloseCode.TLS_HANDSHAKE_FAIL,
 ];
 
+// Keep only the most recent lines so long follow streams do not grow the DOM without bound
+const DEFAULT_MAX_LINES = 10000;
+
 export default defineComponent({
   name: "runai-log-reader",
   emits: ["error", "connecting", "close", "no-data"],
@@ -80,6 +84,10 @@ export default defineComponent({
       type: Boolean as PropType<boolean>,
       required: true,
     },
+    maxLines: {
+      type: Number as PropType<number>,
+      default: DEFAULT_MAX_LINES,
+    },
   },
   data() {
     return {
@@ -87,6 +95,7 @@ export default defineComponent({
       wsSubscription: null as IWebSocketSubscription | null,
       remainderLine: "" as string,
       lines: [] as string[],
+      omittedLines: 0 as number,
       error: false as boolean,
       connected: false as boolean,
       scrollPaused: false as boolean,
@@ -96,7 +105,18 @@ export default defineComponent({
       errorOccurred: false as boolean,
     };
   },
+  computed: {
+    effectiveMaxLines(): number {
+      return Number.isInteger(this.maxLines) && this.maxLines > 0 ? this.maxLines : DEFAULT_MAX_LINES;
+    },
+  },
   methods: {
+    appendLines(newLines: string[]): void {
+      const all = this.lines.concat(newLines);
+      const dropped = Math.max(0, all.length - this.effectiveMaxLines);
+      this.omittedLines += dropped;
+      this.lines = dropped > 0 ? all.slice(dropped) : all;
+    },
     appendLog(event: MessageEvent): void {
       this.connected = true;
 
@@ -117,7 +137,7 @@ export default defineComponent({
       this.remainderLine = logs[logs.length - 1];
       logs = logs.slice(0, logs.length - 1);
 
-      this.lines = this.lines.concat(logs);
+      this.appendLines(logs);
       this.isLoading = false;
       this.$emit("connecting", false);
       this.$emit("no-data", this.lines.length === 0);
@@ -131,6 +151,7 @@ export default defineComponent({
       this.isLoading = true;
       this.$emit("connecting", true);
       this.lines = [];
+      this.omittedLines = 0;
       this.error = false;
       this.connectionClosed = false;
       this.errorOccurred = false;
@@ -232,8 +253,10 @@ export default defineComponent({
       nextTick(() => {
         const listContainer: HTMLElement = this.$refs["list-container"] as HTMLElement;
         if (!listContainer) return;
-        this.isProgrammaticScroll = true;
-        listContainer.scrollTop = (listContainer as HTMLElement).scrollHeight;
+        const before = listContainer.scrollTop;
+        listContainer.scrollTop = listContainer.scrollHeight;
+        // Only a real move queues a scroll event; a no-op must neither set the flag nor clear one a pending event still needs.
+        if (listContainer.scrollTop !== before) this.isProgrammaticScroll = true;
       });
     },
     handleScroll(): void {
@@ -259,6 +282,10 @@ export default defineComponent({
     },
   },
   watch: {
+    effectiveMaxLines(): void {
+      this.appendLines([]);
+      this.autoScroll();
+    },
     scrollPaused: function (paused: boolean) {
       if (paused) return;
       this.autoScroll();
@@ -300,6 +327,12 @@ export default defineComponent({
     flex: 1;
     height: calc(100% - #{$resume-btn-height} - #{$resume-margin-height});
     overflow: auto;
+  }
+
+  .omitted-lines-notice {
+    font-size: 13px;
+    padding: 2px 16px;
+    color: $grey-8;
   }
 
   .logs-list {
