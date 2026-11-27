@@ -157,10 +157,11 @@ func (itc *InferenceToKnativeComposer) processSecurityFields(
 func (itc *InferenceToKnativeComposer) processStorageFields(
 	_ context.Context,
 	src *workloadsApi.InferenceSpecSpecAllOfStorage,
+	largeShmRequest *bool,
 	target *KnativeServiceTarget,
 ) func() *workloadsApi.Error {
 	return func() *workloadsApi.Error {
-		if src == nil {
+		if src == nil && convutils.BoolIsFalse(largeShmRequest) {
 			return nil
 		}
 
@@ -170,17 +171,22 @@ func (itc *InferenceToKnativeComposer) processStorageFields(
 		var mountPropagation workloadsApi.HostPathMountPropagation
 
 		runner := &composer.StepRunner{}
+		if src != nil {
+			runner.Batch(
+				itc.fc.ComposeHostPath(itemizedPrefix(itemized.HostPathPrefix), src.HostPath, &volumesAndMounts, composer.MapHostPathToK8sVol, nil, &mountPropagation),
+				itc.fc.ComposePvc(itemizedPrefix(itemized.PvcPrefix), src.Pvc, &volumesAndMounts, composer_v2.MapPvcToWorkloadRunner, nil),
+				itc.fc.ComposeNfs(itemizedPrefix(itemized.NfsPrefix), src.Nfs, &volumesAndMounts, composer.MapNfsToK8sVol, nil),
+				itc.fc.ComposeConfigMap(itemizedPrefix(itemized.ConfigMapPrefix), src.ConfigMapVolume, &volumesAndMounts, composer.MapConfigMapToK8sVol, nil),
+				itc.fc.ComposeEmptyDir(itemizedPrefix(itemized.EmptyDirPrefix), src.EmptyDirVolume, &volumesAndMounts, composer.MapEmptyDirToK8sVol, nil),
+				itc.fc.ComposeSecretVolume(itemizedPrefix(itemized.SecretStoragePrefix), src.SecretVolume, &volumesAndMounts, composer.MapSecretToK8sVol, nil),
+			)
+			runner.Batch(
+				itc.fc.ComposeDataVolume(itemizedPrefix(itemized.DataVolumePrefix), src.DataVolume, &volumesAndMounts, composer.MapDataVolumesToK8s, itc.DataVolumeClaimNames),
+				itc.fc.ComposeGit(itemizedPrefix(itemized.GitPrefix), src.Git, &target.Service.Spec.Template.Spec.PodSpec, composer.MapGitToWorkloadK8s, nil),
+			)
+		}
 		runner.Batch(
-			itc.fc.ComposeHostPath(itemizedPrefix(itemized.HostPathPrefix), src.HostPath, &volumesAndMounts, composer.MapHostPathToK8sVol, nil, &mountPropagation),
-			itc.fc.ComposePvc(itemizedPrefix(itemized.PvcPrefix), src.Pvc, &volumesAndMounts, composer_v2.MapPvcToWorkloadRunner, nil),
-			itc.fc.ComposeNfs(itemizedPrefix(itemized.NfsPrefix), src.Nfs, &volumesAndMounts, composer.MapNfsToK8sVol, nil),
-			itc.fc.ComposeConfigMap(itemizedPrefix(itemized.ConfigMapPrefix), src.ConfigMapVolume, &volumesAndMounts, composer.MapConfigMapToK8sVol, nil),
-			itc.fc.ComposeEmptyDir(itemizedPrefix(itemized.EmptyDirPrefix), src.EmptyDirVolume, &volumesAndMounts, composer.MapEmptyDirToK8sVol, nil),
-			itc.fc.ComposeSecretVolume(itemizedPrefix(itemized.SecretStoragePrefix), src.SecretVolume, &volumesAndMounts, composer.MapSecretToK8sVol, nil),
-		)
-		runner.Batch(
-			itc.fc.ComposeDataVolume(itemizedPrefix(itemized.DataVolumePrefix), src.DataVolume, &volumesAndMounts, composer.MapDataVolumesToK8s, itc.DataVolumeClaimNames),
-			itc.fc.ComposeGit(itemizedPrefix(itemized.GitPrefix), src.Git, &target.Service.Spec.Template.Spec.PodSpec, composer.MapGitToWorkloadK8s, nil),
+			itc.fc.ComposeLargeShm(largeShmRequest, &volumesAndMounts, composer.MapEmptyDirToK8sVol, nil),
 			itc.fc.CopyBoolean(itc.fc.Options.CleanupCreatedPvcsOnCompletion, volumesAndMounts.Config, composer_v2.BoolToPvcsCleanupConfig, nil),
 		)
 
@@ -192,6 +198,13 @@ func (itc *InferenceToKnativeComposer) processStorageFields(
 }
 
 func itemizedPrefix(p string) string { return p }
+
+func getLargeShmRequest(compute *workloadsApi.WorkspaceSpecSpecAllOfCompute) *bool {
+	if compute == nil {
+		return nil
+	}
+	return compute.LargeShmRequest.Get()
+}
 
 func (itc *InferenceToKnativeComposer) processNetworkingFields(
 	src *workloadsApi.ServingPort,
