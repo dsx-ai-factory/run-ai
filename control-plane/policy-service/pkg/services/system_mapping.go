@@ -122,7 +122,7 @@ const (
 	systemDynamoGraphDeploymentV1alpha1MappingDesc       = "nvidia.com/DynamoGraphDeployment/v1alpha1 mapping (v4)"
 	systemDynamoComponentV1beta1SpecFgDesc               = "dynamoComponentV1beta1Spec fields (v1)"
 	systemDynamoGraphDeploymentV1beta1MappingName        = "nvidia.com/DynamoGraphDeployment/v1beta1"
-	systemDynamoGraphDeploymentV1beta1MappingDesc        = "nvidia.com/DynamoGraphDeployment/v1beta1 mapping (v1)"
+	systemDynamoGraphDeploymentV1beta1MappingDesc        = "nvidia.com/DynamoGraphDeployment/v1beta1 mapping (v2)"
 
 	systemRayClusterSpecFgDesc        = "rayClusterSpec fields (v2)"
 	systemRayClusterSpecFormatterDesc = "formatter for rayClusterSpec fields (v2)"

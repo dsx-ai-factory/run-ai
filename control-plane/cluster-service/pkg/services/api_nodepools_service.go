@@ -57,18 +57,26 @@ const (
 // NodePoolsApiService is a service that implements the logic for the NodePoolsApiServicer
 // This service should implement the business logic for every endpoint for the NodePoolsApi API.
 // Include any external packages or services that will be required by this service.
+type permittedScopesGetter interface {
+	GetPermittedScopes(ctx context.Context, resourceType authorization_api.ResourceType, action *authorization_api.Action) (*authorization_api.PermittedScopesActions, int, error)
+}
+
 type NodePoolsApiService struct {
 	tenantSettingsClient            clients.TenantSettingsClient
 	orgUnitClient                   org_unit_service_client.IOrgUnitClient
+	authorizationClient             permittedScopesGetter
 	metricsService                  QueryMetricsService
 	clusterCapabilityCheckerFactory clients_local.ClusterCapabilityCheckerFactory
 }
 
 // NewNodePoolsApiService creates a default api service
-func NewNodePoolsApiService(client clients.TenantSettingsClient, orgUnitClient org_unit_service_client.IOrgUnitClient) api.NodePoolsAPIServicer {
+func NewNodePoolsApiService(client clients.TenantSettingsClient, orgUnitClient org_unit_service_client.IOrgUnitClient,
+	authorizationClient permittedScopesGetter,
+) api.NodePoolsAPIServicer {
 	return &NodePoolsApiService{
 		tenantSettingsClient:            client,
 		orgUnitClient:                   orgUnitClient,
+		authorizationClient:             authorizationClient,
 		metricsService:                  NewDefaultMetricsService(),
 		clusterCapabilityCheckerFactory: clients_local.LocalClusterCapabilityCheckerFactory,
 	}

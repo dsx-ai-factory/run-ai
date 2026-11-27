@@ -39,8 +39,9 @@ import { defineComponent } from "vue";
 import { InferenceSubmitForm } from "@/components/workload-creation/inference/inference-submit-form";
 
 // models
-import { EWorkloadFormType, EWorkloadType, EWorkloadName } from "@/models/workload.model";
-import { Scope, type StringOption } from "@/swagger-models/assets-service-client";
+import { EWorkloadFormType, EWorkloadName } from "@/models/workload.model";
+import { Scope } from "@/swagger-models/assets-service-client";
+import type { StringOption, WorkspacePolicyDefaultsAndRulesV2 } from "@/swagger-models/policy-service-client";
 import type { ClustersMinimalData } from "@/swagger-models/cluster-service-client";
 import type {
   UnifiedPolicyInfoPerReplicaType,
@@ -50,7 +51,6 @@ import type {
   Workload as WorkloadFlat,
 } from "@/swagger-models/workloads-client";
 import { SettingKeys } from "@/models/setting.model";
-import type { WorkspacePolicyDefaultsAndRulesV2 } from "@/swagger-models/policy-service-client";
 import { getPolicyViewDetails, type IPolicyViewDetails } from "@/utils/policy.util/policy-view.util";
 import type { THybridFormState } from "@/models/workload-hybrid.model";
 import { WorkloadCreationDrawerEntities } from "@/models/workload-creation-drawer-model";
@@ -488,7 +488,7 @@ export default defineComponent({
           this.authStore.tenant.id,
         );
 
-        this.workloadStore.setWorkloadAdded(workload, EWorkloadType.Inference);
+        this.workloadStore.setWorkloadAdded(workload);
         this.clusterStore.setSelectedClusterById(this.inference.clusterId);
         this.$q.notify(alertUtil.getSuccess(`Inference ${this.inference.name} created`));
         this.$router.push({ name: WORKLOAD_ROUTE_NAMES.WORKLOAD_INDEX, query: { clusterId: this.inference.clusterId } });
@@ -523,8 +523,6 @@ export default defineComponent({
         this.$router.push({ name: INFERENCE_ROUTE_NAMES.INFERENCE_NIM_EDIT });
       } else if (this.inferenceStore.inferenceFormUIState.modelBasedOn === EServerType.VLLM) {
         this.$router.push({ name: INFERENCE_ROUTE_NAMES.INFERENCE_VLLM_EDIT });
-      } else if (this.inferenceStore.inferenceFormUIState.modelBasedOn === EServerType.TGI) {
-        this.$router.push({ name: INFERENCE_ROUTE_NAMES.INFERENCE_TGI_EDIT });
       } else {
         console.error(`No model based on ${this.inferenceStore.inferenceFormUIState.modelBasedOn} found`);
       }

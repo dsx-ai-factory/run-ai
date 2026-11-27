@@ -1,0 +1,13 @@
+type: string
+description: An unsaved rank. Only while ranks is on.
+enum:
+  - Highest
+  - VeryHigh
+  - High
+  - MediumHigh
+  - Medium
+  - MediumLow
+  - Low
+  - VeryLow
+  - Lowest
+example: High

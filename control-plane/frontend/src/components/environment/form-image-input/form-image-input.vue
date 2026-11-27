@@ -27,7 +27,7 @@ import { defineComponent, type PropType } from "vue";
 // Cmps
 import { PolicyStringField } from "@/components/common/policy-string-field";
 // Types
-import type { StringRules } from "@/swagger-models/assets-service-client";
+import type { StringRules } from "@/swagger-models/policy-service-client";
 // Stores
 export default defineComponent({
   name: "form-image-input",

@@ -150,6 +150,29 @@ describe("workspace-hybrid.vue", () => {
     vi.clearAllMocks();
   });
 
+  it("preserves required node affinity and restart policy when copying a workspace", async () => {
+    await flushPromises();
+    useWorkspaceStore(pinia).clearFlatFormState();
+    const nodeAffinityRequired = {
+      nodeSelectorTerms: [{ matchExpressions: [{ key: "accelerator", operator: "In" as const, values: ["gpu"] }] }],
+    };
+    vi.mocked(workloadService.getWorkloadClusterPriorities).mockResolvedValueOnce([]);
+    vi.mocked(workloadService.getUnifiedWorkload).mockResolvedValueOnce({
+      spec: { worker: { image: "workspace-image", nodeAffinityRequired, restartPolicy: "OnFailure" } },
+    });
+    await remount({ fromCopyId: "source-workspace", clusterId: "old-cluster", projectId: "123" });
+
+    wrapper.vm.onNameChanged("workspace-copy");
+    await wrapper.vm.onSubmit();
+
+    expect(workspaceService.createWorkspaceFlat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "workspace-copy",
+        spec: expect.objectContaining({ nodeAffinityRequired, restartPolicy: "OnFailure" }),
+      }),
+    );
+  });
+
   it("updateGeneralModel - should preserve legacy allow over quota priority and omit unsupported preemptibility", async () => {
     await flushPromises();
 

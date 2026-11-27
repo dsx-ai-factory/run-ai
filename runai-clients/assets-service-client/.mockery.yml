@@ -25,7 +25,6 @@ packages:
       HostPathAPI: {}
       InferencesAPI: {}
       ModelAPI: {}
-      ModelInferenceAPI: {}
       NFSAPI: {}
       PVCAPI: {}
       RegistryAPI: {}

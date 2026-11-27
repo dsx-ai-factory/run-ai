@@ -21,7 +21,54 @@ import {
   isAlphaNumericOnly,
   isNotEmptyArray,
   isValidPrivateUrl,
+  isValidKubernetesLabelKey,
+  isValidNetworkTopologyLevel,
 } from "./form.validators";
+
+describe("Kubernetes label keys", () => {
+  it.each([
+    "clique",
+    "GPU_Cl.ique-1",
+    "topology.kubernetes.io/Zone",
+    "a".repeat(63),
+    `${"a".repeat(253)}/${"b".repeat(63)}`,
+  ])("accepts %s", (key) => {
+    expect(isValidKubernetesLabelKey(key)).toBe(true);
+  });
+
+  it.each([
+    "",
+    "  ",
+    "/key",
+    "example.com/",
+    "example.com/a/b",
+    "Upper.example/key",
+    "bad_prefix/key",
+    "example..com/key",
+    "-example.com/key",
+    "example-.com/key",
+    "example.com/-key",
+    "example.com/key_",
+    "example.com/key.",
+    "a key",
+    " key",
+    "key ",
+    "key$",
+    "a".repeat(64),
+    `${"a".repeat(254)}/key`,
+  ])("rejects %s", (key) => {
+    expect(isValidKubernetesLabelKey(key)).toBe(false);
+  });
+
+  it("limits a network topology level to 63 characters including its prefix", () => {
+    const fullLengthLevel = `example.com/${"A".repeat(51)}`;
+    expect(isValidNetworkTopologyLevel(fullLengthLevel)).toBe(true);
+    expect(isValidNetworkTopologyLevel(fullLengthLevel + "B")).toBe(false);
+    expect(isValidKubernetesLabelKey(fullLengthLevel + "B")).toBe(true);
+    expect(isValidNetworkTopologyLevel("Example.com/rack")).toBe(false);
+    expect(isValidNetworkTopologyLevel("")).toBe(false);
+  });
+});
 
 describe("form.validators", () => {
   it("should validate directory", () => {

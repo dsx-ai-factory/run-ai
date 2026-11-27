@@ -77,6 +77,54 @@ var _ = Describe("Environment Assets Migration", Ordered, func() {
 			dbTesting.CleanTables()
 		})
 
+		It("updates only unchanged Jupyter SciPy presets and preserves them on rollback", func() {
+			const (
+				pathID           = "102d4a7b-2345-47d4-bcc1-52347eef1b4e"
+				hostID           = "17af3f04-f632-4a43-9ceb-ae8c062eb250"
+				copyID           = "65c13663-1969-43a6-8983-094e0f9f4a9a"
+				legacyImage      = "jupyter/scipy-notebook"
+				replacementImage = "quay.io/jupyter/scipy-notebook"
+				customImage      = "example.com/custom/jupyter:1"
+			)
+			db := runaidb.DB().Actual().WithContext(context.Background())
+			Expect(db.Exec(`INSERT INTO assets_environment (asset_id, image) VALUES (?, ?), (?, ?)
+				ON CONFLICT (asset_id) DO NOTHING`, pathID, legacyImage, hostID, legacyImage).Error).To(Succeed())
+			loadImage := func(id string) string {
+				var image string
+				result := db.Raw("SELECT image FROM assets_environment WHERE asset_id = ?", id).Scan(&image)
+				Expect(result.Error).To(Succeed())
+				Expect(result.RowsAffected).To(Equal(int64(1)))
+				return image
+			}
+			for _, id := range []string{pathID, hostID} {
+				original := loadImage(id)
+				DeferCleanup(func() {
+					Expect(db.Exec("UPDATE assets_environment SET image = ? WHERE asset_id = ?", original, id).Error).To(Succeed())
+				})
+			}
+			DeferCleanup(func() {
+				Expect(db.Exec("DELETE FROM assets_environment WHERE asset_id = ?", copyID).Error).To(Succeed())
+			})
+			Expect(db.Exec("UPDATE assets_environment SET image = ? WHERE asset_id IN (?, ?)", legacyImage, pathID, hostID).Error).To(Succeed())
+			Expect(db.Exec("INSERT INTO assets_environment (asset_id, image) VALUES (?, ?)", copyID, legacyImage).Error).To(Succeed())
+
+			migrateTo(30010005, "up 30010006")
+			Expect(loadImage(pathID)).To(Equal(replacementImage))
+			Expect(loadImage(hostID)).To(Equal(replacementImage))
+			Expect(loadImage(copyID)).To(Equal(legacyImage))
+
+			Expect(db.Exec("UPDATE assets_environment SET image = ? WHERE asset_id = ?", customImage, hostID).Error).To(Succeed())
+			migrateTo(30010005, "up 30010006")
+			Expect(loadImage(pathID)).To(Equal(replacementImage))
+			Expect(loadImage(hostID)).To(Equal(customImage))
+			Expect(loadImage(copyID)).To(Equal(legacyImage))
+
+			migrateTo(30010006, "down 30010005")
+			Expect(loadImage(pathID)).To(Equal(replacementImage))
+			Expect(loadImage(hostID)).To(Equal(customImage))
+			Expect(loadImage(copyID)).To(Equal(legacyImage))
+		})
+
 		It("replaces the legacy GPT-2 image without changing customized environments", func() {
 			gcrEnvironmentID := "7d098107-131b-456f-a38c-9f4cc983b587"
 			jfrogEnvironmentID := "fd09b64d-ef9b-4bb0-a3af-16534020c0b7"

@@ -299,6 +299,7 @@ func setStaticData(roleSpec *models.Role, existingRole *models.Role) {
 	roleSpec.CreatedAt = existingRole.CreatedAt
 	roleSpec.TenantId = existingRole.TenantId
 	roleSpec.InternalOnly = existingRole.InternalOnly
+	roleSpec.NoClusterPermissions = existingRole.NoClusterPermissions
 	roleSpec.Custom = existingRole.Custom
 	roleSpec.NoPermissionSet = existingRole.NoPermissionSet
 }

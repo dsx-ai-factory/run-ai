@@ -109,7 +109,6 @@ export const DOCS = {
     },
     HUGGING_FACE: {
       BASE_URL: "https://huggingface.co",
-      TGI_SUPPORTED_MODELS: "https://huggingface.co/docs/text-generation-inference/en/supported_models",
     },
     NIM: {
       CATALOG_BASE_URL: "https://catalog.ngc.nvidia.com/orgs/nim/teams",

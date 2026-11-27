@@ -1,0 +1,28 @@
+type: object
+description: |
+  GPU settings that replace the stored ones. An omitted or null field keeps its stored value; unlike the org unit
+  APIs, null doesn't mean unlimited here: send -1.
+properties:
+  deserved:
+    type: number
+    format: double
+    minimum: -1
+    nullable: true
+    description: The GPU quota; -1 means unlimited. Values between -1 and 0 are rejected. Ignored while quota is off.
+    example: 4
+  limit:
+    type: number
+    format: double
+    minimum: -1
+    nullable: true
+    description: |
+      The maximum GPU allocation; -1 means unlimited. Values between -1 and 0 are rejected. Only while limits is on,
+      and not below the quota.
+    example: -1
+  overQuotaWeight:
+    type: number
+    format: double
+    minimum: 0
+    nullable: true
+    description: The over-quota weight within the rank. Ignored while adjustableWeights is off, where the weight is the quota.
+    example: 2

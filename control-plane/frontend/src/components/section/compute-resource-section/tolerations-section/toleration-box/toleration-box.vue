@@ -89,7 +89,8 @@
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
 // Models
-import { TolerationOperator, type TolerationRules, type Toleration } from "@/swagger-models/assets-service-client";
+import { TolerationOperator, type Toleration } from "@/swagger-models/assets-service-client";
+import type { TolerationRules } from "@/swagger-models/policy-service-client";
 import type { ISelectOption } from "@/models/global.model";
 // Components
 import { RunaiSelect } from "@/components/common/runai-select";

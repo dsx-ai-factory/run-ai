@@ -33,7 +33,6 @@ var tenantSettingKeys = map[string]string{
 	"EnableNewCliInstaller":         "tenant.is_new_cli_installer_enabled",
 	"DeletedWorkloadsView":          "tenant.deleted_workloads_view",
 	"NewNavigation":                 "tenant.new_navigation",
-	"EnableHybridSubmission":        "tenant.enable_hybrid_submission",
 	"EnableCustomRoles":             "tenant.enable_custom_roles",
 	"EnableDataVolumes":             "tenant.enable_data_volumes",
 	"EnableNgcIntegration":          "tenant.enable_ngc_integration",

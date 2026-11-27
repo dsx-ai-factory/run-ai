@@ -1,0 +1,31 @@
+SERVICE_PORT: "8080"
+ENVIRONMENT: production
+LOG_LEVEL: info
+
+# DB
+DB_NAME: runai
+DB_SCHEMA: cluster_service
+DB_HOST: postgres
+DB_PORT: "5432"
+DB_SSL_MODE: disable
+MIGRATION_FILES: file:///migrations
+
+TRACING_ENABLED: "false"
+CACHE_ENABLED: "false"
+AUDIT_ENABLED: "false"
+AUDIT_ENABLE_PRINT_TO_STDOUT: "false"
+
+# Replaces the authorization and temp-backend-settings clients with in-process mocks
+USE_MOCKS: "true"
+
+# App
+APP_HOST: localhost.example.com
+CLUSTER_HOST_TEMPLATE: "%s.localhost.example.com"
+RUNAI_CLUSTER_DOMAIN_SUFFIX: localhost.example.com
+
+# Pubsub
+PUBSUB_TYPE: nats
+SERVICE_NAME: cluster-service
+SERVER_HEALTH_ENDPOINT: /
+PUBSUB_URL: nats://n1:4222
+PUBSUB_REPLICAS: 1

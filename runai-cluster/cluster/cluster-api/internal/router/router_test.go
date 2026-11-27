@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/auth"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/cluster/meta"
 
 	mocks "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/autogenerate/mocks/http"
@@ -150,6 +151,59 @@ var _ = Describe("Router", func() {
 				Entry("exec", PathExec),
 				Entry("attach", PathAttach),
 			)
+		})
+
+		Context("with CORS middleware", func() {
+			const (
+				allowedOrigin = "https://cp.example.com"
+				logsURL       = "/cluster-api/api/v1/test-project/workloads/test-type/test-framework/test-name" + PathLogs
+			)
+
+			BeforeEach(func() {
+				container.CORSMiddleware = auth.CreateCORSMiddleware([]string{allowedOrigin})
+			})
+
+			serve := func(method, origin string) {
+				request, _ = http.NewRequest(method, logsURL, nil)
+				if origin != "" {
+					request.Header.Set("Origin", origin)
+				}
+				if method == http.MethodOptions {
+					request.Header.Set("Access-Control-Request-Method", http.MethodGet)
+				}
+				CreateRouter(container).ServeHTTP(recorder, request)
+			}
+
+			DescribeTable("answers the preflight before routing and authentication",
+				func(origin, wantAllowOrigin, wantAllowCredentials string) {
+					serve(http.MethodOptions, origin)
+
+					Expect(recorder.Code).To(Equal(http.StatusOK))
+					Expect(recorder.Header().Get("Access-Control-Allow-Origin")).To(Equal(wantAllowOrigin))
+					Expect(recorder.Header().Get("Access-Control-Allow-Credentials")).To(Equal(wantAllowCredentials))
+					Expect(recorder.Header().Get("X-AuthMiddleware")).To(BeEmpty())
+					Expect(logsHandler.GetCalled).To(BeFalse())
+				},
+				Entry("allowed origin gets CORS headers", allowedOrigin, allowedOrigin, "true"),
+				Entry("disallowed origin gets no CORS headers", "https://evil.example.com", "", ""),
+				Entry("missing origin gets no CORS headers", "", "", ""),
+			)
+
+			It("sets CORS headers on an allowed cross-origin GET and still runs authentication", func() {
+				serve(http.MethodGet, allowedOrigin)
+
+				Expect(recorder.Code).To(Equal(http.StatusOK))
+				Expect(recorder.Header().Get("Access-Control-Allow-Origin")).To(Equal(allowedOrigin))
+				Expect(recorder.Header().Get("X-AuthMiddleware")).To(Equal("true"))
+				Expect(logsHandler.GetCalled).To(BeTrue())
+			})
+
+			It("does not set CORS headers on a GET from a disallowed origin", func() {
+				serve(http.MethodGet, "https://evil.example.com")
+
+				Expect(recorder.Header().Get("Access-Control-Allow-Origin")).To(BeEmpty())
+				Expect(recorder.Header().Get("X-AuthMiddleware")).To(Equal("true"))
+			})
 		})
 	})
 })

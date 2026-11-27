@@ -175,7 +175,7 @@ Once the cluster is registered, the next step is to install the NVIDIA Run:ai cl
 
 To retrieve the installation command and required parameters:
 
-* Send a `GET` request to the `/v1/clusters/{clusterUuid}/cluster-install-info?version=<version>` endpoint using the UUID returned when the cluster was created.
+* Send a `GET` request to the `/api/v1/clusters/{clusterUuid}/cluster-install-info?version=<version>` endpoint using the UUID returned when the cluster was created.
 * The response includes a preconfigured `installationStr`, Helm repository details, and a `bootstrapToken` to be used in the install command. The `bootstrapToken` is a short-lived token that expires 2 hours after it is issued. If installation takes longer, send the `GET` request again to retrieve a new `installationStr` and `bootstrapToken` before running the command.
 
 You will run the returned `installationStr` on the tenant's cluster to complete the installation and connect it to the NVIDIA Run:ai platform.

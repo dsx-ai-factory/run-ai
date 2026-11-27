@@ -148,7 +148,7 @@ import { RunaiSection } from "@/components/common/runai-section";
 // Models
 import type { IUIGitInstance } from "@/models/workload.model";
 import type { ISelectOption } from "@/models/global.model";
-import type { GitRules } from "@/swagger-models/assets-service-client";
+import type { GitRules } from "@/swagger-models/policy-service-client";
 // Utils
 import { assetsUtil } from "@/utils/assets.util/assets.util";
 // Constants

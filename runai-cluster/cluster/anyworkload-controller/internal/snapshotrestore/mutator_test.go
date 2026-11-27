@@ -15,6 +15,7 @@ import (
 	snapshotv1alpha1 "github.com/ai-dynamo/snapshot/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/internal/snapshotkey"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 	jsonpatch "github.com/evanphx/json-patch/v5"
 	admissionv1 "k8s.io/api/admission/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -48,14 +49,17 @@ func snapshotReader(t *testing.T, objects ...client.Object) client.Reader {
 // keyLabelPath is the key label as a JSON Pointer: a "/" inside a token is "~1".
 const keyLabelPath = "/metadata/labels/run.ai~1snapshot-key"
 
-// optedInPod is a keyable replica: opted in, owned by a ReplicaSet, one GPU
-// container.
+// optedInPod is a keyable replica: opted in, named after its runner, owned by
+// a ReplicaSet, one GPU container.
 func optedInPod(name string) *corev1.Pod {
 	return &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: "runai-proj",
-			Labels:    map[string]string{constants.SnapshotOptInLabel: "true"},
+			Labels: map[string]string{
+				constants.SnapshotOptInLabel:            "true",
+				commonconstants.WorkloadRunnerNameLabel: "llama",
+			},
 			OwnerReferences: []metav1.OwnerReference{{
 				APIVersion: "apps/v1",
 				Kind:       "ReplicaSet",
@@ -228,8 +232,11 @@ func readySnapshot(t *testing.T, pod *corev1.Pod, conditions ...metav1.Condition
 		t.Fatalf("ComputeKey: %v", err)
 	}
 	return &snapshotv1alpha1.PodSnapshot{
-		ObjectMeta: metav1.ObjectMeta{Name: snapshotkey.SnapshotName(key), Namespace: pod.Namespace},
-		Status:     snapshotv1alpha1.PodSnapshotStatus{Conditions: conditions},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      snapshotkey.SnapshotName(key, pod.Labels[commonconstants.WorkloadRunnerNameLabel]),
+			Namespace: pod.Namespace,
+		},
+		Status: snapshotv1alpha1.PodSnapshotStatus{Conditions: conditions},
 	}
 }
 
@@ -302,6 +309,39 @@ func TestReadySnapshotProducesARestorePod(t *testing.T) {
 	}
 	if admitted.Labels[constants.SnapshotKeyLabel] == "" {
 		t.Error("the key label was not stamped")
+	}
+}
+
+// countingReader records lookups, so a test can tell looking up nothing from
+// finding nothing.
+type countingReader struct {
+	client.Reader
+	gets int
+}
+
+func (r *countingReader) Get(ctx context.Context, key client.ObjectKey, obj client.Object,
+	opts ...client.GetOption) error {
+	r.gets++
+	return r.Reader.Get(ctx, key, obj, opts...)
+}
+
+// Without the runner's name there is no snapshot name, so the replica
+// cold-starts without a lookup.
+func TestWithoutARunnerNameThePodColdStarts(t *testing.T) {
+	pod := optedInPod("replica-0")
+	reader := &countingReader{Reader: snapshotReader(t, readySnapshot(t, pod, ready()))}
+	delete(pod.Labels, commonconstants.WorkloadRunnerNameLabel)
+
+	admitted := restoredPod(t, pod, reader, map[string]string{"nvidia.com/gpu.present": "true"})
+
+	if _, ok := admitted.Annotations[podcontract.RestoreFromAnnotation]; ok {
+		t.Errorf("restored a pod with no %s label", commonconstants.WorkloadRunnerNameLabel)
+	}
+	if admitted.Labels[constants.SnapshotKeyLabel] == "" {
+		t.Error("the key label was not stamped")
+	}
+	if reader.gets != 0 {
+		t.Errorf("looked up %d snapshots, want none", reader.gets)
 	}
 }
 

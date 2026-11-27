@@ -31,6 +31,7 @@ const (
 	readyReplicasField         = "readyReplicas"
 	networkingPluginName       = "networking-plugin"
 	mnnvlPluginName            = "mnnvl"
+	snapshotPluginName         = "snapshot-plugin"
 )
 
 func (h *ExternalWorkloadHandler) applyRunaiStatus(ctx context.Context, object client.Object,
@@ -111,7 +112,7 @@ func (h *ExternalWorkloadHandler) applyInferenceStatus(ctx context.Context, obje
 		input.Pods = pods.Items
 	}
 
-	phase, message := runaistatus.ComputeInferenceStatus(input)
+	phase, message := runaistatus.ComputeInferenceStatus(input, wlr.Status.Plugins[snapshotPluginName])
 	externalWorkload.Status.ObservedStatus.Phase = phase
 	externalWorkload.Status.ObservedStatus.Message = message
 	runaistatus.SetAdditionalFields(externalWorkload,

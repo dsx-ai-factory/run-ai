@@ -416,7 +416,7 @@ navigation:
       path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/README.md
       contents:
       - page: Workspace Templates
-        path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/workspace-templates/README.md
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/workspace-templates.md
       - section: Training Templates
         contents:
         - page: Standard Training Templates

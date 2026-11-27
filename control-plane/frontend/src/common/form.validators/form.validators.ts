@@ -18,6 +18,8 @@ export const formValidators = {
 };
 
 const MAX_K8S_NAME_CHARACTERS = 63;
+const MAX_K8S_DNS_PREFIX_CHARACTERS = 253;
+export const MAX_K8S_LABEL_KEY_CHARACTERS = MAX_K8S_DNS_PREFIX_CHARACTERS + 1 + MAX_K8S_NAME_CHARACTERS;
 export function isEmptyObject(val: object | undefined | null): boolean {
   return !val || Object.keys(val).length === 0;
 }
@@ -139,8 +141,32 @@ export function isValidDomain(val: string): boolean {
   return /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(val);
 }
 
-export function isValidTopologyKey(val: string): boolean {
+export function isValidPodAffinityKey(val: string): boolean {
   return /^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?(?:\/[a-z0-9._-]*[a-z0-9])?$/.test(val);
+}
+
+export function isValidKubernetesLabelKey(key: string): boolean {
+  if (!key || key.length > MAX_K8S_LABEL_KEY_CHARACTERS) return false;
+  const slash = key.indexOf("/");
+  const name = key.slice(slash + 1);
+  if (
+    name.length > MAX_K8S_NAME_CHARACTERS ||
+    !/^[A-Za-z0-9][-A-Za-z0-9_.]*$/.test(name) ||
+    !/[A-Za-z0-9]$/.test(name)
+  ) {
+    return false;
+  }
+  if (slash === -1) return true;
+  const prefix = key.slice(0, slash);
+  return (
+    prefix.length <= MAX_K8S_DNS_PREFIX_CHARACTERS &&
+    prefix.split(".").every((part) => /^[a-z0-9][-a-z0-9]*$/.test(part) && !part.endsWith("-"))
+  );
+}
+
+export function isValidNetworkTopologyLevel(key: string): boolean {
+  // The cluster-service limit applies to the whole level, including its optional prefix.
+  return isValidKubernetesLabelKey(key) && key.length <= MAX_K8S_NAME_CHARACTERS;
 }
 
 export function isValidRegExp(val: string, regexp: string): boolean {

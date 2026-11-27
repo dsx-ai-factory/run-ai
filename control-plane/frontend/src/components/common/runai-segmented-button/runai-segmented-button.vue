@@ -36,6 +36,7 @@
         <span class="runai-segment__label">{{ option.label }}</span>
         <span v-if="option.description" class="runai-segment__description text-b-body1">{{ option.description }}</span>
       </span>
+      <slot name="option-end" :selected="isSelected(option)" :option="option" />
       <q-tooltip v-if="isDisabled(option) && option.disabledTooltip" :max-width="option.disabledTooltipWidth">
         {{ option.disabledTooltip }}
       </q-tooltip>

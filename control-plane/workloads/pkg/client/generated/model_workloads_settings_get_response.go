@@ -24,7 +24,6 @@ var _ MappedNullable = &WorkloadsSettingsGetResponse{}
 type WorkloadsSettingsGetResponse struct {
 	EnablePolicies              *GetEnablePolicies              `json:"enablePolicies,omitempty"`
 	WorkloadSubmissionV2Enabled *GetWorkloadSubmissionV2Enabled `json:"workloadSubmissionV2Enabled,omitempty"`
-	EnableHybridSubmission      *GetEnableHybridSubmission      `json:"enableHybridSubmission,omitempty"`
 	GpuOverProvisioning         *GetGpuOverProvisioning         `json:"gpuOverProvisioning,omitempty"`
 	ApplicationSubmission       *GetApplicationSubmission       `json:"applicationSubmission,omitempty"`
 }
@@ -110,38 +109,6 @@ func (o *WorkloadsSettingsGetResponse) SetWorkloadSubmissionV2Enabled(v GetWorkl
 	o.WorkloadSubmissionV2Enabled = &v
 }
 
-// GetEnableHybridSubmission returns the EnableHybridSubmission field value if set, zero value otherwise.
-func (o *WorkloadsSettingsGetResponse) GetEnableHybridSubmission() GetEnableHybridSubmission {
-	if o == nil || IsNil(o.EnableHybridSubmission) {
-		var ret GetEnableHybridSubmission
-		return ret
-	}
-	return *o.EnableHybridSubmission
-}
-
-// GetEnableHybridSubmissionOk returns a tuple with the EnableHybridSubmission field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *WorkloadsSettingsGetResponse) GetEnableHybridSubmissionOk() (*GetEnableHybridSubmission, bool) {
-	if o == nil || IsNil(o.EnableHybridSubmission) {
-		return nil, false
-	}
-	return o.EnableHybridSubmission, true
-}
-
-// HasEnableHybridSubmission returns a boolean if a field has been set.
-func (o *WorkloadsSettingsGetResponse) HasEnableHybridSubmission() bool {
-	if o != nil && !IsNil(o.EnableHybridSubmission) {
-		return true
-	}
-
-	return false
-}
-
-// SetEnableHybridSubmission gets a reference to the given GetEnableHybridSubmission and assigns it to the EnableHybridSubmission field.
-func (o *WorkloadsSettingsGetResponse) SetEnableHybridSubmission(v GetEnableHybridSubmission) {
-	o.EnableHybridSubmission = &v
-}
-
 // GetGpuOverProvisioning returns the GpuOverProvisioning field value if set, zero value otherwise.
 func (o *WorkloadsSettingsGetResponse) GetGpuOverProvisioning() GetGpuOverProvisioning {
 	if o == nil || IsNil(o.GpuOverProvisioning) {
@@ -221,9 +188,6 @@ func (o WorkloadsSettingsGetResponse) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.WorkloadSubmissionV2Enabled) {
 		toSerialize["workloadSubmissionV2Enabled"] = o.WorkloadSubmissionV2Enabled
-	}
-	if !IsNil(o.EnableHybridSubmission) {
-		toSerialize["enableHybridSubmission"] = o.EnableHybridSubmission
 	}
 	if !IsNil(o.GpuOverProvisioning) {
 		toSerialize["gpuOverProvisioning"] = o.GpuOverProvisioning

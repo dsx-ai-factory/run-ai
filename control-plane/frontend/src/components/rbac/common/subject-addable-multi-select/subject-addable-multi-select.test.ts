@@ -282,6 +282,14 @@ describe("SubjectAddableMultiSelect", () => {
   });
 
   describe("manual options (addEmail)", () => {
+    it("drops a pending subject addition when the field becomes disabled", async () => {
+      factory(USER_SUBJECT_TYPE);
+      wrapper.vm.addEmail("pending@run.ai", vi.fn());
+      await wrapper.setProps({ disable: true });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(wrapper.emitted("add-subject")).toBeUndefined();
+    });
+
     it("preserves manual options after a fetch", async () => {
       vi.mocked(userService.getUsersMinimal).mockResolvedValue(MOCK_USERS);
       factory(USER_SUBJECT_TYPE);

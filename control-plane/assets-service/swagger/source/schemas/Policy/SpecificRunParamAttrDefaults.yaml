@@ -1,5 +1,0 @@
-properties:
-  tolerations:
-    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/Toleration.yaml"
-nullable: true
-type: object
