@@ -72,7 +72,7 @@
 
     <!-- RUN COMMAND -->
     <installation-command-box>
-      <template #top>Run the following command:</template>
+      <template #top>Install the cluster by running the following command:</template>
       <template #bottom>
         <div class="italic">
           For more information, see the
