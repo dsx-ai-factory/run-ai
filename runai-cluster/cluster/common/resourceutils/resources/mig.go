@@ -134,9 +134,19 @@ func getNodeGpuType(ctx context.Context, pod *v1.Pod, kubeClient client.Client) 
 	return nodeGpuType, nil
 }
 
+// getDeviceComputePortions returns the number of MIG compute slices of a whole GPU, per the NVIDIA MIG user guide
+// (supported MIG profiles).
 func getDeviceComputePortions(gpuProduct string) (float64, error) {
-	if strings.Contains(gpuProduct, A100) || strings.Contains(gpuProduct, H100) {
-		return defaultComputePortions, nil
+	for _, product := range []string{A100, H100, H200, B200, B300} {
+		if strings.Contains(gpuProduct, product) {
+			return defaultComputePortions, nil
+		}
+	}
+	if strings.Contains(gpuProduct, RTXPro6000) {
+		return rtxPro6000Portions, nil
+	}
+	if strings.Contains(gpuProduct, RTXPro5000) {
+		return rtxPro5000Portions, nil
 	}
 	return -1, fmt.Errorf("cannot calculate device portion for gpu product %s", gpuProduct)
 }
