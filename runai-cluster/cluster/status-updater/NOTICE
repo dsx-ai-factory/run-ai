@@ -13,9 +13,9 @@ automatically; do not edit it by hand.
 Summary
 ================================================================================
 
-102 third-party packages:
+104 third-party packages:
 
-  - Apache-2.0: 52
+  - Apache-2.0: 54
   - MIT: 26
   - BSD-3-Clause: 22
   - BSD-2-Clause: 1
@@ -97,7 +97,7 @@ Dependencies
 | `go.yaml.in/yaml/v2` | v2.4.4 | Apache-2.0 | https://pkg.go.dev/go.yaml.in/yaml/v2@v2.4.4?tab=licenses |
 | `go.yaml.in/yaml/v3` | v3.0.5 | MIT | https://pkg.go.dev/go.yaml.in/yaml/v3@v3.0.5?tab=licenses |
 | `golang.org/x/crypto/sha3` | v0.58.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/crypto@v0.58.0?tab=licenses |
-| `golang.org/x/exp/slices` | v0.0.0-20260410095643-746e56fc9e2f | BSD-3-Clause | https://pkg.go.dev/golang.org/x/exp@v0.0.0-20260410095643-746e56fc9e2f?tab=licenses |
+| `golang.org/x/exp` | v0.0.0-20260410095643-746e56fc9e2f | BSD-3-Clause | https://pkg.go.dev/golang.org/x/exp@v0.0.0-20260410095643-746e56fc9e2f?tab=licenses |
 | `golang.org/x/net` | v0.61.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/net@v0.61.0?tab=licenses |
 | `golang.org/x/oauth2` | v0.37.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/oauth2@v0.37.0?tab=licenses |
 | `golang.org/x/sync/errgroup` | v0.24.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sync@v0.24.0?tab=licenses |
@@ -117,11 +117,13 @@ Dependencies
 | `k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1` | v1.5.1 | Apache-2.0 | https://pkg.go.dev/k8s.io/autoscaler/vertical-pod-autoscaler@v1.5.1?tab=licenses |
 | `k8s.io/client-go` | v1.5.2 | Apache-2.0 | https://pkg.go.dev/k8s.io/client-go@v1.5.2?tab=licenses |
 | `k8s.io/component-helpers/resource` | v0.35.4 | Apache-2.0 | https://pkg.go.dev/k8s.io/component-helpers@v0.35.4?tab=licenses |
+| `k8s.io/dynamic-resource-allocation` | v0.35.4 | Apache-2.0 | https://pkg.go.dev/k8s.io/dynamic-resource-allocation@v0.35.4?tab=licenses |
 | `k8s.io/klog/v2` | v2.140.0 | Apache-2.0 | https://pkg.go.dev/k8s.io/klog/v2@v2.140.0?tab=licenses |
 | `k8s.io/kube-openapi/pkg` | v0.0.0-20260317180543-43fb72c5454a | Apache-2.0 | https://pkg.go.dev/k8s.io/kube-openapi@v0.0.0-20260317180543-43fb72c5454a?tab=licenses |
 | `k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json` | v0.0.0-20260317180543-43fb72c5454a | BSD-3-Clause | https://pkg.go.dev/k8s.io/kube-openapi@v0.0.0-20260317180543-43fb72c5454a?tab=licenses |
 | `k8s.io/kube-openapi/pkg/validation/spec` | v0.0.0-20260317180543-43fb72c5454a | Apache-2.0 | https://pkg.go.dev/k8s.io/kube-openapi@v0.0.0-20260317180543-43fb72c5454a?tab=licenses |
 | `k8s.io/kubectl/pkg/util/resource` | v0.35.4 | Apache-2.0 | https://pkg.go.dev/k8s.io/kubectl@v0.35.4?tab=licenses |
+| `k8s.io/kubernetes/pkg/apis` | v1.35.4 | Apache-2.0 | https://pkg.go.dev/k8s.io/kubernetes@v1.35.4?tab=licenses |
 | `k8s.io/utils` | v0.0.0-20260319190234-28399d86e0b5 | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20260319190234-28399d86e0b5?tab=licenses |
 | `k8s.io/utils/internal/third_party/forked/golang` | v0.0.0-20260319190234-28399d86e0b5 | BSD-3-Clause | https://pkg.go.dev/k8s.io/utils@v0.0.0-20260319190234-28399d86e0b5?tab=licenses |
 | `sigs.k8s.io/controller-runtime` | v0.23.3 | Apache-2.0 | https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.23.3?tab=licenses |
@@ -818,8 +820,10 @@ Applies to:
   - k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1
   - k8s.io/client-go
   - k8s.io/component-helpers/resource
+  - k8s.io/dynamic-resource-allocation
   - k8s.io/kube-openapi/pkg
   - k8s.io/kube-openapi/pkg/validation/spec
+  - k8s.io/kubernetes/pkg/apis
   - k8s.io/utils
 --------------------------------------------------------------------------------
 
@@ -2069,7 +2073,7 @@ limitations under the License.
 --------------------------------------------------------------------------------
 Applies to:
   - golang.org/x/crypto/sha3
-  - golang.org/x/exp/slices
+  - golang.org/x/exp
   - golang.org/x/net
   - golang.org/x/oauth2
   - golang.org/x/sync/errgroup

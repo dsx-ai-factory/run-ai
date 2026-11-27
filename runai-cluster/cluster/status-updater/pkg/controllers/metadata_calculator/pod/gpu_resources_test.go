@@ -173,7 +173,8 @@ func TestCalcPodGpuResources_MigOnMixedNode(t *testing.T) {
 			}
 			podMeta := metadata.PodMetadata{Status: TranslatePodStatus(pod)}
 
-			err := CalcPodGpuResources(context.Background(), pod, &podMeta, kubeClient)
+			// MIG pods are not resolved through DRA, so no resolver is needed.
+			err := CalcPodGpuResources(context.Background(), pod, &podMeta, kubeClient, nil)
 
 			if tc.expectErr {
 				assert.NotNil(t, err)

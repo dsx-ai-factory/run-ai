@@ -4798,7 +4798,9 @@ Copyright Alex Saskevich - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   k8s.io/kube-openapi/pkg/internal/third_party/govalidator v0.0.0-20260317180543-43fb72c5454a
+  k8s.io/kube-openapi/pkg/internal/third_party/govalidator v0.0.0-20260427204847-8949caaa1199
   k8s.io/kube-openapi/pkg/internal/third_party/govalidator v0.0.0-20260519202549-bbf5c5577288
+  k8s.io/kube-openapi/pkg/internal/third_party/govalidator v0.0.0-20260721132016-d427ff9ee9ad
 
 The MIT License (MIT)
 
@@ -5297,7 +5299,7 @@ SOFTWARE.
 Copyright Anton Medvedev - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/expr-lang/expr v1.17.7
+  github.com/expr-lang/expr v1.17.8
 
 MIT License
 
@@ -6649,7 +6651,7 @@ Components:
   github.com/cespare/xxhash/v2 v2.3.0
   github.com/klauspost/compress/zstd/internal/xxhash v1.20.1
   github.com/klauspost/compress/zstd/internal/xxhash v1.20.3
-  github.com/klauspost/compress/zstd/internal/xxhash v1.20.4
+  github.com/klauspost/compress/zstd/internal/xxhash v1.20.5
 
 Copyright (c) 2016 Caleb Spare
 
@@ -10747,7 +10749,7 @@ SOFTWARE.
 Copyright Frank Schroeder - BSD-2-Clause
 License Text(https://spdx.org/licenses/BSD-2-Clause.html)
 Components:
-  github.com/magiconair/properties v1.18.12
+  github.com/magiconair/properties v1.18.13
   github.com/magiconair/properties v1.8.10
 
 Copyright (c) 2013-2020, Frank Schroeder
@@ -10871,6 +10873,7 @@ License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   github.com/grpc-ecosystem/grpc-gateway/v2 v2.32.0
   github.com/grpc-ecosystem/grpc-gateway/v2 v2.33.0
+  github.com/grpc-ecosystem/grpc-gateway/v2 v2.34.0
 
 Copyright (c) 2015, Gengo, Inc.
 All rights reserved.
@@ -11172,8 +11175,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Copyright Google Inc - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
-  google.golang.org/api v0.278.0
-  google.golang.org/api v0.307.0
+  google.golang.org/api v0.281.0
+  google.golang.org/api v0.317.0
   google.golang.org/api/support/bundler v0.278.0
 
 Copyright (c) 2011 Google Inc. All rights reserved.
@@ -11550,6 +11553,7 @@ Copyright Jack Christensen - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/jackc/puddle/v2 v2.2.3
+  github.com/jackc/puddle/v2 v2.2.4
 
 Copyright (c) 2018 Jack Christensen
 
@@ -12061,7 +12065,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Copyright Jonathan Picques - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/gocarina/gocsv v0.0.0-20261101205459-d0dd027dcbfa
+  github.com/gocarina/gocsv v0.0.0-20261121203658-07c44a65ffb9
 
 The MIT License (MIT)
 
@@ -12286,8 +12290,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Copyright Joshua Tacoma - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
-  google.golang.org/api/internal/third_party/uritemplates v0.278.0
-  google.golang.org/api/internal/third_party/uritemplates v0.307.0
+  google.golang.org/api/internal/third_party/uritemplates v0.281.0
+  google.golang.org/api/internal/third_party/uritemplates v0.317.0
 
 Copyright (c) 2013 Joshua Tacoma. All rights reserved.
 
@@ -12476,7 +12480,7 @@ License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   github.com/klauspost/compress v1.20.1
   github.com/klauspost/compress v1.20.3
-  github.com/klauspost/compress v1.20.4
+  github.com/klauspost/compress v1.20.5
 
 Copyright (c) 2012 The Go Authors. All rights reserved.
 Copyright (c) 2019 Klaus Post. All rights reserved.
@@ -12788,7 +12792,7 @@ Copyright Klaus Post, The Snappy-Go Authors - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   github.com/klauspost/compress/s2 v1.20.3
-  github.com/klauspost/compress/s2 v1.20.4
+  github.com/klauspost/compress/s2 v1.20.5
 
 Copyright (c) 2011 The Snappy-Go Authors. All rights reserved.
 Copyright (c) 2019 Klaus Post. All rights reserved.
@@ -13042,7 +13046,7 @@ SOFTWARE.
 Copyright Masaaki Goshima - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/goccy/go-json v0.10.3
+  github.com/goccy/go-json v0.10.5
 
 MIT License
 
@@ -13250,7 +13254,7 @@ Copyright Micah Parks - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   github.com/MicahParks/keyfunc v1.9.0
-  github.com/MicahParks/keyfunc/v3 v3.9.1
+  github.com/MicahParks/keyfunc/v3 v3.9.2
 
                                  Apache License
                            Version 2.0, January 2004
@@ -13458,7 +13462,7 @@ Components:
 Copyright Micah Parks - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
-  github.com/MicahParks/jwkset v0.11.4
+  github.com/MicahParks/jwkset v0.11.5
 
                                  Apache License
                            Version 2.0, January 2004
@@ -13949,9 +13953,9 @@ Components:
 Copyright Microsoft Corporation - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/Azure/azure-sdk-for-go/sdk/azcore v1.20.0
+  github.com/Azure/azure-sdk-for-go/sdk/azcore v1.21.1
   github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.13.1
-  github.com/Azure/azure-sdk-for-go/sdk/internal v1.11.2
+  github.com/Azure/azure-sdk-for-go/sdk/internal v1.12.0
 
 MIT License
 
@@ -14036,7 +14040,7 @@ Copyright Microsoft Corporation - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/Azure/azure-pipeline-go/pipeline v0.2.3
-  github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.6.3
+  github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.7.0
   github.com/Azure/azure-storage-blob-go/azblob v0.14.0
 
     MIT License
@@ -14114,7 +14118,7 @@ Components:
   @types/sortablejs 1.15.9
   @types/trusted-types 2.0.7
   @types/web-bluetooth 0.0.20
-  github.com/AzureAD/microsoft-authentication-library-for-go/apps v1.6.0
+  github.com/AzureAD/microsoft-authentication-library-for-go/apps v1.7.2
 
     MIT License
 
@@ -14248,7 +14252,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Copyright Miklos Szeredi, Miklos Szeredi <miklos@szeredi.hu>, Russ Cox and 3 others - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
-  github.com/jacobsa/fuse v0.0.0-20260630194014-a124548f6da7
+  github.com/jacobsa/fuse v0.0.0-20261123163607-fc8dd07009de
 
 Apache License
                            Version 2.0, January 2004
@@ -14958,7 +14962,7 @@ THE SOFTWARE.
 Copyright Naoya Inada <naoina@kuune.org> - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/go-openapi/runtime/middleware/denco v0.33.4
+  github.com/go-openapi/runtime/middleware/denco v0.33.5
 
 Copyright (c) 2014 Naoya Inada <naoina@kuune.org>
 
@@ -15927,6 +15931,7 @@ Copyright Pierre Curto - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   github.com/pierrec/lz4/v4 v4.1.33
+  github.com/pierrec/lz4/v4 v4.1.34
 
 Copyright (c) 2015, Pierre Curto
 All rights reserved.
@@ -17014,7 +17019,6 @@ Copyright Segment - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/segmentio/kafka-go v0.4.48
-  github.com/segmentio/kafka-go v0.4.49
   github.com/segmentio/kafka-go v0.4.51
 
 MIT License
@@ -17698,32 +17702,31 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 --------------------------------------------------------------------------------
-Copyright the authors of cel.dev/expr, cloud.google.com/go/auth, cloud.google.com/go/auth/oauth2adapt and 123 others - (MPL-2.0 OR Apache-2.0) / Apache-2.0
+Copyright the authors of cel.dev/expr, cloud.google.com/go/auth, cloud.google.com/go/auth/oauth2adapt and 125 others - (MPL-2.0 OR Apache-2.0) / Apache-2.0
 License Text(http://www.apache.org/licenses/LICENSE-2.0)
 Components:
   cel.dev/expr v0.25.2
   cel.dev/expr v0.25.3
   cloud.google.com/go/auth v0.20.0
-  cloud.google.com/go/auth v0.24.4
+  cloud.google.com/go/auth v0.24.5
   cloud.google.com/go/auth/oauth2adapt v0.2.8
   cloud.google.com/go/auth/oauth2adapt v0.3.1
   cloud.google.com/go/compute/metadata v0.10.0
   cloud.google.com/go/compute/metadata v0.9.0
   cloud.google.com/go/iam v1.15.1
-  cloud.google.com/go/iam v1.5.3
-  cloud.google.com/go/internal v0.121.6
+  cloud.google.com/go/iam v1.7.0
   cloud.google.com/go/internal v0.123.0
-  cloud.google.com/go/monitoring v1.24.3
+  cloud.google.com/go/monitoring v1.29.0
   cloud.google.com/go/monitoring v1.32.1
-  cloud.google.com/go/storage v1.56.0
-  cloud.google.com/go/storage v1.70.0
+  cloud.google.com/go/storage v1.62.2
+  cloud.google.com/go/storage v1.71.1
   dompurify 3.4.16
   echarts 6.1.0
   github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.34.0
-  github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.53.0
-  github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.62.0
-  github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.53.0
-  github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.62.0
+  github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.55.0
+  github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.63.0
+  github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.55.0
+  github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.63.0
   github.com/Masterminds/goutils v1.1.1
   github.com/NVIDIA/k8s-dra-driver-gpu v0.0.0-20260329235847-c657396bd619
   github.com/aws/amazon-ssm-agent/agent/versionutil v0.0.0-20260407151232-1233a2a55f57
@@ -17734,18 +17737,17 @@ Components:
   github.com/envoyproxy/protoc-gen-validate/validate v1.3.3
   github.com/go-jose/go-jose/v4 v4.1.4
   github.com/go-jose/go-jose/v4 v4.1.9
-  github.com/go-openapi/analysis v1.0.1
+  github.com/go-openapi/analysis v1.0.2
   github.com/go-openapi/errors v0.22.9
   github.com/go-openapi/jsonpointer v0.22.1
   github.com/go-openapi/jsonreference v0.21.2
   github.com/go-openapi/jsonreference v0.21.4
   github.com/go-openapi/jsonreference v0.21.6
-  github.com/go-openapi/jsonreference v1.0.0
   github.com/go-openapi/jsonreference v1.0.2
   github.com/go-openapi/jsonreference v1.0.3
-  github.com/go-openapi/loads v0.25.3
-  github.com/go-openapi/runtime v0.33.4
-  github.com/go-openapi/runtime/server-middleware v0.33.4
+  github.com/go-openapi/loads v0.25.4
+  github.com/go-openapi/runtime v0.33.5
+  github.com/go-openapi/runtime/server-middleware v0.33.5
   github.com/go-openapi/spec v1.0.1
   github.com/go-openapi/strfmt v0.27.4
   github.com/go-openapi/swag v0.25.1
@@ -17784,22 +17786,24 @@ Components:
   github.com/go-openapi/swag/yamlutils v0.25.1
   github.com/go-openapi/swag/yamlutils v0.27.1
   github.com/go-openapi/swag/yamlutils v0.29.2
-  github.com/go-openapi/validate v1.0.1
+  github.com/go-openapi/validate v1.0.3
   github.com/golang/mock/gomock v1.6.0
   github.com/google/btree v1.1.3
   github.com/google/cel-go v0.29.0
+  github.com/google/cel-go v0.29.2
   github.com/google/gnostic-models v0.7.0
   github.com/google/gnostic-models v0.7.1
   github.com/google/go-containerregistry v0.22.1
   github.com/google/go-containerregistry/pkg/name v0.20.5
   github.com/google/s2a-go v0.1.11
   github.com/google/s2a-go v0.1.9
-  github.com/googleapis/enterprise-certificate-proxy/client v0.3.15
+  github.com/googleapis/enterprise-certificate-proxy/client v0.3.16
   github.com/googleapis/enterprise-certificate-proxy/client v0.3.25
   github.com/googleapis/google-cloud-go-testing/storage/stiface v0.0.0-20210719221736-1c9a4c676720
   github.com/jmespath/go-jmespath v0.4.1-0.20220621161143-b0104c826a24
   github.com/kai-scheduler/KAI-scheduler/pkg v0.18.2
   github.com/kai-scheduler/KAI-scheduler/pkg/apis/scheduling/v2 v0.18.2
+  github.com/kai-scheduler/KAI-scheduler/pkg/fairshare v0.19.0
   github.com/kubeflow/mpi-operator/pkg/apis/kubeflow/v2beta1 v0.6.0
   github.com/kylelemons/godebug v1.1.0
   github.com/minio/crc64nvme v1.1.1
@@ -17808,8 +17812,10 @@ Components:
   github.com/minio/minio-go/v7 v7.4.1
   github.com/moby/go-archive v0.3.3
   github.com/moby/moby/api v1.56.1
+  github.com/moby/moby/api v1.57.0
   github.com/moby/moby/client v0.6.0
   github.com/moby/moby/client v0.6.2
+  github.com/moby/moby/client v0.6.3
   github.com/moby/spdystream v0.5.1
   github.com/moby/sys/mountinfo v0.7.2
   github.com/moby/sys/sequential v0.7.0
@@ -17823,17 +17829,17 @@ Components:
   go.uber.org/mock/gomock v0.6.0
   google.golang.org/genproto/googleapis/api v0.0.0-20261012220534-4341edf3f941
   google.golang.org/genproto/googleapis/api v0.0.0-20261104224025-d1e00e9f33ab
-  google.golang.org/genproto/googleapis/api v0.0.0-20261110000943-09e21b237f2c
+  google.golang.org/genproto/googleapis/api v0.0.0-20261123191846-1e707ab9fbc2
   google.golang.org/genproto/googleapis/api/expr/v1alpha1 v0.0.0-20261104224025-d1e00e9f33ab
   google.golang.org/genproto/googleapis/api/httpbody v0.0.0-20261012220534-4341edf3f941
   google.golang.org/genproto/googleapis/api/httpbody v0.0.0-20261104224025-d1e00e9f33ab
-  google.golang.org/genproto/googleapis/api/httpbody v0.0.0-20261110000943-09e21b237f2c
+  google.golang.org/genproto/googleapis/api/httpbody v0.0.0-20261123191846-1e707ab9fbc2
   google.golang.org/genproto/googleapis/rpc v0.0.0-20261012220534-4341edf3f941
   google.golang.org/genproto/googleapis/rpc v0.0.0-20261104224025-d1e00e9f33ab
-  google.golang.org/genproto/googleapis/rpc v0.0.0-20261110000943-09e21b237f2c
+  google.golang.org/genproto/googleapis/rpc v0.0.0-20261123191846-1e707ab9fbc2
   google.golang.org/genproto/googleapis/rpc/status v0.0.0-20261104224025-d1e00e9f33ab
   google.golang.org/genproto/googleapis/type v0.0.0-20260319201613-d00831a3d3e7
-  google.golang.org/genproto/googleapis/type v0.0.0-20261110000943-09e21b237f2c
+  google.golang.org/genproto/googleapis/type v0.0.0-20261123191846-1e707ab9fbc2
   google.golang.org/grpc v1.84.0
   google.golang.org/grpc v1.85.0
   k8s.io/api v0.35.4
@@ -17841,24 +17847,28 @@ Components:
   k8s.io/api v0.36.4
   k8s.io/api v0.37.0
   k8s.io/api v0.37.1
-  k8s.io/api v0.37.2
+  k8s.io/api v0.37.3
   k8s.io/apiextensions-apiserver/pkg v0.35.4
+  k8s.io/apiextensions-apiserver/pkg v0.36.0
   k8s.io/apiextensions-apiserver/pkg v0.36.2
   k8s.io/apiextensions-apiserver/pkg v0.37.1
-  k8s.io/apiextensions-apiserver/pkg v0.37.2
+  k8s.io/apiextensions-apiserver/pkg v0.37.3
   k8s.io/apiextensions-apiserver/pkg/apis/apiextensions v0.35.4
   k8s.io/apiextensions-apiserver/pkg/apis/apiextensions v0.36.0
   k8s.io/apiextensions-apiserver/pkg/apis/apiextensions v0.36.4
+  k8s.io/apiextensions-apiserver/pkg/apis/apiextensions v0.37.0
   k8s.io/apiextensions-apiserver/pkg/apis/apiextensions v0.37.1
-  k8s.io/apiextensions-apiserver/pkg/apis/apiextensions v0.37.2
+  k8s.io/apiextensions-apiserver/pkg/apis/apiextensions v0.37.3
   k8s.io/apimachinery/pkg v0.35.4
   k8s.io/apimachinery/pkg v0.36.2
   k8s.io/apimachinery/pkg v0.36.4
   k8s.io/apimachinery/pkg v0.37.0
   k8s.io/apimachinery/pkg v0.37.1
-  k8s.io/apimachinery/pkg v0.37.2
-  k8s.io/apimachinery/pkg/util v0.32.0-alpha.3
+  k8s.io/apimachinery/pkg v0.37.3
+  k8s.io/apimachinery/pkg/util v0.36.2
+  k8s.io/apiserver v0.37.0
   k8s.io/apiserver/pkg v0.35.4
+  k8s.io/apiserver/pkg v0.36.0
   k8s.io/apiserver/pkg v0.36.2
   k8s.io/apiserver/pkg/endpoints/deprecation v0.37.1
   k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1 v1.5.1
@@ -17868,44 +17878,54 @@ Components:
   k8s.io/client-go v0.36.4
   k8s.io/client-go v0.37.0
   k8s.io/client-go v0.37.1
-  k8s.io/client-go v0.37.2
+  k8s.io/client-go v0.37.3
   k8s.io/client-go v1.5.2
-  k8s.io/client-go/util/workqueue v0.32.0-alpha.3
-  k8s.io/code-generator v0.35.4
+  k8s.io/client-go/util/workqueue v0.35.4
+  k8s.io/code-generator v0.36.0
   k8s.io/component-base v0.35.4
+  k8s.io/component-base v0.36.0
   k8s.io/component-base v0.36.2
-  k8s.io/component-base/cli/flag v0.37.2
+  k8s.io/component-base v0.37.0
+  k8s.io/component-base/cli/flag v0.37.3
   k8s.io/component-base/version v0.37.1
   k8s.io/component-helpers v0.35.4
   k8s.io/component-helpers v0.36.2
   k8s.io/component-helpers/resource v0.35.4
   k8s.io/dynamic-resource-allocation v0.35.4
   k8s.io/dynamic-resource-allocation v0.36.2
-  k8s.io/dynamic-resource-allocation v0.37.2
+  k8s.io/dynamic-resource-allocation v0.37.3
   k8s.io/dynamic-resource-allocation/cel v0.35.4
   k8s.io/kube-aggregator/pkg/apis/apiregistration v0.35.4
   k8s.io/kube-openapi/pkg v0.0.0-20250910181357-589584f1c912
   k8s.io/kube-openapi/pkg v0.0.0-20260317180543-43fb72c5454a
+  k8s.io/kube-openapi/pkg v0.0.0-20260427204847-8949caaa1199
   k8s.io/kube-openapi/pkg v0.0.0-20260501160325-927ab1f70cd6
   k8s.io/kube-openapi/pkg v0.0.0-20260519202549-bbf5c5577288
   k8s.io/kube-openapi/pkg v0.0.0-20260721132016-d427ff9ee9ad
   k8s.io/kube-openapi/pkg/validation/errors v0.0.0-20260317180543-43fb72c5454a
+  k8s.io/kube-openapi/pkg/validation/errors v0.0.0-20260427204847-8949caaa1199
   k8s.io/kube-openapi/pkg/validation/errors v0.0.0-20260519202549-bbf5c5577288
+  k8s.io/kube-openapi/pkg/validation/errors v0.0.0-20260721132016-d427ff9ee9ad
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20250910181357-589584f1c912
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260317180543-43fb72c5454a
+  k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260427204847-8949caaa1199
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260501160325-927ab1f70cd6
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260519202549-bbf5c5577288
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260721132016-d427ff9ee9ad
   k8s.io/kube-openapi/pkg/validation/strfmt v0.0.0-20260317180543-43fb72c5454a
+  k8s.io/kube-openapi/pkg/validation/strfmt v0.0.0-20260427204847-8949caaa1199
   k8s.io/kube-openapi/pkg/validation/strfmt v0.0.0-20260519202549-bbf5c5577288
+  k8s.io/kube-openapi/pkg/validation/strfmt v0.0.0-20260721132016-d427ff9ee9ad
   k8s.io/kube-scheduler v0.35.4
   k8s.io/kube-scheduler v0.36.2
   k8s.io/kubelet/pkg/apis v0.35.4
   k8s.io/kubelet/pkg/apis v0.36.2
   k8s.io/kubernetes/pkg v1.35.4
   k8s.io/kubernetes/pkg v1.36.2
-  k8s.io/kubernetes/pkg/apis v1.37.2
+  k8s.io/kubernetes/pkg/apis v1.35.4
+  k8s.io/kubernetes/pkg/apis v1.37.3
   k8s.io/streaming/pkg v0.36.2
+  k8s.io/streaming/pkg v0.37.3
   k8s.io/utils v0.0.0-20260319190234-28399d86e0b5
   k8s.io/utils v0.0.0-20260507154919-ff6756f316d2
   k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
@@ -18126,6 +18146,7 @@ Components:
   github.com/go-openapi/jsonpointer v1.0.0
   github.com/go-openapi/jsonpointer v1.0.1
   github.com/go-openapi/jsonpointer v1.0.2
+  github.com/go-openapi/jsonpointer v1.0.3
   github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1 v0.1.3
   github.com/kserve/kserve/pkg v0.17.1
   github.com/mattermost/xml-roundtrip-validator v0.1.0
@@ -18133,7 +18154,7 @@ Components:
   github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
   github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee
   github.com/nats-io/nats.go v1.54.0
-  github.com/nats-io/nats.go v1.55.0
+  github.com/nats-io/nats.go v1.56.0
   github.com/nats-io/nkeys v0.4.16
   github.com/nats-io/nkeys v0.4.17
   github.com/nats-io/nuid v1.0.1
@@ -18152,6 +18173,7 @@ Components:
   github.com/prometheus/common v0.67.1
   github.com/prometheus/common v0.67.5
   github.com/prometheus/common v0.71.0
+  github.com/prometheus/common v0.72.0
   github.com/prometheus/common v0.72.1
   github.com/prometheus/procfs v0.19.1
   github.com/prometheus/procfs v0.20.1
@@ -18165,9 +18187,11 @@ Components:
   github.com/spiffe/go-spiffe/v2 v2.8.1
   github.com/spiffe/go-spiffe/v2 v2.9.0
   go.opentelemetry.io/auto/sdk v1.2.1
+  go.opentelemetry.io/auto/sdk v1.2.2
   go.opentelemetry.io/contrib/detectors/gcp v1.44.0
   go.opentelemetry.io/contrib/detectors/gcp v1.47.0
   go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.72.0
+  go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.69.0
   go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0
   go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0
   go.opentelemetry.io/otel v1.47.0
@@ -18566,6 +18590,7 @@ here rather than reproduced with unresolved placeholders.]
 Copyright the authors of github.com/aws/smithy-go/ptr, github.com/awslabs/operatorpkg, github.com/russellhaering/goxmldsig and 4 others - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
+  github.com/aws/smithy-go/ptr v1.28.10
   github.com/aws/smithy-go/ptr v1.28.5
   github.com/aws/smithy-go/ptr v1.28.9
   github.com/awslabs/operatorpkg v0.0.0-20261030165915-63f6f735c934
@@ -18577,6 +18602,7 @@ Components:
   github.com/xdg-go/scram v1.2.0
   github.com/xdg-go/scram v1.4.0
   github.com/xdg-go/stringprep v1.0.4
+  github.com/xdg-go/stringprep v1.0.5
 
 
                                  Apache License
@@ -19140,6 +19166,7 @@ Copyright the authors of github.com/go-sql-driver/mysql - MPL-2.0
 License Text(https://spdx.org/licenses/MPL-2.0.html)
 Components:
   github.com/go-sql-driver/mysql v1.10.1
+  github.com/go-sql-driver/mysql v1.10.2
 
 Mozilla Public License Version 2.0
 ==================================
@@ -20714,6 +20741,7 @@ Copyright The github.com/redis/go-redis Authors - BSD-2-Clause
 License Text(https://spdx.org/licenses/BSD-2-Clause.html)
 Components:
   github.com/redis/go-redis/v9 v9.23.0
+  github.com/redis/go-redis/v9 v9.24.0
 
 Copyright (c) 2013 The github.com/redis/go-redis Authors.
 All rights reserved.
@@ -20784,16 +20812,16 @@ Components:
   golang.org/x/crypto/sha3 v0.58.0
   golang.org/x/crypto/sha3 v0.59.0
   golang.org/x/exp v0.0.0-20250103183323-7d7fa50e5329
+  golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f
   golang.org/x/exp v0.0.0-20261014143641-f0251eb4aa3e
-  golang.org/x/exp v0.0.0-20261109185158-a52e3aef5920
-  golang.org/x/exp/slices v0.0.0-20260410095643-746e56fc9e2f
+  golang.org/x/exp v0.0.0-20261124000051-d6646c509b6d
   golang.org/x/exp/slices v0.0.0-20261014143641-f0251eb4aa3e
-  golang.org/x/exp/slices v0.0.0-20261109185158-a52e3aef5920
+  golang.org/x/exp/slices v0.0.0-20261124000051-d6646c509b6d
   golang.org/x/mod/semver v0.42.0
   golang.org/x/mod/semver v0.43.0
   golang.org/x/net v0.59.0
   golang.org/x/net v0.61.0
-  golang.org/x/net v0.62.0
+  golang.org/x/net v0.63.0
   golang.org/x/oauth2 v0.32.0
   golang.org/x/oauth2 v0.36.0
   golang.org/x/oauth2 v0.37.0
@@ -20820,7 +20848,7 @@ Components:
   golang.org/x/time/rate v0.15.0
   golang.org/x/time/rate v0.16.0
   golang.org/x/tools v0.52.0
-  golang.org/x/tools v0.52.1-0.20261111171530-d4453b555d58
+  golang.org/x/tools v0.53.0
 
 Copyright 2009 The Go Authors.
 
@@ -20868,7 +20896,7 @@ Components:
   k8s.io/apimachinery/third_party/forked/golang v0.36.4
   k8s.io/apimachinery/third_party/forked/golang v0.37.0
   k8s.io/apimachinery/third_party/forked/golang v0.37.1
-  k8s.io/apimachinery/third_party/forked/golang v0.37.2
+  k8s.io/apimachinery/third_party/forked/golang v0.37.3
   k8s.io/client-go/third_party/forked/golang/template v0.37.1
   k8s.io/client-go/third_party/forked/golang/template v1.5.2
   k8s.io/kubernetes/third_party/forked/golang/expansion v1.35.4
@@ -20943,6 +20971,7 @@ License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20250910181357-589584f1c912
   k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20260317180543-43fb72c5454a
+  k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20260427204847-8949caaa1199
   k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20260501160325-927ab1f70cd6
   k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20260519202549-bbf5c5577288
   k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20260721132016-d427ff9ee9ad
@@ -22067,7 +22096,7 @@ Components:
 Copyright The KEDA Authors - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
-  github.com/kedacore/keda/v2 v2.18.3
+  github.com/kedacore/keda/v2 v2.20.0
 
 
                                  Apache License
@@ -23352,9 +23381,9 @@ License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   github.com/klauspost/compress/internal/snapref v1.20.1
   github.com/klauspost/compress/internal/snapref v1.20.3
-  github.com/klauspost/compress/internal/snapref v1.20.4
+  github.com/klauspost/compress/internal/snapref v1.20.5
   github.com/klauspost/compress/snappy v1.20.3
-  github.com/klauspost/compress/snappy v1.20.4
+  github.com/klauspost/compress/snappy v1.20.5
 
 Copyright (c) 2011 The Snappy-Go Authors. All rights reserved.
 
@@ -24773,12 +24802,14 @@ Components:
   k8s.io/kubectl/pkg/util/resource v0.35.4
   k8s.io/mount-utils v0.35.4
   k8s.io/mount-utils v0.36.2
+  sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.36.0
   sigs.k8s.io/controller-runtime v0.23.3
   sigs.k8s.io/controller-runtime v0.24.1
-  sigs.k8s.io/controller-runtime v0.25.2
+  sigs.k8s.io/controller-runtime v0.25.3
   sigs.k8s.io/controller-runtime/pkg v0.23.3
   sigs.k8s.io/controller-runtime/pkg v0.24.1
   sigs.k8s.io/controller-runtime/pkg v0.25.2
+  sigs.k8s.io/controller-runtime/pkg v0.25.3
   sigs.k8s.io/gateway-api-inference-extension v1.3.0
   sigs.k8s.io/karpenter/pkg v1.15.1
   sigs.k8s.io/kustomize/api v0.21.1
@@ -25450,6 +25481,7 @@ Copyright 2014-2015 Stripe, Inc.
 --------------------------------------------------------------------------------
 NOTICE of github.com/aws/smithy-go, github.com/awslabs/operatorpkg
 Components:
+  github.com/aws/smithy-go v1.28.10
   github.com/aws/smithy-go v1.28.5
   github.com/aws/smithy-go v1.28.9
   github.com/awslabs/operatorpkg v0.0.0-20261030165915-63f6f735c934
@@ -25484,6 +25516,7 @@ Components:
   github.com/go-openapi/jsonpointer v1.0.0
   github.com/go-openapi/jsonpointer v1.0.1
   github.com/go-openapi/jsonpointer v1.0.2
+  github.com/go-openapi/jsonpointer v1.0.3
 
 Copyright 2015-2025 go-swagger maintainers
 
@@ -25574,7 +25607,6 @@ limitations under the License.
 NOTICE of github.com/go-openapi/jsonreference
 Components:
   github.com/go-openapi/jsonreference v0.21.6
-  github.com/go-openapi/jsonreference v1.0.0
   github.com/go-openapi/jsonreference v1.0.2
   github.com/go-openapi/jsonreference v1.0.3
 
@@ -25621,7 +25653,7 @@ limitations under the License.
 --------------------------------------------------------------------------------
 NOTICE of github.com/go-openapi/runtime
 Components:
-  github.com/go-openapi/runtime v0.33.4
+  github.com/go-openapi/runtime v0.33.5
 
 Copyright 2015-2025 go-swagger maintainers
 
@@ -34435,6 +34467,34 @@ Copyright (c) 2016 Titus Wormer <tituswormer@gmail.com>
 Grand Total
 
 --------------------------------------------------------------------------------
+NOTICE of github.com/kai-scheduler/KAI-scheduler
+Components:
+  github.com/kai-scheduler/KAI-scheduler v0.19.0
+
+# KAI Scheduler
+Copyright Copyright 2025 NVIDIA CORPORATION
+
+This project was originally forked from kube-batch in 2019, therefore it includes core components from kube-batch which are licensed under the Apache License, Version 2.0.
+Copyright (c) The Kubernetes Authors.
+This project includes components derived from kube-batch, originally developed by The Kubernetes Authors.
+
+The `K8sFramework` struct in pkg/common/k8s_utils/framework_handle.go file was originally forked from volcano-sh/volcano, which is licensed under the Apache License, Version 2.0.
+Copyright 2020 The Volcano Authors.
+This file was originally developed by the Volcano Authors.
+
+This project includes components from kueue, which is licensed under the Apache License, Version 2.0.
+Copyright (c) The Kubernetes Authors.
+This project includes components derived from kueue, originally developed by The Kubernetes Authors.
+
+The base code for `dco_check.py` was derived from christophebedard/dco-check , which is licensed under the Apache License, Version 2.0.
+Copyright (c) The christophebedard/dco-check Authors.
+This project includes components derived from christophebedard/dco-check, originally developed by christophebedard/dco-check Authors.
+
+Third-party components distributed with KAI Scheduler releases, their licenses and
+the offer to obtain source code for components under licenses that require it are
+listed in COPYRIGHT.
+
+--------------------------------------------------------------------------------
 NOTICE of github.com/kai-scheduler/kai-resource-management-api
 Components:
   github.com/kai-scheduler/kai-resource-management-api v0.1.3
@@ -34601,6 +34661,7 @@ SoundCloud Ltd. (http://soundcloud.com/).
 NOTICE of github.com/prometheus/common
 Components:
   github.com/prometheus/common v0.67.5
+  github.com/prometheus/common v0.72.0
   github.com/prometheus/common v0.72.1
 
 Common libraries shared by Prometheus Go components.

@@ -13,7 +13,7 @@ import {
   CUSTOM_SCALE_DOWN_ID,
   EScaleDownSectionEvents,
 } from "./scale-down-section.model";
-import type { AutoScalingRules } from "@/swagger-models/assets-service-client";
+import type { AutoScalingRules } from "@/swagger-models/policy-service-client";
 
 interface IReplicaScalingProps {
   modelValue: { scaleToZeroRetentionSeconds: number | undefined };

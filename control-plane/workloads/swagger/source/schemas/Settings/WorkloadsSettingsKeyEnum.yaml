@@ -2,6 +2,5 @@ type: string
 enum:
   - enablePolicies
   - workloadSubmissionV2Enabled
-  - enableHybridSubmission
   - gpuOverProvisioning
   - applicationSubmission

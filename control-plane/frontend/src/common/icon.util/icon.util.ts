@@ -45,6 +45,14 @@ export function getNimIconIfNimImage(
 }
 
 /**
+ * TGI can no longer be created, but existing TGI workloads and templates are still recognised by their image so
+ * they can be flagged as deprecated. This is the single place that decides "is this a TGI inference".
+ */
+export function isTgiInference(type: EWorkloadType, image: string | null | undefined): boolean {
+  return type === EWorkloadType.Inference && !!image && image.includes(LLM_IMAGE_FOR_TGI);
+}
+
+/**
  * @description - This function is used to get the icon of the workload.
  * Note that this logic supports the flat inference workloads/ templates only.
  * For the non-flat inference workloads use the workload.util.getWorkloadIcon.
@@ -60,7 +68,7 @@ export function getHuggingFaceIcon(type: EWorkloadType, image: string | null | u
     return allWorkloadsIconsMap.VLLM;
   }
 
-  if (image.includes(LLM_IMAGE_FOR_TGI)) {
+  if (isTgiInference(type, image)) {
     return allWorkloadsIconsMap.TGI;
   }
 

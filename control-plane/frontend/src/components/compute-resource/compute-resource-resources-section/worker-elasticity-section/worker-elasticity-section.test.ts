@@ -7,7 +7,7 @@ import { mount, type VueWrapper } from "@vue/test-utils";
 import WorkerElasticitySection from "./worker-elasticity-section.vue";
 import { Quasar } from "quasar";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { IntegerRules } from "@/swagger-models/assets-service-client";
+import type { IntegerRules } from "@/swagger-models/policy-service-client";
 
 const defaultPolicyRulesMin: IntegerRules = { min: 1, max: 10 };
 const defaultPolicyRulesMax: IntegerRules = { min: 1, max: 10000 };

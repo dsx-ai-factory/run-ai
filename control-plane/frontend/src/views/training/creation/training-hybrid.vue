@@ -145,12 +145,17 @@ import { policyUtil, clearWorkloadBlockedFields } from "@/utils/policy.util";
 import { ErrorAlert } from "@/utils/error-alert.util";
 import { useSettingStore } from "@/stores/setting.store";
 // Models
-import { AssetKind, Scope, type StringOption } from "@/swagger-models/assets-service-client";
+import { AssetKind, Scope } from "@/swagger-models/assets-service-client";
+import type { StringOption, TrainingPolicyDefaultsAndRulesV2 } from "@/swagger-models/policy-service-client";
 import { EWorkloadTypeSupportedInAssetsService, EWorkloadFormType, EWorkloadName } from "@/models/workload.model";
 import { WORKLOAD_ROUTE_NAMES } from "@/router/workloads.routes/workloads.routes.names";
 import { TRAINING_ROUTE_NAMES } from "@/router/training.routes/training.routes.names";
 import { getPolicyViewDetails, type IPolicyViewDetails } from "@/utils/policy.util/policy-view.util";
-import { type UnifiedPolicyInfoPerReplicaType, type UnifiedProjectInfo } from "@/swagger-models/workloads-client";
+import type {
+  UnifiedPolicyInfoPerReplicaType,
+  UnifiedProjectInfo,
+  UnifiedWorkloadRequest,
+} from "@/swagger-models/workloads-client";
 import { useWorkloadStore } from "@/stores/workload.store";
 import { useDataSourceStore } from "@/stores/data-source.store";
 import {
@@ -170,7 +175,6 @@ import type { IItemizedListItem } from "@/components/common/runai-itemized-list"
 import type { THybridFormState } from "@/models/workload-hybrid.model";
 import type { IUIStorageFields, IUISuperWorkloadSpec } from "@/models/workload.model";
 import type { ILoadedItemizeDefaults } from "@/models/policy.model";
-import type { UnifiedWorkloadRequest } from "@/swagger-models/workloads-client";
 import { useEnvironmentVariablesSection } from "@/composables/use-environment-variables-section.composable";
 import { credentialService } from "@/services/control-plane/credential.service/credential.service";
 import type { SecretListInfo } from "@/swagger-models/k8s-objects-tracker-client";
@@ -183,7 +187,6 @@ import { orgUnitService } from "@/services/control-plane/org-unit.service/org-un
 import { workloadService } from "@/services/cluster/workload.service/workload.service";
 import type { Project } from "@/swagger-models/org-unit-service-client";
 import type { IWorkloadPriorityData } from "@/components/section/general-section/general-section.model";
-import type { TrainingPolicyDefaultsAndRulesV2 } from "@/swagger-models/policy-service-client";
 
 const TrainingHybrid = defineComponent({
   name: "training-hybrid",

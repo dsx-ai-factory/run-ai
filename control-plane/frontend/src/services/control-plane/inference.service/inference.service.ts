@@ -7,15 +7,9 @@
 import { workloadServiceApi } from "@/services/infra/client-apis/workloads-service-api/workloads-service-api";
 import { httpService } from "@/services/infra/https.service/http.service";
 import { assetsServiceApi } from "@/services/infra/client-apis/assets-service-api/assets-service-api";
-import { policyService } from "@/services/control-plane/policy.service/policy.service";
 
 // models
-import type {
-  InferenceCreationRequestV2,
-  InferenceV2,
-  HuggingFaceModelInfoRequest,
-  HuggingFaceModelInfo,
-} from "@/swagger-models/assets-service-client";
+import type { HuggingFaceModelInfoRequest, HuggingFaceModelInfo } from "@/swagger-models/assets-service-client";
 import type {
   Catalog,
   InferenceCreationRequest,
@@ -27,22 +21,16 @@ import type {
   DistributedInference,
 } from "@/swagger-models/workloads-client";
 import type { AxiosResponse } from "axios";
-import type { InferencePolicyV2 } from "@/swagger-models/policy-service-client";
-import { ScopeType } from "@/swagger-models/authorization-client";
 
 import type { Inference as FlatInference } from "@/swagger-models/workloads-client";
 
 export const inferenceService = {
-  getById,
   getMetrics,
   getPodMetrics,
-  createInferenceV2,
   createInferenceFlatApi,
   getFlatById,
   updateFlatWorkload,
   getHuggingFaceModelInfo,
-  getPolicy,
-  getInferenceMergedWithPolicy,
   getNimCatalogModels,
   createDistributedInference,
 };
@@ -87,43 +75,12 @@ async function updateFlatWorkload(inferenceId: string, inferenceSpec: InferenceU
   }
 }
 
-async function createInferenceV2(inference: InferenceCreationRequestV2): Promise<InferenceV2> {
-  try {
-    const response: AxiosResponse = await assetsServiceApi.inferenceApi.createInferenceV2(inference);
-    return response.data;
-  } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
-  }
-}
-
-async function getById(inferenceId: string): Promise<InferenceV2> {
-  try {
-    const response = await assetsServiceApi.inferenceApi.getInferenceByIdV2(inferenceId);
-    return response.data;
-  } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
-  }
-}
-
 async function getHuggingFaceModelInfo(
   huggingFaceModelInfoRequest: HuggingFaceModelInfoRequest,
 ): Promise<HuggingFaceModelInfo> {
   try {
     const response: AxiosResponse =
       await assetsServiceApi.inferenceApi.getHuggingFaceModelInfo(huggingFaceModelInfoRequest);
-    return response.data;
-  } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
-  }
-}
-
-async function getPolicy(projectId: number): Promise<InferencePolicyV2> {
-  return policyService.getInferencePolicyByScope({ scope: ScopeType.Project, projectId });
-}
-
-async function getInferenceMergedWithPolicy(projectId?: string, workloadId?: string): Promise<InferenceV2> {
-  try {
-    const response = await assetsServiceApi.inferenceApi.getInferenceMerged(projectId, workloadId);
     return response.data;
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);

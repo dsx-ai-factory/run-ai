@@ -171,20 +171,13 @@ func buildDynamoGraphDeploymentV1beta1ChildComponents() []karta.ComponentDefinit
 			Name:     "component",
 			OwnerRef: ptr.To("dynamographdeployment"),
 			SpecDefinition: &karta.SpecDefinition{
-				FragmentedPodSpecDefinition: &karta.FragmentedPodSpecDefinition{
-					LabelsPath:            ptr.To(".spec.components[] | .podTemplate.metadata.labels"),
-					AnnotationsPath:       ptr.To(".spec.components[] | .podTemplate.metadata.annotations"),
-					SchedulerNamePath:     ptr.To(".spec.components[] | .podTemplate.spec.schedulerName"),
-					ResourceClaimsPath:    ptr.To(".spec.components[] | .podTemplate.spec.resourceClaims"),
-					NodeAffinityPath:      ptr.To(".spec.components[] | .podTemplate.spec.affinity.nodeAffinity"),
-					PodAffinityPath:       ptr.To(".spec.components[] | .podTemplate.spec.affinity.podAffinity"),
-					PriorityClassNamePath: ptr.To(".spec.components[] | .podTemplate.spec.priorityClassName"),
-					ContainerPath:         ptr.To(".spec.components[] | .podTemplate.spec.containers[] | select(.name == \"main\")"),
-					ImagePath:             ptr.To(".spec.components[] | .podTemplate.spec.containers[] | select(.name == \"main\") | .image"),
-				},
+				// Keep sidecars and init containers when Karta saves changes to the pod.
+				PodTemplateSpecPath: ptr.To(".spec.components[] | .podTemplate"),
 			},
 			ScaleDefinition: &karta.ScaleDefinition{
-				ReplicasPath: ptr.To(".spec.components[] | (.replicas // 1) * (.multinode.nodeCount // 1)"),
+				// multinode: {} means two nodes per replica in Dynamo. Without multinode,
+				// each replica is one pod.
+				ReplicasPath: ptr.To(".spec.components[] | (.replicas // 1) * (if .multinode == null then 1 else (.multinode.nodeCount // 2) end)"),
 			},
 			PodSelector: &karta.PodSelector{
 				ComponentInstanceSelector: &karta.ComponentInstanceSelector{

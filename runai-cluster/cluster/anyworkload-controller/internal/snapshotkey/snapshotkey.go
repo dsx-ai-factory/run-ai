@@ -44,6 +44,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/validation"
 )
 
 // Version is folded into the hash. Bump it whenever the shape
@@ -217,12 +218,13 @@ func Matches(pod *corev1.Pod) (bool, error) {
 }
 
 // SnapshotName returns the SnapshotJob and PodSnapshot name for a key.
-//
-// Derived from the key alone, so the webhook needs no workload identity to
-// look an object up. The workload's name travels as a label on the objects
-// instead. At most 63 characters, since it is used as a label value.
-func SnapshotName(key string) string {
-	return "runai-snap-" + key
+// At most 63 characters, since it is used as a label value.
+func SnapshotName(key string, workloadName string) string {
+	suffix := "-snapshot-" + key
+	if limit := validation.DNS1123LabelMaxLength - len(suffix); len(workloadName) > limit {
+		workloadName = strings.TrimRight(workloadName[:max(limit, 0)], "-.")
+	}
+	return workloadName + suffix
 }
 
 func containerNamed(containers []corev1.Container, name string) *corev1.Container {

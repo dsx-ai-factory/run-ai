@@ -6,7 +6,6 @@ This guide explains how to create NVIDIA NIM inference templates for reuse durin
 
 **Note**
 
-* Workload templates apply to flexible workload submission. If unavailable, contact your administrator to enable **Flexible workload submission** under **General settings** → **Workloads**.
 * Selecting the **inference server** is enabled by default. If you cannot see it in the menu, contact your administrator to enable it under **General settings** → Workloads → NIM models.
 * **Docker registry URL for inference workloads** - For Knative-based inference workloads, Docker Hub credentials must be configured using `https://index.docker.io/v1/` as the registry URL. Credentials configured with `docker.io` result in `401 Unauthorized` errors for Knative-based inference workloads due to differences in how image digests are resolved during image pull. See [Credentials](../../workload-assets/credentials.md#docker-registry) for more details.
 
@@ -120,12 +119,10 @@ Manually configure the settings below as needed.
 
 1. Set the **environment image**:
    * Select **Custom image** and add the **Image URL** or update the URL of the existing setup.
-   * **Select from the NGC catalog** and then set how to **access the NGC catalog**:
-     * **As a guest** - Choose the **image name** and **tag** from the dropdown.
-     * **Authenticated** - Configure **access** to NGC and then choose the **image name** and **tag** from the dropdown:
-       * Under **Source**, select [**Shared secret**](../../workload-assets/credentials.md#ngc-api-key) or [**My credentials**](../../../settings/user-settings/user-credentials.md).
-       * The **Type** field is fixed to **NGC API key**.
-       * Under **Credential name**, select an existing credential from the dropdown. If you select **My credentials**, you can also create a new credential directly from the dropdown. The credential is also saved under **User settings** → Credentials.
+   * **Select from the NGC catalog**, configure **access** to NGC, and then choose the **image name** and **tag** from the dropdown:
+     * Under **Source**, select [**Shared secret**](../../workload-assets/credentials.md#ngc-api-key) or [**My credentials**](../../../settings/user-settings/user-credentials.md).
+     * The **Type** field is fixed to **NGC API key**.
+     * Under **Credential name**, select an existing credential from the dropdown. If you select **My credentials**, you can also create a new credential directly from the dropdown. The credential is also saved under **User settings** → Credentials.
    * **Select from the NGC private registry** and then set how to access the registry:
      * Select a **registry** from the dropdown.
      * Under **Source**, select [**Shared secret**](../../workload-assets/credentials.md#ngc-api-key) or [**My credentials**](../../../settings/user-settings/user-credentials.md).

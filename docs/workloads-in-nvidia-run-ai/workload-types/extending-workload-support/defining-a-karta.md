@@ -199,7 +199,7 @@ Use `podSelector` to associate pods with components or instances. This is requir
         idPath: '.metadata.labels["<replica-group-label>"]'
     ```
 
-**DynamoGraphDeployment Example**
+**DynamoGraphDeployment v1alpha1 Example**
 
 The following example shows how the selectors apply to a `DynamoGraphDeployment` workload with three services: Frontend, Middle, and Backend. All three services share the same structural definition - they are the same component type - and are differentiated only by their instance identity (the service name).
 

@@ -2,14 +2,6 @@
 
 A workload template is a reusable setup that defines all the required configuration fields for submitting a workload. Templates simplify the submission process by allowing users to predefine settings. Researchers can quickly submit workloads using a saved template or adjust the values before submission as needed.
 
-<Note>
-
-**Note**
-
-Workload templates apply to flexible workload submission. If unavailable, contact your administrator to enable **Flexible workload submission** under **General settings** → **Workloads**.
-
-</Note>
-
 ## Templates Table
 
 The Templates table can be found under **Workload manager** in the NVIDIA Run:ai User Interface.
@@ -51,7 +43,7 @@ When installing NVIDIA Run:ai, you automatically get the templates created by NV
 | Template | Image | Description |
 | --- | --- | --- |
 | bio-nemo-four-gpus | `nvcr.io/nvidia/clara/bionemo-framework:2.6.3` | This template is designed for training workloads using NVIDIA’s BioNeMo framework. It runs the `nvcr.io/nvidia/clara/bionemo-framework:2.6.3` image and requests 4 GPUs, making it suitable for large-scale biomolecular modeling tasks. |
-| jupyter-lab-one-gpu | `jupyter/scipy-notebook` | This template provides a preemptible workspace environment based on the JupyterLab SciPy notebook image (`jupyter/scipy-notebook`). It is configured to run with 1 GPU, giving users an interactive environment for experimentation and development. |
+| jupyter-lab-one-gpu | `quay.io/jupyter/scipy-notebook` | This template provides a preemptible workspace environment based on the JupyterLab SciPy notebook image (`quay.io/jupyter/scipy-notebook`). It is configured to run with 1 GPU, giving users an interactive environment for experimentation and development. |
 | nemo-four-gpus | `nvcr.io/nvidia/nemo:25.07` | A training template for NVIDIA NeMo, a framework for training and deploying LLMs and generative AI. It uses the `nvcr.io/nvidia/nemo:25.07` image with 4 GPUs, making it suitable for advanced AI model development. |
 | pytorch-one-gpu | `nvcr.io/nvidia/pytorch:25.06-py3` | This template supports training workloads using PyTorch. It runs the `nvcr.io/nvidia/pytorch:25.06-py3` image and requests 1 GPU, making it well-suited for single-GPU model development and testing. |
 
@@ -61,7 +53,7 @@ To create a new template:
 
 1. Click **+NEW TEMPLATE**
 2. Select a workload type - Follow the links below to view the step-by-step guide for each workload type:
-   * [Workspace](workspace-templates/README.md) - Used for data preparation and model-building tasks.
+   * [Workspace](workspace-templates.md) - Used for data preparation and model-building tasks.
    * [Training](../using-training/train-models.md) - Used for standard training or distributed training tasks of all sorts
    * [Inference](inference-templates/nvidia-nim-inference-templates.md) - Used for inference and serving tasks
 3. Click **CREATE TEMPLATE**
@@ -104,8 +96,6 @@ Legacy asset-based templates and their automatic migration process have been rem
 Templates migrated previously remain available as flexible workload templates. Legacy templates that were not migrated are no longer accessible and are not migrated during upgrade.
 
 Before upgrading from a version that still supports legacy templates, save the definitions of any legacy templates you need. On that version, you can retrieve them with `GET /api/v1/asset/workload-template` and save the response. Use the saved definitions to manually recreate the templates using [Adding a New Template](#adding-a-new-template).
-
-The legacy `/api/v1/asset/workload-template` endpoints are no longer available. Use the workload templates API linked below.
 
 ## Using APIs
 

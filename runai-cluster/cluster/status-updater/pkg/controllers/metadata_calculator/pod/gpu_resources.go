@@ -70,8 +70,14 @@ const (
 	TibInMib  = 1024 * 1024
 )
 
+// DRAGpuResolver resolves the number of GPUs a pod requests through DRA ResourceClaims and ResourceClaimTemplates.
+// It is implemented by *dra.DRAParser. A nil resolver means that DRA is not taken into account.
+type DRAGpuResolver interface {
+	ResolvePodRequestedGpuCount(ctx context.Context, pod *v1.Pod) (int64, error)
+}
+
 func CalcPodGpuResources(ctx context.Context, pod *v1.Pod, podMetrics *metadata.PodMetadata,
-	kubeClient client.Client) error {
+	kubeClient client.Client, draResolver DRAGpuResolver) error {
 	if !IsActiveUsedStatus(GetExtendedPhase(pod)) {
 		return nil
 	}
@@ -81,7 +87,11 @@ func CalcPodGpuResources(ctx context.Context, pod *v1.Pod, podMetrics *metadata.
 	case receivedTypeNone:
 		return nil
 	case receivedTypeRegular:
-		podMetrics.GPUs = GetGpuRequest(pod)
+		gpus, err := getGpuRequestIncludingDRA(ctx, pod, draResolver)
+		if err != nil {
+			return err
+		}
+		podMetrics.GPUs = gpus
 		return matchAllMetrics(ctx, pod, podMetrics, kubeClient)
 	case receivedTypeFraction:
 		podMetrics.GPUs = GetGpuRequest(pod)
@@ -114,6 +124,23 @@ func GetGpuRequest(pod *v1.Pod) float64 {
 	}
 
 	return gpusCount
+}
+
+// getGpuRequestIncludingDRA returns the pod's GPU request from its spec (and GPU-fraction annotation) plus the GPUs
+// it requests through DRA claims. DRA GPUs are not part of the pod spec, so GetGpuRequest alone reports 0 for them.
+// Lookup errors are returned so that the reconcile is retried, rather than writing a wrong (zero) value.
+func getGpuRequestIncludingDRA(ctx context.Context, pod *v1.Pod, draResolver DRAGpuResolver) (float64, error) {
+	gpus := GetGpuRequest(pod)
+	if draResolver == nil || len(pod.Spec.ResourceClaims) == 0 {
+		return gpus, nil
+	}
+
+	draGpus, err := draResolver.ResolvePodRequestedGpuCount(ctx, pod)
+	if err != nil {
+		return 0, fmt.Errorf("failed to resolve DRA gpus of pod %s/%s: %w", pod.Namespace, pod.Name, err)
+	}
+
+	return gpus + float64(draGpus), nil
 }
 
 func GetGpuMemoryRequest(pod *v1.Pod) int64 {

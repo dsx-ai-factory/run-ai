@@ -7,6 +7,7 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"testing"
@@ -109,14 +110,6 @@ func allTransformTestCases() []transformTestCase {
 			stage:       "Alpha",
 		},
 		{
-			name:        "enableHybridSubmission",
-			setting:     &settings.EnableHybridSubmission{Enabled: false},
-			enabled:     false,
-			displayName: "Flexible workload submission",
-			description: "Enable to submit workloads via the new flexible form. Allow selecting an existing setup or starting from scratch, reviewing existing setups and understanding policy definitions.",
-			stage:       "GA",
-		},
-		{
 			name:        "gpuOverProvisioning",
 			setting:     &settings.GpuOverProvisioning{Enabled: true},
 			enabled:     true,
@@ -163,12 +156,6 @@ func TestTransformSettingByKeyToResponse(t *testing.T) {
 				assert.Equal(t, tc.displayName, resp.DisplayName)
 				assert.Equal(t, tc.description, resp.Description)
 				assert.Equal(t, tc.stage, resp.Stage)
-			case api.GetEnableHybridSubmission:
-				require.NotNil(t, resp.Value.Enabled)
-				assert.Equal(t, tc.enabled, *resp.Value.Enabled)
-				assert.Equal(t, tc.displayName, resp.DisplayName)
-				assert.Equal(t, tc.description, resp.Description)
-				assert.Equal(t, tc.stage, resp.Stage)
 			case api.GetGpuOverProvisioning:
 				require.NotNil(t, resp.Value.Enabled)
 				assert.Equal(t, tc.enabled, *resp.Value.Enabled)
@@ -209,10 +196,6 @@ func TestTransformSettingsToResponse(t *testing.T) {
 	require.NotNil(t, response.WorkloadSubmissionV2Enabled.Value.Enabled)
 	assert.Equal(t, false, *response.WorkloadSubmissionV2Enabled.Value.Enabled)
 	assert.Equal(t, "Workload submission v2", response.WorkloadSubmissionV2Enabled.DisplayName)
-
-	require.NotNil(t, response.EnableHybridSubmission.Value.Enabled)
-	assert.Equal(t, false, *response.EnableHybridSubmission.Value.Enabled)
-	assert.Equal(t, "Flexible workload submission", response.EnableHybridSubmission.DisplayName)
 
 	require.NotNil(t, response.GpuOverProvisioning.Value.Enabled)
 	assert.Equal(t, true, *response.GpuOverProvisioning.Value.Enabled)
@@ -387,11 +370,11 @@ func TestGetWorkloadsServiceSettingByKey(t *testing.T) {
 		svc := newTestSettingsService(mgr)
 		ctx := ctxWithTenant(testTenantId)
 
-		settingValue := &settings.EnableHybridSubmission{Enabled: false}
-		mgr.On("GetSettingByKey", api.WORKLOADSSETTINGSKEYENUM_ENABLE_HYBRID_SUBMISSION, testTenantId).Return(settingValue, nil)
+		settingValue := &settings.EnablePolicies{Enabled: false}
+		mgr.On("GetSettingByKey", api.WORKLOADSSETTINGSKEYENUM_ENABLE_POLICIES, testTenantId).Return(settingValue, nil)
 		mgr.On("TransformSettingByKeyToResponse", settingValue).Return(nil, errors.New("transform failed"))
 
-		resp, err := svc.GetWorkloadsServiceSettingByKey(ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_HYBRID_SUBMISSION, "")
+		resp, err := svc.GetWorkloadsServiceSettingByKey(ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_POLICIES, "")
 		assert.NoError(t, err)
 		assertErrorResponse(t, resp, http.StatusInternalServerError)
 	})
@@ -401,7 +384,7 @@ func TestGetWorkloadsServiceSettingByKey(t *testing.T) {
 		svc := newTestSettingsService(mgr)
 		ctx := ctxWithTenant(testTenantId)
 
-		resp, err := svc.GetWorkloadsServiceSettingByKey(ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_HYBRID_SUBMISSION, "other-tenant")
+		resp, err := svc.GetWorkloadsServiceSettingByKey(ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_POLICIES, "other-tenant")
 		assert.NoError(t, err)
 		assertErrorResponse(t, resp, http.StatusUnauthorized)
 	})
@@ -448,7 +431,7 @@ func TestUpdateWorkloadsServiceSettingByKey(t *testing.T) {
 		svc := newTestSettingsService(mgr)
 
 		updateReq := api.UpdateWorkloadsSettingByKeyRequest{Enabled: ptr.To(true)}
-		resp, err := svc.UpdateWorkloadsServiceSettingByKey(context.Background(), api.WORKLOADSSETTINGSKEYENUM_ENABLE_HYBRID_SUBMISSION, updateReq, "")
+		resp, err := svc.UpdateWorkloadsServiceSettingByKey(context.Background(), api.WORKLOADSSETTINGSKEYENUM_ENABLE_POLICIES, updateReq, "")
 		assert.NoError(t, err)
 		assertErrorResponse(t, resp, http.StatusBadRequest)
 	})
@@ -473,10 +456,10 @@ func TestUpdateWorkloadsServiceSettingByKey(t *testing.T) {
 		ctx := ctxWithTenant(testTenantId)
 
 		updateReq := api.UpdateWorkloadsSettingByKeyRequest{Enabled: ptr.To(true)}
-		mgr.On("UpdateSettingByKey", ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_HYBRID_SUBMISSION, testTenantId, updateReq).
+		mgr.On("UpdateSettingByKey", ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_POLICIES, testTenantId, updateReq).
 			Return(errors.New(settings.ErrValidationFailed + ": invalid setting value"))
 
-		resp, err := svc.UpdateWorkloadsServiceSettingByKey(ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_HYBRID_SUBMISSION, updateReq, "")
+		resp, err := svc.UpdateWorkloadsServiceSettingByKey(ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_POLICIES, updateReq, "")
 		assert.NoError(t, err)
 		assertErrorResponse(t, resp, http.StatusBadRequest)
 	})
@@ -512,12 +495,30 @@ func TestUpdateWorkloadsServiceSettingByKey(t *testing.T) {
 		ctx := managementCtxWithTenant("mgmt-tenant")
 
 		updateReq := api.UpdateWorkloadsSettingByKeyRequest{Enabled: ptr.To(true)}
-		mgr.On("UpdateSettingByKey", ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_HYBRID_SUBMISSION, "target-tenant", updateReq).Return(nil)
+		mgr.On("UpdateSettingByKey", ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_POLICIES, "target-tenant", updateReq).Return(nil)
 
-		resp, err := svc.UpdateWorkloadsServiceSettingByKey(ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_HYBRID_SUBMISSION, updateReq, "target-tenant")
+		resp, err := svc.UpdateWorkloadsServiceSettingByKey(ctx, api.WORKLOADSSETTINGSKEYENUM_ENABLE_POLICIES, updateReq, "target-tenant")
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Equal(t, updateReq, resp.Body)
 		mgr.AssertExpectations(t)
 	})
+}
+
+func TestRemovedWorkloadsSetting(t *testing.T) {
+	const key api.WorkloadsSettingsKeyEnum = "enableHybridSubmission"
+	mgr := settings.NewSettingsManager()
+	svc := newTestSettingsService(mgr)
+	ctx := ctxWithTenant(testTenantId)
+
+	listed, err := json.Marshal(mgr.TransformSettingsToResponse(nil))
+	require.NoError(t, err)
+	assert.NotContains(t, string(listed), string(key))
+
+	read, err := svc.GetWorkloadsServiceSettingByKey(ctx, key, "")
+	require.NoError(t, err)
+	assertErrorResponse(t, read, http.StatusBadRequest)
+	updated, err := svc.UpdateWorkloadsServiceSettingByKey(ctx, key, api.UpdateWorkloadsSettingByKeyRequest{Enabled: ptr.To(true)}, "")
+	require.NoError(t, err)
+	assertErrorResponse(t, updated, http.StatusBadRequest)
 }

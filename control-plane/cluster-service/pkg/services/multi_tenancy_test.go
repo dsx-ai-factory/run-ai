@@ -110,7 +110,7 @@ var _ = Describe("ApiClustersService", Ordered, func() {
 		// Setup service
 		clusterDeleter := cd.NewClusterDeleter(authorization_client.NewAuthorizationClient(), mocks.orgUnitClient, nil)
 		clusterInstall := clusterinstall.NewClusterInstallService(GinkgoT())
-		nodepoolService := services.NewNodePoolsApiService(mocks.tenantSettingsClient, mocks.orgUnitClient)
+		nodepoolService := services.NewNodePoolsApiService(mocks.tenantSettingsClient, mocks.orgUnitClient, nil)
 
 		clustersApiService = services.NewClustersApiService(mocks.clusterStateCalculator, mocks.idmClient, clusterDeleter, clusterInstall, nil, nodepoolService, mocks.orgUnitClient,
 			mocks.clusterAccessControlCreator)

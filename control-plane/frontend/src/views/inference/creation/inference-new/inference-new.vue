@@ -111,10 +111,8 @@ import { TemplateSectionV2 } from "@/components/section/template-section-v2";
 import { InferenceArchitecture } from "@/components/section/inference-architecture";
 
 // models
-import type { IUIInferenceCreation } from "@/models/workload.model";
 import {
   EInferenceArchitecture,
-  EInferenceType,
   EServerType,
   type IInferenceArchitectureClusterFeatures,
   type TInferenceServerSelection,
@@ -124,7 +122,7 @@ import type { ProjectMetadata } from "@/swagger-models/org-unit-service-client";
 import type { ClustersMinimalData } from "@/swagger-models/cluster-service-client";
 import { WorkloadType } from "@/swagger-models/workloads-client";
 import type { ICardQuery } from "@/components/common/runai-card-list/runai-card-list.model";
-import type { IInferenceNewModel } from "./inference-new.model";
+import { getEmptyInferenceNewModel } from "./inference-new.model";
 
 // Stores
 import { useAppStore } from "@/stores/app.store";
@@ -151,9 +149,6 @@ import {
 import { workloadService } from "@/services/cluster/workload.service/workload.service";
 import { useFlatTemplatesGallery } from "@/composables/use-flat-templates-gallery.composable";
 import { ErrorAlert } from "@/utils/error-alert.util";
-import { deepCopy } from "@/utils/common.util";
-import { inferenceService } from "@/services/control-plane/inference.service/inference.service";
-import { inferenceWorkloadUtil } from "@/utils/inference-workload.util/inference-workload.util";
 import { clusterUtil } from "@/utils/cluster.util/cluster.util";
 
 const PROJECT_AS_UNSELECTED = -1;
@@ -189,14 +184,7 @@ export default defineComponent({
       isClusterSectionValid: false as boolean,
       disabledClusterOptions: {} as Record<string, string>,
       loadingTemplate: false as boolean,
-      inferenceNewModel: {
-        name: "",
-        serverType: EServerType.Nim, // default value, will be overridden in created()
-        templateId: null,
-        architecture: EInferenceArchitecture.Standard,
-        clusterId: "",
-        projectId: PROJECT_AS_UNSELECTED,
-      } as IInferenceNewModel,
+      inferenceNewModel: getEmptyInferenceNewModel(),
       lastSelectedServerType: EServerType.Nim,
     };
   },
@@ -221,7 +209,7 @@ export default defineComponent({
     };
   },
   async created() {
-    this.applyInferenceStoreToModel();
+    this.inferenceNewModel = { ...this.inferenceStore.inference };
 
     this.disabledClusterOptions = workloadCreateService.getDisabledClusterReasons(this.clusterList, true);
 
@@ -260,9 +248,6 @@ export default defineComponent({
     isPageLoaded(): boolean {
       return !this.appStore.pageLoading;
     },
-    supportingServingPortAccess(): boolean {
-      return this.inferenceStore.supportingServingPortAccess(this.inferenceNewModel.clusterId);
-    },
     selectedProject(): boolean {
       return !!(this.inferenceNewModel.projectId && this.inferenceNewModel.projectId !== PROJECT_AS_UNSELECTED);
     },
@@ -273,11 +258,9 @@ export default defineComponent({
       return this.clusterStore.clusterList;
     },
     isHybridSupported(): boolean {
-      return (
-        this.clusterStore.isClusterVersionSufficient(
-          this.inferenceNewModel.clusterId,
-          MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION,
-        ) && this.settingStore.isHybridSubmissionEnabled
+      return this.clusterStore.isClusterVersionSufficient(
+        this.inferenceNewModel.clusterId,
+        MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION,
       );
     },
     showInferenceTypeSelection(): boolean {
@@ -341,16 +324,6 @@ export default defineComponent({
       }
 
       return selectedDefaultProjectId;
-    },
-    applyInferenceStoreToModel(): void {
-      if (!this.inferenceStore.inference) return;
-      const inference = deepCopy(this.inferenceStore.inference);
-      this.inferenceNewModel.name = inference.name;
-      this.inferenceNewModel.serverType = inference.serverType;
-      this.inferenceNewModel.templateId = inference.templateId || null;
-      this.inferenceNewModel.architecture = inference.architecture;
-      this.inferenceNewModel.clusterId = inference.clusterId;
-      this.inferenceNewModel.projectId = inference.projectId;
     },
     async loadProjects(): Promise<void> {
       try {
@@ -440,7 +413,7 @@ export default defineComponent({
         return;
       }
 
-      this.saveStateToInferenceNewModel();
+      this.inferenceStore.setInference({ ...this.inferenceNewModel });
       if (this.isStandardArchitecture) {
         await this.continueToStandard();
       } else {
@@ -459,8 +432,6 @@ export default defineComponent({
         await this.continueToNim();
       } else if (this.inferenceNewModel.serverType === EServerType.VLLM) {
         await this.continueToVLLM();
-      } else if (this.inferenceNewModel.serverType === EServerType.TGI) {
-        await this.continueToTgi();
       } else {
         await this.continueToCustom();
       }
@@ -502,58 +473,9 @@ export default defineComponent({
       });
     },
 
-    async continueToTgi(): Promise<void> {
-      const query = this.getQuery();
-      this.resetInferenceStore({
-        modelBasedOn: EServerType.TGI,
-      });
-      await this.$router.push({
-        name: INFERENCE_ROUTE_NAMES.INFERENCE_TGI_EDIT,
-        query,
-      });
-    },
-
-    async continueToAssetBased(): Promise<void> {
-      const mergedInference = await inferenceService.getInferenceMergedWithPolicy(
-        String(this.inferenceNewModel.projectId),
-      );
-      const policy = await inferenceService.getPolicy(this.inferenceNewModel.projectId);
-      this.inferenceStore.setLoadedInferenceModelWithDefaults(mergedInference);
-
-      const inference = inferenceWorkloadUtil.convertInferenceToWorkloadUI(
-        {
-          ...mergedInference,
-          meta: {
-            ...mergedInference.meta,
-            name: this.inferenceNewModel.name,
-            clusterId: this.inferenceNewModel.clusterId,
-            projectId: this.inferenceNewModel.projectId?.toString() || "",
-          },
-        },
-        EInferenceType.AssetsBased,
-        this.supportingServingPortAccess,
-        undefined,
-        "",
-        policy?.effective || undefined,
-        this.inferenceNewModel.templateId || undefined,
-        this.inferenceNewModel.architecture,
-      );
-
-      this.inferenceStore.setInference(inference);
-      await this.$router.push({ name: INFERENCE_ROUTE_NAMES.INFERENCE_ASSETS_EDIT });
-    },
     async continueToCustom(): Promise<void> {
-      if (!this.isHybridSupported) {
-        await this.continueToAssetBased();
-        return;
-      }
-
       this.resetInferenceStore();
-      const query: Record<string, string> = {
-        clusterId: this.inferenceNewModel.clusterId,
-        projectId: this.inferenceNewModel.projectId.toString(),
-        inferenceName: this.inferenceNewModel.name,
-      };
+      const query = this.getQuery();
 
       if (this.inferenceNewModel.templateId && this.inferenceNewModel.templateId !== TEMPLATE_AS_START_FROM_SCRATCH) {
         query.templateId = this.inferenceNewModel.templateId;
@@ -648,18 +570,6 @@ export default defineComponent({
           this.inferenceNewModel.serverType = EServerType.Custom;
         }
       }
-    },
-    saveStateToInferenceNewModel(): void {
-      const inference: IUIInferenceCreation = {
-        ...this.inferenceNewModel,
-        namespace: "",
-        assets: {
-          environment: null,
-          compute: null,
-        },
-        specificEnv: {},
-      };
-      this.inferenceStore.setInference(inference);
     },
   },
   unmounted() {

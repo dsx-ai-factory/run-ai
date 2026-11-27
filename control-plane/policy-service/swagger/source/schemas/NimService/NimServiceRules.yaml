@@ -67,6 +67,10 @@ allOf:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/ImagePullSecretsRules.yaml
     labels:
       $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/InstancesRules.yaml
+    loadAwareRouting:
+      allOf:
+      - $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/BooleanRules.yaml
+      x-internal: true
     modelStore:
       nullable: true
       properties:

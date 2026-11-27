@@ -37,6 +37,10 @@ type UrlHandler interface {
 func CreateRouter(container Container) chi.Router {
 	r := container.Router
 
+	if container.CORSMiddleware != nil {
+		r.Use(container.CORSMiddleware)
+	}
+
 	healthApiService := health.NewApiService()
 	healthApiController := openapi.NewHealthAPIController(healthApiService)
 

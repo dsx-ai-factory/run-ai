@@ -67,7 +67,13 @@ func (p *Plugin) MutateResource(
 	if err := kartautils.MutatePodInstances(ctx, karta, resource, mutate); err != nil {
 		return state.AddPluginIssue(ctx, p, resource, err, true, "", issue.Internal)
 	}
-	removeIntroducedNullFields(originalObject, resource.Object)
+	// Saving full Dynamo beta templates can add an empty podTemplate where none
+	// existed. Alpha reads individual fields and keeps the existing null cleanup.
+	// Don't remove empty objects from other workloads; selector: {} can be valid.
+	// TODO: Remove this Dynamo-specific cleanup once Karta preserves missing templates.
+	// https://github.com/dsx-ai-factory/workload-map/issues/346
+	removeEmptyObjects := resource.GetAPIVersion() == "nvidia.com/v1beta1" && resource.GetKind() == "DynamoGraphDeployment"
+	removeIntroducedNullFields(originalObject, resource.Object, removeEmptyObjects)
 
 	return nil
 }
@@ -279,13 +285,13 @@ func stampWorkloadName(instance kartaresource.ExtractedInstance, workloadName st
 	}
 }
 
-// removeIntroducedNullFields repairs nulls added by Karta's bulk fragmented
-// writes. It preserves existing nulls and empty objects, and only prunes parents
-// made empty by this repair. Karta updates array entries without reordering them.
+// removeIntroducedNullFields removes null fields added by Karta.
+// With removeEmptyObjects, it also removes new empty objects and restores nulls
+// that became empty objects. Existing nulls and empty objects are kept.
 // Workaround for https://github.com/dsx-ai-factory/workload-map/issues/346.
 // Remove once the pinned Karta version fixes this writeback behavior and the
 // Dynamo regression tests pass without this cleanup.
-func removeIntroducedNullFields(original, updated interface{}) bool {
+func removeIntroducedNullFields(original, updated interface{}, removeEmptyObjects bool) bool {
 	switch updatedValue := updated.(type) {
 	case map[string]interface{}:
 		originalObject, _ := original.(map[string]interface{})
@@ -298,10 +304,11 @@ func removeIntroducedNullFields(original, updated interface{}) bool {
 				continue
 			}
 
-			if !removeIntroducedNullFields(originalChild, updatedChild) {
+			removedFromChild := removeIntroducedNullFields(originalChild, updatedChild, removeEmptyObjects)
+			if !removedFromChild && !removeEmptyObjects {
 				continue
 			}
-			removedNulls = true
+			removedNulls = removedNulls || removedFromChild
 
 			childObject, isObject := updatedChild.(map[string]interface{})
 			if !isObject || len(childObject) > 0 {
@@ -310,8 +317,10 @@ func removeIntroducedNullFields(original, updated interface{}) bool {
 			switch {
 			case !existed:
 				delete(updatedValue, key)
+				removedNulls = true
 			case originalChild == nil:
 				updatedValue[key] = nil
+				removedNulls = true
 			}
 		}
 		return removedNulls
@@ -323,7 +332,7 @@ func removeIntroducedNullFields(original, updated interface{}) bool {
 			if index < len(originalItems) {
 				originalChild = originalItems[index]
 			}
-			removeIntroducedNullFields(originalChild, updatedChild)
+			removeIntroducedNullFields(originalChild, updatedChild, removeEmptyObjects)
 		}
 	}
 	return false

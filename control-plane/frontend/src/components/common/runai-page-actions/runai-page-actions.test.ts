@@ -14,7 +14,6 @@ import type { IFilterBy } from "@/models/filter.model";
 import type { ITableColumn } from "@/models/table.model";
 import type { ActionMenuItem } from "@/components/common/runai-page-actions/model";
 import { beforeEach, describe, expect, vi, it } from "vitest";
-
 interface IRunaiPageActionsProps {
   advancedFilters?: boolean;
   columns: ITableColumn[];
@@ -48,8 +47,9 @@ setActivePinia(pinia);
 
 describe("RunaiPageActions", () => {
   let runaiPageActionsCmp: VueWrapper<InstanceType<typeof RunaiPageActions>>;
-  const factory = (props?: IRunaiPageActionsProps) => {
+  const factory = (props?: IRunaiPageActionsProps, slots?: Record<string, string>) => {
     runaiPageActionsCmp = mount(RunaiPageActions, {
+      slots,
       global: {
         plugins: [Quasar, pinia],
         directives: {
@@ -75,6 +75,23 @@ describe("RunaiPageActions", () => {
     factory();
   });
   describe("rendering behavior", () => {
+    it("composes local filters and right actions while preserving the selected row toolbar", async () => {
+      runaiPageActionsCmp.unmount();
+      factory(undefined, {
+        filters: '<button aid="local-filters">Local filters</button>',
+        "right-actions": '<button aid="local-settings">Local settings</button>',
+      });
+      expect(runaiPageActionsCmp.find('[aid="local-filters"]').exists()).toBe(true);
+      expect(runaiPageActionsCmp.find('[aid="local-settings"]').exists()).toBe(true);
+      expect(runaiPageActionsCmp.find(".runai-page-filter").exists()).toBe(false);
+      expect(runaiPageActionsCmp.find(".advanced-filters").exists()).toBe(false);
+      await runaiPageActionsCmp.setProps({ selectedRowsAmount: 1 });
+      expect(runaiPageActionsCmp.find(".selected-rows-actions").exists()).toBe(true);
+      expect(runaiPageActionsCmp.find('[aid="local-filters"]').exists()).toBe(false);
+      await runaiPageActionsCmp.setProps({ selectedRowsAmount: 0 });
+      expect(runaiPageActionsCmp.find('[aid="local-filters"]').exists()).toBe(true);
+    });
+
     it("should load the component", () => {
       expect(runaiPageActionsCmp.html()).toContain("new environment");
     });

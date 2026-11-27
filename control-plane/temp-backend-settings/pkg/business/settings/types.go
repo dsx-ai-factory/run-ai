@@ -36,7 +36,6 @@ const (
 	SettingKeyEnableNewCliInstaller         = "tenant.is_new_cli_installer_enabled"
 	SettingKeyDeletedWorkloadsView          = "tenant.deleted_workloads_view"
 	SettingKeyNewNavigation                 = "tenant.new_navigation"
-	SettingKeyEnableHybridSubmission        = "tenant.enable_hybrid_submission"
 	SettingKeyEnableCustomRoles             = "tenant.enable_custom_roles"
 	SettingKeyEnableDataVolumes             = "tenant.enable_data_volumes"
 	SettingKeyEnableNgcIntegration          = "tenant.enable_ngc_integration"

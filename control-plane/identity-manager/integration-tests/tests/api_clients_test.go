@@ -376,12 +376,18 @@ func TestClient_GetAllClients_WithFilter(t *testing.T) {
 			},
 		},
 		{
-			name:            "Filter by client type - application",
-			filter:          "runai.client_type:application",
-			expectedClients: []string{},
+			name:            "Filter by client type - service account",
+			filter:          "runai.client_type:service-account",
+			expectedClients: []string{serviceAccountClientName},
 			verifyFunc: func(clients []openapi.Client) bool {
-				// APPLICATION clients don't have the runai.client_type attribute set in current implementation
-				return len(clients) == 0
+				client := findClientByID(clients, serviceAccountClientName)
+				if client == nil {
+					return false
+				}
+				if clientType, exists := client.Attributes["runai.client_type"]; exists {
+					return clientType == "service-account"
+				}
+				return false
 			},
 		},
 		{

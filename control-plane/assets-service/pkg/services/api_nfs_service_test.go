@@ -122,17 +122,6 @@ func (c *NFSTestFactory) validateListContent(listRequest *http.Request, expected
 	tg.validateListContent(c.router, listRequest, expectedUsedBy, createdSpecs)
 }
 
-func (c *NFSTestFactory) addToWorkloadCreationReq(request *api.WorkloadCreationRequest, assetMeta *api.AssetMeta) bool {
-	if request.Assets.Datasources == nil {
-		request.Assets.Datasources = make([]api.AssetIdAndKind, 0)
-	}
-	request.Assets.Datasources = append(request.Assets.Datasources, api.AssetIdAndKind{
-		Kind: api.ASSETKIND_NFS,
-		Id:   assetMeta.Id,
-	})
-	return true
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 //    Asset Builders
 /////////////////////////////////////////////////////////////////////////////////////////////

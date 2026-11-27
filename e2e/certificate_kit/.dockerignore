@@ -1,0 +1,86 @@
+# Git and version control
+.git
+.gitignore
+.gitattributes
+
+# Documentation (not needed in container)
+README*.md
+HOW_TO_*.md
+*.md
+
+# Environment files (sensitive - should not be in image)
+.env
+.env.*
+.envExample
+*.env
+
+# Development files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Node.js development files
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Test results and reports (will be generated)
+allure-results/
+allure-report/
+test-results/
+results2/
+results3/
+results2/
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker files (not needed inside container)
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+
+# Makefile (not needed inside container)
+Makefile
+
+# Linting and formatting configs (not needed in production)
+.eslintignore
+.eslintrc.json
+.prettierignore
+.prettierrc
+.mocharc.cjs
+.reporterConfig.json
+
+# Certificate kit build artifacts
+certificate_kit/*.tar.gz
+certificate_kit/*.zip
+
+# Other internal files
+globalState.json
+tsconfig*.json

@@ -49,10 +49,18 @@
                 <runai-action-button
                   aid="node-pool-edit-btn"
                   btn-action="edit"
-                  @click="editNodePool"
+                  @click="!editSteps.length && editNodePool()"
                   :disable="!canEditNodePool"
                   v-permission="{ resourceType: ResourceType.Nodepools, action: Action.Update }"
-                />
+                  :aria-haspopup="editSteps.length ? 'menu' : undefined"
+                >
+                  <runai-select-menu
+                    v-if="editSteps.length && canEditNodePool && hasUpdatePermission"
+                    style="min-width: 208px"
+                    :list="editSteps"
+                    @selected-value="editNodePool"
+                  />
+                </runai-action-button>
               </runai-tooltip-wrapper>
               <runai-tooltip-wrapper :display-tooltip="!canDeleteNodePool" :tooltip-text="deleteDisableTooltip">
                 <runai-action-button
@@ -142,6 +150,9 @@ import {
 } from "@/models/filter.model";
 
 // cmps
+import { getNodePoolWizardSteps } from "@/models/node-pool.model";
+import { stepsToSelectOptions } from "@/utils/wizard-steps.util";
+import { RunaiSelectMenu } from "@/components/common/runai-select-menu";
 import { RunaiPageActions } from "@/components/common/runai-page-actions";
 import { RunaiActionButton } from "@/components/common/runai-page-actions/runai-action-button";
 import { RunaiTableWrapper } from "@/components/common/runai-table-wrapper";
@@ -160,6 +171,7 @@ import NodeListModal from "@/components/node/node-list-modal/node-list-modal.vue
 import RunaiTable from "@/components/common/runai-table/runai-table.vue";
 import { RunaiTableNoData } from "@/components/common/runai-table/runai-table-no-data";
 import { Action, ResourceType } from "@/swagger-models/authorization-client";
+import { ENABLE_NODE_POOL_CREATE_FLOW } from "@/constants/node-pool.constants";
 import { NODE_POOL_ROUTE_NAMES } from "@/router/node-pool.routes/node-pool.routes.names";
 import { RunaiTooltipWrapper } from "@/components/common/runai-tooltip-wrapper";
 import { usePermissionStore } from "@/stores/permissions.store";
@@ -215,6 +227,7 @@ const NodePoolIndex = defineComponent({
     NodeListModal,
     RunaiTableWrapper,
     RunaiPageActions,
+    RunaiSelectMenu,
     RunaiActionButton,
     NodePoolDrawerContent,
     RunaiDrawerContent,
@@ -381,6 +394,7 @@ const NodePoolIndex = defineComponent({
     appStore.setPageLoading(false);
     countNodePools(filterBy.value);
     return {
+      editSteps: ENABLE_NODE_POOL_CREATE_FLOW ? stepsToSelectOptions(getNodePoolWizardSteps("identity")) : [],
       setFilterBy,
       clearFilters,
       refreshList,
@@ -463,8 +477,13 @@ const NodePoolIndex = defineComponent({
       const clusterId = this.isMultiCluster ? this.filterBy.clusterUuid : this.clusterStore.selectedClusterId;
       this.$router.push({ name: NODE_POOL_ROUTE_NAMES.NODE_POOL_NEW, query: { clusterId } });
     },
-    editNodePool(): void {
-      this.$router.push({ name: NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT, params: { id: this.selectedNodePool?.id } });
+    editNodePool(stepName?: string): void {
+      if (!this.selectedNodePool || !this.canEditNodePool || !this.hasUpdatePermission) return;
+      this.$router.push({
+        name: NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT,
+        params: { id: this.selectedNodePool.id },
+        query: stepName ? { stepName } : undefined,
+      });
     },
     async deleteNodepool(): Promise<void> {
       if (!this.selectedNodePool) return;

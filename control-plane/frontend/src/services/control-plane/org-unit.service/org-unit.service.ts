@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { isCancel } from "axios";
+import type { FairShareSimulationRequest, FairShareSimulationResponse } from "@/swagger-models/org-unit-service-client";
 import type { IDepartmentTable, IDepartmentTableFilterBy } from "@/models/department.model";
 import { DEFAULT_DEPARTMENT_NAME } from "@/models/department.model";
 import type { IFilterBy, IPaginationFilter } from "@/models/filter.model";
@@ -19,6 +21,8 @@ import {
   type DeletionTypes,
   type Department,
   type DepartmentCreationRequest,
+  type DepartmentsResourcesResetRequest,
+  type ProjectsResourcesResetRequest,
   type DepartmentUpdateRequest,
   type OrgUnitTelemetryType,
   type Project,
@@ -90,10 +94,14 @@ export const orgUnitService = {
   sumProjectNodePoolResources,
   countProjectsNodePoolResources,
   batchPatchDepartmentNodePoolResources,
+  resetDepartmentResources,
+  resetProjectResources,
   getDepartmentNodePoolResources,
   countDepartmentNodePoolResources,
   getDepartmentMetrics,
   getProjectMetrics,
+  simulateNodePoolFairShare,
+  getDepartmentSubordinateGpuQuota,
 };
 
 //******** ProjectsApi ************
@@ -621,6 +629,22 @@ async function createNodeType(name: string, clusterId: string): Promise<NodeType
  * ============================================
  */
 
+async function resetDepartmentResources(request: DepartmentsResourcesResetRequest): Promise<void> {
+  try {
+    await orgUnitServiceApi.departmentsApi.departmentsResetResources(request);
+  } catch (err: unknown) {
+    throw httpService.handleHttpError(err);
+  }
+}
+
+async function resetProjectResources(request: ProjectsResourcesResetRequest): Promise<void> {
+  try {
+    await orgUnitServiceApi.projectsApi.projectsResetResources(request);
+  } catch (err: unknown) {
+    throw httpService.handleHttpError(err);
+  }
+}
+
 async function batchPatchDepartmentNodePoolResources(
   batchPatchDepartmentResourcesRequest: BatchPatchNodePoolResourcesRequest,
 ) {
@@ -779,4 +803,38 @@ async function getProjectMetrics(
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
   }
+}
+
+async function simulateNodePoolFairShare(
+  poolId: string,
+  request: FairShareSimulationRequest,
+  signal?: AbortSignal,
+): Promise<FairShareSimulationResponse> {
+  try {
+    return (await orgUnitServiceApi.orgUnitApi.simulateNodePoolFairShare(poolId, request, { signal })).data;
+  } catch (error) {
+    if (isCancel(error)) throw error;
+    throw httpService.handleHttpError(error);
+  }
+}
+
+async function getDepartmentSubordinateGpuQuota(
+  departmentId: string,
+  scope: { nodePoolId?: string; nodePoolName?: string; clusterId?: string; emptyChildrenAsZero?: boolean },
+): Promise<number | null | undefined> {
+  const department = await orgUnitService.getDepartment(departmentId);
+  if (scope.clusterId && department.clusterId !== scope.clusterId)
+    throw new Error("Department does not belong to this cluster.");
+  const aggregate = department.projectsAggregatedResources?.find((resource) =>
+    scope.nodePoolId ? resource.nodePool?.id === scope.nodePoolId : resource.nodePool?.name === scope.nodePoolName,
+  );
+  const quota = aggregate ? (aggregate.gpu?.deserved ?? null) : undefined;
+  if (
+    quota == null &&
+    scope.emptyChildrenAsZero &&
+    Array.isArray(department.children) &&
+    department.children.length === 0
+  )
+    return 0;
+  return quota;
 }
