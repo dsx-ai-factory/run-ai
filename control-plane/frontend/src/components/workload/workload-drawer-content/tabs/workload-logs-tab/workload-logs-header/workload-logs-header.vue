@@ -67,7 +67,30 @@ import { RunaiSelect } from "@/components/common/runai-select";
 import { alertUtil } from "@/utils/alert.util";
 import { clusterApiService } from "@/services/cluster/cluster-api.service/cluster-api.service";
 
-const defaultFilename = "logs.txt";
+const DEFAULT_POD_NAME = "pod";
+const DEFAULT_CONTAINER_NAME = "container";
+// Kubernetes names can reach 253 chars; bound each part so the combined name stays well under OS filename limits.
+const MAX_FILENAME_COMPONENT_LENGTH = 64;
+
+function sanitizeFilenameComponent(value: string | undefined, fallback: string): string {
+  const sanitized = (value ?? "")
+    .trim()
+    .replace(/[^A-Za-z0-9._-]+/g, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/^[.-]+|[.-]+$/g, "")
+    .slice(0, MAX_FILENAME_COMPONENT_LENGTH)
+    .replace(/[.-]+$/, "");
+  return sanitized || fallback;
+}
+
+function toServerFilename(raw: string | undefined): string | null {
+  if (!raw) return null;
+  // Drop any path the server sent; control characters make the name unusable.
+  const basename = raw.trim().split(/[/\\]/).pop() ?? "";
+  // eslint-disable-next-line no-control-regex
+  if (!basename || basename === "." || basename === ".." || /[\x00-\x1f\x7f]/.test(basename)) return null;
+  return basename;
+}
 
 const LOGS_SOURCE_OPTIONS: ISelectOption[] = [
   { label: "Current instance", value: ELogsSource.CurrentInstance },
@@ -141,30 +164,48 @@ export default defineComponent({
     setSelectedLogsSource(logsSource: ELogsSource): void {
       this.$emit("logs-source-selected", logsSource);
     },
-    extractFilenameFromHeaders(headers: AxiosResponse["headers"]): string {
-      const contentDisposition = headers["content-disposition"];
+    extractFilenameFromHeaders(headers: AxiosResponse["headers"] | undefined): string | null {
+      const contentDisposition: unknown = headers?.["content-disposition"] ?? headers?.["Content-Disposition"];
+      if (typeof contentDisposition !== "string" || !/^\s*attachment\b/i.test(contentDisposition)) return null;
 
-      if (contentDisposition?.includes("attachment")) {
-        const splitHeader = contentDisposition.split("=");
-        if (splitHeader?.length === 2) {
-          return splitHeader[1].replace(/^["']|["']$/g, "");
+      // RFC 6266: prefer the RFC 5987 encoded form (filename*=UTF-8''...) when present.
+      const encodedMatch = contentDisposition.match(/filename\*\s*=\s*([^;]+)/i);
+      if (encodedMatch) {
+        const value = encodedMatch[1].trim().replace(/^["']|["']$/g, "");
+        const encodedPart = value.includes("''") ? value.slice(value.indexOf("''") + 2) : value;
+        try {
+          const decoded = toServerFilename(decodeURIComponent(encodedPart));
+          if (decoded) return decoded;
+        } catch {
+          // Malformed percent-encoding: fall through to the plain filename parameter.
         }
       }
-      return defaultFilename;
+
+      const plainMatch = contentDisposition.match(/(?:^|;)\s*filename\s*=\s*(?:"((?:[^"\\]|\\.)*)"|([^;]*))/i);
+      if (!plainMatch) return null;
+      const quoted = plainMatch[1]?.replace(/\\(.)/g, "$1");
+      const unquoted = plainMatch[2]?.trim().replace(/^'|'$/g, "");
+      return toServerFilename(quoted ?? unquoted);
+    },
+    buildFallbackFilename(): string {
+      const podName = sanitizeFilenameComponent(this.logParams.podName, DEFAULT_POD_NAME);
+      const containerName = sanitizeFilenameComponent(this.selectedContainerName, DEFAULT_CONTAINER_NAME);
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      return `${podName}_${containerName}_${timestamp}.txt`;
     },
     async downloadLogs(): Promise<void> {
       if (!this.logParams) return;
       try {
         let logsBlob: Blob;
-        let filename: string = defaultFilename;
+        let serverFilename: string | null = null;
         if (this.supportClusterApiLogs) {
           const logsResponse = await clusterApiService.downloadLogsClusterApi(this.logParams);
           logsBlob = logsResponse.data;
-          filename = this.extractFilenameFromHeaders(logsResponse.headers);
+          serverFilename = this.extractFilenameFromHeaders(logsResponse.headers);
         } else {
           logsBlob = await researcherService.downloadLogs(this.logParams);
         }
-        createDownloadLink(logsBlob, filename);
+        createDownloadLink(logsBlob, serverFilename ?? this.buildFallbackFilename());
       } catch (err: unknown) {
         this.$q.notify(alertUtil.getError("Failed to download logs"));
       }
