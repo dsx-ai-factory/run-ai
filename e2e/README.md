@@ -99,6 +99,10 @@ npx playwright test -g "department"
 
 The runner uses the current kubeconfig context unless `KUBECONFIG_PATH` / `KUBECONFIG_CLUSTER_NAME` override it.
 
+### Node pool wizard
+
+The standard serial regression projects collect the wizard scenarios as skipped until rollout. The node pool table tests remain active.
+
 ## Layout
 
 ```
