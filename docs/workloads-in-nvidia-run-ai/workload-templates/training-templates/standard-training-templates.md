@@ -2,14 +2,6 @@
 
 This guide explains how to create standard training templates for reuse during workload submission. To manage templates, see [Workload Templates](../README.md).
 
-<Note>
-
-**Note**
-
-Workload templates apply to flexible workload submission. If unavailable, contact your administrator to enable **Flexible workload submission** under **General settings** → **Workloads**.
-
-</Note>
-
 ## Before You Start
 If the image you are planning to use is hosted in NGC, make sure you have an NGC account with an active NGC API key. To obtain a key, go to [NGC](https://catalog.ngc.nvidia.com/) → Setup → API Keys, then generate or copy an existing key. In NVIDIA Run:ai, store the key either as a [shared secret](../../workload-assets/credentials.md#ngc-api-key) (created by an administrator) or a [user credential](../../../settings/user-settings/user-credentials.md) (created under User settings).
 
@@ -64,12 +56,10 @@ Manually configure the settings below as needed.
 
 1. Set the **environment image**:
    * Select **Custom image** and add the **Image URL** or update the URL of the existing setup.
-   * **Select from the NGC catalog** and then set how to **access the NGC catalog**:
-     * **As a guest** - Choose the **image name** and **tag** from the dropdown.
-     * **Authenticated** - Configure **access** to NGC and then choose the **image name** and **tag** from the dropdown:
-       * Under **Source**, select [**Shared secret**](../../workload-assets/credentials.md#ngc-api-key) or [**My credentials**](../../../settings/user-settings/user-credentials.md).
-       * The **Type** field is fixed to **NGC API key**.
-       * Under **Credential name**, select an existing credential from the dropdown. If you select **My credentials**, you can also create a new credential directly from the dropdown. The credential is also saved under **User settings** → Credentials.
+   * **Select from the NGC catalog**, configure **access** to NGC, and then choose the **image name** and **tag** from the dropdown:
+     * Under **Source**, select [**Shared secret**](../../workload-assets/credentials.md#ngc-api-key) or [**My credentials**](../../../settings/user-settings/user-credentials.md).
+     * The **Type** field is fixed to **NGC API key**.
+     * Under **Credential name**, select an existing credential from the dropdown. If you select **My credentials**, you can also create a new credential directly from the dropdown. The credential is also saved under **User settings** → Credentials.
    * **Select from the NGC private registry** and then set how to access the registry:
      * Select a **registry** from the dropdown.
      * Under **Source**, select [**Shared secret**](../../workload-assets/credentials.md#ngc-api-key) or [**My credentials**](../../../settings/user-settings/user-credentials.md).

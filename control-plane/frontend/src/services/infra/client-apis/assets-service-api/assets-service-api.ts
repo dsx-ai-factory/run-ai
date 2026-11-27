@@ -11,15 +11,12 @@ import {
   GitApi,
   HostPathApi,
   ModelApi,
-  ModelInferenceApi,
   NFSApi,
   PVCApi,
   S3Api,
   SecretApi,
   SynchronizationApi,
-  TrainingsApi,
   WorkloadApi,
-  WorkspacesApi,
   Configuration,
   ConfigMapApi,
   InferencesApi,
@@ -36,15 +33,12 @@ class AssetsServiceApi {
   computeApi: ComputeApi;
   credentialApi: CredentialsApi;
   workloadApi: WorkloadApi;
-  workspaceApi: WorkspacesApi;
-  trainingApi: TrainingsApi;
   s3Api: S3Api;
   pvcApi: PVCApi;
   nfsApi: NFSApi;
   hostPathApi: HostPathApi;
   gitApi: GitApi;
   secretApi: SecretApi;
-  modelInferenceApi: ModelInferenceApi;
   modelApi: ModelApi;
   synchronizationApi: SynchronizationApi;
   configMapApi: ConfigMapApi;
@@ -59,15 +53,12 @@ class AssetsServiceApi {
     this.computeApi = new ComputeApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.credentialApi = new CredentialsApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.workloadApi = new WorkloadApi(this.configuration, this.baseUrl, authenticatedAxios);
-    this.workspaceApi = new WorkspacesApi(this.configuration, this.baseUrl, authenticatedAxios);
-    this.trainingApi = new TrainingsApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.s3Api = new S3Api(this.configuration, this.baseUrl, authenticatedAxios);
     this.pvcApi = new PVCApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.nfsApi = new NFSApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.hostPathApi = new HostPathApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.gitApi = new GitApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.secretApi = new SecretApi(this.configuration, this.baseUrl, authenticatedAxios);
-    this.modelInferenceApi = new ModelInferenceApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.modelApi = new ModelApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.synchronizationApi = new SynchronizationApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.configMapApi = new ConfigMapApi(this.configuration, this.baseUrl, authenticatedAxios);

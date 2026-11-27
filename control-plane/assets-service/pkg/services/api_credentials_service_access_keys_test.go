@@ -120,10 +120,6 @@ func (c *AccessKeysTestFactory) validateListContent(listRequest *http.Request, e
 	tg.validateListContent(c.router, listRequest, expectedUsedBy, createdSpecs)
 }
 
-func (c *AccessKeysTestFactory) addToWorkloadCreationReq(*api.WorkloadCreationRequest, *api.AssetMeta) bool {
-	return false // access key asset cannot be part of workload creation request
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 //    Asset Builders
 /////////////////////////////////////////////////////////////////////////////////////////////

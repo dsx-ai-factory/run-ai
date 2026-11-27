@@ -3350,6 +3350,11 @@ components:
       description: Holds cluster configuration values.
       type: object
       properties:
+        inferenceEndpointSchemaVersion:
+          x-internal: true
+          type: string
+          nullable: true
+          description: InferenceEndpoint integration contract declared by the operator when Agent, Anyworkload and inference-endpoint-controller are enabled. v1 means the Agent and the Anyworkload networking plugin understand the externalAccess.inference block in networking endpoints. Omitted by older clusters. Operand readiness and administrator Gateway settings must also be checked before enabling new workloads.
         workloadOwnershipProtection:
           type: boolean
           nullable: true
@@ -3964,6 +3969,12 @@ components:
           example: false
           default: false
           nullable: true
+        limits:
+          type: boolean
+          description: Whether to allow GPU, CPU and memory limits for the nodepool's resources. With quota=false, only GPU limits are allowed.
+          example: false
+          default: true
+          nullable: true
     DefaultNodepoolConfig:
       type: object
       x-internal: true
@@ -4220,6 +4231,7 @@ components:
         - ranks
         - quota
         - cpuQuota
+        - limits
       properties:
         adjustableWeights:
           type: boolean
@@ -4241,6 +4253,11 @@ components:
           description: Whether to allow CPU quota for the nodepool's resources. Only allowed when allowQuota=true.
           example: false
           default: false
+        limits:
+          type: boolean
+          description: Whether to allow GPU, CPU and memory limits for the nodepool's resources. With quota=false, only GPU limits are allowed.
+          example: false
+          default: true
     NodepoolGPUNetworkAccelerationDetection:
       type: string
       enum:
@@ -4607,6 +4624,12 @@ components:
           minimum: 0
           description: Total number of GPU devices of this type across the node pool's nodes.
           example: 16
+        maxDevicesPerNode:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Largest installed GPU count on a single node for this exact GPU type and per-device memory capacity. Not a sum across nodes or a free-device count. Omitted when per-node count evidence is unavailable.
+          example: 8
       x-schema-name: NodepoolGpuTypeDetails
     NodepoolGpuTypes:
       type: array

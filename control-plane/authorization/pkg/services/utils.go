@@ -172,6 +172,13 @@ func AccessRuleDaoToApi(accessRule *models.AccessRule) api.AccessRule {
 	}
 }
 
+func clusterRoleOptional(role *models.Role, predefinedRole *models.Role) bool {
+	if predefinedRole == nil {
+		return role.Custom || ptr.Deref(role.NoClusterPermissions, false)
+	}
+	return ptr.Deref(predefinedRole.NoClusterPermissions, false)
+}
+
 func AccessRuleDaoToSyncApi(accessRule *models.AccessRule, predefinedRole *models.Role) api.AccessRuleSync {
 	var preDefinedRoleApi *api.AccessRuleSyncAllOfPredefinedRole = nil
 	if predefinedRole != nil {
@@ -182,22 +189,23 @@ func AccessRuleDaoToSyncApi(accessRule *models.AccessRule, predefinedRole *model
 	}
 
 	return api.AccessRuleSync{
-		ScopeId:        accessRule.ScopeId,
-		ScopeType:      accessRule.ScopeType,
-		ScopeName:      accessRule.ScopeName,
-		SubjectId:      accessRule.SubjectId,
-		SubjectType:    accessRule.SubjectType,
-		RoleId:         int32(accessRule.RoleID),
-		RoleName:       accessRule.Role.Name,
-		Id:             int32(accessRule.ID),
-		CreatedAt:      accessRule.CreatedAt,
-		UpdatedAt:      accessRule.UpdatedAt,
-		DeletedAt:      dbmodels.GormDeletedAtToNullableTime(accessRule.DeletedAt),
-		CreatedBy:      accessRule.CreatedBy,
-		TenantId:       int32(accessRule.TenantId),
-		ClusterId:      accessRule.ClusterUuid,
-		PredefinedRole: preDefinedRoleApi,
-		IsDeleting:     accessRule.Phase == string(api.ACCESSRULEPHASE_DELETING),
+		ScopeId:             accessRule.ScopeId,
+		ScopeType:           accessRule.ScopeType,
+		ScopeName:           accessRule.ScopeName,
+		SubjectId:           accessRule.SubjectId,
+		SubjectType:         accessRule.SubjectType,
+		RoleId:              int32(accessRule.RoleID),
+		RoleName:            accessRule.Role.Name,
+		Id:                  int32(accessRule.ID),
+		CreatedAt:           accessRule.CreatedAt,
+		UpdatedAt:           accessRule.UpdatedAt,
+		DeletedAt:           dbmodels.GormDeletedAtToNullableTime(accessRule.DeletedAt),
+		CreatedBy:           accessRule.CreatedBy,
+		TenantId:            int32(accessRule.TenantId),
+		ClusterId:           accessRule.ClusterUuid,
+		PredefinedRole:      preDefinedRoleApi,
+		ClusterRoleOptional: clusterRoleOptional(&accessRule.Role, predefinedRole),
+		IsDeleting:          accessRule.Phase == string(api.ACCESSRULEPHASE_DELETING),
 	}
 }
 

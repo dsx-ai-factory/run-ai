@@ -35,15 +35,17 @@ import { defineComponent, type DefineComponent } from "vue";
 import { NimInferenceSubmitForm } from "@/components/workload-creation/inference/nim-inference-submit-form";
 
 // models
-import { AssetKind, Scope, type StringOption } from "@/swagger-models/assets-service-client";
+import { AssetKind, Scope } from "@/swagger-models/assets-service-client";
+import type { StringOption, WorkspacePolicyDefaultsAndRulesV2 } from "@/swagger-models/policy-service-client";
 import type { ClustersMinimalData } from "@/swagger-models/cluster-service-client";
 import type {
   UnifiedPolicyInfoPerReplicaType,
   UnifiedProjectInfo,
   UnifiedWorkload,
   WorkspaceCreationRequest,
+  Inference,
+  Workload,
 } from "@/swagger-models/workloads-client";
-import type { WorkspacePolicyDefaultsAndRulesV2 } from "@/swagger-models/policy-service-client";
 import { getPolicyViewDetails, type IPolicyViewDetails } from "@/utils/policy.util/policy-view.util";
 import { clearWorkloadBlockedFields, policyUtil } from "@/utils/policy.util";
 import { WorkloadCreationDrawerEntities } from "@/models/workload-creation-drawer-model";
@@ -53,13 +55,11 @@ import type { IAssetsFilter } from "@/models/filter.model";
 import type { THybridFormState } from "@/models/workload-hybrid.model";
 import {
   EWorkloadFormType,
-  EWorkloadType,
   EWorkloadTypeSupportedInAssetsService,
   type IUIStorageFields,
   type IUISuperWorkloadCreationRequest,
 } from "@/models/workload.model";
 import type { SecretListInfo } from "@/swagger-models/k8s-objects-tracker-client";
-import type { Inference, Workload } from "@/swagger-models/workloads-client";
 
 // stores
 import { useAppStore } from "@/stores/app.store";
@@ -409,7 +409,7 @@ const InferenceNimBased = defineComponent({
           nimWorkload,
           this.authStore.tenant.id,
         );
-        this.workloadStore.setWorkloadAdded(workload, EWorkloadType.Inference);
+        this.workloadStore.setWorkloadAdded(workload);
         this.$q.notify(alertUtil.getSuccess(`Inference ${this.inference.name} created`));
         this.clearFormState();
         const query = { clusterId: this.inference.clusterId };

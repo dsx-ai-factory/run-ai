@@ -139,4 +139,37 @@ webhooks:
         apiVersions: ["v1alpha1"]
         resources: ["restartrequests"]
         scope: "Namespaced"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: runai-snapshot-restore
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+  labels:
+    app: runai
+webhooks:
+  - name: anyworkload-controller.runai.svc
+    admissionReviewVersions: [ "v1" ]
+    sideEffects: None
+    namespaceSelector:
+      matchExpressions:
+        - key: runai/queue
+          operator: Exists
+    objectSelector:
+      matchLabels:
+        run.ai/snapshot: "true"
+    failurePolicy: Ignore
+    timeoutSeconds: 5
+    clientConfig:
+      service:
+        name: anyworkload-controller
+        namespace: runai
+        path: "/mutate-pod-snapshot-restore"
+    rules:
+      - operations: ["CREATE"]
+        apiGroups: ["*"]
+        apiVersions: ["*"]
+        resources: ["pods"]
+        scope: "Namespaced"
 {{- end }}

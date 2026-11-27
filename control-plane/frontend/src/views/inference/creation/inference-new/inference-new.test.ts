@@ -18,14 +18,13 @@ import { useClusterStore } from "@/stores/cluster.store";
 import { useAuthStore } from "@/stores/auth.store";
 
 // services
-import { inferenceService } from "@/services/control-plane/inference.service/inference.service";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 
 // mocks
-import { clusters, emptyMergedWorkload, projects } from "./inference-new.test.mock";
+import { clusters, projects } from "./inference-new.test.mock";
 
 // utils
-import { inferenceWorkloadUtil } from "@/utils/inference-workload.util/inference-workload.util";
+import { getEmptyInferenceNewModel } from "./inference-new.model";
 import { workloadTemplateService } from "@/services/control-plane/workload-template.service/workload-template.service";
 import { EServerType } from "@/models/inference.model";
 import { INFERENCE_ROUTE_NAMES } from "@/router/inference.routes/inference.routes.names";
@@ -33,7 +32,6 @@ import { MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION } from "@/common/version.cons
 
 // Mock services
 vi.mock("@/services/infra/unleash.service/unleash.service");
-vi.mock("@/services/control-plane/inference.service/inference.service");
 vi.mock("@/services/control-plane/org-unit.service/org-unit.service");
 vi.mock("@/services/control-plane/workload-template.service/workload-template.service");
 
@@ -65,10 +63,9 @@ describe("inference-new.vue", () => {
     vi.mocked(clusterStore.isClusterVersionSufficient).mockImplementation(
       (_, version) => version === MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION,
     );
-    settingStore.$patch({ enableHybridSubmission: { value: true } });
 
     inferenceStore.$patch({
-      inference: inferenceWorkloadUtil.getEmptyUIInferenceCreation(),
+      inference: getEmptyInferenceNewModel(),
     });
 
     appStore.$patch({ pageLoading: false });
@@ -177,14 +174,9 @@ describe("inference-new.vue", () => {
       vi.mocked(workloadTemplateService.templatesCount).mockResolvedValue(0);
     });
 
-    it.each([
-      { enabled: true, supported: true },
-      { enabled: false, supported: true },
-      { enabled: true, supported: false },
-    ])(
-      "only offers and loads templates when submission is supported ($enabled, $supported)",
-      async ({ enabled, supported }) => {
-        settingStore.$patch({ enableHybridSubmission: { value: enabled } });
+    it.each([true, false])(
+      "only offers and loads templates when the cluster supports them (supported = %s)",
+      async (supported) => {
         vi.mocked(clusterStore.isClusterVersionSufficient).mockImplementation(
           (_, version) => supported && version === MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION,
         );
@@ -192,8 +184,8 @@ describe("inference-new.vue", () => {
         wrapper = createWrapper();
         await flushPromises();
 
-        expect(wrapper.find("[aid=template-section]").exists()).toBe(enabled && supported);
-        if (enabled && supported) {
+        expect(wrapper.find("[aid=template-section]").exists()).toBe(supported);
+        if (supported) {
           expect(workloadTemplateService.inferenceTemplatesList).toHaveBeenCalled();
         } else {
           expect(workloadTemplateService.inferenceTemplatesList).not.toHaveBeenCalled();
@@ -217,7 +209,6 @@ describe("inference-new.vue", () => {
           templateId: "template-123",
         },
       });
-      expect(inferenceService.getInferenceMergedWithPolicy).not.toHaveBeenCalled();
     });
 
     it("clears a selected template when switching to a cluster without flexible submission", async () => {
@@ -246,16 +237,15 @@ describe("inference-new.vue", () => {
       expect(workloadTemplateService.inferenceTemplatesList).toHaveBeenCalledOnce();
     });
 
-    it("clears a restored template when flexible submission is disabled", async () => {
-      settingStore.$patch({ enableHybridSubmission: { value: false } });
+    it("restores a selected template on a supported cluster", async () => {
       inferenceStore.$patch({ inference: { templateId: "template-123", clusterId: clusters[0].uuid } });
 
       wrapper = createWrapper();
       await flushPromises();
 
-      expect(wrapper.vm.inferenceNewModel.templateId).toBeNull();
-      expect(wrapper.find("[aid=template-section]").exists()).toBe(false);
-      expect(workloadTemplateService.inferenceTemplatesList).not.toHaveBeenCalled();
+      expect(wrapper.vm.inferenceNewModel.templateId).toBe("template-123");
+      expect(wrapper.find("[aid=template-section]").exists()).toBe(true);
+      expect(workloadTemplateService.inferenceTemplatesList).toHaveBeenCalled();
     });
   });
 
@@ -308,49 +298,18 @@ describe("inference-new.vue", () => {
         });
       });
 
-      describe("serving port access handling", () => {
-        it("should navigate to assets edit when serving port access not supported", async () => {
-          vi.mocked(settingStore.isFeatureEnabled).mockReturnValue(true);
-          vi.mocked(workloadTemplateService.inferenceTemplatesList).mockResolvedValue({
-            pagination: { limit: 5 },
-            entries: [],
-          });
-          vi.mocked(workloadTemplateService.templatesCount).mockResolvedValue(0);
-          vi.mocked(settingStore.isFeatureEnabled).mockReturnValue(false);
-          vi.mocked(inferenceService.getInferenceMergedWithPolicy).mockResolvedValue(emptyMergedWorkload);
-          wrapper = createWrapper();
-          await flushPromises();
+      it("opens the flexible editor for Custom inference", async () => {
+        vi.mocked(settingStore.isFeatureEnabled).mockReturnValue(false);
+        vi.mocked(workloadTemplateService.inferenceTemplatesList).mockResolvedValue({ entries: [], pagination: {} });
+        wrapper = createWrapper();
+        await flushPromises();
 
-          vi.spyOn(wrapper.vm, "supportingServingPortAccess", "get").mockReturnValue(false);
-          vi.spyOn(wrapper.vm, "isHybridSupported", "get").mockReturnValue(false);
+        wrapper.vm.inferenceNewModel.serverType = EServerType.Custom;
+        await wrapper.vm.onContinue();
 
-          wrapper.vm.inferenceNewModel.serverType = EServerType.Custom;
-          await wrapper.vm.onContinue();
-          expect(mockRouter.push).toHaveBeenCalledWith(
-            expect.objectContaining({ name: INFERENCE_ROUTE_NAMES.INFERENCE_ASSETS_EDIT }),
-          );
-          expect(inferenceStore.inference).toBeDefined();
-        });
-
-        it("should keep servingPortAccess when supported", async () => {
-          vi.mocked(settingStore.isFeatureEnabled).mockReturnValue(true);
-          vi.mocked(workloadTemplateService.inferenceTemplatesList).mockResolvedValue({
-            pagination: { limit: 5 },
-            entries: [],
-          });
-          vi.mocked(workloadTemplateService.templatesCount).mockResolvedValue(0);
-          vi.mocked(settingStore.isFeatureEnabled).mockReturnValue(false);
-          vi.mocked(inferenceService.getInferenceMergedWithPolicy).mockResolvedValue(emptyMergedWorkload);
-
-          wrapper = createWrapper();
-          await flushPromises();
-
-          wrapper.vm.inferenceNewModel.serverType = EServerType.Custom;
-          vi.spyOn(wrapper.vm, "supportingServingPortAccess", "get").mockReturnValue(true);
-          vi.spyOn(wrapper.vm, "isHybridSupported", "get").mockReturnValue(false);
-
-          await wrapper.vm.onContinue();
-          expect(inferenceStore.inference?.specificEnv?.servingPortAccess).toBeDefined();
+        expect(mockRouter.push).toHaveBeenCalledWith({
+          name: INFERENCE_ROUTE_NAMES.INFERENCE_FLAT_HYBRID,
+          query: { clusterId: clusters[0].uuid, projectId: projects[0].id, inferenceName: "" },
         });
       });
 
@@ -363,7 +322,6 @@ describe("inference-new.vue", () => {
           });
           vi.mocked(workloadTemplateService.templatesCount).mockResolvedValue(0);
           vi.mocked(settingStore.isFeatureEnabled).mockReturnValue(false);
-          vi.mocked(inferenceService.getInferenceMergedWithPolicy).mockResolvedValue(emptyMergedWorkload);
 
           wrapper = createWrapper();
           await flushPromises();
@@ -385,7 +343,6 @@ describe("inference-new.vue", () => {
           });
           vi.mocked(workloadTemplateService.templatesCount).mockResolvedValue(0);
           vi.mocked(settingStore.isFeatureEnabled).mockReturnValue(false);
-          vi.mocked(inferenceService.getInferenceMergedWithPolicy).mockResolvedValue(emptyMergedWorkload);
 
           wrapper = createWrapper();
           await flushPromises();
@@ -409,7 +366,6 @@ describe("inference-new.vue", () => {
           });
           vi.mocked(workloadTemplateService.templatesCount).mockResolvedValue(0);
           vi.mocked(settingStore.isFeatureEnabled).mockReturnValue(false);
-          vi.mocked(inferenceService.getInferenceMergedWithPolicy).mockResolvedValue(emptyMergedWorkload);
 
           wrapper = createWrapper();
           await flushPromises();
@@ -430,7 +386,6 @@ describe("inference-new.vue", () => {
           });
           vi.mocked(workloadTemplateService.templatesCount).mockResolvedValue(0);
           vi.mocked(settingStore.isFeatureEnabled).mockReturnValue(false);
-          vi.mocked(inferenceService.getInferenceMergedWithPolicy).mockResolvedValue(emptyMergedWorkload);
 
           wrapper = createWrapper();
           await flushPromises();
@@ -451,7 +406,6 @@ describe("inference-new.vue", () => {
           });
           vi.mocked(workloadTemplateService.templatesCount).mockResolvedValue(0);
           vi.mocked(settingStore.isFeatureEnabled).mockReturnValue(false);
-          vi.mocked(inferenceService.getInferenceMergedWithPolicy).mockResolvedValue(emptyMergedWorkload);
 
           wrapper = createWrapper();
           await flushPromises();
@@ -472,7 +426,6 @@ describe("inference-new.vue", () => {
           });
           vi.mocked(workloadTemplateService.templatesCount).mockResolvedValue(0);
           vi.mocked(settingStore.isFeatureEnabled).mockReturnValue(false);
-          vi.mocked(inferenceService.getInferenceMergedWithPolicy).mockResolvedValue(emptyMergedWorkload);
 
           wrapper = createWrapper();
           await flushPromises();

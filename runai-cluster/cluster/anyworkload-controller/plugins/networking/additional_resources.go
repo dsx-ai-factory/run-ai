@@ -43,6 +43,13 @@ func (p *Plugin) HandleAdditionalResources(
 		return nil
 	}
 
+	if shape != inputAnnotation && runner.DeletionTimestamp.IsZero() {
+		if err := p.deleteInferenceEndpoint(ctx, runner, k8sClient); err != nil {
+			_ = state.AddPluginIssue(ctx, p, runner, err, true, "delete inference endpoint", issue.Network)
+			return err
+		}
+	}
+
 	switch shape {
 	case inputLegacy:
 		if err := p.pruneAllMetricsServices(ctx, runner, resource, k8sClient, state); err != nil {

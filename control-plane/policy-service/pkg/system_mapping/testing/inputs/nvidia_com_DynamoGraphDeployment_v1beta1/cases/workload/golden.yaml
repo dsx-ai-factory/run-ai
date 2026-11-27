@@ -37,6 +37,34 @@ spec:
   - name: component-c
     replicas: 1
     type: worker
+  - multinode:
+      nodeCount: 2
+    name: component-d
+    replicas: 1
+    roles:
+    - name: leader
+      podTemplate:
+        spec:
+          containers:
+          - image: placeholder
+            name: main
+          - image: placeholder
+            name: sidecar
+          initContainers:
+          - image: placeholder
+            name: init
+    - name: worker
+      podTemplate:
+        spec:
+          containers:
+          - image: placeholder
+            name: main
+          - image: placeholder
+            name: sidecar
+          initContainers:
+          - image: placeholder
+            name: init
+    type: worker
   restart:
     id: restart-test
     strategy:

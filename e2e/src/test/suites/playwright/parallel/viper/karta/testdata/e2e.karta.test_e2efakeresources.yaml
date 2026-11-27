@@ -1,0 +1,22 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: e2efakeresources.e2e.karta.test
+spec:
+  group: e2e.karta.test
+  names:
+    kind: E2EFakeResource
+    plural: e2efakeresources
+    singular: e2efakeresource
+  scope: Namespaced
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              x-kubernetes-preserve-unknown-fields: true

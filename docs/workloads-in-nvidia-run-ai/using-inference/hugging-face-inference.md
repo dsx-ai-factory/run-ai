@@ -47,7 +47,7 @@ Within the form, you have two options:
 * Within the new form, select the **cluster** and **project**. To create a new project, click **+NEW PROJECT** and refer to [Projects](../../platform-management/aiinitiatives/organization/projects.md) for a step-by-step guide.
 * Set the inference workload architecture as **Standard.** This workload will only be able to use environments that support standard workloads. A standard workload consists of a single process.
 * Select a [**template**](../workload-templates/inference-templates/hugging-face-inference-templates.md) or **Start from scratch** to launch a new workload quickly. You can use a workload template to populate the workload advanced setup form with predefined configuration values. You can still modify the populated fields before submitting the workload. Any changes you make will apply only to the workload and will not be saved back to the original template.
-* Set the inference server to [**vLLM** ](https://docs.vllm.ai/en/latest/models/supported_models.html)or [**TGI**](https://huggingface.co/docs/text-generation-inference/en/supported_models)**.**
+* Set the inference server to [**vLLM**](https://docs.vllm.ai/en/latest/models/supported_models.html)**.**
 * Enter a unique **name** for the workload. If the name already exists in the project, you will be requested to submit a different name.
 * Click **CONTINUE**
 
@@ -99,12 +99,10 @@ Manually configure the settings below as needed. The changes will apply to this 
 
 1. Set the **environment image**:
    * Select **Custom image** and add the **Image URL** or update the URL of the existing setup.
-   * **Select from the NGC catalog** and then set how to **access the NGC catalog**:
-     * **As a guest** - Choose the **image name** and **tag** from the dropdown.
-     * **Authenticated** - Configure **access** to NGC and then choose the **image name** and **tag** from the dropdown:
-       * Under **Source**, select [**Shared secret**](../workload-assets/credentials.md#ngc-api-key) or [**My credentials**](../../settings/user-settings/user-credentials.md).
-       * The **Type** field is fixed to **NGC API key**.
-       * Under **Credential name**, select an existing credential from the dropdown. If you select **My credentials**, you can also create a new credential directly from the dropdown. The credential is also saved under **User settings** → Credentials.
+   * **Select from the NGC catalog**, configure **access** to NGC, and then choose the **image name** and **tag** from the dropdown:
+     * Under **Source**, select [**Shared secret**](../workload-assets/credentials.md#ngc-api-key) or [**My credentials**](../../settings/user-settings/user-credentials.md).
+     * The **Type** field is fixed to **NGC API key**.
+     * Under **Credential name**, select an existing credential from the dropdown. If you select **My credentials**, you can also create a new credential directly from the dropdown. The credential is also saved under **User settings** → Credentials.
    * **Select from the NGC private registry** and then set how to access the registry:
      * Select a **registry** from the dropdown.
      * Under **Source**, select [**Shared secret**](../workload-assets/credentials.md#ngc-api-key) or [**My credentials**](../../settings/user-settings/user-credentials.md).

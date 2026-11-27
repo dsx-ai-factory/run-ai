@@ -1,0 +1,51 @@
+{
+    "compilerOptions": {
+        "emitDecoratorMetadata": true,
+        "outDir": "./dist/",
+        "target": "ES2022",
+        "module": "ES2022",
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "experimentalDecorators": true,
+        "types": [
+            "node",
+            "chai"
+        ],
+        "typeRoots": [
+            "./node_modules/@types"
+        ],
+        "resolveJsonModule": true,
+        "strict": false,
+        "skipLibCheck": true
+    },
+    "ts-node": {
+        "esm": true,
+        "experimentalSpecifierResolution": "node"
+    },
+    "include": [
+        "./src/**/*.ts",
+        "./playwright-global-setup.ts",
+        "./playwright-global-teardown.ts",
+        "aggregateResultsPerTeam.ts",
+        "exportFailedTestsAndTheirOwner.ts",
+        "./testCasesCollector.ts",
+        "./playwright-config/envHealthCheck-playwright.config.ts",
+        "./playwright-config/envHealthCheck-playwright-setup.ts",
+        "./playwright-config/envHealthCheck-playwright-teardown.ts",
+        "./playwright-config/certification-kit.config.ts",
+        "./playwright-config/certification-kit-global-setup.ts",
+        "./playwright-config/certification-kit-global-teardown.ts",
+        "./playwright-config/kit-shared-global-setup.ts",
+        "./playwright-config/kit-shared-global-teardown.ts",
+        "./playwright-config/runai-workloads-kit.config.ts",
+        "./playwright-config/runai-workloads-kit-global-setup.ts",
+        "./playwright-config/runai-workloads-kit-global-teardown.ts",
+        "./playwright-config/unit.config.ts"
+    ],
+    "exclude": [
+        "./node_modules"
+    ],
+    "compileOnSave": false
+}

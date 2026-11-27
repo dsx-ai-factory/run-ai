@@ -11,6 +11,7 @@
     @close="$emit('close')"
     input-label="The following value:"
     :max-width="maxWidth"
+    :width="width"
   >
     <template #body>
       <div class="checkbox-container" role="group" :aria-label="filter.label">
@@ -39,6 +40,10 @@ export default defineComponent({
   components: { RunaiPageFilterWrapper },
   emits: ["save", "close"],
   props: {
+    width: {
+      type: String,
+      required: false,
+    },
     filter: {
       type: Object as PropType<IEnumBasedFilterModel>,
       required: true,
@@ -68,7 +73,7 @@ export default defineComponent({
       return this.filter.inputType === "radio";
     },
     maxWidth(): string {
-      return this.filter.maxWidth || "250px";
+      return this.filter.maxWidth || this.width || "250px";
     },
   },
   methods: {

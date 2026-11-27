@@ -26,7 +26,7 @@
 <script lang="ts">
 import { PolicyNumberInput } from "@/components/common/policy-number-input";
 import { RunaiSection } from "@/components/common/runai-section";
-import type { IntegerRules } from "@/swagger-models/assets-service-client";
+import type { IntegerRules } from "@/swagger-models/policy-service-client";
 import { defineComponent, type PropType } from "vue";
 
 export default defineComponent({

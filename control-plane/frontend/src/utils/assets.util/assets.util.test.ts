@@ -8,12 +8,14 @@ import DOCS from "@/constants/docs";
 import { AssetSyncStatusEnum } from "@/swagger-models/assets-service-client";
 import { assetsUtil } from "./assets.util";
 
-const support = DOCS.SUPPORT as { URL: string };
+const support = DOCS.SUPPORT as { URL: string; LABEL: string };
 const originalSupportUrl = support.URL;
+const originalSupportLabel = support.LABEL;
 
 describe("asset status support CTA", () => {
   afterEach(() => {
     support.URL = originalSupportUrl;
+    support.LABEL = originalSupportLabel;
   });
 
   it("removes support copy and preserves punctuation when the support URL is missing", () => {
@@ -45,6 +47,48 @@ describe("asset status support CTA", () => {
     );
 
     expect(result.tooltipText).toContain('href="https://support.example.test/contact"');
+    expect(result.tooltipText).toContain("<br/><a ");
     expect(result.tooltipText).not.toContain("legacy-support.example.test");
   });
+
+  it("escapes the support URL before placing it in the href", () => {
+    support.URL = 'https://support.example.test/?a=1&b="x"><script>';
+
+    const result = assetsUtil.getStatusColOptions(
+      { status: AssetSyncStatusEnum.IssuesFound, message: "Issue", url: "flag" },
+      "2020-01-01T00:00:00Z",
+    );
+
+    expect(result.tooltipText).toContain(
+      'href="https://support.example.test/?a=1&amp;b=&quot;x&quot;&gt;&lt;script&gt;"',
+    );
+    expect(result.tooltipText).not.toContain("<script>");
+  });
+
+  it("uses the configured support label in the clickable sentence", () => {
+    support.URL = "/helpdesk";
+    support.LABEL = "Platform support";
+
+    const result = assetsUtil.getStatusColOptions(
+      { status: AssetSyncStatusEnum.IssuesFound, message: "Issue", url: "flag" },
+      "2020-01-01T00:00:00Z",
+    );
+
+    expect(result.tooltipText).toContain(">Contact Platform support.</a>");
+    expect(result.tooltipText).not.toContain("NVIDIA Run:ai support");
+  });
+
+  it.each(["Volume unavailable.", "Volume unavailable", "Really?"])(
+    "puts the support link on its own line without adding punctuation to %j",
+    (message) => {
+      support.URL = "https://support.example.test/contact";
+
+      const result = assetsUtil.getStatusColOptions(
+        { status: AssetSyncStatusEnum.IssuesFound, message, url: "flag" },
+        "2020-01-01T00:00:00Z",
+      );
+
+      expect(result.tooltipText?.startsWith(`${message}<br/><a `)).toBe(true);
+    },
+  );
 });

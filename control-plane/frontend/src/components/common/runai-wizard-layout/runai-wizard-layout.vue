@@ -4,13 +4,24 @@
 -->
 
 <template>
-  <runai-panels-layout v-if="orientation === 'vertical'">
-    <template #left>
-      <runai-panel-container :transparent="transparentStepsPanel">
+  <runai-panels-layout
+    v-if="orientation === 'vertical'"
+    :width="width"
+    :responsive="responsive"
+    :margin-top="marginTop"
+    :left-width="leftWidth"
+    :right-width="rightWidth"
+    :collapsed-left-width="collapsedLeftWidth"
+    :hide-right-on-small-screen="hideRightOnSmallScreen"
+    :collapse-left-on-small-screen="collapseLeftOnSmallScreen"
+  >
+    <template #left="{ collapsed, expanded }">
+      <runai-panel-container width="100%" :transparent="transparentStepsPanel && !expanded">
         <runai-wizard-steps-panel
           :steps="steps"
           :active-step="activeStep"
           :disable-navigation="disableNavigation"
+          :collapsed="collapsed"
           @step-click="handleStepClick"
         />
       </runai-panel-container>
@@ -24,7 +35,7 @@
     </runai-wizard-main-content>
 
     <template #right v-if="$slots['right-sidebar']">
-      <runai-panel-container>
+      <runai-panel-container width="100%">
         <slot name="right-sidebar" />
       </runai-panel-container>
     </template>
@@ -63,19 +74,22 @@ import RunaiWizardMainContent from "./runai-wizard-main-content.vue";
 import RunaiPanelsLayout from "@/components/common/runai-panels-layout/runai-panels-layout.vue";
 import RunaiPanelContainer from "@/components/common/runai-panel-container/runai-panel-container.vue";
 import type { IRunaiWizardLayoutStep, WizardOrientation } from "@/models/runai-wizard-layout.model";
+import type { IRunaiPanelsLayoutProps } from "@/models/runai-panels-layout.model";
 
 defineOptions({
   name: "runai-wizard-layout",
 });
 
 const props = withDefaults(
-  defineProps<{
-    steps: IRunaiWizardLayoutStep[];
-    activeStep: string;
-    disableNavigation?: boolean;
-    transparentStepsPanel?: boolean;
-    orientation?: WizardOrientation;
-  }>(),
+  defineProps<
+    IRunaiPanelsLayoutProps & {
+      steps: IRunaiWizardLayoutStep[];
+      activeStep: string;
+      disableNavigation?: boolean;
+      transparentStepsPanel?: boolean;
+      orientation?: WizardOrientation;
+    }
+  >(),
   {
     orientation: "vertical",
   },

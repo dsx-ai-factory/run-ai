@@ -7,7 +7,6 @@ import {
   AssetKind,
   type HostPathSpec,
   type NFSAssetSpec,
-  type ClaimInfo,
   type GitAssetSpec,
   type PVCAssetSpec,
   type S3AssetSpec,
@@ -171,13 +170,6 @@ export const DATA_SOURCE_ASSET_KINDS_TO_NAMES: Record<TDataSourceKinds, string> 
   [AssetKind.SecretVolume]: DATA_SOURCES_TYPES_TO_NAMES.SECRET_VOLUME,
   [AssetKind.DataVolume]: DATA_SOURCES_TYPES_TO_NAMES.DATA_VOLUME,
 };
-export interface IUIVolume {
-  // id: string;
-  claimName: string;
-  path: string;
-  claimInfo: ClaimInfo;
-  ephemeral: boolean;
-}
 export interface IUIHostPathCreationRequest {
   meta: IUIAssetCreationMeta;
   spec: HostPathSpec;
