@@ -163,7 +163,7 @@ func (dinfComposer *DistributedInferenceToLWSComposer) Compose(
 			runner.Run(dinfComposer.processReplica(ctx, src, worker, &lws.Spec.LeaderWorkerTemplate.WorkerTemplate, "worker", dinfComposer.WorkerAssetsMapping, target))
 		}
 
-		runner.Run(dinfComposer.processNetworkingFields(src.ServingPort.Get(), target))
+		runner.Run(dinfComposer.processNetworkingFields(src.ServingPort.Get(), convutils.Deref(src.LoadAwareRouting.Get(), false), target))
 
 		// ComposeMNNVL runs after both replicas are composed so fc.GpuRequested
 		// reflects the leader and worker compute sections.

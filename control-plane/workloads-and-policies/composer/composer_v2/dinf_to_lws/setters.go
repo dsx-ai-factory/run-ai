@@ -31,6 +31,10 @@ type lwsNetworkingCookie struct {
 	lwsName      string
 	serviceName  string
 	servingURL   string
+	// loadAwareRouting gives a protected serving port's Service an authorization
+	// block, so the networking plugin's standalone auth proxy runs the auth check
+	// instead of the leader sidecar.
+	loadAwareRouting bool
 }
 
 func servingPortToLWS(src *composer.ServingPortInfo, target any, rawCookie any) *workloadsApi.Error {
@@ -51,8 +55,16 @@ func servingPortToLWS(src *composer.ServingPortInfo, target any, rawCookie any) 
 
 	authEnabled := src.AuthInfo.AuthorizationType != nil &&
 		*src.AuthInfo.AuthorizationType != composer.ConnectionAuthorizationType_PUBLIC
+	service := workloadsManagerApi.NewNetworkingService()
+	if authEnabled && cookie.loadAwareRouting {
+		authorization, err := standaloneAuthorization(src.AuthInfo)
+		if err != nil {
+			return err
+		}
+		service.SetAuthorization(*authorization)
+	}
 	targetPort := *port
-	if authEnabled {
+	if authEnabled && !service.HasAuthorization() {
 		targetPort = composer.Oauth2ContainerDefaultPort
 	}
 	servicePort := workloadsManagerApi.NewServicePort(servingPortServicePort)
@@ -75,7 +87,6 @@ func servingPortToLWS(src *composer.ServingPortInfo, target any, rawCookie any) 
 		serviceLabels[constants.LabelWorkloadKind] = constants.KindDistributedInferenceWorkload
 		serviceSpec.SetLabels(serviceLabels)
 	}
-	service := workloadsManagerApi.NewNetworkingService()
 	service.SetSpec(*serviceSpec)
 
 	endpoint := workloadsManagerApi.NetworkingEndpoint{
@@ -132,6 +143,33 @@ func servingPortToLWS(src *composer.ServingPortInfo, target any, rawCookie any) 
 		}
 	}
 	return nil
+}
+
+// standaloneAuthorization is the networking auth block of a protected serving
+// port behind the standalone auth proxy. The proxy keeps the JSON errors the
+// leader sidecar returns, so API clients get the same responses.
+func standaloneAuthorization(auth composer.PortAuthInfo) (*workloadsManagerApi.Workloadv2Authorization, *workloadsApi.Error) {
+	authorization := workloadsManagerApi.NewWorkloadv2Authorization()
+	switch convutils.Deref(auth.AuthorizationType, "") {
+	case composer.ConnectionAuthorizationType_AUTHENTICATED_USERS:
+		authorization.SetAuthorizationType(workloadsManagerApi.AUTHORIZATIONTYPE_AUTHENTICATED_USERS)
+	case composer.ConnectionAuthorizationType_AUTHORIZED_USERS,
+		composer.ConnectionAuthorizationType_AUTHORIZED_GROUPS,
+		composer.ConnectionAuthorizationType_AUTHORIZED_USERS_OR_GROUPS:
+		// Validation allows users or groups, not both.
+		if len(auth.AuthorizedUsers) > 0 {
+			authorization.SetAuthorizationType(workloadsManagerApi.AUTHORIZATIONTYPE_AUTHORIZED_USERS)
+			authorization.AuthorizedUsers = auth.AuthorizedUsers
+		} else {
+			authorization.SetAuthorizationType(workloadsManagerApi.AUTHORIZATIONTYPE_AUTHORIZED_GROUPS)
+			authorization.AuthorizedGroups = auth.AuthorizedGroups
+		}
+	default:
+		return nil, workloadsApi.NewError(http.StatusBadRequest,
+			fmt.Sprintf("servingPort: authorization type %q is not supported with load-aware routing", convutils.Deref(auth.AuthorizationType, "")))
+	}
+	authorization.SetForceJsonResponse(true)
+	return authorization, nil
 }
 
 func startupPolicyToLWS(src *string, target any, _ any) *workloadsApi.Error {

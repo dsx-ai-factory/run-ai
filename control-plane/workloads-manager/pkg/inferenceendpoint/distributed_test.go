@@ -83,7 +83,7 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 		Expect(string(raw)).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"}}`))
 	})
 
-	composeNative := func(authorizationType *workloadsapi.DistributedInferenceServingPortAccessAuthorizationTypeEnum) (*lwsv1.LeaderWorkerSet, api.NetworkingEndpoint) {
+	composeNative := func(authorizationType *workloadsapi.DistributedInferenceServingPortAccessAuthorizationTypeEnum, loadAwareRouting bool) (*lwsv1.LeaderWorkerSet, api.NetworkingEndpoint) {
 		config := &composer.StaticClusterStorageConfig{}
 		config.SetIngressEnabled(false)
 		config.SetGatewayAPIEnabled(true)
@@ -104,6 +104,7 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 			config.SetOauth2ProxyOidcIssuerUrl("https://auth.example.com")
 		}
 		spec.SetServingPort(*port)
+		spec.SetLoadAwareRouting(loadAwareRouting)
 		builder := dinf_to_lws.NewDistributedInferenceToLWSComposer("model", "project", "project", "user", nil, nil, composer.FieldsComposerOptions{}, nil).
 			WithLeaderWorkerSetName("model-1234").WithClusterStorageConfig(config)
 		target := dinf_to_lws.NewMinimalLeaderWorkerSetTarget()
@@ -117,7 +118,7 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 	}
 
 	It("accepts the resolved output of the native distributed-inference composer", func() {
-		composed, resolved := composeNative(nil)
+		composed, resolved := composeNative(nil, true)
 		intent, err := BuildDistributedInferenceIntent(composed, resolved, defaults)
 		Expect(err).NotTo(HaveOccurred())
 		setRoute()
@@ -126,15 +127,28 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 		Expect(intent).To(Equal(expected))
 	})
 
-	It("rejects the protected output of the native composer", func() {
+	It("accepts the protected load-aware output of the native composer, which uses the standalone auth proxy", func() {
 		authenticated := workloadsapi.DISTRIBUTEDINFERENCESERVINGPORTACCESSAUTHORIZATIONTYPEENUM_AUTHENTICATED_USERS
-		composed, resolved := composeNative(&authenticated)
+		composed, resolved := composeNative(&authenticated, true)
 		service := (*resolved.Services)[0]
-		Expect(service.Authorization).To(BeNil())
-		Expect(*service.Spec.Ports[0].TargetPort).To(Equal(composer.Oauth2ContainerDefaultPort))
+		Expect(service.Authorization).NotTo(BeNil())
+		Expect(*service.Spec.Ports[0].TargetPort).To(BeEquivalentTo(8000))
+		Expect(composed.Spec.LeaderWorkerTemplate.LeaderTemplate.Spec.Containers).To(HaveLen(1), "no auth proxy sidecar")
+
+		intent, err := BuildDistributedInferenceIntent(composed, resolved, defaults)
+		Expect(err).NotTo(HaveOccurred())
+		raw, err := json.Marshal(intent)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"}}`))
+	})
+
+	It("rejects a serving Service that targets the auth proxy sidecar", func() {
+		authenticated := workloadsapi.DISTRIBUTEDINFERENCESERVINGPORTACCESSAUTHORIZATIONTYPEENUM_AUTHENTICATED_USERS
+		composed, resolved := composeNative(&authenticated, false)
+		Expect(*(*resolved.Services)[0].Spec.Ports[0].TargetPort).To(Equal(composer.Oauth2ContainerDefaultPort))
 
 		_, err := BuildDistributedInferenceIntent(composed, resolved, defaults)
-		Expect(err).To(MatchError(ContainSubstring(AuthNotSupportedMessage)))
+		Expect(err).To(MatchError(ContainSubstring(SidecarAuthProxyMessage)))
 	})
 
 	It("accepts additional bound selectors that the leader template carries", func() {

@@ -15,7 +15,6 @@ import (
 
 	nimv1alpha1 "github.com/NVIDIA/k8s-nim-operator/api/apps/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/internal/generated/pkg/api"
-	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/inferenceendpoint"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
@@ -38,7 +37,6 @@ const (
 	backendProtocolGRPCHAProxy        = "grpc"
 	haproxyForwardedUriHeader         = "X-Forwarded-Uri %[req.uri]"
 
-	nimLoadAwareRoutingProtectedMessage  = "load-aware routing: " + inferenceendpoint.AuthNotSupportedMessage
 	nimLoadAwareRoutingNotExposedMessage = "load-aware routing requires servingPort.exposeExternally to be true"
 	nimLoadAwareRoutingGRPCMessage       = "load-aware routing is not available for NIM services that serve gRPC"
 )
@@ -171,8 +169,6 @@ func nimInferenceRouting(spec api.NimServiceSpec) *api.WorkloadV2ConfigurationIn
 // and path checks depend on the cluster and run when the intent is built.
 func validateNimInferenceRouting(sp *api.NimServiceServingPort) *api.Error {
 	switch {
-	case sp != nil && hasNimServingPortAuth(sp):
-		return api.NewError(http.StatusBadRequest, nimLoadAwareRoutingProtectedMessage, nil)
 	case !nimServingPortExposureWanted(sp):
 		return api.NewError(http.StatusBadRequest, nimLoadAwareRoutingNotExposedMessage, nil)
 	case (sp.GrpcPort != nil && *sp.GrpcPort > 0) || resolveProtocol(sp) == api.SERVINGPORTEXPOSEDPROTOCOL_GRPC:

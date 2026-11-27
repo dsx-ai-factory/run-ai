@@ -22,9 +22,11 @@ const EPPProfileGIEv15 = "gie-v1.5"
 // that has no administrator-enabled Gateway, for example an Ingress-only cluster.
 const GatewayClusterRequiredMessage = "requires a Gateway cluster, but this cluster has no administrator-enabled Gateway"
 
-// AuthNotSupportedMessage is returned when a workload opts in with an authorized
-// serving port. Remove it with the change that supports authorization.
-const AuthNotSupportedMessage = "an authorized serving port is not supported yet"
+// SidecarAuthProxyMessage is returned when a load-aware serving Service targets
+// the leader's auth proxy sidecar. The endpoint picker sends requests to the
+// model port directly, so a protected load-aware workload uses the standalone
+// auth proxy, which runs before the endpoint picker.
+const SidecarAuthProxyMessage = "the serving port targets the auth proxy sidecar; a protected load-aware workload uses the standalone auth proxy"
 
 // Defaults are cluster administrator choices shared by supported workload
 // adapters. They do not establish runtime, authentication or URL compatibility.
