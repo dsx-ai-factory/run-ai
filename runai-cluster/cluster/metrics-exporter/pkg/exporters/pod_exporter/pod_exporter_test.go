@@ -626,6 +626,94 @@ func TestExtractGPUIndexFromPodEnvConfigMapNotFound(t *testing.T) {
 	assert.Equal(t, "", extractedGPUIndex)
 }
 
+// TestExtractGPUIndexFromAnnotationsFallback verifies that extractGPUIndex and
+// GetGpuIndex fall back to CDI, Run:AI, and nvfractions pod annotations for
+// matching container names, ignore annotations for other container names when
+// named containers exist, and scan annotation keys only when containers are
+// unnamed.
+func TestExtractGPUIndexFromAnnotationsFallback(t *testing.T) {
+	tests := []struct {
+		name           string
+		containerName  string
+		annotations    map[string]string
+		expectedRaw    string
+		expectedMapped string
+	}{
+		{
+			name:          "CDI container annotation",
+			containerName: "runner",
+			annotations: map[string]string{
+				"nvidia.cdi.k8s.io/container.runner": "k8s.device-plugin.nvidia.com/gpu=GPU-e7be50b5-06a7-2924-4f04-854c45c50685",
+			},
+			expectedRaw:    "k8s.device-plugin.nvidia.com/gpu=GPU-e7be50b5-06a7-2924-4f04-854c45c50685",
+			expectedMapped: "GPU-e7be50b5-06a7-2924-4f04-854c45c50685",
+		},
+		{
+			name:          "run.ai gpu-visible-devices annotation",
+			containerName: "worker",
+			annotations: map[string]string{
+				"run.ai/gpu-visible-devices-worker": "GPU-abc123,GPU-def456",
+			},
+			expectedRaw:    "GPU-abc123,GPU-def456",
+			expectedMapped: "GPU-abc123,GPU-def456",
+		},
+		{
+			name:          "nvfractions container gpus.devices annotation",
+			containerName: "main",
+			annotations: map[string]string{
+				"nvidia.com/container.main.gpus.devices": "0,2",
+			},
+			expectedRaw:    "0,2",
+			expectedMapped: "0,2",
+		},
+		{
+			name:          "named container ignores annotation for different container",
+			containerName: "main",
+			annotations: map[string]string{
+				"nvidia.cdi.k8s.io/container.other":       "k8s.device-plugin.nvidia.com/gpu=GPU-e7be50b5-06a7-2924-4f04-854c45c50685",
+				"run.ai/gpu-visible-devices-other":        "GPU-abc123",
+				"nvidia.com/container.other.gpus.devices": "0,2",
+			},
+			expectedRaw:    "",
+			expectedMapped: "",
+		},
+		{
+			name:          "unnamed container falls back to annotation key scan",
+			containerName: "",
+			annotations: map[string]string{
+				"nvidia.com/container.app.gpus.devices": "GPU-e7be50b5-06a7-2924-4f04-854c45c50685",
+			},
+			expectedRaw:    "GPU-e7be50b5-06a7-2924-4f04-854c45c50685",
+			expectedMapped: "GPU-e7be50b5-06a7-2924-4f04-854c45c50685",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pod := createPod()
+			pod.Status.Phase = v1.PodRunning
+			for k, v := range tt.annotations {
+				pod.Annotations[k] = v
+			}
+			pod.Spec = v1.PodSpec{
+				Containers: []v1.Container{{
+					Name: tt.containerName,
+				}},
+			}
+
+			exporter := NewPodExporter(context.TODO(), createFakeClient([]client.Object{}), pod)
+
+			raw, err := exporter.extractGPUIndex()
+			assert.Nil(t, err)
+			assert.Equal(t, tt.expectedRaw, raw)
+
+			gpuIndex, err := exporter.GetGpuIndex()
+			assert.Nil(t, err)
+			assert.Equal(t, tt.expectedMapped, gpuIndex)
+		})
+	}
+}
+
 func TestGetMIGDeviceInfoNonMigPod(t *testing.T) {
 	pod := createPod()
 
