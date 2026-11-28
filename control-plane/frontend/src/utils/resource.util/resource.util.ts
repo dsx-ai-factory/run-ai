@@ -19,14 +19,12 @@ import { type Resources, type ResourcesNullable } from "@/swagger-models/org-uni
 const MIB_TO_MB_FACTOR = 1.048576;
 const MIB_TO_GB_FACTOR = 953.67431640625;
 const MEMORY_SIZE_THRESHOLD = 9536.7431640625;
-const BYTE_TO_MIB_FACTOR = 1048576;
 export const resourceUtil = {
   getResourceDisplayValue,
   convertMemoryValue,
   fromMbToMib,
   sortNodePoolNames,
   sortResourcesByNodePoolOrder,
-  fromBytesToMiB,
   getNodePoolResourceOverQuotaWeightDisplayedValue,
   getOverQuotaPriorityKeyByValue,
   getOverQuotaKeyByValue,
@@ -69,10 +67,6 @@ function fromMibToGb(mib: number): number {
 
 function fromMbToMib(mib: number): number {
   return mib / MIB_TO_MB_FACTOR;
-}
-
-function fromBytesToMiB(bytes: number): number {
-  return bytes / BYTE_TO_MIB_FACTOR;
 }
 
 function convertMemoryValue(value: number): { value: number; selectedUnit: EMemoryUnit } {

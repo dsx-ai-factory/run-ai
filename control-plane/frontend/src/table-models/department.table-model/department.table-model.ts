@@ -245,7 +245,7 @@ export const allDepartmentColumnsMap: Record<string, ITableColumn> = {
     sortable: false,
     align: "left",
     format: (allocatedMemory: number | undefined, department: IDepartmentTable) =>
-      toPercent(resourceUtil.fromBytesToMiB(allocatedMemory || 0), department.totalResources?.memoryQuota || 0),
+      toPercent(allocatedMemory || 0, department.totalResources?.memoryQuota || 0),
     hideFilter: true,
   },
   gpuQuota: {
