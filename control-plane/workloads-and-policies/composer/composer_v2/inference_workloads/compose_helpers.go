@@ -42,6 +42,13 @@ func inferenceServingURL(config composer.ClusterStorageConfig, projectName, work
 	return parsed.String(), nil
 }
 
+// processComputeFields composes spec.compute into the Knative Service's user
+// container and pod template: CPU and memory requests and limits, whole or
+// fractional GPU requests, compute.extendedResources (mirrored into both
+// requests and limits, excluded entries skipped, as for workspace and
+// training), and the GPU sizing annotations or legacy env vars. A nil src is
+// a no-op. The first failing step's error is returned; an extended resource
+// that is not excluded and has a missing or malformed quantity is a 400.
 func (itc *InferenceToKnativeComposer) processComputeFields(
 	ctx context.Context,
 	src *workloadsApi.WorkspaceSpecSpecAllOfCompute,
@@ -72,6 +79,9 @@ func (itc *InferenceToKnativeComposer) processComputeFields(
 				src.GpuMemoryPortionRequest.Get(), src.GpuMemoryPortionLimit.Get(),
 				src.GpuMemoryRequest.Get(), src.GpuMemoryLimit.Get(), composer.WholeGpusToK8sResources,
 				&container.Resources, nil, &sizingInfo),
+
+			itc.fc.ComposeExtendedResources(itemized.ExtendedResourceNickPrefix, src.ExtendedResources,
+				&container.Resources, composer.ExtendedResourcesToK8sResources, nil),
 		)
 
 		if sizingInfo.MemoryLimit != nil || sizingInfo.PortionLimit != nil {

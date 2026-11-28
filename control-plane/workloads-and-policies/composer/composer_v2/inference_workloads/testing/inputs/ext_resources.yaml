@@ -1,0 +1,13 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: public
+compute:
+  cpuCoreRequest: 1
+  extendedResources:
+    - resource: nvidia.com/mig-1g.24gb
+      quantity: "1"
+    - resource: example.com/fpga
+      exclude: true
+    - resource: nvidia.com/sriov_resource
+      quantity: "2"
