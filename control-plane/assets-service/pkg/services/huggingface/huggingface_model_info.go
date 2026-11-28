@@ -17,6 +17,13 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/generated/pkg/api"
 )
 
+// A gated-model check must not wait forever when the caller context has no deadline.
+const huggingFaceHTTPTimeout = 15 * time.Second
+
+var newHuggingFaceHTTPClient = func() *http.Client {
+	return &http.Client{Timeout: huggingFaceHTTPTimeout}
+}
+
 var languageModelTags = map[string]bool{
 	"text-generation":          true, // Main tag for LLMs supported by vLLM
 	"text2text-generation":     true, // For models that transform text to text
@@ -241,11 +248,12 @@ func (ea *ExternalApi) modelFileApiCall(ctx context.Context, modelFileUrl string
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *token))
 	}
 
-	client := &http.Client{}
+	client := newHuggingFaceHTTPClient()
 	resp, err := client.Do(req)
 	if err != nil {
 		return 0, err
 	}
+	defer resp.Body.Close()
 
 	return resp.StatusCode, nil
 }
