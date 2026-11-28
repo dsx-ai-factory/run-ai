@@ -7,10 +7,10 @@ package forward
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/cluster/status"
@@ -128,5 +128,5 @@ func (f *Forward) buildUrl() error {
 }
 
 func getAddressUrl(a string, p int32) string {
-	return fmt.Sprintf("%s:%d", a, p)
+	return net.JoinHostPort(strings.Trim(a, "[]"), strconv.FormatInt(int64(p), 10))
 }

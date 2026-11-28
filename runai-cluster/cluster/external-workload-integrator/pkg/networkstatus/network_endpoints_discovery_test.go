@@ -51,6 +51,24 @@ var _ = Describe("findNodePortEndpoints", func() {
 		Expect(ep.SourceRef).To(Equal(v1alpha1.ExternalEndpointSourceRef{Kind: "Service", Name: "svc-np"}))
 	})
 
+	It("brackets an IPv6 node address in the endpoint url", func() {
+		svc := &corev1.Service{
+			ObjectMeta: metav1.ObjectMeta{Name: "svc-np-v6", Namespace: "ns"},
+			Spec: corev1.ServiceSpec{
+				Type: corev1.ServiceTypeNodePort,
+				Ports: []corev1.ServicePort{
+					{Port: 80, NodePort: 30080, Protocol: corev1.ProtocolTCP},
+					{Port: 8080, NodePort: 30081, Protocol: corev1.ProtocolTCP, AppProtocol: ptr.To("http")},
+				},
+			},
+		}
+		eps := NewNetworkStatusUpdater(nil).findNodePortEndpoints(svc, "2600:1f18::1")
+		Expect(eps).To(HaveLen(2))
+		Expect(eps[0].Host).To(Equal("2600:1f18::1"))
+		Expect(eps[0].Url).To(Equal("[2600:1f18::1]:30080"))
+		Expect(eps[1].Url).To(Equal("http://[2600:1f18::1]:30081/"))
+	})
+
 	It("marks TLS when AppProtocol is https", func() {
 		svc := &corev1.Service{
 			ObjectMeta: metav1.ObjectMeta{Name: "svc-np-tls"},
@@ -177,6 +195,34 @@ var _ = Describe("findLoadBalancerEndpoints", func() {
 		Expect(ep.Url).To(Equal("1.2.3.4:8080"))
 		Expect(ep.SourceRef).To(Equal(v1alpha1.ExternalEndpointSourceRef{Kind: "Service", Name: "svc-lb"}))
 	})
+
+	DescribeTable("brackets an IPv6 ingress IP in the endpoint url",
+		func(appProtocol *string, port int32, expectedUrl string) {
+			svc := &corev1.Service{
+				ObjectMeta: metav1.ObjectMeta{Name: "svc-lb-ipv6"},
+				Spec: corev1.ServiceSpec{
+					Type: corev1.ServiceTypeLoadBalancer,
+					Ports: []corev1.ServicePort{
+						{Port: port, Protocol: corev1.ProtocolTCP, AppProtocol: appProtocol},
+					},
+				},
+				Status: corev1.ServiceStatus{
+					LoadBalancer: corev1.LoadBalancerStatus{
+						Ingress: []corev1.LoadBalancerIngress{{IP: "2600:1f18::1"}},
+					},
+				},
+			}
+			eps := NewNetworkStatusUpdater(nil).findLoadBalancerEndpoints(svc)
+			Expect(eps).To(HaveLen(1))
+			Expect(eps[0].Host).To(Equal("2600:1f18::1"))
+			Expect(eps[0].Url).To(Equal(expectedUrl))
+		},
+		Entry("no app protocol", nil, int32(8080), "[2600:1f18::1]:8080"),
+		Entry("http on the default port", ptr.To("http"), int32(80), "http://[2600:1f18::1]/"),
+		Entry("http on a custom port", ptr.To("http"), int32(8080), "http://[2600:1f18::1]:8080/"),
+		Entry("https on the default port", ptr.To("https"), int32(443), "https://[2600:1f18::1]/"),
+		Entry("https on a custom port", ptr.To("https"), int32(8443), "https://[2600:1f18::1]:8443/"),
+	)
 
 	It("falls back to hostname when IP is empty", func() {
 		svc := &corev1.Service{
@@ -2414,6 +2460,23 @@ var _ = Describe("getNodeAddress", func() {
 		fc := newFakeClient(scheme, node)
 		addr := getNodeAddress(context.Background(), fc, node.Name)
 		Expect(addr).To(Equal("203.0.113.2"))
+	})
+
+	It("strips the brackets from a bracketed IPv6 annotation", func() {
+		node := &corev1.Node{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:        "node-with-bracketed-annotation",
+				Annotations: map[string]string{externalNodeIPAnnotation: "[2600:1f18::1]"},
+			},
+			Status: corev1.NodeStatus{
+				Addresses: []corev1.NodeAddress{
+					{Type: corev1.NodeInternalIP, Address: "192.168.1.5"},
+				},
+			},
+		}
+		fc := newFakeClient(scheme, node)
+		addr := getNodeAddress(context.Background(), fc, node.Name)
+		Expect(addr).To(Equal("2600:1f18::1"))
 	})
 
 	It("prefers a Kubernetes external IP over the annotation", func() {

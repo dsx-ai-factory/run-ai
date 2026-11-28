@@ -1,0 +1,28 @@
+suite: Test Thanos gRPC forwarder
+
+templates:
+  - templates/thanos/thanos-grpc-forwarder.yaml
+
+tests:
+  - it: should listen on IPv4 and add IPv6 only when the node has it
+    set:
+      thanos:
+        query:
+          stores:
+            - thanos-grpc-port-forwarder:10901
+    documentSelector:
+      path: kind
+      value: Deployment
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].command[0]
+          value: sh
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: 'ADDRESS=0\.0\.0\.0\n'
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: '\[ -e /proc/net/if_inet6 \] && ADDRESS=0\.0\.0\.0,::'
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: 'exec kubectl port-forward .*--address=\$ADDRESS 10901:10901'

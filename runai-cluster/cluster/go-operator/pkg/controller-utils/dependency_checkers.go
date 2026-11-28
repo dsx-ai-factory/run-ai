@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -184,10 +185,16 @@ func getMissingMetrics(resBodyStr string) []string {
 }
 
 func getMetricsFromExporterService(svc *v1.Service) (string, error) {
-	res, err := http.Get("http://" + svc.Spec.ClusterIP + ":" + strconv.Itoa(int(svc.Spec.Ports[0].Port)) + "/metrics")
+	url := "http://" + net.JoinHostPort(svc.Spec.ClusterIP, strconv.Itoa(int(svc.Spec.Ports[0].Port))) + "/metrics"
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
 	if err != nil {
-		return "", fmt.Errorf("failed to connect to dcgm-exporter service in the cluster")
+		return "", fmt.Errorf("failed to build dcgm-exporter service request: %w", err)
 	}
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to connect to dcgm-exporter service in the cluster: %w", err)
+	}
+	defer func() { _ = res.Body.Close() }()
 
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil || res.StatusCode != http.StatusOK {

@@ -163,3 +163,23 @@ func TestRegisterSerializers_WithInvalidEncryptionKey(t *testing.T) {
 	err := c.registerSerializers(conf)
 	require.EqualError(t, err, "failed to create symmetric encryption serializer: encryption key must be 16, 24, or 32 bytes, got: 11")
 }
+
+func TestBuildHostList(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		host string
+		want string
+	}{
+		{name: "hostname", host: "db", want: "db:5432"},
+		{name: "hostname with port", host: "db:6543", want: "db:6543"},
+		{name: "ipv4", host: "10.0.0.5", want: "10.0.0.5:5432"},
+		{name: "bare ipv6", host: "2600:1f18::5", want: "[2600:1f18::5]:5432"},
+		{name: "bracketed ipv6", host: "[2600:1f18::5]", want: "[2600:1f18::5]:5432"},
+		{name: "bracketed ipv6 with port", host: "[2600:1f18::5]:6543", want: "[2600:1f18::5]:6543"},
+		{name: "mixed list", host: "r1, 2600:1f18::5 ,10.0.0.5:7000", want: "r1:5432,[2600:1f18::5]:5432,10.0.0.5:7000"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			require.Equal(t, tc.want, buildHostList(tc.host, 5432))
+		})
+	}
+}

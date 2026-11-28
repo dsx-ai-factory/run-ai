@@ -66,3 +66,21 @@ func TestParseBodyToEvent_WithHeaders(t *testing.T) {
 	require.Equal(t, "foo", event.Properties["tenant_id"])
 	require.Equal(t, "bar", event.Properties["user_id"])
 }
+
+func TestNewSmtpListenerAddr(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		host string
+		want string
+	}{
+		{name: "hostname", host: "localhost", want: "localhost:2525"},
+		{name: "ipv4", host: "127.0.0.1", want: "127.0.0.1:2525"},
+		{name: "ipv6", host: "::1", want: "[::1]:2525"},
+		{name: "bracketed ipv6", host: "[::1]", want: "[::1]:2525"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			l := NewSmtpListener("id", nil, &SmtpListenerConfig{Host: tc.host, Port: 2525})
+			require.Equal(t, tc.want, l.server.Addr)
+		})
+	}
+}

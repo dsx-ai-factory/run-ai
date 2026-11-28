@@ -62,6 +62,11 @@ var mcpRedirectURIs = []string{
 	"http://localhost/oauth/callback",
 }
 
+var cliLoopbackRedirectURIs = []string{
+	"http://127.0.0.1",
+	"http://[::1]",
+}
+
 var workloadsAuthAttributes = map[string]string{
 	"backchannel.logout.revoke.offline.tokens":   "false",
 	"backchannel.logout.session.required":        "true",
@@ -94,6 +99,7 @@ var clientProfiles = map[string]clientProfile{
 		standardFlow:        true,
 		emailScopeDefault:   true,
 		redirect:            redirectDefault,
+		staticRedirectURIs:  cliLoopbackRedirectURIs,
 		webOrigins:          true,
 		secretlessUserGrant: true,
 	},
@@ -103,6 +109,7 @@ var clientProfiles = map[string]clientProfile{
 		standardFlow:        true,
 		emailScopeDefault:   true,
 		redirect:            redirectDefault,
+		staticRedirectURIs:  cliLoopbackRedirectURIs,
 		webOrigins:          true,
 		secretlessUserGrant: true,
 	},
