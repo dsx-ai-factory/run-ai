@@ -621,6 +621,9 @@ func validateChangeOfPvcSize(ctx context.Context, id string, meta *dbmodel.Asset
 		return api.NewValidationError("claimInfo.size is permitted only for PVC assets with existingPvc=false")
 	}
 
+	//
+	//  validation #1: requested updated size must be no less than the originally requested size
+	//
 	fromSizeAsStr := convutils.Deref(spec.ClaimInfo.Size, "")
 	toSizeAsStr := *request.Spec.ClaimInfo.Size
 
@@ -634,9 +637,7 @@ func validateChangeOfPvcSize(ctx context.Context, id string, meta *dbmodel.Asset
 		return api.NewValidationError(fmt.Sprintf("malformed PVC size %s: %v", toSizeAsStr, convErr))
 	}
 
-	//
-	//  validation #1: if no cluster is attached, fall back to checking against the DB size
-	//
+	//  if no cluster is attached, fall back to checking against the DB size
 	if meta.ClusterId == nil {
 		if toSize.Value() < fromSize.Value() {
 			return api.NewValidationError(fmt.Sprintf("requested size (%s) must be no less than the original requested size (%s) of the PVC", toSizeAsStr, fromSizeAsStr))
