@@ -1508,7 +1508,7 @@ paths:
       - control-plane/workloads/pkg/services/workloads_api_test.go
       x-authorize:
         resource-type: workloads
-        action: update
+        action: sync
         resource-id: workloadId
     put:
       operationId: upsert_workload
