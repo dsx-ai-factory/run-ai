@@ -115,6 +115,10 @@ func NewPVCApiService() *PVCApiService {
 	return &PVCApiService{}
 }
 
+// CreatePvcAsset validates the request and creates a PVC asset, together with its datavolume
+// when data sharing is requested. After the asset is committed it records a "Creating" history
+// event on a best effort basis, so a failure to store that event does not turn the response
+// into an error.
 func (s *PVCApiService) CreatePvcAsset(ctx context.Context, request api.PvcCreationRequest) (api.ImplResponse, error) {
 	assetKind := api.ASSETKIND_PVC
 	audit.AuditFromCtx(ctx).WithEntityType(string(assetKind)).WithEntityName(request.Meta.Name).WithClusterId(safeStrPtr(request.Meta.ClusterId))
@@ -189,14 +193,15 @@ func (s *PVCApiService) CreatePvcAsset(ctx context.Context, request api.PvcCreat
 
 	audit.AuditFromCtx(ctx).WithEntityId(result.Meta.Id)
 
-	err := addCreationEvent(ctx, result)
-	if err != nil {
-		return NewErrorResponse(err), nil
-	}
+	addCreationEvent(ctx, result)
 
 	return api.Response(http.StatusAccepted, result), nil
 }
 
+// DeletePvcAssetById deletes a PVC asset. It soft deletes the asset when the asset owns its
+// claim (existingPvc is false) and the cluster agent can sync the deletion, and hard deletes it
+// otherwise. After the deletion is committed it records a "Deleting" history event on a best
+// effort basis, so a failure to store that event does not turn the response into an error.
 func (s *PVCApiService) DeletePvcAssetById(ctx context.Context, id string) (api.ImplResponse, error) {
 	assetKind := api.ASSETKIND_PVC
 	audit.AuditFromCtx(ctx).WithEntityType(string(assetKind)).WithEntityId(id)
@@ -239,10 +244,7 @@ func (s *PVCApiService) DeletePvcAssetById(ctx context.Context, id string) (api.
 		return NewErrorResponse(actionError), nil
 	}
 
-	err := addDeletionEvent(ctx, pvcAsset)
-	if err != nil {
-		return NewErrorResponse(err), nil
-	}
+	addDeletionEvent(ctx, pvcAsset)
 
 	audit.AuditFromCtx(ctx).WithEntityName(pvcAsset.Meta.Name).WithClusterId(safeStrPtr(pvcAsset.Meta.ClusterId))
 	return NewDeletionResponse(), nil
@@ -879,7 +881,9 @@ func eventModelToApi(event dbmodel.Event, meta *dbmodel.AssetMeta) api.HistoryRe
 	return historyRecord
 }
 
-func addCreationEvent(ctx context.Context, pvcAsset *api.PvcAsset) *api.Error {
+// addCreationEvent records the "Creating" phase update in the history of a newly created PVC
+// asset. It is best effort, see upsertPvcPhaseEvent.
+func addCreationEvent(ctx context.Context, pvcAsset *api.PvcAsset) {
 	scopeId := ""
 	switch pvcAsset.Meta.Scope {
 	case api.SCOPE_TENANT:
@@ -910,15 +914,12 @@ func addCreationEvent(ctx context.Context, pvcAsset *api.PvcAsset) *api.Error {
 		eventModel.ClusterID = uuid.MustParse(*pvcAsset.Meta.ClusterId)
 	}
 
-	return dao.UpsertEvents(
-		ctx,
-		[]*dbmodel.Event{
-			&eventModel,
-		},
-	)
+	upsertPvcPhaseEvent(ctx, &eventModel)
 }
 
-func addDeletionEvent(ctx context.Context, pvcAsset *api.PvcAsset) *api.Error {
+// addDeletionEvent records the "Deleting" phase update in the history of a deleted PVC asset.
+// It is best effort, see upsertPvcPhaseEvent.
+func addDeletionEvent(ctx context.Context, pvcAsset *api.PvcAsset) {
 	scopeInfo := scopeInfo.ScopeInfoOf(scopeInfo.Scope(pvcAsset.Meta.Scope), pvcAsset.Meta.ProjectId, pvcAsset.Meta.DepartmentId, pvcAsset.Meta.ClusterId, pvcAsset.Meta.TenantId)
 	scopeId := scopeInfo.ScopeId
 
@@ -936,12 +937,18 @@ func addDeletionEvent(ctx context.Context, pvcAsset *api.PvcAsset) *api.Error {
 		Message:   fmt.Sprintf("Deleting PVC asset %s", pvcAsset.Meta.Name),
 	}
 
-	return dao.UpsertEvents(
-		ctx,
-		[]*dbmodel.Event{
-			&eventModel,
-		},
-	)
+	upsertPvcPhaseEvent(ctx, &eventModel)
+}
+
+// upsertPvcPhaseEvent stores a phase update event of a PVC asset on a best effort basis.
+// Callers write it after the asset change is committed and the event only feeds the asset
+// history, so a failure is logged instead of returned: returning it would tell the client
+// that a committed change did not happen.
+func upsertPvcPhaseEvent(ctx context.Context, event *dbmodel.Event) {
+	if err := dao.UpsertEvents(ctx, []*dbmodel.Event{event}); err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("failed to record the %s event of PVC asset %s, the asset change is already committed: %v",
+			event.Reason, event.AssetId, err)
+	}
 }
 
 func composeBeingInUseMessage(resourceKind string, resourceNames []string, assetKind api.AssetKind, _ /*assetId*/ string) *api.Error {

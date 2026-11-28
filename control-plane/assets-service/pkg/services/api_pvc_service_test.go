@@ -36,6 +36,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/testing"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/authorization"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 	"github.com/go-chi/chi/v5"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -157,6 +158,27 @@ func createPVCAsset(pvcCreation api.PvcCreationRequest, router chi.Router, heade
 	respJsonErr := json.Unmarshal(createHttpResp.Body.Bytes(), &resp)
 	Expect(respJsonErr).To(BeNil())
 	return resp, createHttpResp.Body.Bytes(), nil
+}
+
+// rejectEventInsertsWithMessage makes every insert into the events table whose message
+// equals message fail until the current spec ends. Matching on the message keeps the
+// failure scoped to the asset under test, so the spec can simulate a failed event write
+// that happens after the asset change was committed.
+func rejectEventInsertsWithMessage(message string) {
+	db := runaidb.DB().Actual()
+	Expect(db.Exec(`CREATE OR REPLACE FUNCTION reject_event_insert_for_test() RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+	RAISE EXCEPTION 'event insert rejected by test';
+END
+$$`).Error).To(Succeed())
+	Expect(db.Exec(fmt.Sprintf(`CREATE TRIGGER reject_event_insert_for_test BEFORE INSERT ON events
+FOR EACH ROW WHEN (NEW.message = '%s') EXECUTE FUNCTION reject_event_insert_for_test()`,
+		strings.ReplaceAll(message, "'", "''"))).Error).To(Succeed())
+	DeferCleanup(func() {
+		Expect(db.Exec(`DROP TRIGGER IF EXISTS reject_event_insert_for_test ON events`).Error).To(Succeed())
+		Expect(db.Exec(`DROP FUNCTION IF EXISTS reject_event_insert_for_test()`).Error).To(Succeed())
+	})
 }
 
 var _ = Describe("TestPVCAsset", func() {
@@ -690,6 +712,65 @@ var _ = Describe("TestPVCAsset", func() {
 			Expect(errResp.Message).To(ContainSubstring("PVC Events are not supported in this cluster version"))
 		})
 
+	})
+
+	Context("pvc event write fails after the asset change is committed", func() {
+		It("should accept the creation", func() {
+			createRequest := testing.BuildRandomProjectPVCAsset(randoms)
+			rejectEventInsertsWithMessage(fmt.Sprintf("Creating PVC asset %s", createRequest.Meta.Name))
+
+			createHttpReq, err := http.NewRequest("POST", urlPVC, makePayload(createRequest))
+			Expect(err).To(BeNil())
+			createHttpReq.Header = *headerForAdmin(randoms)
+
+			createHttpResp := httptest.NewRecorder()
+			router.ServeHTTP(createHttpResp, createHttpReq)
+			Expect(createHttpResp.Code).To(Equal(http.StatusAccepted), createHttpResp.Body.String())
+
+			var pvc api.PvcAsset
+			Expect(json.Unmarshal(createHttpResp.Body.Bytes(), &pvc)).To(Succeed())
+
+			getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", urlPVC, pvc.Meta.Id), nil)
+			Expect(err).To(BeNil())
+			getHttpReq.Header = *headerForAdmin(randoms)
+
+			getHttpResp := httptest.NewRecorder()
+			router.ServeHTTP(getHttpResp, getHttpReq)
+			Expect(getHttpResp.Code).To(Equal(http.StatusOK), getHttpResp.Body.String())
+		})
+
+		It("should accept the deletion", func() {
+			pvc, _, _ := createPVCAsset(testing.BuildRandomProjectPVCAsset(randoms), router, headerForAdmin(randoms))
+			rejectEventInsertsWithMessage(fmt.Sprintf("Deleting PVC asset %s", pvc.Meta.Name))
+
+			deleteHttpReq, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", urlPVC, pvc.Meta.Id), nil)
+			Expect(err).To(BeNil())
+			deleteHttpReq.Header = *headerForAdmin(randoms)
+
+			deleteHttpResp := httptest.NewRecorder()
+			router.ServeHTTP(deleteHttpResp, deleteHttpReq)
+			Expect(deleteHttpResp.Code).To(Equal(http.StatusAccepted), deleteHttpResp.Body.String())
+
+			getHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", urlPVC, pvc.Meta.Id), nil)
+			Expect(err).To(BeNil())
+			getHttpReq.Header = *headerForAdmin(randoms)
+
+			getHttpResp := httptest.NewRecorder()
+			router.ServeHTTP(getHttpResp, getHttpReq)
+			Expect(getHttpResp.Code).To(Equal(http.StatusNotFound), getHttpResp.Body.String())
+
+			getDeletedHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/%s?statusInfo=true", urlPVC, pvc.Meta.Id), nil)
+			Expect(err).To(BeNil())
+			getDeletedHttpReq.Header = *headerForAdmin(randoms)
+
+			getDeletedHttpResp := httptest.NewRecorder()
+			router.ServeHTTP(getDeletedHttpResp, getDeletedHttpReq)
+			Expect(getDeletedHttpResp.Code).To(Equal(http.StatusOK), getDeletedHttpResp.Body.String())
+
+			var deletedPvc api.PvcAsset
+			Expect(json.Unmarshal(getDeletedHttpResp.Body.Bytes(), &deletedPvc)).To(Succeed())
+			Expect(deletedPvc.Meta.DeletedAt.IsZero()).To(BeFalse())
+		})
 	})
 
 	Context("claim name uniqueness", func() {
