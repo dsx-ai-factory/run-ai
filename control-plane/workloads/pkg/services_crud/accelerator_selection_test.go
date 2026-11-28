@@ -22,7 +22,7 @@ func TestAcceleratorLegacySubmission(t *testing.T) {
 	require.NotNil(t, validateNativeGpuMode(&spec))
 	var worker workloadsApi.DistributedInferenceLeaderWorkerSpec
 	selection := workloadsApi.NewAcceleratorSelection()
-	selection.SetResourceName("amd.com/gpu")
+	selection.SetResourceName("vendor.example/device")
 	worker.SetAccelerator(*selection)
 	spec.UnsetGpuType()
 	spec.SetWorker(worker)
@@ -31,10 +31,10 @@ func TestAcceleratorLegacySubmission(t *testing.T) {
 
 func TestAcceleratorSavedSelection(t *testing.T) {
 	const key = "example.com/model"
-	const model = "MI300X"
+	const model = "Model-X"
 	effective, policyErr := MutateWorkload(
 		map[string]interface{}{"compute": map[string]interface{}{"gpuDevicesRequest": 1}},
-		nil, false, map[string]interface{}{"gpuType": model, "accelerator": map[string]interface{}{"resourceName": "amd.com/gpu", "deviceLabelKey": key}}, nil)
+		nil, false, map[string]interface{}{"gpuType": model, "accelerator": map[string]interface{}{"resourceName": "vendor.example/device", "deviceLabelKey": key}}, nil)
 	require.Nil(t, policyErr)
 	spec, _, buildErr := buildResponseSpecFromMap[workloadsApi.SupersetSpec, workloadsApi.MasterSpec](Training, effective)
 	require.Nil(t, buildErr)

@@ -57,7 +57,7 @@ var _ = Describe("GPU selection in Knative inference", func() {
 		c := NewInferenceToKnativeComposer("infer", "p1", "runai-p1", "user", nil, options)
 		var spec workloadsApi.InferenceSpecSpec
 		Expect(json.Unmarshal([]byte(`{
-			"gpuType":"MI300X","accelerator":{"resourceName":"amd.com/gpu","deviceLabelKey":"hardware.example.com/model"},
+			"gpuType":"Model-X","accelerator":{"resourceName":"vendor.example/device","deviceLabelKey":"hardware.example.com/model"},
 			"nodePools":["default","research"]
 		}`), &spec)).To(Succeed())
 		c.ActualNodePools = []clusterapi.Nodepool{{Name: "research", LabelKey: composer.NodePoolNameLabel, LabelValue: "research"}}
@@ -82,13 +82,13 @@ var _ = Describe("GPU selection in Knative inference", func() {
 			labels  map[string]string
 			matches bool
 		}{
-			{map[string]string{"hardware.example.com/model": "MI300X", composer.NodePoolNameLabel: "research"}, true},
-			{map[string]string{"hardware.example.com/model": "MI250", composer.NodePoolNameLabel: "research"}, false},
+			{map[string]string{"hardware.example.com/model": "Model-X", composer.NodePoolNameLabel: "research"}, true},
+			{map[string]string{"hardware.example.com/model": "Model-Y", composer.NodePoolNameLabel: "research"}, false},
 			{map[string]string{composer.NodePoolNameLabel: "research"}, false},
-			{map[string]string{"hardware.example.com/model": "MI300X"}, true},
+			{map[string]string{"hardware.example.com/model": "Model-X"}, true},
 			{map[string]string{}, false},
-			{map[string]string{"hardware.example.com/model": "MI250"}, false},
-			{map[string]string{"hardware.example.com/model": "MI300X", composer.NodePoolNameLabel: "other"}, false},
+			{map[string]string{"hardware.example.com/model": "Model-Y"}, false},
+			{map[string]string{"hardware.example.com/model": "Model-X", composer.NodePoolNameLabel: "other"}, false},
 		} {
 			node := &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: "gpu-node", Labels: tc.labels}}
 			matches, err := nodeaffinity.GetRequiredNodeAffinity(pod).Match(node)

@@ -39,8 +39,8 @@ var _ = Describe("GPU selection in distributed inference", func() {
 		Expect(json.Unmarshal([]byte(`{
 			"servingPort":{"port":8080,"exposeExternally":false},"workers":1,
 			"leader":{"image":"leader:latest","compute":{"gpuDevicesRequest":1},"gpuType":"H100"},
-			"worker":{"image":"worker:latest","compute":{"gpuDevicesRequest":2},"gpuType":"MI300X",
-					  "accelerator":{"resourceName":"amd.com/gpu","deviceLabelKey":"hardware.example.com/model"}}
+			"worker":{"image":"worker:latest","compute":{"gpuDevicesRequest":2},"gpuType":"Model-X",
+					  "accelerator":{"resourceName":"vendor.example/device","deviceLabelKey":"hardware.example.com/model"}}
 		}`), &spec)).To(Succeed())
 		options := composer.FieldsComposerOptions{NodeAffinitySupported: true, WorkloadV2NetworkingSupported: true}
 		c := NewDistributedInferenceToLWSComposer("example", "team", "runai-team", "user", nil, nil, options, nil).
@@ -54,7 +54,7 @@ var _ = Describe("GPU selection in distributed inference", func() {
 			count                int64
 		}{
 			{templates.LeaderTemplate, composer.NvidiaProductLabel, "H100", composer.NvidiaResourceName, 1},
-			{&templates.WorkerTemplate, "hardware.example.com/model", "MI300X", "amd.com/gpu", 2},
+			{&templates.WorkerTemplate, "hardware.example.com/model", "Model-X", "vendor.example/device", 2},
 		} {
 			Expect(tc.pod.Spec.NodeSelector).To(BeEmpty())
 			terms := tc.pod.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms

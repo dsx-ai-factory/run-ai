@@ -345,7 +345,7 @@ For a custom whole-device accelerator, set `accelerator.resourceName` to its Kub
 
 The inventory check looks for the model label in the selected project pools, including pools with a GPU limit of zero. An omitted or empty pool list uses the project defaults. A missing model returns a warning and submission preserves the placement requirement. For a resource-only request, the control plane accepts the request with `GPU_INVENTORY_UNAVAILABLE` because its node inventory cannot verify the resource.
 
-KAI v0.18.2 accounts for `amd.com/gpu` and `nvidia.com/gpu` in a shared GPU counter. On a mixed-vendor pool, a resource-only request for either name cannot guarantee the vendor. Select a vendor-specific pool or specify a model label that identifies the intended hardware. [KAI resource accounting](https://github.com/kai-scheduler/KAI-scheduler/blob/v0.18.2/pkg/scheduler/api/resource_info/resource_vector.go#L192)
+If your scheduler groups resource names together, use a model label or a dedicated node pool to select the intended hardware.
 
 ## Stopping a Workload
 

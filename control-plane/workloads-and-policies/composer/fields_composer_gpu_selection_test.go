@@ -19,15 +19,15 @@ import (
 )
 
 func TestGPUSelectionChoosesResourceAndModelInMixedPool(t *testing.T) {
-	const amd = "amd.com/gpu"
-	const amdLabel = "hardware.example.com/model"
-	amdNode := corev1.Node{ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{amdLabel: "MI300X"}}}
+	const customResource = "vendor.example/device"
+	const customLabel = "hardware.example.com/model"
+	customNode := corev1.Node{ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{customLabel: "Model-X"}}}
 	h100 := corev1.Node{ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{NvidiaProductLabel: "H100"}}}
 	a100 := corev1.Node{ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{NvidiaProductLabel: "A100"}}}
 	acc := &api.AcceleratorSelection{}
-	acc.SetResourceName(amd)
-	amdModel := *acc
-	amdModel.SetDeviceLabelKey(amdLabel)
+	acc.SetResourceName(customResource)
+	customModel := *acc
+	customModel.SetDeviceLabelKey(customLabel)
 	for _, tc := range []struct {
 		name     string
 		model    *string
@@ -36,9 +36,9 @@ func TestGPUSelectionChoosesResourceAndModelInMixedPool(t *testing.T) {
 		matches  []bool
 	}{
 		{"nvidia-default", convutils.Ref("H100"), nil, NvidiaResourceName, []bool{false, true, false}},
-		{"amd-resource-only-has-no-model-affinity", nil, acc, amd, []bool{true, true, true}},
-		{"amd-model", convutils.Ref("MI300X"), &amdModel, amd, []bool{true, false, false}},
-		{"amd-absent", convutils.Ref("MI325X"), &amdModel, amd, []bool{false, false, false}},
+		{"custom-resource-only-has-no-model-affinity", nil, acc, customResource, []bool{true, true, true}},
+		{"custom-model", convutils.Ref("Model-X"), &customModel, customResource, []bool{true, false, false}},
+		{"custom-absent", convutils.Ref("Model-Y"), &customModel, customResource, []bool{false, false, false}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			fc := FieldsComposer{Options: FieldsComposerOptions{NodeAffinitySupported: tc.model != nil}}
@@ -63,7 +63,7 @@ func TestGPUSelectionChoosesResourceAndModelInMixedPool(t *testing.T) {
 			if len(pod.Spec.NodeSelector) != 0 {
 				t.Fatalf("GPU placement added a nodeSelector: %v", pod.Spec.NodeSelector)
 			}
-			for i, node := range []corev1.Node{amdNode, h100, a100} {
+			for i, node := range []corev1.Node{customNode, h100, a100} {
 				node.Name = "gpu-node"
 				match, err := nodeaffinity.GetRequiredNodeAffinity(&pod).Match(&node)
 				if err != nil || match != tc.matches[i] {
@@ -99,7 +99,7 @@ func TestGPUSelectionIntersectsPoolAndEmptySelectors(t *testing.T) {
 
 func TestGPUSelectionRejectsMalformedNamesAndUnknownKeys(t *testing.T) {
 	for _, tc := range []struct{ resource, key, model string }{
-		{"cpu", "", ""}, {"kubernetes.io/fake", "", ""}, {"requests.amd.com/gpu", "", ""}, {"amd.com/gpu", "", "MI300X"}, {"amd.com/gpu", "invalid key", "MI300X"}, {NvidiaResourceName, "", "bad.model/"},
+		{"cpu", "", ""}, {"kubernetes.io/fake", "", ""}, {"requests.vendor.example/device", "", ""}, {"vendor.example/device", "", "Model-X"}, {"vendor.example/device", "invalid key", "Model-X"}, {NvidiaResourceName, "", "bad.model/"},
 	} {
 		acc := &api.AcceleratorSelection{}
 		acc.SetResourceName(tc.resource)
