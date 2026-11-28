@@ -47,6 +47,8 @@ export enum EProjectColumnLabel {
   AllocatedCpu = "Allocated CPUs (Cores)",
   AllocatedMemory = "Allocated CPU memory",
   AllocatedGpus = "Allocated GPUs",
+  AllocatedNonPreemptibleGpus = "Allocated non-preemptible GPUs",
+  OverQuotaGpus = "Over-quota GPUs",
   AverageGpuAllocation = "Avg. GPU allocation",
   AverageGpuUtilization = "Avg. GPU utilization",
   AverageGpuMemoryUtilization = "Avg. GPU memory utilization",
@@ -160,6 +162,28 @@ export const allProjectColumnsMap: Record<string, ITableColumn> = {
     filter: {
       type: EColumnFilterType.Numeric,
     },
+  },
+  allocatedNonPreemptibleGpus: {
+    name: EProjectColumnName.AllocatedNonPreemptibleGpus,
+    label: EProjectColumnLabel.AllocatedNonPreemptibleGpus,
+    field: (row: IProjectTable) => row.status?.quotaStatus?.allocatedNonPreemptible?.gpu,
+    sortable: false,
+    align: "left",
+    format: (allocatedNonPreemptibleGpus: number | undefined) =>
+      allocatedNonPreemptibleGpus
+        ? resourceUtil.getResourceDisplayValue(allocatedNonPreemptibleGpus, EResourceType.GPU)
+        : "-",
+    hideFilter: true,
+  },
+  overQuotaGpus: {
+    name: EProjectColumnName.OverQuotaGpus,
+    label: EProjectColumnLabel.OverQuotaGpus,
+    field: (row: IProjectTable) => orgUnitUtil.getOverQuotaGpus(row.resources, row.status?.nodePoolQuotaStatuses),
+    sortable: false,
+    align: "left",
+    format: (overQuotaGpus: number) =>
+      overQuotaGpus ? resourceUtil.getResourceDisplayValue(overQuotaGpus, EResourceType.GPU) : "-",
+    hideFilter: true,
   },
   averageGpuAllocation: {
     name: EOrgUnitOverTimeColumnName.AverageGpuAllocation,
@@ -425,6 +449,8 @@ export const projectIndexColumns: Array<ITableColumn> = [
   { ...allProjectColumnsMap.accessRules, display: true },
   { ...allProjectColumnsMap.gpuQuota, display: true },
   { ...allProjectColumnsMap.allocatedGpus, display: true },
+  { ...allProjectColumnsMap.allocatedNonPreemptibleGpus, display: false },
+  { ...allProjectColumnsMap.overQuotaGpus, display: false },
   { ...allProjectColumnsMap.averageGpuAllocation, display: true },
   { ...allProjectColumnsMap.averageGpuUtilization, display: true },
   { ...allProjectColumnsMap.averageGpuMemoryUtilization, display: true },

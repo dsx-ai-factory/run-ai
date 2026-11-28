@@ -238,6 +238,8 @@ export enum EProjectColumnName {
   AllocatedCpu = "allocated-cpu",
   AllocatedMemory = "allocated-memory",
   AllocatedGpus = "allocated-gpus",
+  AllocatedNonPreemptibleGpus = "allocated-non-preemptible-gpus",
+  OverQuotaGpus = "over-quota-gpus",
   GpuUtilization = "gpu-utilization",
   CpuUtilization = "cpu-utilization",
   MemoryUtilization = "memory-utilization",

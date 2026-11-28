@@ -16,6 +16,7 @@ import {
   ProjectPhase,
   Units,
   type ProjectStatus,
+  type QuotaStatusNodePool,
   type Resources,
   type ResourcesNullableGpu,
   type SchedulingRules,
@@ -391,6 +392,46 @@ describe("org-unit-util", () => {
     it("should return '-' when gpuQuota is 0", () => {
       const result = orgUnitUtil.getAllocationRatioDisplayValue(50, { gpuQuota: 0 });
       expect(result).toBe("-");
+    });
+  });
+  describe("getOverQuotaGpus", () => {
+    const getResources = (gpuQuotaByNodePoolId: Record<string, number>): Resources[] =>
+      Object.entries(gpuQuotaByNodePoolId).map(([id, deserved]) => ({ nodePool: { id }, gpu: { deserved } }));
+    const getQuotaStatuses = (allocatedGpuByNodePoolId: Record<string, number>): QuotaStatusNodePool[] =>
+      Object.entries(allocatedGpuByNodePoolId).map(([nodePoolId, gpu]) => ({
+        nodePoolId,
+        nodePoolName: nodePoolId,
+        allocated: { gpu },
+      }));
+
+    it("should return 0 when the allocation is within the quota", () => {
+      const result = orgUnitUtil.getOverQuotaGpus(getResources({ a: 4 }), getQuotaStatuses({ a: 3 }));
+      expect(result).toBe(0);
+    });
+
+    it("should return the allocation above the quota", () => {
+      const result = orgUnitUtil.getOverQuotaGpus(getResources({ a: 0 }), getQuotaStatuses({ a: 0.5 }));
+      expect(result).toBe(0.5);
+    });
+
+    it("should not offset over quota in one node pool with unused quota in another", () => {
+      const result = orgUnitUtil.getOverQuotaGpus(getResources({ a: 2, b: 6 }), getQuotaStatuses({ a: 5, b: 1 }));
+      expect(result).toBe(3);
+    });
+
+    it("should sum over quota across node pools", () => {
+      const result = orgUnitUtil.getOverQuotaGpus(getResources({ a: 1, b: 2 }), getQuotaStatuses({ a: 2, b: 4 }));
+      expect(result).toBe(3);
+    });
+
+    it("should ignore node pools the project has no quota entry for", () => {
+      const result = orgUnitUtil.getOverQuotaGpus(getResources({ a: 1 }), getQuotaStatuses({ b: 4 }));
+      expect(result).toBe(0);
+    });
+
+    it("should return 0 when resources or quota statuses are missing", () => {
+      expect(orgUnitUtil.getOverQuotaGpus(undefined, getQuotaStatuses({ a: 4 }))).toBe(0);
+      expect(orgUnitUtil.getOverQuotaGpus(getResources({ a: 1 }), null)).toBe(0);
     });
   });
   describe("getStatusColOptions", () => {

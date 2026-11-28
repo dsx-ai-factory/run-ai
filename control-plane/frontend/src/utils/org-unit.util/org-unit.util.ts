@@ -23,6 +23,7 @@ import {
   ProjectPhase,
   type ProjectStatus,
   type ProjectUpdateRequest,
+  type QuotaStatusNodePool,
   type Resources,
   type ResourcesCpu,
   type ResourcesGpu,
@@ -96,6 +97,7 @@ export const orgUnitUtil = {
   getProjectListFilters,
   getDepartmentListFilters,
   getAllocationRatioDisplayValue,
+  getOverQuotaGpus,
   mapRankingMetricToMetricTypeAndOrder,
   getProgressColOptions,
   isResourceOverQuotaEnabled,
@@ -1020,6 +1022,20 @@ function getAllocationRatioDisplayValue(allocatedGpus: number, totalResources?: 
   const gpuQuota = totalResources?.gpuQuota || 0;
   if (gpuQuota < 0) return "-";
   return toPercent(allocatedGpus || 0, gpuQuota);
+}
+
+// Quota is granted per node pool, so the totals cannot be compared directly:
+// unused quota in one node pool would hide over-quota usage in another.
+function getOverQuotaGpus(resources?: Resources[] | null, nodePoolQuotaStatuses?: QuotaStatusNodePool[] | null): number {
+  const gpuQuotaByNodePoolId = new Map<string, number>(
+    (resources || []).map((resource: Resources) => [getNodePoolIdByResource(resource), resource.gpu?.deserved || 0]),
+  );
+
+  return (nodePoolQuotaStatuses || []).reduce((overQuotaGpus: number, quotaStatus: QuotaStatusNodePool) => {
+    const gpuQuota = gpuQuotaByNodePoolId.get(quotaStatus.nodePoolId);
+    if (gpuQuota === undefined) return overQuotaGpus;
+    return overQuotaGpus + Math.max((quotaStatus.allocated?.gpu || 0) - gpuQuota, 0);
+  }, 0);
 }
 
 /** Ranking utils **/
