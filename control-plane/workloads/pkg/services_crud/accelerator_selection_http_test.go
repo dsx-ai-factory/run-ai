@@ -63,10 +63,12 @@ type placementLookup struct {
 	clusterMock.ClientInterface
 	clusterID string
 	nodes     []map[string]string
+	selectors []map[string]string
 	err       error
 }
 
-func (c placementLookup) MatchGPUPlacement(_ context.Context, clusterID string, pools []string, labels map[string]string) (bool, error) {
+func (c *placementLookup) MatchGPUPlacement(_ context.Context, clusterID string, pools []string, labels map[string]string) (bool, error) {
+	c.selectors = append(c.selectors, labels)
 	if c.err != nil {
 		return false, c.err
 	}
@@ -90,10 +92,11 @@ func (c placementLookup) MatchGPUPlacement(_ context.Context, clusterID string, 
 
 var _ = Describe("GPU selection over the workload HTTP API", func() {
 	var (
-		ctx      context.Context
-		router   http.Handler
-		project  *testutils.RandomValues
-		recorder *gpuManifestRecorder
+		ctx       context.Context
+		router    http.Handler
+		project   *testutils.RandomValues
+		recorder  *gpuManifestRecorder
+		inventory *placementLookup
 	)
 	const amd = "amd.com/gpu"
 	const amdLabel = "amd.com/gpu.product-name"
@@ -121,12 +124,13 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 				pool.LabelKey, pool.LabelValue = "pool", pool.Name
 			}
 		}
-		clusterservice.SetMock(placementLookup{ClientInterface: clusterClient,
+		inventory = &placementLookup{ClientInterface: clusterClient,
 			clusterID: project.ClusterId, nodes: []map[string]string{
 				{nvidiaLabel: "H100"},
 				{amdLabel: "MI300X"},
 				{"hardware.example.com/model": "Flex170"},
-			}})
+			}}
+		clusterservice.SetMock(inventory)
 		projectInfo := GetProjectResponse(*project)
 		projectInfo.DefaultNodePools = []string{"cpu", "h100"}
 		for _, pool := range []struct{ name, id string }{{"h100", "eligible"}, {"cpu", "other"}} {
@@ -276,7 +280,7 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 		Expect(string(raw)).To(ContainSubstring("accelerator.deviceLabelKey"))
 	})
 	It("preserves placement when inventory cannot be checked", func() {
-		clusterservice.SetMock(placementLookup{ClientInterface: clusterservice.Get(), err: errors.New("unavailable")})
+		inventory.err = errors.New("unavailable")
 		created := submit("trainings", "inventory-unavailable", map[string]any{"image": "ubuntu", "compute": map[string]int{"gpuDevicesRequest": 1}, "gpuType": "H100"})
 		Expect(created.Warnings).To(HaveLen(1))
 		Expect(created.Warnings[0].Code).To(Equal(gpuInventoryUnavailable))
@@ -300,6 +304,14 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 		Entry("valid unavailable label is preserved with a warning", "lab.example.com/model", "lab.example.com/model", true),
 	)
 
+	It("accepts an ordinary GPU count without querying inventory or issuing a warning", func() {
+		created := submit("trainings", "plain-gpu", map[string]any{
+			"image": "ubuntu", "compute": map[string]int{"gpuDevicesRequest": 1},
+		})
+		Expect(created.Warnings).To(BeEmpty())
+		Expect(inventory.selectors).To(BeEmpty())
+	})
+
 	DescribeTable("requests the exact custom resource and checks only the optional model label",
 		func(model, warning string) {
 			const device = "vendor.example/device"
@@ -312,6 +324,11 @@ var _ = Describe("GPU selection over the workload HTTP API", func() {
 			}
 			created := submit("trainings", "custom-device", spec)
 			Expect(created.Spec.Accelerator.Get().GetResourceName()).To(Equal(device))
+			if model == "" {
+				Expect(inventory.selectors).To(BeEmpty())
+			} else {
+				Expect(inventory.selectors).To(Equal([]map[string]string{{key: model}}))
+			}
 			if warning == "" {
 				Expect(created.Warnings).To(BeEmpty())
 			} else {
