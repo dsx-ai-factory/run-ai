@@ -2,3 +2,9 @@ Access Keys allow users to authenticate and interact programmatically with the N
 Each access key consists of a client ID and secret that can be used to obtain authentication tokens.
 Access keys can be managed by individual users for their own use, or by administrators for organization-wide access.
 For more information, see [Access control](/run-ai/self-hosted/documentation/platform-management/authentication/overview).
+
+Use the Access Keys endpoints to create, list, retrieve, and delete access keys, and to regenerate an access key secret.
+
+## Administrator Access
+
+Administrators can also list and delete access keys across the organization.

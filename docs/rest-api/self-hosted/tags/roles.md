@@ -2,3 +2,9 @@ The Roles API allows administrators to define and manage roles within the NVIDIA
 A role represents a collection of permission sets that determine what actions can be performed across NVIDIA Run:ai resources.
 NVIDIA Run:ai provides a list of predefined roles that cover common operational needs, such as managing workloads, projects, or data and storage.
 Administrators can also use this API to create custom roles by combining specific permission sets to match their organization's access model.
+
+Use the Roles endpoints to create, list, retrieve, update, and delete roles. Predefined roles cannot be updated or deleted.
+
+## Enabling and Disabling Roles
+
+Enable or disable a role. Disabled roles cannot be assigned to users and do not grant any permissions.

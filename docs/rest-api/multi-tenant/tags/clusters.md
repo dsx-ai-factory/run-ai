@@ -1,1 +1,1 @@
-Use these endpoints to create, manage and delete NVIDIA Run:ai Kubernetes clusters.
+Use the Clusters endpoints to list, retrieve, and update NVIDIA Run:ai Kubernetes clusters, and to retrieve the installation instructions of a cluster.
