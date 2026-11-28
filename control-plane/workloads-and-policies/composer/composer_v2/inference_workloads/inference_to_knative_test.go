@@ -447,6 +447,32 @@ var _ = Describe("InferenceToKnativeComposer", func() {
 			},
 		}),
 
+		// Extended resources (MIG profiles on mig.strategy=mixed nodes, SR-IOV
+		// VFs, FPGAs, ...) are mirrored into both requests and limits, as for
+		// workspace and training. Excluded entries are skipped.
+		Entry("extended resources → container requests and limits", composerCase{
+			specFile:     "ext_resources",
+			expectedFile: "ext_resources",
+			assert: func(target *KnativeServiceTarget) {
+				res := target.Service.Spec.Template.Spec.Containers[0].Resources
+				for _, list := range []corev1.ResourceList{res.Requests, res.Limits} {
+					Expect(list).To(HaveKey(corev1.ResourceName("nvidia.com/mig-1g.24gb")))
+					Expect(list).To(HaveKey(corev1.ResourceName("nvidia.com/sriov_resource")))
+					Expect(list).NotTo(HaveKey(corev1.ResourceName("example.com/fpga")))
+				}
+			},
+		}),
+
+		Entry("extended resource without quantity is rejected", composerCase{
+			specFile:  "ext_resources_no_quantity",
+			expectErr: "compute.extendedResources: quantity is not provided",
+		}),
+
+		Entry("extended resource with a malformed quantity is rejected", composerCase{
+			specFile:  "ext_resources_syntax",
+			expectErr: "malformed quantity: quantities must match the regular expression",
+		}),
+
 		Entry("plain env vars (no credentials)", composerCase{
 			specFile:     "envvars_plain",
 			expectedFile: "envvars_plain",
