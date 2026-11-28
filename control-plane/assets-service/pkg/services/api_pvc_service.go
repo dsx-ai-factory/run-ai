@@ -637,17 +637,17 @@ func validateChangeOfPvcSize(ctx context.Context, id string, meta *dbmodel.Asset
 		return api.NewValidationError(fmt.Sprintf("malformed PVC size %s: %v", toSizeAsStr, convErr))
 	}
 
-	if toSize.Value() < fromSize.Value() {
-		return api.NewValidationError(fmt.Sprintf("requested size (%s) must be no less than the originakl requested size (%s) of the PVC", toSizeAsStr, fromSizeAsStr))
-	}
-
-	//
-	//  validation #2: validate PVC is Bound
-	//
+	//  if no cluster is attached, fall back to checking against the DB size
 	if meta.ClusterId == nil {
+		if toSize.Value() < fromSize.Value() {
+			return api.NewValidationError(fmt.Sprintf("requested size (%s) must be no less than the original requested size (%s) of the PVC", toSizeAsStr, fromSizeAsStr))
+		}
 		return nil
 	}
 
+	//
+	//  validation #2: validate PVC is Bound and requested size >= cluster's effective requested capacity
+	//
 	var scopeId string
 	switch meta.Scope {
 	case api.SCOPE_CLUSTER:
@@ -665,6 +665,8 @@ func validateChangeOfPvcSize(ctx context.Context, id string, meta *dbmodel.Asset
 		}
 		return api.NewError(int(trackerErr.Code), trackerErr.Message, nil)
 	}
+
+	checkedClusterCapacity := false
 
 	// in practice, we'll either have 0 or 1 results, but since list returns an array we run over the array
 	for _, pvc := range pvcs.Pvcs {
@@ -686,10 +688,16 @@ func validateChangeOfPvcSize(ctx context.Context, id string, meta *dbmodel.Asset
 		if convErr != nil {
 			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("invalid requested capqcity size %s", reqCapacityStr)
 		} else {
+			checkedClusterCapacity = true
 			if toSize.Value() < reqCapacity.Value() {
-				return api.NewValidationError(fmt.Sprintf("requested size (%s) must be no less than the effective requested capacity (%s) of the PVC", reqCapacityStr, toSizeAsStr))
+				return api.NewValidationError(fmt.Sprintf("requested size (%s) must be no less than the effective requested capacity (%s) of the PVC", toSizeAsStr, reqCapacityStr))
 			}
 		}
+	}
+
+	// Fall back to the stored DB size only if cluster capacity was not available
+	if !checkedClusterCapacity && toSize.Value() < fromSize.Value() {
+		return api.NewValidationError(fmt.Sprintf("requested size (%s) must be no less than the original requested size (%s) of the PVC", toSizeAsStr, fromSizeAsStr))
 	}
 
 	//  update the spec with the new size

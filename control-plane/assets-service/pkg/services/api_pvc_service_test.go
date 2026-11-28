@@ -908,6 +908,53 @@ var _ = Describe("TestPVCAsset", func() {
 			k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient())
 		})
 
+		It("should allow rolling back PVC size to at least cluster requested capacity when DB size is larger", func() {
+			pvcReq := testing.BuildRandomProjectPVCAsset(randoms)
+			pvcReq.Spec.ExistingPvc = convutils.Ref(false)
+			pvcReq.Spec.ClaimInfo.Size = convutils.Ref("50Gi")
+			created, _, _ := createPVCAsset(pvcReq, router, headerForAdmin(randoms))
+
+			mockTracker := k8sObjectsTracker.NewSimpleMockClient()
+			mockTracker = mockTracker.WithPvc(randoms.ClusterId, &pvcReq, nil)
+			boundPhase := k8sObjectsApi.PVCPHASEOPTIONAL_BOUND
+			mockTracker.PvcResponse.Pvcs[0].Phase.Set(&boundPhase)
+			mockTracker.PvcResponse.Pvcs[0].RequestedCapacity.Set(convutils.Ref("50Gi"))
+			k8sObjectsTracker.SetMock(mockTracker)
+			defer k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient())
+
+			sendResize := func(size string) *httptest.ResponseRecorder {
+				updateReq := api.PvcUpdateRequest{
+					Meta: api.AssetUpdateRequest{
+						Name: created.Meta.Name,
+					},
+					Spec: &api.PvcFieldsUpdatable{
+						Path: pvcReq.Spec.Path,
+						ClaimInfo: &api.ClaimInfoUpdatable{
+							Size: convutils.Ref(size),
+						},
+					},
+				}
+				req, err := http.NewRequest("PUT", fmt.Sprintf("%s/%s", urlPVC, created.Meta.Id), makePayload(updateReq))
+				Expect(err).To(BeNil())
+				req.Header = *headerForAdmin(randoms)
+				resp := httptest.NewRecorder()
+				router.ServeHTTP(resp, req)
+				return resp
+			}
+
+			// Resize to 200Gi succeeds in DB while cluster remains at 50Gi
+			resp := sendResize("200Gi")
+			Expect(resp.Code).To(Equal(http.StatusAccepted), resp.Body.String())
+
+			// Rollback to 100Gi (>= 50Gi cluster capacity) is allowed despite DB having 200Gi
+			resp = sendResize("100Gi")
+			Expect(resp.Code).To(Equal(http.StatusAccepted), resp.Body.String())
+
+			// Shrinking below cluster requested capacity (25Gi < 50Gi) is still rejected
+			resp = sendResize("25Gi")
+			Expect(resp.Code).To(Equal(http.StatusBadRequest), resp.Body.String())
+		})
+
 		It("should allow same claim name in different clusters", func() {
 			claimName := "shared-claim-" + testutils.RandString(10)
 
