@@ -330,7 +330,9 @@ To create a new workload:
 
 ### Selecting a GPU model with the API
 
-For typed workspace, training, and inference submissions, use the exact model value from the node pool’s `gpuTypes`. To request two H100 GPUs, include these fields in the workload spec:
+For NVIDIA GPUs using the default `nvidia.com/gpu.product` label, copy the model from the node pool’s `gpuTypes` into `gpuType`. For other accelerators, or when using a custom model label, set `accelerator.deviceLabelKey` to the model label key on the node and `gpuType` to the exact value of that label.
+
+To request two H100 GPUs, include these fields in the workload spec:
 
 ```json
 {
