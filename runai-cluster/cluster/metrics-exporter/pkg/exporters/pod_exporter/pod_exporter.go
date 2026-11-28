@@ -36,18 +36,39 @@ const (
 	opportunisticPodGpuIndex      = "opportunistic"
 )
 
-type PodExporter struct {
-	ctx    context.Context
-	client client.Client
-	pod    *v1.Pod
+// DRAGpuResolver resolves the number of GPUs a pod requests through DRA ResourceClaims and ResourceClaimTemplates.
+// It is implemented by *dra.DRAParser. Without a resolver, DRA GPUs are not counted.
+type DRAGpuResolver interface {
+	ResolvePodRequestedGpuCount(ctx context.Context, pod *v1.Pod) (int64, error)
 }
 
-func NewPodExporter(ctx context.Context, k8sClient client.Client, pod *v1.Pod) *PodExporter {
-	return &PodExporter{
+type PodExporter struct {
+	ctx         context.Context
+	client      client.Client
+	pod         *v1.Pod
+	draResolver DRAGpuResolver
+}
+
+// Option customizes a PodExporter.
+type Option func(*PodExporter)
+
+// WithDRAGpuResolver makes the exporter count GPUs that the pod requests through DRA claims.
+func WithDRAGpuResolver(resolver DRAGpuResolver) Option {
+	return func(pe *PodExporter) {
+		pe.draResolver = resolver
+	}
+}
+
+func NewPodExporter(ctx context.Context, k8sClient client.Client, pod *v1.Pod, opts ...Option) *PodExporter {
+	pe := &PodExporter{
 		ctx:    ctx,
 		client: k8sClient,
 		pod:    pod,
 	}
+	for _, opt := range opts {
+		opt(pe)
+	}
+	return pe
 }
 
 func (pe *PodExporter) GetName() string {
@@ -234,7 +255,27 @@ func (pe *PodExporter) GetGpuNumDevices() (string, error) {
 		return "1", nil
 	}
 
-	return fmt.Sprintf("%.0f", pe.GetGpusFromResourceRequest()), nil
+	draGpus, err := pe.getDRAGpus()
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%.0f", pe.GetGpusFromResourceRequest()+float64(draGpus)), nil
+}
+
+// getDRAGpus returns the GPUs the pod requests through DRA claims. They are not in the pod spec, so
+// GetGpusFromResourceRequest does not see them. Lookup errors are returned, so the reconcile is retried
+// instead of exporting a wrong (zero) device count.
+func (pe *PodExporter) getDRAGpus() (int64, error) {
+	if pe.draResolver == nil || len(pe.pod.Spec.ResourceClaims) == 0 {
+		return 0, nil
+	}
+
+	draGpus, err := pe.draResolver.ResolvePodRequestedGpuCount(pe.ctx, pe.pod)
+	if err != nil {
+		return 0, fmt.Errorf("failed to resolve DRA gpus of pod %s/%s: %w", pe.GetNamespace(), pe.GetName(), err)
+	}
+	return draGpus, nil
 }
 
 func (pe *PodExporter) isActive() bool {

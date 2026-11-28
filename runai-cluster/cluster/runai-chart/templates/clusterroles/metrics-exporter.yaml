@@ -31,6 +31,15 @@ rules:
       - get
       - watch
   - apiGroups:
+      - resource.k8s.io
+    resources:
+      - resourceclaims
+      - resourceclaimtemplates
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
       - scheduling.run.ai
     resources:
       - podgroups
